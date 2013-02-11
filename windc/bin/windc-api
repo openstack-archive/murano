@@ -23,7 +23,7 @@ Windows DataCenter API Server
 import optparse
 import os
 import sys
-
+import gettext
 # If ../windc/__init__.py exists, add ../ to Python search path, so that
 # it will override what happens to be installed in /usr/(local/)lib/python...
 possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
@@ -31,34 +31,62 @@ possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                    os.pardir))
 if os.path.exists(os.path.join(possible_topdir, 'windc', '__init__.py')):
     sys.path.insert(0, possible_topdir)
-
-from openstack.common import config
-from openstack.common import wsgi
-from windc import version
+    sys.path.insert(0, '.')
 
 
-def create_options(parser):
-    """
-    Sets up the CLI and config-file options that may be
-    parsed and program commands.
+from windc.common import cfg
+from windc.common import config
+from windc.common import wsgi
+from windc.db import session
 
-    :param parser: The option parser
-    """
-    config.add_common_options(parser)
-    config.add_log_options(parser)
+gettext.install('balancer', unicode=1)
 
+dbsync_opt = cfg.BoolOpt('dbsync', default=False,
+                         help='Perform database schema synchronization')
 
 if __name__ == '__main__':
-    oparser = optparse.OptionParser(version='%%prog %s'
-                                    % version.version_string())
-    create_options(oparser)
-    (options, args) = config.parse_options(oparser)
-
     try:
-        conf, app = config.load_paste_app('windc-api', options, args)
+        conf = config.WindcConfigOpts()
+        conf.register_cli_opt(dbsync_opt)
+        conf()
 
-        server = wsgi.Server()
-        server.start(app, int(conf['bind_port']), conf['bind_host'])
-        server.wait()
+        if conf.dbsync:
+            config.setup_logging(conf)
+            session.sync(conf)
+        else:
+            app = config.load_paste_app(conf)
+            server = wsgi.Server()
+            server.start(app, conf, default_port=8181)
+            server.wait()
     except RuntimeError, e:
         sys.exit("ERROR: %s" % e)
+
+
+
+
+
+# def create_options(parser):
+#     """
+#     Sets up the CLI and config-file options that may be
+#     parsed and program commands.
+#
+#     :param parser: The option parser
+#     """
+#     config.add_common_options(parser)
+#     config.add_log_options(parser)
+#
+#
+# if __name__ == '__main__':
+#     oparser = optparse.OptionParser(version='%%prog %s'
+#                                     % version.version_string())
+#     create_options(oparser)
+#     (options, args) = config.parse_options(oparser)
+#
+# #    try:
+#     conf, app = config.load_paste_app('windc', options, args)
+#
+#     server = wsgi.Server()
+#     server.start(app, int(conf['bind_port']), conf['bind_host'])
+#     server.wait()
+# #    except RuntimeError, e:
+# #        sys.exit("ERROR: %s" % e)

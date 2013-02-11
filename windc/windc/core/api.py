@@ -15,5 +15,32 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# TODO(jaypipes) Code in this module is intended to be ported to the eventual 
-#                openstack-common library
+def dc_get_index(conf, tenant_id):
+	pass
+
+def create_dc(conf, params):
+	pass
+
+def delete_dc(conf, tenant_id, dc_id):
+	pass
+
+def dc_get_data(conf, tenant_id, dc_id):
+	pass
+
+def update_dc(conf, tenant_id, dc_id, body):
+	pass
+
+def service_get_index(conf, tenant_id, datacenter_id):
+	pass
+
+def create_service(conf, params):
+	pass
+
+def delete_service(conf, tenant_id, datacenter_id, service_id):
+	pass
+
+def service_get_data(conf, tenant_id, datacenter_id, service_id):
+	pass
+
+def update_service(conf, tenant_id, datacenter_id, service_id, body):
+	pass

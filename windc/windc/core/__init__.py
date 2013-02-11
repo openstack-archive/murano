@@ -14,6 +14,3 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-# TODO(jaypipes) Code in this module is intended to be ported to the eventual 
-#                openstack-common library
