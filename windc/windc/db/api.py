@@ -60,7 +60,7 @@ service_pack_extra = functools.partial(pack_extra, models.Service)
 # Datacenter
 
 
-def datacenter_get(conf, datacenter_id, session=None):
+def datacenter_get(conf, tenant_id, datacenter_id, session=None):
     session = session or get_session(conf)
     datacenter_ref = session.query(models.DataCenter).\
                          filter_by(id=datacenter_id).first()
@@ -69,9 +69,10 @@ def datacenter_get(conf, datacenter_id, session=None):
     return datacenter_ref
 
 
-def datacenter_get_all(conf):
+def datacenter_get_all(conf, tenant_id):
     session = get_session(conf)
-    query = session.query(models.DataCenter)
+    query = session.query(models.DataCenter).\
+    	filter_by(tenant_id=tenant_id)
     return query.all()
 
 
@@ -126,7 +127,7 @@ def service_get_all_by_vm_id(conf, tenant_id, vm_id):
     return query.all()
 
 
-def service_get_all_by_datacenter_id(conf, datacenter_id):
+def service_get_all_by_datacenter_id(conf, tenant_id, datacenter_id):
     session = get_session(conf)
     query = session.query(models.Service).filter_by(datacenter_id=datacenter_id)
     service_refs = query.all()

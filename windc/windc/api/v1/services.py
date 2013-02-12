@@ -53,6 +53,7 @@ class Controller(object):
         LOG.debug("Headers: %s", req.headers)
         # We need to create Service object and return its id
         params['tenant_id'] = tenant_id
+        params['datacenter_id'] = datacenter_id
         service_id = core_api.create_service(self.conf, params)
         return {'service': {'id': service_id}}
 

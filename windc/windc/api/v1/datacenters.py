@@ -42,6 +42,8 @@ class Controller(object):
     def index(self, req, tenant_id):
         LOG.debug("Got index request. Request: %s", req)
         result = core_api.dc_get_index(self.conf, tenant_id)
+        LOG.debug("Got list of datacenters: %s", result)
+        result
         return {'datacenters': result}
 
     @utils.http_success_code(202)

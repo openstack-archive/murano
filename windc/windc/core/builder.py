@@ -15,7 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import builder_set
+class Builder:
+	name = "Abstract Builder"
+	type = "abstract"
+	version = 0
 
-builder_set.builders = builder_set.BuilderSet()
-builder_set.builders.load()
+	def __init__(self):
+		pass
+
+	def __str__(self):
+		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
+
+	def build(self, context, event, data):
+		pass
+
+
+

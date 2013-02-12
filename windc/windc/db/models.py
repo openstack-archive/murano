@@ -40,6 +40,7 @@ class DataCenter(DictBase, Base):
     name = Column(String(255))
     type = Column(String(255))
     version = Column(String(255))
+    tenant_id = Column(String(100))
     KMS = Column(String(80))
     WSUS = Column(String(80))
     extra = Column(JsonBlob())

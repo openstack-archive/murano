@@ -15,7 +15,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import builder_set
 
-builder_set.builders = builder_set.BuilderSet()
-builder_set.builders.load()
+import logging
+LOG = logging.getLogger(__name__)
+
+from windc.core.builder import Builder
+from windc.core import change_events as events
+
+class DataCenter(Builder):
+	def __init__(self):
+		self.name = "Data Center Builder"
+		self.type = "datacenter"
+		self.version = 1
+
+	def build(self, context, event, data):
+		if event.scope == events.SCOPE_DATACENTER_CHANGE:
+			LOG.info ("Got Data Center change event. Analysing...")
+		else:
+			LOG.debug("Not in my scope. Skip event.")
+		pass
+
