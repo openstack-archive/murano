@@ -1,0 +1,8 @@
+{
+"type": "active_directory_service",
+"zones": ["zone1"],
+"domain": "ACME.cloud",
+"AdminUser": "Admin",
+"AdminPassword": "StrongPassword",
+"DomainControllerNames": ["APP-AD001","APP-AD002"]
+}

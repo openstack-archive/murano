@@ -1,0 +1,7 @@
+{
+"name": "Test Data Center 2",
+"type": "SingleZone",
+"version":"1.1",
+"KMS":"172.16.1.2",
+"WSUS":"172.16.1.3"
+}
