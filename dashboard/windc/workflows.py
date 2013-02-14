@@ -454,7 +454,7 @@ class SetNetwork(workflows.Step):
 
 class CreateWinDC(workflows.Workflow):
     slug = "create_windc"
-    name = _("Create WinDC Instance")
+    name = _("Create Windows Data Center Instance")
     finalize_button_name = _("Deploy")
     success_message = _('Deployed %(count)s named "%(name)s".')
     failure_message = _('Unable to deploy %(count)s named "%(name)s".')

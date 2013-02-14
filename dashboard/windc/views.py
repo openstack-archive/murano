@@ -36,8 +36,6 @@ from horizon import tables
 from horizon import workflows
 
 from openstack_dashboard import api
-from .forms import UpdateInstance
-from .tabs import InstanceDetailTabs
 from .tables import WinDCTable
 from .workflows import CreateWinDC
 

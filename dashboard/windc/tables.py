@@ -43,14 +43,9 @@ ACTIVE_STATES = ("ACTIVE",)
 POWER_STATES = {
     0: "NO STATE",
     1: "RUNNING",
-    2: "BLOCKED",
-    3: "PAUSED",
-    4: "SHUTDOWN",
-    5: "SHUTOFF",
-    6: "CRASHED",
-    7: "SUSPENDED",
-    8: "FAILED",
-    9: "BUILDING",
+    2: "SHUTDOWN",
+    3: "FAILED",
+    4: "BUILDING",
 }
 
 PAUSE = 0
@@ -205,13 +200,6 @@ def get_size(instance):
     return _("Not available")
 
 
-def get_keyname(instance):
-    if hasattr(instance, "key_name"):
-        keyname = instance.key_name
-        return keyname
-    return _("Not available")
-
-
 def get_power_state(instance):
     return POWER_STATES.get(getattr(instance, "OS-EXT-STS:power_state", 0), '')
 
@@ -252,7 +240,6 @@ class WinDCTable(tables.DataTable):
     size = tables.Column(get_size,
                          verbose_name=_("Type"),
                          attrs={'data-type': 'type'})
-    keypair = tables.Column(get_keyname, verbose_name=_("Keypair"))
     status = tables.Column("status",
                            filters=(title, replace_underscores),
                            verbose_name=_("Status"),
