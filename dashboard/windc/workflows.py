@@ -61,13 +61,16 @@ class SelectProjectUserAction(workflows.Action):
 
 class SelectProjectUser(workflows.Step):
     action_class = SelectProjectUserAction
-    contributes = ("project_id", "user_id")
 
 
 class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
                               required=False,
                               help_text=_("A name of new domain."))
+
+    dc_net_name = forms.CharField(label=_("Domain NetBIOS Name"),
+                                  required=False,
+                                  help_text=_("A NetBIOS name of new domain."))
 
     dc_count = forms.IntegerField(label=_("Domain Controllers Count"),
                                   required=True,
@@ -76,6 +79,19 @@ class ConfigureWinDCAction(workflows.Action):
                                   initial=1,
                                   help_text=_("Domain Controllers count."))
 
+    adm_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Administrator password"),
+                                   required=False,
+                                   help_text=_("Password for "
+                                               "administrator account."))
+
+    recovery_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Recovery password"),
+                                   required=False,
+                                   help_text=_("Password for "
+                                               "Active Directory "
+                                               "Recovery Mode."))
+
     class Meta:
         name = _("Domain Controllers")
         help_text_template = ("project/windc/_dc_help.html")
@@ -83,7 +99,6 @@ class ConfigureWinDCAction(workflows.Action):
 
 class ConfigureWinDC(workflows.Step):
     action_class = ConfigureWinDCAction
-    #contributes = ("windows_domain_controller",)
 
 
 class ConfigureWinIISAction(workflows.Action):
@@ -110,7 +125,7 @@ class ConfigureWinIISAction(workflows.Action):
 
 class ConfigureWinIIS(workflows.Step):
     action_class = ConfigureWinIISAction
-    #contributes = ("windows_iis",)
+
 
 class CreateWinService(workflows.Workflow):
     slug = "create"
