@@ -1,7 +1,5 @@
 # TO DO: 
-# 1. Fix issue with Create button  
-# 2. Create simple form for Windows Data Center deploy
-# 3. Remove extra code
+# 1. Remove extra code
 #
 
 This file is described how to install new tab on horizon dashboard.

@@ -33,7 +33,6 @@ from horizon.utils.filters import replace_underscores
 from openstack_dashboard import api
 from openstack_dashboard.dashboards.project.access_and_security \
         .floating_ips.workflows import IPAssociationWorkflow
-from .tabs import InstanceDetailTabs, LogTab, ConsoleTab
 
 
 LOG = logging.getLogger(__name__)
@@ -61,12 +60,12 @@ def is_deleting(instance):
     return task_state.lower() == "deleting"
 
 
-class RebootWinDC(tables.BatchAction):
+class RebootService(tables.BatchAction):
     name = "reboot"
     action_present = _("Reboot")
     action_past = _("Rebooted")
-    data_type_singular = _("Instance")
-    data_type_plural = _("Instances")
+    data_type_singular = _("Service")
+    data_type_plural = _("Services")
     classes = ('btn-danger', 'btn-reboot')
 
     def allowed(self, request, instance=None):
@@ -78,9 +77,9 @@ class RebootWinDC(tables.BatchAction):
         api.nova.server_reboot(request, obj_id)
 
 
-class CreateWinDC(tables.LinkAction):
-    name = "CreateWinDC"
-    verbose_name = _("Create WinDC")
+class CreateService(tables.LinkAction):
+    name = "CreateService"
+    verbose_name = _("Create Windows Service")
     url = "horizon:project:windc:create"
     classes = ("btn-launch", "ajax-modal")
 
@@ -101,7 +100,7 @@ class CreateWinDC(tables.LinkAction):
                     self.verbose_name = string_concat(self.verbose_name, ' ',
                                                       _("(Quota exceeded)"))
             else:
-                self.verbose_name = _("Create WinDC")
+                self.verbose_name = _("Create Windows Service")
                 classes = [c for c in self.classes if c != "disabled"]
                 self.classes = classes
         except:
@@ -112,12 +111,12 @@ class CreateWinDC(tables.LinkAction):
         return True  # The action should always be displayed
 
 
-class DeleteWinDC(tables.BatchAction):
-    name = "DeleteWinDC"
-    action_present = _("DeleteWinDC")
+class DeleteService(tables.BatchAction):
+    name = "DeleteService"
+    action_present = _("DeleteService")
     action_past = _("Scheduled termination of")
-    data_type_singular = _("Instance")
-    data_type_plural = _("Instances")
+    data_type_singular = _("Service")
+    data_type_plural = _("Services")
     classes = ('btn-danger', 'btn-terminate')
 
     def allowed(self, request, instance=None):
@@ -132,45 +131,14 @@ class DeleteWinDC(tables.BatchAction):
         api.nova.server_delete(request, obj_id)
 
 
-class EditWinDC(tables.LinkAction):
+class EditService(tables.LinkAction):
     name = "edit"
-    verbose_name = _("Edit Instance")
-    url = "horizon:project:instances:update"
+    verbose_name = _("Edit Service")
+    url = "horizon:project:windc:update"
     classes = ("ajax-modal", "btn-edit")
 
     def allowed(self, request, instance):
         return not is_deleting(instance)
-
-
-class ConsoleLink(tables.LinkAction):
-    name = "console"
-    verbose_name = _("Console")
-    url = "horizon:project:instances:detail"
-    classes = ("btn-console",)
-
-    def allowed(self, request, instance=None):
-        return instance.status in ACTIVE_STATES and not is_deleting(instance)
-
-    def get_link_url(self, datum):
-        base_url = super(ConsoleLink, self).get_link_url(datum)
-        tab_query_string = ConsoleTab(InstanceDetailTabs).get_query_string()
-        return "?".join([base_url, tab_query_string])
-
-
-class LogLink(tables.LinkAction):
-    name = "log"
-    verbose_name = _("View Log")
-    url = "horizon:project:instances:detail"
-    classes = ("btn-log",)
-
-    def allowed(self, request, instance=None):
-        return instance.status in ACTIVE_STATES and not is_deleting(instance)
-
-    def get_link_url(self, datum):
-        base_url = super(LogLink, self).get_link_url(datum)
-        tab_query_string = LogTab(InstanceDetailTabs).get_query_string()
-        return "?".join([base_url, tab_query_string])
-
 
 class UpdateRow(tables.Row):
     ajax = True
@@ -183,7 +151,7 @@ class UpdateRow(tables.Row):
 
 
 def get_ips(instance):
-    template_name = 'project/instances/_instance_ips.html'
+    template_name = 'project/windc/_instance_ips.html'
     context = {"instance": instance}
     return template.loader.render_to_string(template_name, context)
 
@@ -223,7 +191,7 @@ TASK_DISPLAY_CHOICES = (
 )
 
 
-class WinDCTable(tables.DataTable):
+class WinServicesTable(tables.DataTable):
     TASK_STATUS_CHOICES = (
         (None, True),
         ("none", True)
@@ -234,8 +202,8 @@ class WinDCTable(tables.DataTable):
         ("error", False),
     )
     name = tables.Column("name",
-                         link=("horizon:project:instances:detail"),
-                         verbose_name=_("WinDC Instance Name"))
+                         link=("horizon:project:windc:detail"),
+                         verbose_name=_("Name"))
     ip = tables.Column(get_ips, verbose_name=_("IP Address"))
     size = tables.Column(get_size,
                          verbose_name=_("Type"),
@@ -252,14 +220,11 @@ class WinDCTable(tables.DataTable):
                          status=True,
                          status_choices=TASK_STATUS_CHOICES,
                          display_choices=TASK_DISPLAY_CHOICES)
-    state = tables.Column(get_power_state,
-                          filters=(title, replace_underscores),
-                          verbose_name=_("Power State"))
 
     class Meta:
         name = "windc"
-        verbose_name = _("WinDC")
+        verbose_name = _("Windows Services")
         status_columns = ["status", "task"]
         row_class = UpdateRow
-        table_actions = (CreateWinDC, DeleteWinDC)
-        row_actions = (EditWinDC, ConsoleLink, LogLink, RebootWinDC)
+        table_actions = (CreateService, DeleteService)
+        row_actions = (EditService, RebootService)

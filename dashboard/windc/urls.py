@@ -20,12 +20,12 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import IndexView, CreateWinDCView
+from .views import IndexView, CreateWinServiceView
 
 
 VIEW_MOD = 'openstack_dashboard.dashboards.project.windc.views'
 
 urlpatterns = patterns(VIEW_MOD,
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'create/$', CreateWinDCView.as_view(), name='CreateWinDC')
+    url(r'^create$', CreateWinServiceView.as_view(), name='create')
 )

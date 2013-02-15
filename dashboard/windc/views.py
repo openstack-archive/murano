@@ -36,15 +36,15 @@ from horizon import tables
 from horizon import workflows
 
 from openstack_dashboard import api
-from .tables import WinDCTable
-from .workflows import CreateWinDC
+from .tables import WinServicesTable
+from .workflows import CreateWinService
 
 
 LOG = logging.getLogger(__name__)
 
 
 class IndexView(tables.DataTableView):
-    table_class = WinDCTable
+    table_class = WinServicesTable
     template_name = 'project/windc/index.html'
 
     def get_data(self):
@@ -82,12 +82,12 @@ class IndexView(tables.DataTableView):
         return instances
 
 
-class CreateWinDCView(workflows.WorkflowView):
-    workflow_class = CreateWinDC
+class CreateWinServiceView(workflows.WorkflowView):
+    workflow_class = CreateWinService
     template_name = "project/windc/create.html"
 
     def get_initial(self):
-        initial = super(CreateWinDCView, self).get_initial()
+        initial = super(CreateWinServiceView, self).get_initial()
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial
