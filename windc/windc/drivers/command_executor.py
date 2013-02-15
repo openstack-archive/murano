@@ -1,6 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
+# Copyright (c) 2011 X.commerce, a business unit of eBay Inc.
+# Copyright 2010 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# Copyright 2011 Piston Cloud Computing, Inc.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,23 +18,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
+from windc.core import commands as commands_api
+from windc.drivers import openstack_heat
+
+class Executor:
+
+	map = {commands_api.TEMPLATE_DEPLOYMENT_COMMAND : openstack_heat.Heat}
 
 	def __init__(self):
 		pass
 
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
+	def execute(self, commands):
+		for command in commands:
+			if command.type == commands_api.TEMPLATE_DEPLOYMENT_COMMAND:
+				executor = openstack_heat.Heat()
+				executor.execute(command)
 
 

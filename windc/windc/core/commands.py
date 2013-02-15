@@ -15,23 +15,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
+TEMPLATE_DEPLOYMENT_COMMAND = "Template"
+CHEF_COMMAND = "Chef"
+
+class Command:
+	type = "Empty"
+	context = None
 
 	def __init__(self):
-		pass
+		self.type = "Empty"
+		self.context = None
 
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
+	def __init__(self, type, context):
+		self.type = type
+		self.context = context
 
 

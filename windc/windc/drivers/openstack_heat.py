@@ -1,6 +1,9 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
+# Copyright (c) 2011 X.commerce, a business unit of eBay Inc.
+# Copyright 2010 United States Government as represented by the
+# Administrator of the National Aeronautics and Space Administration.
+# Copyright 2011 Piston Cloud Computing, Inc.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,23 +18,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
+#from heatclient import Client
+from subprocess import call
+
+import logging
+LOG = logging.getLogger(__name__)
+
+class Heat:
 
 	def __init__(self):
 		pass
 
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
+	def execute(self, command):
+#		client = Client('1',OS_IMAGE_ENDPOINT, OS_TENANT_ID)
+ 		LOG.debug('Calling heat script to execute template')
+		call(["./heat_run","stack-create","-f "+command.context['template_name'],
+			command.context['stack_name']])
 		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
-
 
