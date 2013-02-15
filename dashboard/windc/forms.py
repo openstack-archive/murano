@@ -46,7 +46,7 @@ class UpdateInstance(forms.SelfHandlingForm):
                              _('Instance "%s" updated.') % data['name'])
             return server
         except:
-            redirect = reverse("horizon:project:instances:index")
+            redirect = reverse("horizon:project:windc:index")
             exceptions.handle(request,
                               _('Unable to update instance.'),
                               redirect=redirect)

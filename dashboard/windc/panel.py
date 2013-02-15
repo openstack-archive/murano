@@ -22,7 +22,7 @@ from openstack_dashboard.dashboards.project import dashboard
 
 
 class WinDC(horizon.Panel):
-    name = _("WinDC")
+    name = _("Windows Services")
     slug = 'windc'
 
 
