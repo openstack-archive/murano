@@ -61,7 +61,21 @@ class SelectProjectUserAction(workflows.Action):
 
 class SelectProjectUser(workflows.Step):
     action_class = SelectProjectUserAction
+    #contributes = ("project_id", "user_id")
 
+
+class ConfigureDCAction(workflows.Action):
+    dc_name = forms.CharField(label=_("Data Center Name"),
+                              required=True,
+                              help_text=_("A name of new data center."))
+
+    class Meta:
+        name = _("Data Center")
+        help_text_template = ("project/windc/_data_center_help.html")
+
+
+class ConfigureDC(workflows.Step):
+    action_class = ConfigureDCAction
 
 class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
@@ -129,14 +143,36 @@ class ConfigureWinIIS(workflows.Step):
 
 class CreateWinService(workflows.Workflow):
     slug = "create"
-    name = _("Create Windows Service")
+    name = _("Create Service")
     finalize_button_name = _("Deploy")
     success_message = _('Deployed %(count)s named "%(name)s".')
     failure_message = _('Unable to deploy %(count)s named "%(name)s".')
-    success_url = "horizon:project:windc:index"
+    success_url = "horizon:project:windc:services"
     default_steps = (SelectProjectUser,
                      ConfigureWinDC,
                      ConfigureWinIIS)
+
+    ## TO DO:
+    ## Need to rewrite the following code:
+
+    #def handle(self, request, context):
+    #    try:
+    #        api.windc.create(request,...)
+    #        return True
+    #    except:
+    #        exceptions.handle(request)
+    #        return False
+
+
+class CreateWinDC(workflows.Workflow):
+    slug = "create"
+    name = _("Create Windows Data Center")
+    finalize_button_name = _("Deploy")
+    success_message = _('Deployed %(count)s named "%(name)s".')
+    failure_message = _('Unable to deploy %(count)s named "%(name)s".')
+    success_url = "horizon:project:windc"
+    default_steps = (SelectProjectUser,
+                     ConfigureDC)
 
     ## TO DO:
     ## Need to rewrite the following code:

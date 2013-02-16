@@ -1,6 +1,7 @@
 # TO DO: 
-# 1. Remove extra code
-#
+# 1. Add new functional for services and data centers
+# 2. Fix issue with list of services: services table shoudl show services for
+#    specific data center
 
 This file is described how to install new tab on horizon dashboard.
 We should do the following:

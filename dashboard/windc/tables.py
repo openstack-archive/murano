@@ -14,6 +14,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+
+# TO DO: clear extra modules
+
+
 import logging
 
 from django import shortcuts
@@ -37,98 +41,32 @@ from openstack_dashboard.dashboards.project.access_and_security \
 
 LOG = logging.getLogger(__name__)
 
-ACTIVE_STATES = ("ACTIVE",)
-
-POWER_STATES = {
-    0: "NO STATE",
-    1: "RUNNING",
-    2: "SHUTDOWN",
-    3: "FAILED",
-    4: "BUILDING",
-}
-
-PAUSE = 0
-UNPAUSE = 1
-SUSPEND = 0
-RESUME = 1
-
-
-def is_deleting(instance):
-    task_state = getattr(instance, "OS-EXT-STS:task_state", None)
-    if not task_state:
-        return False
-    return task_state.lower() == "deleting"
-
-
-class RebootService(tables.BatchAction):
-    name = "reboot"
-    action_present = _("Reboot")
-    action_past = _("Rebooted")
-    data_type_singular = _("Service")
-    data_type_plural = _("Services")
-    classes = ('btn-danger', 'btn-reboot')
-
-    def allowed(self, request, instance=None):
-        return ((instance.status in ACTIVE_STATES
-                 or instance.status == 'SHUTOFF')
-                and not is_deleting(instance))
-
-    def action(self, request, obj_id):
-        api.nova.server_reboot(request, obj_id)
-
 
 class CreateService(tables.LinkAction):
     name = "CreateService"
-    verbose_name = _("Create Windows Service")
+    verbose_name = _("Create Service")
     url = "horizon:project:windc:create"
     classes = ("btn-launch", "ajax-modal")
 
     def allowed(self, request, datum):
-        try:
-            limits = api.nova.tenant_absolute_limits(request, reserved=True)
-
-            instances_available = limits['maxTotalInstances'] \
-                - limits['totalInstancesUsed']
-            cores_available = limits['maxTotalCores'] \
-                - limits['totalCoresUsed']
-            ram_available = limits['maxTotalRAMSize'] - limits['totalRAMUsed']
-
-            if instances_available <= 0 or cores_available <= 0 \
-                    or ram_available <= 0:
-                if "disabled" not in self.classes:
-                    self.classes = [c for c in self.classes] + ['disabled']
-                    self.verbose_name = string_concat(self.verbose_name, ' ',
-                                                      _("(Quota exceeded)"))
-            else:
-                self.verbose_name = _("Create Windows Service")
-                classes = [c for c in self.classes if c != "disabled"]
-                self.classes = classes
-        except:
-            LOG.exception("Failed to retrieve quota information")
-            # If we can't get the quota information, leave it to the
-            # API to check when launching
-
-        return True  # The action should always be displayed
-
-
-class DeleteService(tables.BatchAction):
-    name = "DeleteService"
-    action_present = _("DeleteService")
-    action_past = _("Scheduled termination of")
-    data_type_singular = _("Service")
-    data_type_plural = _("Services")
-    classes = ('btn-danger', 'btn-terminate')
-
-    def allowed(self, request, instance=None):
-        if instance:
-            # FIXME(gabriel): This is true in Essex, but in FOLSOM an instance
-            # can be terminated in any state. We should improve this error
-            # handling when LP bug 1037241 is implemented.
-            return instance.status not in ("PAUSED", "SUSPENDED")
         return True
 
     def action(self, request, obj_id):
-        api.nova.server_delete(request, obj_id)
+        # FIX ME
+        api.windc.datacenter.create_service(request, obj_id)
+
+class CreateDataCenter(tables.LinkAction):
+    name = "CreateDataCenter"
+    verbose_name = _("Create Windows Data Center")
+    url = "horizon:project:windc:create_dc"
+    classes = ("btn-launch", "ajax-modal")
+
+    def allowed(self, request, datum):
+        return True
+
+    def action(self, request, obj_id):
+        # FIX ME
+        api.windc.datacenter.create(request, obj_id)
 
 
 class EditService(tables.LinkAction):
@@ -138,7 +76,15 @@ class EditService(tables.LinkAction):
     classes = ("ajax-modal", "btn-edit")
 
     def allowed(self, request, instance):
-        return not is_deleting(instance)
+        return True
+
+class ShowDataCenterServices(tables.LinkAction):
+    name = "edit"
+    verbose_name = _("Services")
+    url = "horizon:project:windc:services"
+
+    def allowed(self, request, instance):
+        return True
 
 class UpdateRow(tables.Row):
     ajax = True
@@ -150,45 +96,26 @@ class UpdateRow(tables.Row):
         return instance
 
 
-def get_ips(instance):
-    template_name = 'project/windc/_instance_ips.html'
-    context = {"instance": instance}
-    return template.loader.render_to_string(template_name, context)
+class WinDCTable(tables.DataTable):
+    TASK_STATUS_CHOICES = (
+        (None, True),
+        ("none", True)
+    )
+    STATUS_CHOICES = (
+        ("active", True),
+        ("shutoff", True),
+        ("error", False),
+    )
+    name = tables.Column("name",
+                         link=("horizon:project:windc:services"),
+                         verbose_name=_("Name"))
 
-
-def get_size(instance):
-    if hasattr(instance, "full_flavor"):
-        size_string = _("%(name)s | %(RAM)s RAM | %(VCPU)s VCPU "
-                        "| %(disk)s Disk")
-        vals = {'name': instance.full_flavor.name,
-                'RAM': sizeformat.mbformat(instance.full_flavor.ram),
-                'VCPU': instance.full_flavor.vcpus,
-                'disk': sizeformat.diskgbformat(instance.full_flavor.disk)}
-        return size_string % vals
-    return _("Not available")
-
-
-def get_power_state(instance):
-    return POWER_STATES.get(getattr(instance, "OS-EXT-STS:power_state", 0), '')
-
-
-STATUS_DISPLAY_CHOICES = (
-    ("resize", "Resize/Migrate"),
-    ("verify_resize", "Confirm or Revert Resize/Migrate"),
-    ("revert_resize", "Revert Resize/Migrate"),
-)
-
-
-TASK_DISPLAY_CHOICES = (
-    ("image_snapshot", "Snapshotting"),
-    ("resize_prep", "Preparing Resize or Migrate"),
-    ("resize_migrating", "Resizing or Migrating"),
-    ("resize_migrated", "Resized or Migrated"),
-    ("resize_finish", "Finishing Resize or Migrate"),
-    ("resize_confirming", "Confirming Resize or Nigrate"),
-    ("resize_reverting", "Reverting Resize or Migrate"),
-    ("unpausing", "Resuming"),
-)
+    class Meta:
+        name = "windc"
+        verbose_name = _("Windows Data Centers")
+        row_class = UpdateRow
+        table_actions = (CreateDataCenter,)
+        row_actions = (ShowDataCenterServices,)
 
 
 class WinServicesTable(tables.DataTable):
@@ -202,29 +129,12 @@ class WinServicesTable(tables.DataTable):
         ("error", False),
     )
     name = tables.Column("name",
-                         link=("horizon:project:windc:detail"),
+                         link=("horizon:project:windc"),
                          verbose_name=_("Name"))
-    ip = tables.Column(get_ips, verbose_name=_("IP Address"))
-    size = tables.Column(get_size,
-                         verbose_name=_("Type"),
-                         attrs={'data-type': 'type'})
-    status = tables.Column("status",
-                           filters=(title, replace_underscores),
-                           verbose_name=_("Status"),
-                           status=True,
-                           status_choices=STATUS_CHOICES,
-                           display_choices=STATUS_DISPLAY_CHOICES)
-    task = tables.Column("OS-EXT-STS:task_state",
-                         verbose_name=_("Task"),
-                         filters=(title, replace_underscores),
-                         status=True,
-                         status_choices=TASK_STATUS_CHOICES,
-                         display_choices=TASK_DISPLAY_CHOICES)
 
     class Meta:
-        name = "windc"
-        verbose_name = _("Windows Services")
-        status_columns = ["status", "task"]
+        name = "services"
+        verbose_name = _("Services")
         row_class = UpdateRow
-        table_actions = (CreateService, DeleteService)
-        row_actions = (EditService, RebootService)
+        table_actions = (CreateService,)
+        row_actions = (EditService,)

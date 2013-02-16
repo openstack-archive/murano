@@ -15,8 +15,7 @@
 #    Unless required by applicable law or agreed to in writing, software
 #    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+#    License for the specific language governing permissions and limitations#    under the License.
 
 """
 Views for managing instances.
@@ -36,51 +35,61 @@ from horizon import tables
 from horizon import workflows
 
 from openstack_dashboard import api
-from .tables import WinServicesTable
-from .workflows import CreateWinService
+from .tables import WinDCTable, WinServicesTable
+from .tabs import WinServicesTab
+from .workflows import CreateWinService, CreateWinDC
 
 
 LOG = logging.getLogger(__name__)
 
 
 class IndexView(tables.DataTableView):
-    table_class = WinServicesTable
+    table_class = WinDCTable
     template_name = 'project/windc/index.html'
 
     def get_data(self):
         # Gather our instances
         try:
-            instances = api.nova.server_list(self.request)
+            data_centers = api.windc.datacenter_list(self.request)
         except:
-            instances = []
+            data_centers = []
             exceptions.handle(self.request,
-                              _('Unable to retrieve instances.'))
-        # Gather our flavors and correlate our instances to them
-        if instances:
-            try:
-                flavors = api.nova.flavor_list(self.request)
-            except:
-                flavors = []
-                exceptions.handle(self.request, ignore=True)
+                              _('Unable to retrieve data centers list.'))
+        return data_centers
 
-            full_flavors = SortedDict([(str(flavor.id), flavor)
-                                        for flavor in flavors])
-            # Loop through instances to get flavor info.
-            for instance in instances:
-                try:
-                    flavor_id = instance.flavor["id"]
-                    if flavor_id in full_flavors:
-                        instance.full_flavor = full_flavors[flavor_id]
-                    else:
-                        # If the flavor_id is not in full_flavors list,
-                        # get it via nova api.
-                        instance.full_flavor = api.nova.flavor_get(
-                            self.request, flavor_id)
-                except:
-                    msg = _('Unable to retrieve instance size information.')
-                    exceptions.handle(self.request, msg)
-        return instances
 
+class WinServices(tables.DataTableView):
+    table_class = WinServicesTable
+    template_name = 'project/windc/services.html'
+
+    def get_context_data(self, **kwargs):
+        context = super(WinServices, self).get_context_data(**kwargs)
+        context["domain_controller_name"] = self.get_data()[0].name
+        return context
+
+    def get_data(self):
+        try:
+            dc_id = self.kwargs['domain_controller_id']
+            domain_controller = api.windc.datacenter_get(self.request, dc_id)
+        except:
+            redirect = reverse('horizon:project:windc:index')
+            exceptions.handle(self.request,
+                              _('Unable to retrieve details for '
+                              'domain_controller "%s".') % dc_id,
+                              redirect=redirect)
+        self._domain_controller = [domain_controller,]
+        return self._domain_controller
+
+
+class CreateWinDCView(workflows.WorkflowView):
+    workflow_class = CreateWinDC
+    template_name = "project/windc/create_dc.html"
+
+    def get_initial(self):
+        initial = super(CreateWinDCView, self).get_initial()
+        initial['project_id'] = self.request.user.tenant_id
+        initial['user_id'] = self.request.user.id
+        return initial
 
 class CreateWinServiceView(workflows.WorkflowView):
     workflow_class = CreateWinService

@@ -33,20 +33,20 @@ from horizon import messages
 LOG = logging.getLogger(__name__)
 
 
-class UpdateInstance(forms.SelfHandlingForm):
+class UpdateWinDC(forms.SelfHandlingForm):
     tenant_id = forms.CharField(widget=forms.HiddenInput)
-    instance = forms.CharField(widget=forms.HiddenInput)
+    data_center = forms.CharField(widget=forms.HiddenInput)
     name = forms.CharField(required=True)
 
     def handle(self, request, data):
         try:
-            server = api.nova.server_update(request, data['instance'],
+            server = api.nova.server_update(request, data['data_center'],
                                             data['name'])
             messages.success(request,
-                             _('Instance "%s" updated.') % data['name'])
+                             _('Data Center "%s" updated.') % data['name'])
             return server
         except:
             redirect = reverse("horizon:project:windc:index")
             exceptions.handle(request,
-                              _('Unable to update instance.'),
+                              _('Unable to update data center.'),
                               redirect=redirect)
