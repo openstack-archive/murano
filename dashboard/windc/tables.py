@@ -55,6 +55,7 @@ class CreateService(tables.LinkAction):
         # FIX ME
         api.windc.datacenter.create_service(request, obj_id)
 
+
 class CreateDataCenter(tables.LinkAction):
     name = "CreateDataCenter"
     verbose_name = _("Create Windows Data Center")
@@ -69,6 +70,23 @@ class CreateDataCenter(tables.LinkAction):
         api.windc.datacenter.create(request, obj_id)
 
 
+class DeleteDataCenter(tables.BatchAction):
+    name = "delete"
+    action_present = _("Delete")
+    action_past = _("Delete")
+    data_type_singular = _("Data Center")
+    data_type_plural = _("Data Center")
+    classes = ('btn-danger', 'btn-terminate')
+
+    def allowed(self, request, datum):
+        return True
+
+    def action(self, request, datacenter_id):
+        # FIX ME
+        datacenter = api.windc.datacenter_get(request, datacenter_id)
+        api.windc.datacenter_delete(request, datacenter)
+
+
 class EditService(tables.LinkAction):
     name = "edit"
     verbose_name = _("Edit Service")
@@ -78,6 +96,7 @@ class EditService(tables.LinkAction):
     def allowed(self, request, instance):
         return True
 
+
 class ShowDataCenterServices(tables.LinkAction):
     name = "edit"
     verbose_name = _("Services")
@@ -85,6 +104,7 @@ class ShowDataCenterServices(tables.LinkAction):
 
     def allowed(self, request, instance):
         return True
+
 
 class UpdateRow(tables.Row):
     ajax = True
@@ -115,7 +135,7 @@ class WinDCTable(tables.DataTable):
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
         table_actions = (CreateDataCenter,)
-        row_actions = (ShowDataCenterServices,)
+        row_actions = (ShowDataCenterServices,DeleteDataCenter)
 
 
 class WinServicesTable(tables.DataTable):

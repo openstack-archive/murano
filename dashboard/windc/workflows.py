@@ -29,9 +29,6 @@ from horizon import forms
 from horizon import workflows
 
 from openstack_dashboard import api
-from openstack_dashboard.api import cinder
-from openstack_dashboard.api import glance
-from openstack_dashboard.usage import quotas
 
 
 LOG = logging.getLogger(__name__)
@@ -61,13 +58,11 @@ class SelectProjectUserAction(workflows.Action):
 
 class SelectProjectUser(workflows.Step):
     action_class = SelectProjectUserAction
-    #contributes = ("project_id", "user_id")
 
 
 class ConfigureDCAction(workflows.Action):
-    dc_name = forms.CharField(label=_("Data Center Name"),
-                              required=True,
-                              help_text=_("A name of new data center."))
+    name = forms.CharField(label=_("Data Center Name"),
+                              required=True)
 
     class Meta:
         name = _("Data Center")
@@ -76,6 +71,13 @@ class ConfigureDCAction(workflows.Action):
 
 class ConfigureDC(workflows.Step):
     action_class = ConfigureDCAction
+    contibutes = ("name",)
+
+    def contribute(self, data, context):
+        if data:
+            context['name'] = data.get("name", "")
+        return context
+
 
 class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
@@ -167,20 +169,24 @@ class CreateWinService(workflows.Workflow):
 class CreateWinDC(workflows.Workflow):
     slug = "create"
     name = _("Create Windows Data Center")
-    finalize_button_name = _("Deploy")
-    success_message = _('Deployed %(count)s named "%(name)s".')
-    failure_message = _('Unable to deploy %(count)s named "%(name)s".')
+    finalize_button_name = _("Create")
+    success_message = _('Created data center "%(name)s".')
+    failure_message = _('Unable to create data center "%(name)s".')
     success_url = "horizon:project:windc"
     default_steps = (SelectProjectUser,
                      ConfigureDC)
 
-    ## TO DO:
-    ## Need to rewrite the following code:
-
-    #def handle(self, request, context):
-    #    try:
-    #        api.windc.create(request,...)
-    #        return True
-    #    except:
-    #        exceptions.handle(request)
-    #        return False
+    def handle(self, request, context):
+        try:
+            # FIX ME:
+            context['type'] = 'datacenter'
+            context['version'] = '1.0'
+            context['ip'] = '1.1.1.1'
+            context['port'] = '80'
+            context['user'] = 'administrator'
+            context['password'] = 'swordfish'
+            datacenter = api.windc.datacenter_create(request, context)
+            return True
+        except:
+            exceptions.handle(request)
+            return False

@@ -88,7 +88,8 @@ def datacenter_create(conf, values):
 def datacenter_update(conf, datacenter_id, values):
     session = get_session(conf)
     with session.begin():
-        datacenter_ref = datacenter_get(conf, datacenter_id, session=session)
+        datacenter_ref = session.query(models.DataCenter).\
+                         filter_by(id=datacenter_id).first()
         datacenter_ref.update(values)
         return datacenter_ref
 
@@ -96,8 +97,10 @@ def datacenter_update(conf, datacenter_id, values):
 def datacenter_destroy(conf, datacenter_id):
     session = get_session(conf)
     with session.begin():
-        datacenter_ref = device_get(conf, datacenter_id, session=session)
+        datacenter_ref = session.query(models.DataCenter).\
+                         filter_by(id=datacenter_id).first()
         session.delete(datacenter_ref)
+        return datacenter_ref
 
 # Service
 

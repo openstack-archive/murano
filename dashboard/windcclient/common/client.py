@@ -96,6 +96,8 @@ class HTTPClient(httplib2.Http):
             body = None
 
         if 400 <= resp.status < 600:
+            # DELETE THIS STRING
+            logger.exception(url)
             raise exceptions.from_response(resp, body)
 
         return resp, body
@@ -110,6 +112,7 @@ class HTTPClient(httplib2.Http):
         resp, body = self._http_request(url, method, **kwargs)
 
         if 400 <= resp.status < 600:
+            logger.exception(url)
             raise exceptions.from_response(resp, body)
 
         return resp, body

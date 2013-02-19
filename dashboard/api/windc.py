@@ -54,11 +54,11 @@ def datacenter_create(request, parameters):
                                                    version, ip,
                                                    port, user, password)
 
-def datacenter_delete(request, datacenter):
-    return windcclient(request).datacenters.delete(datacenter)
+def datacenter_delete(request, datacenter_id):
+    return windcclient(request).datacenters.delete(datacenter_id)
 
-def datacenter_get(request, lb_id):
-    return windcclient(request).datacenters.get(lb_id)
+def datacenter_get(request, datacenter_id):
+    return windcclient(request).datacenters.get(datacenter_id)
 
 def datacenter_list(request):
     return windcclient(request).datacenters.list()
