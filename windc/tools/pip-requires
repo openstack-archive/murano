@@ -2,7 +2,7 @@
 # the Python.h headers. Make sure you install the python-dev
 # package to get the right headers...
 greenlet>=0.3.1
-
+bsqlite3-dev
 SQLAlchemy>=0.7
 anyjson
 eventlet>=0.9.12
