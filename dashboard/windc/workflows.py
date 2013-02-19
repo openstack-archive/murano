@@ -81,8 +81,7 @@ class ConfigureDC(workflows.Step):
 
 class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
-                              required=False,
-                              help_text=_("A name of new domain."))
+                              required=False)
 
     dc_net_name = forms.CharField(label=_("Domain NetBIOS Name"),
                                   required=False,
@@ -92,8 +91,7 @@ class ConfigureWinDCAction(workflows.Action):
                                   required=True,
                                   min_value=1,
                                   max_value=100,
-                                  initial=1,
-                                  help_text=_("Domain Controllers count."))
+                                  initial=1)
 
     adm_password = forms.CharField(widget=forms.PasswordInput,
                                    label=_("Administrator password"),
@@ -119,15 +117,13 @@ class ConfigureWinDC(workflows.Step):
 
 class ConfigureWinIISAction(workflows.Action):
     iis_name = forms.CharField(label=_("IIS Server Name"),
-                               required=False,
-                               help_text=_("A name of IIS Server."))
+                               required=False)
 
     iis_count = forms.IntegerField(label=_("IIS Servers Count"),
                                    required=True,
                                    min_value=1,
                                    max_value=100,
-                                   initial=1,
-                                   help_text=_("IIS Servers count."))
+                                   initial=1)
 
     iis_domain = forms.CharField(label=_("Member of the Domain"),
                                  required=False,
@@ -170,11 +166,15 @@ class CreateWinDC(workflows.Workflow):
     slug = "create"
     name = _("Create Windows Data Center")
     finalize_button_name = _("Create")
-    success_message = _('Created data center "%(name)s".')
-    failure_message = _('Unable to create data center "%(name)s".')
-    success_url = "horizon:project:windc"
+    success_message = _('Created data center "%s".')
+    failure_message = _('Unable to create data center "%s".')
+    success_url = "horizon:project:windc:index"
     default_steps = (SelectProjectUser,
                      ConfigureDC)
+
+    def format_status_message(self, message):
+        name = self.context.get('name', 'noname')
+        return message % name
 
     def handle(self, request, context):
         try:
