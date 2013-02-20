@@ -32,5 +32,6 @@
 			"Name": "TestThrow",
 
 		}
-	]
+	],
+	"RebootOnCompletion": 0
 }

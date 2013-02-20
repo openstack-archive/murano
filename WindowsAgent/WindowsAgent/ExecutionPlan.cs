@@ -16,5 +16,6 @@ namespace Mirantis.Keero.WindowsAgent
 
 		public string[] Scripts { get; set; }
 		public LinkedList<Command> Commands { get; set; }
+		public int RebootOnCompletion { get; set; }
 	}
 }

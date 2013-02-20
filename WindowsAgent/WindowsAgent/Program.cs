@@ -29,6 +29,7 @@ namespace Mirantis.Keero.WindowsAgent
 
 		void Loop()
 		{
+			var doReboot = false;
 			const string filePath = "data.json";
 			while (!stop)
 			{
@@ -40,16 +41,34 @@ namespace Mirantis.Keero.WindowsAgent
 						File.WriteAllText(filePath, message.Body);
 						message.Ack();
 					}
-					var result = new PlanExecutor(filePath).Execute();
+					var executor = new PlanExecutor(filePath);
+					var result = executor.Execute();
 					if(stop) break;
 					rabbitMqClient.SendResult(result);
 					File.Delete(filePath);
+					if (executor.RebootNeeded)
+					{
+						doReboot = true;
+						break;
+					}
 				}
 				catch (Exception exception)
 				{
 					WaitOnException(exception);
 				}
 				
+			}
+			if (doReboot)
+			{
+				Console.WriteLine("Rebooting...");
+				try
+				{
+					System.Diagnostics.Process.Start("shutdown.exe", "-r -t 0");
+				}
+				catch (Exception ex)
+				{
+					Console.WriteLine(ex);
+				}
 			}
 
 		}
