@@ -51,9 +51,9 @@ class CreateService(tables.LinkAction):
     def allowed(self, request, datum):
         return True
 
-    def action(self, request, obj_id):
+    def action(self, request, service):
         # FIX ME
-        api.windc.datacenter.create_service(request, obj_id)
+        api.windc.services_create(request, service)
 
 
 class CreateDataCenter(tables.LinkAction):
@@ -65,9 +65,8 @@ class CreateDataCenter(tables.LinkAction):
     def allowed(self, request, datum):
         return True
 
-    def action(self, request, obj_id):
-        # FIX ME
-        api.windc.datacenter.create(request, obj_id)
+    def action(self, request, datacenter):
+        api.windc.datacenters_create(request, datacenter)
 
 
 class DeleteDataCenter(tables.BatchAction):
@@ -82,9 +81,8 @@ class DeleteDataCenter(tables.BatchAction):
         return True
 
     def action(self, request, datacenter_id):
-        # FIX ME
-        datacenter = api.windc.datacenter_get(request, datacenter_id)
-        api.windc.datacenter_delete(request, datacenter)
+        datacenter = api.windc.datacenters_get(request, datacenter_id)
+        api.windc.datacenters_delete(request, datacenter)
 
 
 class EditService(tables.LinkAction):
@@ -117,15 +115,6 @@ class UpdateRow(tables.Row):
 
 
 class WinDCTable(tables.DataTable):
-    TASK_STATUS_CHOICES = (
-        (None, True),
-        ("none", True)
-    )
-    STATUS_CHOICES = (
-        ("active", True),
-        ("shutoff", True),
-        ("error", False),
-    )
     name = tables.Column("name",
                          link=("horizon:project:windc:services"),
                          verbose_name=_("Name"))
@@ -139,15 +128,6 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-    TASK_STATUS_CHOICES = (
-        (None, True),
-        ("none", True)
-    )
-    STATUS_CHOICES = (
-        ("active", True),
-        ("shutoff", True),
-        ("error", False),
-    )
     name = tables.Column("name",
                          link=("horizon:project:windc"),
                          verbose_name=_("Name"))

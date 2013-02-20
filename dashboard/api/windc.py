@@ -22,10 +22,7 @@ import logging
 import urlparse
 
 from django.utils.decorators import available_attrs
-
 from windcclient.v1 import client as windc_client
-
-#from horizon.api import base
 
 
 __all__ = ('datacenter_get','datacenter_list',
@@ -42,23 +39,28 @@ def windcclient(request):
               % (request.user.token, url))
     return windc_client.Client(endpoint=url, token=None)
 
-def datacenter_create(request, parameters):
-    name = parameters.get('name')
-    _type = parameters.get('type')
-    version = parameters.get('version')
-    ip = parameters.get('ip')
-    port = parameters.get('port')
-    user = parameters.get('user')
-    password = parameters.get('password')
-    return windcclient(request).datacenters.create(name, _type,
-                                                   version, ip,
-                                                   port, user, password)
+def datacenters_create(request, parameters):
+    name = parameters.get('name', '')
+    return windcclient(request).datacenters.create(name)
 
-def datacenter_delete(request, datacenter_id):
+def datacenters_delete(request, datacenter_id):
     return windcclient(request).datacenters.delete(datacenter_id)
 
-def datacenter_get(request, datacenter_id):
+def datacenters_get(request, datacenter_id):
     return windcclient(request).datacenters.get(datacenter_id)
 
-def datacenter_list(request):
+def datacenters_list(request):
     return windcclient(request).datacenters.list()
+
+def services_create(request, datacenter, parameters):
+    name = parameters.get('name', '')
+    return windcclient(request).services.create(datacenter, name)
+
+def services_list(request, datacenter):
+    return windcclient(request).services.list(datacenter)
+
+def services_get(request, datacenter, service_id):
+    return windcclient(request).services.get(datacenter, service_id)
+
+def services_delete(request, datacenter, service_id):
+    return windcclient(request).services.delete(datacenter, service_id)

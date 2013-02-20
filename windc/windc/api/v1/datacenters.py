@@ -26,24 +26,17 @@ from windc.db import api as db_api
 LOG = logging.getLogger(__name__)
 
 
-class Controller(object):
+class Datacenters_Controller(object):
     def __init__(self, conf):
         LOG.debug("Creating data centers controller with config:"
                                                 "datacenters.py %s", conf)
         self.conf = conf
 
     @utils.verify_tenant
-    def findLBforVM(self, req, tenant_id, vm_id):
-        LOG.debug("Got index request. Request: %s", req)
-        result = core_api.lb_find_for_vm(self.conf, tenant_id, vm_id)
-        return {'loadbalancers': result}
-
-    @utils.verify_tenant
     def index(self, req, tenant_id):
         LOG.debug("Got index request. Request: %s", req)
         result = core_api.dc_get_index(self.conf, tenant_id)
         LOG.debug("Got list of datacenters: %s", result)
-        result
         return {'datacenters': result}
 
     @utils.http_success_code(202)
@@ -80,4 +73,4 @@ def create_resource(conf):
     """Datacenters resource factory method"""
     deserializer = wsgi.JSONRequestDeserializer()
     serializer = wsgi.JSONResponseSerializer()
-    return wsgi.Resource(Controller(conf), deserializer, serializer)
+    return wsgi.Resource(Datacenters_Controller(conf), deserializer, serializer)

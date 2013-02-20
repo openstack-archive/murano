@@ -51,19 +51,22 @@ def update_dc(conf, tenant_id, datacenter_id, body):
 	old_dc = copy.deepcopy(dc)
 	db_api.pack_update(dc, body)
 	dc = db_api.datacenter_update(conf, datacenter_id, dc)
-	event = events.Event(events.SCOPE_DATACENTER_CHANGE, events.ACTION_MODIFY)
+	event = events.Event(events.SCOPE_DATACENTER_CHANGE,
+                             events.ACTION_MODIFY)
 	event.previous_state = old_dc
 	events.change_event(conf, event, dc)
 	pass
 
 def service_get_index(conf, tenant_id, datacenter_id):
-	srvcs = db_api.service_get_all_by_datacenter_id(conf, tenant_id, dtacenter_id)
+	srvcs = db_api.service_get_all_by_datacenter_id(conf, tenant_id,
+                                                        datacenter_id)
 	srv_list = [db_api.unpack_extra(srv) for srv in srvcs]
 	return srv_list
 	pass
 
 def create_service(conf, params):
-	# We need to pack all attributes which are not defined by the model explicitly
+	# We need to pack all attributes which are not defined
+	# by the model explicitly
 	srv_params = db_api.service_pack_extra(params)
 	srv = db_api.service_create(conf, srv_params)
 	event = events.Event(events.SCOPE_SERVICE_CHANGE, events.ACTION_ADD)
@@ -80,7 +83,7 @@ def delete_service(conf, tenant_id, datacenter_id, service_id):
 	pass
 
 def service_get_data(conf, tenant_id, datacenter_id, service_id):
-	srv = db_api.service_get(conf,service_id, tenant_id)
+	srv = db_api.service_get(conf, service_id, tenant_id)
 	srv_data = db_api.unpack_extra(srv)
 	return srv_data
 	pass

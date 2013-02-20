@@ -36,7 +36,6 @@ from horizon import workflows
 
 from openstack_dashboard import api
 from .tables import WinDCTable, WinServicesTable
-from .tabs import WinServicesTab
 from .workflows import CreateWinService, CreateWinDC
 
 
@@ -48,9 +47,9 @@ class IndexView(tables.DataTableView):
     template_name = 'project/windc/index.html'
 
     def get_data(self):
-        # Gather our instances
+        # Gather our datacenters
         try:
-            data_centers = api.windc.datacenter_list(self.request)
+            data_centers = api.windc.datacenters_list(self.request)
         except:
             data_centers = []
             exceptions.handle(self.request,
@@ -64,21 +63,22 @@ class WinServices(tables.DataTableView):
 
     def get_context_data(self, **kwargs):
         context = super(WinServices, self).get_context_data(**kwargs)
-        context["domain_controller_name"] = self.get_data()[0].name
+        data = self.get_data()
+        context["dc_name"] = self.dc_name
         return context
 
     def get_data(self):
         try:
             dc_id = self.kwargs['domain_controller_id']
-            domain_controller = api.windc.datacenter_get(self.request, dc_id)
+            datacenter = api.windc.datacenters_get(self.request, dc_id)
+            self.dc_name = datacenter.name
+            services = api.windc.services_list(self.request, datacenter)
         except:
-            redirect = reverse('horizon:project:windc:index')
+            services = []
             exceptions.handle(self.request,
-                              _('Unable to retrieve details for '
-                              'domain_controller "%s".') % dc_id,
-                              redirect=redirect)
-        self._domain_controller = [domain_controller,]
-        return self._domain_controller
+                              _('Unable to retrieve list of services for '
+                              'data center "%s".') % dc_id)
+        return services
 
 
 class CreateWinDCView(workflows.WorkflowView):

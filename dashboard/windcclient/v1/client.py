@@ -17,6 +17,7 @@
 
 from windcclient.common import client
 from . import datacenters
+from . import dcservices
 
 
 class Client(object):
@@ -25,3 +26,4 @@ class Client(object):
     def __init__(self, **kwargs):
         self.client = client.HTTPClient(**kwargs)
         self.datacenters = datacenters.DCManager(self)
+        self.services = dcservices.DCServiceManager(self)

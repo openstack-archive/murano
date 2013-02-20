@@ -143,23 +143,26 @@ class CreateWinService(workflows.Workflow):
     slug = "create"
     name = _("Create Service")
     finalize_button_name = _("Deploy")
-    success_message = _('Deployed %(count)s named "%(name)s".')
-    failure_message = _('Unable to deploy %(count)s named "%(name)s".')
+    success_message = _('Created service "%s".')
+    failure_message = _('Unable to create service "%s".')
     success_url = "horizon:project:windc:services"
     default_steps = (SelectProjectUser,
                      ConfigureWinDC,
                      ConfigureWinIIS)
 
-    ## TO DO:
-    ## Need to rewrite the following code:
+    def format_status_message(self, message):
+        name = self.context.get('name', 'noname')
+        return message % name
 
-    #def handle(self, request, context):
-    #    try:
-    #        api.windc.create(request,...)
-    #        return True
-    #    except:
-    #        exceptions.handle(request)
-    #        return False
+    def handle(self, request, context):
+        try:
+            datacenter = context.get('domain_controller_name', '')
+            service = api.windc.services_create(request, context)
+            return True
+        except:
+            exceptions.handle(request)
+            return False
+
 
 
 class CreateWinDC(workflows.Workflow):
@@ -178,14 +181,7 @@ class CreateWinDC(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            # FIX ME:
-            context['type'] = 'datacenter'
-            context['version'] = '1.0'
-            context['ip'] = '1.1.1.1'
-            context['port'] = '80'
-            context['user'] = 'administrator'
-            context['password'] = 'swordfish'
-            datacenter = api.windc.datacenter_create(request, context)
+            datacenter = api.windc.datacenters_create(request, context)
             return True
         except:
             exceptions.handle(request)

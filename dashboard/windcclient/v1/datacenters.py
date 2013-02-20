@@ -31,14 +31,8 @@ class DCManager(base.Manager):
     def list(self):
         return self._list('/datacenters', 'datacenters')
 
-    def create(self, name, type, version, ip, port, user, password, **extra):
-        body = {'name': name,
-                'type': type,
-                'version': version,
-                'ip': ip,
-                'port': port,
-                'user': user,
-                'password': password}
+    def create(self, name, **extra):
+        body = {'name': name, 'services': {}}
         body.update(extra)
         return self._create('/datacenters', body, 'datacenter')
 
