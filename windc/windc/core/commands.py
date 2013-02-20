@@ -17,6 +17,10 @@
 
 TEMPLATE_DEPLOYMENT_COMMAND = "Template"
 CHEF_COMMAND = "Chef"
+CHEF_OP_CREATE_ENV = "Env"
+CHEF_OP_CREATE_ROLE = "Role"
+CHEF_OP_ASSIGN_ROLE = "AssignRole"
+CHEF_OP_CREATE_NODE = "CRNode"
 
 class Command:
 	type = "Empty"
@@ -25,9 +29,15 @@ class Command:
 	def __init__(self):
 		self.type = "Empty"
 		self.context = None
+		self.data = None
 
 	def __init__(self, type, context):
 		self.type = type
 		self.context = context
+
+	def __init__(self, type, context, data):
+		self.type = type
+		self.context = context
+		self.data = data
 
 
