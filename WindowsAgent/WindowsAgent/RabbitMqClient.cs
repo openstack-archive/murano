@@ -45,9 +45,7 @@ namespace Mirantis.Keero.WindowsAgent
 				session.QueueDeclare(queueName, true, false, false, null);
 				var consumer = new QueueingBasicConsumer(session);
 				var consumeTag = session.BasicConsume(queueName, false, consumer);
-				Console.WriteLine("Deq");
 				var e = (RabbitMQ.Client.Events.BasicDeliverEventArgs)consumer.Queue.Dequeue();
-				Console.WriteLine("Message received");
 				Action ackFunc = delegate {
 					session.BasicAck(e.DeliveryTag, false);
 					session.BasicCancel(consumeTag);

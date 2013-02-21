@@ -24,20 +24,23 @@ namespace Mirantis.Keero.WindowsAgent
 			this.path = path;
 		}
 
+		public bool RebootNeeded { get; set; }
+
 		public string Execute()
 		{
+			RebootNeeded = false;
 			try
 			{
 				var plan = JsonConvert.DeserializeObject<ExecutionPlan>(File.ReadAllText(this.path));
 				var resultPath = this.path + ".result";
-				List<object> currentResults = null;
+				List<ExecutionResult> currentResults = null;
 				try
 				{
-					currentResults = JsonConvert.DeserializeObject<List<object>>(File.ReadAllText(resultPath));
+					currentResults = JsonConvert.DeserializeObject<List<ExecutionResult>>(File.ReadAllText(resultPath));
 				}
 				catch
 				{
-					currentResults = new List<object>();
+					currentResults = new List<ExecutionResult>();
 				}
 
 
@@ -100,6 +103,19 @@ namespace Mirantis.Keero.WindowsAgent
 					IsException = false,
 					Result = currentResults
 				}, Formatting.Indented);
+
+				if (plan.RebootOnCompletion > 0)
+				{
+					if (plan.RebootOnCompletion == 1)
+					{
+						RebootNeeded = !currentResults.Any(t => t.IsException);
+					}
+					else
+					{
+						RebootNeeded = true;
+					}
+				}
+
 				File.Delete(resultPath);
 				return executionResult;
 			}
