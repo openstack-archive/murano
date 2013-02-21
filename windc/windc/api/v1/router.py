@@ -20,10 +20,6 @@ import routes
 
 from windc.api.v1 import datacenters
 from windc.api.v1 import services
-
-#from . import tasks
-
-
 from openstack.common import wsgi
 
 
@@ -32,7 +28,7 @@ LOG = logging.getLogger(__name__)
 
 class API(wsgi.Router):
 
-    """WSGI router for balancer v1 API requests."""
+    """WSGI router for windc v1 API requests."""
 
     def __init__(self, conf, **local_conf):
         self.conf = conf
@@ -41,16 +37,20 @@ class API(wsgi.Router):
         datacenter_resource = datacenters.create_resource(self.conf)
         datacenter_collection = tenant_mapper.collection(
 			"datacenters", "datacenter",
-			controller=datacenter_resource, member_prefix="/{datacenter_id}",
+			controller=datacenter_resource,
+                        member_prefix="/{datacenter_id}",
 			formatted=False)
         service_resource = services.create_resource(self.conf)
-        service_collection = datacenter_collection.member.collection('services', 'service',
-            controller=service_resource, member_prefix="/{service_id}",
-            formatted=False)
-        service_collection.member.connect("/{status}", action="changeServiceStatus",
-            conditions={'method': ["PUT"]})
+        service_collection = datacenter_collection.member.\
+                             collection('services','service',
+                                        controller=service_resource,
+                                        member_prefix="/{service_id}",
+                                        formatted=False)
+        service_collection.member.connect("/{status}",
+                                          action="changeServiceStatus",
+                                          conditions={'method': ["PUT"]})
         mapper.connect("/servicetypes",
-            controller=datacenter_resource,
-            action="show_servicetypes",
-            conditions={'method': ["GET"]})
+                       controller=datacenter_resource,
+                       action="show_servicetypes",
+                       conditions={'method': ["GET"]})
         super(API, self).__init__(mapper)

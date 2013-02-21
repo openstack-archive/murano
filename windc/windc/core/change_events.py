@@ -20,6 +20,8 @@ import logging
 LOG = logging.getLogger(__name__)
 
 from windc.core import builder_set
+from windc.core import builder
+from windc.drivers import command_executor
 #Declare events types
 
 SCOPE_SERVICE_CHANGE = "Service"
@@ -40,11 +42,14 @@ class Event:
 
 def change_event(conf, event, data):
 	LOG.info("Change event of type: %s ", event)
-	context = {}
+	context = builder.create_context()
 	context['conf'] = conf
 	for builder_type in builder_set.builders.set:
-		builder = builder_set.builders.set[builder_type]
-		builder.build(context, event, data)
+		builder_instance = builder_set.builders.set[builder_type]
+		builder_instance.build(context, event, data)
+
+	executor = command_executor.Executor()
+	executor.execute(context['commands'])
 	pass
 
 

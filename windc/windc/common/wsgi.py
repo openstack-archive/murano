@@ -46,7 +46,7 @@ from windc.common import utils
 
 
 bind_opts = [
-    cfg.StrOpt('bind_host', default='0.0.0.0'),
+    cfg.StrOpt('bind_host', default='localhost'),
     cfg.IntOpt('bind_port'),
 ]
 

@@ -4,5 +4,5 @@
 "domain": "ACME.cloud",
 "AdminUser": "Admin",
 "AdminPassword": "StrongPassword",
-"DomainControllerNames": ["APP-AD001","APP-AD002"]
+"DomainControllerNames": ["AD-DC001"]
 }

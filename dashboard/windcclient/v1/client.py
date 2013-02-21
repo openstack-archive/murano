@@ -1,7 +1,5 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
-# Copyright 2011 OpenStack LLC.
-# All Rights Reserved.
+# Copyright 2012 OpenStack LLC.
+# All Rights Reserved
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -14,24 +12,18 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+#
+# vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
-
-	def __init__(self):
-		pass
-
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
+from windcclient.common import client
+from . import datacenters
+from . import services
 
 
+class Client(object):
+    """Client for the WinDC v1 API."""
+
+    def __init__(self, **kwargs):
+        self.client = client.HTTPClient(**kwargs)
+        self.datacenters = datacenters.DCManager(self)
+        self.services = services.DCServiceManager(self)

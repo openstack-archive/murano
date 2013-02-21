@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
-# All Rights Reserved.
+# Copyright 2012 Nebula, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,23 +14,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
+from django.utils.translation import ugettext_lazy as _
 
-	def __init__(self):
-		pass
+import horizon
 
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
+from openstack_dashboard.dashboards.project import dashboard
 
 
+class WinDC(horizon.Panel):
+    name = _("Windows Data Centers")
+    slug = 'windc'
+
+
+dashboard.Project.register(WinDC)

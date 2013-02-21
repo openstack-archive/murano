@@ -15,23 +15,5 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
-
-	def __init__(self):
-		pass
-
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
-
+from heatclient import Client
 

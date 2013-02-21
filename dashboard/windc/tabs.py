@@ -1,7 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
-# All Rights Reserved.
+# Copyright 2012 Nebula, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,23 +14,25 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-class Builder:
-	name = "Abstract Builder"
-	type = "abstract"
-	version = 0
+from django.utils.translation import ugettext_lazy as _
 
-	def __init__(self):
-		pass
+from horizon import exceptions
+from horizon import tabs
 
-	def __str__(self):
-		return self.name+' type: '+self.type+ ' version: ' + str(self.version)
-
-	def build(self, context, event, data):
-		pass
-
-def create_context():
-	context = {}
-	context['commands']=[]
-	return context
+from openstack_dashboard import api
 
 
+class OverviewTab(tabs.Tab):
+    name = _("Services")
+    slug = "_services"
+    template_name = ("project/windc/_services.html")
+
+    def get_context_data(self, request):
+        dc = self.tab_group.kwargs['domain_controller']
+        return {"domain_controller": dc}
+
+
+class WinServicesTab(tabs.TabGroup):
+    slug = "services_details"
+    tabs = (OverviewTab,)
+    sticky = True

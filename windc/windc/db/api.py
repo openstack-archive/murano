@@ -88,7 +88,8 @@ def datacenter_create(conf, values):
 def datacenter_update(conf, datacenter_id, values):
     session = get_session(conf)
     with session.begin():
-        datacenter_ref = datacenter_get(conf, datacenter_id, session=session)
+        datacenter_ref = session.query(models.DataCenter).\
+                         filter_by(id=datacenter_id).first()
         datacenter_ref.update(values)
         return datacenter_ref
 
@@ -96,8 +97,10 @@ def datacenter_update(conf, datacenter_id, values):
 def datacenter_destroy(conf, datacenter_id):
     session = get_session(conf)
     with session.begin():
-        datacenter_ref = device_get(conf, datacenter_id, session=session)
+        datacenter_ref = session.query(models.DataCenter).\
+                         filter_by(id=datacenter_id).first()
         session.delete(datacenter_ref)
+        return datacenter_ref
 
 # Service
 
@@ -112,31 +115,10 @@ def service_get(conf, service_id, tenant_id=None, session=None):
         raise exception.ServiceNotFound(service_ref=service_ref)
     return service_ref
 
-
-def service_get_all_by_project(conf, tenant_id):
-    session = get_session(conf)
-    query = session.query(models.Service).filter_by(tenant_id=tenant_id)
-    return query.all()
-
-
-def service_get_all_by_vm_id(conf, tenant_id, vm_id):
-    session = get_session(conf)
-    query = session.query(models.Service).distinct().\
-                    filter_by(tenant_id=tenant_id).\
-                    filter(vm_id == vm_id)
-    return query.all()
-
-
 def service_get_all_by_datacenter_id(conf, tenant_id, datacenter_id):
     session = get_session(conf)
     query = session.query(models.Service).filter_by(datacenter_id=datacenter_id)
-    service_refs = query.all()
-    if not service_refs:
-        raise exception.ServiceNotFound('No service '
-                                             'for the datacenter %s found'
-                                             % datacenter_id)
-    return service_refs
-
+    return query.all()
 
 def service_create(conf, values):
     session = get_session(conf)
@@ -146,7 +128,6 @@ def service_create(conf, values):
         session.add(service_ref)
         return service_ref
 
-
 def service_update(conf, service_id, values):
     session = get_session(conf)
     with session.begin():
@@ -155,13 +136,23 @@ def service_update(conf, service_id, values):
         service_ref['updated_at'] = datetime.datetime.utcnow()
         return service_ref
 
-
 def service_destroy(conf, service_id):
     session = get_session(conf)
     with session.begin():
         service_ref = service_get(conf, service_id, session=session)
         session.delete(service_ref)
 
+def service_get_all_by_project(conf, tenant_id):
+    session = get_session(conf)
+    query = session.query(models.Service).filter_by(tenant_id=tenant_id)
+    return query.all()
+
+def service_get_all_by_vm_id(conf, tenant_id, vm_id):
+    session = get_session(conf)
+    query = session.query(models.Service).distinct().\
+                    filter_by(tenant_id=tenant_id).\
+                    filter(vm_id == vm_id)
+    return query.all()
 
 def service_count_active_by_datacenter(conf, datacenter_id):
     session = get_session(conf)
@@ -171,5 +162,3 @@ def service_count_active_by_datacenter(conf, datacenter_id):
                                   filter_by(status=service_status.ACTIVE).\
                                   count()
         return service_count
-
-
