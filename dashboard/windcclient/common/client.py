@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 
 class HTTPClient(httplib2.Http):
 
-    USER_AGENT = 'python-balancerclient'
+    USER_AGENT = 'python-windcclient'
 
     def __init__(self, endpoint=None, token=None, username=None,
                  password=None, tenant_name=None, tenant_id=None,

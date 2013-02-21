@@ -25,10 +25,6 @@ from django.utils.decorators import available_attrs
 from windcclient.v1 import client as windc_client
 
 
-__all__ = ('datacenter_get','datacenter_list',
-           'datacenter_create','datacenter_delete')
-
-
 LOG = logging.getLogger(__name__)
 
 

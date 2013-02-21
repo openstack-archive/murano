@@ -19,6 +19,7 @@ from windcclient.common import base
 
 
 class DCService(base.Resource):
+
     def __repr__(self):
         return "<Service(%s)>" % self._info
 
@@ -27,22 +28,22 @@ class DCServiceManager(base.Manager):
     resource_class = DCService
 
     def list(self, datacenter):
-        return self._list('/datacenters/%s' % base.getid(datacenter),
+        return self._list("/datacenters/%s/services" % base.getid(datacenter),
                           'services')
 
     def create(self, datacenter, name, **extra):
         body = {'name': name,}
         body.update(extra)
-        return self._create('/datacenters/%s' % base.getid(datacenter),
+        return self._create("/datacenters/%s/services" % base.getid(datacenter),
                             body, 'service')
 
     def delete(self, datacenter, service):
-        return self._delete("/datacenters/%s/%s" % \
+        return self._delete("/datacenters/%s/services/%s" % \
                             (base.getid(datacenter),
                              base.getid(service)))
 
     def get(self, datacenter, service):
-        return self._get("/datacenters/%s/%s" % \
+        return self._get("/datacenters/%s/services/%s" % \
                          (base.getid(datacenter),
                           base.getid(service)),
                          'service')
