@@ -18,29 +18,31 @@
 from windcclient.common import base
 
 
-class Service(base.Resource):
-    """Represent load balancer device instance."""
-
+class DCService(base.Resource):
     def __repr__(self):
         return "<Service(%s)>" % self._info
 
 
 class DCServiceManager(base.Manager):
-    resource_class = DC
+    resource_class = DCService
 
     def list(self, datacenter):
-        return self._list('/datacenters/%s' % base.getid(datacenter), 'datacenters')
+        return self._list('/datacenters/%s' % base.getid(datacenter),
+                          'services')
 
-    def create(self, datacenter,  service, **extra):
+    def create(self, datacenter, name, **extra):
         body = {'name': name,}
         body.update(extra)
-        return self._create('/datacenters/%s/services' % base.getid(datacenter),
-    		 body, 'service')
+        return self._create('/datacenters/%s' % base.getid(datacenter),
+                            body, 'service')
 
     def delete(self, datacenter, service):
-        return self._delete("/datacenters/%s/services/%s" % [base.getid(datacenter), 
-    		base.getid(service)])
+        return self._delete("/datacenters/%s/%s" % \
+                            (base.getid(datacenter),
+                             base.getid(service)))
 
     def get(self, datacenter, service):
-        return self._get("/datacenters/%s/services/%s" % [base.getid(datacenter),base.getid(service)],
+        return self._get("/datacenters/%s/%s" % \
+                         (base.getid(datacenter),
+                          base.getid(service)),
                          'service')
