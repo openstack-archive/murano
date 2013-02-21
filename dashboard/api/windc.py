@@ -49,8 +49,8 @@ def datacenters_delete(request, datacenter_id):
 def datacenters_get(request, datacenter_id):
     return windcclient(request).datacenters.get(datacenter_id)
 
-def datacenters_list(request, datacenter_id):
-    return windcclient(request).datacenters.list(datacenter_id)
+def datacenters_list(request):
+    return windcclient(request).datacenters.list()
 
 def services_create(request, datacenter, parameters):
     name = parameters.get('name', '')
