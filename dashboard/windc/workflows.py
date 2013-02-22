@@ -20,6 +20,7 @@
 
 import json
 import logging
+import re
 
 from django.utils.text import normalize_newlines
 from django.utils.translation import ugettext as _
@@ -149,22 +150,20 @@ class CreateWinService(workflows.Workflow):
     default_steps = (SelectProjectUser,
                      ConfigureWinDC,
                      ConfigureWinIIS)
-
-    def __init__(self, *args, **kwargs):
-        LOG.debug("%%%%%%%%%")
-        LOG.debug(args)
-        LOG.debug(kwargs)
-        LOG.debug("%%%%%%%%%")
-
+    
     def format_status_message(self, message):
         name = self.context.get('name', 'noname')
         return message % name
 
     def handle(self, request, context):
         try:
-            datacenter = context.get('domain_controller_name', '')
+            ############## FIX ME:
+            link = request.__dict__['META']['HTTP_REFERER']
+            datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+            ##############
+
             service = api.windc.services_create(request,
-                                                datacenter,
+                                                datacenter_id,
                                                 context)
             return True
         except:
