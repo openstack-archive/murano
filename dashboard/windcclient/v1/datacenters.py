@@ -19,7 +19,6 @@ from windcclient.common import base
 
 
 class DC(base.Resource):
-    """Represent load balancer device instance."""
 
     def __repr__(self):
         return "<DC(%s)>" % self._info
