@@ -150,6 +150,12 @@ class CreateWinService(workflows.Workflow):
                      ConfigureWinDC,
                      ConfigureWinIIS)
 
+    def __init__(self, *args, **kwargs):
+        LOG.debug("%%%%%%%%%")
+        LOG.debug(args)
+        LOG.debug(kwargs)
+        LOG.debug("%%%%%%%%%")
+
     def format_status_message(self, message):
         name = self.context.get('name', 'noname')
         return message % name
