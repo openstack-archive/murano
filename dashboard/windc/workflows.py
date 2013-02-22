@@ -157,7 +157,9 @@ class CreateWinService(workflows.Workflow):
     def handle(self, request, context):
         try:
             datacenter = context.get('domain_controller_name', '')
-            service = api.windc.services_create(request, context)
+            service = api.windc.services_create(request,
+                                                datacenter,
+                                                context)
             return True
         except:
             exceptions.handle(request)

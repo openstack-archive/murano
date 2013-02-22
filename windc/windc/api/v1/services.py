@@ -49,6 +49,7 @@ class Services_Controller(object):
         # We need to create Service object and return its id
         params['tenant_id'] = tenant_id
         params['datacenter_id'] = datacenter_id
+        params['type'] = 'active_directory_service'
         service_id = core_api.create_service(self.conf, params)
         return {'service': {'id': service_id}}
 

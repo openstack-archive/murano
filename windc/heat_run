@@ -1,5 +1,8 @@
 #!/bin/bash
 
-source openrc.sh
+
+#export OS_USERNAME=admin
+#source ../../devstack/openrc
+#nova keypair-add keero-linux-keys > heat_key.priv
 heat "$@"
 

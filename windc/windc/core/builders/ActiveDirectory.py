@@ -18,6 +18,7 @@
 
 import logging
 import uuid
+import os
 LOG = logging.getLogger(__name__)
 
 from windc.core.builder import Builder
@@ -46,8 +47,10 @@ class ActiveDirectory(Builder):
 
 	def do_analysis(self, context, event, data):
 		LOG.debug("Doing analysis for data: %s", data)
-		zones = data['zones']
-		if data['type'] == self.type and len(zones) == 1:
+		print data
+
+		context['zones'] = ['a1']
+		if data['type'] == self.type:
 			LOG.debug("It is a service which I should build.")
 			datacenter_id = data['datacenter_id']
 			dc = db_api.datacenter_get(context['conf'],data['tenant_id'],
@@ -90,6 +93,9 @@ class ActiveDirectory(Builder):
 
 	def deploy_template_command(self, context, event, data):
 		LOG.debug("Creating CloudFormation Template deployment command...")
+                print context['template'].to_json()
+                LOG.debug(context['template'])
+                print os.system('pwd')
 		fname = "templates/"+str(uuid.uuid4())
 		f=open(fname, "w")
 		f.write(context['template'].to_json())

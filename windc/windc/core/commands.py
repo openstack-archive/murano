@@ -26,16 +26,8 @@ class Command:
 	type = "Empty"
 	context = None
 
-	def __init__(self):
-		self.type = "Empty"
-		self.context = None
-		self.data = None
 
-	def __init__(self, type, context):
-		self.type = type
-		self.context = context
-
-	def __init__(self, type, context, data):
+	def __init__(self, type="Empty", context=None, data=None):
 		self.type = type
 		self.context = context
 		self.data = data
