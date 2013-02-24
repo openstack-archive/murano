@@ -72,11 +72,11 @@ class ConfigureDCAction(workflows.Action):
 
 class ConfigureDC(workflows.Step):
     action_class = ConfigureDCAction
-    contibutes = ("name",)
+    contibutes = ('name',)
 
     def contribute(self, data, context):
         if data:
-            context['name'] = data.get("name", "")
+            context['name'] = data.get('name', '')
         return context
 
 
@@ -84,9 +84,9 @@ class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
                               required=False)
 
-    dc_net_name = forms.CharField(label=_("Domain NetBIOS Name"),
-                                  required=False,
-                                  help_text=_("A NetBIOS name of new domain."))
+    #dc_net_name = forms.CharField(label=_("Domain NetBIOS Name"),
+    #                              required=False,
+    #                              help_text=_("A NetBIOS name of new domain."))
 
     dc_count = forms.IntegerField(label=_("Domain Controllers Count"),
                                   required=True,
@@ -114,6 +114,16 @@ class ConfigureWinDCAction(workflows.Action):
 
 class ConfigureWinDC(workflows.Step):
     action_class = ConfigureWinDCAction
+    contibutes = ('dc_name', 'dc_count', 'adm_password', 'recovery_password')
+
+    def contribute(self, data, context):
+        if data:
+            context['dc_name'] = data.get('dc_name', '')
+            context['dc_count'] = data.get('dc_count', 1)
+            context['adm_password'] = data.get('adm_password', '')
+            context['recovery_password'] = data.get('recovery_password', '')
+            context['type'] = 'active_directory_service'
+        return context
 
 
 class ConfigureWinIISAction(workflows.Action):
@@ -139,6 +149,15 @@ class ConfigureWinIISAction(workflows.Action):
 class ConfigureWinIIS(workflows.Step):
     action_class = ConfigureWinIISAction
 
+    contibutes = ('iis_name', 'iis_count', 'iis_domain')
+
+    def contribute(self, data, context):
+        if data:
+            context['iis_name'] = data.get('iis_name', '')
+            context['iis_count'] = data.get('iis_count', 1)
+            context['iis_domain'] = data.get('iis_domain', '')
+        return context
+
 
 class CreateWinService(workflows.Workflow):
     slug = "create"
@@ -152,7 +171,7 @@ class CreateWinService(workflows.Workflow):
                      ConfigureWinIIS)
     
     def format_status_message(self, message):
-        name = self.context.get('name', 'noname')
+        name = self.context.get('dc_name', 'noname')
         return message % name
 
     def handle(self, request, context):
