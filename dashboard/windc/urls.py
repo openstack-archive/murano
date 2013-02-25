@@ -30,5 +30,7 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^create$', CreateWinServiceView.as_view(), name='create'),
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
     url(r'^(?P<domain_controller_id>[^/]+)/$', WinServices.as_view(),
+        name='services'),
+    url(r'^(?P<domain_controller_id>[^/]+)/$', WinServices.as_view(),
         name='services')
 )

@@ -17,7 +17,7 @@
 
 # TO DO: clear extra modules
 
-
+import re
 import logging
 
 from django import shortcuts
@@ -85,20 +85,31 @@ class DeleteDataCenter(tables.BatchAction):
         api.windc.datacenters_delete(request, datacenter)
 
 
+class DeleteService(tables.BatchAction):
+    name = "delete"
+    action_present = _("Delete")
+    action_past = _("Delete")
+    data_type_singular = _("Service")
+    data_type_plural = _("Service")
+    classes = ('btn-danger', 'btn-terminate')
+
+    def allowed(self, request, datum):
+        return True
+
+    def action(self, request, service_id):
+        ############## FIX ME:
+        link = request.__dict__['META']['HTTP_REFERER']
+        datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+        ##############
+        datacenter = api.windc.datacenters_get(request, datacenter_id)
+        
+        api.windc.services_delete(request, datacenter, service_id)
+
+
 class EditService(tables.LinkAction):
     name = "edit"
     verbose_name = _("Edit")
     url = "horizon:project:windc:update"
-    classes = ("ajax-modal", "btn-edit")
-
-    def allowed(self, request, instance):
-        return True
-
-
-class DeleteService(tables.LinkAction):
-    name = "delete"
-    verbose_name = _("Delete")
-    url = "horizon:project:windc:delete"
     classes = ("ajax-modal", "btn-edit")
 
     def allowed(self, request, instance):
@@ -138,13 +149,9 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-    name = tables.Column('name',
-                         link=('horizon:project:windc'),
-                         verbose_name=_('Name'))
-    _type = tables.Column('type',
-                          verbose_name=_('Type'))
-    status = tables.Column('status',
-                           verbose_name=_('Status'))
+    name = tables.Column('dc_name', verbose_name=_('Name'))
+    _type = tables.Column('type', verbose_name=_('Type'))
+    status = tables.Column('status', verbose_name=_('Status'))
 
     class Meta:
         name = "services"
