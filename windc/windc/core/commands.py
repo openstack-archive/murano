@@ -16,26 +16,19 @@
 #    under the License.
 
 TEMPLATE_DEPLOYMENT_COMMAND = "Template"
+EXECUTION_PLAN_DEPLOYMENT_COMMAND = "EPlan"
 CHEF_COMMAND = "Chef"
 CHEF_OP_CREATE_ENV = "Env"
 CHEF_OP_CREATE_ROLE = "Role"
 CHEF_OP_ASSIGN_ROLE = "AssignRole"
 CHEF_OP_CREATE_NODE = "CRNode"
 
-class Command:
+class Command(object):
 	type = "Empty"
 	context = None
 
-	def __init__(self):
-		self.type = "Empty"
-		self.context = None
-		self.data = None
 
-	def __init__(self, type, context):
-		self.type = type
-		self.context = context
-
-	def __init__(self, type, context, data):
+	def __init__(self, type="Empty", context=None, data=None):
 		self.type = type
 		self.context = context
 		self.data = data

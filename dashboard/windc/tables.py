@@ -87,8 +87,18 @@ class DeleteDataCenter(tables.BatchAction):
 
 class EditService(tables.LinkAction):
     name = "edit"
-    verbose_name = _("Edit Service")
+    verbose_name = _("Edit")
     url = "horizon:project:windc:update"
+    classes = ("ajax-modal", "btn-edit")
+
+    def allowed(self, request, instance):
+        return True
+
+
+class DeleteService(tables.LinkAction):
+    name = "delete"
+    verbose_name = _("Delete")
+    url = "horizon:project:windc:delete"
     classes = ("ajax-modal", "btn-edit")
 
     def allowed(self, request, instance):
@@ -128,13 +138,17 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-    name = tables.Column("name",
-                         link=("horizon:project:windc"),
-                         verbose_name=_("Name"))
+    name = tables.Column('name',
+                         link=('horizon:project:windc'),
+                         verbose_name=_('Name'))
+    _type = tables.Column('type',
+                          verbose_name=_('Type'))
+    status = tables.Column('status',
+                           verbose_name=_('Status'))
 
     class Meta:
         name = "services"
         verbose_name = _("Services")
         row_class = UpdateRow
         table_actions = (CreateService,)
-        row_actions = (EditService,)
+        row_actions = (EditService, DeleteService)

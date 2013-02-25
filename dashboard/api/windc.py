@@ -49,7 +49,7 @@ def datacenters_list(request):
     return windcclient(request).datacenters.list()
 
 def services_create(request, datacenter, parameters):
-    name = parameters.get('name', '')
+    name = parameters.get('dc_name', '')
     return windcclient(request).services.create(datacenter, name)
 
 def services_list(request, datacenter):

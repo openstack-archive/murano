@@ -33,24 +33,21 @@ ACTION_MODIFY = "Modify"
 ACTION_DELETE = "Delete"
 
 class Event:
-	scope = None
-	action = None
-	previous_state = None
-	def __init__(self, scope, action):
-		self.scope = scope
-		self.action = action
+    scope = None
+    action = None
+    previous_state = None
+    def __init__(self, scope, action):
+        self.scope = scope
+        self.action = action
 
 def change_event(conf, event, data):
-	LOG.info("Change event of type: %s ", event)
-	context = builder.create_context()
-	context['conf'] = conf
-	for builder_type in builder_set.builders.set:
-		builder_instance = builder_set.builders.set[builder_type]
-		builder_instance.build(context, event, data)
-
-	executor = command_executor.Executor()
-	executor.execute(context['commands'])
-	pass
+    LOG.info("Change event of type: %s ", event)
+    context = builder.create_context()
+    context['conf'] = conf
+    executor = command_executor.Executor(conf)
+    for builder_type in builder_set.builders.set:
+        builder_instance = builder_set.builders.set[builder_type]
+        builder_instance.build(context, event, data, executor)
 
 
 

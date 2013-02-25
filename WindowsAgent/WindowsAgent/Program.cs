@@ -1,6 +1,7 @@
 ﻿using System;
 using System.ComponentModel;
 using System.IO;
+using System.Net;
 using System.Threading;
 using NLog;
 
@@ -60,14 +61,13 @@ namespace Mirantis.Keero.WindowsAgent
 			}
 			if (doReboot)
 			{
-				Console.WriteLine("Rebooting...");
 				try
 				{
 					System.Diagnostics.Process.Start("shutdown.exe", "-r -t 0");
 				}
 				catch (Exception ex)
 				{
-					Console.WriteLine(ex);
+					Log.ErrorException("Cannot execute shutdown.exe", ex);
 				}
 			}
 

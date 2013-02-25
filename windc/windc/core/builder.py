@@ -20,7 +20,7 @@ class Builder:
 	type = "abstract"
 	version = 0
 
-	def __init__(self):
+	def __init__(self, conf):
 		pass
 
 	def __str__(self):

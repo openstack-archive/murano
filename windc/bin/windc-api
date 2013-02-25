@@ -38,6 +38,7 @@ from windc.common import cfg
 from windc.common import config
 from windc.common import wsgi
 from windc.db import session
+from windc.core import builder_set
 
 gettext.install('balancer', unicode=1)
 
@@ -50,10 +51,11 @@ if __name__ == '__main__':
         conf.register_cli_opt(dbsync_opt)
         conf()
 
+        config.setup_logging(conf)
         if conf.dbsync:
-            config.setup_logging(conf)
             session.sync(conf)
         else:
+            builder_set.builders.load(conf)
             app = config.load_paste_app(conf)
             server = wsgi.Server()
             server.start(app, conf, default_port=8181)

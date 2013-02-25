@@ -20,18 +20,21 @@
 
 from windc.core import commands as commands_api
 from windc.drivers import openstack_heat
+from windc.drivers import windows_agent
 
 class Executor:
 
-	map = {commands_api.TEMPLATE_DEPLOYMENT_COMMAND : openstack_heat.Heat}
+    map = {commands_api.TEMPLATE_DEPLOYMENT_COMMAND : openstack_heat.Heat}
 
-	def __init__(self):
-		pass
+    def __init__(self, conf):
+        self._conf = conf
 
-	def execute(self, commands):
-		for command in commands:
-			if command.type == commands_api.TEMPLATE_DEPLOYMENT_COMMAND:
-				executor = openstack_heat.Heat()
-				executor.execute(command)
+    def execute(self, command):
+        if command.type == commands_api.TEMPLATE_DEPLOYMENT_COMMAND:
+            executor = openstack_heat.Heat()
+            return executor.execute(command)
+        elif command.type == commands_api.EXECUTION_PLAN_DEPLOYMENT_COMMAND:
+            executor = windows_agent.Agent(self._conf)
+            return executor.execute(command)
 
 
