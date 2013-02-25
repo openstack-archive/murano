@@ -26,7 +26,7 @@ import traceback
 LOG = logging.getLogger(__name__)
 global builders
 
-def load_from_file(filepath):
+def load_from_file(filepath, conf):
     class_inst = None
 
     mod_name,file_ext = os.path.splitext(os.path.split(filepath)[-1])
@@ -39,7 +39,7 @@ def load_from_file(filepath):
 
     if hasattr(py_mod, mod_name):
     	callable = getattr(__import__(mod_name),mod_name)
-        class_inst = callable()
+        class_inst = callable(conf)
 
     return class_inst
 
@@ -50,14 +50,14 @@ class BuilderSet:
 		sys.path.append(self.path)
 		self.set = {}
 
-	def load(self):
+	def load(self, conf):
 
 		files = glob.glob(self.path+'/*.py')
 
 		for file in files:
 			LOG.debug("Trying to load builder from file: %s", file)
 			try:
-				builder = load_from_file(file)
+				builder = load_from_file(file, conf)
 				LOG.info("Buider '%s' loaded.", builder.name)
 				self.set[builder.type] = builder
 			except:

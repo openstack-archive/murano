@@ -32,7 +32,12 @@ class Heat:
 	def execute(self, command):
 #		client = Client('1',OS_IMAGE_ENDPOINT, OS_TENANT_ID)
  		LOG.debug('Calling heat script to execute template')
-		call(["./heat_run","stack-create","-f"+command.context['template_name'],
-			command.context['stack_name']])
+		arguments = ";".join(['%s=%s' % (key, value) for (key, value) in command.context['template_arguments'].items()])
+		call([
+            "./heat_run","stack-create",
+            "-f" + command.context['template_name'],
+            "-P" + arguments,
+			command.context['stack_name']
+        ])
 		pass
 

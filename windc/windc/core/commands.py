@@ -16,13 +16,14 @@
 #    under the License.
 
 TEMPLATE_DEPLOYMENT_COMMAND = "Template"
+EXECUTION_PLAN_DEPLOYMENT_COMMAND = "EPlan"
 CHEF_COMMAND = "Chef"
 CHEF_OP_CREATE_ENV = "Env"
 CHEF_OP_CREATE_ROLE = "Role"
 CHEF_OP_ASSIGN_ROLE = "AssignRole"
 CHEF_OP_CREATE_NODE = "CRNode"
 
-class Command:
+class Command(object):
 	type = "Empty"
 	context = None
 

@@ -23,12 +23,12 @@ from windc.core.builder import Builder
 from windc.core import change_events as events
 
 class DataCenter(Builder):
-	def __init__(self):
+	def __init__(self, conf):
 		self.name = "Data Center Builder"
 		self.type = "datacenter"
 		self.version = 1
 
-	def build(self, context, event, data):
+	def build(self, context, event, data, executor):
 		if event.scope == events.SCOPE_DATACENTER_CHANGE:
 			LOG.info ("Got Data Center change event. Analysing...")
 		else:

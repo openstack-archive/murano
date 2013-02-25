@@ -2,6 +2,7 @@
 using System.Collections.Generic;
 using System.Configuration;
 using System.Linq;
+using System.Net;
 using System.Text;
 using System.Threading.Tasks;
 using RabbitMQ.Client;
@@ -32,7 +33,7 @@ namespace Mirantis.Keero.WindowsAgent
 
 		public MqMessage GetMessage()
 		{
-			var queueName = ConfigurationManager.AppSettings["rabbitmq.inputQueue"] ?? Environment.MachineName.ToLower();
+			var queueName = ConfigurationManager.AppSettings["rabbitmq.inputQueue"] ?? Dns.GetHostName().ToLower();
 			try
 			{
 				IConnection connection = null;
