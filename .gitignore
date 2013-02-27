@@ -12,7 +12,6 @@ local_settings.py
 # User-specific files
 *.suo
 *.user
-*.sln.docstates
 
 # Build results
 [Dd]ebug/
