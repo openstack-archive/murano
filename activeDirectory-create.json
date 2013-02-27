@@ -1,0 +1,60 @@
+[
+    {
+        "name": "acme.dc",
+        "configuration": "site",
+        "units": [
+            {
+                "type": "external",
+                "credentails": {
+                    "username": "admin",
+                    "password": "password"
+                }
+            },
+            {
+                "type": "internal",
+                "location": "west-dc"
+            }
+        ]
+    },
+    {
+        "name": "acme.dc",
+        "configuration": "standalone",
+        "credentails": {
+            "username": "admin",
+            "password": "password"
+        },
+        "recoveryPassword": "rpassword",
+        "units": [
+            {
+                "type": "master",
+                "location": "west-dc"
+            },
+            {
+                "type": "secondary",
+                "location": "west-dc"
+            }
+        ]
+    },
+    {
+        "name": "acme.dc",
+        "configuration": "inTree",
+        "credentails": {
+            "username": "admin",
+            "password": "password"
+        },
+        "recoveryPassword": "rpassword",
+        "tree": {
+            "name": "acme.t",
+            "credentails": {
+                "username": "admin",
+                "password": "password"
+            }
+        },
+        "units": [
+            {
+                "location": "west-dc"
+            }
+        ]
+    }
+]
+
