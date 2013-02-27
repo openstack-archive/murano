@@ -165,14 +165,14 @@ class CreateWinService(workflows.Workflow):
     finalize_button_name = _("Deploy")
     success_message = _('Created service "%s".')
     failure_message = _('Unable to create service "%s".')
-    success_url = "horizon:project:windc:services"
+    success_url = "/project/windc/%s/"
     default_steps = (SelectProjectUser,
                      ConfigureWinDC,
                      ConfigureWinIIS)
     
     def format_status_message(self, message):
-        name = self.context.get('dc_name', 'noname')
-        return message % name
+        dc_name = self.context.get('dc_name', 'noname')
+        return message % dc_name
 
     def handle(self, request, context):
         try:
@@ -180,6 +180,8 @@ class CreateWinService(workflows.Workflow):
             link = request.__dict__['META']['HTTP_REFERER']
             datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
             ##############
+
+            self.success_url = "/project/windc/%s/" % datacenter_id
 
             service = api.windc.services_create(request,
                                                 datacenter_id,

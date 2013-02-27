@@ -31,9 +31,9 @@ class DCServiceManager(base.Manager):
         return self._list("/datacenters/%s/services" % base.getid(datacenter),
                           'services')
 
-    def create(self, datacenter, name, **extra):
-        body = {'name': name,}
-        body.update(extra)
+    def create(self, datacenter, parameters):
+        body = {'dc_count': 1,}
+        body.update(parameters)
         return self._create("/datacenters/%s/services" % base.getid(datacenter),
                             body, 'service')
 
