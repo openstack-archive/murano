@@ -8,61 +8,68 @@ Function break script execution with error code provided. Error code may be 0 in
 
 It also tries to parse ErrorRecord or Exception object (if provided) and logs this information.
 #>
+    [CmdletBinding(DefaultParameterSetName="Exception")]
+    
 	param (
+        [Parameter(Position=1,ParameterSetName="Exception")]
 		$InputObject = $null,
+        
+        [Parameter(ParameterSetName="ErrorString")]
 		[String] $ExitString = "",
-		[Int] $ExitCode = 1,
+        
+        [Parameter(ParameterSetName="ErrorString")]
+		[Int] $ExitCode = 0,
+        
+        [Parameter(ParameterSetName="ErrorString")]
 		[Switch] $Success
 	)
-	
-	Function Do-ExitFailure {
-		Write-LogFatal "STOP ($ExitCode): $ExitString"
-        if ($__StopExecutionThrowsExeption__) {
-            throw $InputObject
-        }
-        elseif ($__StopExecutionExitsSession__) {
-		    exit $ExitCode
+    
+    Function Exit-Function {
+        if ($ExitCode -eq 0) {
+            Write-LogInfo ( "STOP ({0}):`n{1}" -f $ExitCode, $ExitString )
         }
         else {
-            break
+            Write-LogFatal ( "STOP ({0}):`n{1}" -f $ExitCode,  $ExitString )
         }
-	}
-	
-	Function Do-ExitSuccess {
-		Write-LogInfo "STOP (0): $ExitString"
-        if ($__StopExecutionThrowsExeption__) {
-            exit 0
+        
+        Write-Log "__StopExecutionPreference__ = '$__StopExecutionPreference__'"
+        switch ("$__StopExecutionPreference__") {
+            "Exit" {
+                exit $ExitCode
+            }
+            "ThrowIfException" {
+                if ($InputObject -eq $null) {
+                    exit $ExitCode
+                }
+                else {
+                    throw $InputObject
+                }
+            }
+            "ThrowAlways" {
+                throw $InputObject
+            }
+            default {
+                throw "Unknown value for __StopExecutionPreference__: '$__StopExecutionPreference__'"
+            }
         }
-        elseif ($__StopExecutionExitsSession__) {
-    		exit 0
-        }
-        else {
-            break
-        }
-	}
+    }
 
-	if ($Success -eq $true) {
-		if ($ExitString -eq "") {
-			$ExitString = "Script stopped with NO ERROR."
-		}
-		Do-ExitSuccess
-	}
-
-	if ($ExitString -ne "") {
-		Do-ExitFailure
-	}
-
-
-	if ($InputObject -eq $null) {
-		$ExitString = "***** SCRIPT INTERRUPTED *****"
-		Do-ExitFailure
-	}
-
-
-	if ($ExitString -eq "") {
-		try {
-			$ErrorRecord = [System.Management.Automation.ErrorRecord] $InputObject
-			$ExitString = @"
+    switch($PSCmdlet.ParameterSetName) {
+		"Exception" {
+            #----------
+            if ($InputObject -eq $null) {
+		        $ExitString = "***** SCRIPT INTERRUPTED *****"
+                $ExitCode = 255
+                Exit-Function
+            }
+            #----------
+        
+        
+            #----------
+    		try {
+    			$ErrorRecord = [System.Management.Automation.ErrorRecord] $InputObject
+<#
+                $ExitString = @"
 $($ErrorRecord.ToString())
 
 *** Invocation Info ***
@@ -78,37 +85,59 @@ $($ErrorRecord.FullyQualifiedErrorId.ToString())
 $($ErrorRecord.ScriptStackTrace.ToString())
 *** *** ***
 "@
-		}
-		catch {
-			$ErrorRecord = $null
-			Write-LogWarning "Unable to cast InputObject to [System.Management.Automation.ErrorRecord]"
-		}
-	}
+#>
+                $ExitString = Out-String -InputObject $InputObject
+                $ExitCode = 255
+                Exit-Function
+    		}
+    		catch {
+    			$ErrorRecord = $null
+    			Write-LogWarning "Unable to cast InputObject to [System.Management.Automation.ErrorRecord]"
+    		}
+            #----------
+            
+            
+            #----------
+    		try {
+    			$Exception = [System.Exception] $InputObject
+    			#$ExitString = $Exception.ToString()
+                $ExitString = Out-String -InputObject $InputObject
+                $ExitCode = 255
+                Exit-Function
+    		}
+    		catch {
+    			$Exception = $null
+    			Write-LogWarning "Unable to cast InputObject to [System.Exception]"
+    		}
+            #----------
 
-
-	if ($ExitString -eq "") {
-		try {
-			$Exception = [System.Exception] $InputObject
-			$ExitString = $Exception.ToString()
-		}
-		catch {
-			$Exception = $null
-			Write-LogWarning "Unable to cast InputObject to [System.Exception]"
-		}
-	}
-
-	
-	if ($ExitString -eq "") {
-		try {
-			$ExitString = [String] $InputObject
-		}
-		catch {
-			Write-LogWarning "Unable to cast InputObject of type [$($InputObject.GetType())] to any of supported types."
-		}
-	}
+        
+            #----------
+    		try {
+    			$ExitString = Out-String -InputObject $InputObject
+                $ExitCode = 255
+                Exit-Function
+    		}
+    		catch {
+    			Write-LogWarning "Unable to cast InputObject of type [$($InputObject.GetType())] to any of supported types."
+    		}
+            #----------
+        }
+        "ErrorString" {
+            if ($Success) {
+                $ExitString = "Script stopped with NO ERROR."
+                $ExitCode = 0
+            }
+            
+            Exit-Function
+        }
+    }
     
-	Do-ExitFailure
+    $ExitString = "Unknown error occured in Stop-Execution"
+    $ExitCode = 255
+    Exit-Function
 }
+
 
 
 Function Set-ComputerName {

@@ -24,6 +24,5 @@ $script:__ImportModulesExplicitely = $true
 $script:__ImportModulesErrorAction = "Stop"
 
 
-$global:__StopExecutionThrowsExeption__ = $true
-$global:__StopExecutionExitsSession__ = $false
+$global:__StopExecutionPreference__ = "Exit"
 
