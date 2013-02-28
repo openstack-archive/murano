@@ -24,23 +24,41 @@ import logging
 
 from django import http
 from django import shortcuts
+from django.views import generic
 from django.core.urlresolvers import reverse, reverse_lazy
 from django.utils.datastructures import SortedDict
 from django.utils.translation import ugettext_lazy as _
+from django.contrib.formtools.wizard.views import SessionWizardView
 
 from horizon import exceptions
 from horizon import forms
 from horizon import tabs
 from horizon import tables
 from horizon import workflows
+from horizon.forms.views import ModalFormMixin
 
 from openstack_dashboard import api
 from .tables import WinDCTable, WinServicesTable
 from .workflows import CreateWinService, CreateWinDC
+from .forms import WizardForm1, WizardForm2
 
-
+import pdb
 LOG = logging.getLogger(__name__)
 
+
+class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
+    template_name = 'project/windc/services_tabs.html'
+
+    def done(self, form_list, **kwargs):
+        #do_something_with_the_form_data(form_list)
+        return HttpResponseRedirect('/')
+
+    def get_form(self, step=None, data=None, files=None):
+        form = super(Wizard, self).get_form(step, data, files)
+        print step
+        print data
+        print files
+        return form
 
 class IndexView(tables.DataTableView):
     table_class = WinDCTable
@@ -69,7 +87,7 @@ class WinServices(tables.DataTableView):
 
     def get_data(self):
         try:
-            dc_id = self.kwargs['domain_controller_id']
+            dc_id = self.kwargs['data_center_id']
             datacenter = api.windc.datacenters_get(self.request, dc_id)
             self.dc_name = datacenter.name
             services = api.windc.services_list(self.request, datacenter)

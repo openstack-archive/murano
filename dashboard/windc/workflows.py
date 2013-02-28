@@ -88,7 +88,7 @@ class ConfigureWinDCAction(workflows.Action):
     #                              required=False,
     #                              help_text=_("A NetBIOS name of new domain."))
 
-    dc_count = forms.IntegerField(label=_("Domain Controllers Count"),
+    dc_count = forms.IntegerField(label=_("Instances Count"),
                                   required=True,
                                   min_value=1,
                                   max_value=100,
@@ -108,7 +108,7 @@ class ConfigureWinDCAction(workflows.Action):
                                                "Recovery Mode."))
 
     class Meta:
-        name = _("Domain Controllers")
+        name = _("Active Directory")
         help_text_template = ("project/windc/_dc_help.html")
 
 
