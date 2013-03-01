@@ -1,5 +1,11 @@
-lab_id=102
-lab_password=swordfish
+# lab_id = ( 100 | 101 | 102 )
+lab_id=
+lab_password=K#er0P@ssw0rd
+
+if [ -z "$lab_id" ] ; then
+    echo "Please specify 'lab_id' parameter in 'localrc' file."
+    exit
+fi
 
 #--------------------------------------
 
