@@ -845,3 +845,24 @@ Function Expand-Template {
             Add-Content -Path $OutputFile -Encoding $Encoding -Value $Line
         }
 }
+
+
+
+Function Update-AgentConfig {
+    param (
+        [String] $RootPath = "C:\Keero\Agent"
+    )
+    
+    try {
+        $MetaData = Get-ConfigDriveObject -MetaData -ErrorAction Stop
+        if ($MetaData.meta -ne $null) {
+            Stop-Service "Keero Agent" -Force
+            Expand-Template -TemplateFile "$RootPath\WindowsAgent.exe.config.template" -OutputFile "$RootPath\WindowsAgent.exe.config" -ReplacementList $MetaData.meta
+            Start-Service "Keero Agent"
+        }
+    }
+    catch {
+        Write-LogError "Failed to update agent configuration"
+    }
+}
+
