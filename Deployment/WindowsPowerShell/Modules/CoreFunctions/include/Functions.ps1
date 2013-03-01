@@ -774,3 +774,47 @@ Function Wait-LdapServerAvailable {
 }
 
 
+
+Function Get-ConfigDriveObject {
+    [CmdletBinding()]
+    param (
+        [Parameter(ParameterSetName="MetaData")]
+        [Switch] $MetaData,
+        
+        [Parameter(ParameterSetName="UserData")]
+        [Switch] $UserData,
+        
+        [Parameter(ParameterSetName="CustomObject")]
+        [String] $CustomObject,
+        
+        [String] $Path = "openstack/latest"
+    )
+    
+    $ConfigDrivePrefix = "http://169.254.169.154/$Path"
+    
+    try {
+        switch($PSCmdlet.ParameterSetName) {
+            "MetaData" {
+                $ConfigDriveObjectUrl = "$ConfigDrivePrefix/meta_data.json"
+                $MetaData = Invoke-WebRequest $ConfigDriveObjectUrl
+                ConvertFrom-Json $MetaData.Content
+            }
+            "UserData" {
+                $ConfigDriveObjectUrl = "$ConfigDrivePrefix/user_data"
+                $UserData = Invoke-WebRequest $ConfigDriveObjectUrl
+                $UserData.Content
+            }
+            "CustomObject" {
+                $ConfigDriveObjectUrl = "$ConfigDrivePrefix/$CustomObject"
+                $CustomObject = Invoke-WebRequest $ConfigDriveObjectUrl
+                $CustomObject.Content
+            }
+        }
+    }
+    catch {
+        Write-Error "Unable to retrieve object from 'ConfigDriveObjectUrl'"
+        return $null
+    }
+}
+
+
