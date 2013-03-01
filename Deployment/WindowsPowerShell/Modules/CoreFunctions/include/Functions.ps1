@@ -818,3 +818,30 @@ Function Get-ConfigDriveObject {
 }
 
 
+
+Function Expand-Template {
+    param (
+        [String] $TemplateFile,
+        [String] $OutputFile,
+        [System.Collections.Hashtable] $ReplacementList,
+        [String] $Encoding = "Ascii"
+    )
+    
+    if (-not [IO.File]::Exists($TemplateFile)) {
+        Write-Error "File '$TemplateFile' not exists"
+        return $null
+    }
+    
+    if ([IO.File]::Exists($OutputFile)) {
+        [IO.File]::Delete($OutputFile)
+    }
+    
+    Get-Content $TemplateFile -Encoding $Encoding |
+        ForEach-Object {
+            $Line = $_
+            foreach ($Key in $ReplacementList.Keys) {
+                $Line = $Line.Replace("%_$($Key)_%", $ReplacementList[$Key])
+            }
+            Add-Content -Path $OutputFile -Encoding $Encoding -Value $Line
+        }
+}
