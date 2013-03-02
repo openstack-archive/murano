@@ -138,24 +138,49 @@ function New-OptionParser() {
 
     # Fields
     $OptionParser | Add-Member NoteProperty Options -value @{}
+    $OptionParser | Add-Member NoteProperty Defaults -value @{}
+    $OptionParser | Add-Member NoteProperty RequiredOptions -value @()
 
     # Methods
 
     $OptionParser | Add-Member ScriptMethod AddOption {
-        param($Option)
+        param($Option, [bool]$Required=$false, $Default=$null)
         $this.Options.Add($Option.Name, $Option)
+        if ($Required) {
+            $this.RequiredOptions = $this.RequiredOptions + $Option.Name
+            if ($Option | Get-Member "Value") {
+                if ($Default) {
+                    $this.Defaults.Add($Option.Name, $Default)
+                }
+            } else {
+                $this.Defaults.Add($Option.Name, $null)
+            }
+        }
     }
 
     $OptionParser | Add-Member ScriptMethod Parse {
         param([hashtable]$Options)
 
         $CommandLine = @()
-        foreach($OptionName in $($Options.keys)) {
+        foreach ($RequiredOptionName in $this.RequiredOptions) {
+            if (-not $Options.ContainsKey($RequiredOptionName)) {
+                $Default = $this.Defaults.Get_Item($RequiredOptionName)
+                if ($this.Defaults.ContainsKey($RequiredOptionName)) {
+                    $Options.Add($RequiredOptionName, $this.Defaults.Get_Item($RequiredOptionName))
+                } else {
+                    throw "Required option '$RequiredOptionName' is missing"
+                }
+            }
+        }
+
+        foreach ($OptionName in $($Options.keys)) {
             $Option = $this.Options.Get_Item($OptionName)
             if ($Option -eq $null) {
                 throw "Option '$OptionName' is not allowed"
             }
-            $Option.Value = $Options.Get_Item($OptionName)
+            if ($Option | Get-Member "Value") {
+                $Option.Value = $Options.Get_Item($OptionName)
+            }
             $Option.Validate()
             $CommandLine = $CommandLine + $Option.ToString()
         }

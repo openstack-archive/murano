@@ -1,5 +1,8 @@
 Import-Module '.\OptionParser.psm1'
 
+#RVER /SQLSVCACCOUNT="<DomainName\UserName>" /SQLSVCPASSWORD="<StrongPassword>"
+# /SQLSYSADMINACCOUNTS="<DomainName\UserName>" /AGTSVCACCOUNT="NT AUTHORITY\Network Service" /IACCEPTSQLSERVERLICENSETERMS
+
 function New-OptionParserInstall {
     <#
     .SYNOPSIS
@@ -12,8 +15,8 @@ function New-OptionParserInstall {
     #>
     $OptionParserInstall = New-OptionParser
 
-    $OptionParserInstall.AddOption((New-Option "ACTION" -String -Constraints "INSTALL"))
-    $OptionParserInstall.AddOption((New-Option "IACCEPTSQLSERVERLICENSETERMS" -Switch))
+    $OptionParserInstall.AddOption((New-Option "ACTION" -String -Constraints "INSTALL"), $true, "INSTALL")
+    $OptionParserInstall.AddOption((New-Option "IACCEPTSQLSERVERLICENSETERMS" -Switch), $true)
     $OptionParserInstall.AddOption((New-Option "ENU" -Switch))
     $OptionParserInstall.AddOption((New-Option "UpdateEnabled" -Switch))
     $OptionParserInstall.AddOption((New-Option "UpdateSource" -String))
@@ -26,14 +29,14 @@ function New-OptionParserInstall {
     $OptionParserInstall.AddOption((New-Option "INSTALLSHAREDWOWDIR" -String))
     $OptionParserInstall.AddOption((New-Option "INSTANCEDIR" -String))
     $OptionParserInstall.AddOption((New-Option "INSTANCEID" -String))
-    $OptionParserInstall.AddOption((New-Option "INSTANCENAME" -String))
+    $OptionParserInstall.AddOption((New-Option "INSTANCENAME" -String), $true, "MSSQLSERVER")
     $OptionParserInstall.AddOption((New-Option "PID" -String))
     $OptionParserInstall.AddOption((New-Option "Q" -Switch))
     $OptionParserInstall.AddOption((New-Option "QS" -Switch))
     $OptionParserInstall.AddOption((New-Option "UIMODE" -String -Constraints ("Normal", "AutoAdvance")))
     $OptionParserInstall.AddOption((New-Option "SQMREPORTING" -Boolean))
     $OptionParserInstall.AddOption((New-Option "HIDECONSOLE" -Switch))
-    $OptionParserInstall.AddOption((New-Option "AGTSVCACCOUNT" -String))
+    $OptionParserInstall.AddOption((New-Option "AGTSVCACCOUNT" -String), $true, "NT AUTHORITY\Network Service")
     $OptionParserInstall.AddOption((New-Option "AGTSVCPASSWORD" -String))
     $OptionParserInstall.AddOption((New-Option "AGTSVCSTARTUPTYPE" -String -Constraints ("Manual", "Automatic", "Disabled")))
     $OptionParserInstall.AddOption((New-Option "ASBACKUPDIR" -String))
@@ -42,10 +45,10 @@ function New-OptionParserInstall {
     $OptionParserInstall.AddOption((New-Option "ASDATADIR" -String))
     $OptionParserInstall.AddOption((New-Option "ASLOGDIR" -String))
     $OptionParserInstall.AddOption((New-Option "ASSERVERMODE" -String -Constraints ("MULTIDIMENSIONAL", "POWERPIVOT", "TABULAR")))
-    $OptionParserInstall.AddOption((New-Option "ASSVCACCOUNT" -String))
+    $OptionParserInstall.AddOption((New-Option "ASSVCACCOUNT" -String), $true, "NT AUTHORITY\Network Service")
     $OptionParserInstall.AddOption((New-Option "ASSVCPASSWORD" -String))
     $OptionParserInstall.AddOption((New-Option "ASSVCSTARTUPTYPE" -String -Constraints ("Manual", "Automatic", "Disabled")))
-    $OptionParserInstall.AddOption((New-Option "ASSYSADMINACCOUNTS" -String))
+    $OptionParserInstall.AddOption((New-Option "ASSYSADMINACCOUNTS" -String), $true, "$ENV:USERDOMAIN\$ENV:USERNAME")
     $OptionParserInstall.AddOption((New-Option "ASTEMPDIR" -String))
     $OptionParserInstall.AddOption((New-Option "ASPROVIDERMSOLAP" -Boolean))
     $OptionParserInstall.AddOption((New-Option "FARMACCOUNT" -String))
@@ -60,10 +63,10 @@ function New-OptionParserInstall {
     $OptionParserInstall.AddOption((New-Option "SQLBACKUPDIR" -String))
     $OptionParserInstall.AddOption((New-Option "SQLCOLLATION" -String))
     $OptionParserInstall.AddOption((New-Option "ADDCURRENTUSERASSQLADMIN" -Switch))
-    $OptionParserInstall.AddOption((New-Option "SQLSVCACCOUNT" -String))
+    $OptionParserInstall.AddOption((New-Option "SQLSVCACCOUNT" -String), $true, "NT AUTHORITY\Network Service")
     $OptionParserInstall.AddOption((New-Option "SQLSVCPASSWORD" -String))
     $OptionParserInstall.AddOption((New-Option "SQLSVCSTARTUPTYPE" -String -Constraints ("Manual", "Automatic", "Disabled")))
-    $OptionParserInstall.AddOption((New-Option "SQLSYSADMINACCOUNTS" -Switch))
+    $OptionParserInstall.AddOption((New-Option "SQLSYSADMINACCOUNTS" -String), $true, "$ENV:USERDOMAIN\$ENV:USERNAME")
     $OptionParserInstall.AddOption((New-Option "SQLTEMPDBDIR" -String))
     $OptionParserInstall.AddOption((New-Option "SQLTEMPDBLOGDIR" -String))
     $OptionParserInstall.AddOption((New-Option "SQLUSERDBDIR" -String))
@@ -72,13 +75,13 @@ function New-OptionParserInstall {
     $OptionParserInstall.AddOption((New-Option "FILESTREAMSHARENAME" -String))
     $OptionParserInstall.AddOption((New-Option "FTSVCACCOUNT" -String))
     $OptionParserInstall.AddOption((New-Option "FTSVCPASSWORD" -String))
-    $OptionParserInstall.AddOption((New-Option "ISSVCACCOUNT" -String))
+    $OptionParserInstall.AddOption((New-Option "ISSVCACCOUNT" -String), $true, "NT AUTHORITY\Network Service")
     $OptionParserInstall.AddOption((New-Option "ISSVCPASSWORD" -String))
     $OptionParserInstall.AddOption((New-Option "ISSVCStartupType" -String -Constraints ("Manual", "Automatic", "Disabled")))
     $OptionParserInstall.AddOption((New-Option "NPENABLED" -Boolean))
     $OptionParserInstall.AddOption((New-Option "TCPENABLED" -Boolean))
     $OptionParserInstall.AddOption((New-Option "RSINSTALLMODE" -String -Constraints ("SharePointFilesOnlyMode", "DefaultNativeMode", "FilesOnlyMode")))
-    $OptionParserInstall.AddOption((New-Option "RSSVCACCOUNT" -String))
+    $OptionParserInstall.AddOption((New-Option "RSSVCACCOUNT" -String), $true, "NT AUTHORITY\Network Service")
     $OptionParserInstall.AddOption((New-Option "RSSVCPASSWORD" -String))
     $OptionParserInstall.AddOption((New-Option "RSSVCStartupType" -String -Constraints ("Manual", "Automatic", "Disabled")))
 
