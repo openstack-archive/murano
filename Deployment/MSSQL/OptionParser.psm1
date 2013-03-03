@@ -184,7 +184,23 @@ function New-OptionParser() {
             $Option.Validate()
             $CommandLine = $CommandLine + $Option.ToString()
         }
-        return $CommandLine -join ' '
+        return $CommandLine
+    }
+
+    $OptionParser | Add-Member ScriptMethod ExecuteBinary {
+        param($Binary, [hashtable]$Options = @{}, $CommandLineSuffix = @())
+
+        $Binary = Get-Item $Binary
+        $CommandLine = $this.Parse($Options)
+        if ($CommandLineSuffix) {
+            $CommandLine = $CommandLine + $CommandLineSuffix
+        }
+
+        Write-Host "Executing: $($Binary.FullName) $($CommandLine -join ' ')"
+        $process = [System.Diagnostics.Process]::Start($Binary, $CommandLine)
+        $process.WaitForExit()
+        $process.Refresh()
+        return $process.ExitCode
     }
 
     return $OptionParser
