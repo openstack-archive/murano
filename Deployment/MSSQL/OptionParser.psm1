@@ -1,10 +1,32 @@
 function New-Option ([string]$Name, [switch]$Switch, [switch]$Boolean, [switch]$String, [switch]$List, $Constraints=$null) {
     <#
     .SYNOPSIS
-    ToDo: Describe
+    Creates Option object
 
     .DESCRIPTION
-    ToDo: Describe
+    Option object is a virtual object represtnting typed command line option. These objects encapsulate escaping and
+    validation matters.
+
+    One and only one of the switches 'Name', 'Switch', 'Boolean', 'String' or 'List' should be provided.
+
+    .PARAMETER Name
+    Option name as it appears in the command line.
+
+    .PARAMETER Switch
+    Use this switch to create valueless option (a switch).
+
+    .PARAMETER Boolean
+    Use this switch to create boolean option. Its value is always converted to "1" or "0"
+
+    .PARAMETER String
+    Use this switch to create string option. Its value will be properly quoted if necessary.
+
+    .PARAMETER List
+    Use this switch to create option with list value. Values will be put into command line using valid value delemiter (a comma)
+
+    .PARAMETER Constraints
+    When this parameter is specified, option values are limited to options from that list.
+
     #>
 
     $Option = New-Object -TypeName PSObject
@@ -128,10 +150,12 @@ function AugmentOptionList($Option) {
 function New-OptionParser() {
     <#
     .SYNOPSIS
-    ToDo: Describe
+    Creates OptionParser object.
 
     .DESCRIPTION
-    ToDo: Describe
+    OptionParser object leverages Option objects capabilities and builds valid command line using specified options.
+    An application may also be invoked with OptionParser.
+
     #>
 
     $OptionParser = New-Object -TypeName PSObject
@@ -144,6 +168,22 @@ function New-OptionParser() {
     # Methods
 
     $OptionParser | Add-Member ScriptMethod AddOption {
+        <#
+        .SYNOPSIS
+        Adds supported option into OptionParser.
+        
+        .DESCRIPTION
+        OptionParser does not allow using unrecognized options. Use this method to fill OptionParser with recognized options
+
+        .PARAMETER Option
+        Option object
+
+        .PARAMETER Required
+        Required option switch
+
+        .PARAMETER Default
+        Option default value
+        #>
         param($Option, [bool]$Required=$false, $Default=$null)
         $this.Options.Add($Option.Name, $Option)
         if ($Required) {
@@ -159,6 +199,18 @@ function New-OptionParser() {
     }
 
     $OptionParser | Add-Member ScriptMethod Parse {
+        <#
+        .SYNOPSIS
+        Parses supplied options and returns command line parameters array.
+        
+        .DESCRIPTION
+        This method verifies that only supported options are provided, all mandatory options are in place, 
+        all option meet constraints if any. Unspecified options with default values are added to command line.
+        So, mandatory option with default value never causes exception.
+
+        .PARAMETER Options
+        A hash map of options to parse. Option names should be mapped to corresponding values.
+        #>
         param([hashtable]$Options)
 
         $CommandLine = @()
@@ -189,6 +241,27 @@ function New-OptionParser() {
 
     $OptionParser | Add-Member ScriptMethod ExecuteBinary {
         param($Binary, [hashtable]$Options = @{}, $CommandLineSuffix = @())
+        <#
+        .SYNOPSIS
+        Executes binary with a command line constructed from provided options. An arbitrary suffix may be 
+        appended to the command line.
+        
+        .DESCRIPTION
+        This method uses OptionParser.Parse method to construct command line. If there a command line suffix 
+        was supplied, it is appended to the end of command line. Normally command line suffix should contain
+        leading space character.
+
+        Method waits for executable process to complete and returns its exit code.
+
+        .PARAMETER Binary
+        Full or relative path to the executable to run.
+
+        .PARAMETER Options
+        A hash map of options to pass to the executable.
+
+        .PARAMETER CommandLineSuffix
+        Arbitrary command line suffix. Normally it shoud have leading space character.
+        #>
 
         $Binary = Get-Item $Binary
         $CommandLine = $this.Parse($Options)
