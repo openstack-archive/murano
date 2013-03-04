@@ -14,7 +14,10 @@ class Controller(object):
         return {"environments": [env.to_dict() for env in self.repository.list()]}
 
     def create(self, request, body):
-        return self.repository.add(body).to_dict()
+        params = body.copy()
+        params['tenant_id'] = request.context.tenant
+
+        return self.repository.add(params).to_dict()
 
     # def delete(self, request, datacenter_id):
     #     log.debug("Got delete request. Request: %s", req)
