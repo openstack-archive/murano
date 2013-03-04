@@ -35,11 +35,11 @@ import pdb
 LOG = logging.getLogger(__name__)
 
 
-class WizardForm1(forms.Form):
+class WizardFormServiceType(forms.Form):
     _type = forms.ChoiceField(label=_("Service Type"))
 
 
-class WizardForm2(forms.Form):
+class WizardFormConfiguration(forms.Form):
     subject = forms.CharField(max_length=100)
     sender = forms.CharField(max_length=1)
 

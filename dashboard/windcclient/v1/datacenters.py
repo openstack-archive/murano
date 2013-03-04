@@ -35,9 +35,9 @@ class DCManager(base.Manager):
         body.update(extra)
         return self._create('/datacenters', body, 'datacenter')
 
-    def delete(self, datacenter):
-        return self._delete("/datacenters/%s" % base.getid(datacenter))
+    def delete(self, datacenter_id):
+        return self._delete("/datacenters/%s" % datacenter_id)
 
-    def get(self, datacenter):
-        return self._get("/datacenters/%s" % base.getid(datacenter),
+    def get(self, datacenter_id):
+        return self._get("/datacenters/%s" % datacenter_id,
                          'datacenter')

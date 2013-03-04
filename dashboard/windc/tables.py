@@ -81,8 +81,7 @@ class DeleteDataCenter(tables.BatchAction):
         return True
 
     def action(self, request, datacenter_id):
-        datacenter = api.windc.datacenters_get(request, datacenter_id)
-        api.windc.datacenters_delete(request, datacenter)
+        api.windc.datacenters_delete(request, datacenter_id)
 
 
 class DeleteService(tables.BatchAction):
@@ -101,9 +100,8 @@ class DeleteService(tables.BatchAction):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         ##############
-        datacenter = api.windc.datacenters_get(request, datacenter_id)
         
-        api.windc.services_delete(request, datacenter, service_id)
+        api.windc.services_delete(request, datacenter_id, service_id)
 
 
 class EditService(tables.LinkAction):

@@ -40,7 +40,7 @@ from horizon.forms.views import ModalFormMixin
 from openstack_dashboard import api
 from .tables import WinDCTable, WinServicesTable
 from .workflows import CreateWinService, CreateWinDC
-from .forms import WizardForm1, WizardForm2
+from .forms import WizardFormServiceType, WizardFormConfiguration
 
 import pdb
 LOG = logging.getLogger(__name__)
@@ -57,7 +57,6 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         form = super(Wizard, self).get_form(step, data, files)
         print step
         print data
-        print files
         return form
 
 class IndexView(tables.DataTableView):
