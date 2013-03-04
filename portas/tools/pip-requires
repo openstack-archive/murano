@@ -1,0 +1,23 @@
+# The greenlet package must be compiled with gcc and needs
+# the Python.h headers. Make sure you install the python-dev
+# package to get the right headers...
+greenlet>=0.3.1
+
+SQLAlchemy<=0.7.9
+anyjson
+eventlet>=0.9.12
+PasteDeploy
+Routes
+webob==1.0.8
+wsgiref
+argparse
+sqlalchemy-migrate>=0.7.2
+httplib2
+kombu
+iso8601>=0.1.4
+PyChef
+# For paste.util.template used in keystone.common.template
+Paste
+
+passlib
+puka
