@@ -15,8 +15,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from glance.openstack.common import local
-from glance.openstack.common import uuidutils
+from portas.openstack.common import uuidutils
 
 
 class RequestContext(object):
@@ -25,22 +24,12 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_tok=None, user=None, tenant=None, roles=None,
-                 is_admin=False, read_only=False, show_deleted=False,
-                 owner_is_tenant=True, service_catalog=None):
+    def __init__(self, auth_tok=None, user=None, tenant=None, roles=None):
         self.auth_tok = auth_tok
         self.user = user
         self.tenant = tenant
         self.roles = roles or []
-        self.is_admin = is_admin
-        self.read_only = read_only
-        self._show_deleted = show_deleted
-        self.owner_is_tenant = owner_is_tenant
         self.request_id = uuidutils.generate_uuid()
-        self.service_catalog = service_catalog
-
-        if not hasattr(local.store, 'context'):
-            self.update_store()
 
     def to_dict(self):
         # NOTE(ameade): These keys are named to correspond with the default
@@ -57,28 +46,10 @@ class RequestContext(object):
             'tenant_id': self.tenant,
             'project_id': self.tenant,
 
-            'is_admin': self.is_admin,
-            'read_deleted': self.show_deleted,
             'roles': self.roles,
             'auth_token': self.auth_tok,
-            'service_catalog': self.service_catalog,
         }
 
     @classmethod
     def from_dict(cls, values):
         return cls(**values)
-
-    def update_store(self):
-        local.store.context = self
-
-    @property
-    def owner(self):
-        """Return the owner to correlate with an image."""
-        return self.tenant if self.owner_is_tenant else self.user
-
-    @property
-    def show_deleted(self):
-        """Admins can see deleted by default"""
-        if self._show_deleted or self.is_admin:
-            return True
-        return False

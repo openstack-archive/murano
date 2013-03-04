@@ -16,24 +16,15 @@
 #    under the License.
 
 import json
-
 from oslo.config import cfg
+
 import webob.exc
 
-from glance.common import wsgi
-import glance.context
-import glance.openstack.common.log as logging
-
-
-context_opts = [
-    cfg.BoolOpt('owner_is_tenant', default=True),
-    cfg.StrOpt('admin_role', default='admin'),
-    cfg.BoolOpt('allow_anonymous_access', default=False),
-]
+from portas.openstack.common import wsgi
+import portas.context
+import portas.openstack.common.log as logging
 
 CONF = cfg.CONF
-CONF.register_opts(context_opts)
-
 LOG = logging.getLogger(__name__)
 
 
@@ -52,7 +43,7 @@ class ContextMiddleware(BaseContextMiddleware):
     def process_request(self, req):
         """Convert authentication information into a request context
 
-        Generate a glance.context.RequestContext object from the available
+        Generate a portas.context.RequestContext object from the available
         authentication headers and store on the 'context' attribute
         of the req object.
 
@@ -62,61 +53,34 @@ class ContextMiddleware(BaseContextMiddleware):
                                             anonymous access is disallowed
         """
         if req.headers.get('X-Identity-Status') == 'Confirmed':
-            req.context = self._get_authenticated_context(req)
-        elif CONF.allow_anonymous_access:
-            req.context = self._get_anonymous_context()
+            roles_header = req.headers.get('X-Roles', '')
+            roles = [r.strip().lower() for r in roles_header.split(',')]
+
+            #NOTE(bcwaldon): This header is deprecated in favor of X-Auth-Token
+            deprecated_token = req.headers.get('X-Storage-Token')
+
+            service_catalog = None
+            if req.headers.get('X-Service-Catalog') is not None:
+                try:
+                    catalog_header = req.headers.get('X-Service-Catalog')
+                    service_catalog = json.loads(catalog_header)
+                except ValueError:
+                    raise webob.exc.HTTPInternalServerError(
+                        _('Invalid service catalog json.'))
+
+            kwargs = {
+                'user': req.headers.get('X-User-Id'),
+                'tenant': req.headers.get('X-Tenant-Id'),
+                'roles': roles,
+                'auth_tok': req.headers.get('X-Auth-Token', deprecated_token),
+                'service_catalog': service_catalog,
+                }
+            req.context = portas.context.RequestContext(**kwargs)
         else:
             raise webob.exc.HTTPUnauthorized()
 
-    def _get_anonymous_context(self):
-        kwargs = {
-            'user': None,
-            'tenant': None,
-            'roles': [],
-            'is_admin': False,
-            'read_only': True,
-        }
-        return glance.context.RequestContext(**kwargs)
-
-    def _get_authenticated_context(self, req):
-        #NOTE(bcwaldon): X-Roles is a csv string, but we need to parse
-        # it into a list to be useful
-        roles_header = req.headers.get('X-Roles', '')
-        roles = [r.strip().lower() for r in roles_header.split(',')]
-
-        #NOTE(bcwaldon): This header is deprecated in favor of X-Auth-Token
-        deprecated_token = req.headers.get('X-Storage-Token')
-
-        service_catalog = None
-        if req.headers.get('X-Service-Catalog') is not None:
-            try:
-                catalog_header = req.headers.get('X-Service-Catalog')
-                service_catalog = json.loads(catalog_header)
-            except ValueError:
-                raise webob.exc.HTTPInternalServerError(
-                    _('Invalid service catalog json.'))
-
-        kwargs = {
-            'user': req.headers.get('X-User-Id'),
-            'tenant': req.headers.get('X-Tenant-Id'),
-            'roles': roles,
-            'is_admin': CONF.admin_role.strip().lower() in roles,
-            'auth_tok': req.headers.get('X-Auth-Token', deprecated_token),
-            'owner_is_tenant': CONF.owner_is_tenant,
-            'service_catalog': service_catalog,
-        }
-
-        return glance.context.RequestContext(**kwargs)
-
-
-class UnauthenticatedContextMiddleware(BaseContextMiddleware):
-    def process_request(self, req):
-        """Create a context without an authorized user."""
-        kwargs = {
-            'user': None,
-            'tenant': None,
-            'roles': [],
-            'is_admin': True,
-        }
-
-        req.context = glance.context.RequestContext(**kwargs)
+    @classmethod
+    def factory(cls, global_conf, **local_conf):
+        def filter(app):
+            return cls(app)
+        return filter
