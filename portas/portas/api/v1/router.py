@@ -26,6 +26,36 @@ class API(wsgi.Router):
 
     def __init__(self, mapper):
         environments_resource = environments.create_resource()
-        mapper.resource("environment", "environments", controller=environments_resource,
-                        member_prefix="/{environment_id}")
+        mapper.connect('/environments',
+                       controller=environments_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments',
+                       controller=environments_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}',
+                       controller=environments_resource,
+                       action='update',
+                       conditions={'method': ['PUT']})
+        mapper.connect('/environments/{environment_id}',
+                       controller=environments_resource,
+                       action='show',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}',
+                       controller=environments_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+
         super(API, self).__init__(mapper)
+
+
+class SessionEnabledAPI(wsgi.Router):
+    @classmethod
+    def factory(cls, global_conf, **local_conf):
+        return cls(routes.Mapper())
+
+    def __init__(self, mapper):
+        services_resource = environments.create_resource()
+        mapper.resource("activeDirectory", "activeDirectories", controller=services_resource)
+        super(SessionEnabledAPI, self).__init__(mapper)

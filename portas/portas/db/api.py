@@ -25,3 +25,8 @@ class EnvironmentRepository(object):
         query = query.filter(Environment.id == environment_id)
 
         return query.first()
+
+    def remove(self, environment):
+        session = get_session()
+        with session.begin():
+            session.delete(environment)

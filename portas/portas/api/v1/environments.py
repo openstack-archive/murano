@@ -27,8 +27,8 @@ class Controller(object):
 
         return self.repository.add(env).to_dict()
 
-    def show(self, request, id):
-        environment = self.repository.get(id)
+    def show(self, request, environment_id):
+        environment = self.repository.get(environment_id)
 
         if environment.tenant_id != request.context.tenant:
             log.info('User is not authorized to access this tenant resources.')
@@ -36,8 +36,8 @@ class Controller(object):
 
         return environment.to_dict()
 
-    def update(self, request, id, body):
-        environment = self.repository.get(id)
+    def update(self, request, environment_id, body):
+        environment = self.repository.get(environment_id)
 
         if environment.tenant_id != request.context.tenant:
             log.info('User is not authorized to access this tenant resources.')
@@ -47,6 +47,13 @@ class Controller(object):
         environment.save()
 
         return environment.to_dict()
+
+    def delete(self, request, environment_id):
+        environment = self.repository.get(environment_id)
+        self.repository.remove(environment)
+
+        return None
+
 
 
 def create_resource():
