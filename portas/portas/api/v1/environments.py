@@ -55,6 +55,5 @@ class Controller(object):
         return None
 
 
-
 def create_resource():
     return wsgi.Resource(Controller())

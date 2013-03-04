@@ -17,6 +17,7 @@
 import routes
 from portas.openstack.common import wsgi
 from portas.api.v1 import environments
+from portas.api.v1 import services
 
 
 class API(wsgi.Router):
@@ -56,6 +57,10 @@ class SessionEnabledAPI(wsgi.Router):
         return cls(routes.Mapper())
 
     def __init__(self, mapper):
-        services_resource = environments.create_resource()
-        mapper.resource("activeDirectory", "activeDirectories", controller=services_resource)
+        services_resource = services.create_resource()
+        mapper.connect('/environments/{environment_id}/activeDirectories',
+                       controller=services_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+
         super(SessionEnabledAPI, self).__init__(mapper)
