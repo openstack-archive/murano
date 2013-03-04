@@ -1,4 +1,6 @@
+from webob import exc
 from portas.db.api import EnvironmentRepository
+from portas.db.models import Environment
 from portas.openstack.common import wsgi
 from portas.openstack.common import log as logging
 
@@ -20,7 +22,31 @@ class Controller(object):
         params = body.copy()
         params['tenant_id'] = request.context.tenant
 
-        return self.repository.add(params).to_dict()
+        env = Environment()
+        env.update(params)
+
+        return self.repository.add(env).to_dict()
+
+    def show(self, request, id):
+        environment = self.repository.get(id)
+
+        if environment.tenant_id != request.context.tenant:
+            log.info('User is not authorized to access this tenant resources.')
+            raise exc.HTTPUnauthorized
+
+        return environment.to_dict()
+
+    def update(self, request, id, body):
+        environment = self.repository.get(id)
+
+        if environment.tenant_id != request.context.tenant:
+            log.info('User is not authorized to access this tenant resources.')
+            raise exc.HTTPUnauthorized
+
+        environment.update(body)
+        environment.save()
+
+        return environment.to_dict()
 
 
 def create_resource():

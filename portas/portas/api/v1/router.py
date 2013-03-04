@@ -26,5 +26,6 @@ class API(wsgi.Router):
 
     def __init__(self, mapper):
         environments_resource = environments.create_resource()
-        mapper.resource("environment", "environments", controller=environments_resource)
+        mapper.resource("environment", "environments", controller=environments_resource,
+                        member_prefix="/{environment_id}")
         super(API, self).__init__(mapper)

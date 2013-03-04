@@ -12,10 +12,16 @@ class EnvironmentRepository(object):
 
         return query.all()
 
-    def add(self, values):
+    def add(self, environment):
         session = get_session()
         with session.begin():
-            env = Environment()
-            env.update(values)
-            session.add(env)
-            return env
+            session.add(environment)
+            return environment
+
+    def get(self, environment_id):
+        session = get_session()
+
+        query = session.query(Environment)
+        query = query.filter(Environment.id == environment_id)
+
+        return query.first()
