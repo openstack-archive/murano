@@ -1,0 +1,23 @@
+{
+	"name": "MyDataCenter",
+	"services": {
+		"activeDirectory": [
+			{
+				"id": "1234567890",
+				"domain": "acme.loc",
+				"units": [
+					{
+						"name": "dc01",
+						"isMaster": true,
+						"recoveryPassword": "2SuperP@ssw0rd2"
+					},
+					{
+						"name": "dc02",
+						"isMaster": false,
+						"adminPassword": "SuperP@ssw0rd"
+					}
+				]
+			}
+		]
+	}
+}

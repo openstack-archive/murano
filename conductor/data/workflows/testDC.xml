@@ -1,0 +1,69 @@
+<workflow>
+	<rule match="$.services.activeDirectory[*].units[?(@.state.instanceName is None)]">
+		<update-cf-stack template="Windows">
+			<parameter name="mappings">
+				<map>
+					<mapping name="instanceName">
+						<select path="name"/>
+					</mapping>
+				</map>
+			</parameter>
+			<parameter name="arguments">
+				<map>
+					<argument name="KeyName">keero-linux-keys</argument>
+					<argument name="InstanceType">m1.medium</argument>
+					<argument name="ImageName">ws-2012-full-agent</argument>
+				</map>
+			</parameter>
+
+			<success>
+				<set path="state.instanceName"><select path="name"/></set>
+			</success>
+		</update-cf-stack>
+	</rule>
+	<rule match="$.services.activeDirectory[*].units[?(@.state.instanceName is not None and @.adminPassword is not None)]">
+		<send-command template="SetPassword">
+			<parameter name="host">
+				<select path="name"/>
+			</parameter>
+			<parameter name="mappings">
+				<map>
+					<mapping name="adm_password">
+						<select path="adminPassword"/>
+					</mapping>
+				</map>
+			</parameter>
+
+			<success>
+				<set path="adminPassword"><null/></set>
+			</success>
+
+		</send-command>
+	</rule>
+	<rule match="$.services.activeDirectory[*].units[?(@.state.instanceName is not None and not @.state.isInRole and @.isMaster)]">
+		<send-command template="CreatePrimaryDC">
+			<parameter name="host">
+				<select path="name"/>
+			</parameter>
+			<parameter name="mappings">
+				<map>
+					<mapping name="dc_name">
+						<select path="::domain"/>
+					</mapping>
+					<mapping name="recovery_password">
+						<select path="recoveryPassword"/>
+					</mapping>
+				</map>
+			</parameter>
+			<success>
+				<set path="recoveryPassword"><null/></set>
+				<set path="state.isInRole"><true/></set>
+				<set path="::state.WeHavePrimaryDC"><true/></set>
+			</success>
+
+		</send-command>
+	</rule>
+	<rule match="$.services.activeDirectory[?(@state.WeHavePrimaryDC == True)].units[?(@.state.instanceName is not None and not @.state.isInRole and @.isMaster = False)]">
+
+	</rule>
+</workflow>
