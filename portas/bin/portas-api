@@ -19,29 +19,32 @@ import gettext
 import os
 import sys
 
-
 # If ../portas/__init__.py exists, add ../ to Python search path, so that
 # it will override what happens to be installed in /usr/(local/)lib/python...
+
 possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
                                                 os.pardir,
                                                 os.pardir))
 if os.path.exists(os.path.join(possible_topdir, 'portas', '__init__.py')):
     sys.path.insert(0, possible_topdir)
 
-gettext.install('portas', './portas/locale', unicode=1)
-
 from portas.common import config
 from portas.openstack.common import log
 from portas.openstack.common import wsgi
+from portas.openstack.common import service
 
+gettext.install('portas', './portas/locale', unicode=1)
 
 if __name__ == '__main__':
     try:
         config.parse_args()
+        log.setup('portas')
 
-        server = wsgi.Server()
-        server.start(config.load_paste_app(), default_port=8181)
-        server.wait()
+        api_service = wsgi.Service(config.load_paste_app(),
+                                   port=config.CONF.bind_port,
+                                   host=config.CONF.bind_host)
+        launcher = service.Launcher()
+        launcher.run_service(api_service)
     except RuntimeError, e:
         sys.stderr.write("ERROR: %s\n" % e)
         sys.exit(1)

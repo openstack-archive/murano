@@ -28,8 +28,8 @@ function process_option {
     -P|--no-pep8) let no_pep8=1;;
     -f|--force) let force=1;;
     -u|--update) update=1;;
-    --unittests-only) noseopts="$noseopts --exclude-dir=glance/tests/functional";;
-    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=glance";;
+    --unittests-only) noseopts="$noseopts --exclude-dir=portas/tests/functional";;
+    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=portas";;
     -*) noseopts="$noseopts $1";;
     *) noseargs="$noseargs $1"
   esac

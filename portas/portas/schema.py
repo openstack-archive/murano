@@ -44,21 +44,6 @@ class Schema(object):
     def _filter_func(properties, key):
         return key in properties
 
-    def merge_properties(self, properties):
-        # Ensure custom props aren't attempting to override base props
-        original_keys = set(self.properties.keys())
-        new_keys = set(properties.keys())
-        intersecting_keys = original_keys.intersection(new_keys)
-        conflicting_keys = [k for k in intersecting_keys
-                            if self.properties[k] != properties[k]]
-        if len(conflicting_keys) > 0:
-            props = ', '.join(conflicting_keys)
-            reason = _("custom properties (%(props)s) conflict "
-                       "with base properties")
-            raise exception.SchemaLoadError(reason=reason % {'props': props})
-
-        self.properties.update(properties)
-
     def raw(self):
         raw = {
             'name': self.name,
@@ -67,17 +52,6 @@ class Schema(object):
         }
         if self.links:
             raw['links'] = self.links
-        return raw
-
-
-class PermissiveSchema(Schema):
-    @staticmethod
-    def _filter_func(properties, key):
-        return True
-
-    def raw(self):
-        raw = super(PermissiveSchema, self).raw()
-        raw['additionalProperties'] = {'type': 'string'}
         return raw
 
 

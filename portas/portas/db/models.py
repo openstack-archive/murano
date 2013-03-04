@@ -17,19 +17,20 @@
 #    under the License.
 
 """
-SQLAlchemy models for glance data
+SQLAlchemy models for portas data
 """
+import anyjson
 
-from sqlalchemy import Column, Integer, String, BigInteger
+from sqlalchemy import Column, String, BigInteger, TypeDecorator, ForeignKey
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import ForeignKey, DateTime, Boolean, Text
+from sqlalchemy import DateTime, Text
 from sqlalchemy.orm import relationship, backref, object_mapper
-from sqlalchemy import UniqueConstraint
 
-import glance.db.sqlalchemy.api
-from glance.openstack.common import timeutils
-from glance.openstack.common import uuidutils
+from portas.openstack.common import timeutils
+from portas.openstack.common import uuidutils
+
+from portas.db.session import get_session
 
 BASE = declarative_base()
 
@@ -40,22 +41,16 @@ def compile_big_int_sqlite(type_, compiler, **kw):
 
 
 class ModelBase(object):
-    """Base class for Nova and Glance Models"""
-    __table_args__ = {'mysql_engine': 'InnoDB'}
-    __table_initialized__ = False
-    __protected_attributes__ = set([
-        "created_at", "updated_at", "deleted_at", "deleted"])
+    __protected_attributes__ = {"created", "updated"}
 
-    created_at = Column(DateTime, default=timeutils.utcnow,
-                        nullable=False)
-    updated_at = Column(DateTime, default=timeutils.utcnow,
-                        nullable=False, onupdate=timeutils.utcnow)
-    deleted_at = Column(DateTime)
-    deleted = Column(Boolean, nullable=False, default=False)
+    created = Column(DateTime, default=timeutils.utcnow,
+                     nullable=False)
+    updated = Column(DateTime, default=timeutils.utcnow,
+                     nullable=False, onupdate=timeutils.utcnow)
 
     def save(self, session=None):
         """Save this object"""
-        session = session or glance.db.sqlalchemy.api.get_session()
+        session = session or get_session()
         session.add(self)
         session.flush()
 
@@ -94,80 +89,55 @@ class ModelBase(object):
         return self.__dict__.items()
 
     def to_dict(self):
-        return self.__dict__.copy()
+        dictionary = self.__dict__.copy()
+        return {k: v for k, v in dictionary.iteritems() if k != '_sa_instance_state'}
 
 
-class Image(BASE, ModelBase):
-    """Represents an image in the datastore"""
-    __tablename__ = 'images'
+class JsonBlob(TypeDecorator):
+    impl = Text
+
+    def process_bind_param(self, value, dialect):
+        return anyjson.serialize(value)
+
+    def process_result_value(self, value, dialect):
+        return anyjson.deserialize(value)
+
+
+class Environment(BASE, ModelBase):
+    """Represents a Environment in the metadata-store"""
+    __tablename__ = 'environment'
 
     id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
     name = Column(String(255))
-    disk_format = Column(String(20))
-    container_format = Column(String(20))
-    size = Column(BigInteger)
-    status = Column(String(30), nullable=False)
-    is_public = Column(Boolean, nullable=False, default=False)
-    checksum = Column(String(32))
-    min_disk = Column(Integer(), nullable=False, default=0)
-    min_ram = Column(Integer(), nullable=False, default=0)
-    owner = Column(String(255))
-    protected = Column(Boolean, nullable=False, default=False)
+    tenant_id = Column(String(36))
+    description = Column(JsonBlob())
 
 
-class ImageProperty(BASE, ModelBase):
-    """Represents an image properties in the datastore"""
-    __tablename__ = 'image_properties'
-    __table_args__ = (UniqueConstraint('image_id', 'name'), {})
+class Service(BASE, ModelBase):
+    """
+    Represents an instance of service.
 
-    id = Column(Integer, primary_key=True)
-    image_id = Column(String(36), ForeignKey('images.id'),
-                      nullable=False)
-    image = relationship(Image, backref=backref('properties'))
+    :var name: string
+    :var type: string - type of service (e.g. Active Directory)
+    """
 
+    __tablename__ = 'service'
+
+    id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
     name = Column(String(255), index=True, nullable=False)
-    value = Column(Text)
-
-
-class ImageTag(BASE, ModelBase):
-    """Represents an image tag in the datastore"""
-    __tablename__ = 'image_tags'
-
-    id = Column(Integer, primary_key=True, nullable=False)
-    image_id = Column(String(36), ForeignKey('images.id'), nullable=False)
-    value = Column(String(255), nullable=False)
-
-
-class ImageLocation(BASE, ModelBase):
-    """Represents an image location in the datastore"""
-    __tablename__ = 'image_locations'
-
-    id = Column(Integer, primary_key=True, nullable=False)
-    image_id = Column(String(36), ForeignKey('images.id'), nullable=False)
-    image = relationship(Image, backref=backref('locations'))
-    value = Column(Text(), nullable=False)
-
-
-class ImageMember(BASE, ModelBase):
-    """Represents an image members in the datastore"""
-    __tablename__ = 'image_members'
-    __table_args__ = (UniqueConstraint('image_id', 'member'), {})
-
-    id = Column(Integer, primary_key=True)
-    image_id = Column(String(36), ForeignKey('images.id'),
-                      nullable=False)
-    image = relationship(Image, backref=backref('members'))
-
-    member = Column(String(255), nullable=False)
-    can_share = Column(Boolean, nullable=False, default=False)
-    status = Column(String(20), nullable=False, default="pending")
+    type = Column(String(255), index=True, nullable=False)
+    environment_id = Column(String(36), ForeignKey('environment.id'))
+    environment = relationship(Environment,
+                               backref=backref('service', order_by=id),
+                               uselist=False)
+    description = Column(JsonBlob())
 
 
 def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
-    models = (Image, ImageProperty, ImageMember)
+    models = (Environment, Service)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -176,6 +146,6 @@ def unregister_models(engine):
     """
     Drops database tables for all models with the given engine
     """
-    models = (Image, ImageProperty)
+    models = (Environment, Service)
     for model in models:
         model.metadata.drop_all(engine)

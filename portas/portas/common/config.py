@@ -29,70 +29,39 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-from glance.version import version_info as version
+from portas.version import version_info as version
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor'),
     cfg.StrOpt('config_file'),
 ]
-common_opts = [
-    cfg.BoolOpt('allow_additional_image_properties', default=True,
-                help=_('Whether to allow users to specify image properties '
-                'beyond what the image schema provides')),
-    cfg.StrOpt('data_api', default='glance.db.sqlalchemy.api',
-               help=_('Python module path of data access API')),
-    cfg.IntOpt('limit_param_default', default=25,
-               help=_('Default value for the number of items returned by a '
-               'request if not specified explicitly in the request')),
-    cfg.IntOpt('api_limit_max', default=1000,
-               help=_('Maximum permissible number of items that could be '
-               'returned by a request')),
-    cfg.BoolOpt('show_image_direct_url', default=False,
-                help=_('Whether to include the backend image storage location '
-                'in image properties. Revealing storage location can be a '
-                'security risk, so use this setting with caution!')),
-    cfg.IntOpt('image_size_cap', default=1099511627776,
-               help=_("Maximum size of image a user can upload in bytes. "
-                      "Defaults to 1099511627776 bytes (1 TB).")),
-    cfg.BoolOpt('enable_v1_api', default=True,
-                help=_("Deploy the v1 OpenStack Images API. ")),
-    cfg.BoolOpt('enable_v2_api', default=True,
-                help=_("Deploy the v2 OpenStack Images API. ")),
-    cfg.StrOpt('pydev_worker_debug_host', default=None,
-               help=_('The hostname/IP of the pydev process listening for '
-                      'debug connections')),
-    cfg.IntOpt('pydev_worker_debug_port', default=5678,
-               help=_('The port on which a pydev process is listening for '
-                      'connections.')),
+
+bind_opts = [
+    cfg.StrOpt('bind_host', default='localhost'),
+    cfg.IntOpt('bind_port'),
 ]
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
-CONF.register_opts(common_opts)
+CONF.register_opts(bind_opts)
 
-CONF.import_opt('verbose', 'glance.openstack.common.log')
-CONF.import_opt('debug', 'glance.openstack.common.log')
-CONF.import_opt('log_dir', 'glance.openstack.common.log')
-CONF.import_opt('log_file', 'glance.openstack.common.log')
-CONF.import_opt('log_config', 'glance.openstack.common.log')
-CONF.import_opt('log_format', 'glance.openstack.common.log')
-CONF.import_opt('log_date_format', 'glance.openstack.common.log')
-CONF.import_opt('use_syslog', 'glance.openstack.common.log')
-CONF.import_opt('syslog_log_facility', 'glance.openstack.common.log')
+CONF.import_opt('verbose', 'portas.openstack.common.log')
+CONF.import_opt('debug', 'portas.openstack.common.log')
+CONF.import_opt('log_dir', 'portas.openstack.common.log')
+CONF.import_opt('log_file', 'portas.openstack.common.log')
+CONF.import_opt('log_config', 'portas.openstack.common.log')
+CONF.import_opt('log_format', 'portas.openstack.common.log')
+CONF.import_opt('log_date_format', 'portas.openstack.common.log')
+CONF.import_opt('use_syslog', 'portas.openstack.common.log')
+CONF.import_opt('syslog_log_facility', 'portas.openstack.common.log')
 
 
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,
-         project='glance',
+         project='portas',
          version=version.cached_version_string(),
          usage=usage,
          default_config_files=default_config_files)
-
-
-def parse_cache_args(args=None):
-    config_files = cfg.find_config_files(project='glance', prog='glance-cache')
-    parse_args(args=args, default_config_files=config_files)
-
 
 def setup_logging():
     """

@@ -15,6 +15,6 @@
 #    under the License.
 
 
-from glance.openstack.common import version as common_version
+from portas.openstack.common import version as common_version
 
-version_info = common_version.VersionInfo('glance')
+version_info = common_version.VersionInfo('portas')

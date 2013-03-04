@@ -1,34 +1,27 @@
 from sqlalchemy.schema import MetaData, Table, Column, ForeignKey
-from sqlalchemy.types import Integer, String, Text, DateTime
+from sqlalchemy.types import String, Text, DateTime
 
 
 meta = MetaData()
 
-Table('datacenter', meta,
-    Column('id', String(32), primary_key=True),
-    Column('name', String(255)),
-    Column('type', String(255)),
-    Column('version', String(255)),
-    Column('tenant_id',String(100)),
-    Column('KMS', String(80)),
-    Column('WSUS', String(80)),
-    Column('extra', Text()),
+Table('environment', meta,
+      Column('id', String(32), primary_key=True),
+      Column('name', String(255)),
+      Column('created', DateTime(), nullable=False),
+      Column('updated', DateTime(), nullable=False),
+      Column('tenant_id', String(36)),
+      Column('description', Text()),
 )
 
 Table('service', meta,
-    Column('id', String(32), primary_key=True),
-    Column('datacenter_id', String(32), ForeignKey('datacenter.id')),
-    Column('name', String(255)),
-    Column('type', String(40)),
-    Column('status', String(255)),
-    Column('tenant_id', String(40)),
-    Column('created_at', DateTime, nullable=False),
-    Column('updated_at', DateTime, nullable=False),
-    Column('deployed', String(40)),
-    Column('vm_id',String(40)),
-    Column('extra', Text()),
+      Column('id', String(32), primary_key=True),
+      Column('name', String(255)),
+      Column('type', String(40)),
+      Column('environment_id', String(32), ForeignKey('environment.id')),
+      Column('created', DateTime, nullable=False),
+      Column('updated', DateTime, nullable=False),
+      Column('description', Text()),
 )
-
 
 
 def upgrade(migrate_engine):

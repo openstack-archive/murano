@@ -30,15 +30,10 @@ from sqlalchemy.orm import sessionmaker
 from sqlalchemy.pool import NullPool
 from sqlalchemy.exc import DisconnectionError
 
-from windc.common import cfg
-from windc.db import migrate_repo
+from portas.common.config import CONF as conf
 
+from portas.db import migrate_repo
 
-DB_GROUP_NAME = 'sql'
-DB_OPTIONS = (
-    cfg.IntOpt('idle_timeout', default=3600),
-    cfg.StrOpt('connection', default='sqlite:///windc.sqlite'),
-)
 
 MAKER = None
 ENGINE = None
@@ -73,27 +68,26 @@ class MySQLPingListener(object):
                 raise
 
 
-def get_session(conf, autocommit=True, expire_on_commit=False):
+def get_session(autocommit=True, expire_on_commit=False):
     """Return a SQLAlchemy session."""
     global MAKER
 
     if MAKER is None:
         MAKER = sessionmaker(autocommit=autocommit,
                              expire_on_commit=expire_on_commit)
-    engine = get_engine(conf)
+    engine = get_engine()
     MAKER.configure(bind=engine)
     session = MAKER()
     return session
 
 
-def get_engine(conf):
+def get_engine():
     """Return a SQLAlchemy engine."""
     global ENGINE
 
-    register_conf_opts(conf)
-    connection_url = make_url(conf.sql.connection)
+    connection_url = make_url(conf.sql_connection)
     if ENGINE is None or not ENGINE.url == connection_url:
-        engine_args = {'pool_recycle': conf.sql.idle_timeout,
+        engine_args = {'pool_recycle': 3600,
                        'echo': False,
                        'convert_unicode': True
                        }
@@ -101,22 +95,16 @@ def get_engine(conf):
             engine_args['poolclass'] = NullPool
         if 'mysql' in connection_url.drivername:
             engine_args['listeners'] = [MySQLPingListener()]
-        ENGINE = create_engine(conf.sql.connection, **engine_args)
+        ENGINE = create_engine(conf.sql_connection, **engine_args)
+
+        sync()
     return ENGINE
 
 
-def register_conf_opts(conf, options=DB_OPTIONS, group=DB_GROUP_NAME):
-    """Register database options."""
-
-    conf.register_group(cfg.OptGroup(name=group))
-    conf.register_opts(options, group=group)
-
-
-def sync(conf):
-    register_conf_opts(conf)
+def sync():
     repo_path = os.path.abspath(os.path.dirname(migrate_repo.__file__))
     try:
-        versioning_api.upgrade(conf.sql.connection, repo_path)
+        versioning_api.upgrade(conf.sql_connection, repo_path)
     except versioning_exceptions.DatabaseNotControlledError:
-        versioning_api.version_control(conf.sql.connection, repo_path)
-        versioning_api.upgrade(conf.sql.connection, repo_path)
+        versioning_api.version_control(conf.sql_connection, repo_path)
+        versioning_api.upgrade(conf.sql_connection, repo_path)

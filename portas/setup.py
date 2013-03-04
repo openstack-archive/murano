@@ -25,7 +25,8 @@ project = 'portas'
 setuptools.setup(
     name=project,
     version=setup.get_version(project, '2013.1'),
-    description='The Portas project provides a simple WSGI server for Windows Environment Management',
+    description='The Portas project provides a simple WSGI server for Windows '
+                'Environment Management',
     license='Apache License (2.0)',
     author='OpenStack',
     author_email='openstack@lists.launchpad.net',
@@ -43,6 +44,7 @@ setuptools.setup(
         'Programming Language :: Python :: 2.7',
         'Environment :: No Input/Output (Daemon)',
         'Environment :: OpenStack',
-        ],
+    ],
     scripts=['bin/portas-api'],
-    py_modules=[])
+    py_modules=[]
+)
