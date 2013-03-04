@@ -3,9 +3,14 @@ from portas.db.session import get_session
 
 
 class EnvironmentRepository(object):
-    def list(self):
+    def list(self, filters=None):
         session = get_session()
-        return session.query(Environment).all()
+        query = session.query(Environment)
+
+        if filters:
+            query = query.filter_by(**filters)
+
+        return query.all()
 
     def add(self, values):
         session = get_session()
@@ -14,5 +19,3 @@ class EnvironmentRepository(object):
             env.update(values)
             session.add(env)
             return env
-
-    # def update(self, env):

@@ -11,22 +11,16 @@ class Controller(object):
 
     def index(self, request):
         log.debug(_("Display list of environments"))
-        return {"environments": [env.to_dict() for env in self.repository.list()]}
+
+        #Only environments from same tenant as users should be shown
+        filters = {'tenant_id': request.context.tenant}
+        return {"environments": [env.to_dict() for env in self.repository.list(filters)]}
 
     def create(self, request, body):
         params = body.copy()
         params['tenant_id'] = request.context.tenant
 
         return self.repository.add(params).to_dict()
-
-    # def delete(self, request, datacenter_id):
-    #     log.debug("Got delete request. Request: %s", req)
-    #     self.repository., datacenter_id)
-    #
-    # def update(self, req, tenant_id, datacenter_id, body):
-    #     log.debug("Got update request. Request: %s", req)
-    #     core_api.update_dc(self.conf, tenant_id, datacenter_id, body)
-    #     return {'datacenter': {'id': dc_id}}
 
 
 def create_resource():
