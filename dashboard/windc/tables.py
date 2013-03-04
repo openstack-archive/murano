@@ -116,6 +116,16 @@ class EditService(tables.LinkAction):
         return True
 
 
+class Wizard(tables.LinkAction):
+    name = "wizard"
+    verbose_name = _("Wizard")
+    url = "horizon:project:windc:update"
+    classes = ("ajax-modal", "btn-edit")
+
+    def allowed(self, request, instance):
+        return True
+
+
 class ShowDataCenterServices(tables.LinkAction):
     name = "edit"
     verbose_name = _("Services")
@@ -144,18 +154,36 @@ class WinDCTable(tables.DataTable):
         name = "windc"
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
-        table_actions = (CreateDataCenter,)
+        table_actions = (CreateDataCenter, Wizard)
         row_actions = (ShowDataCenterServices,DeleteDataCenter)
 
 
+STATUS_DISPLAY_CHOICES = (
+    ("create", "Deploy"),
+)
+
+
 class WinServicesTable(tables.DataTable):
-    name = tables.Column('dc_name', verbose_name=_('Name'))
+
+    STATUS_CHOICES = (
+        (None, True),
+        ("deployed", True),
+        ("active", True),
+        ("error", False),
+    )
+    
+    name = tables.Column('dc_name', verbose_name=_('Name'),
+                         link=("horizon:project:windc:service_details"),)
     _type = tables.Column('type', verbose_name=_('Type'))
-    status = tables.Column('status', verbose_name=_('Status'))
+    status = tables.Column('status', verbose_name=_('Status'),
+                           status=True,
+                           status_choices=STATUS_CHOICES,
+                           display_choices=STATUS_DISPLAY_CHOICES)
 
     class Meta:
         name = "services"
         verbose_name = _("Services")
         row_class = UpdateRow
+        status_columns = ['status']
         table_actions = (CreateService,)
         row_actions = (EditService, DeleteService)

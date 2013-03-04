@@ -1,0 +1,28 @@
+{% extends "horizon/common/_modal_form.html" %}
+{% load i18n %}
+{% block modal-header %}{% trans "Create Service" %}{% endblock %}
+
+{% block modal-body %}
+<p>Step {{ wizard.steps.step1 }} of {{ wizard.steps.count }}</p>
+<form action="" method="post">{% csrf_token %}
+<table>
+{{ wizard.management_form }}
+{% if wizard.form.forms %}
+    {{ wizard.form.management_form }}
+    {% for form in wizard.form.forms %}
+        {{ form }}
+    {% endfor %}
+{% else %}
+    {{ wizard.form }}
+{% endif %}
+{{ wizard.form.forms }}
+</table>
+{% if wizard.steps.prev %}
+<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.prev }}">{% trans "Back" %}</button>
+<input type="submit" class="btn btn-primary pull-right"  value="{% trans 'Deploy' %}"/>
+{% else %}
+<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.next }}">{% trans "Next" %}</button>
+<input type="submit" class="btn btn-primary pull-right"  value="{% trans 'Deploy' %}"/>
+{% endif %}
+</form>
+{% endblock %}
