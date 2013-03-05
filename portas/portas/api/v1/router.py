@@ -17,7 +17,6 @@
 import routes
 from portas.openstack.common import wsgi
 from portas.api.v1 import environments
-from portas.api.v1 import services
 
 
 class API(wsgi.Router):
@@ -49,18 +48,3 @@ class API(wsgi.Router):
                        conditions={'method': ['DELETE']})
 
         super(API, self).__init__(mapper)
-
-
-class SessionEnabledAPI(wsgi.Router):
-    @classmethod
-    def factory(cls, global_conf, **local_conf):
-        return cls(routes.Mapper())
-
-    def __init__(self, mapper):
-        services_resource = services.create_resource()
-        mapper.connect('/environments/{environment_id}/activeDirectories',
-                       controller=services_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-
-        super(SessionEnabledAPI, self).__init__(mapper)
