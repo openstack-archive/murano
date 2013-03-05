@@ -107,10 +107,10 @@ class Environment(BASE, ModelBase):
     """Represents a Environment in the metadata-store"""
     __tablename__ = 'environment'
 
-    id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
-    name = Column(String(255))
-    tenant_id = Column(String(36))
-    description = Column(JsonBlob())
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
+    name = Column(String(255), nullable=False)
+    tenant_id = Column(String(32), nullable=False)
+    description = Column(JsonBlob(), nullable=False, default='{}')
 
 
 class Service(BASE, ModelBase):
@@ -123,14 +123,26 @@ class Service(BASE, ModelBase):
 
     __tablename__ = 'service'
 
-    id = Column(String(36), primary_key=True, default=uuidutils.generate_uuid)
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
     name = Column(String(255), index=True, nullable=False)
     type = Column(String(255), index=True, nullable=False)
-    environment_id = Column(String(36), ForeignKey('environment.id'))
+    environment_id = Column(String(32), ForeignKey('environment.id'))
     environment = relationship(Environment,
-                               backref=backref('service', order_by=id),
+                               backref=backref('service'),
                                uselist=False)
-    description = Column(JsonBlob())
+    description = Column(JsonBlob(), nullable=False)
+
+
+class Session(BASE, ModelBase):
+    __tablename__ = 'session'
+
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
+    environment_id = Column(String(32), ForeignKey('environment.id'))
+    environment = relationship(Environment,
+                               backref=backref('session'),
+                               uselist=False)
+    user_id = Column(String(36), nullable=False)
+    state = Column(String(36), nullable=False)
 
 
 def register_models(engine):
