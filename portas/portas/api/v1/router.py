@@ -16,7 +16,7 @@
 #    under the License.
 import routes
 from portas.openstack.common import wsgi
-from portas.api.v1 import environments
+from portas.api.v1 import environments, sessions
 
 
 class API(wsgi.Router):
@@ -44,6 +44,23 @@ class API(wsgi.Router):
                        conditions={'method': ['GET']})
         mapper.connect('/environments/{environment_id}',
                        controller=environments_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+        sessions_resource = sessions.create_resource()
+        mapper.connect('/environments/{environment_id}/sessions',
+                       controller=sessions_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/configure',
+                       controller=sessions_resource,
+                       action='configure',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/sessions/{session_id}',
+                       controller=sessions_resource,
+                       action='show',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/sessions/{session_id}',
+                       controller=sessions_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
 

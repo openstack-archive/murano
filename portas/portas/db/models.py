@@ -140,7 +140,7 @@ class Session(BASE, ModelBase):
     environment_id = Column(String(32), ForeignKey('environment.id'))
     environment = relationship(Environment,
                                backref=backref('session'),
-                               uselist=False)
+                               uselist=False, lazy='joined')
     user_id = Column(String(36), nullable=False)
     state = Column(String(36), nullable=False)
 
