@@ -1,6 +1,7 @@
 import ConfigParser
 from selenium import webdriver
 
+
 class LoginPage():
 
     def login(self):
@@ -9,7 +10,7 @@ class LoginPage():
         url = config.get('server', 'address')
         user = config.get('server', 'user')
         password = config.get('server', 'password')
-        
+
         page = webdriver.Firefox()
         page.set_page_load_timeout(30)
         page.implicitly_wait(30)

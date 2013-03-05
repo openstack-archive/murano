@@ -1,6 +1,7 @@
 import ConfigParser
 from selenium import webdriver
 
+
 class ServicesPage():
     page = None
 

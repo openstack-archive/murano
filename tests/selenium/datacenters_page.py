@@ -1,6 +1,7 @@
 import re
 from login_page import LoginPage
 
+
 class DataCentersPage():
     page = None
 

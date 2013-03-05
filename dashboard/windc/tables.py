@@ -100,7 +100,7 @@ class DeleteService(tables.BatchAction):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         ##############
-        
+
         api.windc.services_delete(request, datacenter_id, service_id)
 
 
@@ -153,7 +153,7 @@ class WinDCTable(tables.DataTable):
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
         table_actions = (CreateDataCenter, Wizard)
-        row_actions = (ShowDataCenterServices,DeleteDataCenter)
+        row_actions = (ShowDataCenterServices, DeleteDataCenter)
 
 
 STATUS_DISPLAY_CHOICES = (
@@ -169,7 +169,7 @@ class WinServicesTable(tables.DataTable):
         ("active", True),
         ("error", False),
     )
-    
+
     name = tables.Column('dc_name', verbose_name=_('Name'),
                          link=("horizon:project:windc:service_details"),)
     _type = tables.Column('type', verbose_name=_('Type'))

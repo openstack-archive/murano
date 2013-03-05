@@ -20,7 +20,8 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import IndexView, CreateWinDCView, WinServices, CreateWinServiceView
+from .views import IndexView, WinServices, \
+                   CreateWinDCView, CreateWinServiceView
 from .views import Wizard
 from .forms import WizardFormServiceType, WizardFormConfiguration
 

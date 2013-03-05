@@ -1,6 +1,7 @@
 import untitests
 from datacenters_page import DataCentersPage
 
+
 class SanityTests():
 
     def setUp(self):
@@ -18,7 +19,7 @@ class SanityTests():
         assert self.page.find_data_center('dc1') is None
 
     def test_03_create_data_centers(self):
-        for i in range(1,20):
+        for i in range(1, 20):
             name = 'datacenter' + str(i)
             self.page.create_data_center(name)
             assert self.page.find_data_center(name) is not None
@@ -29,6 +30,6 @@ class SanityTests():
         assert self.page.find_data_center('datacenter1') is None
         assert self.page.find_data_center('datacenter20') is None
 
-        for i in range(2,19):
+        for i in range(2, 19):
             name = 'datacenter' + str(i)
             assert self.page.find_data_center(name) is not None
