@@ -84,11 +84,7 @@ class ConfigureWinDCAction(workflows.Action):
     dc_name = forms.CharField(label=_("Domain Name"),
                               required=False)
 
-    #dc_net_name = forms.CharField(label=_("Domain NetBIOS Name"),
-    #                              required=False,
-    #                              help_text=_("A NetBIOS name of new domain."))
-
-    dc_count = forms.IntegerField(label=_("Domain Controllers Count"),
+    dc_count = forms.IntegerField(label=_("Instances Count"),
                                   required=True,
                                   min_value=1,
                                   max_value=100,
@@ -108,7 +104,7 @@ class ConfigureWinDCAction(workflows.Action):
                                                "Recovery Mode."))
 
     class Meta:
-        name = _("Domain Controllers")
+        name = _("Active Directory")
         help_text_template = ("project/windc/_dc_help.html")
 
 
@@ -169,7 +165,7 @@ class CreateWinService(workflows.Workflow):
     default_steps = (SelectProjectUser,
                      ConfigureWinDC,
                      ConfigureWinIIS)
-    
+
     def format_status_message(self, message):
         dc_name = self.context.get('dc_name', 'noname')
         return message % dc_name
@@ -190,7 +186,6 @@ class CreateWinService(workflows.Workflow):
         except:
             exceptions.handle(request)
             return False
-
 
 
 class CreateWinDC(workflows.Workflow):

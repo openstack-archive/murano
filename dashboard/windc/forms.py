@@ -20,17 +20,28 @@
 
 import logging
 
+from django import forms
 from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 
 from openstack_dashboard import api
 
-from horizon import exceptions
 from horizon import forms
+from horizon import exceptions
 from horizon import messages
 
+import pdb
 
 LOG = logging.getLogger(__name__)
+
+
+class WizardFormServiceType(forms.Form):
+    _type = forms.ChoiceField(label=_("Service Type"))
+
+
+class WizardFormConfiguration(forms.Form):
+    subject = forms.CharField(max_length=100)
+    sender = forms.CharField(max_length=1)
 
 
 class UpdateWinDC(forms.SelfHandlingForm):

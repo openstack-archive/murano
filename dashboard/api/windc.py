@@ -35,27 +35,35 @@ def windcclient(request):
               % (request.user.token, url))
     return windc_client.Client(endpoint=url, token=None)
 
+
 def datacenters_create(request, parameters):
     name = parameters.get('name', '')
     return windcclient(request).datacenters.create(name)
 
+
 def datacenters_delete(request, datacenter_id):
     return windcclient(request).datacenters.delete(datacenter_id)
+
 
 def datacenters_get(request, datacenter_id):
     return windcclient(request).datacenters.get(datacenter_id)
 
+
 def datacenters_list(request):
     return windcclient(request).datacenters.list()
+
 
 def services_create(request, datacenter, parameters):
     return windcclient(request).services.create(datacenter, parameters)
 
+
 def services_list(request, datacenter):
     return windcclient(request).services.list(datacenter)
 
+
 def services_get(request, datacenter, service_id):
     return windcclient(request).services.get(datacenter, service_id)
+
 
 def services_delete(request, datacenter, service_id):
     return windcclient(request).services.delete(datacenter, service_id)

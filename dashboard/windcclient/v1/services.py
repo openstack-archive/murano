@@ -37,10 +37,9 @@ class DCServiceManager(base.Manager):
         return self._create("/datacenters/%s/services" % base.getid(datacenter),
                             body, 'service')
 
-    def delete(self, datacenter, service):
+    def delete(self, datacenter_id, service_id):
         return self._delete("/datacenters/%s/services/%s" % \
-                            (base.getid(datacenter),
-                             base.getid(service)))
+                            (datacenter_id, service_id))
 
     def get(self, datacenter, service):
         return self._get("/datacenters/%s/services/%s" % \

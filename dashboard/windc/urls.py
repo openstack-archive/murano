@@ -20,8 +20,10 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import IndexView, CreateWinDCView, WinServices, CreateWinServiceView
-
+from .views import IndexView, WinServices, \
+                   CreateWinDCView, CreateWinServiceView
+from .views import Wizard
+from .forms import WizardFormServiceType, WizardFormConfiguration
 
 VIEW_MOD = 'openstack_dashboard.dashboards.project.windc.views'
 
@@ -29,6 +31,11 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^$', IndexView.as_view(), name='index'),
     url(r'^create$', CreateWinServiceView.as_view(), name='create'),
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
-    url(r'^(?P<domain_controller_id>[^/]+)/$', WinServices.as_view(),
-        name='services')
+    url(r'^(?P<data_center_id>[^/]+)/$', WinServices.as_view(),
+        name='services'),
+    url(r'^update$',
+        Wizard.as_view([WizardFormServiceType, WizardFormConfiguration]),
+        name='update'),
+    url(r'^(?P<service_id>[^/]+)/$', WinServices.as_view(),
+        name='service_details')
 )
