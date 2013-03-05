@@ -1,24 +1,24 @@
+import functools
 import logging
+from webob import exc
+from portas.db.api import SessionRepository
 
 LOG = logging.getLogger(__name__)
 
 
-# def verify_tenant(func):
-#     @functools.wraps(func)
-#     def __inner(self, req, tenant_id, *args, **kwargs):
-#         if hasattr(req, 'context') and tenant_id != req.context.tenant:
-#             LOG.info('User is not authorized to access this tenant.')
-#             raise webob.exc.HTTPUnauthorized
-#         return func(self, req, tenant_id, *args, **kwargs)
-#     return __inner
-#
-#
-# def require_admin(func):
-#     @functools.wraps(func)
-#     def __inner(self, req, *args, **kwargs):
-#         if hasattr(req, 'context') and not req.context.is_admin:
-#             LOG.info('User has no admin priviledges.')
-#             raise webob.exc.HTTPUnauthorized
-#         return func(self, req, *args, **kwargs)
-#     return __inner
+def verify_session(func):
+    @functools.wraps(func)
+    def __inner(self, request, *args, **kwargs):
+        if hasattr(request, 'context') and request.context.session:
+            repo = SessionRepository()
+            session = repo.get(request.context.session)
+            if session.status != 'open':
+                LOG.info('Session is already deployed')
+                raise exc.HTTPUnauthorized
+        else:
+            LOG.info('No session is supplied')
+            raise exc.HTTPUnauthorized
+        return func(self, request, *args, **kwargs)
+    return __inner
+
 
