@@ -11,12 +11,14 @@ trap { Stop-Execution $_ }
 
 Export-ModuleMember -Function * -Alias *
 
+<#
 if ($__ImportModulesExplicitely) {
     foreach ($Module in $__RequiredModules) {
         Write-Log "Importing module '$Module' ..."
         Import-Module -Name "$Module" -ErrorAction "$__ImportModulesErrorAction"
     }
 }
+#>
 
 Write-Log "Module loaded from '$PsScriptRoot'"
 
