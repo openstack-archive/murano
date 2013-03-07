@@ -38,10 +38,9 @@ LOG = logging.getLogger(__name__)
 class WizardFormServiceType(forms.Form):
     service = forms.ChoiceField(label=_("Service Type"),
                                 choices=[
-                                       ('active directory', 'Active Directory'),
-                                       ('iis', 'Internet Information Services')
-                                        ],
-                                initial = 'Please, select the type of service...')
+                                ('active directory', 'Active Directory'),
+                                ('iis', 'Internet Information Services')
+                                ])
 
 
 class WizardFormConfiguration(forms.Form):
@@ -60,23 +59,21 @@ class WizardFormADConfiguration(forms.Form):
                                   initial=1)
 
     adm_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Administrator password"), required=False)
+                                   label=_("Administrator password"),
+                                   required=False)
 
     recovery_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Recovery password"), required=False)
-    
-    def handle(self, request, data):
-        message = "Test"
-        messages.success(request, message)
-        LOG.critical('^^^^^^^^^^^^^^^^^^^^^')
+                                   label=_("Recovery password"),
+                                   required=False)
 
 
 class WizardFormIISConfiguration(forms.Form):
     iis_name = forms.CharField(label=_("IIS Server Name"),
                                required=False)
-    
+
     adm_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Administrator password"), required=False)
+                                   label=_("Administrator password"),
+                                   required=False)
 
     iis_count = forms.IntegerField(label=_("IIS Servers Count"),
                                    required=True,
@@ -86,13 +83,14 @@ class WizardFormIISConfiguration(forms.Form):
 
     iis_domain = forms.CharField(label=_("Member of the Domain"),
                                  required=False)
-    
+
     domain_user_name = forms.CharField(label=_("Domain User Name"),
-                               required=False)
-    
+                                       required=False)
+
     domain_user_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Domain User Password"), required=False)
-    
+                                      label=_("Domain User Password"),
+                                      required=False)
+
 
 class UpdateWinDC(forms.SelfHandlingForm):
     tenant_id = forms.CharField(widget=forms.HiddenInput)

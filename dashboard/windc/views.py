@@ -41,7 +41,7 @@ from horizon.forms.views import ModalFormMixin
 
 from openstack_dashboard import api
 from .tables import WinDCTable, WinServicesTable
-from .workflows import CreateWinService, CreateWinDC
+from .workflows import CreateWinDC
 from .forms import (WizardFormServiceType, WizardFormConfiguration,
                     WizardFormADConfiguration, WizardFormIISConfiguration)
 
@@ -58,26 +58,31 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         link = self.request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         url = "/project/windc/%s/" % datacenter_id
-        
+
         service_type = form_list[0].data.get('0-service', '')
         parameters = {}
-        
+        if form_list[1].data:
+            data = form_list[1].data
+
         if service_type == 'active directory':
-            parameters['dc_name'] = str(form_list[1].data.get('1-dc_name', 'noname'))
-            parameters['adm_password'] = str(form_list[1].data.get('1-adm_password', ''))
-            parameters['dc_count'] = int(form_list[1].data.get('1-dc_count', 1))
-            parameters['recovery_password'] = str(form_list[1].data.get('1-recovery_password', ''))
+            parameters['dc_name'] = str(data.get('1-dc_name', 'noname'))
+            parameters['adm_password'] = str(data.get('1-adm_password', ''))
+            parameters['dc_count'] = int(data.get('1-dc_count', 1))
+            parameters['recovery_password'] = \
+                        str(data.get('1-recovery_password', ''))
         elif service_type == 'iis':
-            parameters['iis_name'] = str(form_list[1].data.get('1-iis_name', 'noname'))
-            parameters['adm_password'] = str(form_list[1].data.get('1-adm_password', ''))
-            parameters['iis_count'] = int(form_list[1].data.get('1-iis_count', 1))
-            parameters['iis_domain'] = str(form_list[1].data.get('1-iis_domain', ''))
-            parameters['domain_user_name'] = str(form_list[1].data.get('1-domain_user_name', ''))
-            parameters['domain_user_password'] = str(form_list[1].data.get('1-domain_user_password', ''))
+            parameters['iis_name'] = str(data.get('1-iis_name', 'noname'))
+            parameters['adm_password'] = str(data.get('1-adm_password', ''))
+            parameters['iis_count'] = int(data.get('1-iis_count', 1))
+            parameters['iis_domain'] = str(data.get('1-iis_domain', ''))
+            parameters['domain_user_name'] = \
+                        str(data.get('1-domain_user_name', ''))
+            parameters['domain_user_password'] = \
+                        str(data.get('1-domain_user_password', ''))
 
         service = api.windc.services_create(self.request,
                                             datacenter_id,
-                                            parameters)        
+                                            parameters)
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
@@ -95,10 +100,6 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                 self.form_list['1'] = WizardFormIISConfiguration
 
         return form
-    
-    def get_form_step_data(self, form):
-        LOG.debug(form.data)
-        return form.data
 
 
 class IndexView(tables.DataTableView):
@@ -146,17 +147,6 @@ class CreateWinDCView(workflows.WorkflowView):
 
     def get_initial(self):
         initial = super(CreateWinDCView, self).get_initial()
-        initial['project_id'] = self.request.user.tenant_id
-        initial['user_id'] = self.request.user.id
-        return initial
-
-
-class CreateWinServiceView(workflows.WorkflowView):
-    workflow_class = CreateWinService
-    template_name = "project/windc/create.html"
-
-    def get_initial(self):
-        initial = super(CreateWinServiceView, self).get_initial()
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial

@@ -114,16 +114,6 @@ class EditService(tables.LinkAction):
         return True
 
 
-class Wizard(tables.LinkAction):
-    name = "wizard"
-    verbose_name = _("Wizard")
-    url = "horizon:project:windc:update"
-    classes = ("ajax-modal", "btn-edit")
-
-    def allowed(self, request, instance):
-        return True
-
-
 class ShowDataCenterServices(tables.LinkAction):
     name = "edit"
     verbose_name = _("Services")
@@ -152,7 +142,7 @@ class WinDCTable(tables.DataTable):
         name = "windc"
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
-        table_actions = (CreateDataCenter, Wizard)
+        table_actions = (CreateDataCenter,)
         row_actions = (ShowDataCenterServices, DeleteDataCenter)
 
 
