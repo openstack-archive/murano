@@ -1,5 +1,6 @@
 import re
 from login_page import LoginPage
+from services_page import ServicesPage
 
 
 class DataCentersPage():
@@ -51,5 +52,5 @@ class DataCentersPage():
     def select_data_center(self, name):
         datacenter = self.page.find_data_center(name)
         datacenter.click()
-
+        self.page = ServicesPage(self.page)
         return self.page

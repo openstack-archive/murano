@@ -28,8 +28,10 @@ class ServicesPage():
         return page
 
     def select_type_of_service(self, service_type):
-        tab = find_element_by_link_text(service_type)
-        tab.click()
+        type_field = self.page.find_element_by_name('0-service')
+        type_field.select_by_visible_text(service_type)
+        next_button = self.page.find_element_by_name('wizard_goto_step')
+        next_button.click()
         return self.page
 
     def find_service(self, name):
