@@ -172,10 +172,8 @@ class CreateWinService(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            ############## FIX ME:
             link = request.__dict__['META']['HTTP_REFERER']
             datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-            ##############
 
             self.success_url = "/project/windc/%s/" % datacenter_id
 

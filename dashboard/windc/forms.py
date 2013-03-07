@@ -36,13 +36,63 @@ LOG = logging.getLogger(__name__)
 
 
 class WizardFormServiceType(forms.Form):
-    _type = forms.ChoiceField(label=_("Service Type"))
+    service = forms.ChoiceField(label=_("Service Type"),
+                                choices=[
+                                       ('active directory', 'Active Directory'),
+                                       ('iis', 'Internet Information Services')
+                                        ],
+                                initial = 'Please, select the type of service...')
 
 
 class WizardFormConfiguration(forms.Form):
-    subject = forms.CharField(max_length=100)
-    sender = forms.CharField(max_length=1)
+    "The functions for this class will dynamically create in views.py"
+    pass
 
+
+class WizardFormADConfiguration(forms.Form):
+    dc_name = forms.CharField(label=_("Domain Name"),
+                        required=False)
+
+    dc_count = forms.IntegerField(label=_("Instances Count"),
+                                  required=True,
+                                  min_value=1,
+                                  max_value=100,
+                                  initial=1)
+
+    adm_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Administrator password"), required=False)
+
+    recovery_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Recovery password"), required=False)
+    
+    def handle(self, request, data):
+        message = "Test"
+        messages.success(request, message)
+        LOG.critical('^^^^^^^^^^^^^^^^^^^^^')
+
+
+class WizardFormIISConfiguration(forms.Form):
+    iis_name = forms.CharField(label=_("IIS Server Name"),
+                               required=False)
+    
+    adm_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Administrator password"), required=False)
+
+    iis_count = forms.IntegerField(label=_("IIS Servers Count"),
+                                   required=True,
+                                   min_value=1,
+                                   max_value=100,
+                                   initial=1)
+
+    iis_domain = forms.CharField(label=_("Member of the Domain"),
+                                 required=False)
+    
+    domain_user_name = forms.CharField(label=_("Domain User Name"),
+                               required=False)
+    
+    domain_user_password = forms.CharField(widget=forms.PasswordInput,
+                                   label=_("Domain User Password"), required=False)
+    
 
 class UpdateWinDC(forms.SelfHandlingForm):
     tenant_id = forms.CharField(widget=forms.HiddenInput)

@@ -29,13 +29,12 @@ VIEW_MOD = 'openstack_dashboard.dashboards.project.windc.views'
 
 urlpatterns = patterns(VIEW_MOD,
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create$', CreateWinServiceView.as_view(), name='create'),
+    url(r'^create$', 
+        Wizard.as_view([WizardFormServiceType, WizardFormConfiguration]),
+        name='create'),
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
     url(r'^(?P<data_center_id>[^/]+)/$', WinServices.as_view(),
         name='services'),
-    url(r'^update$',
-        Wizard.as_view([WizardFormServiceType, WizardFormConfiguration]),
-        name='update'),
     url(r'^(?P<service_id>[^/]+)/$', WinServices.as_view(),
         name='service_details')
 )
