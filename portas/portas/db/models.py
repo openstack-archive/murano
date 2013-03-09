@@ -26,10 +26,9 @@ from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import DateTime, Text
 from sqlalchemy.orm import relationship, backref, object_mapper
+from portas.common import uuidutils
 
 from portas.openstack.common import timeutils
-from portas.openstack.common import uuidutils
-
 from portas.db.session import get_session
 
 BASE = declarative_base()
@@ -53,12 +52,6 @@ class ModelBase(object):
         session = session or get_session()
         session.add(self)
         session.flush()
-
-    def delete(self, session=None):
-        """Delete this object"""
-        self.deleted = True
-        self.deleted_at = timeutils.utcnow()
-        self.save(session=session)
 
     def update(self, values):
         """dict.update() behaviour."""
@@ -112,6 +105,11 @@ class Environment(BASE, ModelBase):
     tenant_id = Column(String(32), nullable=False)
     description = Column(JsonBlob(), nullable=False, default='{}')
 
+    def to_dict(self):
+        dictionary = super(Environment, self).to_dict()
+        del dictionary['description']
+        return dictionary
+
 
 class Service(BASE, ModelBase):
     """
@@ -142,6 +140,19 @@ class Session(BASE, ModelBase):
                                backref=backref('session'),
                                uselist=False, lazy='joined')
     user_id = Column(String(36), nullable=False)
+    state = Column(String(36), nullable=False)
+
+    def to_dict(self):
+        dictionary = super(Session, self).to_dict()
+        del dictionary['environment']
+        return dictionary
+
+
+class SessionChanges(BASE, ModelBase):
+    __tablename__ = 'session_changes'
+
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
+    service_id = Column(String(32), ForeignKey('service.id'))
     state = Column(String(36), nullable=False)
 
 
