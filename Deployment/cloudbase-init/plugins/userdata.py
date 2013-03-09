@@ -30,18 +30,18 @@ from cloudbaseinit.plugins.base import *
 LOG = logging.getLogger(__name__)
 
 opts = [
-    cfg.StrOpt('user-data_folder', default='cloud-data',
+    cfg.StrOpt('user_data_folder', default='cloud-data',
         help='Specifies a folder to store multipart data files.'),
-  ]
+    ]
 
 CONF = cfg.CONF
 CONF.register_opts(opts)
 
 class UserDataPlugin():
-	def __init__(self, cfg=CONF):
-		self.cfg = cfg
-		self.msg = None
-		return
+    def __init__(self, cfg=CONF):
+        self.cfg = cfg
+        self.msg = None
+        return
 
     def execute(self, service):
         user_data = service.get_user_data('openstack')
@@ -50,33 +50,33 @@ class UserDataPlugin():
 
         LOG.debug('User data content:\n%s' % user_data)
 
-		if user_data.starts_with('Content-Type: multipart'):
-			for part in self.parse_MIME(user_data):
-			    self.process_part(part)
-		else:
-			self.handle(user_data)
-		return
+        if user_data.starts_with('Content-Type: multipart'):
+            for part in self.parse_MIME(user_data):
+                self.process_part(part)
+        else:
+            self.handle(user_data)
+        return
 
-	def process_part(self, part):
-		if part.get_filename() == 'cfn-userdata':
-			self.handle(part.get_payload())
-		return
+    def process_part(self, part):
+        if part.get_filename() == 'cfn-userdata':
+            self.handle(part.get_payload())
+        return
 
-	def parse_MIME(self, user_data):
-	    folder = self.cfg.user-data_folder
-	    self.create_folder(folder)
+    def parse_MIME(self, user_data):
+        folder = self.cfg.user_data_folder
+        self.create_folder(folder)
 
-		self.msg = email.message_from_string(user_data)
-		return self.msg.walk()
+        self.msg = email.message_from_string(user_data)
+        return self.msg.walk()
 
 
     def create_folder(self, folder):
-    	try:
-    		os.mkdir(folder)
-    	except os.OSError, e:
-    		if e.errno != errno.EEXIST:
-    			raise e
-    	return
+        try:
+            os.mkdir(folder)
+        except os.OSError, e:
+            if e.errno != errno.EEXIST:
+                raise e
+        return
 
     def handle(self, user_data):
 
