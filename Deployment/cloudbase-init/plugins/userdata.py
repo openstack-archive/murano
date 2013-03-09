@@ -50,7 +50,7 @@ class UserDataPlugin():
 
         LOG.debug('User data content:\n%s' % user_data)
 
-        if user_data.starts_with('Content-Type: multipart'):
+        if user_data.startswith('Content-Type: multipart'):
             for part in self.parse_MIME(user_data):
                 self.process_part(part)
         else:
