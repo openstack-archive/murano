@@ -41,9 +41,28 @@ bind_opts = [
     cfg.IntOpt('bind_port'),
 ]
 
+reports_opts = [
+    cfg.StrOpt('results_exchange', default='task-results'),
+    cfg.StrOpt('results_queue', default='task-results'),
+    cfg.StrOpt('reports_exchange', default='task-reports'),
+    cfg.StrOpt('reports_queue', default='task-reports')
+]
+
+rabbit_opts = [
+    cfg.StrOpt('host', default='localhost'),
+    cfg.IntOpt('port', default=5672),
+    cfg.BoolOpt('use_ssl', default=False),
+    cfg.StrOpt('userid', default='guest'),
+    cfg.StrOpt('password', default='guest'),
+    cfg.StrOpt('virtual_host', default='/'),
+]
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_opts(bind_opts)
+CONF.register_opts(reports_opts, group='reports')
+CONF.register_opts(rabbit_opts, group='rabbitmq')
+
 
 CONF.import_opt('verbose', 'portas.openstack.common.log')
 CONF.import_opt('debug', 'portas.openstack.common.log')

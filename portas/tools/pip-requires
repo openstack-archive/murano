@@ -13,6 +13,7 @@ httplib2
 kombu
 pycrypto>=2.1.0alpha1
 iso8601>=0.1.4
+amqplib
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
