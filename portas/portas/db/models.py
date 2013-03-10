@@ -148,12 +148,14 @@ class Session(BASE, ModelBase):
         return dictionary
 
 
-class SessionChanges(BASE, ModelBase):
-    __tablename__ = 'session_changes'
+class Status(BASE, ModelBase):
+    __tablename__ = 'status'
 
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    service_id = Column(String(32), ForeignKey('service.id'))
-    state = Column(String(36), nullable=False)
+    id = Column(String(32), primary_key=True)
+    entity = Column(String(10), nullable=False)
+    environment_id = Column(String(32), ForeignKey('environment.id'))
+    session_id = Column(String(32), ForeignKey('session.id'))
+    text = Column(Text(), nullable=False)
 
 
 def register_models(engine):

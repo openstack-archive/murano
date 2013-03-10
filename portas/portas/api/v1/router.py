@@ -63,6 +63,10 @@ class API(wsgi.Router):
                        controller=sessions_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
+        mapper.connect('/environments/{environment_id}/sessions/{session_id}/reports',
+                       controller=sessions_resource,
+                       action='reports',
+                       conditions={'method': ['GET']})
         mapper.connect('/environments/{environment_id}/sessions/{session_id}/deploy',
                        controller=sessions_resource,
                        action='deploy',

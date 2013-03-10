@@ -1,5 +1,5 @@
 from webob import exc
-from portas.db.models import Session
+from portas.db.models import Session, Status
 from portas.db.session import get_session
 from portas.openstack.common import wsgi
 from portas.openstack.common import log as logging
@@ -56,6 +56,12 @@ class Controller(object):
             unit.delete(session)
 
         return None
+
+    def reports(self, request, environment_id, session_id):
+        unit = get_session()
+        statuses = unit.query(Status).filter_by(session_id=session_id)
+
+        return {"reports": [status.to_dict() for status in statuses]}
 
     def deploy(self, request, environment_id, session_id):
         log.debug(_("Got Deploy command"))
