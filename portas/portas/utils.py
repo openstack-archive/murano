@@ -14,7 +14,7 @@ def verify_session(func):
             uw = get_session()
             configuration_session = uw.query(Session).get(request.context.session)
 
-            if configuration_session.status != 'open':
+            if configuration_session.state != 'open':
                 log.info('Session is already deployed')
                 raise exc.HTTPUnauthorized
         else:

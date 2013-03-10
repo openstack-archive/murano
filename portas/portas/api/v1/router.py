@@ -16,7 +16,7 @@
 #    under the License.
 import routes
 from portas.openstack.common import wsgi
-from portas.api.v1 import environments, sessions
+from portas.api.v1 import environments, sessions, active_directories
 
 
 class API(wsgi.Router):
@@ -46,6 +46,7 @@ class API(wsgi.Router):
                        controller=environments_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
+
         sessions_resource = sessions.create_resource()
         mapper.connect('/environments/{environment_id}/sessions',
                        controller=sessions_resource,
@@ -71,4 +72,18 @@ class API(wsgi.Router):
                        controller=sessions_resource,
                        action='deploy',
                        conditions={'method': ['POST']})
+
+        activeDirectories_resource = active_directories.create_resource()
+        mapper.connect('/environments/{environment_id}/activeDirectories',
+                       controller=activeDirectories_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/activeDirectories',
+                       controller=activeDirectories_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/activeDirectories/{active_directory_id}',
+                       controller=activeDirectories_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
         super(API, self).__init__(mapper)

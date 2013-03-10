@@ -24,13 +24,14 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_tok=None, user=None, tenant=None, roles=None, service_catalog=None):
+    def __init__(self, auth_tok=None, user=None, tenant=None, roles=None, service_catalog=None, session=None):
         self.auth_tok = auth_tok
         self.user = user
         self.tenant = tenant
         self.roles = roles or []
         self.request_id = uuidutils.generate_uuid()
         self.service_catalog = service_catalog
+        self.session = session
 
     def to_dict(self):
         # NOTE(ameade): These keys are named to correspond with the default
@@ -49,6 +50,7 @@ class RequestContext(object):
 
             'roles': self.roles,
             'auth_token': self.auth_tok,
+            'session': self.session
         }
 
     @classmethod
