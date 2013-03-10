@@ -1,0 +1,12 @@
+{
+  "Scripts": [
+    "ZnVuY3Rpb24gR2V0LURuc0xpc3RlbmluZ0lwQWRkcmVzc2VzIHsNCiAgICAoR2V0LUROU1NlcnZlciAtQ29tcHV0ZXJOYW1lIGxvY2FsaG9zdCkuU2VydmVyU2V0dGluZy5MaXN0ZW5pbmdJcEFkZHJlc3MNCn0NCg=="
+  ],
+  "Commands": [
+    {
+      "Name": "Get-DnsListeningIpAddress",
+      "Arguments": {}
+    }
+  ],
+  "RebootOnCompletion": 0
+}
