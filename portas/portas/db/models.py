@@ -141,10 +141,12 @@ class Session(BASE, ModelBase):
                                uselist=False, lazy='joined')
     user_id = Column(String(36), nullable=False)
     state = Column(String(36), nullable=False)
+    description = Column(JsonBlob(), nullable=False)
 
     def to_dict(self):
         dictionary = super(Session, self).to_dict()
         del dictionary['environment']
+        del dictionary['description']
         return dictionary
 
 

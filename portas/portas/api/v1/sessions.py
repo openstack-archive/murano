@@ -1,14 +1,28 @@
+from amqplib.client_0_8 import Message
+import anyjson
+import eventlet
+from eventlet.semaphore import Semaphore
 from webob import exc
-from portas.db.models import Session, Status
+from portas.common import config
+from portas.db.models import Session, Status, Environment
 from portas.db.session import get_session
 from portas.openstack.common import wsgi
 from portas.openstack.common import log as logging
 
-
+amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
+rabbitmq = config.CONF.rabbitmq
 log = logging.getLogger(__name__)
 
 
 class Controller(object):
+    def __init__(self):
+        self.write_lock = Semaphore(1)
+        connection = amqp.Connection(rabbitmq.host, virtual_host=rabbitmq.virtual_host,
+                                     userid=rabbitmq.userid, password=rabbitmq.password,
+                                     ssl=rabbitmq.use_ssl, insist=True)
+        self.ch = connection.channel()
+        self.ch.exchange_declare('tasks', 'direct', durable=True, auto_delete=False)
+
     def index(self, request, environment_id):
         filters = {'environment_id': environment_id, 'user_id': request.context.user}
 
@@ -28,6 +42,10 @@ class Controller(object):
         if unit.query(Session).filter_by(**{'environment_id': environment_id, 'state': 'open'}).first():
             log.info('There is already open session for this environment')
             raise exc.HTTPConflict
+
+        #create draft for apply later changes
+        environment = unit.query(Environment).get(environment_id)
+        session.description = environment.description
 
         with unit.begin():
             unit.add(session)
@@ -64,7 +82,17 @@ class Controller(object):
         return {"reports": [status.to_dict() for status in statuses]}
 
     def deploy(self, request, environment_id, session_id):
-        log.debug(_("Got Deploy command"))
+        unit = get_session()
+        session = unit.query(Session).get(session_id)
+
+        if session.state != 'open':
+            log.warn(_('Could not deploy session. Session is already deployed or in deployment state'))
+
+        session.state = 'deploying'
+        session.save(unit)
+
+        with self.write_lock:
+            self.ch.basic_publish(Message(body=anyjson.serialize(session.description)), 'tasks', 'tasks')
 
 
 def create_resource():
