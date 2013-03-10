@@ -15,36 +15,37 @@ class Controller(object):
         if not draft.has_key('services'):
             return dict()
 
-        if not draft['services'].has_key('activeDirectories'):
+        if not draft['services'].has_key('webServers'):
             return dict()
 
-        return {'activeDirectories': draft['services']['activeDirectories']}
+        return {'webServers': draft['services']['webServers']}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
         draft = get_draft(request.context.session)
 
-        active_directory = body.copy()
-        active_directory['id'] = uuidutils.generate_uuid()
-        active_directory['created'] = timeutils.utcnow
-        active_directory['updated'] = timeutils.utcnow
+        webServer = body.copy()
+        webServer['id'] = uuidutils.generate_uuid()
+        webServer['created'] = timeutils.utcnow
+        webServer['updated'] = timeutils.utcnow
 
         unit_count = 0
-        for unit in active_directory['units']:
+        for unit in webServer['units']:
             unit_count += 1
             unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = 'dc-{0}'.format(unit_count)
+            unit['name'] = 'webserver-{0}'.format(unit_count)
 
         draft = prepare_draft(draft)
-        draft['services']['activeDirectories'].append(active_directory)
+        draft['services']['webServers'].append(webServer)
         save_draft(request.context.session, draft)
 
-        return active_directory
+        return webServer
 
-    def delete(self, request, environment_id, active_directory_id):
+    @utils.verify_session
+    def delete(self, request, environment_id, web_server_id):
         draft = get_draft(request.context.session)
-        draft['services']['activeDirectories'] = [service for service in draft['services']['activeDirectories'] if
-                                                  service['id'] != active_directory_id]
+        draft['services']['webServers'] = [service for service in draft['services']['webServers'] if
+                                           service['id'] != web_server_id]
         save_draft(request.context.session, draft)
 
 
@@ -52,8 +53,8 @@ def prepare_draft(draft):
     if not draft.has_key('services'):
         draft['services'] = {}
 
-    if not draft['services'].has_key('activeDirectories'):
-        draft['services']['activeDirectories'] = []
+    if not draft['services'].has_key('webServers'):
+        draft['services']['webServers'] = []
 
     return draft
 
