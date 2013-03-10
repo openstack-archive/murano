@@ -1,6 +1,6 @@
 import anyjson
 from eventlet import patcher
-from portas.db.models import Status, Session
+from portas.db.models import Status, Session, Environment
 from portas.db.session import get_session
 
 amqp = patcher.import_patched('amqplib.client_0_8')
@@ -65,5 +65,20 @@ def handle_report(msg):
 
 
 def handle_result(msg):
-    msg.channel.basic_ack(msg.delivery_tag)
     log.debug(_('Got result message from orchestration engine:\n{0}'.format(msg.body)))
+
+    environment_result = anyjson.deserialize(msg.body)
+
+    session = get_session()
+    environment = session.query(Environment).get(environment_result['id'])
+
+    environment.description = environment_result
+    environment.save(session)
+
+    #close session
+    conf_session = session.query(Session).filter_by(
+        **{'environment_id': environment.id, 'state': 'deploying'}).first()
+    conf_session.state = 'deployed'
+    conf_session.save(session)
+
+    msg.channel.basic_ack(msg.delivery_tag)
