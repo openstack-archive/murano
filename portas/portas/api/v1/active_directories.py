@@ -30,8 +30,11 @@ class Controller(object):
         active_directory['created'] = timeutils.utcnow
         active_directory['updated'] = timeutils.utcnow
 
+        unit_count = 0
         for unit in active_directory['units']:
+            unit_count += 1
             unit['id'] = uuidutils.generate_uuid()
+            unit['name'] = 'dc-{0}'.format(unit_count)
 
         draft = prepare_draft(draft)
         draft['services']['activeDirectories'].append(active_directory)
