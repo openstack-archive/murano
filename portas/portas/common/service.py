@@ -33,15 +33,17 @@ class TaskResultHandlerService(service.Service):
         ch = connection.channel()
 
         def bind(exchange, queue):
-            ch.exchange_declare(exchange, 'direct')
+            if not exchange:
+                ch.exchange_declare(exchange, 'direct', durable=True, auto_delete=False)
             ch.queue_declare(queue)
-            ch.queue_bind(queue, exchange, queue)
+            if not exchange:
+                ch.queue_bind(queue, exchange, queue)
 
         bind(conf.results_exchange, conf.results_queue)
         bind(conf.reports_exchange, conf.reports_queue)
 
-        ch.basic_consume('task-results', callback=handle_result)
-        ch.basic_consume('task-reports', callback=handle_report)
+        ch.basic_consume(conf.results_exchange, callback=handle_result)
+        ch.basic_consume(conf.reports_exchange, callback=handle_report)
         while ch.callbacks:
             ch.wait()
 
