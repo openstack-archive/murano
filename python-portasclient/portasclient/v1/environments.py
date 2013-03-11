@@ -12,13 +12,14 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import anyjson
 
 from portasclient.common import base
 
 
 class Environment(base.Resource):
     def __repr__(self):
-        return "<Meter %s>" % self._info
+        return "<Environment %s>" % self._info
 
     def data(self, **kwargs):
         return self.manager.data(self, **kwargs)
@@ -29,3 +30,15 @@ class EnvironmentManager(base.Manager):
 
     def list(self):
         return self._list('environments', 'environments')
+
+    def create(self, name):
+        return self._create('environments', {'name': name})
+
+    def update(self, environment_id, name):
+        return self._update('environments/{id}'.format(id=environment_id), {'name': name})
+
+    def delete(self, environment_id):
+        return self._delete('environments/{id}'.format(id=environment_id))
+
+    def get(self, environment_id):
+        return self._get("environments/{id}".format(id=environment_id))
