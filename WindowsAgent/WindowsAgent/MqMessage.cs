@@ -14,8 +14,13 @@ namespace Mirantis.Keero.WindowsAgent
 		{
 			this.ackFunc = ackFunc;
 		}
+		
+		public MqMessage()
+		{
+		}
 
 		public string Body { get; set; }
+		public string Id { get; set; }
 
 		public void Ack()
 		{

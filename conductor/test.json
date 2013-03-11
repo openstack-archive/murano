@@ -1,0 +1,41 @@
+{
+	"name": "MyDataCenter",
+	"id": "adc6d143f9584d10808c7ef4d07e4802",
+	"services": {
+		"activeDirectories": [
+			{
+				"id": "9571747991184642B95F430A014616F9",
+				"domain": "acme.loc",
+				"adminPassword": "SuperP@ssw0rd!",
+				"units": [
+					{
+						"id": "273c9183b6e74c9c9db7fdd532c5eb25",
+						"name": "dc01",
+						"isMaster": true,
+						"recoveryPassword": "2SuperP@ssw0rd2"
+					},
+					{
+						"id": "377c6f16d17a416791f80724dab360c6",
+						"name": "dc02",
+						"isMaster": false,
+						"adminPassword": "SuperP@ssw0rd",
+						"recoveryPassword": "2SuperP@ssw0rd2"
+					}
+				]
+			}
+		],
+		"webServers": [
+			{
+				"id": "e9657ceef84a4e669e31795040080262",
+				"domain": "acme.loc",
+				"units": [
+					{
+						"id": "e6f9cfd07ced48fba64e6bd9e65aba64",
+						"name": "iis01",
+						"adminPassword": "SuperP@ssw0rd"
+					}
+				]
+			}
+		]
+	}
+}

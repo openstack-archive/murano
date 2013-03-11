@@ -5,12 +5,15 @@ using System.Linq;
 using System.Management.Automation;
 using System.Management.Automation.Runspaces;
 using System.Text;
+using NLog;
 using Newtonsoft.Json;
 
 namespace Mirantis.Keero.WindowsAgent
 {
 	class PlanExecutor
 	{
+		private static readonly Logger Log = LogManager.GetCurrentClassLogger();
+
 		class ExecutionResult
 		{
 			public bool IsException { get; set; }
@@ -26,13 +29,14 @@ namespace Mirantis.Keero.WindowsAgent
 
 		public bool RebootNeeded { get; set; }
 
-		public string Execute()
+		public void Execute()
 		{
 			RebootNeeded = false;
+			var resultPath = this.path + ".result";
+			Runspace runSpace = null;
 			try
 			{
 				var plan = JsonConvert.DeserializeObject<ExecutionPlan>(File.ReadAllText(this.path));
-				var resultPath = this.path + ".result";
 				List<ExecutionResult> currentResults = null;
 				try
 				{
@@ -44,7 +48,7 @@ namespace Mirantis.Keero.WindowsAgent
 				}
 
 
-				var runSpace = RunspaceFactory.CreateRunspace();
+				runSpace = RunspaceFactory.CreateRunspace();
 				runSpace.Open();
 
 				var runSpaceInvoker = new RunspaceInvoke(runSpace);
@@ -70,6 +74,11 @@ namespace Mirantis.Keero.WindowsAgent
 							psCommand.Parameters.Add(kvp.Key, kvp.Value);
 						}
 					}
+
+					Log.Info("Executing {0} {1}", command.Name, string.Join(" ",
+						(command.Arguments ?? new Dictionary<string, object>()).Select(
+							t => string.Format("{0}={1}", t.Key, t.Value == null ? "null" : t.Value.ToString()))));
+
 					pipeline.Commands.Add(psCommand);
 					try
 					{
@@ -90,6 +99,7 @@ namespace Mirantis.Keero.WindowsAgent
 								exception.GetType().FullName, exception.Message
 							}
 						});
+						break;
 					}
 					finally
 					{
@@ -115,16 +125,27 @@ namespace Mirantis.Keero.WindowsAgent
 						RebootNeeded = true;
 					}
 				}
+				File.WriteAllText(resultPath, executionResult);
 
-				File.Delete(resultPath);
-				return executionResult;
 			}
 			catch (Exception ex)
 			{
-				return JsonConvert.SerializeObject(new ExecutionResult {
+				File.WriteAllText(resultPath, JsonConvert.SerializeObject(new ExecutionResult {
 					IsException = true,
 					Result = ex.Message
-				}, Formatting.Indented);
+				}, Formatting.Indented));
+			}
+			finally
+			{
+				if (runSpace != null)
+				{
+					try
+					{
+						runSpace.Close();
+					}
+					catch
+					{}
+				}
 			}
 		}
 	
