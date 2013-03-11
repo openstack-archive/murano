@@ -18,7 +18,7 @@
 		</rules>
 	</nlog>
 	<appSettings>
-		<add key="rabbitmq.host" value="localhost"/>
+		<add key="rabbitmq.host" value="%RABBITMQ_HOST%"/>
 		<add key="rabbitmq.user" value="keero"/>
 		<add key="rabbitmq.password" value="keero"/>
 		<add key="rabbitmq.vhost" value="keero"/>
