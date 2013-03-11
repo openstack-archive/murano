@@ -11,23 +11,20 @@
 		<targets>
 			<target name="file" xsi:type="File" fileName="${basedir}/log.txt"
 					layout="${date} ${level}: &lt;${logger:shortName=true}&gt; ${message} ${exception:format=tostring}"/>
-			<target name="console" xsi:type="Console"
-					layout="${date} ${level}: &lt;${logger:shortName=true}&gt; ${message} ${exception:format=tostring}"/>
 		</targets>
 
 		<rules>
 			<logger name="*" minlevel="Debug" writeTo="file" />
-			<logger name="*" minlevel="Debug" writeTo="console" />
 		</rules>
 	</nlog>
 	<appSettings>
-		<add key="rabbitmq.host" value="localhost"/>
+		<add key="rabbitmq.host" value="%RABBITMQ_HOST%"/>
 		<add key="rabbitmq.user" value="keero"/>
 		<add key="rabbitmq.password" value="keero"/>
 		<add key="rabbitmq.vhost" value="keero"/>
 		<add key="rabbitmq.resultExchange" value=""/>
 		<add key="rabbitmq.resultRoutingKey" value="-execution-results"/>
-		<add key="rabbitmq.durableMessages" value="trueтест"/>
+		<add key="rabbitmq.durableMessages" value="true"/>
 
 	</appSettings>
 </configuration>

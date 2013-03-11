@@ -51,7 +51,8 @@
       "Properties": {
         "InstanceType" : { "Ref" : "InstanceType" },
         "ImageId" : { "Ref" : "ImageName" },
-        "KeyName" : { "Ref" : "KeyName" }
+        "KeyName" : { "Ref" : "KeyName" },
+        "UserData": "$userData"
       }
     }
    },

@@ -1,5 +1,6 @@
 from ConfigParser import SafeConfigParser
 
+
 class Config(object):
     CONFIG_PATH = './etc/app.config'
 
@@ -14,4 +15,5 @@ class Config(object):
 
     def __getitem__(self, item):
         parts = item.rsplit('.', 1)
-        return self.get_setting(parts[0] if len(parts) == 2 else 'DEFAULT', parts[-1])
+        return self.get_setting(
+            parts[0] if len(parts) == 2 else 'DEFAULT', parts[-1])

@@ -2,11 +2,13 @@ import command
 import cloud_formation
 import windows_agent
 
+
 class CommandDispatcher(command.CommandBase):
     def __init__(self, environment_name, rmqclient):
         self._command_map = {
             'cf': cloud_formation.HeatExecutor(environment_name),
-            'agent': windows_agent.WindowsAgentExecutor(environment_name, rmqclient)
+            'agent': windows_agent.WindowsAgentExecutor(
+                environment_name, rmqclient)
         }
 
     def execute(self, name, **kwargs):
@@ -27,7 +29,6 @@ class CommandDispatcher(command.CommandBase):
             if not command.execute_pending(on_result):
                 count[0] -= 1
                 result -= 1
-
 
         return result > 0
 

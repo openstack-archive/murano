@@ -12,8 +12,8 @@
 	{
 		"Name": "Install-RolePrimaryDomainController",
 		"Arguments": {
-        	"DomainName": "$dc_name",
-			"SafeModePassword": "$recovery_password"
+        	"DomainName": "$domain",
+			"SafeModePassword": "$recoveryPassword"
 	 	}
 	}
   ],

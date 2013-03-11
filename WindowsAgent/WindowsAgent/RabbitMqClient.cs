@@ -5,12 +5,14 @@ using System.Linq;
 using System.Net;
 using System.Text;
 using System.Threading.Tasks;
+using NLog;
 using RabbitMQ.Client;
 
 namespace Mirantis.Keero.WindowsAgent
 {
 	class RabbitMqClient : IDisposable
 	{
+		private static readonly Logger Log = LogManager.GetCurrentClassLogger();
 		private static readonly ConnectionFactory connectionFactory;
 		private IConnection currentConnecton;
 
@@ -43,21 +45,22 @@ namespace Mirantis.Keero.WindowsAgent
 				}
 				var session = connection.CreateModel();
 				session.BasicQos(0, 1, false);
-				session.QueueDeclare(queueName, true, false, false, null);
+				//session.QueueDeclare(queueName, true, false, false, null);
 				var consumer = new QueueingBasicConsumer(session);
 				var consumeTag = session.BasicConsume(queueName, false, consumer);
-				var e = (RabbitMQ.Client.Events.BasicDeliverEventArgs)consumer.Queue.Dequeue();
+				var e = (RabbitMQ.Client.Events.BasicDeliverEventArgs) consumer.Queue.Dequeue();
 				Action ackFunc = delegate {
 					session.BasicAck(e.DeliveryTag, false);
 					session.BasicCancel(consumeTag);
 					session.Close();
 				};
-				
+
 				return new MqMessage(ackFunc) {
-					Body = Encoding.UTF8.GetString(e.Body)
+					Body = Encoding.UTF8.GetString(e.Body),
+					Id = e.BasicProperties.MessageId
 				};
 			}
-			catch (Exception)
+			catch (Exception exception)
 			{
 
 				Dispose();
@@ -65,10 +68,11 @@ namespace Mirantis.Keero.WindowsAgent
 			}
 		}
 
-		public void SendResult(string text)
+		public void SendResult(MqMessage message)
 		{
 			var exchangeName = ConfigurationManager.AppSettings["rabbitmq.resultExchange"] ?? "";
-			var resultQueue = ConfigurationManager.AppSettings["rabbitmq.resultQueue"] ?? "-execution-results";
+			var resultRoutingKey = ConfigurationManager.AppSettings["rabbitmq.resultRoutingKey"] ?? "-execution-results";
+			bool durable = bool.Parse(ConfigurationManager.AppSettings["rabbitmq.durableMessages"] ?? "true");
 
 			try
 			{
@@ -78,18 +82,19 @@ namespace Mirantis.Keero.WindowsAgent
 					connection = this.currentConnecton = this.currentConnecton ?? connectionFactory.CreateConnection();
 				}
 				var session = connection.CreateModel();
-				if (!string.IsNullOrEmpty(resultQueue))
+				/*if (!string.IsNullOrEmpty(resultQueue))
 				{
-					session.QueueDeclare(resultQueue, true, false, false, null);
+					//session.QueueDeclare(resultQueue, true, false, false, null);
 					if (!string.IsNullOrEmpty(exchangeName))
 					{
 						session.ExchangeBind(exchangeName, resultQueue, resultQueue);
 					}
-				}
+				}*/
 				var basicProperties = session.CreateBasicProperties();
-				basicProperties.SetPersistent(true);
+				basicProperties.SetPersistent(durable);
+				basicProperties.MessageId = message.Id;
 				basicProperties.ContentType = "application/json";
-				session.BasicPublish(exchangeName, resultQueue, basicProperties, Encoding.UTF8.GetBytes(text));
+				session.BasicPublish(exchangeName, resultRoutingKey, basicProperties, Encoding.UTF8.GetBytes(message.Body));
 				session.Close();
 			}
 			catch (Exception)

@@ -1,4 +1,3 @@
-
 class CommandBase(object):
     def execute(self, **kwargs):
         pass

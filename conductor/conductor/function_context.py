@@ -5,7 +5,8 @@ class Context(object):
 
     def _get_data(self):
         if self._data is None:
-            self._data = {} if self._parent is None else self._parent._get_data().copy()
+            self._data = {} if self._parent is None \
+                else self._parent._get_data().copy()
         return self._data
 
     def __getitem__(self, item):

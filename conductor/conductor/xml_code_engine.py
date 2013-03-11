@@ -1,6 +1,9 @@
 #from lxml import etree
 import xml.etree.ElementTree as etree
+import types
+
 import function_context
+
 
 class XmlCodeEngine(object):
     _functionMap = {}
@@ -24,13 +27,14 @@ class XmlCodeEngine(object):
 
         definition = self._functionMap[name]
         context = function_context.Context(parent_context)
-        args = { 'engine': self, 'body': element, 'context': context }
+        args = {'engine': self, 'body': element, 'context': context}
 
         for key, value in element.items():
             args[key] = value
 
         for parameter in element.findall('parameter'):
-            args[parameter.get('name')] = self.evaluate_content(parameter, context)
+            args[parameter.get('name')] = self.evaluate_content(
+                parameter, context)
 
         return definition(**args)
 
@@ -44,21 +48,22 @@ class XmlCodeEngine(object):
             if sub_element.tag == 'parameter':
                 continue
             do_strip = True
-            parts.append(self._execute_function(sub_element.tag, sub_element, context))
+            parts.append(self._execute_function(
+                sub_element.tag, sub_element, context))
             parts.append(sub_element.tail or '')
 
         result = []
 
         for t in parts:
-            if not isinstance(t, (str, unicode)):
+            if not isinstance(t, types.StringTypes):
                 result.append(t)
+
+        return_value = result
         if len(result) == 0:
             return_value = ''.join(parts)
             if do_strip: return_value = return_value.strip()
         elif len(result) == 1:
             return_value = result[0]
-        else:
-            return_value = result
 
         return return_value
 
@@ -75,26 +80,33 @@ def _dict_func(engine, body, context, **kwargs):
         result[key] = value
     return result
 
+
 def _array_func(engine, body, context, **kwargs):
     result = []
     for item in body:
         result.append(engine.evaluate(item, context))
     return result
 
+
 def _text_func(engine, body, context, **kwargs):
     return str(engine.evaluate_content(body, context))
+
 
 def _int_func(engine, body, context, **kwargs):
     return int(engine.evaluate_content(body, context))
 
+
 def _function_func(engine, body, context, **kwargs):
     return lambda: engine.evaluate_content(body, context)
+
 
 def _null_func(**kwargs):
     return None
 
+
 def _true_func(**kwargs):
     return True
+
 
 def _false_func(**kwargs):
     return False
@@ -115,27 +127,8 @@ def xprint(context, body, **kwargs):
     for arg in kwargs:
         print "%s = %s" % (arg, kwargs[arg])
     print 'context = ', context
-    print 'body = %s (%s)' %(body, body.text)
+    print 'body = %s (%s)' % (body, body.text)
     print "------------------------- end -------------------------"
+
+
 XmlCodeEngine.register_function(xprint, "print")
-
-
-# parser = XmlCodeEngine()
-# file = open('test2.xml')
-# parser.load(file)
-#
-#
-#
-#
-# context = functioncontext.Context()
-# context['test'] = 'xxx'
-#
-# parser.execute(context)
-#
-# print etree.xpath('/')
-# root = parser._document.getroot()
-# print root.items()
-# print root.text.lstrip() + "|"
-# for x in root:
-#     print x, type(x), x.tail
-
