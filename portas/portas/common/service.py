@@ -27,7 +27,7 @@ class TaskResultHandlerService(service.Service):
         super(TaskResultHandlerService, self).stop()
 
     def _handle_results(self):
-        connection = amqp.Connection(rabbitmq.host, virtual_host=rabbitmq.virtual_host,
+        connection = amqp.Connection('{0}:{1}'.format(rabbitmq.host, rabbitmq.port), virtual_host=rabbitmq.virtual_host,
                                      userid=rabbitmq.userid, password=rabbitmq.password,
                                      ssl=rabbitmq.use_ssl, insist=True)
         ch = connection.channel()
