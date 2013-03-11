@@ -79,7 +79,7 @@ class Controller(object):
         unit = get_session()
         statuses = unit.query(Status).filter_by(session_id=session_id)
 
-        return {"reports": [status.to_dict() for status in statuses]}
+        return {'reports': [status.to_dict() for status in statuses]}
 
     def deploy(self, request, environment_id, session_id):
         unit = get_session()

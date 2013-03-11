@@ -125,7 +125,6 @@ class Session(BASE, ModelBase):
 
     def to_dict(self):
         dictionary = super(Session, self).to_dict()
-        del dictionary['environment']
         del dictionary['description']
         return dictionary
 
