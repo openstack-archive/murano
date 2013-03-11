@@ -49,8 +49,8 @@ class Manager(object):
     def __init__(self, api):
         self.api = api
 
-    def _list(self, url, response_key=None, obj_class=None, body=None):
-        resp, body = self.api.json_request('GET', url)
+    def _list(self, url, response_key=None, obj_class=None, body=None, headers={}):
+        resp, body = self.api.json_request('GET', url, headers=headers)
 
         if obj_class is None:
             obj_class = self.resource_class
@@ -61,8 +61,8 @@ class Manager(object):
             data = body
         return [obj_class(self, res, loaded=True) for res in data if res]
 
-    def _delete(self, url):
-        self.api.raw_request('DELETE', url)
+    def _delete(self, url, headers={}):
+        self.api.raw_request('DELETE', url, headers=headers)
 
     def _update(self, url, body, response_key=None):
         resp, body = self.api.json_request('PUT', url, body=body)
@@ -72,11 +72,11 @@ class Manager(object):
                 return self.resource_class(self, body[response_key])
             return self.resource_class(self, body)
 
-    def _create(self, url, body=None, response_key=None, return_raw=False):
+    def _create(self, url, body=None, response_key=None, return_raw=False, headers={}):
         if body:
-            resp, body = self.api.json_request('POST', url, body=body)
+            resp, body = self.api.json_request('POST', url, body=body, headers=headers)
         else:
-            resp, body = self.api.json_request('POST', url)
+            resp, body = self.api.json_request('POST', url, headers=headers)
         if return_raw:
             if response_key:
                 return body[response_key]

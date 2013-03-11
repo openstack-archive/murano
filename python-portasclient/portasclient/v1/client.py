@@ -14,7 +14,7 @@
 #    under the License.
 
 from portasclient.common import http
-from portasclient.v1 import environments, sessions
+from portasclient.v1 import environments, sessions, services
 
 
 class Client(http.HTTPClient):
@@ -32,3 +32,5 @@ class Client(http.HTTPClient):
         super(Client, self).__init__(*args, **kwargs)
         self.environments = environments.EnvironmentManager(self)
         self.sessions = sessions.SessionManager(self)
+        self.activeDirectories = services.ActiveDirectoryManager(self)
+        self.webServers = services.WebServerManager(self)
