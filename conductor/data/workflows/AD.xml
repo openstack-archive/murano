@@ -183,15 +183,15 @@
 					</mapping>
 				</map>
 			</parameter>
-			<success marker="1">
+			<success>
 				<set path="state.installed"><true/></set>
 				<report entity="unit">
 					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">Primary Domain Controller created</parameter>
+					<parameter name="text">Secondary Domain Controller created</parameter>
 				</report>
 				<report entity="service">
 					<parameter name="id"><select path="::id"/></parameter>
-					<parameter name="text">Primary Domain Controller created</parameter>
+					<parameter name="text">Domain <select path="::domain"/> created</parameter>
 				</report>
 			</success>
 		</send-command>
