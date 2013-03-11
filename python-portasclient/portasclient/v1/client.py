@@ -14,7 +14,7 @@
 #    under the License.
 
 from portasclient.common import http
-from portasclient.v1 import environments
+from portasclient.v1 import environments, sessions
 
 
 class Client(http.HTTPClient):
@@ -31,3 +31,4 @@ class Client(http.HTTPClient):
         """ Initialize a new client for the Portas v1 API. """
         super(Client, self).__init__(*args, **kwargs)
         self.environments = environments.EnvironmentManager(self)
+        self.sessions = sessions.SessionManager(self)
