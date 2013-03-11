@@ -19,6 +19,6 @@ from portasclient.common import utils
 def do_environment_list(cc, args={}):
     """List the environments"""
     environments = cc.environments.list()
-    field_labels = ['ID', 'Name']
-    fields = ['id', 'name']
+    field_labels = ['ID', 'Name', 'Created', 'Updated']
+    fields = ['id', 'name', 'created', 'updated']
     utils.print_list(environments, fields, field_labels, sortby=0)

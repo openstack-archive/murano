@@ -68,7 +68,29 @@ class Manager(object):
         resp, body = self.api.json_request('PUT', url, body=body)
         # PUT requests may not return a body
         if body:
+            if response_key:
+                return self.resource_class(self, body[response_key])
+            return self.resource_class(self, body)
+
+    def _create(self, url, body, response_key=None, return_raw=False):
+        resp, body = self.api.json_request('POST', url, body=body)
+        if return_raw:
+            if response_key:
+                return body[response_key]
+            return body
+        if response_key:
             return self.resource_class(self, body[response_key])
+        return self.resource_class(self, body)
+
+    def _get(self, url, response_key=None, return_raw=False):
+        resp, body = self.api.json_request('GET', url)
+        if return_raw:
+            if response_key:
+                return body[response_key]
+            return body
+        if response_key:
+            return self.resource_class(self, body[response_key])
+        return self.resource_class(self, body)
 
 
 class Resource(object):
