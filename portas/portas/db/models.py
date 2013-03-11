@@ -111,26 +111,6 @@ class Environment(BASE, ModelBase):
         return dictionary
 
 
-class Service(BASE, ModelBase):
-    """
-    Represents an instance of service.
-
-    :var name: string
-    :var type: string - type of service (e.g. Active Directory)
-    """
-
-    __tablename__ = 'service'
-
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    name = Column(String(255), index=True, nullable=False)
-    type = Column(String(255), index=True, nullable=False)
-    environment_id = Column(String(32), ForeignKey('environment.id'))
-    environment = relationship(Environment,
-                               backref=backref('service'),
-                               uselist=False)
-    description = Column(JsonBlob(), nullable=False)
-
-
 class Session(BASE, ModelBase):
     __tablename__ = 'session'
 
@@ -164,7 +144,7 @@ def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
-    models = (Environment, Service)
+    models = (Environment, Status, Session)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -173,6 +153,6 @@ def unregister_models(engine):
     """
     Drops database tables for all models with the given engine
     """
-    models = (Environment, Service)
+    models = (Environment, Status, Session)
     for model in models:
         model.metadata.drop_all(engine)
