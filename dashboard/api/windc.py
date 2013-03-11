@@ -22,35 +22,34 @@ import logging
 import urlparse
 
 from django.utils.decorators import available_attrs
-from windcclient.v1 import client as windc_client
+from portasclient.v1.client import Client as windc_client
 
 
 LOG = logging.getLogger(__name__)
 
 
 def windcclient(request):
-    o = urlparse.urlparse("http://127.0.0.1:8082")
-    url = "http://127.0.0.1:8082/foo"
+    url = "http://127.0.0.1:8082"
     LOG.debug('windcclient connection created using token "%s" and url "%s"'
               % (request.user.token, url))
-    return windc_client.Client(endpoint=url, token=None)
+    return windc_client(endpoint=url, token=request.user.token.token['id'])
 
 
 def datacenters_create(request, parameters):
     name = parameters.get('name', '')
-    return windcclient(request).datacenters.create(name)
+    return windcclient(request).environments.create(name)
 
 
 def datacenters_delete(request, datacenter_id):
-    return windcclient(request).datacenters.delete(datacenter_id)
+    return windcclient(request).environments.delete(datacenter_id)
 
 
 def datacenters_get(request, datacenter_id):
-    return windcclient(request).datacenters.get(datacenter_id)
+    return windcclient(request).environments.get(datacenter_id)
 
 
 def datacenters_list(request):
-    return windcclient(request).datacenters.list()
+    return windcclient(request).environments.list()
 
 
 def services_create(request, datacenter, parameters):
@@ -58,10 +57,21 @@ def services_create(request, datacenter, parameters):
 
 
 def services_list(request, datacenter):
-    return windcclient(request).services.list(datacenter)
+    LOG.critical("********************************")
+    LOG.critical(dir(windcclient(request)))
+    LOG.critical("********************************")
+    session_id = request.user.token.token['id']
+    services = []
+    services += windcclient(request).activeDirectories.list(datacenter, session_id)
+    #services += windcclient(request).webServers.list(datacenter)
+    
+    return services
 
 
 def services_get(request, datacenter, service_id):
+    LOG.critical("********************************")
+    LOG.debug(parameters)
+    LOG.critical("********************************")
     return windcclient(request).services.get(datacenter, service_id)
 
 
