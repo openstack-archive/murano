@@ -26,7 +26,6 @@ class Controller(object):
     def index(self, request, environment_id):
         log.debug(_('Session:List <EnvId: {0}>'.format(environment_id)))
 
-
         filters = {'environment_id': environment_id, 'user_id': request.context.user}
 
         unit = get_session()
@@ -44,7 +43,8 @@ class Controller(object):
         session.update(params)
 
         unit = get_session()
-        if unit.query(Session).filter_by(**{'environment_id': environment_id, 'state': 'open'}).first():
+        if unit.query(Session).filter(Session.environment_id == environment_id and Session.state.in_(
+                ['open', 'deploing'])).first():
             log.info('There is already open session for this environment')
             raise exc.HTTPConflict
 
