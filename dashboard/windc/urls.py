@@ -28,7 +28,7 @@ VIEW_MOD = 'openstack_dashboard.dashboards.project.windc.views'
 
 urlpatterns = patterns(VIEW_MOD,
     url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create$', 
+    url(r'^create$',
         Wizard.as_view([WizardFormServiceType, WizardFormConfiguration]),
         name='create'),
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),

@@ -102,8 +102,8 @@ class DeleteService(tables.BatchAction):
         ##############
 
         api.windc.services_delete(request, datacenter_id, service_id)
-        
-        
+
+
 class DeployDataCenter(tables.BatchAction):
     name = "deploy"
     action_present = _("Deploy")
@@ -143,53 +143,62 @@ class ShowDataCenterServices(tables.LinkAction):
 class UpdateRow(tables.Row):
     ajax = True
 
-    def get_data(self, request, instance_id):
-        instance = api.nova.server_get(request, instance_id)
-        instance.full_flavor = api.nova.flavor_get(request,
-                                                   instance.flavor["id"])
-        return instance
+    def get_data(self, request, datacenter_id):
+        datacenter = api.windc.datacenters_get(request, datacenter_id)
+        datacenter.status = api.windc.datacenters_get_status(request,
+                                                             datacenter_id)
+        return datacenter
+
+
+STATUS_DISPLAY_CHOICES = (
+    ('deploying', 'Deploy in progress'),
+    ('open', 'Ready to deploy')
+)
+
+
+def get_datacenter_status(datacenter):
+    return datacenter.status
 
 
 class WinDCTable(tables.DataTable):
+
+    STATUS_CHOICES = (
+        (None, True),
+        ("Ready to deploy", False),
+        ("deploying", True),
+        ("deployed", True),
+        ("ready", True),
+        ("error", False),
+    )
+
     name = tables.Column("name",
                          link=("horizon:project:windc:services"),
                          verbose_name=_("Name"))
+
+    status = tables.Column(get_datacenter_status, verbose_name=_('Status'),
+                           status=True,
+                           status_choices=STATUS_CHOICES,
+                           display_choices=STATUS_DISPLAY_CHOICES)
 
     class Meta:
         name = "windc"
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
         table_actions = (CreateDataCenter,)
+        status_columns = ['status']
         row_actions = (ShowDataCenterServices, DeleteDataCenter,
                        DeployDataCenter)
 
 
-STATUS_DISPLAY_CHOICES = (
-    ("create", "Deploy"),
-)
-
-
 class WinServicesTable(tables.DataTable):
 
-    STATUS_CHOICES = (
-        (None, True),
-        ("deployed", True),
-        ("active", True),
-        ("error", False),
-    )
-
-    name = tables.Column('dc_name', verbose_name=_('Name'),
+    name = tables.Column('name', verbose_name=_('Name'),
                          link=("horizon:project:windc:service_details"),)
-    _type = tables.Column('type', verbose_name=_('Type'))
-    status = tables.Column('status', verbose_name=_('Status'),
-                           status=True,
-                           status_choices=STATUS_CHOICES,
-                           display_choices=STATUS_DISPLAY_CHOICES)
+    _type = tables.Column('service_type', verbose_name=_('Type'))
 
     class Meta:
         name = "services"
         verbose_name = _("Services")
         row_class = UpdateRow
-        status_columns = ['status']
         table_actions = (CreateService,)
         row_actions = (EditService, DeleteService)

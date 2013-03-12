@@ -51,43 +51,66 @@ def datacenters_get(request, datacenter_id):
 def datacenters_list(request):
     return windcclient(request).environments.list()
 
+
 def datacenters_deploy(request, datacenter_id):
-    session_id = windcclient(request).sessions.list(datacenter_id)[0].id
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for session in sessions:
+        if session.state == 'open':
+            session_id = session.id
+    if not session_id:
+        return "Sorry, nothing to deploy."
     return windcclient(request).sessions.deploy(datacenter_id, session_id)
 
-def services_create(request, datacenter, parameters):
-    LOG.critical("////////////////////////////////")
-    LOG.critical(parameters)
-    LOG.critical("////////////////////////////////")
-    session_id = windcclient(request).sessions.list(datacenter)[0].id
-    if parameters['service_type'] == 'active directory':
-        res = windcclient(request).activeDirectories.create(datacenter, session_id, parameters)
+
+def datacenters_get_status(request, datacenter_id):
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for session in sessions:
+        if session.state == 'deployed':
+            windcclient(request).sessions.delete(datacenter_id, session.id)
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    if sessions:
+        session = sessions[0]
     else:
-        res = windcclient(request).webServers.create(datacenter, session_id, parameters)
-        
+        session = windcclient(request).sessions.configure(datacenter_id)
+
+    return session.state
+
+
+def services_create(request, datacenter, parameters):
+    session_id = windcclient(request).sessions.list(datacenter)[0].id
+    if parameters['service_type'] == 'Active Directory':
+        res = windcclient(request).activeDirectories.create(datacenter,
+                                                            session_id,
+                                                            parameters)
+    else:
+        res = windcclient(request).webServers.create(datacenter,
+                                                     session_id,
+                                                     parameters)
+
     return res
 
 
 def services_list(request, datacenter_id):
     session_id = request.user.token.token['id']
     services = []
-    
+
+    session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
     for s in sessions:
-        if s.state == 'open':
-            windcclient(request).sessions.delete(datacenter_id, s.id)
-    
-    session_id = windcclient(request).sessions.configure(datacenter_id).id
-    services = windcclient(request).activeDirectories.list(datacenter_id, session_id)
+        if s.state in ['open', 'deployed', 'deploying']:
+            session_id = s.id
+
+    if session_id is None:
+        session_id = windcclient(request).sessions.configure(datacenter_id).id
+
+    services = windcclient(request).activeDirectories.list(datacenter_id,
+                                                           session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
-    
+
     return services
 
 
 def services_get(request, datacenter, service_id):
-    LOG.critical("********************************")
-    LOG.debug(parameters)
-    LOG.critical("********************************")
     return windcclient(request).services.get(datacenter, service_id)
 
 

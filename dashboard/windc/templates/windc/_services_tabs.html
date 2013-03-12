@@ -27,15 +27,14 @@
 </div>
 <div class="right">
     {% if wizard.steps.prev %}
-        {% if service_type == 'active directory' %}
-            <H3>Active Directory Service</H3>
+        <H3>{{ service_type }} Service</H3>
+        {% if service_type == 'Active Directory' %}
             <p>{% trans "Now you can set the parameters for Active Directory Service." %}</p>
             <p>{% trans "You can create few Active Directory instances, in this case will be created one Main Active Directory server and few Secondary Active Directory servers." %}</p>
             <p>{% trans "The DNS service will be automatically created on each Active Directory servers." %}</p>
         {% else %}
-            <H3>Internet Information Services</H3>
             <p>{% trans "Now you can set parameters for IIS Service." %}</p>
-            <p>{% trans "The IIS Service - it is the server with complex IIS infrastructure, which included to the domain infrasructure." %}</p>
+            <p>{% trans "The IIS Service - it is the server with complex Internet Information Services infrastructure, which included to the domain infrasructure." %}</p>
             <p>{% trans "Please, set the complex password for local administrator account." %}</p>
             <p>{% trans "Also, you can add this IIS server to the existing domain and configure credentials for domain user." %}</p>
         {% endif %}

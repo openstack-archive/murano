@@ -58,35 +58,50 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         link = self.request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         url = "/project/windc/%s/" % datacenter_id
-        
+
         service_type = form_list[0].data.get('0-service', '')
         parameters = {'service_type': service_type}
-        
-        if service_type == 'active directory':
+
+        if service_type == 'Active Directory':
             parameters['configuration'] = 'standalone'
-            parameters['name'] = str(form_list[1].data.get('1-dc_name', 'noname'))
-            parameters['adminPassword'] = str(form_list[1].data.get('1-adm_password', ''))
+            parameters['name'] = str(form_list[1].data.get('1-dc_name',
+                                                           'noname'))
+            parameters['adminPassword'] = \
+                       str(form_list[1].data.get('1-adm_password', ''))
             dc_count = int(form_list[1].data.get('1-dc_count', 1))
-            recovery_password = str(form_list[1].data.get('1-recovery_password', ''))
+            recovery_password = \
+                  str(form_list[1].data.get('1-recovery_password', ''))
             parameters['units'] = []
-            parameters['units'].append({'isMaster': True, 'recoveryPassword': recovery_password,
+            parameters['units'].append({'isMaster': True,
+                                        'recoveryPassword': recovery_password,
                                         'location': 'west-dc'})
-            for dc in range(dc_count-1):
-                parameters['units'].append({'isMaster': False, 'recoveryPassword': recovery_password,
-                                            'location': 'west-dc'})
-            
-        elif service_type == 'iis':
-            parameters['name'] = str(form_list[1].data.get('1-iis_name', 'noname'))
+            for dc in range(dc_count - 1):
+                parameters['units'].append({'isMaster': False,
+                                        'recoveryPassword': recovery_password,
+                                        'location': 'west-dc'})
+
+        elif service_type == 'IIS':
+            password = form_list[1].data.get('1-adm_password', '')
+            domain = form_list[1].data.get('1-iis_domain', '')
+            dc_user = form_list[1].data.get('1-domain_user_name', '')
+            dc_pass = form_list[1].data.get('1-domain_user_password', '')
+            parameters['name'] = str(form_list[1].data.get('1-iis_name',
+                                                           'noname'))
             parameters['credentials'] = {'username': 'Administrator',
-                                         'password': str(form_list[1].data.get('1-adm_password', ''))}
-            parameters['domain'] = {'name': str(form_list[1].data.get('1-iis_domain', '')),
-                                    'username': str(form_list[1].data.get('1-domain_user_name', '')),
-                                    'password': str(form_list[1].data.get('1-domain_user_password', ''))}
+                                         'password': password}
+            parameters['domain'] = {'name': str(domain),
+                                    'username': str(dc_user),
+                                    'password': str(dc_pass)}
             parameters['location'] = 'west-dc'
+
+            parameters['units'] = []
+            parameters['units'].append({'id': '1',
+                                        'endpoint': [{'host': '10.0.0.1'}],
+                                        'location': 'west-dc'})
 
         service = api.windc.services_create(self.request,
                                             datacenter_id,
-                                            parameters)        
+                                            parameters)
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
@@ -98,17 +113,17 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         if data:
             service_type = data.get('0-service', '')
             self.service_type = service_type
-            if service_type == 'active directory':
+            if service_type == 'Active Directory':
                 self.form_list['1'] = WizardFormADConfiguration
-            elif service_type == 'iis':
+            elif service_type == 'IIS':
                 self.form_list['1'] = WizardFormIISConfiguration
 
         return form
-    
+
     def get_form_step_data(self, form):
         LOG.debug(form.data)
         return form.data
-    
+
     def get_context_data(self, form, **kwargs):
         context = super(Wizard, self).get_context_data(form=form, **kwargs)
         if self.steps.index > 0:
@@ -121,9 +136,12 @@ class IndexView(tables.DataTableView):
     template_name = 'project/windc/index.html'
 
     def get_data(self):
-        # Gather our datacenters
         try:
             data_centers = api.windc.datacenters_list(self.request)
+            for dc in data_centers:
+                # get the information about session status for each dc
+                dc.status = api.windc.datacenters_get_status(self.request,
+                                                             dc.id)
         except:
             data_centers = []
             exceptions.handle(self.request,
