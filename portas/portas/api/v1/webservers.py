@@ -30,8 +30,8 @@ class Controller(object):
 
         webServer = body.copy()
         webServer['id'] = uuidutils.generate_uuid()
-        webServer['created'] = timeutils.utcnow
-        webServer['updated'] = timeutils.utcnow
+        webServer['created'] = str(timeutils.utcnow())
+        webServer['updated'] = str(timeutils.utcnow())
 
         unit_count = 0
         for unit in webServer['units']:

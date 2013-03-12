@@ -30,8 +30,8 @@ class Controller(object):
 
         active_directory = body.copy()
         active_directory['id'] = uuidutils.generate_uuid()
-        active_directory['created'] = timeutils.utcnow
-        active_directory['updated'] = timeutils.utcnow
+        active_directory['created'] = str(timeutils.utcnow())
+        active_directory['updated'] = str(timeutils.utcnow())
 
         unit_count = 0
         for unit in active_directory['units']:
