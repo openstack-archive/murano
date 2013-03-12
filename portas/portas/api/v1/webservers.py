@@ -10,6 +10,8 @@ log = logging.getLogger(__name__)
 class Controller(object):
     @utils.verify_session
     def index(self, request, environment_id):
+        log.debug(_('WebServer:List <EnvId: {0}>'.format(environment_id)))
+
         draft = get_draft(request.context.session)
 
         if not draft.has_key('services'):
@@ -22,6 +24,8 @@ class Controller(object):
 
     @utils.verify_session
     def create(self, request, environment_id, body):
+        log.debug(_('WebServer:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
+
         draft = get_draft(request.context.session)
 
         webServer = body.copy()
@@ -43,6 +47,8 @@ class Controller(object):
 
     @utils.verify_session
     def delete(self, request, environment_id, web_server_id):
+        log.debug(_('WebServer:Delete <EnvId: {0}, Id: {1}>'.format(environment_id, web_server_id)))
+
         draft = get_draft(request.context.session)
         draft['services']['webServers'] = [service for service in draft['services']['webServers'] if
                                            service['id'] != web_server_id]

@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 
 class Controller(object):
     def index(self, request):
-        log.debug(_("Display list of environments"))
+        log.debug(_('Environments:List'))
 
         #Only environments from same tenant as users should be shown
         filters = {'tenant_id': request.context.tenant}
@@ -21,6 +21,8 @@ class Controller(object):
         return {"environments": [env.to_dict() for env in environments]}
 
     def create(self, request, body):
+        log.debug(_('Environments:Create <Body {0}>'.format(body)))
+
         #tagging environment by tenant_id for later checks
         params = body.copy()
         params['tenant_id'] = request.context.tenant
@@ -39,6 +41,8 @@ class Controller(object):
         return environment.to_dict()
 
     def show(self, request, environment_id):
+        log.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
@@ -49,6 +53,8 @@ class Controller(object):
         return environment.to_dict()
 
     def update(self, request, environment_id, body):
+        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.format(environment_id, body)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
@@ -62,6 +68,8 @@ class Controller(object):
         return environment.to_dict()
 
     def delete(self, request, environment_id):
+        log.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 

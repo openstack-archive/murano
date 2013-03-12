@@ -10,6 +10,8 @@ log = logging.getLogger(__name__)
 class Controller(object):
     @utils.verify_session
     def index(self, request, environment_id):
+        log.debug(_('ActiveDirectory:Index <EnvId: {0}}>'.format(environment_id)))
+
         draft = get_draft(request.context.session)
 
         if not draft.has_key('services'):
@@ -22,6 +24,8 @@ class Controller(object):
 
     @utils.verify_session
     def create(self, request, environment_id, body):
+        log.debug(_('ActiveDirectory:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
+
         draft = get_draft(request.context.session)
 
         active_directory = body.copy()
@@ -42,6 +46,8 @@ class Controller(object):
         return active_directory
 
     def delete(self, request, environment_id, active_directory_id):
+        log.debug(_('ActiveDirectory:Delete <EnvId: {0}, Id: {1}>'.format(environment_id, active_directory_id)))
+
         draft = get_draft(request.context.session)
         draft['services']['activeDirectories'] = [service for service in draft['services']['activeDirectories'] if
                                                   service['id'] != active_directory_id]
