@@ -67,8 +67,6 @@ def handle_report(msg):
     with session.begin():
         session.add(status)
 
-    msg.channel.basic_ack(msg.delivery_tag)
-
 
 def handle_result(msg):
     log.debug(_('Got result message from orchestration engine:\n{0}'.format(msg.body)))
