@@ -8,17 +8,10 @@ log = logging.getLogger(__name__)
 
 
 class Controller(object):
-    @utils.verify_session
     def index(self, request, environment_id):
         log.debug(_('WebServer:List <EnvId: {0}>'.format(environment_id)))
 
-        draft = get_draft(request.context.session)
-
-        if not draft.has_key('services'):
-            return dict()
-
-        if not draft['services'].has_key('webServers'):
-            return dict()
+        draft = prepare_draft(get_draft(environment_id, request.context.session))
 
         return {'webServers': draft['services']['webServers']}
 

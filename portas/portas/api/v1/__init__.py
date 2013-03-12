@@ -1,12 +1,16 @@
-from portas.db.models import Session
+from portas.db.models import Session, Environment
 from portas.db.session import get_session
 
 
-def get_draft(session_id):
+def get_draft(environment_id, session_id):
     unit = get_session()
-    session = unit.query(Session).get(session_id)
-
-    return session.description
+    #TODO: When session is deployed should be returned env.description
+    if session_id:
+        session = unit.query(Session).get(session_id)
+        return session.description
+    else:
+        environment = unit.query(Environment).get(environment_id)
+        return environment.description
 
 
 def save_draft(session_id, draft):

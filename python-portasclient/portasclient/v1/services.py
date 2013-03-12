@@ -27,8 +27,12 @@ class ActiveDirectory(base.Resource):
 class ActiveDirectoryManager(base.Manager):
     resource_class = ActiveDirectory
 
-    def list(self, environment_id, session_id):
-        headers = {'X-Configuration-Session': session_id}
+    def list(self, environment_id, session_id=None):
+        if session_id:
+            headers = {'X-Configuration-Session': session_id}
+        else:
+            headers = {}
+
         return self._list('environments/{id}/activeDirectories'.format(id=environment_id), 'activeDirectories',
                           headers=headers)
 
@@ -56,8 +60,12 @@ class WebServer(base.Resource):
 class WebServerManager(base.Manager):
     resource_class = WebServer
 
-    def list(self, environment_id, session_id):
-        headers = {'X-Configuration-Session': session_id}
+    def list(self, environment_id, session_id=None):
+        if session_id:
+            headers = {'X-Configuration-Session': session_id}
+        else:
+            headers = {}
+
         return self._list('environments/{id}/webServers'.format(id=environment_id), 'webServers',
                           headers=headers)
 
