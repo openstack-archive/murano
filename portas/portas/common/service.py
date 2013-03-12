@@ -42,8 +42,8 @@ class TaskResultHandlerService(service.Service):
         bind(conf.results_exchange, conf.results_queue)
         bind(conf.reports_exchange, conf.reports_queue)
 
-        ch.basic_consume(conf.results_exchange, callback=handle_result)
-        ch.basic_consume(conf.reports_exchange, callback=handle_report)
+        ch.basic_consume(conf.results_exchange, callback=handle_result, no_ack=True)
+        ch.basic_consume(conf.reports_exchange, callback=handle_report, no_ack=True)
         while ch.callbacks:
             ch.wait()
 
@@ -51,8 +51,12 @@ class TaskResultHandlerService(service.Service):
 def handle_report(msg):
     log.debug(_('Got report message from orchestration engine:\n{0}'.format(msg.body)))
 
+    params = anyjson.deserialize(msg.body)
+    params['entity_id'] = params['id']
+    del params['id']
+
     status = Status()
-    status.update(anyjson.deserialize(msg.body))
+    status.update(params)
 
     session = get_session()
     #connect with session
