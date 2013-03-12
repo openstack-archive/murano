@@ -102,6 +102,23 @@ class DeleteService(tables.BatchAction):
         ##############
 
         api.windc.services_delete(request, datacenter_id, service_id)
+        
+        
+class DeployDataCenter(tables.BatchAction):
+    name = "deploy"
+    action_present = _("Deploy")
+    action_past = _("Deploy")
+    data_type_singular = _("Data Center")
+    data_type_plural = _("Data Center")
+    classes = ("btn-launch")
+
+    def allowed(self, request, datum):
+        return True
+
+    def action(self, request, datacenter_id):
+        #link = request.__dict__['META']['HTTP_REFERER']
+        #datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+        return api.windc.datacenters_deploy(request, datacenter_id)
 
 
 class EditService(tables.LinkAction):
@@ -143,7 +160,8 @@ class WinDCTable(tables.DataTable):
         verbose_name = _("Windows Data Centers")
         row_class = UpdateRow
         table_actions = (CreateDataCenter,)
-        row_actions = (ShowDataCenterServices, DeleteDataCenter)
+        row_actions = (ShowDataCenterServices, DeleteDataCenter,
+                       DeployDataCenter)
 
 
 STATUS_DISPLAY_CHOICES = (

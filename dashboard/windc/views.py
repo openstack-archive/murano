@@ -58,31 +58,35 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         link = self.request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         url = "/project/windc/%s/" % datacenter_id
-
+        
         service_type = form_list[0].data.get('0-service', '')
-        parameters = {}
-        if form_list[1].data:
-            data = form_list[1].data
-
+        parameters = {'service_type': service_type}
+        
         if service_type == 'active directory':
-            parameters['dc_name'] = str(data.get('1-dc_name', 'noname'))
-            parameters['adm_password'] = str(data.get('1-adm_password', ''))
-            parameters['dc_count'] = int(data.get('1-dc_count', 1))
-            parameters['recovery_password'] = \
-                        str(data.get('1-recovery_password', ''))
+            parameters['configuration'] = 'standalone'
+            parameters['name'] = str(form_list[1].data.get('1-dc_name', 'noname'))
+            parameters['adminPassword'] = str(form_list[1].data.get('1-adm_password', ''))
+            dc_count = int(form_list[1].data.get('1-dc_count', 1))
+            recovery_password = str(form_list[1].data.get('1-recovery_password', ''))
+            parameters['units'] = []
+            parameters['units'].append({'isMaster': True, 'recoveryPassword': recovery_password,
+                                        'location': 'west-dc'})
+            for dc in range(dc_count-1):
+                parameters['units'].append({'isMaster': False, 'recoveryPassword': recovery_password,
+                                            'location': 'west-dc'})
+            
         elif service_type == 'iis':
-            parameters['iis_name'] = str(data.get('1-iis_name', 'noname'))
-            parameters['adm_password'] = str(data.get('1-adm_password', ''))
-            parameters['iis_count'] = int(data.get('1-iis_count', 1))
-            parameters['iis_domain'] = str(data.get('1-iis_domain', ''))
-            parameters['domain_user_name'] = \
-                        str(data.get('1-domain_user_name', ''))
-            parameters['domain_user_password'] = \
-                        str(data.get('1-domain_user_password', ''))
+            parameters['name'] = str(form_list[1].data.get('1-iis_name', 'noname'))
+            parameters['credentials'] = {'username': 'Administrator',
+                                         'password': str(form_list[1].data.get('1-adm_password', ''))}
+            parameters['domain'] = {'name': str(form_list[1].data.get('1-iis_domain', '')),
+                                    'username': str(form_list[1].data.get('1-domain_user_name', '')),
+                                    'password': str(form_list[1].data.get('1-domain_user_password', ''))}
+            parameters['location'] = 'west-dc'
 
         service = api.windc.services_create(self.request,
                                             datacenter_id,
-                                            parameters)
+                                            parameters)        
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
@@ -93,13 +97,23 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         LOG.debug("********" + str(self.form_list))
         if data:
             service_type = data.get('0-service', '')
-
+            self.service_type = service_type
             if service_type == 'active directory':
                 self.form_list['1'] = WizardFormADConfiguration
             elif service_type == 'iis':
                 self.form_list['1'] = WizardFormIISConfiguration
 
         return form
+    
+    def get_form_step_data(self, form):
+        LOG.debug(form.data)
+        return form.data
+    
+    def get_context_data(self, form, **kwargs):
+        context = super(Wizard, self).get_context_data(form=form, **kwargs)
+        if self.steps.index > 0:
+            context.update({'service_type': self.service_type})
+        return context
 
 
 class IndexView(tables.DataTableView):
@@ -132,7 +146,7 @@ class WinServices(tables.DataTableView):
             dc_id = self.kwargs['data_center_id']
             datacenter = api.windc.datacenters_get(self.request, dc_id)
             self.dc_name = datacenter.name
-            services = api.windc.services_list(self.request, datacenter)
+            services = api.windc.services_list(self.request, dc_id)
         except:
             services = []
             exceptions.handle(self.request,
