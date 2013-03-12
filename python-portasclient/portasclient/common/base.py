@@ -56,6 +56,8 @@ class Manager(object):
             obj_class = self.resource_class
 
         if response_key:
+            if not body.has_key(response_key):
+                body[response_key] = []
             data = body[response_key]
         else:
             data = body

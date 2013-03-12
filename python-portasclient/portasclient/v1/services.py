@@ -54,7 +54,7 @@ class WebServer(base.Resource):
 
 
 class WebServerManager(base.Manager):
-    resource_class = ActiveDirectory
+    resource_class = WebServer
 
     def list(self, environment_id, session_id):
         headers = {'X-Configuration-Session': session_id}
