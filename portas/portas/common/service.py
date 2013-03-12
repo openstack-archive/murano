@@ -35,7 +35,7 @@ class TaskResultHandlerService(service.Service):
         def bind(exchange, queue):
             if not exchange:
                 ch.exchange_declare(exchange, 'direct', durable=True, auto_delete=False)
-            ch.queue_declare(queue)
+            ch.queue_declare(queue, durable=True, auto_delete=False)
             if not exchange:
                 ch.queue_bind(queue, exchange, queue)
 
