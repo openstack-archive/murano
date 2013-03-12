@@ -19,7 +19,7 @@ class Controller(object):
     def create(self, request, environment_id, body):
         log.debug(_('WebServer:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
 
-        draft = get_draft(request.context.session)
+        draft = get_draft(session_id=request.context.session)
 
         webServer = body.copy()
         webServer['id'] = uuidutils.generate_uuid()
@@ -42,7 +42,7 @@ class Controller(object):
     def delete(self, request, environment_id, web_server_id):
         log.debug(_('WebServer:Delete <EnvId: {0}, Id: {1}>'.format(environment_id, web_server_id)))
 
-        draft = get_draft(request.context.session)
+        draft = get_draft(session_id=request.context.session)
         draft['services']['webServers'] = [service for service in draft['services']['webServers'] if
                                            service['id'] != web_server_id]
         save_draft(request.context.session, draft)

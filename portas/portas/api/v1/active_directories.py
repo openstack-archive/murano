@@ -19,7 +19,7 @@ class Controller(object):
     def create(self, request, environment_id, body):
         log.debug(_('ActiveDirectory:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
 
-        draft = get_draft(request.context.session)
+        draft = get_draft(session_id=request.context.session)
 
         active_directory = body.copy()
         active_directory['id'] = uuidutils.generate_uuid()

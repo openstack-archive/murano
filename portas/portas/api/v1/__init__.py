@@ -2,7 +2,7 @@ from portas.db.models import Session, Environment
 from portas.db.session import get_session
 
 
-def get_draft(environment_id, session_id):
+def get_draft(environment_id=None, session_id=None):
     unit = get_session()
     #TODO: When session is deployed should be returned env.description
     if session_id:
