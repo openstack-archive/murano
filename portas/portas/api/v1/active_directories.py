@@ -10,7 +10,7 @@ log = logging.getLogger(__name__)
 class Controller(object):
     @utils.verify_session
     def index(self, request, environment_id):
-        log.debug(_('ActiveDirectory:Index <EnvId: {0}}>'.format(environment_id)))
+        log.debug(_('ActiveDirectory:Index <EnvId: {0}>'.format(environment_id)))
 
         draft = get_draft(request.context.session)
 
