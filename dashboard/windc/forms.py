@@ -19,6 +19,7 @@
 #    under the License.
 
 import logging
+import string
 
 from django import forms
 from django.core.urlresolvers import reverse
@@ -30,13 +31,54 @@ from horizon import forms
 from horizon import exceptions
 from horizon import messages
 
-import pdb
-
 LOG = logging.getLogger(__name__)
 
 
+class PasswordField(forms.CharField):
+
+    # Setup the Field
+    def __init__(self, label, *args, **kwargs):
+        super(PasswordField, self).__init__(min_length=7, required=True,
+                         label=label,
+                         widget=forms.PasswordInput(render_value=False),
+                        *args, **kwargs)
+
+    def clean(self, value):
+
+        # Setup Our Lists of Characters and Numbers
+        characters = list(string.letters)
+        special_characters = '!@#$%^&*()_+|\/.,~?><:{}'
+        numbers = [str(i) for i in range(10)]
+
+        # Assume False until Proven Otherwise
+        numCheck = False
+        charCheck = False
+        specCharCheck = False
+
+        # Loop until we Match
+        for char in value:
+            if not charCheck:
+                if char in characters:
+                    charCheck = True
+            if not specCharCheck:
+                if char in special_characters:
+                    specCharCheck = True
+            if not numCheck:
+                if char in numbers:
+                    numCheck = True
+            if numCheck and charCheck and specCharCheck:
+                break
+
+        if not numCheck or not charCheck or not specCharCheck:
+            raise forms.ValidationError(u'Your password must include at least \
+                                          one letter, at least one number and \
+                                          at least one special character.')
+
+        return super(PasswordField, self).clean(value)
+
+
 class WizardFormServiceType(forms.Form):
-    service = forms.ChoiceField(label=_("Service Type"),
+    service = forms.ChoiceField(label=_('Service Type'),
                                 choices=[
                                 ('Active Directory', 'Active Directory'),
                                 ('IIS', 'Internet Information Services')
@@ -44,62 +86,35 @@ class WizardFormServiceType(forms.Form):
 
 
 class WizardFormConfiguration(forms.Form):
-    "The functions for this class will dynamically create in views.py"
+    'The functions for this class will dynamically create in views.py'
     pass
 
 
 class WizardFormADConfiguration(forms.Form):
-    dc_name = forms.CharField(label=_("Domain Name"),
-                        required=False)
+    dc_name = forms.CharField(label=_('Domain Name'),
+                              required=True)
 
-    dc_count = forms.IntegerField(label=_("Instances Count"),
+    dc_count = forms.IntegerField(label=_('Instances Count'),
                                   required=True,
                                   min_value=1,
                                   max_value=100,
                                   initial=1)
 
-    adm_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Administrator password"),
-                                   required=False)
+    adm_password = PasswordField(_('Administrator password'))
 
-    recovery_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Recovery password"),
-                                   required=False)
+    recovery_password = PasswordField(_('Recovery password'))
 
 
 class WizardFormIISConfiguration(forms.Form):
-    iis_name = forms.CharField(label=_("IIS Server Name"),
-                               required=False)
+    iis_name = forms.CharField(label=_('IIS Server Name'),
+                               required=True)
 
-    adm_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Administrator password"),
-                                   required=False)
+    adm_password = PasswordField(_('Administrator password'))
 
-    iis_domain = forms.CharField(label=_("Member of the Domain"),
-                                 required=False)
+    iis_domain = forms.CharField(label=_('Member of the Domain'),
+                                 required=True)
 
-    domain_user_name = forms.CharField(label=_("Domain User Name"),
-                               required=False)
+    domain_user_name = forms.CharField(label=_('Domain User Name'),
+                                       required=True)
 
-    domain_user_password = forms.CharField(widget=forms.PasswordInput,
-                                   label=_("Domain User Password"),
-                                   required=False)
-
-
-class UpdateWinDC(forms.SelfHandlingForm):
-    tenant_id = forms.CharField(widget=forms.HiddenInput)
-    data_center = forms.CharField(widget=forms.HiddenInput)
-    name = forms.CharField(required=True)
-
-    def handle(self, request, data):
-        try:
-            server = api.nova.server_update(request, data['data_center'],
-                                            data['name'])
-            messages.success(request,
-                             _('Data Center "%s" updated.') % data['name'])
-            return server
-        except:
-            redirect = reverse("horizon:project:windc:index")
-            exceptions.handle(request,
-                              _('Unable to update data center.'),
-                              redirect=redirect)
+    domain_user_password = PasswordField(_('Domain User Password'))
