@@ -24,14 +24,17 @@ def save_draft(session_id, draft):
 def get_env_status(environment_id, session_id):
     status = 'draft'
 
+    if not session_id:
+        return status
+
     unit = get_session()
     session_state = unit.query(Session).get(session_id).state
-    reports = unit.query(Status).filter_by(environment_id=environment_id, session_id=session_id).all()
+    reports_count = unit.query(Status).filter_by(environment_id=environment_id, session_id=session_id).count()
 
     if session_state == 'deployed':
         status = 'finished'
 
-    if session_state == 'deploying' and len(reports) > 1:
+    if session_state == 'deploying' and reports_count > 1:
         status = 'pending'
 
     draft = get_draft(environment_id, session_id)

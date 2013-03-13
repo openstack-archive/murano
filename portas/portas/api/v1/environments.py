@@ -18,8 +18,12 @@ class Controller(object):
 
         session = get_session()
         environments = session.query(Environment).filter_by(**filters)
+        environments = [env.to_dict() for env in environments]
 
-        return {"environments": [env.to_dict() for env in environments]}
+        for env in environments:
+            env['status'] = get_env_status(env['id'], request.context.session)
+
+        return {"environments": environments}
 
     def create(self, request, body):
         log.debug(_('Environments:Create <Body {0}>'.format(body)))
