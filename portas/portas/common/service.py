@@ -42,7 +42,7 @@ class TaskResultHandlerService(service.Service):
         bind(conf.results_exchange, conf.results_queue)
         bind(conf.reports_exchange, conf.reports_queue)
 
-        ch.basic_consume(conf.results_exchange, callback=handle_result, no_ack=True)
+        ch.basic_consume(conf.results_exchange, callback=handle_result)
         ch.basic_consume(conf.reports_exchange, callback=handle_report, no_ack=True)
         while ch.callbacks:
             ch.wait()
