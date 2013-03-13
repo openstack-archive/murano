@@ -64,10 +64,11 @@ def get_service_status(environment_id, session_id, service):
     unit = get_session()
     session_state = unit.query(Session).get(session_id).state
 
-    entities = [unit['id'] for unit in service['units']]
+    entities = [u['id'] for u in service['units']]
     reports_count = unit.query(Status).filter(Status.environment_id == environment_id
                                               and Status.session_id == session_id
-    and Status.entity_id.in_(entities)).count()
+                                              and Status.entity_id.in_(entities))\
+                                      .count()
 
     if session_state == 'deployed':
         status = 'finished'
