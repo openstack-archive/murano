@@ -50,9 +50,9 @@
 
 {% block modal-footer %}
 {% if wizard.steps.prev %}
-<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.prev }}">{% trans "Back" %}</button>
-<input type="submit" class="btn btn-primary pull-right"  value="{% trans 'Deploy' %}"/>
+<input type="submit" class="btn btn-primary pull-right"  value="{% trans 'Create' %}"/>
+<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.prev }}">{% trans "< Back" %}</button>
 {% else %}
-<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.next }}">{% trans "Next" %}</button>
+<button name="wizard_goto_step" class="btn btn-small" type="submit" value="{{ wizard.steps.next }}">{% trans "Next >" %}</button>
 {% endif %}
 {% endblock %}

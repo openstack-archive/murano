@@ -43,24 +43,23 @@ LOG = logging.getLogger(__name__)
 
 
 class CreateService(tables.LinkAction):
-    name = "CreateService"
-    verbose_name = _("Create Service")
-    url = "horizon:project:windc:create"
-    classes = ("btn-launch", "ajax-modal")
+    name = 'CreateService'
+    verbose_name = _('Create Service')
+    url = 'horizon:project:windc:create'
+    classes = ('btn-launch', 'ajax-modal')
 
     def allowed(self, request, datum):
         return True
 
     def action(self, request, service):
-        # FIX ME
         api.windc.services_create(request, service)
 
 
 class CreateDataCenter(tables.LinkAction):
-    name = "CreateDataCenter"
-    verbose_name = _("Create Windows Data Center")
-    url = "horizon:project:windc:create_dc"
-    classes = ("btn-launch", "ajax-modal")
+    name = 'CreateDataCenter'
+    verbose_name = _('Create Windows Data Center')
+    url = 'horizon:project:windc:create_dc'
+    classes = ('btn-launch', 'ajax-modal')
 
     def allowed(self, request, datum):
         return True
@@ -70,11 +69,11 @@ class CreateDataCenter(tables.LinkAction):
 
 
 class DeleteDataCenter(tables.BatchAction):
-    name = "delete"
-    action_present = _("Delete")
-    action_past = _("Delete")
-    data_type_singular = _("Data Center")
-    data_type_plural = _("Data Center")
+    name = 'delete'
+    action_present = _('Delete')
+    action_past = _('Delete')
+    data_type_singular = _('Data Center')
+    data_type_plural = _('Data Center')
     classes = ('btn-danger', 'btn-terminate')
 
     def allowed(self, request, datum):
@@ -85,62 +84,52 @@ class DeleteDataCenter(tables.BatchAction):
 
 
 class DeleteService(tables.BatchAction):
-    name = "delete"
-    action_present = _("Delete")
-    action_past = _("Delete")
-    data_type_singular = _("Service")
-    data_type_plural = _("Service")
+    name = 'delete'
+    action_present = _('Delete')
+    action_past = _('Delete')
+    data_type_singular = _('Service')
+    data_type_plural = _('Service')
     classes = ('btn-danger', 'btn-terminate')
 
     def allowed(self, request, datum):
         return True
 
     def action(self, request, service_id):
-        ############## FIX ME:
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-        ##############
 
-        api.windc.services_delete(request, datacenter_id, service_id)
+        try:
+            api.windc.services_delete(request, datacenter_id, service_id)
+        except:
+            messages.error(request,
+                  _('Sorry, you can not delete this service right now.'))
 
 
 class DeployDataCenter(tables.BatchAction):
-    name = "deploy"
-    action_present = _("Deploy")
-    action_past = _("Deploy")
-    data_type_singular = _("Data Center")
-    data_type_plural = _("Data Center")
-    classes = ("btn-launch")
+    name = 'deploy'
+    action_present = _('Deploy')
+    action_past = _('Deploy')
+    data_type_singular = _('Data Center')
+    data_type_plural = _('Data Center')
+    classes = ('btn-launch')
 
     def allowed(self, request, datum):
         return True
 
     def action(self, request, datacenter_id):
-        #link = request.__dict__['META']['HTTP_REFERER']
-        #datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         return api.windc.datacenters_deploy(request, datacenter_id)
 
 
-class EditService(tables.LinkAction):
-    name = "edit"
-    verbose_name = _("Edit")
-    url = "horizon:project:windc:update"
-    classes = ("ajax-modal", "btn-edit")
-
-    def allowed(self, request, instance):
-        return True
-
-
 class ShowDataCenterServices(tables.LinkAction):
-    name = "edit"
-    verbose_name = _("Services")
-    url = "horizon:project:windc:services"
+    name = 'edit'
+    verbose_name = _('Services')
+    url = 'horizon:project:windc:services'
 
     def allowed(self, request, instance):
         return True
 
 
-class UpdateRow(tables.Row):
+class UpdateDCRow(tables.Row):
     ajax = True
 
     def get_data(self, request, datacenter_id):
@@ -164,16 +153,16 @@ class WinDCTable(tables.DataTable):
 
     STATUS_CHOICES = (
         (None, True),
-        ("Ready to deploy", False),
-        ("deploying", True),
-        ("deployed", True),
-        ("ready", True),
-        ("error", False),
+        ('Ready to deploy', False),
+        ('deploying', True),
+        ('deployed', True),
+        ('ready', True),
+        ('error', False),
     )
 
-    name = tables.Column("name",
-                         link=("horizon:project:windc:services"),
-                         verbose_name=_("Name"))
+    name = tables.Column('name',
+                         link=('horizon:project:windc:services'),
+                         verbose_name=_('Name'))
 
     status = tables.Column(get_datacenter_status, verbose_name=_('Status'),
                            status=True,
@@ -181,9 +170,9 @@ class WinDCTable(tables.DataTable):
                            display_choices=STATUS_DISPLAY_CHOICES)
 
     class Meta:
-        name = "windc"
-        verbose_name = _("Windows Data Centers")
-        row_class = UpdateRow
+        name = 'windc'
+        verbose_name = _('Windows Data Centers')
+        row_class = UpdateDCRow
         table_actions = (CreateDataCenter,)
         status_columns = ['status']
         row_actions = (ShowDataCenterServices, DeleteDataCenter,
@@ -193,12 +182,11 @@ class WinDCTable(tables.DataTable):
 class WinServicesTable(tables.DataTable):
 
     name = tables.Column('name', verbose_name=_('Name'),
-                         link=("horizon:project:windc:service_details"),)
+                         link=('horizon:project:windc:service_details'),)
     _type = tables.Column('service_type', verbose_name=_('Type'))
 
     class Meta:
-        name = "services"
-        verbose_name = _("Services")
-        row_class = UpdateRow
+        name = 'services'
+        verbose_name = _('Services')
         table_actions = (CreateService,)
-        row_actions = (EditService, DeleteService)
+        row_actions = (DeleteService,)

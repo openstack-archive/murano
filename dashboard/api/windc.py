@@ -24,7 +24,6 @@ import urlparse
 from django.utils.decorators import available_attrs
 from portasclient.v1.client import Client as windc_client
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -91,9 +90,6 @@ def services_create(request, datacenter, parameters):
 
 
 def services_list(request, datacenter_id):
-    session_id = request.user.token.token['id']
-    services = []
-
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
     for s in sessions:
@@ -114,5 +110,25 @@ def services_get(request, datacenter, service_id):
     return windcclient(request).services.get(datacenter, service_id)
 
 
-def services_delete(request, datacenter, service_id):
-    return windcclient(request).services.delete(datacenter, service_id)
+def services_delete(request, datacenter_id, service_id):
+    services = services_list(request, datacenter_id)
+
+    session_id = None
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for session in sessions:
+        if session.state == 'open':
+            session_id = session.id
+
+    if session_id is None:
+        raise Exception("Sorry, you can not delete this service now.")
+
+    for service in services:
+        if service.id is service_id:
+            if service.type is 'Active Directory':
+                windcclient(request).activeDirectories.delete(datacenter_id,
+                                                              session_id,
+                                                              service_id)
+            elif service.type is 'IIS':
+                windcclient(request).webServers.delete(datacenter_id,
+                                                       session_id,
+                                                       service_id)

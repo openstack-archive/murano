@@ -109,7 +109,6 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
     def get_form(self, step=None, data=None, files=None):
         form = super(Wizard, self).get_form(step, data, files)
-        LOG.debug("********" + str(self.form_list))
         if data:
             service_type = data.get('0-service', '')
             self.service_type = service_type
@@ -139,7 +138,6 @@ class IndexView(tables.DataTableView):
         try:
             data_centers = api.windc.datacenters_list(self.request)
             for dc in data_centers:
-                # get the information about session status for each dc
                 dc.status = api.windc.datacenters_get_status(self.request,
                                                              dc.id)
         except:
@@ -156,7 +154,7 @@ class WinServices(tables.DataTableView):
     def get_context_data(self, **kwargs):
         context = super(WinServices, self).get_context_data(**kwargs)
         data = self.get_data()
-        context["dc_name"] = self.dc_name
+        context['dc_name'] = self.dc_name
         return context
 
     def get_data(self):
@@ -175,7 +173,7 @@ class WinServices(tables.DataTableView):
 
 class CreateWinDCView(workflows.WorkflowView):
     workflow_class = CreateWinDC
-    template_name = "project/windc/create_dc.html"
+    template_name = 'project/windc/create_dc.html'
 
     def get_initial(self):
         initial = super(CreateWinDCView, self).get_initial()
