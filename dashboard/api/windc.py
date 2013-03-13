@@ -24,7 +24,6 @@ import urlparse
 from django.utils.decorators import available_attrs
 from portasclient.v1.client import Client as windc_client
 
-
 LOG = logging.getLogger(__name__)
 
 
@@ -52,28 +51,78 @@ def datacenters_list(request):
     return windcclient(request).environments.list()
 
 
+def datacenters_deploy(request, datacenter_id):
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for session in sessions:
+        if session.state == 'open':
+            session_id = session.id
+    if not session_id:
+        return "Sorry, nothing to deploy."
+    return windcclient(request).sessions.deploy(datacenter_id, session_id)
+
+
+def datacenters_get_status(request, datacenter_id):
+    return datacenters_get(request, datacenter_id).status
+
+
 def services_create(request, datacenter, parameters):
-    return windcclient(request).services.create(datacenter, parameters)
+    session_id = windcclient(request).sessions.list(datacenter)[0].id
+    if parameters['service_type'] == 'Active Directory':
+        res = windcclient(request).activeDirectories.create(datacenter,
+                                                            session_id,
+                                                            parameters)
+    else:
+        res = windcclient(request).webServers.create(datacenter,
+                                                     session_id,
+                                                     parameters)
+
+    return res
 
 
-def services_list(request, datacenter):
-    LOG.critical("********************************")
-    LOG.critical(dir(windcclient(request)))
-    LOG.critical("********************************")
-    session_id = request.user.token.token['id']
-    services = []
-    services += windcclient(request).activeDirectories.list(datacenter, session_id)
-    #services += windcclient(request).webServers.list(datacenter)
-    
+def services_list(request, datacenter_id):
+    session_id = None
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for s in sessions:
+        if s.state in ['open', 'deployed', 'deploying']:
+            session_id = s.id
+
+    if session_id is None:
+        session_id = windcclient(request).sessions.configure(datacenter_id).id
+
+    services = windcclient(request).activeDirectories.list(datacenter_id,
+                                                           session_id)
+    services += windcclient(request).webServers.list(datacenter_id, session_id)
+
     return services
 
 
-def services_get(request, datacenter, service_id):
-    LOG.critical("********************************")
-    LOG.debug(parameters)
-    LOG.critical("********************************")
-    return windcclient(request).services.get(datacenter, service_id)
+def services_get(request, datacenter_id, service_id):
+    services = services_list(request, datacenter_id)
+    
+    for service in services:
+        if service.id is service_id:
+            return service
 
 
-def services_delete(request, datacenter, service_id):
-    return windcclient(request).services.delete(datacenter, service_id)
+def services_delete(request, datacenter_id, service_id):
+    services = services_list(request, datacenter_id)
+
+    session_id = None
+    sessions = windcclient(request).sessions.list(datacenter_id)
+    for session in sessions:
+        if session.state == 'open':
+            session_id = session.id
+
+    if session_id is None:
+        raise Exception("Sorry, you can not delete this service now.")
+
+    for service in services:
+        if service.id is service_id:
+            if service.type is 'Active Directory':
+                windcclient(request).activeDirectories.delete(datacenter_id,
+                                                              session_id,
+                                                              service_id)
+            elif service.type is 'IIS':
+                windcclient(request).webServers.delete(datacenter_id,
+                                                       session_id,
+                                                       service_id)
