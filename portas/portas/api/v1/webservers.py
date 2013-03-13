@@ -33,7 +33,7 @@ class Controller(object):
         for unit in webServer['units']:
             unit_count += 1
             unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = 'iis{0}'.format(unit_count)
+            unit['name'] = 'iis{0}{1}'.format(unit_count, webServer['id'][:3])
 
         draft = prepare_draft(draft)
         draft['services']['webServers'].append(webServer)

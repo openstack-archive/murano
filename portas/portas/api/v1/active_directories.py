@@ -33,7 +33,7 @@ class Controller(object):
         for unit in active_directory['units']:
             unit_count += 1
             unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = 'dc{0}'.format(unit_count)
+            unit['name'] = 'dc{0}{1}'.format(unit_count, active_directory['id'][:4])
 
         draft = prepare_draft(draft)
         draft['services']['activeDirectories'].append(active_directory)
