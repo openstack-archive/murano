@@ -1,4 +1,5 @@
 from webob import exc
+from portas.api.v1 import get_env_status
 from portas.db.session import get_session
 from portas.db.models import Environment
 from portas.openstack.common import wsgi
@@ -50,7 +51,10 @@ class Controller(object):
             log.info('User is not authorized to access this tenant resources.')
             raise exc.HTTPUnauthorized
 
-        return environment.to_dict()
+        env = environment.to_dict()
+        env['status'] = get_env_status(environment_id, request.context.session)
+
+        return env
 
     def update(self, request, environment_id, body):
         log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.format(environment_id, body)))

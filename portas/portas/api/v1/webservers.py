@@ -1,5 +1,5 @@
 from portas import utils
-from portas.api.v1 import save_draft, get_draft
+from portas.api.v1 import save_draft, get_draft, get_service_status
 from portas.common import uuidutils
 from portas.openstack.common import wsgi, timeutils
 from portas.openstack.common import log as logging
@@ -12,6 +12,9 @@ class Controller(object):
         log.debug(_('WebServer:List <EnvId: {0}>'.format(environment_id)))
 
         draft = prepare_draft(get_draft(environment_id, request.context.session))
+
+        for dc in draft['services']['webServers']:
+            dc['status'] = get_service_status(environment_id, request.context.session, dc)
 
         return {'webServers': draft['services']['webServers']}
 
