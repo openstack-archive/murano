@@ -24,10 +24,16 @@ def save_draft(session_id, draft):
 def get_env_status(environment_id, session_id):
     status = 'draft'
 
-    if not session_id:
-        return status
-
     unit = get_session()
+
+    if not session_id:
+        session = unit.query(Session).filter(
+            Session.environment_id == environment_id and Session.state.in_(['open', 'deploying'])).first()
+        if session:
+            session_id = session.id
+        else:
+            return status
+
     session_state = unit.query(Session).get(session_id).state
     reports_count = unit.query(Status).filter_by(environment_id=environment_id, session_id=session_id).count()
 
@@ -67,8 +73,8 @@ def get_service_status(environment_id, session_id, service):
     entities = [u['id'] for u in service['units']]
     reports_count = unit.query(Status).filter(Status.environment_id == environment_id
                                               and Status.session_id == session_id
-                                              and Status.entity_id.in_(entities))\
-                                      .count()
+    and Status.entity_id.in_(entities)) \
+        .count()
 
     if session_state == 'deployed':
         status = 'finished'
