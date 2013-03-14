@@ -133,7 +133,9 @@ class UpdateDCRow(tables.Row):
     ajax = True
 
     def get_data(self, request, datacenter_id):
-        return api.windc.datacenters_get(request, datacenter_id)
+        datacenter = api.windc.datacenters_get(request, datacenter_id)
+        datacenter.status = api.windc.datacenters_get_status(request, datacenter_id)
+        return datacenter
     
     
 class UpdateServiceRow(tables.Row):
@@ -143,24 +145,28 @@ class UpdateServiceRow(tables.Row):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
 
-        return api.windc.services_get(request, datacenter_id, service_id)
+        service = api.windc.services_get(request, datacenter_id, service_id)
+        service.status = api.windc.services_get_status(request, datacenter_id,
+                                                       service_id)
+        return service
 
 
-STATUS_DISPLAY_CHOICES = (
+DC_STATUS_DISPLAY_CHOICES = (
     ('draft', 'Ready to deploy'),
     ('pending', 'Wait for configuration'),
-    ('inprogress', 'Deploy in progress'),
-    ('finished', 'Active')
+    ('finished', 'Active'),
+    ('inprogress', "Deploy in progress")
 )
 
-STATUS_CHOICES = (
-    (None, True),
-    ('Ready to deploy', False),
-    ('Wait for configuration', True),
-    ('Deploy in progress', True),
-    ('Active', False),
-    ('error', False),
+SERVICES_STATUS_DISPLAY_CHOICES = (
+    ('draft', 'Ready to deploy'),
+    ('pending', 'Wait for configuration'),
+    ('finished', 'Active'),
+    ('inprogress', "Deploy in progress")
 )
+
+
+
 
 def get_datacenter_status(datacenter):
     return datacenter.status
@@ -171,6 +177,13 @@ def get_service_status(service):
 
 class WinDCTable(tables.DataTable):
 
+    STATUS_CHOICES = (
+        (None, True),
+        ('draft', False),
+        ('finished', False)
+    )
+
+
     name = tables.Column('name',
                          link=('horizon:project:windc:services'),
                          verbose_name=_('Name'))
@@ -178,7 +191,7 @@ class WinDCTable(tables.DataTable):
     status = tables.Column(get_datacenter_status, verbose_name=_('Status'),
                            status=True,
                            status_choices=STATUS_CHOICES,
-                           display_choices=STATUS_DISPLAY_CHOICES)
+                           display_choices=DC_STATUS_DISPLAY_CHOICES)
 
     class Meta:
         name = 'windc'
@@ -191,6 +204,12 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
+    
+    STATUS_CHOICES = (
+        (None, True),
+        ('draft', False),
+        ('finished', False)
+    )
 
     name = tables.Column('name', verbose_name=_('Name'),
                          link=('horizon:project:windc:service_details'),)
@@ -200,7 +219,7 @@ class WinServicesTable(tables.DataTable):
     status = tables.Column(get_service_status, verbose_name=_('Status'),
                            status=True,
                            status_choices=STATUS_CHOICES,
-                           display_choices=STATUS_DISPLAY_CHOICES)
+                           display_choices=SERVICES_STATUS_DISPLAY_CHOICES)
 
     class Meta:
         name = 'services'
