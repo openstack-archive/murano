@@ -61,10 +61,6 @@ def datacenters_deploy(request, datacenter_id):
     return windcclient(request).sessions.deploy(datacenter_id, session_id)
 
 
-def datacenters_get_status(request, datacenter_id):
-    return datacenters_get(request, datacenter_id).status
-
-
 def services_create(request, datacenter, parameters):
     session_id = windcclient(request).sessions.list(datacenter)[0].id
     if parameters['service_type'] == 'Active Directory':
@@ -92,6 +88,10 @@ def services_list(request, datacenter_id):
     services = windcclient(request).activeDirectories.list(datacenter_id,
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
+    
+    for i in range(len(services)):
+        LOG.critical(services[i].units[0]['id'])
+        services[i].id = services[i].units[0]['id']
 
     return services
 
