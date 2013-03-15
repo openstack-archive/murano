@@ -1,4 +1,5 @@
 from webob import exc
+from portas.api.v1 import get_env_status
 from portas.db.session import get_session
 from portas.db.models import Environment
 from portas.openstack.common import wsgi
@@ -10,17 +11,23 @@ log = logging.getLogger(__name__)
 
 class Controller(object):
     def index(self, request):
-        log.debug(_("Display list of environments"))
+        log.debug(_('Environments:List'))
 
         #Only environments from same tenant as users should be shown
         filters = {'tenant_id': request.context.tenant}
 
         session = get_session()
         environments = session.query(Environment).filter_by(**filters)
+        environments = [env.to_dict() for env in environments]
 
-        return {"environments": [env.to_dict() for env in environments]}
+        for env in environments:
+            env['status'] = get_env_status(env['id'], request.context.session)
+
+        return {"environments": environments}
 
     def create(self, request, body):
+        log.debug(_('Environments:Create <Body {0}>'.format(body)))
+
         #tagging environment by tenant_id for later checks
         params = body.copy()
         params['tenant_id'] = request.context.tenant
@@ -39,6 +46,8 @@ class Controller(object):
         return environment.to_dict()
 
     def show(self, request, environment_id):
+        log.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
@@ -46,9 +55,14 @@ class Controller(object):
             log.info('User is not authorized to access this tenant resources.')
             raise exc.HTTPUnauthorized
 
-        return environment.to_dict()
+        env = environment.to_dict()
+        env['status'] = get_env_status(environment_id, request.context.session)
+
+        return env
 
     def update(self, request, environment_id, body):
+        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.format(environment_id, body)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
@@ -62,6 +76,8 @@ class Controller(object):
         return environment.to_dict()
 
     def delete(self, request, environment_id):
+        log.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
+
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 

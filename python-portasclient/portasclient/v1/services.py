@@ -27,22 +27,32 @@ class ActiveDirectory(base.Resource):
 class ActiveDirectoryManager(base.Manager):
     resource_class = ActiveDirectory
 
-    def list(self, environment_id, session_id):
-        headers = {'X-Configuration-Session': session_id}
-        return self._list('environments/{id}/activeDirectories'.format(id=environment_id), 'activeDirectories',
+    def list(self, environment_id, session_id=None):
+        if session_id:
+            headers = {'X-Configuration-Session': session_id}
+        else:
+            headers = {}
+
+        return self._list('environments/{id}/activeDirectories'.
+                          format(id=environment_id),
+                          'activeDirectories',
                           headers=headers)
 
     def create(self, environment_id, session_id, active_directory):
         headers = {'X-Configuration-Session': session_id}
 
-        return self._create('environments/{id}/activeDirectories'.format(id=environment_id), active_directory,
+        return self._create('environments/{id}/activeDirectories'.
+                            format(id=environment_id),
+                            active_directory,
                             headers=headers)
 
-    def delete(self, environment_id, session_id, active_directory_id):
+    def delete(self, environment_id, session_id, service_id):
         headers = {'X-Configuration-Session': session_id}
+        path = 'environments/{id}/activeDirectories/{active_directory_id}'
 
-        return self._delete('environments/{id}/activeDirectories/{active_directory_id}'
-                            .format(id=environment_id, active_directory_id=active_directory_id), headers=headers)
+        return self._delete(patch.format(id=environment_id,
+                                         active_directory_id=service_id),
+                            headers=headers)
 
 
 class WebServer(base.Resource):
@@ -56,19 +66,29 @@ class WebServer(base.Resource):
 class WebServerManager(base.Manager):
     resource_class = WebServer
 
-    def list(self, environment_id, session_id):
-        headers = {'X-Configuration-Session': session_id}
-        return self._list('environments/{id}/webServers'.format(id=environment_id), 'webServers',
+    def list(self, environment_id, session_id=None):
+        if session_id:
+            headers = {'X-Configuration-Session': session_id}
+        else:
+            headers = {}
+
+        return self._list('environments/{id}/webServers'.
+                          format(id=environment_id),
+                          'webServers',
                           headers=headers)
 
     def create(self, environment_id, session_id, web_server):
         headers = {'X-Configuration-Session': session_id}
 
-        return self._create('environments/{id}/webServers'.format(id=environment_id), web_server,
+        return self._create('environments/{id}/webServers'.
+                            format(id=environment_id),
+                            web_server,
                             headers=headers)
 
-    def delete(self, environment_id, session_id, web_server_id):
+    def delete(self, environment_id, session_id, service_id):
         headers = {'X-Configuration-Session': session_id}
 
         return self._delete('environments/{id}/webServers/{web_server_id}'
-                            .format(id=environment_id, web_server_id=web_server_id), headers=headers)
+                            .format(id=environment_id,
+                                    web_server_id=service_id),
+                            headers=headers)

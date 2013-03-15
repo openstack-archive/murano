@@ -34,7 +34,8 @@ class EnvironmentManager(base.Manager):
         return self._create('environments', {'name': name})
 
     def update(self, environment_id, name):
-        return self._update('environments/{id}'.format(id=environment_id), {'name': name})
+        return self._update('environments/{id}'.format(id=environment_id),
+                            {'name': name})
 
     def delete(self, environment_id):
         return self._delete('environments/{id}'.format(id=environment_id))

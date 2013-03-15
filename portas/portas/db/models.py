@@ -132,7 +132,8 @@ class Session(BASE, ModelBase):
 class Status(BASE, ModelBase):
     __tablename__ = 'status'
 
-    id = Column(String(32), primary_key=True)
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
+    entity_id = Column(String(32), nullable=False)
     entity = Column(String(10), nullable=False)
     environment_id = Column(String(32), ForeignKey('environment.id'))
     session_id = Column(String(32), ForeignKey('session.id'))

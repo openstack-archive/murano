@@ -37,26 +37,32 @@ class SessionManager(base.Manager):
     resource_class = Session
 
     def list(self, environment_id):
-        return self._list('environments/{id}/sessions'.format(id=environment_id), 'sessions')
+        return self._list('environments/{id}/sessions'.
+                          format(id=environment_id), 'sessions')
 
     def get(self, environment_id, session_id):
-        return self._get('environments/{id}/sessions/{session_id}'.format(id=environment_id, session_id=session_id))
+        return self._get('environments/{id}/sessions/{session_id}'.
+                         format(id=environment_id, session_id=session_id))
 
     def configure(self, environment_id):
-        return self._create('environments/{id}/configure'.format(id=environment_id), None)
+        return self._create('environments/{id}/configure'.
+                            format(id=environment_id), None)
 
     def deploy(self, environment_id, session_id):
+        path = 'environments/{id}/sessions/{session_id}/deploy'
         self.api.json_request('POST',
-                              'environments/{id}/sessions/{session_id}/deploy'.format(id=environment_id,
-                                                                                      session_id=session_id))
+                              path.format(id=environment_id,
+                                          session_id=session_id))
 
     def reports(self, environment_id, session_id):
+        path = 'environments/{id}/sessions/{session_id}/reports'
         resp, body = self.api.json_request('GET',
-                                           'environments/{id}/sessions/{session_id}/reports'.
-                                           format(id=environment_id, session_id=session_id))
+                                           path.format(id=environment_id,
+                                                       session_id=session_id))
 
         data = body['reports']
         return [Status(self, res, loaded=True) for res in data if res]
 
     def delete(self, environment_id, session_id):
-        return self._delete("environments/{id}/sessions/{session_id}".format(id=environment_id, session_id=session_id))
+        return self._delete("environments/{id}/sessions/{session_id}".
+                            format(id=environment_id, session_id=session_id))

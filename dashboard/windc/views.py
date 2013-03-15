@@ -66,6 +66,10 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             parameters['configuration'] = 'standalone'
             parameters['name'] = str(form_list[1].data.get('1-dc_name',
                                                            'noname'))
+
+            # Fix Me in orchestrator
+            parameters['domain'] = parameters['name']
+
             parameters['adminPassword'] = \
                        str(form_list[1].data.get('1-adm_password', ''))
             dc_count = int(form_list[1].data.get('1-dc_count', 1))
@@ -87,11 +91,10 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             dc_pass = form_list[1].data.get('1-domain_user_password', '')
             parameters['name'] = str(form_list[1].data.get('1-iis_name',
                                                            'noname'))
+
             parameters['credentials'] = {'username': 'Administrator',
                                          'password': password}
-            parameters['domain'] = {'name': str(domain),
-                                    'username': str(dc_user),
-                                    'password': str(dc_pass)}
+            parameters['domain'] = str(domain)
             parameters['location'] = 'west-dc'
 
             parameters['units'] = []
@@ -153,7 +156,6 @@ class WinServices(tables.DataTableView):
 
     def get_context_data(self, **kwargs):
         context = super(WinServices, self).get_context_data(**kwargs)
-        data = self.get_data()
         context['dc_name'] = self.dc_name
         return context
 
@@ -167,7 +169,7 @@ class WinServices(tables.DataTableView):
             services = []
             exceptions.handle(self.request,
                               _('Unable to retrieve list of services for '
-                              'data center "%s".') % dc_id)
+                                'data center "%s".') % self.dc_name)
         return services
 
 

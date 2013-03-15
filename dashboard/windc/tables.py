@@ -133,38 +133,40 @@ class UpdateDCRow(tables.Row):
     ajax = True
 
     def get_data(self, request, datacenter_id):
-        datacenter = api.windc.datacenters_get(request, datacenter_id)
-        datacenter.status = api.windc.datacenters_get_status(request,
-                                                             datacenter_id)
-        return datacenter
+        return api.windc.datacenters_get(request, datacenter_id)
+
+
+class UpdateServiceRow(tables.Row):
+    ajax = True
+
+    def get_data(self, request, service_id):
+        link = request.__dict__['META']['HTTP_REFERER']
+        datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+
+        return api.windc.services_get(request, datacenter_id, service_id)
 
 
 STATUS_DISPLAY_CHOICES = (
-    ('deploying', 'Deploy in progress'),
-    ('open', 'Ready to deploy')
+    ('draft', 'Ready to deploy'),
+    ('pending', 'Wait for configuration'),
+    ('inprogress', 'Deploy in progress'),
+    ('finished', 'Active')
 )
-
-
-def get_datacenter_status(datacenter):
-    return datacenter.status
 
 
 class WinDCTable(tables.DataTable):
 
     STATUS_CHOICES = (
         (None, True),
-        ('Ready to deploy', False),
-        ('deploying', True),
-        ('deployed', True),
-        ('ready', True),
-        ('error', False),
+        ('Ready to deploy', True),
+        ('Active', True)
     )
 
     name = tables.Column('name',
                          link=('horizon:project:windc:services'),
                          verbose_name=_('Name'))
 
-    status = tables.Column(get_datacenter_status, verbose_name=_('Status'),
+    status = tables.Column('status', verbose_name=_('Status'),
                            status=True,
                            status_choices=STATUS_CHOICES,
                            display_choices=STATUS_DISPLAY_CHOICES)
@@ -173,7 +175,34 @@ class WinDCTable(tables.DataTable):
         name = 'windc'
         verbose_name = _('Windows Data Centers')
         row_class = UpdateDCRow
+        status_columns = ['status']
         table_actions = (CreateDataCenter,)
+        row_actions = (ShowDataCenterServices, DeleteDataCenter,
+                       DeployDataCenter)
+
+
+class WinServicesTable(tables.DataTable):
+
+    STATUS_CHOICES = (
+        (None, True),
+        ('Ready to deploy', True),
+        ('Active', True)
+    )
+
+    name = tables.Column('name', verbose_name=_('Name'),
+                         link=('horizon:project:windc:service_details'),)
+
+    _type = tables.Column('service_type', verbose_name=_('Type'))
+
+    status = tables.Column('status', verbose_name=_('Status'),
+                           status=True,
+                           status_choices=STATUS_CHOICES,
+                           display_choices=STATUS_DISPLAY_CHOICES)
+
+    class Meta:
+        name = 'services'
+        verbose_name = _('Services')
+        row_class = UpdateServiceRow
         status_columns = ['status']
         row_actions = (ShowDataCenterServices, DeleteDataCenter,
                        DeployDataCenter)

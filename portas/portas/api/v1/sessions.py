@@ -24,6 +24,8 @@ class Controller(object):
         self.ch.exchange_declare('tasks', 'direct', durable=True, auto_delete=False)
 
     def index(self, request, environment_id):
+        log.debug(_('Session:List <EnvId: {0}>'.format(environment_id)))
+
         filters = {'environment_id': environment_id, 'user_id': request.context.user}
 
         unit = get_session()
@@ -33,13 +35,16 @@ class Controller(object):
                              session.environment.tenant_id == request.context.tenant]}
 
     def configure(self, request, environment_id):
+        log.debug(_('Session:Configure <EnvId: {0}>'.format(environment_id)))
+
         params = {'environment_id': environment_id, 'user_id': request.context.user, 'state': 'open'}
 
         session = Session()
         session.update(params)
 
         unit = get_session()
-        if unit.query(Session).filter_by(**{'environment_id': environment_id, 'state': 'open'}).first():
+        if unit.query(Session).filter(Session.environment_id == environment_id and Session.state.in_(
+                ['open', 'deploing'])).first():
             log.info('There is already open session for this environment')
             raise exc.HTTPConflict
 
@@ -53,6 +58,8 @@ class Controller(object):
         return session.to_dict()
 
     def show(self, request, environment_id, session_id):
+        log.debug(_('Session:Show <EnvId: {0}, SessionId: {1}>'.format(environment_id, session_id)))
+
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
@@ -63,6 +70,8 @@ class Controller(object):
         return session.to_dict()
 
     def delete(self, request, environment_id, session_id):
+        log.debug(_('Session:Delete <EnvId: {0}, SessionId: {1}>'.format(environment_id, session_id)))
+
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
@@ -76,12 +85,16 @@ class Controller(object):
         return None
 
     def reports(self, request, environment_id, session_id):
+        log.debug(_('Session:Reports <EnvId: {0}, SessionId: {1}>'.format(environment_id, session_id)))
+
         unit = get_session()
         statuses = unit.query(Status).filter_by(session_id=session_id)
 
         return {'reports': [status.to_dict() for status in statuses]}
 
     def deploy(self, request, environment_id, session_id):
+        log.debug(_('Session:Deploy <EnvId: {0}, SessionId: {1}>'.format(environment_id, session_id)))
+
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
