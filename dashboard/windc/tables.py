@@ -190,7 +190,7 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-    
+
     STATUS_CHOICES = (
         (None, True),
         ('Ready to deploy', True),
@@ -201,7 +201,7 @@ class WinServicesTable(tables.DataTable):
                          link=('horizon:project:windc:service_details'),)
 
     _type = tables.Column('service_type', verbose_name=_('Type'))
-    
+
     status = tables.Column('status', verbose_name=_('Status'),
                            status=True,
                            status_choices=STATUS_CHOICES,
