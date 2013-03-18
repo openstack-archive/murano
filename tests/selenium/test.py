@@ -1,8 +1,10 @@
-import untitests
+# -*- coding: utf-8 -*-
+
+import untitest2
 from datacenters_page import DataCentersPage
 
 
-class SanityTests():
+class SanityTests(unittest2.TestCase):
 
     def setUp(self):
         self.page = DataCentersPage()
@@ -46,3 +48,7 @@ class SanityTests():
         self.page.create_service('Active Directory', ad_parameters)
         
         assert self.page.find_service(name) is not None
+
+
+if __name__ == '__main__':
+    unittest2.main()
