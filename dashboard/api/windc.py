@@ -78,8 +78,10 @@ def services_create(request, datacenter, parameters):
 def services_list(request, datacenter_id):
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
+    LOG.critical('DC ID: ' + str(datacenter_id))
+    
     for s in sessions:
-        if s.state in ['open', 'deployed', 'deploying']:
+        if s.state in ['open', 'deploying']:
             session_id = s.id
 
     if session_id is None:
@@ -94,7 +96,7 @@ def services_list(request, datacenter_id):
 
 def services_get(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
-
+    
     for service in services:
         if service.id is service_id:
             return service

@@ -66,10 +66,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             parameters['configuration'] = 'standalone'
             parameters['name'] = str(form_list[1].data.get('1-dc_name',
                                                            'noname'))
-
-            # Fix Me in orchestrator
-            parameters['domain'] = parameters['name']
-
+            parameters['domain'] = parameters['name'] # Fix Me in orchestrator
             parameters['adminPassword'] = \
                        str(form_list[1].data.get('1-adm_password', ''))
             dc_count = int(form_list[1].data.get('1-dc_count', 1))
@@ -91,10 +88,12 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             dc_pass = form_list[1].data.get('1-domain_user_password', '')
             parameters['name'] = str(form_list[1].data.get('1-iis_name',
                                                            'noname'))
-
+            parameters['domain'] = parameters['name']
             parameters['credentials'] = {'username': 'Administrator',
                                          'password': password}
             parameters['domain'] = str(domain)
+                                   # 'username': str(dc_user),
+                                   # 'password': str(dc_pass)}
             parameters['location'] = 'west-dc'
 
             parameters['units'] = []
@@ -140,9 +139,6 @@ class IndexView(tables.DataTableView):
     def get_data(self):
         try:
             data_centers = api.windc.datacenters_list(self.request)
-            for dc in data_centers:
-                dc.status = api.windc.datacenters_get_status(self.request,
-                                                             dc.id)
         except:
             data_centers = []
             exceptions.handle(self.request,
@@ -162,6 +158,7 @@ class WinServices(tables.DataTableView):
     def get_data(self):
         try:
             dc_id = self.kwargs['data_center_id']
+            self.datacenter_id = dc_id
             datacenter = api.windc.datacenters_get(self.request, dc_id)
             self.dc_name = datacenter.name
             services = api.windc.services_list(self.request, dc_id)

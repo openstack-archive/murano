@@ -134,17 +134,28 @@ class UpdateDCRow(tables.Row):
 
     def get_data(self, request, datacenter_id):
         return api.windc.datacenters_get(request, datacenter_id)
-
-
+    
+    
 class UpdateServiceRow(tables.Row):
     ajax = True
 
     def get_data(self, request, service_id):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-
+        
+        LOG.critical('////////////////')
+        LOG.critical(datacenter_id)
+        LOG.critical('////////////////')
+ 
         return api.windc.services_get(request, datacenter_id, service_id)
 
+
+STATUS_DISPLAY_CHOICES = (
+    ('draft', 'Ready to deploy'),
+    ('pending', 'Wait for configuration'),
+    ('inprogress', 'Deploy in progress'),
+    ('finished', 'Active')
+)
 
 STATUS_DISPLAY_CHOICES = (
     ('draft', 'Ready to deploy'),
@@ -161,6 +172,7 @@ class WinDCTable(tables.DataTable):
         ('Ready to deploy', True),
         ('Active', True)
     )
+
 
     name = tables.Column('name',
                          link=('horizon:project:windc:services'),
@@ -182,7 +194,7 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-
+    
     STATUS_CHOICES = (
         (None, True),
         ('Ready to deploy', True),
@@ -193,7 +205,7 @@ class WinServicesTable(tables.DataTable):
                          link=('horizon:project:windc:service_details'),)
 
     _type = tables.Column('service_type', verbose_name=_('Type'))
-
+    
     status = tables.Column('status', verbose_name=_('Status'),
                            status=True,
                            status_choices=STATUS_CHOICES,
@@ -204,18 +216,5 @@ class WinServicesTable(tables.DataTable):
         verbose_name = _('Services')
         row_class = UpdateServiceRow
         status_columns = ['status']
-        row_actions = (ShowDataCenterServices, DeleteDataCenter,
-                       DeployDataCenter)
-
-
-class WinServicesTable(tables.DataTable):
-
-    name = tables.Column('name', verbose_name=_('Name'),
-                         link=('horizon:project:windc:service_details'),)
-    _type = tables.Column('service_type', verbose_name=_('Type'))
-
-    class Meta:
-        name = 'services'
-        verbose_name = _('Services')
         table_actions = (CreateService,)
         row_actions = (DeleteService,)
