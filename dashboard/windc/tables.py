@@ -142,10 +142,6 @@ class UpdateServiceRow(tables.Row):
     def get_data(self, request, service_id):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-        
-        LOG.critical('////////////////')
-        LOG.critical(datacenter_id)
-        LOG.critical('////////////////')
  
         return api.windc.services_get(request, datacenter_id, service_id)
 
