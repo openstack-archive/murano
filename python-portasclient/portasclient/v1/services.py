@@ -50,8 +50,8 @@ class ActiveDirectoryManager(base.Manager):
         headers = {'X-Configuration-Session': session_id}
         path = 'environments/{id}/activeDirectories/{active_directory_id}'
 
-        return self._delete(patch.format(id=environment_id,
-                                         active_directory_id=service_id),
+        return self._delete(path.format(id=environment_id,
+                                        active_directory_id=service_id),
                             headers=headers)
 
 

@@ -1,5 +1,7 @@
 distribute>=0.6.24
 
+mock
+anyjson
 mox
 nose
 nose-exclude

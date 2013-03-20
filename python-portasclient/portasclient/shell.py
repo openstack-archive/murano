@@ -41,8 +41,7 @@ class PortasShell(object):
         # Global arguments
         parser.add_argument('-h', '--help',
                             action='store_true',
-                            help=argparse.SUPPRESS,
-        )
+                            help=argparse.SUPPRESS,)
 
         parser.add_argument('-d', '--debug',
                             default=bool(utils.env('PORTASCLIENT_DEBUG')),
@@ -60,24 +59,24 @@ class PortasShell(object):
                                  "\"insecure\" SSL (https) requests. "
                                  "The server's certificate will "
                                  "not be verified against any certificate "
-                                 "authorities. This option should be used with "
-                                 "caution.")
+                                 "authorities. This option should be used "
+                                 "with caution.")
 
         parser.add_argument('--cert-file',
                             help='Path of certificate file to use in SSL '
-                                 'connection. This file can optionally be prepended'
-                                 ' with the private key.')
+                                 'connection. This file can optionally be '
+                                 'prepended with the private key.')
 
         parser.add_argument('--key-file',
                             help='Path of client key to use in SSL connection.'
-                                 ' This option is not necessary if your key is '
-                                 'prepended to your cert file.')
+                                 ' This option is not necessary if your '
+                                 'key is prepended to your cert file.')
 
         parser.add_argument('--ca-file',
                             help='Path of CA SSL certificate(s) used to verify'
-                                 ' the remote server certificate. Without this '
-                                 'option glance looks for the default system '
-                                 'CA certificates.')
+                                 ' the remote server certificate. Without '
+                                 'this option glance looks for the default '
+                                 'system CA certificates.')
 
         parser.add_argument('--timeout',
                             default=600,
@@ -226,24 +225,24 @@ class PortasShell(object):
             endpoint = args.portas_url
         else:
             if not args.os_username:
-                raise exceptions.CommandError("You must provide a username via "
-                                              "either --os-username or via "
-                                              "env[OS_USERNAME]")
+                raise exceptions.CommandError("You must provide a username "
+                                              "via either --os-username "
+                                              "or via env[OS_USERNAME]")
 
             if not args.os_password:
-                raise exceptions.CommandError("You must provide a password via "
-                                              "either --os-password or via "
-                                              "env[OS_PASSWORD]")
+                raise exceptions.CommandError("You must provide a password "
+                                              "via either --os-password "
+                                              "or via env[OS_PASSWORD]")
 
             if not (args.os_tenant_id or args.os_tenant_name):
-                raise exceptions.CommandError("You must provide a tenant_id via "
-                                              "either --os-tenant-id or via "
-                                              "env[OS_TENANT_ID]")
+                raise exceptions.CommandError("You must provide a tenant_id "
+                                              "via either --os-tenant-id "
+                                              "or via env[OS_TENANT_ID]")
 
             if not args.os_auth_url:
-                raise exceptions.CommandError("You must provide an auth url via "
-                                              "either --os-auth-url or via "
-                                              "env[OS_AUTH_URL]")
+                raise exceptions.CommandError("You must provide an auth url "
+                                              "via either --os-auth-url or "
+                                              "via env[OS_AUTH_URL]")
             kwargs = {
                 'username': args.os_username,
                 'password': args.os_password,
@@ -257,8 +256,8 @@ class PortasShell(object):
             _ksclient = self._get_ksclient(**kwargs)
             token = args.os_auth_token or _ksclient.auth_token
 
-            endpoint = args.portas_url or \
-                       self._get_endpoint(_ksclient, **kwargs)
+            url = args.portas_url
+            endpoint = url or self._get_endpoint(_ksclient, **kwargs)
 
         kwargs = {
             'token': token,
@@ -274,7 +273,8 @@ class PortasShell(object):
         try:
             args.func(client, args)
         except exceptions.Unauthorized:
-            raise exceptions.CommandError("Invalid OpenStack Identity credentials.")
+            msg = "Invalid OpenStack Identity credentials."
+            raise exceptions.CommandError(msg)
 
     @utils.arg('command', metavar='<subcommand>', nargs='?',
                help='Display help for <subcommand>')
@@ -286,8 +286,8 @@ class PortasShell(object):
             if args.command in self.subcommands:
                 self.subcommands[args.command].print_help()
             else:
-                raise exceptions.CommandError("'%s' is not a valid subcommand" %
-                                              args.command)
+                msg = "'%s' is not a valid subcommand"
+                raise exceptions.CommandError(msg % args.command)
         else:
             self.parser.print_help()
 

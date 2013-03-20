@@ -22,7 +22,6 @@ import prettytable
 from portasclient.openstack.common import importutils
 
 
-
 # Decorator for cli-args
 def arg(*args, **kwargs):
     def _decorator(func):
