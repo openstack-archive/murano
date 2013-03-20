@@ -159,7 +159,7 @@ class SanityUnitTests(unittest.TestCase):
 
         assert result is None
     
-    @unittest.skip("https://mirantis.jira.com/browse/KEERO-219")
+    #@unittest.skip("https://mirantis.jira.com/browse/KEERO-219")
     def test_session_manager_reports(self):
 
         manager = sessions.SessionManager(api)
