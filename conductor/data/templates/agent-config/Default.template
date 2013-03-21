@@ -23,7 +23,7 @@
 		<add key="rabbitmq.password" value="keero"/>
 		<add key="rabbitmq.vhost" value="keero"/>
 		<add key="rabbitmq.resultExchange" value=""/>
-		<add key="rabbitmq.resultRoutingKey" value="-execution-results"/>
+		<add key="rabbitmq.resultRoutingKey" value="%RESULT_QUEUE%"/>
 		<add key="rabbitmq.durableMessages" value="true"/>
 
 	</appSettings>

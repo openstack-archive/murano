@@ -1,8 +1,6 @@
-#!/usr/bin/env python
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
-# All Rights Reserved.
+#    Copyright 2012 OpenStack Foundation
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -16,22 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import os
-import sys
 
+from conductor.openstack.common import version as common_version
 
-from conductor import config
-from conductor.openstack.common import log
-from conductor.openstack.common import service
-from conductor.app import ConductorWorkflowService
-
-if __name__ == '__main__':
-    try:
-        config.parse_args()
-        log.setup('conductor')
-        launcher = service.ServiceLauncher()
-        launcher.launch_service(ConductorWorkflowService())
-        launcher.wait()
-    except RuntimeError, e:
-        sys.stderr.write("ERROR: %s\n" % e)
-        sys.exit(1)
+version_info = common_version.VersionInfo('conductor')
