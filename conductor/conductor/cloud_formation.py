@@ -22,9 +22,13 @@ def prepare_user_data(context, template='Default', **kwargs):
         with open('data/templates/agent-config/%s.template'
                 % template) as template_file:
             init_script = init_script_file.read()
-            template_data = template_file.read().replace(
+            template_data = template_file.read()
+            template_data = template_data.replace(
                 '%RABBITMQ_HOST%',
                 config.get_setting('rabbitmq', 'host') or 'localhost')
+            template_data = template_data.replace(
+                '%RESULT_QUEUE%',
+                '-execution-results-%s' % str(context['/dataSource']['name']))
 
             return init_script.replace(
                 '%WINDOWS_AGENT_CONFIG_BASE64%',

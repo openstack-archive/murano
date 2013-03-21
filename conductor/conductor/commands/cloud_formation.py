@@ -1,4 +1,4 @@
-import json
+import anyjson
 import os
 import uuid
 
@@ -17,7 +17,7 @@ class HeatExecutor(CommandBase):
             template_data = template_file.read()
 
         template_data = conductor.helpers.transform_json(
-            json.loads(template_data), mappings)
+            anyjson.loads(template_data), mappings)
 
         self._pending_list.append({
             'template': template_data,
@@ -28,7 +28,7 @@ class HeatExecutor(CommandBase):
     def has_pending_commands(self):
         return len(self._pending_list) > 0
 
-    def execute_pending(self, callback):
+    def execute_pending(self):
         if not self.has_pending_commands():
             return False
 
@@ -40,7 +40,7 @@ class HeatExecutor(CommandBase):
             arguments = conductor.helpers.merge_dicts(
                 arguments, t['arguments'], max_levels=1)
 
-        print 'Executing heat template', json.dumps(template), \
+        print 'Executing heat template', anyjson.dumps(template), \
             'with arguments', arguments, 'on stack', self._stack
 
         if not os.path.exists("tmp"):
@@ -48,28 +48,23 @@ class HeatExecutor(CommandBase):
         file_name = "tmp/" + str(uuid.uuid4())
         print "Saving template to", file_name
         with open(file_name, "w") as f:
-            f.write(json.dumps(template))
+            f.write(anyjson.dumps(template))
 
         arguments_str = ';'.join(['%s=%s' % (key, value)
                                   for (key, value) in arguments.items()])
-        call([
-            "./heat_run", "stack-create",
-            "-f" + file_name,
-            "-P" + arguments_str,
-            self._stack
-        ])
+        # call([
+        #     "./heat_run", "stack-create",
+        #     "-f" + file_name,
+        #     "-P" + arguments_str,
+        #     self._stack
+        # ])
 
-
-        callbacks = []
-        for t in self._pending_list:
-            if t['callback']:
-                callbacks.append(t['callback'])
-
+        pending_list = self._pending_list
         self._pending_list = []
 
-        for cb in callbacks:
-            cb(True)
+        for item in pending_list:
+            item['callback'](True)
 
-        callback()
+
 
         return True

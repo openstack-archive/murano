@@ -7,7 +7,8 @@ def send_command(engine, context, body, template, host, mappings=None,
     command_dispatcher = context['/commandDispatcher']
 
     def callback(result_value):
-        print "Received result for %s: %s. Body is %s" % (template, result_value, body)
+        print "Received result for %s: %s. Body is %s" % \
+              (template, result_value, body)
         if result is not None:
             context[result] = result_value['Result']
 
@@ -16,10 +17,8 @@ def send_command(engine, context, body, template, host, mappings=None,
             engine.evaluate_content(success_handler, context)
 
     command_dispatcher.execute(name='agent',
-                               template=template,
-                               mappings=mappings,
-                               host=host,
-                               callback=callback)
+        template=template, mappings=mappings,
+        host=host, callback=callback)
 
 
 xml_code_engine.XmlCodeEngine.register_function(send_command, "send-command")
