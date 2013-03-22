@@ -1,13 +1,13 @@
 #!/bin/bash
 
 DEVSTACK_DIR=/home/stack/devstack
+INSTALL_DIR=/opt/stack
 
 MYSQL_DB_TMPFS=true
 MYSQL_DB_TMPFS_SIZE=128M
 
 NOVA_CACHE_TMPFS=true
 NOVA_CACHE_TMPFS_SIZE=24G
-
 
 #======================================
 source $DEVSTACK_DIR/openrc admin admin
