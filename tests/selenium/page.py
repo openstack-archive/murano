@@ -1,11 +1,10 @@
-from selenium import webdriver
 
 
 class ButtonClass:
     button = None
 
-    def __init__(self, object):
-        self.button = object
+    def __init__(self, obj):
+        self.button = obj
 
     def Click(self):
         self.button.click()
@@ -19,8 +18,8 @@ class ButtonClass:
 class LinkClass:
     link = None
 
-    def __init__(self, object):
-        self.link = object
+    def __init__(self, obj):
+        self.link = obj
 
     def Click(self):
         self.link.click()
@@ -35,10 +34,9 @@ class LinkClass:
 
 
 class EditBoxClass:
-    edit = None
 
-    def __init__(self, object):
-        self.edit = object
+    def __init__(self, obj):
+        self.edit = obj
 
     def isPresented(self):
         if self.edit != None:
@@ -56,8 +54,8 @@ class EditBoxClass:
 class DropDownListClass:
     select = None
 
-    def __init__(self, object):
-        self.select = object
+    def __init__(self, obj):
+        self.select = obj
 
     def isPresented(self):
         if self.select != None:
@@ -72,59 +70,68 @@ class DropDownListClass:
 
 
 class Page:
-    
+
     driver = None
-    timeout = 30
-    
+    timeout = 300
+
     def __init__(self, driver):
         driver.set_page_load_timeout(30)
-        driver.implicitly_wait(30)
+        driver.implicitly_wait(0.01)
         self.driver = driver
-    
+
     def _find_element(self, parameter):
-        object = None
-        try:
-            object = self.driver.find_element_by_name(parameter)
-            return object
-        except:
-            pass
-        try:
-            object = self.driver.find_element_by_id(parameter)
-            return object
-        except:
-            pass
-        try:
-            object = self.driver.find_element_by_xpath(parameter)
-            return object
-        except:
-            pass
-        try:
-            object = self.driver.find_element_by_link_text(parameter)
-            return object
-        except:
-            pass
-        
-        return object
-    
+        obj = None
+        k = 0
+        while (obj == None and k < self.timeout):
+            k += 1
+            try:
+                obj = self.driver.find_element_by_name(parameter)
+                return obj
+            except:
+                pass
+            try:
+                obj = self.driver.find_element_by_id(parameter)
+                return obj
+            except:
+                pass
+            try:
+                obj = self.driver.find_element_by_xpath(parameter)
+                return obj
+            except:
+                pass
+            try:
+                obj = self.driver.find_element_by_partial_link_text(parameter)
+                return obj
+            except:
+                pass
+
+        return obj
+
     def Open(self, url):
         self.driver.get(url)
-    
+
     def Button(self, name):
-        object = self._find_element(name)
-        button = ButtonClass(object)
+        obj = self._find_element(name)
+        button = ButtonClass(obj)
         return button
-    
+
     def Link(self, name):
-        object = self._find_element(name)
-        link = LinkClass(object)
+        obj = self._find_element(name)
+        link = LinkClass(obj)
         return link
-    
+
     def EditBox(self, name):
-        object = self._find_element(name)
-        edit = EditBoxClass(object)
+        obj = self._find_element(name)
+        edit = EditBoxClass(obj)
         return edit
-    
+
     def DropDownList(self, name):
-        object = self._find_element(name)
-        select = DropDownListClass(object)
+        obj = self._find_element(name)
+        select = DropDownListClass(obj)
         return select
+
+    def Navigate(self, path):
+        steps = path.split(':')
+
+        for step in steps:
+            self.Button(step).Click()

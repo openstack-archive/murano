@@ -20,7 +20,9 @@ class DataCentersPage(page.Page):
         link = self.Link(name).Address()
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
 
-        xpath = ".//*[@id='windc__row__%s']/td[3]/div/a[2]" % datacenter_id
+        print 'Data Center ID: ' + datacenter_id
+
+        xpath = ".//*[@id='windc__row__%s']/td[4]/div/a[2]" % datacenter_id
         self.Button(xpath).Click()
 
         button_id = "windc__row_%s__action_delete" % datacenter_id
