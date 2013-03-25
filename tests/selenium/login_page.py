@@ -1,8 +1,8 @@
 import ConfigParser
-from selenium import webdriver
+import page
 
 
-class LoginPage():
+class LoginPage(page.Page):
 
     def login(self):
         config = ConfigParser.RawConfigParser()
@@ -11,20 +11,11 @@ class LoginPage():
         user = config.get('server', 'user')
         password = config.get('server', 'password')
 
-        page = webdriver.Firefox()
-        page.set_page_load_timeout(30)
-        page.implicitly_wait(30)
-        page.get(url)
-        name = page.find_element_by_name('username')
-        pwd = page.find_element_by_name('password')
+        self.Open(url)
+
+        self.EditBox('username').Set(user)
+        self.EditBox('password').Set(password)
         xpath = "//button[@type='submit']"
-        button = page.find_element_by_xpath(xpath)
+        self.Button(xpath).Click()
 
-        name.clear()
-        name.send_keys(user)
-        pwd.clear()
-        pwd.send_keys(password)
-
-        button.click()
-
-        return page
+        return self
