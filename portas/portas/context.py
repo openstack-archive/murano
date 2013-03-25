@@ -24,7 +24,9 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_tok=None, user=None, tenant=None, roles=None, service_catalog=None, session=None):
+    def __init__(self, auth_tok=None, user=None, tenant=None,
+                 roles=None, service_catalog=None, session=None):
+
         self.auth_tok = auth_tok
         self.user = user
         self.tenant = tenant

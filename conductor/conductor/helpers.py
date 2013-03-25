@@ -38,6 +38,7 @@ def merge_dicts(dict1, dict2, max_levels=0):
             result[key] = value
     return result
 
+
 def find(f, seq):
     """Return first item in sequence where f(item) == True."""
     index = 0

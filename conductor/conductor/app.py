@@ -41,12 +41,14 @@ def task_received(task, message_id):
     def loop(callback):
         for workflow in workflows:
             workflow.execute()
-        if not command_dispatcher.execute_pending(lambda: schedule(loop, callback)):
+        func = lambda: schedule(loop, callback)
+        if not command_dispatcher.execute_pending(func):
             callback()
 
     def shutdown():
         command_dispatcher.close()
-        rmqclient.send('task-results', json.dumps(task), message_id=message_id)
+        rmqclient.send('task-results', json.dumps(task),
+                       message_id=message_id)
         print 'Finished at', datetime.datetime.now()
 
     loop(shutdown)
@@ -61,4 +63,3 @@ def start():
 
 rmqclient.start(start)
 tornado.ioloop.IOLoop.instance().start()
-

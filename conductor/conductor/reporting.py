@@ -18,12 +18,9 @@ class Reporter(object):
         self._rmqclient.send(
             queue='task-reports', data=msg, message_id=self._task_id)
 
+
 def _report_func(context, id, entity, text, **kwargs):
     reporter = context['/reporter']
     return reporter._report_func(id, entity, text, **kwargs)
 
 xml_code_engine.XmlCodeEngine.register_function(_report_func, "report")
-
-
-
-

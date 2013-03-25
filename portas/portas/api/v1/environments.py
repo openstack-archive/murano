@@ -61,7 +61,8 @@ class Controller(object):
         return env
 
     def update(self, request, environment_id, body):
-        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.format(environment_id, body)))
+        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.
+                    format(environment_id, body)))
 
         session = get_session()
         environment = session.query(Environment).get(environment_id)

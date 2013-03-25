@@ -61,7 +61,8 @@ class XmlCodeEngine(object):
         return_value = result
         if len(result) == 0:
             return_value = ''.join(parts)
-            if do_strip: return_value = return_value.strip()
+            if do_strip:
+                return_value = return_value.strip()
         elif len(result) == 1:
             return_value = result[0]
 

@@ -59,7 +59,6 @@ class HeatExecutor(CommandBase):
             self._stack
         ])
 
-
         callbacks = []
         for t in self._pending_list:
             if t['callback']:

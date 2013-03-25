@@ -54,7 +54,8 @@ class RabbitMqClient(object):
         del self._subscriptions[queue]
 
     def start(self, callback=None):
-        if IOLoop is None: raise ImportError("Tornado not installed")
+        if IOLoop is None:
+            raise ImportError("Tornado not installed")
         self._started_callback = callback
         ioloop = IOLoop.instance()
         self.timeout_id = ioloop.add_timeout(time.time() + 0.1,
@@ -67,6 +68,3 @@ class RabbitMqClient(object):
             callback=lambda frame: self._channel.basic_publish(
                 exchange=exchange, routing_key=queue,
                 body=data, properties=properties))
-
-
-

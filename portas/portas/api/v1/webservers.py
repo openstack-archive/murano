@@ -11,16 +11,19 @@ class Controller(object):
     def index(self, request, environment_id):
         log.debug(_('WebServer:List <EnvId: {0}>'.format(environment_id)))
 
-        draft = prepare_draft(get_draft(environment_id, request.context.session))
+        draft = prepare_draft(get_draft(environment_id,
+                                        request.context.session))
 
         for dc in draft['services']['webServers']:
-            dc['status'] = get_service_status(environment_id, request.context.session, dc)
+            dc['status'] = get_service_status(environment_id,
+                                              request.context.session, dc)
 
         return {'webServers': draft['services']['webServers']}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
-        log.debug(_('WebServer:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
+        log.debug(_('WebServer:Create <EnvId: {0}, Body: {1}>'.
+                    format(environment_id, body)))
 
         draft = get_draft(session_id=request.context.session)
 
@@ -43,19 +46,22 @@ class Controller(object):
 
     @utils.verify_session
     def delete(self, request, environment_id, web_server_id):
-        log.debug(_('WebServer:Delete <EnvId: {0}, Id: {1}>'.format(environment_id, web_server_id)))
+        log.debug(_('WebServer:Delete <EnvId: {0}, Id: {1}>'.
+                    format(environment_id, web_server_id)))
 
         draft = get_draft(session_id=request.context.session)
-        draft['services']['webServers'] = [service for service in draft['services']['webServers'] if
-                                           service['id'] != web_server_id]
+
+        elements = [service for service in draft['services']['webServers'] if
+                    service['id'] != web_server_id]
+        draft['services']['webServers'] = elements
         save_draft(request.context.session, draft)
 
 
 def prepare_draft(draft):
-    if not draft.has_key('services'):
+    if not 'services' in draft:
         draft['services'] = {}
 
-    if not draft['services'].has_key('webServers'):
+    if not 'webServers' in draft['services']:
         draft['services']['webServers'] = []
 
     return draft

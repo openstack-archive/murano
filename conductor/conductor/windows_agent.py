@@ -3,11 +3,13 @@ import xml_code_engine
 
 def send_command(engine, context, body, template, host, mappings=None,
                  result=None, **kwargs):
-    if not mappings: mappings = {}
+    if not mappings:
+        mappings = {}
     command_dispatcher = context['/commandDispatcher']
 
     def callback(result_value):
-        print "Received result for %s: %s. Body is %s" % (template, result_value, body)
+        msg = "Received result for %s: %s. Body is %s"
+        print msg % (template, result_value, body)
         if result is not None:
             context[result] = result_value['Result']
 

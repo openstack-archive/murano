@@ -63,4 +63,3 @@ class WindowsAgentExecutor(CommandBase):
 
     def close(self):
         self._rmqclient.unsubscribe('-execution-results')
-
