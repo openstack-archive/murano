@@ -9,7 +9,6 @@ import string
 def update_cf_stack(engine, context, body, template,
                     mappings, arguments, **kwargs):
     command_dispatcher = context['/commandDispatcher']
-    print "update-cf", template
 
     callback = lambda result: engine.evaluate_content(
         body.find('success'), context)
@@ -20,7 +19,6 @@ def update_cf_stack(engine, context, body, template,
 
 def delete_cf_stack(engine, context, body, **kwargs):
     command_dispatcher = context['/commandDispatcher']
-    print "delete-cf"
 
     callback = lambda result: engine.evaluate_content(
         body.find('success'), context)
