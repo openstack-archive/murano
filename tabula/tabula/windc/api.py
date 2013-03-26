@@ -78,7 +78,6 @@ def services_create(request, datacenter, parameters):
 def services_list(request, datacenter_id):
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
-    LOG.critical('DC ID: ' + str(datacenter_id))
 
     for s in sessions:
         if s.state in ['open', 'deploying']:

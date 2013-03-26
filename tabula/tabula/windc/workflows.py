@@ -62,8 +62,7 @@ class SelectProjectUser(workflows.Step):
 
 
 class ConfigureDCAction(workflows.Action):
-    name = forms.CharField(label=_("Data Center Name"),
-                              required=True)
+    name = forms.CharField(label=_("Data Center Name"), required=True)
 
     class Meta:
         name = _("Data Center")
@@ -87,8 +86,7 @@ class CreateWinDC(workflows.Workflow):
     success_message = _('Created data center "%s".')
     failure_message = _('Unable to create data center "%s".')
     success_url = "horizon:project:windc:index"
-    default_steps = (SelectProjectUser,
-                     ConfigureDC)
+    default_steps = (SelectProjectUser, ConfigureDC)
 
     def format_status_message(self, message):
         name = self.context.get('name', 'noname')

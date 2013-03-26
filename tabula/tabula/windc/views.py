@@ -58,21 +58,24 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
     def done(self, form_list, **kwargs):
         link = self.request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+        
+        LOG.critical("/////////////////////////////")
+        LOG.critical(link)
+        LOG.critical(datacenter_id)
+        LOG.critical("/////////////////////////////")
+        
         url = "/project/windc/%s/" % datacenter_id
 
         service_type = form_list[0].data.get('0-service', '')
         parameters = {'service_type': service_type}
-
+        data = form_list[1].data
         if service_type == 'Active Directory':
             parameters['configuration'] = 'standalone'
-            parameters['name'] = str(form_list[1].data.get('1-dc_name',
-                                                           'noname'))
+            parameters['name'] = str(data.get('1-dc_name', 'noname'))
             parameters['domain'] = parameters['name'] # Fix Me in orchestrator
-            parameters['adminPassword'] = \
-                       str(form_list[1].data.get('1-adm_password', ''))
-            dc_count = int(form_list[1].data.get('1-dc_count', 1))
-            recovery_password = \
-                  str(form_list[1].data.get('1-recovery_password', ''))
+            parameters['adminPassword'] = str(data.get('1-adm_password', ''))
+            dc_count = int(data.get('1-dc_count', 1))
+            recovery_password = str(data.get('1-recovery_password', ''))
             parameters['units'] = []
             parameters['units'].append({'isMaster': True,
                                         'recoveryPassword': recovery_password,
@@ -83,18 +86,11 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                                         'location': 'west-dc'})
 
         elif service_type == 'IIS':
-            password = form_list[1].data.get('1-adm_password', '')
-            domain = form_list[1].data.get('1-iis_domain', '')
-            dc_user = form_list[1].data.get('1-domain_user_name', '')
-            dc_pass = form_list[1].data.get('1-domain_user_password', '')
-            parameters['name'] = str(form_list[1].data.get('1-iis_name',
-                                                           'noname'))
-            parameters['domain'] = parameters['name']
+            password = data.get('1-adm_password', '')
+            parameters['name'] = str(data.get('1-iis_name', 'noname'))
             parameters['credentials'] = {'username': 'Administrator',
                                          'password': password}
-            parameters['domain'] = str(domain)
-                                   # 'username': str(dc_user),
-                                   # 'password': str(dc_pass)}
+            parameters['domain'] = str(data.get('1-iis_domain', ''))
             parameters['location'] = 'west-dc'
 
             parameters['units'] = []
@@ -102,22 +98,24 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                                         'endpoint': [{'host': '10.0.0.1'}],
                                         'location': 'west-dc'})
 
-        service = api.services_create(self.request,
-                                            datacenter_id,
-                                            parameters)
+        service = api.services_create(self.request, datacenter_id, parameters)
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
         return HttpResponseRedirect(url)
 
     def get_form(self, step=None, data=None, files=None):
+        
+        LOG.critical("@@@@@@@@@@@@@@@@@@@@@@")
+        LOG.critical(dir(WizardFormIISConfiguration))
+        LOG.critical("######################")
+        
         form = super(Wizard, self).get_form(step, data, files)
         if data:
-            service_type = data.get('0-service', '')
-            self.service_type = service_type
-            if service_type == 'Active Directory':
+            self.service_type = data.get('0-service', '')
+            if self.service_type == 'Active Directory':
                 self.form_list['1'] = WizardFormADConfiguration
-            elif service_type == 'IIS':
+            elif self.service_type == 'IIS':
                 self.form_list['1'] = WizardFormIISConfiguration
 
         return form

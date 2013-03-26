@@ -154,13 +154,6 @@ STATUS_DISPLAY_CHOICES = (
     ('finished', 'Active')
 )
 
-STATUS_DISPLAY_CHOICES = (
-    ('draft', 'Ready to deploy'),
-    ('pending', 'Wait for configuration'),
-    ('inprogress', 'Deploy in progress'),
-    ('finished', 'Active')
-)
-
 
 class WinDCTable(tables.DataTable):
 
@@ -169,7 +162,6 @@ class WinDCTable(tables.DataTable):
         ('Ready to deploy', True),
         ('Active', True)
     )
-
 
     name = tables.Column('name',
                          link=('horizon:project:windc:services'),
@@ -199,7 +191,7 @@ class WinServicesTable(tables.DataTable):
     )
 
     name = tables.Column('name', verbose_name=_('Name'),
-                         link=('horizon:project:windc:service_details'),)
+                         link=('horizon:project:windc:service_details'))
 
     _type = tables.Column('service_type', verbose_name=_('Type'))
 

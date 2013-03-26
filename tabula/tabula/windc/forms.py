@@ -24,6 +24,8 @@ import string
 from django import forms
 from django.utils.translation import ugettext_lazy as _
 
+from tabula.windc import api
+
 LOG = logging.getLogger(__name__)
 
 
@@ -104,10 +106,25 @@ class WizardFormIISConfiguration(forms.Form):
 
     adm_password = PasswordField(_('Administrator password'))
 
-    iis_domain = forms.CharField(label=_('Member of the Domain'),
-                                 required=True)
+    iis_domain = forms.ChoiceField(label=_('Member of the Domain'),
+                                 required=False)
+    
+    def __init__(self, request, *args, **kwargs):
 
-    domain_user_name = forms.CharField(label=_('Domain User Name'),
-                                       required=True)
-
-    domain_user_password = PasswordField(_('Domain User Password'))
+        super(WizardFormIISConfiguration, self).__init__(request,
+                                                         *args,
+                                                         **kwargs)
+        
+        link = self.request.__dict__['META']['HTTP_REFERER']
+        datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+        
+        domains = api.services_list(request, datacenter_id)
+        
+        LOG.critical('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+        LOG.critical(domains)
+        LOG.critical('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+        
+        self.fields['iis_domain'].choices = [("", "")] + \
+                                      [(domain.name, domain.name)
+                                       for domain in domains]
+        
