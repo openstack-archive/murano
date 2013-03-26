@@ -1,6 +1,7 @@
 import datetime
 import glob
 import sys
+import traceback
 
 from conductor.openstack.common import service
 from workflow import Workflow
@@ -40,7 +41,8 @@ def task_received(task, message_id):
                         break
                 if not command_dispatcher.execute_pending():
                     break
-            except Exception:
+            except Exception as ex:
+                traceback.print_exc()
                 break
 
         command_dispatcher.close()

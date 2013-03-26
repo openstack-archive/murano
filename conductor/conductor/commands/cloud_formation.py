@@ -13,35 +13,59 @@ import heatclient.exc
 
 class HeatExecutor(CommandBase):
     def __init__(self, stack, token):
-        self._pending_list = []
-        self._stack = stack
+        self._update_pending_list = []
+        self._delete_pending_list = []
+        self._stack = 'e' + stack
         settings = conductor.config.CONF.heat
         self._heat_client = Client('1', settings.url,
             token_only=True, token=token)
 
-    def execute(self, template, mappings, arguments, callback):
+    def execute(self, command, callback, **kwargs):
+        if command == 'CreateOrUpdate':
+            return self._execute_create_update(
+                kwargs['template'],
+                kwargs['mappings'],
+                kwargs['arguments'],
+                callback)
+        elif command == 'Delete':
+            return self._execute_delete(callback)
+
+
+    def _execute_create_update(self, template, mappings, arguments, callback):
         with open('data/templates/cf/%s.template' % template) as template_file:
             template_data = template_file.read()
 
         template_data = conductor.helpers.transform_json(
             anyjson.loads(template_data), mappings)
 
-        self._pending_list.append({
+        self._update_pending_list.append({
             'template': template_data,
             'arguments': arguments,
             'callback': callback
         })
 
+    def _execute_delete(self, callback):
+        self._delete_pending_list.append({
+            'callback': callback
+        })
+
+
     def has_pending_commands(self):
-        return len(self._pending_list) > 0
+        return len(self._update_pending_list) + \
+               len(self._delete_pending_list) > 0
 
     def execute_pending(self):
-        if not self.has_pending_commands():
+        r1 = self._execute_pending_updates()
+        r2 = self._execute_pending_deletes()
+        return r1 or r2
+
+    def _execute_pending_updates(self):
+        if not len(self._update_pending_list):
             return False
 
         template = {}
         arguments = {}
-        for t in self._pending_list:
+        for t in self._update_pending_list:
             template = conductor.helpers.merge_dicts(
                 template, t['template'], max_levels=2)
             arguments = conductor.helpers.merge_dicts(
@@ -49,22 +73,6 @@ class HeatExecutor(CommandBase):
 
         print 'Executing heat template', anyjson.dumps(template), \
             'with arguments', arguments, 'on stack', self._stack
-
-        # if not os.path.exists("tmp"):
-        #     os.mkdir("tmp")
-        # file_name = "tmp/" + str(uuid.uuid4())
-        # print "Saving template to", file_name
-        # with open(file_name, "w") as f:
-        #     f.write(anyjson.dumps(template))
-        #
-        # arguments_str = ';'.join(['%s=%s' % (key, value)
-        #                           for (key, value) in arguments.items()])
-        # call([
-        #     "./heat_run", "stack-create",
-        #     "-f" + file_name,
-        #     "-P" + arguments_str,
-        #     self._stack
-        # ])
 
         try:
             print 'try update'
@@ -85,12 +93,30 @@ class HeatExecutor(CommandBase):
             self._wait_state('CREATE_COMPLETE')
 
 
-        pending_list = self._pending_list
-        self._pending_list = []
+        pending_list = self._update_pending_list
+        self._update_pending_list = []
 
         for item in pending_list:
             item['callback'](True)
 
+        return True
+
+    def _execute_pending_deletes(self):
+        if not len(self._delete_pending_list):
+            return False
+
+        try:
+            self._heat_client.stacks.delete(
+                stack_id=self._stack)
+            self._wait_state('DELETE_COMPLETE')
+        except Exception:
+            pass
+
+        pending_list = self._delete_pending_list
+        self._delete_pending_list = []
+
+        for item in pending_list:
+            item['callback'](True)
         return True
 
     def _wait_state(self, state):
