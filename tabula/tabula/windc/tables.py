@@ -214,4 +214,3 @@ class WinServicesTable(tables.DataTable):
         row_class = UpdateServiceRow
         status_columns = ['status']
         table_actions = (CreateService,)
-        row_actions = (DeleteService,)
