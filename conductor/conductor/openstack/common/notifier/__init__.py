@@ -1,6 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
-# Copyright 2012 Red Hat, Inc.
+# Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -14,20 +12,3 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-"""
-gettext for openstack-common modules.
-
-Usual usage in an openstack.common module:
-
-    from conductor.openstack.common.gettextutils import _
-"""
-
-import gettext
-
-
-t = gettext.translation('conductor', 'locale', fallback=True)
-
-
-def _(msg):
-    return t.ugettext(msg)

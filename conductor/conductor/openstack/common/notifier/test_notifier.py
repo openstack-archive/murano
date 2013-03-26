@@ -1,6 +1,4 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
-# Copyright 2012 Red Hat, Inc.
+# Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -15,19 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-gettext for openstack-common modules.
 
-Usual usage in an openstack.common module:
-
-    from conductor.openstack.common.gettextutils import _
-"""
-
-import gettext
+NOTIFICATIONS = []
 
 
-t = gettext.translation('conductor', 'locale', fallback=True)
-
-
-def _(msg):
-    return t.ugettext(msg)
+def notify(_context, message):
+    """Test notifier, stores notifications in memory for unittests."""
+    NOTIFICATIONS.append(message)
