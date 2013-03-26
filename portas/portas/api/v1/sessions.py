@@ -121,9 +121,13 @@ class Controller(object):
         session.state = 'deploying'
         session.save(unit)
 
+        #Set X-Auth-Tokenconductor for conductor
+        env = session.description
+        env['token'] = request.context.auth_token
+
         with self.write_lock:
             self.ch.basic_publish(Message(body=anyjson.
-                                          serialize(session.description)),
+                                          serialize(env)),
                                   'tasks', 'tasks')
 
 
