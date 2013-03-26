@@ -1,18 +1,16 @@
 import datetime
 import glob
-import json
 import sys
 
 from conductor.openstack.common import service
 from workflow import Workflow
-import cloud_formation
-import windows_agent
 from commands.dispatcher import CommandDispatcher
 from config import Config
 import reporting
 import rabbitmq
 
 config = Config(sys.argv[1] if len(sys.argv) > 1 else None)
+
 
 def task_received(task, message_id):
     with rabbitmq.RmqClient() as rmqclient:
@@ -23,7 +21,8 @@ def task_received(task, message_id):
         workflows = []
         for path in glob.glob("data/workflows/*.xml"):
             print "loading", path
-            workflow = Workflow(path, task, command_dispatcher, config, reporter)
+            workflow = Workflow(path, task, command_dispatcher, config,
+                                reporter)
             workflows.append(workflow)
 
         while True:
@@ -39,7 +38,6 @@ def task_received(task, message_id):
 
         rmqclient.send(message=result_msg, key='task-results')
         print 'Finished at', datetime.datetime.now()
-
 
 
 class ConductorWorkflowService(service.Service):
