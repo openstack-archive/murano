@@ -7,14 +7,14 @@ from command import CommandBase
 
 
 class WindowsAgentExecutor(CommandBase):
-    def __init__(self, stack, rmqclient, environment):
+    def __init__(self, stack, rmqclient):
         self._stack = stack
         self._rmqclient = rmqclient
         self._pending_list = []
-        self._results_queue = '-execution-results-%s' % str(environment)
+        self._results_queue = '-execution-results-%s' % str(stack)
         rmqclient.declare(self._results_queue)
 
-    def execute(self, template, mappings, host, callback):
+    def execute(self, template, mappings, host, service, callback):
         with open('data/templates/agent/%s.template' %
                   template) as template_file:
             template_data = template_file.read()
@@ -23,7 +23,7 @@ class WindowsAgentExecutor(CommandBase):
             json.loads(template_data), mappings)
 
         id = str(uuid.uuid4()).lower()
-        host = ('%s-%s' % (self._stack, host)).lower().replace(' ', '-')
+        host = ('%s-%s-%s' % (self._stack, service, host)).lower()
         self._pending_list.append({
             'id': id,
             'callback': callback

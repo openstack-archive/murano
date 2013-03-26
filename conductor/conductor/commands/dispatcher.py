@@ -8,7 +8,7 @@ class CommandDispatcher(command.CommandBase):
         self._command_map = {
             'cf': cloud_formation.HeatExecutor(environment_id, token),
             'agent': windows_agent.WindowsAgentExecutor(
-                environment_id, rmqclient, environment_id)
+                environment_id, rmqclient)
         }
 
     def execute(self, name, **kwargs):

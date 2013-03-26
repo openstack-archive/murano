@@ -67,17 +67,23 @@ class HeatExecutor(CommandBase):
         # ])
 
         try:
+            print 'try update'
             self._heat_client.stacks.update(
                 stack_id=self._stack,
                 parameters=arguments,
                 template=template)
+            print 'wait update'
             self._wait_state('UPDATE_COMPLETE')
         except heatclient.exc.HTTPNotFound:
+            print 'try create'
+
             self._heat_client.stacks.create(
                 stack_name=self._stack,
                 parameters=arguments,
                 template=template)
+            print 'wait create'
             self._wait_state('CREATE_COMPLETE')
+
 
         pending_list = self._pending_list
         self._pending_list = []

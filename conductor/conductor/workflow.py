@@ -17,14 +17,12 @@ class Workflow(object):
         self._reporter = reporter
 
     def execute(self):
-        while True:
-            context = function_context.Context()
-            context['/dataSource'] = self._data
-            context['/commandDispatcher'] = self._command_dispatcher
-            context['/config'] = self._config
-            context['/reporter'] = self._reporter
-            if not self._engine.execute(context):
-                break
+        context = function_context.Context()
+        context['/dataSource'] = self._data
+        context['/commandDispatcher'] = self._command_dispatcher
+        context['/config'] = self._config
+        context['/reporter'] = self._reporter
+        return self._engine.execute(context)
 
     @staticmethod
     def _get_path(obj, path, create_non_existing=False):
