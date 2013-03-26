@@ -1,16 +1,38 @@
+import logging
+from selenium.webdriver.support.ui import Select
+logging.basicConfig()
+LOG = logging.getLogger(' Page object: ')
+
+
+class TableCellClass:
+    table = None
+
+    def __init__(self, obj):
+        if not obj:
+            LOG.error('TableCell does not found')
+        self.table = obj
+
+    def Text(self):
+        if self.table:
+            return self.table.text()
+        else:
+            return ''
 
 
 class ButtonClass:
     button = None
 
     def __init__(self, obj):
+        if not obj:
+            LOG.error('Button does not found')
         self.button = obj
 
     def Click(self):
-        self.button.click()
+        if self.button:
+            self.button.click()
 
     def isPresented(self):
-        if self.button != None:
+        if self.button:
             return True
         return False
 
@@ -19,60 +41,84 @@ class LinkClass:
     link = None
 
     def __init__(self, obj):
+        if not obj:
+            LOG.error('Link does not found')
         self.link = obj
 
     def Click(self):
-        self.link.click()
+        if self.link:
+            self.link.click()
 
     def isPresented(self):
-        if self.link != None:
+        if self.link:
             return True
         return False
 
     def Address(self):
-        return self.link.get_attribute('href')
+        if self.link:
+            return self.link.get_attribute('href')
+        else:
+            return ''
 
 
 class EditBoxClass:
 
     def __init__(self, obj):
+        if not obj:
+            LOG.error('EditBox does not found')
         self.edit = obj
 
     def isPresented(self):
-        if self.edit != None:
+        if self.edit:
             return True
         return False
 
     def Set(self, value):
-        self.edit.clear()
-        self.edit.send_keys(value)
+        if self.edit:
+            self.edit.clear()
+            self.edit.send_keys(value)
 
     def Text(self):
-        return self.edit.get_text()
+        if self.edit:
+            return self.edit.get_text()
+        else:
+            return ''
 
 
 class DropDownListClass:
     select = None
 
     def __init__(self, obj):
+        if not obj:
+            LOG.error('DropDownList does not found')
         self.select = obj
 
     def isPresented(self):
-        if self.select != None:
+        if self.select is not None:
             return True
         return False
 
     def Set(self, value):
-        self.select.select_by_visible_text(value)
+        if self.select:
+            Select(self.select).select_by_visible_text(value)
 
     def Text(self):
-        return self.select.get_text()
+        if self.select:
+            return self.select.get_text()
+        else:
+            return ''
+
+
+error_msg = """
+                Object with parameter: %s
+                does not found on page.
+            """
 
 
 class Page:
 
     driver = None
-    timeout = 300
+    timeout = 30
 
     def __init__(self, driver):
         driver.set_page_load_timeout(30)
@@ -82,7 +128,7 @@ class Page:
     def _find_element(self, parameter):
         obj = None
         k = 0
-        while (obj == None and k < self.timeout):
+        while (obj is None and k < self.timeout):
             k += 1
             try:
                 obj = self.driver.find_element_by_name(parameter)
@@ -105,10 +151,19 @@ class Page:
             except:
                 pass
 
-        return obj
+        LOG.error(error_msg % parameter)
+        return None
 
     def Open(self, url):
         self.driver.get(url)
+
+    def Refresh(self):
+        self.driver.refresh()
+
+    def TableCell(self, name):
+        obj = self._find_element(name)
+        table = TableCellClass(obj)
+        return table
 
     def Button(self, name):
         obj = self._find_element(name)
