@@ -1,16 +1,23 @@
 import anyjson
 import os
 import uuid
+import eventlet
 
 import conductor.helpers
 from command import CommandBase
-from subprocess import call
+import conductor.config
+from heatclient.client import Client
+import heatclient.exc
+
 
 
 class HeatExecutor(CommandBase):
-    def __init__(self, stack):
+    def __init__(self, stack, token):
         self._pending_list = []
         self._stack = stack
+        settings = conductor.config.CONF.heat
+        self._heat_client = Client('1', settings.url,
+            token_only=True, token=token)
 
     def execute(self, template, mappings, arguments, callback):
         with open('data/templates/cf/%s.template' % template) as template_file:
@@ -43,15 +50,15 @@ class HeatExecutor(CommandBase):
         print 'Executing heat template', anyjson.dumps(template), \
             'with arguments', arguments, 'on stack', self._stack
 
-        if not os.path.exists("tmp"):
-            os.mkdir("tmp")
-        file_name = "tmp/" + str(uuid.uuid4())
-        print "Saving template to", file_name
-        with open(file_name, "w") as f:
-            f.write(anyjson.dumps(template))
-
-        arguments_str = ';'.join(['%s=%s' % (key, value)
-                                  for (key, value) in arguments.items()])
+        # if not os.path.exists("tmp"):
+        #     os.mkdir("tmp")
+        # file_name = "tmp/" + str(uuid.uuid4())
+        # print "Saving template to", file_name
+        # with open(file_name, "w") as f:
+        #     f.write(anyjson.dumps(template))
+        #
+        # arguments_str = ';'.join(['%s=%s' % (key, value)
+        #                           for (key, value) in arguments.items()])
         # call([
         #     "./heat_run", "stack-create",
         #     "-f" + file_name,
@@ -59,12 +66,35 @@ class HeatExecutor(CommandBase):
         #     self._stack
         # ])
 
+        try:
+            self._heat_client.stacks.update(
+                stack_id=self._stack,
+                parameters=arguments,
+                template=template)
+            self._wait_state('UPDATE_COMPLETE')
+        except heatclient.exc.HTTPNotFound:
+            self._heat_client.stacks.create(
+                stack_name=self._stack,
+                parameters=arguments,
+                template=template)
+            self._wait_state('CREATE_COMPLETE')
+
         pending_list = self._pending_list
         self._pending_list = []
 
         for item in pending_list:
             item['callback'](True)
 
-
-
         return True
+
+    def _wait_state(self, state):
+        while True:
+            status = self._heat_client.stacks.get(
+                stack_id=self._stack).stack_status
+            if 'IN_PROGRESS' in status:
+                eventlet.sleep(1)
+                continue
+            if status != state:
+                raise EnvironmentError()
+            return
+

@@ -17,7 +17,8 @@ def task_received(task, message_id):
         print 'Starting at', datetime.datetime.now()
         reporter = reporting.Reporter(rmqclient, message_id, task['id'])
 
-        command_dispatcher = CommandDispatcher(task['name'], rmqclient)
+        command_dispatcher = CommandDispatcher(
+            task['name'], rmqclient, task['token'])
         workflows = []
         for path in glob.glob("data/workflows/*.xml"):
             print "loading", path
@@ -26,9 +27,12 @@ def task_received(task, message_id):
             workflows.append(workflow)
 
         while True:
-            for workflow in workflows:
-                workflow.execute()
-            if not command_dispatcher.execute_pending():
+            try:
+                for workflow in workflows:
+                    workflow.execute()
+                if not command_dispatcher.execute_pending():
+                    break
+            except Exception:
                 break
 
         command_dispatcher.close()
