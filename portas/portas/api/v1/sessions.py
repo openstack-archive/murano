@@ -1,7 +1,6 @@
 from amqplib.client_0_8 import Message
 import anyjson
 import eventlet
-from eventlet.semaphore import Semaphore
 from webob import exc
 from portas.common import config
 from portas.db.models import Session, Status, Environment
@@ -15,18 +14,6 @@ log = logging.getLogger(__name__)
 
 
 class Controller(object):
-    def __init__(self):
-        self.write_lock = Semaphore(1)
-        connection = amqp.Connection('{0}:{1}'.
-                                     format(rabbitmq.host, rabbitmq.port),
-                                     virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.userid,
-                                     password=rabbitmq.password,
-                                     ssl=rabbitmq.use_ssl, insist=True)
-        self.ch = connection.channel()
-        self.ch.exchange_declare('tasks', 'direct', durable=True,
-                                 auto_delete=False)
-
     def index(self, request, environment_id):
         log.debug(_('Session:List <EnvId: {0}>'.format(environment_id)))
 
@@ -121,14 +108,22 @@ class Controller(object):
         session.state = 'deploying'
         session.save(unit)
 
-        #Set X-Auth-Tokenconductor for conductor
+        #Set X-Auth-Token for conductor
         env = session.description
         env['token'] = request.context.auth_token
 
-        with self.write_lock:
-            self.ch.basic_publish(Message(body=anyjson.
-                                          serialize(env)),
-                                  'tasks', 'tasks')
+        connection = amqp.Connection('{0}:{1}'.
+                                     format(rabbitmq.host, rabbitmq.port),
+                                     virtual_host=rabbitmq.virtual_host,
+                                     userid=rabbitmq.userid,
+                                     password=rabbitmq.password,
+                                     ssl=rabbitmq.use_ssl, insist=True)
+        channel = connection.channel()
+        channel.exchange_declare('tasks', 'direct', durable=True,
+                                 auto_delete=False)
+
+        channel.basic_publish(Message(body=anyjson.serialize(env)), 'tasks',
+                              'tasks')
 
 
 def create_resource():

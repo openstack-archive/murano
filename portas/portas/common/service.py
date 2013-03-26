@@ -55,7 +55,7 @@ class TaskResultHandlerService(service.Service):
 
 def handle_report(msg):
     log.debug(_('Got report message from orchestration engine:\n{0}'.
-                format(msg.body)))
+    format(msg.body)))
 
     params = anyjson.deserialize(msg.body)
     params['entity_id'] = params['id']
@@ -76,10 +76,16 @@ def handle_report(msg):
 
 
 def handle_result(msg):
-    log.debug(_('Got result message from orchestration engine:\n{0}'.
-                format(msg.body)))
+    log.debug(_('Got result message from '
+                'orchestration engine:\n{0}'.format(msg.body)))
 
     environment_result = anyjson.deserialize(msg.body)
+    if environment_result['deleted']:
+        log.debug(_('Result for environment {0} is dropped. '
+                    'Environment is deleted'.format(environment_result['id'])))
+
+        msg.channel.basic_ack(msg.delivery_tag)
+        return
 
     session = get_session()
     environment = session.query(Environment).get(environment_result['id'])
