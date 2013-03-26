@@ -5,12 +5,13 @@ meta = MetaData()
 
 session = Table('session', meta,
                 Column('id', String(32), primary_key=True),
-                Column('environment_id', String(32), ForeignKey('environment.id')),
+                Column('environment_id', String(32),
+                       ForeignKey('environment.id')),
                 Column('created', DateTime, nullable=False),
                 Column('updated', DateTime, nullable=False),
                 Column('user_id', String(32), nullable=False),
                 Column('state', Text(), nullable=False),
-)
+                )
 
 
 def upgrade(migrate_engine):

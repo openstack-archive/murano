@@ -20,6 +20,7 @@ $DEVSTACK_DIR/stack.sh
 # Executing post-stack actions
 #===============================================================================
 source ./post-stack.sh no-localrc
+source ./start-keero.sh no-localrc
 #===============================================================================
 
 

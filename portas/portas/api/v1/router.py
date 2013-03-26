@@ -16,7 +16,8 @@
 #    under the License.
 import routes
 from portas.openstack.common import wsgi
-from portas.api.v1 import environments, sessions, active_directories, webservers
+from portas.api.v1 import (environments, sessions,
+                           active_directories, webservers)
 
 
 class API(wsgi.Router):
@@ -64,11 +65,13 @@ class API(wsgi.Router):
                        controller=sessions_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
-        mapper.connect('/environments/{environment_id}/sessions/{session_id}/reports',
+        mapper.connect('/environments/{environment_id}/sessions/'
+                       '{session_id}/reports',
                        controller=sessions_resource,
                        action='reports',
                        conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/sessions/{session_id}/deploy',
+        mapper.connect('/environments/{environment_id}/sessions/'
+                       '{session_id}/deploy',
                        controller=sessions_resource,
                        action='deploy',
                        conditions={'method': ['POST']})
@@ -82,7 +85,8 @@ class API(wsgi.Router):
                        controller=activeDirectories_resource,
                        action='create',
                        conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/activeDirectories/{active_directory_id}',
+        mapper.connect('/environments/{environment_id}/activeDirectories/'
+                       '{active_directory_id}',
                        controller=activeDirectories_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
@@ -96,7 +100,8 @@ class API(wsgi.Router):
                        controller=webServers_resource,
                        action='create',
                        conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/webServers/{web_server_id}',
+        mapper.connect('/environments/{environment_id}/webServers/'
+                       '{web_server_id}',
                        controller=webServers_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})

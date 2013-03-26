@@ -15,6 +15,6 @@
 #    under the License.
 
 
-from portas.openstack.common import version as common_version
+from portasclient.openstack.common import version as common_version
 
 version_info = common_version.VersionInfo('python-portasclient')

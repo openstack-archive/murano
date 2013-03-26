@@ -40,4 +40,3 @@ xml_code_engine.XmlCodeEngine.register_function(
 
 xml_code_engine.XmlCodeEngine.register_function(
     prepare_user_data, "prepare_user_data")
-

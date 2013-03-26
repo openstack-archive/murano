@@ -21,7 +21,6 @@ class CommandDispatcher(command.CommandBase):
 
         return result
 
-
     def has_pending_commands(self):
         result = False
         for command in self._command_map.values():
