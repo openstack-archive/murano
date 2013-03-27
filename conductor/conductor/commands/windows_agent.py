@@ -1,9 +1,12 @@
 import json
 import uuid
-from conductor.rabbitmq import Message
 
+from conductor.openstack.common import log as logging
+from conductor.rabbitmq import Message
 import conductor.helpers
 from command import CommandBase
+
+log = logging.getLogger(__name__)
 
 
 class WindowsAgentExecutor(CommandBase):
@@ -11,7 +14,7 @@ class WindowsAgentExecutor(CommandBase):
         self._stack = stack
         self._rmqclient = rmqclient
         self._pending_list = []
-        self._results_queue = '-execution-results-%s' % str(stack)
+        self._results_queue = '-execution-results-%s' % str(stack).lower()
         rmqclient.declare(self._results_queue)
 
     def execute(self, template, mappings, host, service, callback):
@@ -34,8 +37,8 @@ class WindowsAgentExecutor(CommandBase):
         msg.id = id
         self._rmqclient.declare(host)
         self._rmqclient.send(message=msg, key=host)
-        print 'Sending RMQ message %s to %s' % (
-            template_data, host)
+        log.info('Sending RMQ message {0} to {1} with id {2}'.format(
+            template_data, host, id))
 
     def has_pending_commands(self):
         return len(self._pending_list) > 0

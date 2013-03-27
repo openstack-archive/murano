@@ -1,14 +1,15 @@
 import anyjson
-import os
-import uuid
 import eventlet
 
+from conductor.openstack.common import log as logging
 import conductor.helpers
 from command import CommandBase
 import conductor.config
 from heatclient.client import Client
 import heatclient.exc
+import types
 
+log = logging.getLogger(__name__)
 
 
 class HeatExecutor(CommandBase):
@@ -21,6 +22,8 @@ class HeatExecutor(CommandBase):
             token_only=True, token=token)
 
     def execute(self, command, callback, **kwargs):
+        log.debug('Got command {0} on stack {1}'.format(command, self._stack))
+
         if command == 'CreateOrUpdate':
             return self._execute_create_update(
                 kwargs['template'],
@@ -71,26 +74,27 @@ class HeatExecutor(CommandBase):
             arguments = conductor.helpers.merge_dicts(
                 arguments, t['arguments'], max_levels=1)
 
-        print 'Executing heat template', anyjson.dumps(template), \
-            'with arguments', arguments, 'on stack', self._stack
+        log.info('Executing heat template {0} with arguments {1} on stack {2}'
+            .format(anyjson.dumps(template), arguments, self._stack))
 
         try:
-            print 'try update'
             self._heat_client.stacks.update(
                 stack_id=self._stack,
                 parameters=arguments,
                 template=template)
-            print 'wait update'
+            log.debug('Waiting for the stack {0} to be update'
+                .format(self._stack))
             self._wait_state('UPDATE_COMPLETE')
+            log.info('Stack {0} updated'.format(self._stack))
         except heatclient.exc.HTTPNotFound:
-            print 'try create'
-
             self._heat_client.stacks.create(
                 stack_name=self._stack,
                 parameters=arguments,
                 template=template)
-            print 'wait create'
+            log.debug('Waiting for the stack {0} to be create'
+                .format(self._stack))
             self._wait_state('CREATE_COMPLETE')
+            log.info('Stack {0} created'.format(self._stack))
 
 
         pending_list = self._update_pending_list
@@ -105,12 +109,16 @@ class HeatExecutor(CommandBase):
         if not len(self._delete_pending_list):
             return False
 
+        log.debug('Deleting stack {0}'.format(self._stack))
         try:
             self._heat_client.stacks.delete(
                 stack_id=self._stack)
-            self._wait_state('DELETE_COMPLETE')
-        except Exception:
-            pass
+            log.debug('Waiting for the stack {0} to be deleted'
+                .format(self._stack))
+            self._wait_state(['DELETE_COMPLETE', ''])
+            log.info('Stack {0} deleted'.format(self._stack))
+        except Exception as ex:
+            log.exception(ex)
 
         pending_list = self._delete_pending_list
         self._delete_pending_list = []
@@ -120,13 +128,23 @@ class HeatExecutor(CommandBase):
         return True
 
     def _wait_state(self, state):
+        if isinstance(state, types.ListType):
+            states = state
+        else:
+            states = [state]
+
+
         while True:
-            status = self._heat_client.stacks.get(
-                stack_id=self._stack).stack_status
+            try:
+                status = self._heat_client.stacks.get(
+                    stack_id=self._stack).stack_status
+            except heatclient.exc.HTTPNotFound:
+                status = ''
+
             if 'IN_PROGRESS' in status:
                 eventlet.sleep(1)
                 continue
-            if status != state:
+            if status not in states:
                 raise EnvironmentError()
             return
 
