@@ -90,8 +90,8 @@ def services_list(request, datacenter_id):
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
     
-    for i in range(len(services)):
-        services[i]['operation'] = get_status_message_for_service(request, services[i].id)
+    #for i in range(len(services)):
+    #    services[i]['operation'] = get_status_message_for_service(request, services[i].id)
 
     return services
 
@@ -149,7 +149,8 @@ def get_status_message_for_service(request, service_id):
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
-    return len(reports(self, environment_id, session_id, service_id))
+    return len(windcclient(request).sessions.
+               reports(self, environment_id, session_id, service_id))
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
