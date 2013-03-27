@@ -31,9 +31,7 @@ class OverviewTab(tabs.Tab):
     template_name = ("project/windc/_services.html")
     
     def get_context_data(self, request):
-        LOG.debug(self.tab_group)
-        LOG.critical(self.tab_group.kwargs)
-        return {"service": self.tab_group.kwargs['service']}
+        return {"service_id": self.tab_group.kwargs['service_id']}
 
 class LogsTab(tabs.Tab):
     name = _("Logs")
@@ -41,9 +39,7 @@ class LogsTab(tabs.Tab):
     template_name = ("project/windc/_services.html")
     
     def get_context_data(self, request):
-        LOG.debug(self.tab_group)
-        LOG.critical(self.tab_group.kwargs)
-        return {"service": self.tab_group.kwargs['service']}
+        return {"service_id": self.tab_group.kwargs['service_id']}
 
 
 class WinServicesTabs(tabs.TabGroup):
