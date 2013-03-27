@@ -149,6 +149,10 @@ def get_status_message_for_service(request, service_id):
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
+    LOG.critical(environment_id)
+    LOG.critical(session_id)
+    LOG.critical(service_id)
+
     return len(windcclient(request).sessions.
                reports(environment_id, session_id, service_id=service_id))
 
