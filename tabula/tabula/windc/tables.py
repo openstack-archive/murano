@@ -159,13 +159,6 @@ STATUS_DISPLAY_CHOICES = (
     ('finished', 'Active')
 )
 
-STATUS_DISPLAY_CHOICES = (
-    ('draft', 'Ready to deploy'),
-    ('pending', 'Wait for configuration'),
-    ('inprogress', 'Deploy in progress'),
-    ('finished', 'Active')
-)
-
 
 class WinDCTable(tables.DataTable):
 
