@@ -12,6 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from mercurial import patch
 
 from portasclient.common import base
 
@@ -49,10 +50,9 @@ class ActiveDirectoryManager(base.Manager):
     def delete(self, environment_id, session_id, service_id):
         headers = {'X-Configuration-Session': session_id}
         path = 'environments/{id}/activeDirectories/{active_directory_id}'
+        path = path.format(id=environment_id, active_directory_id=service_id)
 
-        return self._delete(patch.format(id=environment_id,
-                                         active_directory_id=service_id),
-                            headers=headers)
+        return self._delete(path, headers=headers)
 
 
 class WebServer(base.Resource):
