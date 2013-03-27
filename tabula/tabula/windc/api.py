@@ -140,7 +140,7 @@ def get_service_datails(request, service_id):
 def get_status_message_for_service(request, service_id):
     environment_id = get_data_center_id_for_service(request, service_id)
     session_id = None
-    sessions = windcclient(request).sessions.list(datacenter_id)
+    sessions = windcclient(request).sessions.list(environment_id)
 
     for s in sessions:
         if s.state in ['open', 'deploying']:
