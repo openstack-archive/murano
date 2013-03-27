@@ -33,16 +33,8 @@ class OverviewTab(tabs.Tab):
     def get_context_data(self, request):
         return {"service_id": self.tab_group.kwargs['service_id']}
 
-class LogsTab(tabs.Tab):
-    name = _("Logs")
-    slug = "_logs"
-    template_name = "services.html"
-    
-    def get_context_data(self, request):
-        return {"service_id": self.tab_group.kwargs['service_id']}
-
 
 class WinServicesTabs(tabs.TabGroup):
     slug = "services_details"
-    tabs = (OverviewTab,)
+    #tabs = (OverviewTab,)
     sticky = True
