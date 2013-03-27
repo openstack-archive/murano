@@ -91,7 +91,7 @@ def services_list(request, datacenter_id):
     services += windcclient(request).webServers.list(datacenter_id, session_id)
     
     for i in range(len(services)):
-        services[i]['operation'] = 
+        services[i]['operation'] = get_status_message_for_service(request, services[i].id)
 
     return services
 
