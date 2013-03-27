@@ -176,6 +176,30 @@ class WinServices(tables.DataTableView):
 class DetailServiceView(tabs.TabView):
     tab_group_class = WinServicesTabs
     template_name = '_services.html'
+    
+    def get_context_data(self, **kwargs):
+        context = super(DetailServiceView, self).get_context_data(**kwargs)
+        context["service"] = self.get_data()
+        context["service_name"] = self.get_data().name
+        return context
+
+    def get_data(self):
+        if not "_service" in self:
+            try:
+                service_id = self.kwargs['service_id']
+                service = api.get_service_datails(self.request, service_id)
+            except:
+                redirect = reverse('horizon:project:windc:index')
+                exceptions.handle(self.request,
+                                  _('Unable to retrieve details for '
+                                    'service "%s".') % service_id,
+                                    redirect=redirect)
+            self._service = service
+        return self._service
+
+    def get_tabs(self, request, *args, **kwargs):
+        service = self.get_data()
+        return self.tab_group_class(request, service=service, **kwargs)
 
 
 class CreateWinDCView(workflows.WorkflowView):

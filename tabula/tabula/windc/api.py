@@ -114,6 +114,15 @@ def services_get(request, datacenter_id, service_id):
         if service.id is service_id:
             return service
 
+def get_service_datails(request, service_id):
+    datacenters = datacenters_list(request)
+    services = []
+    for dc in datacenters:
+        services += services_list(request, dc.id)
+    
+    for service in services:
+        if service.id == service_id:
+            return service
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
