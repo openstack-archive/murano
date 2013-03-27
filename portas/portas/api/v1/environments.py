@@ -95,6 +95,8 @@ class Controller(object):
         env = environment.description
         env['services'] = []
         env['deleted'] = True
+        #Set X-Auth-Token for conductor
+        env['token'] = request.context.auth_token
 
         connection = amqp.Connection('{0}:{1}'.
                                      format(rabbitmq.host, rabbitmq.port),
