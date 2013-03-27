@@ -78,7 +78,7 @@ class ConductorWorkflowService(service.Service):
             try:
                 with rabbitmq.RmqClient() as rmq:
                     rmq.declare('tasks', 'tasks')
-                    rmq.declare('task-results', 'tasks')
+                    rmq.declare('task-results')
                     with rmq.open('tasks') as subscription:
                         while True:
                             msg = subscription.get_message()
