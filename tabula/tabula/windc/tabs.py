@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 class OverviewTab(tabs.Tab):
     name = _("Service")
     slug = "_service"
-    template_name = ("project:windc:services")
+    template_name = "project/windc/_services"
     
     def get_context_data(self, request):
         return {"service_id": self.tab_group.kwargs['service_id']}
