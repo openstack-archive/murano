@@ -18,9 +18,12 @@ from django.utils.translation import ugettext_lazy as _
 
 from horizon import exceptions
 from horizon import tabs
+import logging
 
 from openstack_dashboard import api
 
+
+LOG = logging.getLogger(__name__)
 
 class OverviewTab(tabs.Tab):
     name = _("Service")
@@ -28,6 +31,8 @@ class OverviewTab(tabs.Tab):
     template_name = ("project/windc/_services.html")
     
     def get_context_data(self, request):
+        LOG.debug(self.tab_group)
+        LOG.critical(self.tab_group.kwargs.__dict__)
         return {"service": self.tab_group.kwargs['service']}
 
 class LogsTab(tabs.Tab):
@@ -36,6 +41,8 @@ class LogsTab(tabs.Tab):
     template_name = ("project/windc/_services.html")
     
     def get_context_data(self, request):
+        LOG.debug(self.tab_group)
+        LOG.critical(self.tab_group.kwargs.__dict__)
         return {"service": self.tab_group.kwargs['service']}
 
 
