@@ -11,8 +11,8 @@ def verify_session(func):
     @functools.wraps(func)
     def __inner(self, request, *args, **kwargs):
         if hasattr(request, 'context') and request.context.session:
-            uw = get_session()
-            configuration_session = uw.query(Session).get(request.context.session)
+            uw = get_session().query(Session)
+            configuration_session = uw.get(request.context.session)
 
             if configuration_session.state != 'open':
                 log.info('Session is already deployed')
@@ -22,5 +22,3 @@ def verify_session(func):
             raise exc.HTTPUnauthorized
         return func(self, request, *args, **kwargs)
     return __inner
-
-

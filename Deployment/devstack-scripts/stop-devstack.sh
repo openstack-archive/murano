@@ -18,5 +18,6 @@ $DEVSTACK_DIR/unstack.sh
 # Executing post-unstack actions
 #===============================================================================
 source ./post-unstack.sh no-localrc
+source ./stop-keero.sh no-localrc
 #===============================================================================
 

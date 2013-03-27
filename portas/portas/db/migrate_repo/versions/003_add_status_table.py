@@ -8,10 +8,11 @@ status = Table('status', meta,
                Column('created', DateTime, nullable=False),
                Column('updated', DateTime, nullable=False),
                Column('entity', String(10), nullable=False),
-               Column('environment_id', String(32), ForeignKey('environment.id')),
+               Column('environment_id', String(32),
+                      ForeignKey('environment.id')),
                Column('session_id', String(32), ForeignKey('session.id')),
                Column('text', Text(), nullable=False),
-)
+               )
 
 
 def upgrade(migrate_engine):

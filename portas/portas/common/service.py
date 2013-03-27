@@ -27,14 +27,18 @@ class TaskResultHandlerService(service.Service):
         super(TaskResultHandlerService, self).stop()
 
     def _handle_results(self):
-        connection = amqp.Connection('{0}:{1}'.format(rabbitmq.host, rabbitmq.port), virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.userid, password=rabbitmq.password,
+        connection = amqp.Connection('{0}:{1}'.
+                                     format(rabbitmq.host, rabbitmq.port),
+                                     virtual_host=rabbitmq.virtual_host,
+                                     userid=rabbitmq.userid,
+                                     password=rabbitmq.password,
                                      ssl=rabbitmq.use_ssl, insist=True)
         ch = connection.channel()
 
         def bind(exchange, queue):
             if not exchange:
-                ch.exchange_declare(exchange, 'direct', durable=True, auto_delete=False)
+                ch.exchange_declare(exchange, 'direct', durable=True,
+                                    auto_delete=False)
             ch.queue_declare(queue, durable=True, auto_delete=False)
             if not exchange:
                 ch.queue_bind(queue, exchange, queue)
@@ -43,13 +47,15 @@ class TaskResultHandlerService(service.Service):
         bind(conf.reports_exchange, conf.reports_queue)
 
         ch.basic_consume(conf.results_exchange, callback=handle_result)
-        ch.basic_consume(conf.reports_exchange, callback=handle_report, no_ack=True)
+        ch.basic_consume(conf.reports_exchange, callback=handle_report,
+                         no_ack=True)
         while ch.callbacks:
             ch.wait()
 
 
 def handle_report(msg):
-    log.debug(_('Got report message from orchestration engine:\n{0}'.format(msg.body)))
+    log.debug(_('Got report message from orchestration engine:\n{0}'.
+    format(msg.body)))
 
     params = anyjson.deserialize(msg.body)
     params['entity_id'] = params['id']
@@ -61,7 +67,8 @@ def handle_report(msg):
     session = get_session()
     #connect with session
     conf_session = session.query(Session).filter_by(
-        **{'environment_id': status.environment_id, 'state': 'deploying'}).first()
+        **{'environment_id': status.environment_id,
+           'state': 'deploying'}).first()
     status.session_id = conf_session.id
 
     with session.begin():
@@ -69,9 +76,16 @@ def handle_report(msg):
 
 
 def handle_result(msg):
-    log.debug(_('Got result message from orchestration engine:\n{0}'.format(msg.body)))
+    log.debug(_('Got result message from '
+                'orchestration engine:\n{0}'.format(msg.body)))
 
     environment_result = anyjson.deserialize(msg.body)
+    if environment_result['deleted']:
+        log.debug(_('Result for environment {0} is dropped. '
+                    'Environment is deleted'.format(environment_result['id'])))
+
+        msg.channel.basic_ack(msg.delivery_tag)
+        return
 
     session = get_session()
     environment = session.query(Environment).get(environment_result['id'])

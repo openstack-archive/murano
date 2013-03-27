@@ -16,6 +16,7 @@ RABBIT_PASSWORD=$lab_password
 SERVICE_PASSWORD=$lab_password
 SERVICE_TOKEN=tokentoken
 ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
+ENABLED_SERVICES+=,conductor,portas
 
 LOGFILE=/opt/stack/devstack/stack.sh.log
 SCREEN_LOGDIR=/opt/stack/log/

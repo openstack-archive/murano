@@ -5,6 +5,7 @@ import re
 import xml_code_engine
 import function_context
 
+
 class Workflow(object):
     def __init__(self, filename, data, command_dispatcher, config, reporter):
         self._data = data
@@ -84,7 +85,6 @@ class Workflow(object):
         else:
             return position + suffix.split('.')
 
-
     @staticmethod
     def _select_func(context, path='', source=None, **kwargs):
 
@@ -101,7 +101,6 @@ class Workflow(object):
             return Workflow._get_path(
                 context['/dataSource'],
                 Workflow._correct_position(path, context))
-
 
     @staticmethod
     def _set_func(path, context, body, engine, target=None, **kwargs):

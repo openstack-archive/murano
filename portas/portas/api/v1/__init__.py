@@ -27,15 +27,19 @@ def get_env_status(environment_id, session_id):
     unit = get_session()
 
     if not session_id:
-        session = unit.query(Session).filter(
-            Session.environment_id == environment_id and Session.state.in_(['open', 'deploying'])).first()
+        variants = ['open', 'deploying']
+        session = unit.query(Session).filter(Session.environment_id ==
+                                             environment_id and
+                                             Session.state.in_(variants)
+                                             ).first()
         if session:
             session_id = session.id
         else:
             return status
 
     session_state = unit.query(Session).get(session_id).state
-    reports_count = unit.query(Status).filter_by(environment_id=environment_id, session_id=session_id).count()
+    reports_count = unit.query(Status).filter_by(environment_id=environment_id,
+                                                 session_id=session_id).count()
 
     if session_state == 'deployed':
         status = 'finished'
@@ -50,13 +54,16 @@ def get_env_status(environment_id, session_id):
 
     def get_statuses(type):
         if type in draft['services']:
-            return [get_service_status(environment_id, session_id, service) for service in
-                    draft['services'][type]]
+            services = draft['services'][type]
+            return [get_service_status(environment_id,
+                                       session_id,
+                                       service) for service in services]
         else:
             return []
 
     is_inprogress = filter(lambda item: item == 'inprogress',
-                           get_statuses('activeDirectories') + get_statuses('webServers'))
+                           get_statuses('activeDirectories') +
+                           get_statuses('webServers'))
 
     if session_state == 'deploying' and is_inprogress > 1:
         status = 'inprogress'
@@ -71,10 +78,11 @@ def get_service_status(environment_id, session_id, service):
     session_state = unit.query(Session).get(session_id).state
 
     entities = [u['id'] for u in service['units']]
-    reports_count = unit.query(Status).filter(Status.environment_id == environment_id
-                                              and Status.session_id == session_id
-    and Status.entity_id.in_(entities)) \
-        .count()
+    reports_count = unit.query(Status).filter(
+                    Status.environment_id == environment_id
+                    and Status.session_id == session_id
+                    and Status.entity_id.in_(entities)
+                    ).count()
 
     if session_state == 'deployed':
         status = 'finished'

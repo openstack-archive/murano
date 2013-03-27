@@ -11,7 +11,7 @@ Table('environment', meta,
       Column('updated', DateTime(), nullable=False),
       Column('tenant_id', String(32), nullable=False),
       Column('description', Text(), nullable=False),
-)
+      )
 
 Table('service', meta,
       Column('id', String(32), primary_key=True),
@@ -21,7 +21,7 @@ Table('service', meta,
       Column('created', DateTime, nullable=False),
       Column('updated', DateTime, nullable=False),
       Column('description', Text(), nullable=False),
-)
+      )
 
 
 def upgrade(migrate_engine):
