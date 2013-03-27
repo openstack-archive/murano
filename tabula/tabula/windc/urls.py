@@ -20,7 +20,7 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import IndexView, WinServices, CreateWinDCView
+from .views import IndexView, WinServices, CreateWinDCView, DetailServiceView
 from .views import Wizard
 from .forms import WizardFormServiceType, WizardFormConfiguration
 
@@ -34,6 +34,6 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
     url(r'^(?P<data_center_id>[^/]+)/$', WinServices.as_view(),
         name='services'),
-    url(r'^(?P<service_id>[^/]+)/$', WinServices.as_view(),
+    url(r'^(?P<service_id>[^/]+)/$', DetailServiceView.as_view(),
         name='service_details')
 )

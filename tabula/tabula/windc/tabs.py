@@ -32,7 +32,7 @@ class OverviewTab(tabs.Tab):
         return {"domain_controller": dc}
 
 
-class WinServicesTab(tabs.TabGroup):
+class WinServicesTabs(tabs.TabGroup):
     slug = "services_details"
     tabs = (OverviewTab,)
     sticky = True

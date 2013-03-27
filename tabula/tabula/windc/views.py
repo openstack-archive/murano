@@ -43,6 +43,7 @@ from tabula.windc import api
 
 from .tables import WinDCTable, WinServicesTable
 from .workflows import CreateWinDC
+from .tabs import WinServicesTabs
 from .forms import (WizardFormServiceType, WizardFormConfiguration,
                     WizardFormADConfiguration, WizardFormIISConfiguration)
 
@@ -167,6 +168,11 @@ class WinServices(tables.DataTableView):
                               _('Unable to retrieve list of services for '
                                 'data center "%s".') % self.dc_name)
         return services
+
+
+class DetailServiceView(tabs.TabView):
+    tab_group_class = WinServicesTabs
+    template_name = '_services.html'
 
 
 class CreateWinDCView(workflows.WorkflowView):
