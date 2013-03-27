@@ -44,5 +44,5 @@ class LogsTab(tabs.Tab):
 
 class WinServicesTabs(tabs.TabGroup):
     slug = "services_details"
-    tabs = (OverviewTab, LogsTab)
+    tabs = (OverviewTab,)
     sticky = True

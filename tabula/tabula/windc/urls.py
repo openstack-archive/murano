@@ -34,6 +34,6 @@ urlpatterns = patterns(VIEW_MOD,
     url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
     url(r'^(?P<data_center_id>[^/]+)/$', WinServices.as_view(),
         name='services'),
-    url(r'^(?P<service_id>[^/]+)$', DetailServiceView.as_view(),
+    url(r'^(?P<service_id>[^/]+)/details$', DetailServiceView.as_view(),
         name='service_details')
 )
