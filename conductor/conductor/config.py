@@ -46,7 +46,8 @@ rabbit_opts = [
 ]
 
 heat_opts = [
-    cfg.StrOpt('url')
+    cfg.StrOpt('url'),
+    cfg.StrOpt('keystone')
 ]
 
 CONF = cfg.CONF

@@ -4,9 +4,9 @@ import windows_agent
 
 
 class CommandDispatcher(command.CommandBase):
-    def __init__(self, environment_id, rmqclient, token):
+    def __init__(self, environment_id, rmqclient, token, tenant_id):
         self._command_map = {
-            'cf': cloud_formation.HeatExecutor(environment_id, token),
+            'cf': cloud_formation.HeatExecutor(environment_id, token, tenant_id),
             'agent': windows_agent.WindowsAgentExecutor(
                 environment_id, rmqclient)
         }
