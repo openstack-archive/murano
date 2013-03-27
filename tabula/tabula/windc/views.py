@@ -54,7 +54,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
-    template_name = 'project/windc/services_tabs.html'
+    template_name = 'services_tabs.html'
 
     def done(self, form_list, **kwargs):
         link = self.request.__dict__['META']['HTTP_REFERER']
@@ -133,7 +133,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
 class IndexView(tables.DataTableView):
     table_class = WinDCTable
-    template_name = 'project/windc/index.html'
+    template_name = 'index.html'
 
     def get_data(self):
         try:
@@ -147,7 +147,7 @@ class IndexView(tables.DataTableView):
 
 class WinServices(tables.DataTableView):
     table_class = WinServicesTable
-    template_name = 'project/windc/services.html'
+    template_name = 'services.html'
 
     def get_context_data(self, **kwargs):
         context = super(WinServices, self).get_context_data(**kwargs)
@@ -171,7 +171,7 @@ class WinServices(tables.DataTableView):
 
 class DetailServiceView(tabs.TabView):
     tab_group_class = WinServicesTabs
-    template_name = 'project/windc/service_details.html'
+    template_name = 'service_details.html'
     
     def get_context_data(self, **kwargs):
         context = super(DetailServiceView, self).get_context_data(**kwargs)
@@ -200,7 +200,7 @@ class DetailServiceView(tabs.TabView):
 
 class CreateWinDCView(workflows.WorkflowView):
     workflow_class = CreateWinDC
-    template_name = 'project/windc/create_dc.html'
+    template_name = 'create_dc.html'
 
     def get_initial(self):
         initial = super(CreateWinDCView, self).get_initial()
