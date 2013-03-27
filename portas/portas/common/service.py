@@ -80,7 +80,7 @@ def handle_result(msg):
                 'orchestration engine:\n{0}'.format(msg.body)))
 
     environment_result = anyjson.deserialize(msg.body)
-    if environment_result['deleted']:
+    if 'deleted' in environment_result:
         log.debug(_('Result for environment {0} is dropped. '
                     'Environment is deleted'.format(environment_result['id'])))
 
