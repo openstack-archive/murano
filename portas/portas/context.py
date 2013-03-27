@@ -24,10 +24,10 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_tok=None, user=None, tenant=None,
+    def __init__(self, auth_token=None, user=None, tenant=None,
                  roles=None, service_catalog=None, session=None):
 
-        self.auth_tok = auth_tok
+        self.auth_token = auth_token
         self.user = user
         self.tenant = tenant
         self.roles = roles or []
@@ -51,7 +51,7 @@ class RequestContext(object):
             'project_id': self.tenant,
 
             'roles': self.roles,
-            'auth_token': self.auth_tok,
+            'auth_token': self.auth_token,
             'session': self.session
         }
 
