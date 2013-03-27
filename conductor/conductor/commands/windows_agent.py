@@ -18,9 +18,8 @@ class WindowsAgentExecutor(CommandBase):
         rmqclient.declare(self._results_queue)
 
     def execute(self, template, mappings, host, service, callback):
-        with open('data/templates/agent/%s.template' %
-                  template) as template_file:
-            template_data = template_file.read()
+        with open('data/templates/agent/%s.template' % template) as file:
+            template_data = file.read()
 
         template_data = conductor.helpers.transform_json(
             json.loads(template_data), mappings)
@@ -56,7 +55,6 @@ class WindowsAgentExecutor(CommandBase):
                 if item:
                     self._pending_list.pop(index)
                     item['callback'](msg.body)
-
 
         return True
 

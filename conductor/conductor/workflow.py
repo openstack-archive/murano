@@ -5,6 +5,7 @@ import re
 import xml_code_engine
 import function_context
 
+
 class Workflow(object):
     def __init__(self, filename, data, command_dispatcher, config, reporter):
         self._data = data

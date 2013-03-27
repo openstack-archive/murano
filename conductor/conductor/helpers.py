@@ -1,5 +1,6 @@
 import types
 
+
 def transform_json(json, mappings):
     if isinstance(json, types.ListType):
         return [transform_json(t, mappings) for t in json]
@@ -46,7 +47,3 @@ def find(f, seq):
             return item, index
         index += 1
     return None, -1
-
-
-def generate(length):
-    return ''.join(choice(chars) for _ in range(length))

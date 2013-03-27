@@ -1,6 +1,6 @@
 import xml_code_engine
-import json
 import rabbitmq
+
 
 class Reporter(object):
     def __init__(self, rmqclient, task_id, environment_id):
