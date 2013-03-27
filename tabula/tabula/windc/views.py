@@ -171,7 +171,7 @@ class WinServices(tables.DataTableView):
 
 class DetailServiceView(tabs.TabView):
     tab_group_class = WinServicesTabs
-    template_name = 'service_details.html'
+    template_name = 'project/tabula/service_details.html'
     
     def get_context_data(self, **kwargs):
         context = super(DetailServiceView, self).get_context_data(**kwargs)
