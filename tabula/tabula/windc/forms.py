@@ -109,22 +109,22 @@ class WizardFormIISConfiguration(forms.Form):
     iis_domain = forms.ChoiceField(label=_('Member of the Domain'),
                                  required=False)
     
-    def __init__(self, request, *args, **kwargs):
-
-        super(WizardFormIISConfiguration, self).__init__(request,
-                                                         *args,
-                                                         **kwargs)
-        
-        link = self.request.__dict__['META']['HTTP_REFERER']
-        datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-        
-        domains = api.services_list(request, datacenter_id)
-        
-        LOG.critical('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-        LOG.critical(domains)
-        LOG.critical('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-        
-        self.fields['iis_domain'].choices = [("", "")] + \
-                                      [(domain.name, domain.name)
-                                       for domain in domains]
+    # def __init__(self, request, *args, **kwargs):
+    #
+    #     super(WizardFormIISConfiguration, self).__init__(request,
+    #                                                      *args,
+    #                                                      **kwargs)
+    #
+    #     link = self.request.__dict__['META']['HTTP_REFERER']
+    #     datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+    #
+    #     domains = api.services_list(request, datacenter_id)
+    #
+    #     LOG.critical('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
+    #     LOG.critical(domains)
+    #     LOG.critical('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
+    #
+    #     self.fields['iis_domain'].choices = [("", "")] + \
+    #                                   [(domain.name, domain.name)
+    #                                    for domain in domains]
         

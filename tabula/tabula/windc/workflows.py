@@ -66,7 +66,7 @@ class ConfigureDCAction(workflows.Action):
 
     class Meta:
         name = _("Data Center")
-        help_text_template = ("api_data_center_help.html")
+        help_text_template = "_data_center_help.html"
 
 
 class ConfigureDC(workflows.Step):
