@@ -112,7 +112,17 @@ def services_get(request, datacenter_id, service_id):
 
     for service in services:
         if service.id is service_id:
+            service['operation'] = get_status_message_for_service(request, service_id)
             return service
+
+def get_data_center_id_for_service(request, service_id):
+    datacenters = datacenters_list(request)
+
+    for dc in datacenters:
+        services = services_list(request, dc.id)
+        for service in services:
+            if service.id == service_id:
+                return dc.id
 
 def get_service_datails(request, service_id):
     datacenters = datacenters_list(request)
@@ -123,6 +133,20 @@ def get_service_datails(request, service_id):
     for service in services:
         if service.id == service_id:
             return service
+
+def get_status_message_for_service(request, service_id):
+    environment_id = get_data_center_id_for_service(request, service_id)
+    session_id = None
+    sessions = windcclient(request).sessions.list(datacenter_id)
+
+    for s in sessions:
+        if s.state in ['open', 'deploying']:
+            session_id = s.id
+
+    if session_id is None:
+        session_id = windcclient(request).sessions.configure(datacenter_id).id
+
+    return reports(self, environment_id, session_id, service_id)
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)

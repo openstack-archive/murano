@@ -200,9 +200,12 @@ class WinServicesTable(tables.DataTable):
                            status_choices=STATUS_CHOICES,
                            display_choices=STATUS_DISPLAY_CHOICES)
 
+    operation = tables.Column('operation', verbose_name=_('Operation'),
+                              status=True)
+
     class Meta:
         name = 'services'
         verbose_name = _('Services')
         row_class = UpdateServiceRow
-        status_columns = ['status']
+        status_columns = ['status', 'operation']
         table_actions = (CreateService,)
