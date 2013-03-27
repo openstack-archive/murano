@@ -79,7 +79,7 @@ class ConductorWorkflowService(service.Service):
                 with rabbitmq.RmqClient() as rmq:
                     rmq.declare('tasks', 'tasks')
                     rmq.declare('task-results')
-                    with rmq.open('tasks2') as subscription:
+                    with rmq.open('tasks') as subscription:
                         while True:
                             msg = subscription.get_message()
                             self.tg.add_thread(
