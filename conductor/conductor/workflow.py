@@ -5,6 +5,7 @@ import re
 import xml_code_engine
 import function_context
 
+
 class Workflow(object):
     def __init__(self, filename, data, command_dispatcher, config, reporter):
         self._data = data
@@ -16,21 +17,15 @@ class Workflow(object):
         self._reporter = reporter
 
     def execute(self):
-        while True:
-            context = function_context.Context()
-            context['/dataSource'] = self._data
-            context['/commandDispatcher'] = self._command_dispatcher
-            context['/config'] = self._config
-            context['/reporter'] = self._reporter
-            if not self._engine.execute(context):
-                break
+        context = function_context.Context()
+        context['/dataSource'] = self._data
+        context['/commandDispatcher'] = self._command_dispatcher
+        context['/config'] = self._config
+        context['/reporter'] = self._reporter
+        return self._engine.execute(context)
 
     @staticmethod
     def _get_path(obj, path, create_non_existing=False):
-        # result = jsonpath.jsonpath(obj, '.'.join(path))
-        # if not result or len(result) < 1:
-        #     return None
-        # return result[0]
         current = obj
         for part in path:
             if isinstance(current, types.ListType):
@@ -84,7 +79,6 @@ class Workflow(object):
         else:
             return position + suffix.split('.')
 
-
     @staticmethod
     def _select_func(context, path='', source=None, **kwargs):
 
@@ -102,7 +96,6 @@ class Workflow(object):
                 context['/dataSource'],
                 Workflow._correct_position(path, context))
 
-
     @staticmethod
     def _set_func(path, context, body, engine, target=None, **kwargs):
         body_data = engine.evaluate_content(body, context)
@@ -119,6 +112,7 @@ class Workflow(object):
             if Workflow._get_path(data, position) != body_data:
                 Workflow._set_path(data, position, body_data)
                 context['/hasSideEffects'] = True
+
         else:
             data = context['/dataSource']
             new_position = Workflow._correct_position(path, context)
@@ -130,8 +124,6 @@ class Workflow(object):
     def _rule_func(match, context, body, engine, limit=0, name=None, **kwargs):
         position = context['__dataSource_currentPosition'] or []
 
-        if name == 'marker':
-            print "!"
         # data = context['__dataSource_currentObj']
         # if data is None:
         #     data = context['/dataSource']
@@ -139,21 +131,29 @@ class Workflow(object):
         data = Workflow._get_path(context['/dataSource'], position)
         match = re.sub(r'@\.([\w.]+)',
                        r"Workflow._get_path(@, '\1'.split('.'))", match)
-        selected = jsonpath.jsonpath(data, match, 'IPATH') or []
-
+        match = match.replace('$.', '$[*].')
+        selected = jsonpath.jsonpath([data], match, 'IPATH') or []
         index = 0
         for found_match in selected:
             if 0 < int(limit) <= index:
                 break
             index += 1
-            new_position = position + found_match
+            new_position = position + found_match[1:]
             context['__dataSource_currentPosition'] = new_position
             context['__dataSource_currentObj'] = Workflow._get_path(
                 context['/dataSource'], new_position)
             for element in body:
+                if element.tag == 'empty':
+                    continue
                 engine.evaluate(element, context)
                 if element.tag == 'rule' and context['/hasSideEffects']:
                     break
+        if not index:
+            empty_handler = body.find('empty')
+            if empty_handler is not None:
+
+                engine.evaluate_content(empty_handler, context)
+
 
     @staticmethod
     def _workflow_func(context, body, engine, **kwargs):

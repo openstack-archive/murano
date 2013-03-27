@@ -16,7 +16,8 @@
 #    under the License.
 import routes
 from portas.openstack.common import wsgi
-from portas.api.v1 import environments, sessions, active_directories, webservers
+from portas.api.v1 import (environments, sessions,
+                           active_directories, webservers)
 
 
 class API(wsgi.Router):

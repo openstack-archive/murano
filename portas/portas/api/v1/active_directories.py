@@ -9,18 +9,23 @@ log = logging.getLogger(__name__)
 
 class Controller(object):
     def index(self, request, environment_id):
-        log.debug(_('ActiveDirectory:Index <EnvId: {0}>'.format(environment_id)))
+        log.debug(_('ActiveDirectory:Index <EnvId: {0}>'.
+                    format(environment_id)))
 
-        draft = prepare_draft(get_draft(environment_id, request.context.session))
+        draft = prepare_draft(get_draft(environment_id,
+                                        request.context.session))
 
         for dc in draft['services']['activeDirectories']:
-            dc['status'] = get_service_status(environment_id, request.context.session, dc)
+            dc['status'] = get_service_status(environment_id,
+                                              request.context.session,
+                                              dc)
 
         return {'activeDirectories': draft['services']['activeDirectories']}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
-        log.debug(_('ActiveDirectory:Create <EnvId: {0}, Body: {1}>'.format(environment_id, body)))
+        log.debug(_('ActiveDirectory:Create <EnvId: {0}, Body: {1}>'.
+                    format(environment_id, body)))
 
         draft = get_draft(session_id=request.context.session)
 
@@ -33,7 +38,7 @@ class Controller(object):
         for unit in active_directory['units']:
             unit_count += 1
             unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = 'dc{0}{1}'.format(unit_count, active_directory['id'][:4])
+            unit['name'] = 'dc{0}'.format(unit_count)
 
         draft = prepare_draft(draft)
         draft['services']['activeDirectories'].append(active_directory)
@@ -42,19 +47,21 @@ class Controller(object):
         return active_directory
 
     def delete(self, request, environment_id, active_directory_id):
-        log.debug(_('ActiveDirectory:Delete <EnvId: {0}, Id: {1}>'.format(environment_id, active_directory_id)))
+        log.debug(_('ActiveDirectory:Delete <EnvId: {0}, Id: {1}>'.
+                    format(environment_id, active_directory_id)))
 
         draft = get_draft(request.context.session)
-        draft['services']['activeDirectories'] = [service for service in draft['services']['activeDirectories'] if
-                                                  service['id'] != active_directory_id]
+        items = [service for service in draft['services']['activeDirectories']
+                 if service['id'] != active_directory_id]
+        draft['services']['activeDirectories'] = items
         save_draft(request.context.session, draft)
 
 
 def prepare_draft(draft):
-    if not draft.has_key('services'):
+    if not 'services' in draft:
         draft['services'] = {}
 
-    if not draft['services'].has_key('activeDirectories'):
+    if not 'activeDirectories' in draft['services']:
         draft['services']['activeDirectories'] = []
 
     return draft

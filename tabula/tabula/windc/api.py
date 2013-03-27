@@ -78,7 +78,6 @@ def services_create(request, datacenter, parameters):
 def services_list(request, datacenter_id):
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
-
     for s in sessions:
         if s.state in ['open', 'deploying']:
             session_id = s.id
@@ -112,7 +111,7 @@ def get_active_directories(request, datacenter_id):
 
 def services_get(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
-
+    
     for service in services:
         if service.id is service_id:
             service['operation'] = get_status_message_for_service(request, service_id)

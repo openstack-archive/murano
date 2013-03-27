@@ -72,10 +72,11 @@ class ContextMiddleware(BaseContextMiddleware):
                 'user': req.headers.get('X-User-Id'),
                 'tenant': req.headers.get('X-Tenant-Id'),
                 'roles': roles,
-                'auth_tok': req.headers.get('X-Auth-Token', deprecated_token),
+                'auth_token': req.headers.get('X-Auth-Token',
+                                              deprecated_token),
                 'service_catalog': service_catalog,
                 'session': req.headers.get('X-Configuration-Session')
-                }
+            }
             req.context = portas.context.RequestContext(**kwargs)
         else:
             raise webob.exc.HTTPUnauthorized()

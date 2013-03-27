@@ -1,75 +1,146 @@
-import json
-import os
-import uuid
+import anyjson
+import eventlet
 
+from conductor.openstack.common import log as logging
 import conductor.helpers
 from command import CommandBase
-from subprocess import call
+import conductor.config
+from heatclient.client import Client
+import heatclient.exc
+import types
+
+log = logging.getLogger(__name__)
 
 
 class HeatExecutor(CommandBase):
-    def __init__(self, stack):
-        self._pending_list = []
-        self._stack = stack
+    def __init__(self, stack, token):
+        self._update_pending_list = []
+        self._delete_pending_list = []
+        self._stack = 'e' + stack
+        settings = conductor.config.CONF.heat
+        self._heat_client = Client('1', settings.url,
+                                   token_only=True, token=token)
 
-    def execute(self, template, mappings, arguments, callback):
+    def execute(self, command, callback, **kwargs):
+        log.debug('Got command {0} on stack {1}'.format(command, self._stack))
+
+        if command == 'CreateOrUpdate':
+            return self._execute_create_update(
+                kwargs['template'],
+                kwargs['mappings'],
+                kwargs['arguments'],
+                callback)
+        elif command == 'Delete':
+            return self._execute_delete(callback)
+
+    def _execute_create_update(self, template, mappings, arguments, callback):
         with open('data/templates/cf/%s.template' % template) as template_file:
             template_data = template_file.read()
 
         template_data = conductor.helpers.transform_json(
-            json.loads(template_data), mappings)
+            anyjson.loads(template_data), mappings)
 
-        self._pending_list.append({
+        self._update_pending_list.append({
             'template': template_data,
             'arguments': arguments,
             'callback': callback
         })
 
-    def has_pending_commands(self):
-        return len(self._pending_list) > 0
+    def _execute_delete(self, callback):
+        self._delete_pending_list.append({
+            'callback': callback
+        })
 
-    def execute_pending(self, callback):
-        if not self.has_pending_commands():
+    def has_pending_commands(self):
+        return len(self._update_pending_list) + \
+            len(self._delete_pending_list) > 0
+
+    def execute_pending(self):
+        r1 = self._execute_pending_updates()
+        r2 = self._execute_pending_deletes()
+        return r1 or r2
+
+    def _execute_pending_updates(self):
+        if not len(self._update_pending_list):
             return False
 
         template = {}
         arguments = {}
-        for t in self._pending_list:
+        for t in self._update_pending_list:
             template = conductor.helpers.merge_dicts(
                 template, t['template'], max_levels=2)
             arguments = conductor.helpers.merge_dicts(
                 arguments, t['arguments'], max_levels=1)
 
-        print 'Executing heat template', json.dumps(template), \
-            'with arguments', arguments, 'on stack', self._stack
+        log.info(
+            'Executing heat template {0} with arguments {1} on stack {2}'
+            .format(anyjson.dumps(template), arguments, self._stack))
 
-        if not os.path.exists("tmp"):
-            os.mkdir("tmp")
-        file_name = "tmp/" + str(uuid.uuid4())
-        print "Saving template to", file_name
-        with open(file_name, "w") as f:
-            f.write(json.dumps(template))
+        try:
+            self._heat_client.stacks.update(
+                stack_id=self._stack,
+                parameters=arguments,
+                template=template)
+            log.debug(
+                'Waiting for the stack {0} to be update'.format(self._stack))
+            self._wait_state('UPDATE_COMPLETE')
+            log.info('Stack {0} updated'.format(self._stack))
+        except heatclient.exc.HTTPNotFound:
+            self._heat_client.stacks.create(
+                stack_name=self._stack,
+                parameters=arguments,
+                template=template)
+            log.debug('Waiting for the stack {0} to be create'.format(
+                self._stack))
+            self._wait_state('CREATE_COMPLETE')
+            log.info('Stack {0} created'.format(self._stack))
 
-        arguments_str = ';'.join(['%s=%s' % (key, value)
-                                  for (key, value) in arguments.items()])
-        call([
-            "./heat_run", "stack-create",
-            "-f" + file_name,
-            "-P" + arguments_str,
-            self._stack
-        ])
+        pending_list = self._update_pending_list
+        self._update_pending_list = []
 
-
-        callbacks = []
-        for t in self._pending_list:
-            if t['callback']:
-                callbacks.append(t['callback'])
-
-        self._pending_list = []
-
-        for cb in callbacks:
-            cb(True)
-
-        callback()
+        for item in pending_list:
+            item['callback'](True)
 
         return True
+
+    def _execute_pending_deletes(self):
+        if not len(self._delete_pending_list):
+            return False
+
+        log.debug('Deleting stack {0}'.format(self._stack))
+        try:
+            self._heat_client.stacks.delete(
+                stack_id=self._stack)
+            log.debug(
+                'Waiting for the stack {0} to be deleted'.format(self._stack))
+            self._wait_state(['DELETE_COMPLETE', ''])
+            log.info('Stack {0} deleted'.format(self._stack))
+        except Exception as ex:
+            log.exception(ex)
+
+        pending_list = self._delete_pending_list
+        self._delete_pending_list = []
+
+        for item in pending_list:
+            item['callback'](True)
+        return True
+
+    def _wait_state(self, state):
+        if isinstance(state, types.ListType):
+            states = state
+        else:
+            states = [state]
+
+        while True:
+            try:
+                status = self._heat_client.stacks.get(
+                    stack_id=self._stack).stack_status
+            except heatclient.exc.HTTPNotFound:
+                status = ''
+
+            if 'IN_PROGRESS' in status:
+                eventlet.sleep(1)
+                continue
+            if status not in states:
+                raise EnvironmentError()
+            return

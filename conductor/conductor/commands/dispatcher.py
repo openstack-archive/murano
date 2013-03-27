@@ -4,34 +4,22 @@ import windows_agent
 
 
 class CommandDispatcher(command.CommandBase):
-    def __init__(self, environment_name, rmqclient):
+    def __init__(self, environment_id, rmqclient, token):
         self._command_map = {
-            'cf': cloud_formation.HeatExecutor(environment_name),
+            'cf': cloud_formation.HeatExecutor(environment_id, token),
             'agent': windows_agent.WindowsAgentExecutor(
-                environment_name, rmqclient)
+                environment_id, rmqclient)
         }
 
     def execute(self, name, **kwargs):
         self._command_map[name].execute(**kwargs)
 
-    def execute_pending(self, callback):
-        result = 0
-        count = [0]
-
-        def on_result():
-            count[0] -= 1
-            if not count[0]:
-                callback()
-
+    def execute_pending(self):
+        result = False
         for command in self._command_map.values():
-            count[0] += 1
-            result += 1
-            if not command.execute_pending(on_result):
-                count[0] -= 1
-                result -= 1
+            result |= command.execute_pending()
 
-        return result > 0
-
+        return result
 
     def has_pending_commands(self):
         result = False

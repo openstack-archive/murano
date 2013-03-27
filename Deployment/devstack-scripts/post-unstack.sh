@@ -1,28 +1,25 @@
 #!/bin/bash
 
-source openrc admin admin
-
-if [ -z "$TOP_DIR" ] ; then
-    echo "Environment variable TOP_DIR is not set."
-    exit
+if [[ -z "$1" ]] ; then
+    source ./localrc
 fi
 
-echo "Devstack installed in '$TOP_DIR'"
 
 #Remove certificates
-echo "* Removing certificate files ..."
-for file in $(sudo find $TOP_DIR/accrc/ -type f -regex ".+.pem.*") ; do
+echo "* Removing old certificate files"
+for file in $(sudo find $DEVSTACK_DIR/accrc/ -type f -regex ".+.pem.*") ; do
     echo "Removing file '$file'"
     sudo rm -f "$file"
 done
 
 # Remove logs
-echo "* Removing 'devstack' logs ..."
+echo Removing 'devstack' logs
 sudo rm -f /var/log/devstack/*
+#sudo rm -f /opt/stack/devstack/stack.sh.log
 
-
-echo "* Removing 'apache2' logs ..."
+echo "* Removing 'apache2' logs"
 for file in $(sudo find /var/log/apache2 -type f) ; do
     echo "Removing file '$file'"
     sudo rm -f "$file"
 done
+

@@ -1,64 +1,89 @@
 import datetime
 import glob
-import json
-import time
 import sys
-import tornado.ioloop
+import traceback
 
-import rabbitmq
+import anyjson
+from conductor.openstack.common import service
 from workflow import Workflow
-import cloud_formation
-import windows_agent
 from commands.dispatcher import CommandDispatcher
+from openstack.common import log as logging
 from config import Config
 import reporting
+import rabbitmq
+
+import windows_agent
+import cloud_formation
 
 config = Config(sys.argv[1] if len(sys.argv) > 1 else None)
 
-rmqclient = rabbitmq.RabbitMqClient(
-    virtual_host=config.get_setting('rabbitmq', 'vhost', '/'),
-    login=config.get_setting('rabbitmq', 'login', 'guest'),
-    password=config.get_setting('rabbitmq', 'password', 'guest'),
-    host=config.get_setting('rabbitmq', 'host', 'localhost'))
-
-
-def schedule(callback, *args, **kwargs):
-    tornado.ioloop.IOLoop.instance().add_timeout(time.time() + 0.1,
-        lambda args=args, kwargs=kwargs: callback(*args, **kwargs))
+log = logging.getLogger(__name__)
 
 
 def task_received(task, message_id):
-    print 'Starting at', datetime.datetime.now()
-    reporter = reporting.Reporter(rmqclient, message_id, task['id'])
+    with rabbitmq.RmqClient() as rmqclient:
+        log.info('Starting processing task {0}: {1}'.format(
+            message_id, anyjson.dumps(task)))
+        reporter = reporting.Reporter(rmqclient, message_id, task['id'])
 
-    command_dispatcher = CommandDispatcher(task['name'], rmqclient)
-    workflows = []
-    for path in glob.glob("data/workflows/*.xml"):
-        print "loading", path
-        workflow = Workflow(path, task, command_dispatcher, config, reporter)
-        workflows.append(workflow)
+        command_dispatcher = CommandDispatcher(
+            task['id'], rmqclient, task['token'])
+        workflows = []
+        for path in glob.glob("data/workflows/*.xml"):
+            log.debug('Loading XML {0}'.format(path))
+            workflow = Workflow(path, task, command_dispatcher, config,
+                                reporter)
+            workflows.append(workflow)
 
-    def loop(callback):
-        for workflow in workflows:
-            workflow.execute()
-        if not command_dispatcher.execute_pending(lambda: schedule(loop, callback)):
-            callback()
+        while True:
+            try:
+                while True:
+                    result = False
+                    for workflow in workflows:
+                        if workflow.execute():
+                            result = True
+                    if not result:
+                        break
+                if not command_dispatcher.execute_pending():
+                    break
+            except Exception as ex:
+                log.exception(ex)
+                break
 
-    def shutdown():
         command_dispatcher.close()
-        rmqclient.send('task-results', json.dumps(task), message_id=message_id)
-        print 'Finished at', datetime.datetime.now()
 
-    loop(shutdown)
+        del task['token']
+        result_msg = rabbitmq.Message()
+        result_msg.body = task
+        result_msg.id = message_id
+
+        rmqclient.send(message=result_msg, key='task-results')
+    log.info('Finished processing task {0}. Result = {1}'.format(
+        message_id, anyjson.dumps(task)))
 
 
-def message_received(body, message_id, **kwargs):
-    task_received(json.loads(body), message_id)
+class ConductorWorkflowService(service.Service):
+    def __init__(self):
+        super(ConductorWorkflowService, self).__init__()
 
+    def start(self):
+        super(ConductorWorkflowService, self).start()
+        self.tg.add_thread(self._start_rabbitmq)
 
-def start():
-    rmqclient.subscribe("tasks", message_received)
+    def stop(self):
+        super(ConductorWorkflowService, self).stop()
 
-rmqclient.start(start)
-tornado.ioloop.IOLoop.instance().start()
+    def _start_rabbitmq(self):
+        while True:
+            try:
+                with rabbitmq.RmqClient() as rmq:
+                    rmq.declare('tasks', 'tasks')
+                    rmq.declare('task-results')
+                    with rmq.open('tasks') as subscription:
+                        while True:
+                            msg = subscription.get_message()
+                            self.tg.add_thread(
+                                task_received, msg.body, msg.id)
+            except Exception as ex:
+                log.exception(ex)
 

@@ -45,6 +45,7 @@ class PortasException(Exception):
 
         super(PortasException, self).__init__(message)
 
+
 class SchemaLoadError(PortasException):
     message = _("Unable to load schema: %(reason)s")
 
@@ -52,5 +53,3 @@ class SchemaLoadError(PortasException):
 class InvalidObject(PortasException):
     message = _("Provided object does not match schema "
                 "'%(schema)s': %(reason)s")
-
-

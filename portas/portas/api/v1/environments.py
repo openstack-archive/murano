@@ -1,10 +1,16 @@
+from amqplib.client_0_8 import Message
+import anyjson
+import eventlet
 from webob import exc
+from portas.common import config
 from portas.api.v1 import get_env_status
 from portas.db.session import get_session
 from portas.db.models import Environment
 from portas.openstack.common import wsgi
 from portas.openstack.common import log as logging
 
+amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
+rabbitmq = config.CONF.rabbitmq
 
 log = logging.getLogger(__name__)
 
@@ -61,7 +67,8 @@ class Controller(object):
         return env
 
     def update(self, request, environment_id, body):
-        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.format(environment_id, body)))
+        log.debug(_('Environments:Update <Id: {0}, Body: {1}>'.
+                    format(environment_id, body)))
 
         session = get_session()
         environment = session.query(Environment).get(environment_id)
@@ -83,6 +90,26 @@ class Controller(object):
 
         with session.begin():
             session.delete(environment)
+
+        #preparing data for removal from conductor
+        env = environment.description
+        env['services'] = []
+        env['deleted'] = True
+        #Set X-Auth-Token for conductor
+        env['token'] = request.context.auth_token
+
+        connection = amqp.Connection('{0}:{1}'.
+                                     format(rabbitmq.host, rabbitmq.port),
+                                     virtual_host=rabbitmq.virtual_host,
+                                     userid=rabbitmq.userid,
+                                     password=rabbitmq.password,
+                                     ssl=rabbitmq.use_ssl, insist=True)
+        channel = connection.channel()
+        channel.exchange_declare('tasks', 'direct', durable=True,
+                                 auto_delete=False)
+
+        channel.basic_publish(Message(body=anyjson.serialize(env)), 'tasks',
+                              'tasks')
 
         return None
 

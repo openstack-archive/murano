@@ -92,6 +92,18 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             parameters['credentials'] = {'username': 'Administrator',
                                          'password': password}
             parameters['domain'] = str(data.get('1-iis_domain', ''))
+            password = form_list[1].data.get('1-adm_password', '')
+            domain = form_list[1].data.get('1-iis_domain', '')
+            dc_user = form_list[1].data.get('1-domain_user_name', '')
+            dc_pass = form_list[1].data.get('1-domain_user_password', '')
+            parameters['name'] = str(form_list[1].data.get('1-iis_name',
+                                                           'noname'))
+            parameters['domain'] = parameters['name']
+            parameters['credentials'] = {'username': 'Administrator',
+                                         'password': password}
+            parameters['domain'] = str(domain)
+                                   # 'username': str(dc_user),
+                                   # 'password': str(dc_pass)}
             parameters['location'] = 'west-dc'
 
             parameters['units'] = []

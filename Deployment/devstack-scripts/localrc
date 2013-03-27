@@ -1,36 +1,15 @@
-# lab_id = ( 100 | 101 | 102 )
-lab_id=
-lab_password=K#er0P@ssw0rd
+#!/bin/bash
 
-if [ -z "$lab_id" ] ; then
-    echo "Please specify 'lab_id' parameter in 'localrc' file."
-    exit
-fi
+DEVSTACK_DIR=/home/stack/devstack
+INSTALL_DIR=/opt/stack
 
-#--------------------------------------
+MYSQL_DB_TMPFS=true
+MYSQL_DB_TMPFS_SIZE=128M
 
-HOST_IP=172.18.124.${lab_id}
+NOVA_CACHE_TMPFS=true
+NOVA_CACHE_TMPFS_SIZE=24G
 
-FIXED_RANGE=10.0.${lab_id}.0/24
-NETWORK_GATEWAY=10.0.${lab_id}.1
+#======================================
+source $DEVSTACK_DIR/openrc admin admin
+source ./functions.sh
 
-FLAT_INTERFACE=eth1
-PUBLIC_INTERFACE=eth0
-
-
-ADMIN_PASSWORD=$lab_password
-MYSQL_PASSWORD=$lab_password
-RABBIT_PASSWORD=$lab_password
-SERVICE_PASSWORD=$lab_password
-SERVICE_TOKEN=tokentoken
-
-
-ENABLED_SERVICES+=,heat,h-api,h-api-cfn,h-api-cw,h-eng
-
-
-LOGFILE=/opt/stack/devstack/stack.sh.log
-SCREEN_LOGDIR=/var/log/devstack
-#SCREEN_LOGDIR=/dev/null
-
-
-EXTRA_OPTS=(force_config_drive=true)

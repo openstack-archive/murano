@@ -1,7 +1,6 @@
 from amqplib.client_0_8 import Message
 import anyjson
 import eventlet
-from eventlet.semaphore import Semaphore
 from webob import exc
 from portas.common import config
 from portas.db.models import Session, Status, Environment
@@ -35,9 +34,9 @@ class Controller(object):
         unit = get_session()
         configuration_sessions = unit.query(Session).filter_by(**filters)
 
-        return {
-            "sessions": [session.to_dict() for session in configuration_sessions if
-                         session.environment.tenant_id == request.context.tenant]}
+        sessions = [session.to_dict() for session in configuration_sessions if
+                    session.environment.tenant_id == request.context.tenant]
+        return {"sessions": sessions}
 
     def configure(self, request, environment_id):
         log.debug(_('Session:Configure <EnvId: {0}>'.format(environment_id)))
@@ -49,9 +48,10 @@ class Controller(object):
         session.update(params)
 
         unit = get_session()
-        if unit.query(Session).filter(
-                                Session.environment_id == environment_id and Session.state.in_(
-                        ['open', 'deploing'])).first():
+        if unit.query(Session).filter(Session.environment_id == environment_id
+                                      and
+                                      Session.state.in_(['open', 'deploing'])
+                                      ).first():
             log.info('There is already open session for this environment')
             raise exc.HTTPConflict
 
@@ -65,9 +65,8 @@ class Controller(object):
         return session.to_dict()
 
     def show(self, request, environment_id, session_id):
-        log.debug(_(
-            'Session:Show <EnvId: {0}, SessionId: {1}>'.format(environment_id,
-                                                               session_id)))
+        log.debug(_('Session:Show <EnvId: {0}, SessionId: {1}>'.
+                    format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
@@ -79,17 +78,16 @@ class Controller(object):
         return session.to_dict()
 
     def delete(self, request, environment_id, session_id):
-        log.debug(_('Session:Delete <EnvId: {0}, SessionId: {1}>'.format(
-            environment_id, session_id)))
+        log.debug(_('Session:Delete <EnvId: {0}, SessionId: {1}>'.
+                    format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        comment = 'Session object in \'deploying\' state could not be deleted'
         if session.state == 'deploying':
-            log.info(
-                'Session is in \'deploying\' state. Could not be deleted.')
-            raise exc.HTTPForbidden(
-                comment='Session object in \'deploying\' state could not be deleted')
+            log.info(comment)
+            raise exc.HTTPForbidden(comment=comment)
 
         with unit.begin():
             unit.delete(session)
@@ -97,8 +95,8 @@ class Controller(object):
         return None
 
     def reports(self, request, environment_id, session_id):
-        log.debug(_('Session:Reports <EnvId: {0}, SessionId: {1}>'.format(
-            environment_id, session_id)))
+        log.debug(_('Session:Reports <EnvId: {0}, SessionId: {1}>'.
+                    format(environment_id, session_id)))
 
         unit = get_session()
         statuses = unit.query(Status).filter_by(session_id=session_id)
@@ -125,23 +123,36 @@ class Controller(object):
         return {'reports': [status.to_dict() for status in result]}
 
     def deploy(self, request, environment_id, session_id):
-        log.debug(_('Session:Deploy <EnvId: {0}, SessionId: {1}>'.format(
-            environment_id, session_id)))
+        log.debug(_('Session:Deploy <EnvId: {0}, SessionId: {1}>'.
+                    format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        msg = _('Could not deploy session. Session is already '
+                'deployed or in deployment state')
         if session.state != 'open':
-            log.warn(_(
-                'Could not deploy session. Session is already deployed or in deployment state'))
+            log.warn(msg)
 
         session.state = 'deploying'
         session.save(unit)
 
-        with self.write_lock:
-            self.ch.basic_publish(
-                Message(body=anyjson.serialize(session.description)), 'tasks',
-                'tasks')
+        #Set X-Auth-Token for conductor
+        env = session.description
+        env['token'] = request.context.auth_token
+
+        connection = amqp.Connection('{0}:{1}'.
+                                     format(rabbitmq.host, rabbitmq.port),
+                                     virtual_host=rabbitmq.virtual_host,
+                                     userid=rabbitmq.userid,
+                                     password=rabbitmq.password,
+                                     ssl=rabbitmq.use_ssl, insist=True)
+        channel = connection.channel()
+        channel.exchange_declare('tasks', 'direct', durable=True,
+                                 auto_delete=False)
+
+        channel.basic_publish(Message(body=anyjson.serialize(env)), 'tasks',
+                              'tasks')
 
 
 def create_resource():

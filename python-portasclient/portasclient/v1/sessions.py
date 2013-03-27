@@ -62,7 +62,7 @@ class SessionManager(base.Manager):
 
         resp, body = self.api.json_request('GET', path)
 
-        data = body['reports']
+        data = body.get('reports', [])
         return [Status(self, res, loaded=True) for res in data if res]
 
     def delete(self, environment_id, session_id):

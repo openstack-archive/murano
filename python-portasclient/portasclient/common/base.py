@@ -49,14 +49,16 @@ class Manager(object):
     def __init__(self, api):
         self.api = api
 
-    def _list(self, url, response_key=None, obj_class=None, body=None, headers={}):
+    def _list(self, url, response_key=None, obj_class=None,
+              body=None, headers={}):
+
         resp, body = self.api.json_request('GET', url, headers=headers)
 
         if obj_class is None:
             obj_class = self.resource_class
 
         if response_key:
-            if not body.has_key(response_key):
+            if not response_key in body:
                 body[response_key] = []
             data = body[response_key]
         else:
@@ -74,9 +76,12 @@ class Manager(object):
                 return self.resource_class(self, body[response_key])
             return self.resource_class(self, body)
 
-    def _create(self, url, body=None, response_key=None, return_raw=False, headers={}):
+    def _create(self, url, body=None, response_key=None,
+                return_raw=False, headers={}):
+
         if body:
-            resp, body = self.api.json_request('POST', url, body=body, headers=headers)
+            resp, body = self.api.json_request('POST', url,
+                                               body=body, headers=headers)
         else:
             resp, body = self.api.json_request('POST', url, headers=headers)
         if return_raw:
