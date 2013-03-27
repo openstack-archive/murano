@@ -32,7 +32,7 @@ class OverviewTab(tabs.Tab):
     
     def get_context_data(self, request):
         LOG.debug(self.tab_group)
-        LOG.critical(self.tab_group.kwargs.__dict__)
+        LOG.critical(self.tab_group.kwargs)
         return {"service": self.tab_group.kwargs['service']}
 
 class LogsTab(tabs.Tab):
@@ -42,7 +42,7 @@ class LogsTab(tabs.Tab):
     
     def get_context_data(self, request):
         LOG.debug(self.tab_group)
-        LOG.critical(self.tab_group.kwargs.__dict__)
+        LOG.critical(self.tab_group.kwargs)
         return {"service": self.tab_group.kwargs['service']}
 
 
