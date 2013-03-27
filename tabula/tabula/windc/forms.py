@@ -23,7 +23,7 @@ import string
 
 from django import forms
 from django.utils.translation import ugettext_lazy as _
-
+import re
 from tabula.windc import api
 
 LOG = logging.getLogger(__name__)
@@ -86,6 +86,8 @@ class WizardFormConfiguration(forms.Form):
 
 
 class WizardFormADConfiguration(forms.Form):
+
+
     dc_name = forms.CharField(label=_('Domain Name'),
                               required=True)
 
@@ -99,6 +101,10 @@ class WizardFormADConfiguration(forms.Form):
 
     recovery_password = PasswordField(_('Recovery password'))
 
+    def __init__(self, request, *args, **kwargs):
+        super(WizardFormADConfiguration, self).__init__(*args, **kwargs)
+
+
 
 class WizardFormIISConfiguration(forms.Form):
     iis_name = forms.CharField(label=_('IIS Server Name'),
@@ -108,23 +114,16 @@ class WizardFormIISConfiguration(forms.Form):
 
     iis_domain = forms.ChoiceField(label=_('Member of the Domain'),
                                  required=False)
-    
-    # def __init__(self, request, *args, **kwargs):
-    #
-    #     super(WizardFormIISConfiguration, self).__init__(request,
-    #                                                      *args,
-    #                                                      **kwargs)
-    #
-    #     link = self.request.__dict__['META']['HTTP_REFERER']
-    #     datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-    #
-    #     domains = api.services_list(request, datacenter_id)
-    #
-    #     LOG.critical('$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$$')
-    #     LOG.critical(domains)
-    #     LOG.critical('&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&')
-    #
-    #     self.fields['iis_domain'].choices = [("", "")] + \
-    #                                   [(domain.name, domain.name)
-    #                                    for domain in domains]
+
+    def __init__(self, request, *args, **kwargs):
+        super(WizardFormIISConfiguration, self).__init__(*args, **kwargs)
+
+        link = request.__dict__['META']['HTTP_REFERER']
+        datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+
+        domains = api.get_active_directories(request, datacenter_id)
+
+        self.fields['iis_domain'].choices = [("", "")] + \
+                                      [(domain.name, domain.name)
+                                       for domain in domains]
         

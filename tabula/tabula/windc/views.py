@@ -121,6 +121,9 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
         return form
 
+    def get_form_kwargs(self, step=None):
+        return {'request': self.request} if step == u'1' else {}
+
     def get_form_step_data(self, form):
         LOG.debug(form.data)
         return form.data

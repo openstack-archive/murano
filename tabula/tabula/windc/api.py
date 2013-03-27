@@ -92,6 +92,20 @@ def services_list(request, datacenter_id):
 
     return services
 
+def get_active_directories(request, datacenter_id):
+    session_id = None
+    sessions = windcclient(request).sessions.list(datacenter_id)
+
+    for s in sessions:
+        if s.state in ['open', 'deploying']:
+            session_id = s.id
+
+    if session_id is None:
+        session_id = windcclient(request).sessions.configure(datacenter_id).id
+
+    services = windcclient(request).activeDirectories.list(datacenter_id,
+                                                           session_id)
+    return services
 
 def services_get(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
