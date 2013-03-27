@@ -14,17 +14,6 @@ log = logging.getLogger(__name__)
 
 
 class Controller(object):
-    def __init__(self):
-        self.write_lock = Semaphore(1)
-        connection = amqp.Connection(
-            '{0}:{1}'.format(rabbitmq.host, rabbitmq.port),
-            virtual_host=rabbitmq.virtual_host,
-            userid=rabbitmq.userid, password=rabbitmq.password,
-            ssl=rabbitmq.use_ssl, insist=True)
-        self.ch = connection.channel()
-        self.ch.exchange_declare('tasks', 'direct', durable=True,
-                                 auto_delete=False)
-
     def index(self, request, environment_id):
         log.debug(_('Session:List <EnvId: {0}>'.format(environment_id)))
 
