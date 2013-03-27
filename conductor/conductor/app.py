@@ -9,6 +9,9 @@ from config import Config
 import reporting
 import rabbitmq
 
+import windows_agent
+import cloud_formation
+
 config = Config(sys.argv[1] if len(sys.argv) > 1 else None)
 
 
@@ -18,7 +21,7 @@ def task_received(task, message_id):
         reporter = reporting.Reporter(rmqclient, message_id, task['id'])
 
         command_dispatcher = CommandDispatcher(
-            task['name'], rmqclient, task['token'])
+            task['id'], rmqclient, task['token'])
         workflows = []
         for path in glob.glob("data/workflows/*.xml"):
             print "loading", path
@@ -28,14 +31,21 @@ def task_received(task, message_id):
 
         while True:
             try:
-                for workflow in workflows:
-                    workflow.execute()
+                while True:
+                    result = False
+                    for workflow in workflows:
+                        if workflow.execute():
+                            result = True
+                    if not result:
+                        break
                 if not command_dispatcher.execute_pending():
                     break
             except Exception:
                 break
 
         command_dispatcher.close()
+
+        del task['token']
         result_msg = rabbitmq.Message()
         result_msg.body = task
         result_msg.id = message_id
@@ -59,9 +69,9 @@ class ConductorWorkflowService(service.Service):
         while True:
             try:
                 with rabbitmq.RmqClient() as rmq:
-                    rmq.declare('tasks', 'tasks')
-                    rmq.declare('task-results', 'tasks')
-                    with rmq.open('tasks') as subscription:
+                    rmq.declare('tasks2', 'tasks2')
+                    rmq.declare('task-results', 'tasks2')
+                    with rmq.open('tasks2') as subscription:
                         while True:
                             msg = subscription.get_message()
                             self.tg.add_thread(
