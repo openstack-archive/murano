@@ -45,9 +45,14 @@ rabbit_opts = [
     cfg.StrOpt('virtual_host', default='/'),
 ]
 
+heat_opts = [
+    cfg.StrOpt('url')
+]
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_opts(rabbit_opts, group='rabbitmq')
+CONF.register_opts(heat_opts, group='heat')
 
 
 CONF.import_opt('verbose', 'conductor.openstack.common.log')

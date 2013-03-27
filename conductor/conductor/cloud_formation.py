@@ -1,7 +1,7 @@
 import base64
 
 import xml_code_engine
-
+import config
 
 def update_cf_stack(engine, context, body, template,
                     mappings, arguments, **kwargs):
@@ -17,15 +17,15 @@ def update_cf_stack(engine, context, body, template,
 
 
 def prepare_user_data(context, template='Default', **kwargs):
-    config = context['/config']
+    settings = config.CONF.rabbitmq
+
     with open('data/init.ps1') as init_script_file:
         with open('data/templates/agent-config/%s.template'
                 % template) as template_file:
             init_script = init_script_file.read()
             template_data = template_file.read()
             template_data = template_data.replace(
-                '%RABBITMQ_HOST%',
-                config.get_setting('rabbitmq', 'host') or 'localhost')
+                '%RABBITMQ_HOST%', settings.host)
             template_data = template_data.replace(
                 '%RESULT_QUEUE%',
                 '-execution-results-%s' % str(context['/dataSource']['name']))
