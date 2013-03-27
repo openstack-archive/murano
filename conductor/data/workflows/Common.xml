@@ -4,4 +4,16 @@
 		<set path="state.hostname"><generate-hostname/></set>
 	</rule>
 
+	<rule match="$[?(not @.state.deleted)]">
+		<rule match="$.services[*][*].units[*]">
+			<empty>
+				<delete-cf-stack>
+					<success>
+						<set path="/state.deleted"><true/></set>
+					</success>
+				</delete-cf-stack>
+			</empty>
+		</rule>
+	</rule>
+
 </workflow>

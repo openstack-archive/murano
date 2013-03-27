@@ -143,6 +143,9 @@
 		<set path="#unit">
 			<select/>
 		</set>
+		<set path="#service">
+			<select path="::"/>
+		</set>
 		<rule>
 			<parameter name="match">/$.services.activeDirectories[?(@.domain == '<select path="domain"/>' and @.state.primaryDcIp)]</parameter>
 
@@ -151,7 +154,7 @@
 					<select path="name" source="unit"/>
 				</parameter>
 				<parameter name="service">
-					<select path="::id"/>
+					<select path="id" source="service"/>
 				</parameter>
 				<parameter name="mappings">
 					<map>
