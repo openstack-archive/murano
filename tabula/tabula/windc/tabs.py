@@ -23,16 +23,17 @@ from openstack_dashboard import api
 
 
 class OverviewTab(tabs.Tab):
-    name = _("Services")
-    slug = "_services"
+    name = _("Service")
+    slug = "_service"
     template_name = ("project/windc/_services.html")
 
-    def get_context_data(self, request):
-        dc = self.tab_group.kwargs['domain_controller']
-        return {"domain_controller": dc}
+class LogsTab(tabs.Tab):
+    name = _("Logs")
+    slug = "_logs"
+    template_name = ("project/windc/_services.html")
 
 
 class WinServicesTabs(tabs.TabGroup):
     slug = "services_details"
-    tabs = (OverviewTab,)
+    tabs = (OverviewTab, LogsTab)
     sticky = True
