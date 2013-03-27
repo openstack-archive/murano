@@ -19,7 +19,7 @@ class HeatExecutor(CommandBase):
         self._stack = 'e' + stack
         settings = conductor.config.CONF.heat
         self._heat_client = Client('1', settings.url,
-            token_only=True, token=token)
+                                   token_only=True, token=token)
 
     def execute(self, command, callback, **kwargs):
         log.debug('Got command {0} on stack {1}'.format(command, self._stack))
@@ -32,7 +32,6 @@ class HeatExecutor(CommandBase):
                 callback)
         elif command == 'Delete':
             return self._execute_delete(callback)
-
 
     def _execute_create_update(self, template, mappings, arguments, callback):
         with open('data/templates/cf/%s.template' % template) as template_file:
@@ -52,10 +51,9 @@ class HeatExecutor(CommandBase):
             'callback': callback
         })
 
-
     def has_pending_commands(self):
         return len(self._update_pending_list) + \
-               len(self._delete_pending_list) > 0
+            len(self._delete_pending_list) > 0
 
     def execute_pending(self):
         r1 = self._execute_pending_updates()
@@ -74,7 +72,8 @@ class HeatExecutor(CommandBase):
             arguments = conductor.helpers.merge_dicts(
                 arguments, t['arguments'], max_levels=1)
 
-        log.info('Executing heat template {0} with arguments {1} on stack {2}'
+        log.info(
+            'Executing heat template {0} with arguments {1} on stack {2}'
             .format(anyjson.dumps(template), arguments, self._stack))
 
         try:
@@ -82,8 +81,8 @@ class HeatExecutor(CommandBase):
                 stack_id=self._stack,
                 parameters=arguments,
                 template=template)
-            log.debug('Waiting for the stack {0} to be update'
-                .format(self._stack))
+            log.debug(
+                'Waiting for the stack {0} to be update'.format(self._stack))
             self._wait_state('UPDATE_COMPLETE')
             log.info('Stack {0} updated'.format(self._stack))
         except heatclient.exc.HTTPNotFound:
@@ -91,11 +90,10 @@ class HeatExecutor(CommandBase):
                 stack_name=self._stack,
                 parameters=arguments,
                 template=template)
-            log.debug('Waiting for the stack {0} to be create'
-                .format(self._stack))
+            log.debug('Waiting for the stack {0} to be create'.format(
+                self._stack))
             self._wait_state('CREATE_COMPLETE')
             log.info('Stack {0} created'.format(self._stack))
-
 
         pending_list = self._update_pending_list
         self._update_pending_list = []
@@ -113,8 +111,8 @@ class HeatExecutor(CommandBase):
         try:
             self._heat_client.stacks.delete(
                 stack_id=self._stack)
-            log.debug('Waiting for the stack {0} to be deleted'
-                .format(self._stack))
+            log.debug(
+                'Waiting for the stack {0} to be deleted'.format(self._stack))
             self._wait_state(['DELETE_COMPLETE', ''])
             log.info('Stack {0} deleted'.format(self._stack))
         except Exception as ex:
@@ -133,7 +131,6 @@ class HeatExecutor(CommandBase):
         else:
             states = [state]
 
-
         while True:
             try:
                 status = self._heat_client.stacks.get(
@@ -147,4 +144,3 @@ class HeatExecutor(CommandBase):
             if status not in states:
                 raise EnvironmentError()
             return
-

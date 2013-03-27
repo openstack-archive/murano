@@ -6,6 +6,7 @@ from random import choice
 import time
 import string
 
+
 def update_cf_stack(engine, context, body, template,
                     mappings, arguments, **kwargs):
     command_dispatcher = context['/commandDispatcher']
@@ -16,6 +17,7 @@ def update_cf_stack(engine, context, body, template,
     command_dispatcher.execute(
         name='cf', command='CreateOrUpdate', template=template,
         mappings=mappings, arguments=arguments, callback=callback)
+
 
 def delete_cf_stack(engine, context, body, **kwargs):
     command_dispatcher = context['/commandDispatcher']
@@ -31,8 +33,8 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
     settings = config.CONF.rabbitmq
 
     with open('data/init.ps1') as init_script_file:
-        with open('data/templates/agent-config/%s.template'
-                % template) as template_file:
+        with open('data/templates/agent-config/{0}.template'.format(
+                template)) as template_file:
             init_script = init_script_file.read()
             template_data = template_file.read()
             template_data = template_data.replace(
@@ -44,8 +46,8 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
             )
             template_data = template_data.replace(
                 '%RESULT_QUEUE%',
-                '-execution-results-%s' %
-                    str(context['/dataSource']['id']).lower())
+                '-execution-results-{0}'.format(
+                    str(context['/dataSource']['id'])).lower())
 
             init_script = init_script.replace(
                 '%WINDOWS_AGENT_CONFIG_BASE64%',
@@ -56,6 +58,7 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
             return init_script
 
 counter = 0
+
 
 def int2base(x, base):
     digs = string.digits + string.lowercase
@@ -72,6 +75,7 @@ def int2base(x, base):
     digits.reverse()
     return ''.join(digits)
 
+
 def generate_hostname(**kwargs):
     global counter
     prefix = ''.join(choice(string.lowercase) for _ in range(5))
@@ -79,8 +83,6 @@ def generate_hostname(**kwargs):
     suffix = int2base(counter, 36)
     counter = (counter + 1) % 1296
     return prefix + timestamp + suffix
-
-
 
 
 xml_code_engine.XmlCodeEngine.register_function(

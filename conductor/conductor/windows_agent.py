@@ -6,12 +6,14 @@ log = logging.getLogger(__name__)
 
 def send_command(engine, context, body, template, service, host, mappings=None,
                  result=None, **kwargs):
-    if not mappings: mappings = {}
+    if not mappings:
+        mappings = {}
     command_dispatcher = context['/commandDispatcher']
 
     def callback(result_value):
-        log.info('Received result from {3} for {0}: {1}. Body is {2}'.format(
-              template, result_value, body, host))
+        log.info(
+            'Received result from {3} for {0}: {1}. Body is {2}'.format(
+                template, result_value, body, host))
         if result is not None:
             context[result] = result_value['Result']
 
@@ -19,8 +21,8 @@ def send_command(engine, context, body, template, service, host, mappings=None,
         if success_handler is not None:
             engine.evaluate_content(success_handler, context)
 
-    command_dispatcher.execute(name='agent',
-        template=template, mappings=mappings,
+    command_dispatcher.execute(
+        name='agent', template=template, mappings=mappings,
         host=host, service=service, callback=callback)
 
 

@@ -62,7 +62,6 @@ def task_received(task, message_id):
         message_id, anyjson.dumps(task)))
 
 
-
 class ConductorWorkflowService(service.Service):
     def __init__(self):
         super(ConductorWorkflowService, self).__init__()

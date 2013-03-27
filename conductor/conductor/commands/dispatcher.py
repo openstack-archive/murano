@@ -28,7 +28,6 @@ class CommandDispatcher(command.CommandBase):
 
         return result
 
-
     def close(self):
         for t in self._command_map.values():
             t.close()

@@ -4,6 +4,7 @@ puka = patcher.import_patched('puka')
 import anyjson
 import config
 
+
 class RmqClient(object):
     def __init__(self):
         settings = config.CONF.rabbitmq
@@ -64,6 +65,7 @@ class RmqClient(object):
             raise RuntimeError('Not connected to RabbitMQ')
 
         return Subscription(self._client, queue)
+
 
 class Subscription(object):
     def __init__(self, client, queue):
