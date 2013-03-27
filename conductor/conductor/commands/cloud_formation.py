@@ -1,6 +1,7 @@
 import anyjson
 import eventlet
 
+import jsonpath
 from conductor.openstack.common import log as logging
 import conductor.helpers
 from command import CommandBase
@@ -20,13 +21,18 @@ class HeatExecutor(CommandBase):
         self._stack = 'e' + stack
         settings = conductor.config.CONF.heat
 
-        client = ksclient.Client(endpoint=settings.keystone)
-        scoped_token = client.tokens.authenticate(
+        client = ksclient.Client(endpoint=settings.auth_url)
+        auth_data = client.tokens.authenticate(
             tenant_id=tenant_id,
-            token=token).id
+            token=token)
 
-        self._heat_client = Client('1', settings.url,
-                                   token_only=True, token=scoped_token)
+        scoped_token = auth_data.id
+
+        heat_url = jsonpath.jsonpath(auth_data.serviceCatalog,
+            "$[?(@.name == 'heat')].endpoints[0].publicURL")[0]
+
+        self._heat_client = Client('1', heat_url,
+            token_only=True, token=scoped_token)
 
     def execute(self, command, callback, **kwargs):
         log.debug('Got command {0} on stack {1}'.format(command, self._stack))

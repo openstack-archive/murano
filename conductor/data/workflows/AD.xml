@@ -25,7 +25,7 @@
 			</parameter>
 			<parameter name="arguments">
 				<map>
-					<argument name="KeyName">keero-linux-keys</argument>
+					<argument name="KeyName">keero-keys</argument>
 					<argument name="InstanceType">m1.medium</argument>
 					<argument name="ImageName">ws-2012-full</argument>
 				</map>
