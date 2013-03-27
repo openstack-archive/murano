@@ -150,7 +150,7 @@ def get_status_message_for_service(request, service_id):
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
     return len(windcclient(request).sessions.
-               reports(environment_id, session_id, service_id))
+               reports(environment_id, session_id, service_id=service_id))
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
