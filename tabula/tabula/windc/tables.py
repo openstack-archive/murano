@@ -145,7 +145,9 @@ class UpdateServiceRow(tables.Row):
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
  
         service = api.services_get(request, datacenter_id, service_id)
-        service['operation'] = api.get_status_message_for_service(request, service_id)
+        if service:
+            service['operation'] = api.\
+                get_status_message_for_service(request, service_id)
         
         return service
 
