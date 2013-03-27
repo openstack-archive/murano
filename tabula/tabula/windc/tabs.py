@@ -26,11 +26,17 @@ class OverviewTab(tabs.Tab):
     name = _("Service")
     slug = "_service"
     template_name = ("project/windc/_services.html")
+    
+    def get_context_data(self, request):
+        return {"service": self.tab_group.kwargs['service']}
 
 class LogsTab(tabs.Tab):
     name = _("Logs")
     slug = "_logs"
     template_name = ("project/windc/_services.html")
+    
+    def get_context_data(self, request):
+        return {"service": self.tab_group.kwargs['service']}
 
 
 class WinServicesTabs(tabs.TabGroup):
