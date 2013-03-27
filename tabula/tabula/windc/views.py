@@ -184,7 +184,7 @@ class DetailServiceView(tabs.TabView):
         return context
 
     def get_data(self):
-        if not "_service" in self:
+        if not hasattr(self, "_service"):
             try:
                 service_id = self.kwargs['service_id']
                 service = api.get_service_datails(self.request, service_id)
