@@ -144,7 +144,10 @@ class UpdateServiceRow(tables.Row):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
  
-        return api.services_get(request, datacenter_id, service_id)
+        service = api.services_get(request, datacenter_id, service_id)
+        service['operation'] = api.get_status_message_for_service(request, service_id)
+        
+        return service
 
 
 STATUS_DISPLAY_CHOICES = (
@@ -200,12 +203,11 @@ class WinServicesTable(tables.DataTable):
                            status_choices=STATUS_CHOICES,
                            display_choices=STATUS_DISPLAY_CHOICES)
 
-    operation = tables.Column('operation', verbose_name=_('Operation'),
-                              status=True)
+    operation = tables.Column('operation', verbose_name=_('Operation'))
 
     class Meta:
         name = 'services'
         verbose_name = _('Services')
         row_class = UpdateServiceRow
-        status_columns = ['status', 'operation']
+        status_columns = ['status']
         table_actions = (CreateService,)

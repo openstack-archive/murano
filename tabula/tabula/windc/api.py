@@ -89,6 +89,9 @@ def services_list(request, datacenter_id):
     services = windcclient(request).activeDirectories.list(datacenter_id,
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
+    
+    for i in range(len(services)):
+        services[i]['operation'] = 
 
     return services
 
