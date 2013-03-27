@@ -27,7 +27,7 @@ def task_received(task, message_id):
         reporter = reporting.Reporter(rmqclient, message_id, task['id'])
 
         command_dispatcher = CommandDispatcher(
-            task['id'], rmqclient, task['token'])
+            task['id'], rmqclient, task['token'], task['tenant_id'])
         workflows = []
         for path in glob.glob("data/workflows/*.xml"):
             log.debug('Loading XML {0}'.format(path))
@@ -79,7 +79,7 @@ class ConductorWorkflowService(service.Service):
                 with rabbitmq.RmqClient() as rmq:
                     rmq.declare('tasks', 'tasks')
                     rmq.declare('task-results')
-                    with rmq.open('tasks') as subscription:
+                    with rmq.open('tasks2') as subscription:
                         while True:
                             msg = subscription.get_message()
                             self.tg.add_thread(

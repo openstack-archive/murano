@@ -7,19 +7,26 @@ from command import CommandBase
 import conductor.config
 from heatclient.client import Client
 import heatclient.exc
+from keystoneclient.v2_0 import client as ksclient
 import types
 
 log = logging.getLogger(__name__)
 
 
 class HeatExecutor(CommandBase):
-    def __init__(self, stack, token):
+    def __init__(self, stack, token, tenant_id):
         self._update_pending_list = []
         self._delete_pending_list = []
         self._stack = 'e' + stack
         settings = conductor.config.CONF.heat
+
+        client = ksclient.Client(endpoint=settings.keystone)
+        scoped_token = client.tokens.authenticate(
+            tenant_id=tenant_id,
+            token=token).id
+
         self._heat_client = Client('1', settings.url,
-                                   token_only=True, token=token)
+                                   token_only=True, token=scoped_token)
 
     def execute(self, command, callback, **kwargs):
         log.debug('Got command {0} on stack {1}'.format(command, self._stack))
