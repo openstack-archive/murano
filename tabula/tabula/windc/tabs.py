@@ -28,7 +28,7 @@ LOG = logging.getLogger(__name__)
 class OverviewTab(tabs.Tab):
     name = _("Service")
     slug = "_service"
-    template_name = "services.html"
+    template_name = '_services.html'
     
     def get_context_data(self, request):
         return {"service_id": self.tab_group.kwargs['service_id']}
@@ -36,5 +36,5 @@ class OverviewTab(tabs.Tab):
 
 class WinServicesTabs(tabs.TabGroup):
     slug = "services_details"
-    #tabs = (OverviewTab,)
+    tabs = (OverviewTab,)
     sticky = True
