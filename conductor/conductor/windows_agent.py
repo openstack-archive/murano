@@ -12,8 +12,8 @@ def send_command(engine, context, body, template, service, host, mappings=None,
 
     def callback(result_value):
         log.info(
-            'Received result from {3} for {0}: {1}. Body is {2}'.format(
-                template, result_value, body, host))
+            'Received result from {2} for {0}: {1}'.format(
+                template, result_value, host))
         if result is not None:
             context[result] = result_value['Result']
 
