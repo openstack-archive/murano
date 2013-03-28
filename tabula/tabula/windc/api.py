@@ -81,6 +81,8 @@ def services_list(request, datacenter_id):
     for s in sessions:
         if s.state in ['open', 'deploying']:
             session_id = s.id
+        else:
+            windcclient(request).sessions.delete(datacenter_id, s.id)
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
@@ -101,6 +103,8 @@ def get_active_directories(request, datacenter_id):
     for s in sessions:
         if s.state in ['open', 'deploying']:
             session_id = s.id
+        else:
+            windcclient(request).sessions.delete(datacenter_id, s.id)
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
@@ -144,6 +148,8 @@ def get_status_message_for_service(request, service_id):
     for s in sessions:
         if s.state in ['open', 'deploying']:
             session_id = s.id
+        else:
+            windcclient(request).sessions.delete(datacenter_id, s.id)
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
