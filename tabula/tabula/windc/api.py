@@ -91,6 +91,8 @@ def services_list(request, datacenter_id):
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
     
+    LOG.critical(services[0])
+    
     #for i in range(len(services)):
     #    services[i]['operation'] = windcclient(request).sessions.\
     #                               reports(datacenter_id, session_id)
