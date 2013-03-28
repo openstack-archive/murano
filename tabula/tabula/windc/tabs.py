@@ -46,10 +46,9 @@ class LogsTab(tabs.Tab):
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
 
-        return {"service_name": data.name,
-                "service_status": data.status,
-                "service_type": data.service_type,
-                "service_domain": data.domain}
+        LOG.critical(self.tab_group.kwargs)
+
+        return {"service": data}
 
 
 class WinServicesTabs(tabs.TabGroup):
