@@ -48,7 +48,8 @@ class LogsTab(tabs.Tab):
         
         reports = api.get_status_message_for_service(request, data.id)
 
-        return {"reports": reports}
+        return {"service_id": data.id,
+                "reports": reports}
 
 
 class WinServicesTabs(tabs.TabGroup):
