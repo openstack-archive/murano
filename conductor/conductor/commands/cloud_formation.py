@@ -18,7 +18,7 @@ class HeatExecutor(CommandBase):
     def __init__(self, stack, token, tenant_id):
         self._update_pending_list = []
         self._delete_pending_list = []
-        self._stack = 'e' + stack
+        self._stack = stack
         settings = conductor.config.CONF.heat
 
         client = ksclient.Client(endpoint=settings.auth_url)

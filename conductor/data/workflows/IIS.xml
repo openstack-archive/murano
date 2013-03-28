@@ -13,7 +13,7 @@
 		<update-cf-stack template="Windows">
 			<parameter name="mappings">
 				<map>
-					<mapping name="instanceName">WS-<select path="::id"/>-<select path="name"/></mapping>
+					<mapping name="instanceName">WS-<select path="::name"/>-<select path="name"/></mapping>
 					<mapping name="userData">
 						<prepare-user-data>
 							<parameter name="hostname"><select path="state.hostname"/></parameter>
