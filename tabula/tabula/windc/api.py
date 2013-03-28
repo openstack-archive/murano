@@ -98,7 +98,7 @@ def services_list(request, datacenter_id):
         reports = windcclient(request).sessions.\
                                 reports(datacenter_id, session_id)
 
-        services[i].operation = reports.sort(key=get_time).last()
+        services[i].operation = reports[-1]
 
     return services
 
