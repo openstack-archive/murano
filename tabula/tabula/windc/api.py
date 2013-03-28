@@ -74,6 +74,8 @@ def services_create(request, datacenter, parameters):
 
     return res
 
+def get_time(obj):
+    return obj.updated
 
 def services_list(request, datacenter_id):
     session_id = None
@@ -95,8 +97,8 @@ def services_list(request, datacenter_id):
     for i in range(len(services)):
         reports = windcclient(request).sessions.\
                                 reports(datacenter_id, session_id)
-                                
-        services[i].operation = reports.sort(key=self.updated).last()
+
+        services[i].operation = reports.sort(key=get_time).last()
 
     return services
 
