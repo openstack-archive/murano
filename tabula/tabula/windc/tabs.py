@@ -20,7 +20,7 @@ from horizon import exceptions
 from horizon import tabs
 import logging
 
-from openstack_dashboard import api
+from tabula.windc import api
 
 
 LOG = logging.getLogger(__name__)
