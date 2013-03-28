@@ -161,8 +161,14 @@ def get_status_message_for_service(request, service_id):
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
-    return windcclient(request).sessions.\
+    reports = windcclient(request).sessions.\
                reports(environment_id, session_id, service_id)
+    
+    result = ""
+    for report in reprots:
+        result += '<p>' + report.text + '</p>'
+    
+    return result
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
