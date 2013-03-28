@@ -4,7 +4,8 @@
   <h3 class="pull-left">{% trans "Service Details" %}</h3>
 <br>
 <br>
-<p>  Name: {{ service }} </p>
-<p>  ID:   {{ service_name }} </p>
-<p>  ID:   {{ context }} </p>
+<p>  Name:     {{ service.name }}   </p><br>
+<p>  Type:     {{ service_type }}   </p><br>
+<p>  Domain:   {{ service.domain }} </p><br>
+<p>  Status:   {{ service.status }} </p><br>
 </div>
