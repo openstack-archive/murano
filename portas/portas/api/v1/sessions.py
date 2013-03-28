@@ -38,9 +38,9 @@ class Controller(object):
 
         unit = get_session()
         if unit.query(Session).filter(Session.environment_id == environment_id
-                                      and
-                                      Session.state.in_(['open', 'deploing'])
-                                      ).first():
+        and
+                Session.state.in_(['open', 'deploing'])
+        ).first():
             log.info('There is already open session for this environment')
             raise exc.HTTPConflict
 
@@ -55,7 +55,7 @@ class Controller(object):
 
     def show(self, request, environment_id, session_id):
         log.debug(_('Session:Show <EnvId: {0}, SessionId: {1}>'.
-                    format(environment_id, session_id)))
+        format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
@@ -68,7 +68,7 @@ class Controller(object):
 
     def delete(self, request, environment_id, session_id):
         log.debug(_('Session:Delete <EnvId: {0}, SessionId: {1}>'.
-                    format(environment_id, session_id)))
+        format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
@@ -85,18 +85,24 @@ class Controller(object):
 
     def reports(self, request, environment_id, session_id):
         log.debug(_('Session:Reports <EnvId: {0}, SessionId: {1}>'.
-                    format(environment_id, session_id)))
+        format(environment_id, session_id)))
 
         unit = get_session()
-        statuses = unit.query(Status).filter_by(session_id=session_id)
+        statuses = unit.query(Status).filter_by(session_id=session_id).all()
         result = statuses
 
-        if request.GET['service_id']:
+        if 'service_id' in request.GET:
             service_id = request.GET['service_id']
 
             environment = unit.query(Session).get(session_id).description
-            services = environment['services']['activeDirectories']
-            services += environment['services']['webServers']
+            services = []
+            if 'services' in environment and \
+                            'activeDirectories' in environment['services']:
+                services += environment['services']['activeDirectories']
+
+            if 'services' in environment and \
+                            'webServers' in environment['services']:
+                services += environment['services']['webServers']
 
             service = [service for service in services
                        if service['id'] == service_id][0]
@@ -106,14 +112,14 @@ class Controller(object):
                 entities.append(service_id)
                 result = []
                 for status in statuses:
-                    if status['id'] in entities:
+                    if status.entity_id in entities:
                         result.append(status)
 
         return {'reports': [status.to_dict() for status in result]}
 
     def deploy(self, request, environment_id, session_id):
         log.debug(_('Session:Deploy <EnvId: {0}, SessionId: {1}>'.
-                    format(environment_id, session_id)))
+        format(environment_id, session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
