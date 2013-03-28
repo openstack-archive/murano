@@ -178,7 +178,8 @@ class WinServices(tables.DataTableView):
             exceptions.handle(self.request,
                               _('Unable to retrieve list of services for '
                                 'data center "%s".') % self.dc_name)
-        return services
+        self._services = services
+        return self._services
 
 
 class DetailServiceView(tabs.TabView):
