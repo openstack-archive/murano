@@ -131,10 +131,6 @@
 				<set path="::state.primaryDcIp">
 					<select source="ip" path="0.Result.0"/>
 				</set>
-				<report entity="unit">
-					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">DNS IP = <select source="ip" path="0.Result.0"/></parameter>
-				</report>
 			</success>
 		</send-command>
 	</rule>

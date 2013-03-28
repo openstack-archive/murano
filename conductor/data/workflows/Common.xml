@@ -1,6 +1,6 @@
 <workflow>
 
-	<rule match="$..units[?(@.state.hostname is None)]">
+	<rule match="$.services[*][*].units[?(@.state.hostname is None)]">
 		<set path="state.hostname"><generate-hostname/></set>
 	</rule>
 

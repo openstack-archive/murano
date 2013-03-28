@@ -77,8 +77,9 @@ class HeatExecutor(CommandBase):
         if not len(self._update_pending_list):
             return False
 
-        template = {}
-        arguments = {}
+        template, arguments = self._get_current_template()
+        stack_exists = (template != {})
+
         for t in self._update_pending_list:
             template = conductor.helpers.merge_dicts(
                 template, t['template'], max_levels=2)
@@ -89,7 +90,7 @@ class HeatExecutor(CommandBase):
             'Executing heat template {0} with arguments {1} on stack {2}'
             .format(anyjson.dumps(template), arguments, self._stack))
 
-        try:
+        if stack_exists:
             self._heat_client.stacks.update(
                 stack_id=self._stack,
                 parameters=arguments,
@@ -98,7 +99,7 @@ class HeatExecutor(CommandBase):
                 'Waiting for the stack {0} to be update'.format(self._stack))
             self._wait_state('UPDATE_COMPLETE')
             log.info('Stack {0} updated'.format(self._stack))
-        except heatclient.exc.HTTPNotFound:
+        else:
             self._heat_client.stacks.create(
                 stack_name=self._stack,
                 parameters=arguments,
@@ -137,6 +138,15 @@ class HeatExecutor(CommandBase):
         for item in pending_list:
             item['callback'](True)
         return True
+
+    def _get_current_template(self):
+        try:
+            stack_info = self._heat_client.stacks.get(stack_id=self._stack)
+            template = self._heat_client.stacks.template(
+                stack_id='{0}/{1}'.format(stack_info.stack_name, stack_info.id))
+            return template, stack_info.parameters
+        except heatclient.exc.HTTPNotFound:
+            return {}, {}
 
     def _wait_state(self, state):
         if isinstance(state, types.ListType):
