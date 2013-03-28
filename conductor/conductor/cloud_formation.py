@@ -41,7 +41,7 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
                 '%RABBITMQ_HOST%', settings.host)
             template_data = template_data.replace(
                 '%RABBITMQ_INPUT_QUEUE%',
-                '-'.join([str(context['/dataSource']['id']),
+                '-'.join([str(context['/dataSource']['name']),
                          str(service), str(unit)]).lower()
             )
             template_data = template_data.replace(
