@@ -165,7 +165,7 @@ def get_status_message_for_service(request, service_id):
                reports(environment_id, session_id, service_id)
     
     result = ""
-    for report in reprots:
+    for report in reports:
         result += '<p>' + report.text + '</p>'
     
     return result
