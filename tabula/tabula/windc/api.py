@@ -93,8 +93,10 @@ def services_list(request, datacenter_id):
     
    
     for i in range(len(services)):
-        services[i].operation = windcclient(request).sessions.\
+        reports = windcclient(request).sessions.\
                                 reports(datacenter_id, session_id)
+                                
+        services[i].operation = reports.sort(key=self.updated).last()
 
     return services
 
