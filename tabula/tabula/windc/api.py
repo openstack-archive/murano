@@ -91,8 +91,9 @@ def services_list(request, datacenter_id):
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
     
-    #for i in range(len(services)):
-    #    services[i]['operation'] = get_status_message_for_service(request, services[i].id)
+    for i in range(len(services)):
+        services[i]['operation'] = windcclient(request).sessions.\
+                                   reports(datacenter_id, session_id)
 
     return services
 
@@ -135,7 +136,7 @@ def get_service_datails(request, service_id):
     services = []
     for dc in datacenters:
         services += services_list(request, dc.id)
-    
+
     for service in services:
         if service.id == service_id:
             return service
