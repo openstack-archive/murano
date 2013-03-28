@@ -31,7 +31,10 @@ class OverviewTab(tabs.Tab):
     template_name = '_services.html'
     
     def get_context_data(self, request):
-        return {"service_id": self.tab_group.kwargs['service_id']}
+        service_id = self.tab_group.kwargs['service_id']
+        datacenter_id = api.get_data_center_id_for_service(request, service_id)
+        service = api.services_get(request, datacenter_id, service_id)
+        return {"service": service}
 
 class LogsTab(tabs.Tab):
     name = _("Logs")
@@ -39,7 +42,10 @@ class LogsTab(tabs.Tab):
     template_name = '_service_logs.html'
     
     def get_context_data(self, request):
-        return {"service_id": self.tab_group.kwargs['service_id']}
+        service_id = self.tab_group.kwargs['service_id']
+        datacenter_id = api.get_data_center_id_for_service(request, service_id)
+        service = api.services_get(request, datacenter_id, service_id)
+        return {"service": service}
 
 
 class WinServicesTabs(tabs.TabGroup):
