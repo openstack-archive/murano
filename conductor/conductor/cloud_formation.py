@@ -47,7 +47,7 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
             template_data = template_data.replace(
                 '%RESULT_QUEUE%',
                 '-execution-results-{0}'.format(
-                    str(context['/dataSource']['id'])).lower())
+                    str(context['/dataSource']['name'])).lower())
 
             init_script = init_script.replace(
                 '%WINDOWS_AGENT_CONFIG_BASE64%',
