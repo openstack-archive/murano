@@ -164,9 +164,9 @@ def get_status_message_for_service(request, service_id):
     reports = windcclient(request).sessions.\
                reports(environment_id, session_id, service_id)
     
-    result = ""
+    result = 'Initialization.... \n'
     for report in reports:
-        result += '  ' + report.text + '\n'
+        result += '  ' + str(report.text) + '\n'
     
     return result
 
