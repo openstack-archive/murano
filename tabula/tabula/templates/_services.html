@@ -4,8 +4,19 @@
   <h3 class="pull-left">{% trans "Service Details" %}</h3>
 <br>
 <br>
-<p>  Name:     {{ service_name }}   </p><br>
-<p>  Type:     {{ service_type }}   </p><br>
-<p>  Domain:   {{ service_domain }} </p><br>
-<p>  Status:   {{ service_status }} </p><br>
+</div>
+
+<div class="status row-fluid detail">
+  <h4>{% trans "Info" %}</h4>
+  <hr class="header_rule">
+  <dl>
+    <dt>{% trans "Name" %}</dt>
+    <dd>{{ service_name }}</dd>
+    <dt>{% trans "Type" %}</dt>
+    <dd>{{ service_type }}</dd>
+    <dt>{% trans "Domain" %}</dt>
+    <dd>{{ service_domain }}</dd>
+    <dt>{% trans "Status" %}</dt>
+    <dd>{{ service_status }}</dd>
+  </dl>
 </div>
