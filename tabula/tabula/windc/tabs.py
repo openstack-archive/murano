@@ -46,10 +46,9 @@ class LogsTab(tabs.Tab):
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
         
-        reports = api.get_status_message_for_service(request, data.id)
+        #reports = api.get_status_message_for_service(request, data.id)
 
-        return {"service_id": data.id,
-                "reports": reports}
+        return {"service_id": data.id}
 
 
 class WinServicesTabs(tabs.TabGroup):
