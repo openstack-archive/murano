@@ -166,7 +166,7 @@ def get_status_message_for_service(request, service_id):
     
     result = ""
     for report in reports:
-        result += '<p>' + report.text + '</p>'
+        result += '<p>' + report.text + '\n</p>'
     
     return result
 
