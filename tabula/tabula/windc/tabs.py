@@ -32,14 +32,11 @@ class OverviewTab(tabs.Tab):
     
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
-        
-        service = {}
-        service.name = data['name']
-        service.status = data['status']
-        service.service_type = data['service_type']
-        service.domain = data['domain']
-        
-        return {"service": service}
+
+        return {"service_name": data.name,
+                "service_status": data.status,
+                "service_type": data.service_type,
+                "service_domain": data.domain}
 
 class LogsTab(tabs.Tab):
     name = _("Logs")
@@ -48,14 +45,11 @@ class LogsTab(tabs.Tab):
     
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
-        
-        service = {}
-        service.name = data['name']
-        service.status = data['status']
-        service.service_type = data['service_type']
-        service.domain = data['domain']
-        
-        return {"service": service}
+
+        return {"service_name": data.name,
+                "service_status": data.status,
+                "service_type": data.service_type,
+                "service_domain": data.domain}
 
 
 class WinServicesTabs(tabs.TabGroup):
