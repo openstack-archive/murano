@@ -99,7 +99,8 @@ def services_list(request, datacenter_id):
                                 reports(datacenter_id, session_id,
                                         services[i].id)
 
-        services[i].operation = reports[-1].text
+        for report in reports:
+            services[i].operation = report.text
 
     return services
 
