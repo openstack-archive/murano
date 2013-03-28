@@ -96,7 +96,8 @@ def services_list(request, datacenter_id):
    
     for i in range(len(services)):
         reports = windcclient(request).sessions.\
-                                reports(datacenter_id, session_id)
+                                reports(datacenter_id, session_id,
+                                        services[i].id)
 
         services[i].operation = reports[-1].text
 
