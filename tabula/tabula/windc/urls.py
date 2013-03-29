@@ -27,13 +27,15 @@ from .forms import WizardFormServiceType, WizardFormConfiguration
 VIEW_MOD = 'openstack_dashboard.dashboards.project.windc.views'
 
 urlpatterns = patterns(VIEW_MOD,
-    url(r'^$', IndexView.as_view(), name='index'),
-    url(r'^create$',
-        Wizard.as_view([WizardFormServiceType, WizardFormConfiguration]),
-        name='create'),
-    url(r'^create_dc$', CreateWinDCView.as_view(), name='create_dc'),
-    url(r'^(?P<data_center_id>[^/]+)/$', WinServices.as_view(),
-        name='services'),
-    url(r'^(?P<service_id>[^/]+)/details$', DetailServiceView.as_view(),
-        name='service_details')
-)
+                       url(r'^$', IndexView.as_view(), name='index'),
+                       url(r'^create$',
+                           Wizard.as_view([WizardFormServiceType,
+                                           WizardFormConfiguration]),
+                           name='create'),
+                       url(r'^create_dc$', CreateWinDCView.as_view(),
+                           name='create_dc'),
+                       url(r'^(?P<data_center_id>[^/]+)/$',
+                           WinServices.as_view(), name='services'),
+                       url(r'^(?P<service_id>[^/]+)/details$',
+                           DetailServiceView.as_view(),
+                           name='service_details'))

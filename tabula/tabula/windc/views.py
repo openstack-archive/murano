@@ -24,16 +24,12 @@ Views for managing instances.
 import logging
 import re
 
-from django import http
-from django import shortcuts
 from django.views import generic
-from django.core.urlresolvers import reverse, reverse_lazy
-from django.utils.datastructures import SortedDict
+from django.core.urlresolvers import reverse
 from django.utils.translation import ugettext_lazy as _
 from django.contrib.formtools.wizard.views import SessionWizardView
 
 from horizon import exceptions
-from horizon import forms
 from horizon import tabs
 from horizon import tables
 from horizon import workflows
@@ -44,12 +40,12 @@ from tabula.windc import api
 from .tables import WinDCTable, WinServicesTable
 from .workflows import CreateWinDC
 from .tabs import WinServicesTabs
-from .forms import (WizardFormServiceType, WizardFormConfiguration,
-                    WizardFormADConfiguration, WizardFormIISConfiguration)
+from .forms import (WizardFormADConfiguration, WizardFormIISConfiguration)
 
 from horizon import messages
 
 from django.http import HttpResponseRedirect
+
 LOG = logging.getLogger(__name__)
 
 
@@ -59,12 +55,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
     def done(self, form_list, **kwargs):
         link = self.request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-        
-        LOG.critical("/////////////////////////////")
-        LOG.critical(link)
-        LOG.critical(datacenter_id)
-        LOG.critical("/////////////////////////////")
-        
+
         url = "/project/windc/%s/" % datacenter_id
 
         service_type = form_list[0].data.get('0-service', '')
@@ -73,7 +64,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
         if service_type == 'Active Directory':
             parameters['configuration'] = 'standalone'
             parameters['name'] = str(data.get('1-dc_name', 'noname'))
-            parameters['domain'] = parameters['name'] # Fix Me in orchestrator
+            parameters['domain'] = parameters['name']  # Fix Me in orchestrator
             parameters['adminPassword'] = str(data.get('1-adm_password', ''))
             dc_count = int(data.get('1-dc_count', 1))
             recovery_password = str(data.get('1-recovery_password', ''))
@@ -82,9 +73,11 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                                         'recoveryPassword': recovery_password,
                                         'location': 'west-dc'})
             for dc in range(dc_count - 1):
-                parameters['units'].append({'isMaster': False,
-                                        'recoveryPassword': recovery_password,
-                                        'location': 'west-dc'})
+                parameters['units'].append({
+                    'isMaster': False,
+                    'recoveryPassword': recovery_password,
+                    'location': 'west-dc'
+                })
 
         elif service_type == 'IIS':
             password = data.get('1-adm_password', '')
@@ -102,8 +95,8 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
             parameters['credentials'] = {'username': 'Administrator',
                                          'password': password}
             parameters['domain'] = str(domain)
-                                   # 'username': str(dc_user),
-                                   # 'password': str(dc_pass)}
+            # 'username': str(dc_user),
+            # 'password': str(dc_pass)}
             parameters['location'] = 'west-dc'
 
             parameters['units'] = []
@@ -185,7 +178,7 @@ class WinServices(tables.DataTableView):
 class DetailServiceView(tabs.TabView):
     tab_group_class = WinServicesTabs
     template_name = 'service_details.html'
-    
+
     def get_context_data(self, **kwargs):
         context = super(DetailServiceView, self).get_context_data(**kwargs)
         context["service"] = self.get_data()
@@ -202,7 +195,7 @@ class DetailServiceView(tabs.TabView):
                 exceptions.handle(self.request,
                                   _('Unable to retrieve details for '
                                     'service "%s".') % service_id,
-                                    redirect=redirect)
+                                  redirect=redirect)
             self._service = service
         return self._service
 

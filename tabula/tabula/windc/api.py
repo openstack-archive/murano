@@ -74,8 +74,10 @@ def services_create(request, datacenter, parameters):
 
     return res
 
+
 def get_time(obj):
     return obj.updated
+
 
 def services_list(request, datacenter_id):
     session_id = None
@@ -92,17 +94,17 @@ def services_list(request, datacenter_id):
     services = windcclient(request).activeDirectories.list(datacenter_id,
                                                            session_id)
     services += windcclient(request).webServers.list(datacenter_id, session_id)
-    
-   
+
     for i in range(len(services)):
-        reports = windcclient(request).sessions.\
-                                reports(datacenter_id, session_id,
-                                        services[i].id)
+        reports = windcclient(request).sessions. \
+            reports(datacenter_id, session_id,
+                    services[i].id)
 
         for report in reports:
             services[i].operation = report.text
 
     return services
+
 
 def get_active_directories(request, datacenter_id):
     session_id = None
@@ -121,13 +123,16 @@ def get_active_directories(request, datacenter_id):
                                                            session_id)
     return services
 
+
 def services_get(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
-    
+
     for service in services:
         if service.id is service_id:
-            service['operation'] = get_status_message_for_service(request, service_id)
+            service['operation'] = get_status_message_for_service(request,
+                                                                  service_id)
             return service
+
 
 def get_data_center_id_for_service(request, service_id):
     datacenters = datacenters_list(request)
@@ -138,6 +143,7 @@ def get_data_center_id_for_service(request, service_id):
             if service.id == service_id:
                 return dc.id
 
+
 def get_service_datails(request, service_id):
     datacenters = datacenters_list(request)
     services = []
@@ -147,6 +153,7 @@ def get_service_datails(request, service_id):
     for service in services:
         if service.id == service_id:
             return service
+
 
 def get_status_message_for_service(request, service_id):
     environment_id = get_data_center_id_for_service(request, service_id)
@@ -162,14 +169,15 @@ def get_status_message_for_service(request, service_id):
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
-    reports = windcclient(request).sessions.\
-               reports(environment_id, session_id, service_id)
-    
+    reports = windcclient(request).sessions. \
+        reports(environment_id, session_id, service_id)
+
     result = 'Initialization.... \n'
     for report in reports:
         result += '  ' + str(report.text) + '\n'
-    
+
     return result
+
 
 def services_delete(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)

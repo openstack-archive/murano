@@ -39,13 +39,13 @@ LOGGING = {
         'null': {
             'level': 'DEBUG',
             'class': 'django.utils.log.NullHandler',
-            },
         },
+    },
     'loggers': {
         'django.db.backends': {
             'handlers': ['null'],
             'propagate': False,
-            },
+        },
         'horizon': {
             'handlers': ['null'],
             'propagate': False,

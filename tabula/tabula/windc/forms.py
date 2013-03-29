@@ -30,13 +30,13 @@ LOG = logging.getLogger(__name__)
 
 
 class PasswordField(forms.CharField):
-
     # Setup the Field
     def __init__(self, label, *args, **kwargs):
         super(PasswordField, self).__init__(min_length=7, required=True,
-                         label=label,
-                         widget=forms.PasswordInput(render_value=False),
-                        *args, **kwargs)
+                                            label=label,
+                                            widget=forms.PasswordInput(
+                                                render_value=False),
+                                            *args, **kwargs)
 
     def clean(self, value):
 
@@ -75,8 +75,8 @@ class PasswordField(forms.CharField):
 class WizardFormServiceType(forms.Form):
     service = forms.ChoiceField(label=_('Service Type'),
                                 choices=[
-                                ('Active Directory', 'Active Directory'),
-                                ('IIS', 'Internet Information Services')
+                                    ('Active Directory', 'Active Directory'),
+                                    ('IIS', 'Internet Information Services')
                                 ])
 
 
@@ -86,8 +86,6 @@ class WizardFormConfiguration(forms.Form):
 
 
 class WizardFormADConfiguration(forms.Form):
-
-
     dc_name = forms.CharField(label=_('Domain Name'),
                               required=True)
 
@@ -105,7 +103,6 @@ class WizardFormADConfiguration(forms.Form):
         super(WizardFormADConfiguration, self).__init__(*args, **kwargs)
 
 
-
 class WizardFormIISConfiguration(forms.Form):
     iis_name = forms.CharField(label=_('IIS Server Name'),
                                required=True)
@@ -113,7 +110,7 @@ class WizardFormIISConfiguration(forms.Form):
     adm_password = PasswordField(_('Administrator password'))
 
     iis_domain = forms.ChoiceField(label=_('Member of the Domain'),
-                                 required=False)
+                                   required=False)
 
     def __init__(self, request, *args, **kwargs):
         super(WizardFormIISConfiguration, self).__init__(*args, **kwargs)
@@ -124,6 +121,5 @@ class WizardFormIISConfiguration(forms.Form):
         domains = api.get_active_directories(request, datacenter_id)
 
         self.fields['iis_domain'].choices = [("", "")] + \
-                                      [(domain.name, domain.name)
-                                       for domain in domains]
-        
+                                            [(domain.name, domain.name)
+                                             for domain in domains]
