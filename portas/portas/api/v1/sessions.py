@@ -139,7 +139,7 @@ class Controller(object):
         connection = amqp.Connection('{0}:{1}'.
                                      format(rabbitmq.host, rabbitmq.port),
                                      virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.userid,
+                                     userid=rabbitmq.login,
                                      password=rabbitmq.password,
                                      ssl=rabbitmq.use_ssl, insist=True)
         channel = connection.channel()
