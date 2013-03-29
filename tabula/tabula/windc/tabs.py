@@ -25,11 +25,12 @@ from tabula.windc import api
 
 LOG = logging.getLogger(__name__)
 
+
 class OverviewTab(tabs.Tab):
     name = _("Service")
     slug = "_service"
     template_name = '_services.html'
-    
+
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
 
@@ -38,14 +39,15 @@ class OverviewTab(tabs.Tab):
                 "service_type": data.service_type,
                 "service_domain": data.domain}
 
+
 class LogsTab(tabs.Tab):
     name = _("Logs")
     slug = "_logs"
     template_name = '_service_logs.html'
-    
+
     def get_context_data(self, request):
         data = self.tab_group.kwargs['service']
-        
+
         reports = api.get_status_message_for_service(request, data.id)
 
         return {"reports": reports}

@@ -17,27 +17,13 @@
 
 # TO DO: clear extra modules
 
-import re
 import logging
 
-from django import shortcuts
-from django import template
-from django.core import urlresolvers
-from django.template.defaultfilters import title
-from django.utils.http import urlencode
-from django.utils.translation import string_concat, ugettext_lazy as _
-
-from horizon.conf import HORIZON_CONFIG
-from horizon import exceptions
+import re
+from django.utils.translation import ugettext_lazy as _
 from horizon import messages
 from horizon import tables
-from horizon.templatetags import sizeformat
-from horizon.utils.filters import replace_underscores
-
 from tabula.windc import api
-
-from openstack_dashboard.dashboards.project.access_and_security \
-        .floating_ips.workflows import IPAssociationWorkflow
 
 
 LOG = logging.getLogger(__name__)
@@ -102,8 +88,8 @@ class DeleteService(tables.BatchAction):
         try:
             api.services_delete(request, datacenter_id, service_id)
         except:
-            messages.error(request,
-                  _('Sorry, you can not delete this service right now.'))
+            messages.error(request, _('Sorry, you can not delete this '
+                                      'service right now.'))
 
 
 class DeployDataCenter(tables.BatchAction):
@@ -112,7 +98,7 @@ class DeployDataCenter(tables.BatchAction):
     action_past = _('Deploy')
     data_type_singular = _('Data Center')
     data_type_plural = _('Data Center')
-    classes = ('btn-launch')
+    classes = 'btn-launch'
 
     def allowed(self, request, datum):
         return True
@@ -135,20 +121,20 @@ class UpdateDCRow(tables.Row):
 
     def get_data(self, request, datacenter_id):
         return api.datacenters_get(request, datacenter_id)
-    
-    
+
+
 class UpdateServiceRow(tables.Row):
     ajax = True
 
     def get_data(self, request, service_id):
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
- 
+
         service = api.services_get(request, datacenter_id, service_id)
         if service:
-            service['operation'] = api.\
+            service['operation'] = api. \
                 get_status_message_for_service(request, service_id)
-        
+
         return service
 
 
@@ -161,13 +147,11 @@ STATUS_DISPLAY_CHOICES = (
 
 
 class WinDCTable(tables.DataTable):
-
     STATUS_CHOICES = (
         (None, True),
         ('Ready to deploy', True),
         ('Active', True)
     )
-
 
     name = tables.Column('name',
                          link=('horizon:project:windc:services'),
@@ -189,7 +173,6 @@ class WinDCTable(tables.DataTable):
 
 
 class WinServicesTable(tables.DataTable):
-
     STATUS_CHOICES = (
         (None, True),
         ('Ready to deploy', True),
