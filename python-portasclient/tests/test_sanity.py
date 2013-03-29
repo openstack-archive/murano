@@ -10,8 +10,8 @@ import portasclient.v1.environments as environments
 import portasclient.v1.services as services
 import portasclient.v1.sessions as sessions
 
-import portasclient.shell as shell
-import portasclient.common.http as http
+#import portasclient.shell as shell
+#import portasclient.common.http as http
 
 
 LOG = logging.getLogger('Unit tests')
