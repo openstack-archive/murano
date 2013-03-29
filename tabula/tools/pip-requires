@@ -5,7 +5,7 @@
 Django>=1.4,<1.5
 
 #API
--e ./packages/python-portasclient-2013.1.a345.ga70b44e.tar.gz#egg=python-portasclient
+./packages/python-portasclient-2013.1.a345.ga70b44e.tar.gz
 
 anyjson
 
