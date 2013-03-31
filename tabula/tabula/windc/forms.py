@@ -26,7 +26,7 @@ from django.utils.translation import ugettext_lazy as _
 import re
 from tabula.windc import api
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 class PasswordField(forms.CharField):

@@ -19,35 +19,39 @@
 #    under the License.
 
 import logging
-import urlparse
 
-from django.utils.decorators import available_attrs
 from portasclient.v1.client import Client as windc_client
 
-LOG = logging.getLogger(__name__)
+log = logging.getLogger(__name__)
 
 
 def windcclient(request):
     url = "http://127.0.0.1:8082"
-    LOG.debug('windcclient connection created using token "%s" and url "%s"'
+    log.debug('windcclient connection created using token "%s" and url "%s"'
               % (request.user.token, url))
     return windc_client(endpoint=url, token=request.user.token.token['id'])
 
 
 def datacenters_create(request, parameters):
-    name = parameters.get('name', '')
-    return windcclient(request).environments.create(name)
+    env = windcclient(request).environments.create(parameters.get('name', ''))
+    log.debug('Environment::Create {0}'.format(env))
+    return env
 
 
 def datacenters_delete(request, datacenter_id):
-    return windcclient(request).environments.delete(datacenter_id)
+    result = windcclient(request).environments.delete(datacenter_id)
+    log.debug('Environment::Delete Id:{0}'.format(datacenter_id))
+    return result
 
 
 def datacenters_get(request, datacenter_id):
-    return windcclient(request).environments.get(datacenter_id)
+    env = windcclient(request).environments.get(datacenter_id)
+    log.debug('Environment::Get {0}'.format(env))
+    return env
 
 
 def datacenters_list(request):
+    log.debug('Environment::List')
     return windcclient(request).environments.list()
 
 
@@ -58,21 +62,25 @@ def datacenters_deploy(request, datacenter_id):
             session_id = session.id
     if not session_id:
         return "Sorry, nothing to deploy."
-    return windcclient(request).sessions.deploy(datacenter_id, session_id)
+    log.debug('Obtained session with Id: {0}'.format(session_id))
+    result = windcclient(request).sessions.deploy(datacenter_id, session_id)
+    log.debug('Environment with Id: {0} deployed in session '
+              'with Id: {1}'.format(datacenter_id, session_id))
+    return result
 
 
 def services_create(request, datacenter, parameters):
     session_id = windcclient(request).sessions.list(datacenter)[0].id
     if parameters['service_type'] == 'Active Directory':
-        res = windcclient(request).activeDirectories.create(datacenter,
-                                                            session_id,
-                                                            parameters)
+        service = windcclient(request)\
+            .activeDirectories\
+            .create(datacenter, session_id, parameters)
     else:
-        res = windcclient(request).webServers.create(datacenter,
-                                                     session_id,
-                                                     parameters)
+        service = windcclient(request)\
+            .webServers.create(datacenter, session_id, parameters)
 
-    return res
+    log.debug('Service::Create {0}'.format(service))
+    return service
 
 
 def get_time(obj):
@@ -103,6 +111,7 @@ def services_list(request, datacenter_id):
         for report in reports:
             services[i].operation = report.text
 
+    log.debug('Service::List')
     return services
 
 
@@ -119,8 +128,11 @@ def get_active_directories(request, datacenter_id):
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
 
-    services = windcclient(request).activeDirectories.list(datacenter_id,
-                                                           session_id)
+    services = windcclient(request)\
+        .activeDirectories\
+        .list(datacenter_id, session_id)
+
+    log.debug('Service::Active Directories::List')
     return services
 
 
@@ -131,6 +143,7 @@ def services_get(request, datacenter_id, service_id):
         if service.id is service_id:
             service['operation'] = get_status_message_for_service(request,
                                                                   service_id)
+            log.debug('Service::Get {0}'.format(service))
             return service
 
 
@@ -164,10 +177,10 @@ def get_status_message_for_service(request, service_id):
         if s.state in ['open', 'deploying']:
             session_id = s.id
         else:
-            windcclient(request).sessions.delete(datacenter_id, s.id)
+            windcclient(request).sessions.delete(environment_id, s.id)
 
     if session_id is None:
-        session_id = windcclient(request).sessions.configure(datacenter_id).id
+        session_id = windcclient(request).sessions.configure(environment_id).id
 
     reports = windcclient(request).sessions. \
         reports(environment_id, session_id, service_id)
@@ -180,6 +193,9 @@ def get_status_message_for_service(request, service_id):
 
 
 def services_delete(request, datacenter_id, service_id):
+    log.debug('Service::Remove EnvId: {0} '
+              'SrvId: {1}'.format(datacenter_id, service_id))
+
     services = services_list(request, datacenter_id)
 
     session_id = None
