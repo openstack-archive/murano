@@ -127,23 +127,14 @@ class UpdateServiceRow(tables.Row):
     ajax = True
 
     def get_data(self, request, service_id):
-        
-        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        LOG.critical(request)
-        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        
+
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
-        
-        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
-        LOG.critical(datacenter_id)
-        LOG.critical(service_id)
-        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
 
         service = api.services_get(request, datacenter_id, service_id)
-        #if service:
-        #    service['operation'] = api. \
-        #        get_status_message_for_service(request, service_id)
+        if service:
+            service['operation'] = api. \
+                get_status_message_for_service(request, service_id)
 
         LOG.critical(service)
 
