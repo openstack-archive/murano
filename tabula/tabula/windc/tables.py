@@ -127,6 +127,11 @@ class UpdateServiceRow(tables.Row):
     ajax = True
 
     def get_data(self, request, service_id):
+        
+        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        LOG.critical(request)
+        LOG.critical("&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&&")
+        
         link = request.__dict__['META']['HTTP_REFERER']
         datacenter_id = re.search('windc/(\S+)', link).group(0)[6:-1]
         
