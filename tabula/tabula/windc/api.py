@@ -140,10 +140,7 @@ def services_get(request, datacenter_id, service_id):
     services = services_list(request, datacenter_id)
 
     for service in services:
-        log.critical(service)
-        log.critical(service.id)
-        log.critical(service_id)
-        if service.id is service_id:
+        if service.id == service_id:
             log.debug('Service::Get {0}'.format(service))
             return service
 
