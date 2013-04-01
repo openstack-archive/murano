@@ -70,7 +70,18 @@ def datacenters_deploy(request, datacenter_id):
 
 
 def services_create(request, datacenter, parameters):
-    session_id = windcclient(request).sessions.list(datacenter)[0].id
+    session_id = None
+    sessions = windcclient(request).sessions.list(environment_id)
+
+    for s in sessions:
+        if s.state == 'open':
+            session_id = s.id
+        else:
+            windcclient(request).sessions.delete(environment_id, s.id)
+
+    if session_id is None:
+        session_id = windcclient(request).sessions.configure(environment_id).id
+
     if parameters['service_type'] == 'Active Directory':
         service = windcclient(request)\
             .activeDirectories\
@@ -91,10 +102,7 @@ def services_list(request, datacenter_id):
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
     for s in sessions:
-        if s.state in ['open', 'deploying']:
-            session_id = s.id
-        else:
-            windcclient(request).sessions.delete(datacenter_id, s.id)
+        session_id = s.id
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
@@ -120,10 +128,7 @@ def get_active_directories(request, datacenter_id):
     sessions = windcclient(request).sessions.list(datacenter_id)
 
     for s in sessions:
-        if s.state in ['open', 'deploying']:
-            session_id = s.id
-        else:
-            windcclient(request).sessions.delete(datacenter_id, s.id)
+        session_id = s.id
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(datacenter_id).id
@@ -172,10 +177,7 @@ def get_status_message_for_service(request, service_id):
     sessions = windcclient(request).sessions.list(environment_id)
 
     for s in sessions:
-        if s.state in ['open', 'deploying']:
-            session_id = s.id
-        else:
-            windcclient(request).sessions.delete(environment_id, s.id)
+        session_id = s.id
 
     if session_id is None:
         session_id = windcclient(request).sessions.configure(environment_id).id
