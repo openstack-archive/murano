@@ -69,7 +69,7 @@ def datacenters_deploy(request, datacenter_id):
     return result
 
 
-def services_create(request, datacenter, parameters):
+def services_create(request, environment_id, parameters):
     session_id = None
     sessions = windcclient(request).sessions.list(environment_id)
 
@@ -85,10 +85,10 @@ def services_create(request, datacenter, parameters):
     if parameters['service_type'] == 'Active Directory':
         service = windcclient(request)\
             .activeDirectories\
-            .create(datacenter, session_id, parameters)
+            .create(environment_id, session_id, parameters)
     else:
         service = windcclient(request)\
-            .webServers.create(datacenter, session_id, parameters)
+            .webServers.create(environment_id, session_id, parameters)
 
     log.debug('Service::Create {0}'.format(service))
     return service
@@ -99,43 +99,41 @@ def get_time(obj):
 
 
 def services_list(request, datacenter_id):
+    services = []
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
     for s in sessions:
         session_id = s.id
 
-    if session_id is None:
-        session_id = windcclient(request).sessions.configure(datacenter_id).id
+    if session_id:
+        services = windcclient(request).activeDirectories.list(datacenter_id,
+                                                               session_id)
+        services += windcclient(request).webServers.list(datacenter_id,
+                                                         session_id)
+        for i in range(len(services)):
+            reports = windcclient(request).sessions. \
+                reports(datacenter_id, session_id,
+                        services[i].id)
 
-    services = windcclient(request).activeDirectories.list(datacenter_id,
-                                                           session_id)
-    services += windcclient(request).webServers.list(datacenter_id, session_id)
-
-    for i in range(len(services)):
-        reports = windcclient(request).sessions. \
-            reports(datacenter_id, session_id,
-                    services[i].id)
-
-        for report in reports:
-            services[i].operation = report.text
+            for report in reports:
+                services[i].operation = report.text
 
     log.debug('Service::List')
     return services
 
 
 def get_active_directories(request, datacenter_id):
+    services = []
     session_id = None
     sessions = windcclient(request).sessions.list(datacenter_id)
 
     for s in sessions:
         session_id = s.id
 
-    if session_id is None:
-        session_id = windcclient(request).sessions.configure(datacenter_id).id
-
-    services = windcclient(request)\
-        .activeDirectories\
-        .list(datacenter_id, session_id)
+    if session_id:
+        services = windcclient(request)\
+                   .activeDirectories\
+                   .list(datacenter_id, session_id)
 
     log.debug('Service::Active Directories::List')
     return services
@@ -179,11 +177,9 @@ def get_status_message_for_service(request, service_id):
     for s in sessions:
         session_id = s.id
 
-    if session_id is None:
-        session_id = windcclient(request).sessions.configure(environment_id).id
-
-    reports = windcclient(request).sessions. \
-        reports(environment_id, session_id, service_id)
+    if session_id:
+        reports = windcclient(request).sessions.\
+                  reports(environment_id, session_id, service_id)
 
     result = 'Initialization.... \n'
     for report in reports:
