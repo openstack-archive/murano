@@ -37,8 +37,8 @@ paste_deploy_opts = [
 ]
 
 bind_opts = [
-    cfg.StrOpt('bind_host', default='localhost'),
-    cfg.IntOpt('bind_port'),
+    cfg.StrOpt('bind-host', default='0.0.0.0'),
+    cfg.IntOpt('bind-port', default='8082'),
 ]
 
 reports_opts = [
@@ -59,7 +59,8 @@ rabbit_opts = [
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
-CONF.register_opts(bind_opts)
+CONF.register_cli_opts(bind_opts)
+# CONF.register_opts(bind_opts)
 CONF.register_opts(reports_opts, group='reports')
 CONF.register_opts(rabbit_opts, group='rabbitmq')
 
