@@ -55,7 +55,7 @@ class TaskResultHandlerService(service.Service):
 
 def handle_report(msg):
     log.debug(_('Got report message from orchestration engine:\n{0}'.
-    format(msg.body)))
+                format(msg.body)))
 
     params = anyjson.deserialize(msg.body)
     params['entity_id'] = params['id']
