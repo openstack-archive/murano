@@ -1,0 +1,9 @@
+#IntelJ Idea
+.idea/
+
+#Build results
+target
+
+#Translation build
+*.mo
+*.pot
