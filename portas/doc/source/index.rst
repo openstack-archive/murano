@@ -103,7 +103,7 @@ Run
 ----
 Run Portas and supply valid configuration file::
 
-    smelikyan@work:~/portas-api --config-file=./keero/portas/etc/portas-api.conf
+    user@work:~/$ portas-api --config-file=./keero/portas/etc/portas-api.conf
 
 Man Pages
 =========
