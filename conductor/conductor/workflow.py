@@ -14,11 +14,11 @@
 # limitations under the License.
 
 import jsonpath
-import types
 import re
+import types
 
-import xml_code_engine
 import function_context
+import xml_code_engine
 
 
 class Workflow(object):

@@ -14,12 +14,12 @@
 # limitations under the License.
 
 import base64
+import config
+import random
+import string
+import time
 
 import xml_code_engine
-import config
-from random import choice
-import time
-import string
 
 
 def update_cf_stack(engine, context, body, template,
@@ -53,17 +53,20 @@ def prepare_user_data(context, hostname, service, unit,
                 template)) as template_file:
             init_script = init_script_file.read()
             template_data = template_file.read()
-            template_data = template_data.replace(
-                '%RABBITMQ_HOST%', settings.host)
-            template_data = template_data.replace(
-                '%RABBITMQ_INPUT_QUEUE%',
-                '-'.join([str(context['/dataSource']['name']),
-                         str(service), str(unit)]).lower()
-            )
-            template_data = template_data.replace(
-                '%RESULT_QUEUE%',
-                '-execution-results-{0}'.format(
-                    str(context['/dataSource']['name'])).lower())
+
+            replacements = {
+                '%RABBITMQ_HOST%': settings.host,
+                '%RABBITMQ_INPUT_QUEUE%': '-'.join(
+                    [str(context['/dataSource']['name']),
+                     str(service), str(unit)]).lower(),
+                '%RESULT_QUEUE%': '-execution-results-{0}'.format(
+                    str(context['/dataSource']['name'])).lower(),
+                '%RABBITMQ_USER%': settings.login,
+                '%RABBITMQ_PASSWORD%': settings.password,
+                '%RABBITMQ_VHOST%': settings.virtual_host
+            }
+
+            template_data = set_config_params(template_data, replacements)
 
             init_script = init_script.replace(
                 '%WINDOWS_AGENT_CONFIG_BASE64%',
@@ -73,13 +76,24 @@ def prepare_user_data(context, hostname, service, unit,
 
             return init_script
 
+
+def set_config_params(template_data, replacements):
+    for key in replacements:
+        template_data = template_data.replace(key, replacements[key])
+    return template_data
+
+
 counter = 0
+
 
 def int2base(x, base):
     digs = string.digits + string.lowercase
-    if x < 0: sign = -1
-    elif x==0: return '0'
-    else: sign = 1
+    if x < 0:
+        sign = -1
+    elif x == 0:
+        return '0'
+    else:
+        sign = 1
     x *= sign
     digits = []
     while x:
@@ -93,7 +107,7 @@ def int2base(x, base):
 
 def generate_hostname(**kwargs):
     global counter
-    prefix = ''.join(choice(string.lowercase) for _ in range(5))
+    prefix = ''.join(random.choice(string.lowercase) for _ in range(5))
     timestamp = int2base(int(time.time() * 1000), 36)[:8]
     suffix = int2base(counter, 36)
     counter = (counter + 1) % 1296
