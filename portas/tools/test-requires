@@ -2,6 +2,7 @@
 distribute>=0.6.24
 
 # Needed for testing
+unittest2
 coverage
 fixtures>=0.3.12
 mox
