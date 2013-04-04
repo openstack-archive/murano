@@ -1,7 +1,46 @@
 import logging
 from selenium.webdriver.support.ui import Select
+import xml.etree.ElementTree as ET
+
+
 logging.basicConfig()
 LOG = logging.getLogger(' Page object: ')
+"""
+    Disable selenium logging:
+"""
+logger = logging.getLogger('selenium.webdriver.remote.remote_connection')
+logger.setLevel('ERROR')
+
+
+class ObjectsLibrary:
+    file = None
+    objects = []
+
+    def __init__(self, file_name='objects.xml'):
+        """
+            Initialization of the Objects Library.
+            Read objects descriptions from XML file.
+        """
+        self.file = file_name
+        tree = ET.parse(self.file)
+        objects = tree.getroot()
+        self.objects = []
+        for element in objects:
+            object = {}
+            for parameter in element:
+                object.update({parameter.tag: parameter.text})
+            self.objects.append(object)
+
+    def get_object(self, name, pagename):
+        """
+            Search objects in Objects Library.
+        """
+        for object in self.objects:
+            obj_pagename = object.get('pagename', None)
+            if object['name'] == name and (obj_pagename == pagename
+                                           or obj_pagename is None):
+                return object['parameter']
+        return None
 
 
 class TableCellClass:
@@ -14,7 +53,8 @@ class TableCellClass:
 
     def Text(self):
         if self.table:
-            return self.table.text()
+            LOG.critical(self.table.text)
+            return self.table.text
         else:
             return ''
 
@@ -75,8 +115,11 @@ class EditBoxClass:
 
     def Set(self, value):
         if self.edit:
-            self.edit.clear()
-            self.edit.send_keys(value)
+            try:
+                self.edit.clear()
+                self.edit.send_keys(value)
+            except:
+                LOG.error('Can not set value for text box.')
 
     def Text(self):
         if self.edit:
@@ -100,7 +143,11 @@ class DropDownListClass:
 
     def Set(self, value):
         if self.select:
-            Select(self.select).select_by_visible_text(value)
+            try:
+                Select(self.select).select_by_visible_text(value)
+            except:
+                LOG.error('Can not select element %s from drop down list.'
+                          .format(value))
 
     def Text(self):
         if self.select:
@@ -118,40 +165,57 @@ error_msg = """
 class Page:
 
     driver = None
-    timeout = 30
+    timeout = 10
+    lib = None
+    name = None
 
     def __init__(self, driver):
-        driver.set_page_load_timeout(30)
+        driver.set_page_load_timeout(self.timeout)
         driver.implicitly_wait(0.01)
         self.driver = driver
 
-    def _find_element(self, parameter):
+    def _find_element(self, name, parameter=None):
+        """
+            This method allows to find element,
+            based on descriptions in Object Library,
+            xpath, id, name or pertial link text.
+            If parameter != None will be used name % parameter
+        """
+        lib = ObjectsLibrary()
+        if lib.get_object(name, self.name):
+            name = lib.get_object(name, self.name)
+
+        if parameter:
+            name = name % parameter
+
         obj = None
         k = 0
+
         while (obj is None and k < self.timeout):
             k += 1
+
             try:
-                obj = self.driver.find_element_by_name(parameter)
+                obj = self.driver.find_element_by_name(name)
                 return obj
             except:
                 pass
             try:
-                obj = self.driver.find_element_by_id(parameter)
+                obj = self.driver.find_element_by_id(name)
                 return obj
             except:
                 pass
             try:
-                obj = self.driver.find_element_by_xpath(parameter)
+                obj = self.driver.find_element_by_xpath(name)
                 return obj
             except:
                 pass
             try:
-                obj = self.driver.find_element_by_partial_link_text(parameter)
+                obj = self.driver.find_element_by_partial_link_text(name)
                 return obj
             except:
                 pass
 
-        LOG.error(error_msg % parameter)
+        LOG.error(error_msg % name)
         return None
 
     def Open(self, url):
@@ -160,32 +224,37 @@ class Page:
     def Refresh(self):
         self.driver.refresh()
 
-    def TableCell(self, name):
-        obj = self._find_element(name)
+    def TableCell(self, name, parameter=None):
+        obj = self._find_element(name, parameter)
         table = TableCellClass(obj)
         return table
 
-    def Button(self, name):
-        obj = self._find_element(name)
+    def Button(self, name, parameter=None):
+        obj = self._find_element(name, parameter)
         button = ButtonClass(obj)
         return button
 
-    def Link(self, name):
-        obj = self._find_element(name)
+    def Link(self, name, parameter=None):
+        obj = self._find_element(name, parameter)
         link = LinkClass(obj)
         return link
 
-    def EditBox(self, name):
-        obj = self._find_element(name)
+    def EditBox(self, name, parameter=None):
+        obj = self._find_element(name, parameter)
         edit = EditBoxClass(obj)
         return edit
 
-    def DropDownList(self, name):
-        obj = self._find_element(name)
+    def DropDownList(self, name, parameter=None):
+        obj = self._find_element(name, parameter)
         select = DropDownListClass(obj)
         return select
 
     def Navigate(self, path):
+        """
+            This method allows to navigate by
+            webUI menu button and links to
+            the specific page
+        """
         steps = path.split(':')
 
         for step in steps:
