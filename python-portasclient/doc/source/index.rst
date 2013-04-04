@@ -3,7 +3,7 @@ Python API
 In order to use the python api directly, you must first obtain an auth token and identify which endpoint you wish to speak to. Once you have done so, you can use the API like so::
 
     >>> from portasclient import Client
-    >>> portas = Client('1', endpoint=OS_IMAGE_ENDPOINT, token=OS_AUTH_TOKEN)
+    >>> portas = Client('1', endpoint=PORTAS_URL, token=OS_AUTH_TOKEN)
 ...
 
 
@@ -18,7 +18,7 @@ In order to use the CLI, you must provide your OpenStack username, password, ten
 
 The command line tool will attempt to reauthenticate using your provided credentials for every request. You can override this behavior by manually supplying an auth token using ``--os-image-url`` and ``--os-auth-token``. You can alternatively set these environment variables::
 
-    export OS_IMAGE_URL=http://ceilometer.example.org:8004/
+    export PORTAS_URL=http://portas.example.org:8082/
     export OS_AUTH_TOKEN=3bcc3d3a03f44e3d8377f9247b0ad155
 
 Once you've configured your authentication parameters, you can run ``portas help`` to see a complete listing of available commands.
