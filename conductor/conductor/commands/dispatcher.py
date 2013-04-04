@@ -1,14 +1,29 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import command
 import cloud_formation
 import windows_agent
 
 
 class CommandDispatcher(command.CommandBase):
-    def __init__(self, environment_id, rmqclient, token, tenant_id):
+    def __init__(self, environment, rmqclient, token, tenant_id):
         self._command_map = {
-            'cf': cloud_formation.HeatExecutor(environment_id, token, tenant_id),
+            'cf': cloud_formation.HeatExecutor(environment, token, tenant_id),
             'agent': windows_agent.WindowsAgentExecutor(
-                environment_id, rmqclient)
+                environment, rmqclient)
         }
 
     def execute(self, name, **kwargs):

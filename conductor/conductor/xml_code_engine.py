@@ -1,4 +1,18 @@
-#from lxml import etree
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import xml.etree.ElementTree as etree
 import types
 
@@ -121,15 +135,3 @@ XmlCodeEngine.register_function(_function_func, "function")
 XmlCodeEngine.register_function(_null_func, "null")
 XmlCodeEngine.register_function(_true_func, "true")
 XmlCodeEngine.register_function(_false_func, "false")
-
-
-def xprint(context, body, **kwargs):
-    print "------------------------ start ------------------------"
-    for arg in kwargs:
-        print "%s = %s" % (arg, kwargs[arg])
-    print 'context = ', context
-    print 'body = %s (%s)' % (body, body.text)
-    print "------------------------- end -------------------------"
-
-
-XmlCodeEngine.register_function(xprint, "print")

@@ -1,3 +1,18 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import base64
 
 import xml_code_engine
@@ -29,7 +44,8 @@ def delete_cf_stack(engine, context, body, **kwargs):
         name='cf', command='Delete', callback=callback)
 
 
-def prepare_user_data(context, hostname, service, unit, template='Default', **kwargs):
+def prepare_user_data(context, hostname, service, unit,
+                      template='Default', **kwargs):
     settings = config.CONF.rabbitmq
 
     with open('data/init.ps1') as init_script_file:
@@ -58,7 +74,6 @@ def prepare_user_data(context, hostname, service, unit, template='Default', **kw
             return init_script
 
 counter = 0
-
 
 def int2base(x, base):
     digs = string.digits + string.lowercase
