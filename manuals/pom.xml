@@ -24,7 +24,7 @@
 	  <xincludeSupported>true</xincludeSupported>
 	  <chunkSectionDepth>100</chunkSectionDepth>
 	  <postProcess>
-	    <copy todir="target/docbkx/webhelp/example/content/figures">
+	    <copy todir="target/docbkx/webhelp/keero-manual/content/figures">
 	      <fileset dir="src/docbkx/figures">
               <include name="**/*.png" />
 	      </fileset>
