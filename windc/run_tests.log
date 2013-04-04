@@ -1,3 +1,0 @@
-nose.config: INFO: Ignoring files matching ['^\\.', '^_', '^setup\\.py$']
-nose.selector: INFO: /Users/gokrokve/Keero/windc/run_tests.sh is executable; skipped
-2013-02-11 13:35:01,989 DEBUG Initialized with method overriding = True, and path info altering = True

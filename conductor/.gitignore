@@ -1,0 +1,20 @@
+#IntelJ Idea
+.idea/
+
+#virtualenv
+.venv/
+
+#Build results
+build/
+dist/
+*.egg-info/
+
+#Python
+*.pyc
+
+#Translation build
+*.mo
+*.pot
+
+#SQLite Database files
+*.sqlite

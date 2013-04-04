@@ -5,7 +5,7 @@
 		</set>
 	</rule>
 
-	<rule match="$.services.activeDirectories[*].units[?(@.state.instanceName is None)]">
+	<rule match="$.services.activeDirectories[*].units[?(@.state.hostname and not @.state.instanceName)]">
 		<report entity="unit">
 			<parameter name="id"><select path="id"/></parameter>
 			<parameter name="text">Creating instance <select path="name"/></parameter>
@@ -13,17 +13,19 @@
 		<update-cf-stack template="Windows">
 			<parameter name="mappings">
 				<map>
-					<mapping name="instanceName">
-						<select path="name"/>
-					</mapping>
+					<mapping name="instanceName"><select path="::name"/>-<select path="name"/></mapping>
 					<mapping name="userData">
-						<prepare_user_data/>
+						<prepare-user-data>
+							<parameter name="hostname"><select path="state.hostname"/></parameter>
+							<parameter name="unit"><select path="name"/></parameter>
+							<parameter name="service"><select path="::id"/></parameter>
+						</prepare-user-data>
 					</mapping>
 				</map>
 			</parameter>
 			<parameter name="arguments">
 				<map>
-					<argument name="KeyName">keero-linux-keys</argument>
+					<argument name="KeyName">keero-keys</argument>
 					<argument name="InstanceType">m1.medium</argument>
 					<argument name="ImageName">ws-2012-full</argument>
 				</map>
@@ -44,6 +46,9 @@
 			<parameter name="host">
 				<select path="name"/>
 			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
+			</parameter>
 			<parameter name="mappings">
 				<map>
 					<mapping name="adminPassword">
@@ -63,6 +68,9 @@
 		<send-command template="SetPassword">
 			<parameter name="host">
 				<select path="name"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
 			</parameter>
 			<parameter name="mappings">
 				<map>
@@ -87,6 +95,9 @@
 		<send-command template="CreatePrimaryDC">
 			<parameter name="host">
 				<select path="name"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
 			</parameter>
 			<parameter name="mappings">
 				<map>
@@ -113,14 +124,13 @@
 			<parameter name="host">
 				<select path="name"/>
 			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
+			</parameter>
 			<success>
 				<set path="::state.primaryDcIp">
 					<select source="ip" path="0.Result.0"/>
 				</set>
-				<report entity="unit">
-					<parameter name="id"><select path="id"/></parameter>
-					<parameter name="text">DNS IP = <select source="ip" path="0.Result.0"/></parameter>
-				</report>
 			</success>
 		</send-command>
 	</rule>
@@ -129,12 +139,18 @@
 		<set path="#unit">
 			<select/>
 		</set>
+		<set path="#service">
+			<select path="::"/>
+		</set>
 		<rule>
 			<parameter name="match">/$.services.activeDirectories[?(@.domain == '<select path="domain"/>' and @.state.primaryDcIp)]</parameter>
 
 			<send-command template="JoinDomain">
 				<parameter name="host">
 					<select path="name" source="unit"/>
+				</parameter>
+				<parameter name="service">
+					<select path="id" source="service"/>
 				</parameter>
 				<parameter name="mappings">
 					<map>
@@ -172,6 +188,9 @@
 		<send-command template="CreateSecondaryDC">
 			<parameter name="host">
 				<select path="name"/>
+			</parameter>
+			<parameter name="service">
+				<select path="::id"/>
 			</parameter>
 			<parameter name="mappings">
 				<map>

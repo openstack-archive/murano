@@ -28,10 +28,10 @@ def get_env_status(environment_id, session_id):
 
     if not session_id:
         variants = ['open', 'deploying']
-        session = unit.query(Session).filter(Session.environment_id ==
-                                             environment_id and
-                                             Session.state.in_(variants)
-                                             ).first()
+        session = unit.query(Session).filter(
+            Session.environment_id == environment_id and
+            Session.state.in_(variants)
+        ).first()
         if session:
             session_id = session.id
         else:
@@ -79,10 +79,10 @@ def get_service_status(environment_id, session_id, service):
 
     entities = [u['id'] for u in service['units']]
     reports_count = unit.query(Status).filter(
-                    Status.environment_id == environment_id
-                    and Status.session_id == session_id
-                    and Status.entity_id.in_(entities)
-                    ).count()
+        Status.environment_id == environment_id
+        and Status.session_id == session_id
+        and Status.entity_id.in_(entities)
+    ).count()
 
     if session_state == 'deployed':
         status = 'finished'

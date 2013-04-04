@@ -54,11 +54,13 @@ class SessionManager(base.Manager):
                               path.format(id=environment_id,
                                           session_id=session_id))
 
-    def reports(self, environment_id, session_id):
+    def reports(self, environment_id, session_id, service_id=None):
         path = 'environments/{id}/sessions/{session_id}/reports'
-        resp, body = self.api.json_request('GET',
-                                           path.format(id=environment_id,
-                                                       session_id=session_id))
+        path = path.format(id=environment_id, session_id=session_id)
+        if service_id:
+            path += '?service_id={0}'.format(service_id)
+
+        resp, body = self.api.json_request('GET', path)
 
         data = body.get('reports', [])
         return [Status(self, res, loaded=True) for res in data if res]
