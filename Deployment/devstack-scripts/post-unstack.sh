@@ -1,7 +1,8 @@
 #!/bin/bash
 
 if [[ -z "$1" ]] ; then
-    source ./localrc
+    SCRIPTS_DIR=$( cd $( dirname "$0" ) && pwd )
+    source $SCRIPTS_DIR/localrc
 fi
 
 
@@ -12,14 +13,24 @@ for file in $(sudo find $DEVSTACK_DIR/accrc/ -type f -regex ".+.pem.*") ; do
     sudo rm -f "$file"
 done
 
-# Remove logs
-echo Removing 'devstack' logs
-sudo rm -f /var/log/devstack/*
-#sudo rm -f /opt/stack/devstack/stack.sh.log
 
-echo "* Removing 'apache2' logs"
+# Remove logs
+echo "* Removing 'devstack' logs ..."
+sudo rm -f /opt/stack/log/*
+
+
+echo "* Removing 'apache2' logs ..."
 for file in $(sudo find /var/log/apache2 -type f) ; do
     echo "Removing file '$file'"
     sudo rm -f "$file"
 done
+
+
+echo "* Stopping all VMs ..."
+sudo killall kvm
+sleep 2
+
+
+echo "* Unmounting ramdrive ..."
+umount /opt/stack/data/nova/instances
 

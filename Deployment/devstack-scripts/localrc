@@ -1,7 +1,7 @@
 #!/bin/bash
 
 DEVSTACK_DIR=/home/stack/devstack
-INSTALL_DIR=/opt/stack
+DEVSTACK_INSTALL_DIR=/opt/stack
 
 MYSQL_DB_TMPFS=true
 MYSQL_DB_TMPFS_SIZE=128M
@@ -9,7 +9,12 @@ MYSQL_DB_TMPFS_SIZE=128M
 NOVA_CACHE_TMPFS=true
 NOVA_CACHE_TMPFS_SIZE=24G
 
+GLANCE_IMAGE_LIST=""
+COMPUTE_NODE_LIST="172.18.124.102"
+
 #======================================
-source $DEVSTACK_DIR/openrc admin admin
-source ./functions.sh
+if [[ -d "$DEVSTACK_DIR" ]] ; then
+    source $DEVSTACK_DIR/openrc admin admin
+fi
+source $SCRIPTS_DIR/functions.sh
 

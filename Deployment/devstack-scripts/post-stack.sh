@@ -1,33 +1,62 @@
 #!/bin/bash
 
-if [ -z "$1" ] ; then
-    source ./localrc
+if [[ -z "$1" ]] ; then
+    SCRIPTS_DIR=$( cd $( dirname "$0" ) && pwd )
+    source $SCRIPTS_DIR/localrc
 fi
 
 
 function glance_image_create {
-    local __image_name=$1
+    local __image_path=$1
 
-    if [[ -z "$__image_name" ]] ; then
-        echo "No image name provided!"
+    if [[ -z "$__image_path" ]] ; then
+        echo "Image path is missed!"
         return
     fi
 
-    echo "Importing image '$__image_name' into Glance..."
+    local __image_name=${__image_path##*/}
+    __image_name=${__image_name%.*}
+    
+    echo "Importing image '$__image_name' into Glance ..."
     glance image-delete "$__image_name"
-    glance image-create \
-      --name "$__image_name" \
-      --disk-format qcow2 \
-      --container-format bare \
-      --is-public true \
-      --copy-from "http://172.18.124.100:8888/$__image_name.qcow2"
+    if [[ ^http =~ $__image_path]] ; then
+        glance image-create \
+          --name "$__image_name" \
+          --disk-format qcow2 \
+          --container-format bare \
+          --is-public true \
+          --copy-from "$__image_path"
+    else
+        glance image-create \
+          --name "$__image_name" \
+          --disk-format qcow2 \
+          --container-format bare \
+          --is-public true \
+          --file "$__image_path"
+    fi
 }
-
 
 # Executing post-stack actions
 #===============================================================================
 
-if [ -z "$(sudo rabbitmqctl list_users | grep keero)" ] ; then
+if [[ ,$INSTALL_MODE, =~ ',standalone,compute,' ]] ; then
+    echo "Adding iptables rule to allow Internet access from instances..."
+    __iptables_rule="POSTROUTING -t nat -s '$FIXED_RANGE' ! -d '$FIXED_RANGE' -j MASQUERADE"
+    sudo iptables -C $__iptables_rule
+    if [[ $? == 0 ]] ; then
+        echo "Iptables rule already exists."
+    else
+        sudo iptables -A $__iptables_rule
+    fi
+fi
+
+
+if [[ $INSTALL_MODE == 'compute' ]] ; then
+    return
+fi
+
+
+if [[ -z "$(sudo rabbitmqctl list_users | grep keero)" ]] ; then
     echo "Adding RabbitMQ 'keero' user"
     sudo rabbitmqctl add_user keero keero
 else
@@ -35,16 +64,15 @@ else
 fi
 
 
-if [ -z "$(sudo rabbitmq-plugins list -e | grep rabbitmq_management)" ] ; then
+if [[ -z "$(sudo rabbitmq-plugins list -e | grep rabbitmq_management)" ]] ; then
     echo "Enabling RabbitMQ management plugin"
     sudo rabbitmq-plugins enable rabbitmq_management
+    
+    echo "Restarting RabbitMQ ..."
+    restart_service rabbitmq-server
 else
     echo "RabbitMQ management plugin already enabled."
 fi
-
-
-echo "Restarting RabbitMQ ..."
-restart_service rabbitmq-server
 
 
 echo "* Removing nova flavors ..."
@@ -55,12 +83,18 @@ done
 
 
 echo "* Creating new flavors ..."
-nova flavor-create m1.small  auto 1024 40 1
-nova flavor-create m1.medium auto 2048 40 2
-nova flavor-create m1.large  auto 4096 40 4
+nova flavor-create m1.small  auto 768  40 1
+nova flavor-create m1.medium auto 1024 40 1
+nova flavor-create m1.large  auto 1280 40 2
 
 
-if [ -z "$(nova keypair-list | grep keero_key)" ] ; then
+echo "* Creating security group rules ..."
+nova secgroup-add-rule default tcp 1 65535 0.0.0.0/0
+nova secgroup-add-rule default udp 1 65535 0.0.0.0/0
+nova secgroup-add-rule default icmp 0 8 0.0.0.0/0
+
+
+if [[ -z "$(nova keypair-list | grep keero_key)" ]] ; then
     echo "Creating keypair 'keero_key' ..."
     nova keypair-add keero_key
 else
@@ -69,4 +103,7 @@ fi
 
 #===============================================================================
 
-glance_image_create "ws-2012-full"
+for $image in $GLANCE_IMAGE_LIST ; do
+    glance_image_create "$image"
+done
+
