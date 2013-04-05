@@ -89,7 +89,7 @@ class CreateDC(workflows.Workflow):
 
     def handle(self, request, context):
         try:
-            datacenter = api.datacenters_create(request, context)
+            api.environment_create(request, context)
             return True
         except:
             exceptions.handle(request)

@@ -46,9 +46,9 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
     def done(self, form_list, **kwargs):
         link = self.request.__dict__['META']['HTTP_REFERER']
-        datacenter_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
+        environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
 
-        url = "/project/tabula/%s/" % datacenter_id
+        url = "/project/tabula/%s/" % environment_id
 
         service_type = form_list[0].data.get('0-service', '')
         parameters = {'service_type': service_type}
@@ -94,7 +94,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                                         'endpoint': [{'host': '10.0.0.1'}],
                                         'location': 'west-dc'})
 
-        service = api.services_create(self.request, datacenter_id, parameters)
+        service = api.services_create(self.request, environment_id, parameters)
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
@@ -127,17 +127,17 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
 
 class IndexView(tables.DataTableView):
-    table_class = WinDCTable
+    table_class = DCTable
     template_name = 'index.html'
 
     def get_data(self):
         try:
-            data_centers = api.datacenters_list(self.request)
+            environments = api.environments_list(self.request)
         except:
-            data_centers = []
+            environments = []
             exceptions.handle(self.request,
-                              _('Unable to retrieve data centers list.'))
-        return data_centers
+                              _('Unable to retrieve environments list.'))
+        return environments
 
 
 class Services(tables.DataTableView):
@@ -146,21 +146,20 @@ class Services(tables.DataTableView):
 
     def get_context_data(self, **kwargs):
         context = super(Services, self).get_context_data(**kwargs)
-        context['dc_name'] = self.dc_name
+        context['environment_name'] = self.environment_name
         return context
 
     def get_data(self):
         try:
-            dc_id = self.kwargs['data_center_id']
-            self.datacenter_id = dc_id
-            datacenter = api.datacenters_get(self.request, dc_id)
-            self.dc_name = datacenter.name
-            services = api.services_list(self.request, dc_id)
+            self.environment_id = self.kwargs['environment_id']
+            environment = api.datacenters_get(self.request, self.environment_id)
+            self.environment_name = environment.name
+            services = api.services_list(self.request, environment_id)
         except:
             services = []
             exceptions.handle(self.request,
                               _('Unable to retrieve list of services for '
-                                'data center "%s".') % self.dc_name)
+                                'environment "%s".') % self.environment_name)
         self._services = services
         return self._services
 

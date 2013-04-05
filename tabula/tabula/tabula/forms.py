@@ -111,9 +111,9 @@ class WizardFormIISConfiguration(forms.Form):
         super(WizardFormIISConfiguration, self).__init__(*args, **kwargs)
 
         link = request.__dict__['META']['HTTP_REFERER']
-        datacenter_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
+        environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
 
-        domains = api.get_active_directories(request, datacenter_id)
+        domains = api.get_active_directories(request, environment_id)
 
         self.fields['iis_domain'].choices = [("", "")] + \
                                             [(domain.name, domain.name)
