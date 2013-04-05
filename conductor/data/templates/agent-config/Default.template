@@ -19,9 +19,9 @@
 	</nlog>
 	<appSettings>
 		<add key="rabbitmq.host" value="%RABBITMQ_HOST%"/>
-		<add key="rabbitmq.user" value="keero"/>
-		<add key="rabbitmq.password" value="keero"/>
-		<add key="rabbitmq.vhost" value="keero"/>
+		<add key="rabbitmq.user" value="%RABBITMQ_USER%"/>
+		<add key="rabbitmq.password" value="%RABBITMQ_PASSWORD%"/>
+		<add key="rabbitmq.vhost" value="%RABBITMQ_VHOST%"/>
 		<add key="rabbitmq.inputQueue" value="%RABBITMQ_INPUT_QUEUE%"/>
 		<add key="rabbitmq.resultExchange" value=""/>
 		<add key="rabbitmq.resultRoutingKey" value="%RESULT_QUEUE%"/>
