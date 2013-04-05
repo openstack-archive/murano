@@ -1,10 +1,22 @@
-# -*- coding: utf-8 -*-
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
 
 import unittest2
 import logging
 from login_page import LoginPage
-from datacenters_page import DataCentersPage
-from test_case import TestCase
+from environments_page import EnvironmentsPage
 from selenium import webdriver
 
 
@@ -34,7 +46,12 @@ def generate_iis(name="test", domain="test"):
     return ['Internet Information Services', iis_parameters]
 
 
+environment_for_deploy = 'environment_for_deploy'
+
+
 class SanityTests(unittest2.TestCase):
+    
+    screenshots = 0  # Make screenshots for the end of each test
 
     @classmethod
     def setUpClass(self):
@@ -45,8 +62,6 @@ class SanityTests(unittest2.TestCase):
         driver = webdriver.Firefox()
         self.page = LoginPage(driver)
         self.page.login()
-        self.page.Navigate('Project:Windows Data Centers')
-        self.page = DataCentersPage(driver)
 
     @classmethod
     def tearDownClass(self):
@@ -55,20 +70,33 @@ class SanityTests(unittest2.TestCase):
         """
         self.page.driver.close()
 
-    def test_001_create_data_center(self):
-        self.page.create_data_center('dc1')
+    def setUp(self):
+        """
+            Navigate to the start page
+        """
+        self.page.Navigate('Project:Environments')
+        self.page = EnvironmentsPage(driver)
+
+    def tearDown(self):
+        """
+            Make screenshot
+        """
+        self.screenshots += 1
+        self.page.driver.save_screenshot("screen_%s.png" % self.screenshots)
+
+    def test_001_create_environment(self):
+        self.page.create_environment('dc1')
         assert self.page.Link('dc1').isPresented()
 
-    def test_002_delete_data_center(self):
-        self.page.delete_data_center('dc1')
+    def test_002_delete_environment(self):
+        self.page.delete_environment('dc1')
         assert not self.page.Link('dc1').isPresented()
 
-    def test_003_deploy_data_center(self):
+    def test_003_configure_environment_before_deploy(self):
         ad_name = "AD.net"
         iis_name = "iis_server"
-        self.page.Navigate('Windows Data Centers')
-        self.page.create_data_center('data_center_for_deploy')
-        self.page = self.page.select_data_center('data_center_for_deploy')
+        self.page.create_environment(environment_for_deploy)
+        self.page = self.page.select_environment(environment_for_deploy)
 
         self.page.create_service(generate_ad(ad_name, 2))
         assert self.page.Link(ad_name).isPresented()
@@ -76,121 +104,78 @@ class SanityTests(unittest2.TestCase):
         self.page.create_service(generate_iis(iis_name, ad_name))
         assert self.page.Link(iis_name).isPresented()
 
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-        self.page.deploy_data_center('data_center_for_deploy')
-
-        status = self.page.get_datacenter_status('data_center_for_deploy')
+    def test_004_deploy_environment(self):
+        self.page.deploy_environment(environment_for_deploy)
+        status = self.page.get_environment_status(environment_for_deploy)
         assert 'Deploy in progress' in status
 
-    def test_004_create_data_centers(self):
+    def test_005_create_environments(self):
         for i in range(1, 10):
-            name = "datacenter" + str(i)
-            self.page.create_data_center(name)
+            name = "environment" + str(i)
+            self.page.create_environment(name)
             assert self.page.Link(name).isPresented()
 
-    def test_005_delete_data_centers(self):
-        self.page.delete_data_center('datacenter1')
-        self.page.delete_data_center('datacenter9')
-        assert not self.page.Link('datacenter1').isPresented()
-        assert not self.page.Link('datacenter9').isPresented()
+    def test_006_delete_environments(self):
+        self.page.delete_environment('environment1')
+        self.page.delete_environment('environment9')
+        assert not self.page.Link('environment1').isPresented()
+        assert not self.page.Link('environment9').isPresented()
 
         for i in range(2, 9):
-            name = 'datacenter' + str(i)
+            name = 'environment' + str(i)
             assert self.page.Link(name).isPresented()
 
-    def test_006_create_service_ad(self):
+    def test_007_create_service_ad(self):
         name = "dc001.local"
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-
-        self.page.create_data_center('test05')
-        self.page = self.page.select_data_center('test05')
-
+        self.page.create_environment('test05')
+        self.page = self.page.select_environment('test05')
         self.page.create_service(generate_ad(name, 1))
+        assert self.page.Link(name).isPresented()
 
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify(self.page.Link(name).isPresented())
-
-    def test_007_create_service_ad_two_instances(self):
-        test_name = "Create AD service with two instances"
+    def test_008_create_service_ad_two_instances(self):
         name = "dc002.local"
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-
-        self.page.create_data_center('test06')
-        self.page = self.page.select_data_center('test06')
-
+        self.page.create_environment('test06')
+        self.page = self.page.select_environment('test06')
         self.page.create_service(generate_ad(name, 2))
+        assert self.page.Link(name).isPresented()
 
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify(self.page.Link(name).isPresented())
-
-    def test_008_create_service_ad_with_iis(self):
-        test_name = "Create data center with a few services"
+    def test_009_create_service_ad_with_iis(self):
         ad_name = "dc003.local"
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-
-        self.page.create_data_center('test07')
-        self.page = self.page.select_data_center('test07')
-
+        self.page.create_environment('test07')
+        self.page = self.page.select_environment('test07')
         self.page.create_service(generate_ad(ad_name, 3))
-
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify(self.page.Link(ad_name).isPresented())
+        assert self.page.Link(ad_name).isPresented()
 
         for i in range(5):
             iis_name = 'iis_server' + str(i)
             self.page.create_service(generate_iis(iis_name, ad_name))
-            assert test_case.verify(self.page.Link(iis_name).isPresented())
+            assert self.page.Link(iis_name).isPresented()
 
-    def test_009_delete_data_center_with_services(self):
-        test_name = "Delete data center with a few services with status ready to deploy"
-        dc_name = "test07"
+    def test_010_delete_environment_with_services(self):
+        name = "test07"
+        self.page.delete_environment(name)
+        assert not self.page.Link(name).isPresented()
 
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-        self.page.delete_data_center(dc_name)
-
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify(not self.page.Link(dc_name).isPresented())
-
-    def test_010_service_deploy_in_progress_status(self):
-        test_name = "Check status for services in deploing state"
-        
-        dc_name = "data_center_for_deploy"
+    def test_011_service_deploy_in_progress_status(self):
         ad_name = "AD.net"
         iis_name = "iis_server"
-
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-        self.page = self.page.select_data_center(dc_name)
-        
+        self.page = self.page.select_environment(environment_for_deploy)
         ad_status = self.page.get_service_status(ad_name)
         iis_status = self.page.get_service_status(iis_name)
 
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify('Deploy in progress' in ad_status)
-        assert test_case.verify('Deploy in progress' in iis_status)
+        assert 'Deploy in progress' in ad_status
+        assert 'Deploy in progress' in iis_status
 
-    def test_011_show_service_details_for_deploy(self):
-        test_name = "Check IIS service details page"
-        dc_name = "data_center_for_deploy"
+    def test_012_show_service_details_for_deploy(self):
         ad_name = "AD.net"
         iis_name = "iis_server"
-
-        self.page.Navigate('Windows Data Centers')
-        self.page = DataCentersPage(self.page.driver)
-        self.page = self.page.select_data_center(dc_name)
+        self.page = self.page.select_environment(environment_for_deploy)
         self.page = self.page.select_service(iis_name)
-
         name = self.page.get_service_name()
         domain = self.page.get_service_domain()
 
-        test_case = TestCase(self.page.driver, test_name)
-        assert test_case.verify(name == iis_name)
-        assert test_case.verify(name == ad_name)
+        assert name == iis_name
+        assert name == ad_name
 
 
 if __name__ == '__main__':

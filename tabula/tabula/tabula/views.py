@@ -152,7 +152,7 @@ class Services(tables.DataTableView):
     def get_data(self):
         try:
             self.environment_id = self.kwargs['environment_id']
-            environment = api.datacenters_get(self.request, self.environment_id)
+            environment = api.environment_get(self.request, self.environment_id)
             self.environment_name = environment.name
             services = api.services_list(self.request, environment_id)
         except:

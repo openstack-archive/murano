@@ -35,7 +35,7 @@ class CreateService(tables.LinkAction):
         return True
 
     def action(self, request, service):
-        api.services_create(request, service)
+        api.service_create(request, service)
 
 
 class CreateEnvironment(tables.LinkAction):
@@ -82,7 +82,7 @@ class DeleteService(tables.BatchAction):
         datacenter_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
 
         try:
-            api.services_delete(request, datacenter_id, service_id)
+            api.service_delete(request, datacenter_id, service_id)
         except:
             messages.error(request, _('Sorry, you can not delete this '
                                       'service right now.'))
@@ -127,7 +127,7 @@ class UpdateServiceRow(tables.Row):
         link = request.__dict__['META']['HTTP_REFERER']
         environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
 
-        service = api.services_get(request, environment_id, service_id)
+        service = api.service_get(request, environment_id, service_id)
 
         return service
 
