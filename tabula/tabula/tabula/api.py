@@ -45,7 +45,7 @@ def environment_get(request, environment_id):
     return env
 
 
-def environment_list(request):
+def environments_list(request):
     log.debug('Environment::List')
     return glazierclient(request).environments.list()
 
@@ -64,7 +64,7 @@ def environment_deploy(request, environment_id):
     return result
 
 
-def services_create(request, environment_id, parameters):
+def service_create(request, environment_id, parameters):
     session_id = None
     sessions = glazierclient(request).sessions.list(environment_id)
 
@@ -135,7 +135,7 @@ def get_active_directories(request, environment_id):
     return services
 
 
-def services_get(request, environment_id, service_id):
+def service_get(request, environment_id, service_id):
     services = services_list(request, environment_id)
 
     for service in services:
@@ -184,7 +184,7 @@ def get_status_message_for_service(request, service_id):
     return result
 
 
-def services_delete(request, environment_id, service_id):
+def service_delete(request, environment_id, service_id):
     log.debug('Service::Remove EnvId: {0} '
               'SrvId: {1}'.format(environment_id, service_id))
 

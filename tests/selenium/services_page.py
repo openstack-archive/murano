@@ -1,3 +1,18 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import page
 import re
 from services_details_page import ServicesDetailsPage
@@ -33,7 +48,7 @@ class ServicesPage(page.Page):
 
         link = self.Link(name).Address()
 
-        service_id = re.search('windc/(\S+)', link).group(0)[6:-1]
+        service_id = re.search('tabula/(\S+)', link).group(0)[7:-1]
 
         self.Button('More', service_id).Click()
         self.Button('Delete', service_id).Click()
@@ -49,6 +64,6 @@ class ServicesPage(page.Page):
         self.Refresh()
 
         link = self.Link(name).Address()
-        service_id = re.search('windc/(\S+)', link).group(0)[6:-8]
+        service_id = re.search('tabula/(\S+)', link).group(0)[7:-8]
 
         return self.TableCell('Status', service_id).Text()
