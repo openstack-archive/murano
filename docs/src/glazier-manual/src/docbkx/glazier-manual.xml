@@ -1,0 +1,161 @@
+<!--
+ Copyright (c) 2013 Mirantis, Inc.
+
+ Licensed under the Apache License, Version 2.0 (the "License");
+ you may not use this file except in compliance with the License.
+ You may obtain a copy of the License at
+
+    http://www.apache.org/licenses/LICENSE-2.0
+
+ Unless required by applicable law or agreed to in writing, software
+ distributed under the License is distributed on an "AS IS" BASIS,
+ WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+ implied.
+ See the License for the specific language governing permissions and
+ limitations under the License.
+-->
+<book xmlns="http://docbook.org/ns/docbook"
+      xmlns:xlink="http://www.w3.org/1999/xlink"
+      xmlns:xi="http://www.w3.org/2001/XInclude"
+      xmlns:svg="http://www.w3.org/2000/svg"
+      xmlns:m="http://www.w3.org/1998/Math/MathML"
+      xmlns:html="http://www.w3.org/1999/xhtml" version="5.0" status="DRAFT">
+    <title>Glazier Project Documentation</title>
+    <info>
+        <author>
+            <personname>
+                <firstname/>
+                <surname/>
+            </personname>
+            <affiliation>
+                <orgname>Mirantis, Inc.</orgname>
+            </affiliation>
+        </author>
+        <copyright>
+            <year>2013</year>
+            <holder>Mirantis, Inc.</holder>
+        </copyright>
+        <releaseinfo>v0.1</releaseinfo>
+        <productname>Glazier™</productname>
+        <pubdate>2013-04-04</pubdate>
+        <legalnotice role="apache2">
+            <annotation>
+                <remark>Copyright details are filled in by the template. Change
+                    the value of the role
+                    attribute on the legalnotice element to change the license.
+                </remark>
+            </annotation>
+        </legalnotice>
+        <abstract>
+            <para>This document is intended for individuals who wish to
+                configure
+                and use our product or intend to contribute.
+            </para>
+        </abstract>
+        <cover>
+            <para>this is a placeholder for the front cover</para>
+        </cover>
+        <cover>
+            <para>this is a placeholder for the back cover</para>
+        </cover>
+    </info>
+    <chapter>
+        <title>Overview</title>
+        <para>Welcome to Glazier Project.
+        </para>
+        <section>
+            <title>Intended Audience</title>
+            <para>This guide is intended to individuals who want to contribute
+                to our
+                project.
+            </para>
+        </section>
+        <section>
+            <title>Document Change History</title>
+            <para>This version of the Glazier Manual replaces and obsoletes all
+                previous versions. The
+                most recent changes are described in the table below:
+            </para>
+            <informaltable rules="all">
+                <thead>
+                    <tr>
+                        <td align="center" colspan="1">Revision Date</td>
+                        <td align="center" colspan="4">Summary of Changes</td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td colspan="1" align="center">April. 4, 2013</td>
+                        <td colspan="4">
+                            <itemizedlist spacing="compact">
+                                <listitem>
+                                    <para>Initial document creation.</para>
+                                </listitem>
+                            </itemizedlist>
+                        </td>
+                    </tr>
+                </tbody>
+            </informaltable>
+        </section>
+        <section>
+            <title>Additional Resources</title>
+            <itemizedlist spacing="compact">
+                <listitem>
+                    <para>
+                        <link xlink:href="http://www.mirantis.com">
+                            Mirantis - Cloud Software
+                        </link>
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </section>
+    </chapter>
+    <chapter>
+        <title>Architecture</title>
+        <figure xml:id="keeroarchitecture">
+            <title>Architecture</title>
+            <mediaobject>
+                <imageobject role="fo">
+                    <imagedata fileref="figures/architecture_diagram.png"
+                               contentwidth="5in"/>
+                </imageobject>
+                <imageobject role="html">
+                    <imagedata fileref="figures/architecture_diagram.png"/>
+                </imageobject>
+            </mediaobject>
+        </figure>
+        <para>
+            The Glazier architecture has the following components:
+            <itemizedlist spacing="compact">
+                <listitem>
+                    <para>Glazier Dashboard - UI for the Glazier, extends
+                        Horizon
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>REST API - exposes Glazier API via REST. Maintains
+                        environment configurations in Database
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Glazier Python Client - Python client for Glazier
+                        REST API
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Orchestration Engine - builds the environment as
+                        configured by the user.
+                        Turns environment configurations into a Heat templates
+                        for VM provision and Glazier Agent commands for service
+                        deployment
+                    </para>
+                </listitem>
+                <listitem>
+                    <para>Glazier Agent - built into Windows Server VM images.
+                        Executes commands sent by Orchestration Engine
+                    </para>
+                </listitem>
+            </itemizedlist>
+        </para>
+    </chapter>
+</book>
