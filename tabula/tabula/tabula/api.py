@@ -15,7 +15,7 @@
 
 import logging
 
-from portasclient.v1.client import Client as glazier_client
+from glazierclient.v1.client import Client as glazier_client
 
 log = logging.getLogger(__name__)
 
