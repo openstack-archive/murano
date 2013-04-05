@@ -21,7 +21,7 @@
 
 import setuptools
 
-from tabula.openstack.common import setup
+from glazierdashboard.openstack.common import setup
 
 requires = setup.parse_requirements()
 depend_links = setup.parse_dependency_links()
