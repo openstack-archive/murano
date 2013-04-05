@@ -19,7 +19,10 @@
       xmlns:xi="http://www.w3.org/2001/XInclude"
       xmlns:svg="http://www.w3.org/2000/svg"
       xmlns:m="http://www.w3.org/1998/Math/MathML"
-      xmlns:html="http://www.w3.org/1999/xhtml" version="5.0" status="DRAFT">
+      xmlns:html="http://www.w3.org/1999/xhtml" version="5.0" status="DRAFT"
+      xsi:schemaLocation="http://docbook.org/ns/docbook http://www.docbook.org/xml/5.0/xsd/docbook.xsd
+                          http://www.w3.org/1999/xlink http://www.w3.org/1999/xlink.xsd
+http://docbook.org/ns/docbook " xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
     <title>Glazier Project Documentation</title>
     <info>
         <author>
@@ -110,9 +113,9 @@
             </itemizedlist>
         </section>
     </chapter>
-    <chapter>
+    <chapter id="architecture">
         <title>Architecture</title>
-        <figure xml:id="keeroarchitecture">
+        <figure xml:id="glazierarchitecture">
             <title>Architecture</title>
             <mediaobject>
                 <imageobject role="fo">
@@ -157,5 +160,286 @@
                 </listitem>
             </itemizedlist>
         </para>
+    </chapter>
+    <chapter>
+        <title>API Specification</title>
+        <informaltable rules="all">
+            <thead>
+                <tr>
+                    <td align="center" colspan="1">Revision Date</td>
+                    <td align="center" colspan="4">Summary of Changes</td>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td colspan="1" align="center">February 4, 2013</td>
+                    <td colspan="4">
+                        <itemizedlist spacing="compact">
+                            <listitem>
+                                <para>Initial document creation</para>
+                            </listitem>
+                        </itemizedlist>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1" align="center">February 22, 2013</td>
+                    <td colspan="4">
+                        <itemizedlist spacing="compact">
+                            <listitem>
+                                <para>Enhance API with latest architecture
+                                    changes
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </td>
+                </tr>
+                <tr>
+                    <td colspan="1" align="center">March 06, 2013</td>
+                    <td colspan="4">
+                        <itemizedlist spacing="compact">
+                            <listitem>
+                                <para>Fix specification according to remarks
+                                    from Dmitry Teselkin
+                                </para>
+                            </listitem>
+                        </itemizedlist>
+                    </td>
+                </tr>
+            </tbody>
+        </informaltable>
+        <section>
+            <title>Introduction</title>
+            <para>Glazier Service API is a programmatic interface used for interaction
+                with Glazier. Other interaction
+                mechanisms like Glazier Dashboard or Glazier CLI should use API as underlying
+                protocol for interaction.
+            </para>
+
+            <glossary>
+                <para>For detailed information about entities and terms used in this document, please refer first to
+                    <xref
+                            linkend="architecture"/>.
+                </para>
+                <glossentry>
+                    <glossterm>Environment</glossterm>
+                    <glossdef>
+                        <para>Environment is a set of logically related Services managed by a single tenant. Environment
+                            defines Windows environment boundaries.
+                        </para>
+                        <para>Services within single Environment may comprise some complex configuration while Services
+                            in different Environments are always independent from one another. Each Environment is
+                            associated with single OpenStack project (tenant).
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Service</glossterm>
+                    <glossdef>
+                        <para>Service is building block of Windows environment. Service is a set of one or more Virtual
+                            Machines sharing a common purpose and configured together. Each service belongs to a single
+                            Environment and single Service Type.
+                        </para>
+                        <para>Services are comprised from one or more Service Units.</para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Service Type</glossterm>
+                    <glossdef>
+                        <para>Service type is definition for describing set of features exposed by service.</para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Service Unit</glossterm>
+                    <glossdef>
+                        <para>Service Units are the actual Windows Server VMs instantiated by OpenStack and then
+                            configured according to its Service Type (this may also correspond to one of predefined
+                            Windows Server roles).
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Service Metadata</glossterm>
+                    <glossdef>
+                        <para>Service Metadata is a JSON-encoded definition of Environment, its Services and their
+                            Service Units along with all their attributes. Service Metadata may describe both current
+                            and the intended state of the Environment.
+                        </para>
+                    </glossdef>
+                </glossentry>
+                <glossentry>
+                    <glossterm>Session</glossterm>
+                    <glossdef>
+                        <para>All changes to environment done in scope of Session. After all changes to Environment
+                            state are accumulated, changes actually are applied only after session is deployed.
+                        </para>
+                    </glossdef>
+                </glossentry>
+            </glossary>
+        </section>
+        <section>
+            <title>Return codes and errors</title>
+            <para>All REST API calls return the natural HTTP response codes for the operations, e.g. a successful GET
+                returns a HTTP 200, a successful PUT returns a HTTP 201, a GET for a non-existent entity returns HTTP
+                404, unauthorized operations return HTTP 401 or HTTP 403, internal errors return HTTP 500.
+            </para>
+        </section>
+        <section>
+            <title>Response of POSTs and PUTs</title>
+            <para>All POST and PUT requests by convention should return the created object (in the case of POST, with a
+                generated ID) as if it was requested by GET.
+            </para>
+        </section>
+        <section>
+            <title>Authentication</title>
+            <para>All requests include a Keystone authentication token header (X-Auth-Token). Clients must authenticate
+                with Keystone before interacting with the Glazier service.
+            </para>
+        </section>
+        <section>
+            <title>Workflow</title>
+            <figure xml:id="api_workflow">
+                <title>Sample Workflow</title>
+                <mediaobject>
+                    <imageobject role="fo">
+                        <imagedata fileref="figures/api_workflow.png"
+                                   contentwidth="5in"/>
+                    </imageobject>
+                    <imageobject role="html">
+                        <imagedata fileref="figures/api_workflow.png"/>
+                    </imageobject>
+                </mediaobject>
+            </figure>
+            <para>Let’s review a sample workflow (series of API calls) for creating new Environment with Active
+                Directory Service deployment:
+                <orderedlist spacing="compact">
+                    <listitem>
+                        <para>POST /environments/ - Creating new Environment</para>
+                    </listitem>
+                    <listitem>
+                        <para>POST /environments/id/configure – Creating new configuration session for Environment
+                        </para>
+                    </listitem>
+                    <listitem>
+                        <para>POST /environments/id/activeDirectory – Creating new ActiveDirectory service</para>
+                    </listitem>
+                    <listitem>
+                        <para>POST /environments/id/sessions/session_id/deploy – Saving and deploying changes</para>
+                    </listitem>
+                </orderedlist>
+            </para>
+        </section>
+        <section>
+            <title>API</title>
+            <section>
+                <title>Environment API</title>
+                <para>This section describes API calls for Environment management.</para>
+                <table frame='all'>
+                    <title>Environment Object</title>
+                    <tgroup cols='3' align='left' colsep='1' rowsep='1'>
+                        <colspec colnum="1" colname="col1" colwidth="1*"/>
+                        <colspec colnum="2" colname="col2" colwidth="1*"/>
+                        <colspec colnum="3" colname="col3" colwidth="4*"/>
+                        <thead>
+                            <row>
+                                <entry>Attribute</entry>
+                                <entry>Type</entry>
+                                <entry>Description</entry>
+                            </row>
+                        </thead>
+                        <tbody>
+                            <row>
+                                <entry>id</entry>
+                                <entry>GUID</entry>
+                                <entry>Unique ID</entry>
+                            </row>
+                            <row>
+                                <entry>name</entry>
+                                <entry>string</entry>
+                                <entry>User-friendly name</entry>
+                            </row>
+                            <row>
+                                <entry>created</entry>
+                                <entry>datetime</entry>
+                                <entry>Creation date and time in ISO format</entry>
+                            </row>
+                            <row>
+                                <entry>updated</entry>
+                                <entry>datetime</entry>
+                                <entry>Modification date and time in ISO format</entry>
+                            </row>
+                            <row>
+                                <entry>tenant_id</entry>
+                                <entry>GUID</entry>
+                                <entry>Open Stack tenant id</entry>
+                            </row>
+                            <row>
+                                <entry>status</entry>
+                                <entry>string</entry>
+                                <entry>Deployment status: draft, pending, inprogress, finished</entry>
+                            </row>
+                        </tbody>
+                    </tgroup>
+                </table>
+                <section>
+                    <title>Get a List of existing Environments</title>
+                    <section>
+                        <title>Call</title>
+                        <table frame='all'>
+                            <title> </title>
+                            <tgroup cols='3' align='left' colsep='1' rowsep='1'>
+                                <colspec colnum="1" colname="col1" colwidth="1*"/>
+                                <colspec colnum="2" colname="col2" colwidth="4*"/>
+                                <colspec colnum="3" colname="col3" colwidth="4*"/>
+                                <thead>
+                                    <row>
+                                        <entry>Method</entry>
+                                        <entry>URI</entry>
+                                        <entry>Description</entry>
+                                    </row>
+                                </thead>
+                                <tbody>
+                                    <row>
+                                        <entry>GET</entry>
+                                        <entry>/environments</entry>
+                                        <entry>Get a list of existing Environments</entry>
+                                    </row>
+                                </tbody>
+                            </tgroup>
+                        </table>
+                    </section>
+                    <section>
+                        <title>Payload</title>
+                        <para>None</para>
+                    </section>
+                    <section>
+                        <title>Returns</title>
+                        <para>This call returns list of environments. Only the basic properties are returned. For details see “Get Environment Detailed Information”:
+                                <programlisting>
+                                    <![CDATA[
+ {
+    "environments": [
+        {
+            "id": "0ce373a477f211e187a55404a662f968",
+            "name": "dc1",
+            "created": "2010-11-30T03:23:42Z",
+            "updated": "2010-11-30T03:23:44Z",
+            "tenant_id": "0849006f7ce94961b3aab4e46d6f229a"
+        },
+        {
+            "id": "c697bd2429304820a928d145aa42af59",
+            "name": "dc2",
+            "created": "2010-11-30T03:23:42Z",
+            "updated": "2010-11-30T03:23:44Z",
+            "tenant_id": "0849006f7ce94961b3aab4e46d6f229a"
+        }
+    ]
+}
+                                    ]]>
+                                </programlisting>
+                        </para>
+                    </section>
+                </section>
+            </section>
+        </section>
     </chapter>
 </book>
