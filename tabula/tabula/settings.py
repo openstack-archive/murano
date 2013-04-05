@@ -39,7 +39,7 @@ HORIZON_CONFIG = {
     'exceptions': {'recoverable': exceptions.RECOVERABLE,
                    'not_found': exceptions.NOT_FOUND,
                    'unauthorized': exceptions.UNAUTHORIZED},
-    'customization_module': 'windc.overrides'
+    'customization_module': 'tabula.overrides'
 }
 
 
