@@ -1,3 +1,18 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import jsonpath
 import types
 import re
@@ -124,9 +139,6 @@ class Workflow(object):
     def _rule_func(match, context, body, engine, limit=0, name=None, **kwargs):
         position = context['__dataSource_currentPosition'] or []
 
-        # data = context['__dataSource_currentObj']
-        # if data is None:
-        #     data = context['/dataSource']
         position, match = Workflow._get_relative_position(match, context)
         data = Workflow._get_path(context['/dataSource'], position)
         match = re.sub(r'@\.([\w.]+)',

@@ -1,7 +1,23 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
 import anyjson
 import eventlet
-
+import types
 import jsonpath
+
 from conductor.openstack.common import log as logging
 import conductor.helpers
 from command import CommandBase
@@ -9,7 +25,6 @@ import conductor.config
 from heatclient.client import Client
 import heatclient.exc
 from keystoneclient.v2_0 import client as ksclient
-import types
 
 log = logging.getLogger(__name__)
 
@@ -28,11 +43,15 @@ class HeatExecutor(CommandBase):
 
         scoped_token = auth_data.id
 
-        heat_url = jsonpath.jsonpath(auth_data.serviceCatalog,
+        heat_url = jsonpath.jsonpath(
+            auth_data.serviceCatalog,
             "$[?(@.name == 'heat')].endpoints[0].publicURL")[0]
 
-        self._heat_client = Client('1', heat_url,
-            token_only=True, token=scoped_token)
+        self._heat_client = Client(
+            '1',
+            heat_url,
+            token_only=True,
+            token=scoped_token)
 
     def execute(self, command, callback, **kwargs):
         log.debug('Got command {0} on stack {1}'.format(command, self._stack))
