@@ -48,7 +48,7 @@ class CreateEnvironment(tables.LinkAction):
         return True
 
     def action(self, request, environment):
-        api.datacenters_create(request, environment)
+        api.environment_create(request, environment)
 
 
 class DeleteEnvironment(tables.BatchAction):
@@ -63,7 +63,7 @@ class DeleteEnvironment(tables.BatchAction):
         return True
 
     def action(self, request, environment_id):
-        api.datacenters_delete(request, environment_id)
+        api.environment_delete(request, environment_id)
 
 
 class DeleteService(tables.BatchAction):
@@ -100,7 +100,7 @@ class DeployEnvironment(tables.BatchAction):
         return True
 
     def action(self, request, environment_id):
-        return api.datacenters_deploy(request, environment_id)
+        return api.environment_deploy(request, environment_id)
 
 
 class ShowDataCenterServices(tables.LinkAction):
@@ -115,8 +115,8 @@ class ShowDataCenterServices(tables.LinkAction):
 class UpdateDCRow(tables.Row):
     ajax = True
 
-    def get_data(self, request, datacenter_id):
-        return api.datacenters_get(request, datacenter_id)
+    def get_data(self, request, environment_id):
+        return api.environment_get(request, environment_id)
 
 
 class UpdateServiceRow(tables.Row):
@@ -125,9 +125,9 @@ class UpdateServiceRow(tables.Row):
     def get_data(self, request, service_id):
 
         link = request.__dict__['META']['HTTP_REFERER']
-        datacenter_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
+        environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
 
-        service = api.services_get(request, datacenter_id, service_id)
+        service = api.services_get(request, environment_id, service_id)
 
         return service
 
