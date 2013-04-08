@@ -193,12 +193,12 @@ class DetailServiceView(tabs.TabView):
         return self.tab_group_class(request, service=service, **kwargs)
 
 
-class CreateDCView(workflows.WorkflowView):
-    workflow_class = CreateDC
+class CreateEnvironmentView(workflows.WorkflowView):
+    workflow_class = CreateEnvironment
     template_name = 'create_dc.html'
 
     def get_initial(self):
-        initial = super(CreateDCView, self).get_initial()
+        initial = super(CreateEnvironmentView, self).get_initial()
         initial['project_id'] = self.request.user.tenant_id
         initial['user_id'] = self.request.user.id
         return initial
