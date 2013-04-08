@@ -15,7 +15,7 @@
 
 from django.conf.urls.defaults import patterns, url
 
-from .views import IndexView, Services, CreateDCView, DetailServiceView
+from .views import IndexView, Services, CreateEnvironmentView, DetailServiceView
 from .views import Wizard
 from .forms import WizardFormServiceType, WizardFormConfiguration
 
@@ -27,7 +27,7 @@ urlpatterns = patterns(VIEW_MOD,
                            Wizard.as_view([WizardFormServiceType,
                                            WizardFormConfiguration]),
                            name='create'),
-                       url(r'^create_dc$', CreateDCView.as_view(),
+                       url(r'^create_dc$', CreateEnvironmentView.as_view(),
                            name='create_dc'),
                        url(r'^(?P<environment_id>[^/]+)/$',
                            Services.as_view(), name='services'),
