@@ -151,6 +151,7 @@ class Services(tables.DataTableView):
 
     def get_data(self):
         try:
+            LOG.critical(self.kwargs)
             self.environment_id = self.kwargs['environment_id']
             environment = api.environment_get(self.request, self.environment_id)
             self.environment_name = environment.name
