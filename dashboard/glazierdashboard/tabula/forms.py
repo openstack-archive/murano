@@ -111,7 +111,7 @@ class WizardFormIISConfiguration(forms.Form):
         super(WizardFormIISConfiguration, self).__init__(*args, **kwargs)
 
         link = request.__dict__['META']['HTTP_REFERER']
-        environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
+        environment_id = re.search('tabula/(\S+)', link).group(0)[7:-1]
 
         domains = api.get_active_directories(request, environment_id)
 

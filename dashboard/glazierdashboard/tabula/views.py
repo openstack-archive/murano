@@ -46,7 +46,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
     def done(self, form_list, **kwargs):
         link = self.request.__dict__['META']['HTTP_REFERER']
-        environment_id = re.search('tabula/(\S+)', link).group(0)[6:-1]
+        environment_id = re.search('tabula/(\S+)', link).group(0)[7:-1]
 
         url = "/project/tabula/%s/" % environment_id
 
