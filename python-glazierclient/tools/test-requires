@@ -12,3 +12,4 @@ pep8==1.3.3
 setuptools-git>=0.4
 sphinx>=1.1.2
 unittest2
+httpretty
