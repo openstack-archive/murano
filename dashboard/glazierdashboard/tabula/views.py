@@ -30,7 +30,7 @@ from horizon.forms.views import ModalFormMixin
 from glazierdashboard.tabula import api
 
 from .tables import EnvironmentsTable, ServicesTable
-from .workflows import CreateDC
+from .workflows import CreateEnvironment
 from .tabs import ServicesTabs
 from .forms import (WizardFormADConfiguration, WizardFormIISConfiguration)
 
