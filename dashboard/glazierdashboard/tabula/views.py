@@ -94,7 +94,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
                                         'endpoint': [{'host': '10.0.0.1'}],
                                         'location': 'west-dc'})
 
-        service = api.services_create(self.request, environment_id, parameters)
+        service = api.service_create(self.request, environment_id, parameters)
 
         message = "The %s service successfully created." % service_type
         messages.success(self.request, message)
