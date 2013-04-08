@@ -151,11 +151,10 @@ class Services(tables.DataTableView):
 
     def get_data(self):
         try:
-            LOG.critical(self.kwargs)
             self.environment_id = self.kwargs['environment_id']
             environment = api.environment_get(self.request, self.environment_id)
             self.environment_name = environment.name
-            services = api.services_list(self.request, environment_id)
+            services = api.services_list(self.request, self.environment_id)
         except:
             services = []
             exceptions.handle(self.request,
