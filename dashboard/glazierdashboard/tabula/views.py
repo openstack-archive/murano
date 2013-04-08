@@ -29,7 +29,7 @@ from horizon.forms.views import ModalFormMixin
 
 from glazierdashboard.tabula import api
 
-from .tables import DCTable, ServicesTable
+from .tables import EnvironmentsTable, ServicesTable
 from .workflows import CreateDC
 from .tabs import ServicesTabs
 from .forms import (WizardFormADConfiguration, WizardFormIISConfiguration)
@@ -127,7 +127,7 @@ class Wizard(ModalFormMixin, SessionWizardView, generic.FormView):
 
 
 class IndexView(tables.DataTableView):
-    table_class = DCTable
+    table_class = EnvironmentsTable
     template_name = 'index.html'
 
     def get_data(self):

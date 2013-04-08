@@ -56,7 +56,7 @@ class SelectProjectUser(workflows.Step):
     action_class = SelectProjectUserAction
 
 
-class ConfigureDCAction(workflows.Action):
+class ConfigureEnvironmentAction(workflows.Action):
     name = forms.CharField(label=_("Environment Name"), required=True)
 
     class Meta:
@@ -64,8 +64,8 @@ class ConfigureDCAction(workflows.Action):
         help_text_template = "_data_center_help.html"
 
 
-class ConfigureDC(workflows.Step):
-    action_class = ConfigureDCAction
+class ConfigureEnvironment(workflows.Step):
+    action_class = ConfigureEnvironmentAction
     contibutes = ('name',)
 
     def contribute(self, data, context):
@@ -74,14 +74,14 @@ class ConfigureDC(workflows.Step):
         return context
 
 
-class CreateDC(workflows.Workflow):
+class CreateEnvironment(workflows.Workflow):
     slug = "create"
     name = _("Create Environment")
     finalize_button_name = _("Create")
     success_message = _('Created environment "%s".')
     failure_message = _('Unable to create environment "%s".')
     success_url = "horizon:project:tabula:index"
-    default_steps = (SelectProjectUser, ConfigureDC)
+    default_steps = (SelectProjectUser, ConfigureEnvironment)
 
     def format_status_message(self, message):
         name = self.context.get('name', 'noname')

@@ -103,7 +103,7 @@ class DeployEnvironment(tables.BatchAction):
         return api.environment_deploy(request, environment_id)
 
 
-class ShowDataCenterServices(tables.LinkAction):
+class ShowEnvironmentServices(tables.LinkAction):
     name = 'edit'
     verbose_name = _('Services')
     url = 'horizon:project:tabula:services'
@@ -112,7 +112,7 @@ class ShowDataCenterServices(tables.LinkAction):
         return True
 
 
-class UpdateDCRow(tables.Row):
+class UpdateEnvironmentRow(tables.Row):
     ajax = True
 
     def get_data(self, request, environment_id):
@@ -140,7 +140,7 @@ STATUS_DISPLAY_CHOICES = (
 )
 
 
-class DCTable(tables.DataTable):
+class EnvironmentsTable(tables.DataTable):
     STATUS_CHOICES = (
         (None, True),
         ('Ready to deploy', True),
@@ -158,12 +158,12 @@ class DCTable(tables.DataTable):
 
     class Meta:
         name = 'tabula'
-        verbose_name = _('Environment')
-        row_class = UpdateDCRow
+        verbose_name = _('Environments')
+        row_class = UpdateEnvironmentRow
         status_columns = ['status']
-        table_actions = (CreateDataCenter,)
-        row_actions = (ShowDataCenterServices, DeleteDataCenter,
-                       DeployDataCenter)
+        table_actions = (CreateEnvironment,)
+        row_actions = (ShowEnvironmentServices, DeleteEnvironment,
+                       DeployEnvironment)
 
 
 class ServicesTable(tables.DataTable):
