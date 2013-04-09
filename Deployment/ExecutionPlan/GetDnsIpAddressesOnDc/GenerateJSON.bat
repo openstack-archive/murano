@@ -1,1 +1,0 @@
-..\ExecutionPlanGenerator.exe ExecutionPlan.txt

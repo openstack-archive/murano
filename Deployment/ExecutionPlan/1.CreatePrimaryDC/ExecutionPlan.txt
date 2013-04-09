@@ -1,9 +1,0 @@
-include Install-RolePrimaryDomainController.ps1
-
-call Import-Module Name="CoreFunctions"
-call Set-LocalUserPassword UserName="Administrator" , Password="P@ssw0rd123" , Force=true
-call Install-RolePrimaryDomainController DomainName="acme.local" , SafeModePassword="P@ssw0rd"
-
-reboot 1
-
-out CreatePrimaryDC.json

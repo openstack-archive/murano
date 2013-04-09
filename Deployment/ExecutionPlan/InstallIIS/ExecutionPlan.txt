@@ -1,7 +1,0 @@
-include Install-WebServer.ps1
-
-call Install-WebServer
-
-reboot 0
-
-out out.json

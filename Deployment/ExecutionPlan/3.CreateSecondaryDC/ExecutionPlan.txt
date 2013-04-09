@@ -1,8 +1,0 @@
-include Install-RoleSecondaryDomainController.ps1
-
-call Import-Module Name="CoreFunctions"
-call Install-RoleSecondaryDomainController DomainName="acme.local" , UserName="Administrator" , Password="P@ssw0rd123" , SafeModePassword="P@ssw0rd"
-
-reboot 1
-
-out out.json

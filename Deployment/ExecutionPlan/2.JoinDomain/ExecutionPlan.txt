@@ -1,9 +1,0 @@
-call Import-Module Name="CoreFunctions"
-call Set-NetworkAdapterConfiguration FirstAvailable=true , DNSServer="10.0.102.2"
-call Join-Domain DomainName="acme.local" , Username="Administrator" , Password="P@ssw0rd123"
-
-reboot 1
-
-out out.json
-
-

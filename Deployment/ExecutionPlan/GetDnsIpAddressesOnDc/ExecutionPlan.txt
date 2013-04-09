@@ -1,7 +1,0 @@
-include Get-DnsListeningIpAddress.ps1
-
-call Get-DnsListeningIpAddress
-
-reboot 0
-
-out out.json

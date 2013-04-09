@@ -1,5 +1,0 @@
-argparse
-prettytable>=0.6,<0.7
-python-keystoneclient>=0.1.2
-httplib2
-iso8601>=0.1.4
