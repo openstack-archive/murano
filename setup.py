@@ -44,6 +44,6 @@ setuptools.setup(
         'Environment :: No Input/Output (Daemon)',
         'Environment :: OpenStack',
     ],
-    scripts=['bin/glazierapi-api'],
+    scripts=['bin/glazier-api'],
     py_modules=[]
 )
