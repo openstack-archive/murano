@@ -2,7 +2,7 @@
 
 function usage {
   echo "Usage: $0 [OPTION]..."
-  echo "Run Glazier API's test suite(s)"
+  echo "Run Murano API's test suite(s)"
   echo ""
   echo "  -V, --virtual-env        Always use virtualenv.  Install automatically if not present"
   echo "  -N, --no-virtual-env     Don't use virtualenv.  Run tests in local environment"
@@ -28,8 +28,8 @@ function process_option {
     -P|--no-pep8) let no_pep8=1;;
     -f|--force) let force=1;;
     -u|--update) update=1;;
-    --unittests-only) noseopts="$noseopts --exclude-dir=portas/tests/functional";;
-    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=portas";;
+    --unittests-only) noseopts="$noseopts --exclude-dir=muranoapi/tests/functional";;
+    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=muranoapi";;
     -*) noseopts="$noseopts $1";;
     *) noseargs="$noseargs $1"
   esac
