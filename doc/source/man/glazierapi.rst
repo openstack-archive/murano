@@ -14,11 +14,11 @@
       under the License.
 
 ==========
-glazier-api
+murano-api
 ==========
 
 -----------------------------
-Glazier API Server
+Murano API Server
 -----------------------------
 
 :Author: smelikyan@mirantis.com
@@ -32,12 +32,12 @@ Glazier API Server
 SYNOPSIS
 ========
 
-  glazier-api [options]
+  murano-api [options]
 
 DESCRIPTION
 ===========
 
-glazier-api is a server daemon that serves the Glazier API
+murano-api is a server daemon that serves the Murano API
 
 OPTIONS
 =======
@@ -51,19 +51,19 @@ OPTIONS
         Config file used for running service
 
   **--bind-host=HOST**
-        Address of host running ``glazier-api``. Defaults to `0.0.0.0`.
+        Address of host running ``murano-api``. Defaults to `0.0.0.0`.
 
   **--bind-port=PORT**
-        Port that ``glazier-api`` listens on. Defaults to `8082`.
+        Port that ``murano-api`` listens on. Defaults to `8082`.
 
 
 FILES
 =====
 
-* /etc/glazier/glazier-api.conf
-* /etc/glazier/glazier-api-paste.conf
+* /etc/murano/murano-api.conf
+* /etc/murano/murano-api-paste.conf
 
 SEE ALSO
 ========
 
-* `Glazier <http://glazier.mirantis.com>`__
+* `Murano <http://murano.mirantis.com>`__

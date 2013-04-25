@@ -16,20 +16,20 @@
 
 import setuptools
 
-from glazierapi.openstack.common import setup
+from muranoapi.openstack.common import setup
 
 requires = setup.parse_requirements()
 depend_links = setup.parse_dependency_links()
-project = 'glazierapi'
+project = 'muranoapi'
 
 setuptools.setup(
     name=project,
     version=setup.get_version(project, '2013.1'),
-    description='The Glazier Project API',
+    description='The Murano Project API',
     license='Apache License (2.0)',
     author='Mirantis, Inc',
     author_email='smelikyan@mirantis.com',
-    url='http://glazierapi.mirantis.com/',
+    url='http://muranoapi.mirantis.com/',
     packages=setuptools.find_packages(exclude=['bin']),
     test_suite='nose.collector',
     cmdclass=setup.get_cmdclass(),
@@ -44,6 +44,6 @@ setuptools.setup(
         'Environment :: No Input/Output (Daemon)',
         'Environment :: OpenStack',
     ],
-    scripts=['bin/glazier-api'],
+    scripts=['bin/murano-api'],
     py_modules=[]
 )
