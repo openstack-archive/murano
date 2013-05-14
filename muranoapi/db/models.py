@@ -36,7 +36,7 @@ def compile_big_int_sqlite(type_, compiler, **kw):
 
 
 class ModelBase(object):
-    __protected_attributes__ = {"created", "updated"}
+    __protected_attributes__ = set(["created", "updated"])
 
     created = Column(DateTime, default=timeutils.utcnow,
                      nullable=False)
@@ -79,8 +79,7 @@ class ModelBase(object):
 
     def to_dict(self):
         dictionary = self.__dict__.copy()
-        return {k: v for k, v in dictionary.iteritems()
-                if k != '_sa_instance_state'}
+        return dict([(k, v) for k, v in dictionary.iteritems()])
 
 
 class JsonBlob(TypeDecorator):

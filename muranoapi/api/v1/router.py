@@ -14,8 +14,10 @@
 
 import routes
 from muranoapi.openstack.common import wsgi
-from muranoapi.api.v1 import (environments, sessions,
-                           active_directories, webservers)
+from muranoapi.api.v1 import environments
+from muranoapi.api.v1 import sessions
+from muranoapi.api.v1 import active_directories
+from muranoapi.api.v1 import webservers
 
 
 class API(wsgi.Router):
