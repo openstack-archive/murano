@@ -100,7 +100,7 @@ class Environment(BASE, ModelBase):
     id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
     name = Column(String(255), nullable=False)
     tenant_id = Column(String(32), nullable=False)
-    description = Column(JsonBlob(), nullable=False, default='{}')
+    description = Column(JsonBlob(), nullable=False, default={})
 
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
