@@ -13,19 +13,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 #
-#    Ubuntu script.
-
+#    CentOS script.
 LOGLVL=1
 SERVICE_CONTENT_DIRECTORY=`cd $(dirname "$0") && pwd`
-PREREQ_PKGS="wget git python-pip python-dev python-mysqldb"
+PREREQ_PKGS="upstart wget git make python-pip python-devel mysql-connector-python"
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
 ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-api.conf"
 
-
 if [ -z "$SERVICE_EXEC_PATH" ];then
-	SERVICE_EXEC_PATH="/usr/local/bin/murano-api"
+	SERVICE_EXEC_PATH="/usr/bin/murano-api"
 fi
 # Functions
 # Loger function
@@ -41,15 +39,15 @@ log()
 in_sys_pkg()
 {
 	PKG=$1
-	dpkg -s $PKG > /dev/null 2>&1
+	rpm -q $PKG > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
 	    log "Package \"$PKG\" already installed"
 	else
-		log "Installing \"$PKG\"..."
-		apt-get install $PKG --yes > /dev/null 2>&1
-		if [ $? -ne 0 ];then
-			log "installation fails, exiting!!!"
-			exit
+	    log "Installing \"$PKG\"..."
+	    yum install $PKG --assumeyes > /dev/null 2>&1
+	    if [ $? -ne 0 ];then
+	        log "installation fails, exiting!!!"
+	        exit
 		fi
 	fi
 }
@@ -62,11 +60,10 @@ gitclone()
 	log "Cloning from \"$FROM\" repo to \"$CLONEROOT\""
 	cd $CLONEROOT && git clone $FROM > /dev/null 2>&1
 	if [ $? -ne 0 ];then
-	    log "cloning from \"$FROM\" fails, exiting!!!"
-	    exit
-	fi
+        	log "cloning from \"$FROM\" fails, exiting!!!"
+        	exit
+        fi
 }
-
 
 # install
 inst()
@@ -76,34 +73,34 @@ CLONE_FROM_GIT=$1
 	for PKG in $PREREQ_PKGS
 	do
 		in_sys_pkg $PKG
-	done 
+	done
 
 # If clone from git set
 	if [ ! -z $CLONE_FROM_GIT ]; then
 # Preparing clone root directory
-	if [ ! -d $GIT_CLONE_DIR ];then
+	if [ ! -d $GIT_CLONE_DIR ]; then
 		log "Creting $GIT_CLONE_DIR direcory..."
 		mkdir -p $GIT_CLONE_DIR
-		if [ $? -ne 0 ];then
-			log "Can't create $GIT_CLONE_DIR, exiting!!!" 
+		if [ $? -ne 0 ]; then
+			log "Can't create $GIT_CLONE_DIR, exiting!!!"
 			exit
 		fi
 	fi
 # Cloning from GIT
 		GIT_WEBPATH_PRFX="https://github.com/stackforge/"
 		gitclone "$GIT_WEBPATH_PRFX$SERVICE_SRV_NAME.git" $GIT_CLONE_DIR
-# End clone from git section 
+# End clone from git section
 	fi
 
 # Setupping...
 	log "Running setup.py"
 	MRN_CND_SPY=$GIT_CLONE_DIR/$SERVICE_SRV_NAME/setup.py
 	log $MRN_CND_SPY
-	if [ -e $MRN_CND_SPY ];then
+	if [ -e $MRN_CND_SPY ]; then
 		chmod +x $MRN_CND_SPY
 		log "$MRN_CND_SPY output:_____________________________________________________________"
 		cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY install
-		if [ $? -ne 0 ];then
+		if [ $? -ne 0 ]; then
 			log "Install of \"$MRN_CND_SPY\" FAILS, exiting!!!"
 			exit
 		fi
@@ -111,16 +108,16 @@ CLONE_FROM_GIT=$1
 		log "$MRN_CND_SPY not found!"
 	fi
 # Creating etc directory for config files
-	if [ ! -d $ETC_CFG_DIR ];then
-		log "Creating $ETC_CFG_DIR direcory..."
-		mkdir -p $ETC_CFG_DIR
-		if [ $? -ne 0 ];then
-			log "Can't create $ETC_CFG_DIR, exiting!!!"
-			exit
-		fi
-	fi
-# making sample configs 
-	log "Making sample configuration files at \"$ETC_CFG_DIR\""
+	if [ ! -d $ETC_CFG_DIR ]; then
+	    log "Creting $ETC_CFG_DIR direcory..."
+	    mkdir -p $ETC_CFG_DIR
+	    if [ $? -ne 0 ]; then
+	        log "Can't create $ETC_CFG_DIR, exiting!!!"
+	        exit
+	    fi
+    fi
+# making smaple configs 
+    log "Making sample configuration files at \"$ETC_CFG_DIR\""
 	for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
 	do
 		cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
@@ -130,7 +127,6 @@ CLONE_FROM_GIT=$1
 # inject init
 injectinit()
 {
-ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
 echo "description \"Murano Conductor service\"
 author \"Igor Yozhikov <iyozhikov@mirantis.com>\"
 start on runlevel [2345]
@@ -138,17 +134,14 @@ stop on runlevel [!2345]
 respawn
 env PYTHONPATH=\$PYTHONPATH:$GIT_CLONE_DIR/$SERVICE_SRV_NAME
 export PYTHONPATH
-exec start-stop-daemon --start --chuid root --user root --name $SERVICE_SRV_NAME --exec $SERVICE_EXEC_PATH -- --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
+exec $SERVICE_EXEC_PATH --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
 log "Reloading initctl"
 initctl reload-configuration
-update-rc.d $SERVICE_SRV_NAME defaults
-
 }
 
 # purge init
 purgeinit()
 {
-	update-rc.d -f $SERVICE_SRV_NAME remove
 	rm -f /etc/init.d/$SERVICE_SRV_NAME
 	rm -f /etc/init/$SERVICE_SRV_NAME.conf
 	log "Reloading initctl"
@@ -173,9 +166,10 @@ case $COMMAND in
 	inject-init )
 		# searching for daemon PATH
 		if [ ! -x $SERVICE_EXEC_PATH ]; then
-			log "Can't find \"conductor\" in at \"$SERVICE_EXEC_PATH\", please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!!!"
-			exit
+		    log "Can't find \"conductor\" in at \"$SERVICE_EXEC_PATH\", please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!!!"
+		    exit
 		fi
+		ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
 		log "Injecting \"$SERVICE_SRV_NAME\" to init..."
 		injectinit
 		postinst
@@ -211,4 +205,3 @@ case $COMMAND in
 		exit 1
 		;;
 esac
-
