@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.openstack.common import uuidutils
-
 
 class RequestContext(object):
     """
@@ -21,33 +19,16 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_token=None, user=None, tenant=None,
-                 roles=None, service_catalog=None, session=None):
-
+    def __init__(self, auth_token=None, user=None, tenant=None, session=None):
         self.auth_token = auth_token
         self.user = user
         self.tenant = tenant
-        self.roles = roles or []
-        self.request_id = uuidutils.generate_uuid()
-        self.service_catalog = service_catalog
         self.session = session
 
     def to_dict(self):
-        # NOTE(ameade): These keys are named to correspond with the default
-        # format string for logging the context in openstack common
         return {
-            'request_id': self.request_id,
-
-            #NOTE(bcwaldon): openstack-common logging expects 'user'
             'user': self.user,
-            'user_id': self.user,
-
-            #NOTE(bcwaldon): openstack-common logging expects 'tenant'
             'tenant': self.tenant,
-            'tenant_id': self.tenant,
-            'project_id': self.tenant,
-
-            'roles': self.roles,
             'auth_token': self.auth_token,
             'session': self.session
         }
