@@ -30,6 +30,7 @@ class SanityUnitTests(unittest2.TestCase):
 
     def test_api(self):
         router.webservers = MagicMock(create_resource=func_mock)
+        router.aspNetApps = MagicMock(create_resource=func_mock)
         router.sessions = MagicMock(create_resource=func_mock)
         router.active_directories = MagicMock(create_resource=func_mock)
         router.environments = MagicMock(create_resource=func_mock)

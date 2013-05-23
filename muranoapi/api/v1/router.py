@@ -18,6 +18,7 @@ from muranoapi.api.v1 import environments
 from muranoapi.api.v1 import sessions
 from muranoapi.api.v1 import active_directories
 from muranoapi.api.v1 import webservers
+from muranoapi.api.v1 import aspNetApps
 
 
 class API(wsgi.Router):
@@ -105,4 +106,20 @@ class API(wsgi.Router):
                        controller=webServers_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
+
+        aspNetApps_resource = aspNetApps.create_resource()
+        mapper.connect('/environments/{environment_id}/aspNetApps',
+                       controller=aspNetApps_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/aspNetApps',
+                       controller=aspNetApps_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/aspNetApps/'
+                       '{app_id}',
+                       controller=aspNetApps_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+
         super(API, self).__init__(mapper)

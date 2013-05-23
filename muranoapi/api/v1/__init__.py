@@ -77,7 +77,8 @@ def get_env_status(environment_id, session_id):
 
     is_inprogress = filter(lambda item: item == 'inprogress',
                            get_statuses('activeDirectories') +
-                           get_statuses('webServers'))
+                           get_statuses('webServers') +
+                           get_statuses('aspNetApps'))
 
     if session_state == 'deploying' and is_inprogress > 1:
         status = 'inprogress'

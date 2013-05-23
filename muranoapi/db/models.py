@@ -79,8 +79,8 @@ class ModelBase(object):
 
     def to_dict(self):
         dictionary = self.__dict__.copy()
-        return dict((k, v) for k, v in dictionary.iteritems()
-                    if k != '_sa_instance_state')
+        return dict([(k, v) for k, v in dictionary.iteritems()
+                     if k != '_sa_instance_state'])
 
 
 class JsonBlob(TypeDecorator):

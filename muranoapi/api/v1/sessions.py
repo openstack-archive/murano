@@ -118,6 +118,10 @@ class Controller(object):
                     environment['services']:
                 services += environment['services']['webServers']
 
+            if 'services' in environment and 'aspNetApps' in\
+                    environment['services']:
+                services += environment['services']['aspNetApps']
+
             service = [service for service in services
                        if service['id'] == service_id][0]
 
