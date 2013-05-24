@@ -12,8 +12,20 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
+from sqlalchemy.schema import MetaData, Table, Column
+from sqlalchemy.types import BigInteger
+
+meta = MetaData()
 
 
-def generate_uuid():
-    return str(uuid.uuid4()).replace('-', '')
+def upgrade(migrate_engine):
+    meta.bind = migrate_engine
+    session = Table('session', meta, autoload=True)
+    version = Column('version', BigInteger, nullable=False, server_default='0')
+    version.create(session)
+
+
+def downgrade(migrate_engine):
+    meta.bind = migrate_engine
+    session = Table('session', meta, autoload=True)
+    session.c.version.drop()

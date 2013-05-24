@@ -10,7 +10,7 @@
 #    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
-#    under the License.from oslo.config import cfg
+#    under the License.
 
 import routes
 from muranoapi.openstack.common import wsgi
@@ -50,10 +50,6 @@ class API(wsgi.Router):
                        conditions={'method': ['DELETE']})
 
         sessions_resource = sessions.create_resource()
-        mapper.connect('/environments/{environment_id}/sessions',
-                       controller=sessions_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
         mapper.connect('/environments/{environment_id}/configure',
                        controller=sessions_resource,
                        action='configure',
