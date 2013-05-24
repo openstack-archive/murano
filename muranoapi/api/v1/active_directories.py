@@ -64,7 +64,7 @@ class Controller(object):
         log.debug(_('ActiveDirectory:Delete <EnvId: {0}, Id: {1}>'.
                     format(environment_id, active_directory_id)))
 
-        draft = get_draft(request.context.session)
+        draft = get_draft(session_id=request.context.session)
         items = [service for service in draft['services']['activeDirectories']
                  if service['id'] != active_directory_id]
         draft['services']['activeDirectories'] = items

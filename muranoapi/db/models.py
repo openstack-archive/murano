@@ -21,7 +21,7 @@ from sqlalchemy import Column, String, BigInteger, TypeDecorator, ForeignKey
 from sqlalchemy.ext.compiler import compiles
 from sqlalchemy.ext.declarative import declarative_base
 from sqlalchemy import DateTime, Text
-from sqlalchemy.orm import relationship, backref, object_mapper
+from sqlalchemy.orm import relationship, object_mapper
 from muranoapi.common import uuidutils
 
 from muranoapi.openstack.common import timeutils
@@ -102,6 +102,11 @@ class Environment(BASE, ModelBase):
     tenant_id = Column(String(32), nullable=False)
     description = Column(JsonBlob(), nullable=False, default={})
 
+    sessions = relationship("Session", backref='environment',
+                            cascade='save-update, merge, delete')
+    statuses = relationship("Status", backref='environment',
+                            cascade='save-update, merge, delete')
+
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
         del dictionary['description']
@@ -113,9 +118,7 @@ class Session(BASE, ModelBase):
 
     id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
     environment_id = Column(String(32), ForeignKey('environment.id'))
-    environment = relationship(Environment,
-                               backref=backref('session'),
-                               uselist=False, lazy='joined')
+
     user_id = Column(String(36), nullable=False)
     state = Column(String(36), nullable=False)
     description = Column(JsonBlob(), nullable=False)
@@ -123,6 +126,9 @@ class Session(BASE, ModelBase):
     def to_dict(self):
         dictionary = super(Session, self).to_dict()
         del dictionary['description']
+        #object relations may be not loaded yet
+        if 'environment' in dictionary:
+            del dictionary['environment']
         return dictionary
 
 
@@ -135,6 +141,15 @@ class Status(BASE, ModelBase):
     environment_id = Column(String(32), ForeignKey('environment.id'))
     session_id = Column(String(32), ForeignKey('session.id'))
     text = Column(Text(), nullable=False)
+
+    def to_dict(self):
+        dictionary = super(Status, self).to_dict()
+        #object relations may be not loaded yet
+        if 'session' in dictionary:
+            del dictionary['session']
+        if 'environment' in dictionary:
+            del dictionary['environment']
+        return dictionary
 
 
 def register_models(engine):
