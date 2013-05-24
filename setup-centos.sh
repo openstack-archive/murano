@@ -127,7 +127,7 @@ CLONE_FROM_GIT=$1
 # inject init
 injectinit()
 {
-echo "description \"Murano Conductor service\"
+echo "description \"$SERVICE_SRV_NAME service\"
 author \"Igor Yozhikov <iyozhikov@mirantis.com>\"
 start on runlevel [2345]
 stop on runlevel [!2345]
@@ -166,7 +166,7 @@ case $COMMAND in
 	inject-init )
 		# searching for daemon PATH
 		if [ ! -x $SERVICE_EXEC_PATH ]; then
-		    log "Can't find \"conductor\" in at \"$SERVICE_EXEC_PATH\", please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!!!"
+		    log "Can't find \"$SERVICE_SRV_NAME\" in at \"$SERVICE_EXEC_PATH\", please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!!!"
 		    exit
 		fi
 		ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
