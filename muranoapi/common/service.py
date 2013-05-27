@@ -104,6 +104,11 @@ def handle_result(msg):
     session = get_session()
     environment = session.query(Environment).get(environment_result['id'])
 
+    if not environment:
+        log.warning(_('Environment result could not be handled, specified '
+                      'environment does not found in database'))
+        return
+
     environment.description = environment_result
     environment.save(session)
 
