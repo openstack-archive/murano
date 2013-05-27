@@ -98,6 +98,9 @@ class SystemServices(object):
         if 'webServers' in env_description['services']:
             services += env_description['services']['webServers']
 
+        if 'aspNetApps' in env_description['services']:
+            services += env_description['services']['aspNetApps']
+
         services = filter(lambda s: s.id == service_id, services)
 
         if len(services) > 0:

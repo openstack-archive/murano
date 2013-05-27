@@ -65,7 +65,7 @@ class Controller(object):
             session_id = request.context.session
 
         #add services to env
-        get = SystemServices.get_service
+        get = SystemServices.get_services
 
         ad = get(environment_id, 'activeDirectories', session_id)
         webServers = get(environment_id, 'webServers', session_id)
