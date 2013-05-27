@@ -176,6 +176,39 @@ class SystemServices(object):
         return web_server
 
     @staticmethod
+    def create_asp_application(params, session_id, environment_id):
+        """
+        Creates ASP.NET Application service and saves it in specified session
+        :param params: Params as Dict
+        :param session_id: Session
+        """
+        env_description = EnvironmentServices.get_environment_description(
+            environment_id, session_id)
+
+        aspApp = params
+        aspApp['id'] = uuidutils.generate_uuid()
+        aspApp['created'] = str(timeutils.utcnow())
+        aspApp['updated'] = str(timeutils.utcnow())
+
+        unit_count = 0
+        for unit in aspApp['units']:
+            unit_count += 1
+            unit['id'] = uuidutils.generate_uuid()
+            unit['name'] = aspApp['name'] + '_instance_' + str(unit_count)
+
+        if not 'services' in env_description:
+            env_description['services'] = {}
+
+        if not 'webServers' in env_description['services']:
+            env_description['services']['aspNetApps'] = []
+
+        env_description['services']['aspNetApps'].append(aspApp)
+        EnvironmentServices.save_environment_description(session_id,
+                                                         env_description)
+
+        return aspApp
+
+    @staticmethod
     def delete_service(service_id, service_type, session_id, environment_id):
         env_description = EnvironmentServices.get_environment_description(
             environment_id, session_id)

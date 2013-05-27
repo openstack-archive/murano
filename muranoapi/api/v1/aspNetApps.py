@@ -13,9 +13,8 @@
 #    under the License.from oslo.config import cfg
 
 from muranoapi import utils
-from muranoapi.api.v1 import save_draft, get_draft, get_service_status
-from muranoapi.common import uuidutils
-from muranoapi.openstack.common import wsgi, timeutils
+from muranoapi.db.services.systemservices import SystemServices
+from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
 
 log = logging.getLogger(__name__)
@@ -25,60 +24,34 @@ class Controller(object):
     def index(self, request, environment_id):
         log.debug(_('AspNetApps:List <EnvId: {0}>'.format(environment_id)))
 
-        draft = prepare_draft(get_draft(environment_id,
-                                        request.context.session))
+        session_id = None
+        if hasattr(request, 'context') and request.context.session:
+            session_id = request.context.session
 
-        for dc in draft['services']['aspNetApps']:
-            dc['status'] = get_service_status(environment_id,
-                                              request.context.session, dc)
+        get = SystemServices.get_services
 
-        return {'aspNetApps': draft['services']['aspNetApps']}
+        services = get(environment_id, 'aspNetApps', session_id)
+        return {'aspNetApps': services}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
         log.debug(_('AspNetApps:Create <EnvId: {0}, Body: {1}>'.
                     format(environment_id, body)))
 
-        draft = get_draft(session_id=request.context.session)
+        session_id = request.context.session
+        create = SystemServices.create_asp_application
 
-        aspNetApp = body.copy()
-        aspNetApp['id'] = uuidutils.generate_uuid()
-        aspNetApp['created'] = str(timeutils.utcnow())
-        aspNetApp['updated'] = str(timeutils.utcnow())
-
-        unit_count = 0
-        for unit in aspNetApp['units']:
-            unit_count += 1
-            unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = aspNetApp['name'] + '_instance_' + str(unit_count)
-
-        draft = prepare_draft(draft)
-        draft['services']['aspNetApps'].append(aspNetApp)
-        save_draft(request.context.session, draft)
-
-        return aspNetApp
+        return create(body.copy(), session_id, environment_id)
 
     @utils.verify_session
     def delete(self, request, environment_id, app_id):
         log.debug(_('AspNetApps:Delete <EnvId: {0}, Id: {1}>'.
                     format(environment_id, app_id)))
 
-        draft = get_draft(session_id=request.context.session)
+        session_id = request.context.session
+        delete = SystemServices.delete_service
 
-        elements = [service for service in draft['services']['aspNetApps'] if
-                    service['id'] != app_id]
-        draft['services']['aspNetApps'] = elements
-        save_draft(request.context.session, draft)
-
-
-def prepare_draft(draft):
-    if not 'services' in draft:
-        draft['services'] = {}
-
-    if not 'aspNetApps' in draft['services']:
-        draft['services']['aspNetApps'] = []
-
-    return draft
+        delete(app_id, 'aspNetApps', session_id, environment_id)
 
 
 def create_resource():

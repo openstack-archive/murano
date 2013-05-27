@@ -31,8 +31,6 @@ class Controller(object):
         get = SystemServices.get_services
 
         services = get(environment_id, 'webServers', session_id)
-        services = [srv.to_dict() for srv in services]
-
         return {'webServers': services}
 
     @utils.verify_session

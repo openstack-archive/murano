@@ -32,8 +32,6 @@ class Controller(object):
         get = SystemServices.get_services
 
         services = get(environment_id, 'activeDirectories', session_id)
-        services = [srv.to_dict() for srv in services]
-
         return {'activeDirectories': services}
 
     @utils.verify_session
