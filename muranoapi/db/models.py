@@ -51,10 +51,12 @@ class ModelBase(object):
 
     def update(self, values):
         """dict.update() behaviour."""
+        self.updated = timeutils.utcnow()
         for k, v in values.iteritems():
             self[k] = v
 
     def __setitem__(self, key, value):
+        self.updated = timeutils.utcnow()
         setattr(self, key, value)
 
     def __getitem__(self, key):
@@ -79,8 +81,8 @@ class ModelBase(object):
 
     def to_dict(self):
         dictionary = self.__dict__.copy()
-        return dict([(k, v) for k, v in dictionary.iteritems()
-                     if k != '_sa_instance_state'])
+        return dict((k, v) for k, v in dictionary.iteritems()
+                    if k != '_sa_instance_state')
 
 
 class JsonBlob(TypeDecorator):
@@ -100,6 +102,7 @@ class Environment(BASE, ModelBase):
     id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
     name = Column(String(255), nullable=False)
     tenant_id = Column(String(32), nullable=False)
+    version = Column(BigInteger, nullable=False, default=0)
     description = Column(JsonBlob(), nullable=False, default={})
 
     sessions = relationship("Session", backref='environment',
@@ -122,6 +125,7 @@ class Session(BASE, ModelBase):
     user_id = Column(String(36), nullable=False)
     state = Column(String(36), nullable=False)
     description = Column(JsonBlob(), nullable=False)
+    version = Column(BigInteger, nullable=False, default=0)
 
     def to_dict(self):
         dictionary = super(Session, self).to_dict()

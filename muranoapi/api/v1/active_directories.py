@@ -10,12 +10,11 @@
 #    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
-#    under the License.from oslo.config import cfg
+#    under the License.
 
 from muranoapi import utils
-from muranoapi.api.v1 import save_draft, get_draft, get_service_status
-from muranoapi.common import uuidutils
-from muranoapi.openstack.common import wsgi, timeutils
+from muranoapi.db.services.systemservices import SystemServices
+from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
 
 log = logging.getLogger(__name__)
@@ -23,62 +22,40 @@ log = logging.getLogger(__name__)
 
 class Controller(object):
     def index(self, request, environment_id):
-        log.debug(_('ActiveDirectory:Index <EnvId: {0}>'.
-                    format(environment_id)))
+        log.debug(_('ActiveDirectory:Index '
+                    '<EnvId: {0}>'.format(environment_id)))
 
-        draft = prepare_draft(get_draft(environment_id,
-                                        request.context.session))
+        session_id = None
+        if hasattr(request, 'context') and request.context.session:
+            session_id = request.context.session
 
-        for dc in draft['services']['activeDirectories']:
-            dc['status'] = get_service_status(environment_id,
-                                              request.context.session,
-                                              dc)
+        get = SystemServices.get_services
 
-        return {'activeDirectories': draft['services']['activeDirectories']}
+        services = get(environment_id, 'activeDirectories', session_id)
+        services = [srv.to_dict() for srv in services]
+
+        return {'activeDirectories': services}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
-        log.debug(_('ActiveDirectory:Create <EnvId: {0}, Body: {1}>'.
-                    format(environment_id, body)))
+        log.debug(_('ActiveDirectory:Create <EnvId: {0}, '
+                    'Body: {1}>'.format(environment_id, body)))
 
-        draft = get_draft(session_id=request.context.session)
+        session_id = request.context.session
+        create = SystemServices.create_active_directory
 
-        active_directory = body.copy()
-        active_directory['id'] = uuidutils.generate_uuid()
-        active_directory['created'] = str(timeutils.utcnow())
-        active_directory['updated'] = str(timeutils.utcnow())
+        return create(body.copy(), session_id, environment_id)
 
-        unit_count = 0
-        for unit in active_directory['units']:
-            unit_count += 1
-            unit['id'] = uuidutils.generate_uuid()
-            unit['name'] = 'dc{0}'.format(unit_count)
-
-        draft = prepare_draft(draft)
-        draft['services']['activeDirectories'].append(active_directory)
-        save_draft(request.context.session, draft)
-
-        return active_directory
-
+    @utils.verify_session
     def delete(self, request, environment_id, active_directory_id):
-        log.debug(_('ActiveDirectory:Delete <EnvId: {0}, Id: {1}>'.
-                    format(environment_id, active_directory_id)))
+        log.debug(_('ActiveDirectory:Delete <EnvId: {0}, '
+                    'Id: {1}>'.format(environment_id, active_directory_id)))
 
-        draft = get_draft(session_id=request.context.session)
-        items = [service for service in draft['services']['activeDirectories']
-                 if service['id'] != active_directory_id]
-        draft['services']['activeDirectories'] = items
-        save_draft(request.context.session, draft)
+        session_id = request.context.session
+        delete = SystemServices.delete_service
 
-
-def prepare_draft(draft):
-    if not 'services' in draft:
-        draft['services'] = {}
-
-    if not 'activeDirectories' in draft['services']:
-        draft['services']['activeDirectories'] = []
-
-    return draft
+        delete(active_directory_id, 'activeDirectories', session_id,
+               environment_id)
 
 
 def create_resource():
