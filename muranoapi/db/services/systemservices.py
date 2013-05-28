@@ -101,6 +101,12 @@ class SystemServices(object):
         if 'aspNetApps' in env_description['services']:
             services += env_description['services']['aspNetApps']
 
+        if 'webServerFarms' in env_description['services']:
+            services += env_description['services']['webServerFarms']
+
+        if 'aspNetAppFarms' in env_description['services']:
+            services += env_description['services']['aspNetAppFarms']
+
         services = filter(lambda s: s.id == service_id, services)
 
         if len(services) > 0:
@@ -207,6 +213,74 @@ class SystemServices(object):
                                                          env_description)
 
         return aspApp
+
+    @staticmethod
+    def create_web_server_farm(ws_params, session_id, environment_id):
+        """
+        Creates web server farm service and saves it in specified session
+        :param ws_params: Web Server Farm Params as Dict
+        :param session_id: Session
+        """
+        env_description = EnvironmentServices.get_environment_description(
+            environment_id, session_id)
+
+        web_server_farm = ws_params
+        web_server_farm['id'] = uuidutils.generate_uuid()
+        web_server_farm['created'] = str(timeutils.utcnow())
+        web_server_farm['updated'] = str(timeutils.utcnow())
+
+        unit_count = 0
+        for unit in web_server_farm['units']:
+            unit_count += 1
+            unit['id'] = uuidutils.generate_uuid()
+            unit['name'] = web_server_farm['name'] + '_instance_' + \
+                str(unit_count)
+
+        if not 'services' in env_description:
+            env_description['services'] = {}
+
+        if not 'webServerFarmss' in env_description['services']:
+            env_description['services']['webServerFarms'] = []
+
+        env_description['services']['webServerFarms'].append(web_server_farm)
+        EnvironmentServices.save_environment_description(session_id,
+                                                         env_description)
+
+        return web_server_farm
+
+    @staticmethod
+    def create_asp_application_farm(params, session_id, environment_id):
+        """
+        Creates ASP.NET Application Farm service and saves it in
+        specified session
+        :param params: Params as Dict
+        :param session_id: Session
+        """
+        env_description = EnvironmentServices.get_environment_description(
+            environment_id, session_id)
+
+        aspApp_farm = params
+        aspApp_farm['id'] = uuidutils.generate_uuid()
+        aspApp_farm['created'] = str(timeutils.utcnow())
+        aspApp_farm['updated'] = str(timeutils.utcnow())
+
+        unit_count = 0
+        for unit in aspApp_farm['units']:
+            unit_count += 1
+            unit['id'] = uuidutils.generate_uuid()
+            unit['name'] = aspApp_farm['name'] + '_instance_' + str(unit_count)
+
+        if not 'services' in env_description:
+            env_description['services'] = {}
+
+        if not 'webServers' in env_description['services']:
+            env_description['services']['aspNetAppFarms'] = []
+
+        env_description['services']['aspNetAppFarms'].append(aspApp_farm)
+        EnvironmentServices.save_environment_description(session_id,
+                                                         env_description)
+
+        return aspApp_farm
 
     @staticmethod
     def delete_service(service_id, service_type, session_id, environment_id):

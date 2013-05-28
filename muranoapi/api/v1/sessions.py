@@ -102,7 +102,7 @@ class Controller(object):
                       'deployment is in progress'.format(session_id))
             raise exc.HTTPForbidden()
 
-        SessionServices.deploy(session, request.context.auth_token)
+        SessionServices.deploy(session, unit, request.context.auth_token)
 
     def reports(self, request, environment_id, session_id):
         log.debug(_('Session:Reports <EnvId: {0}, '
@@ -128,6 +128,14 @@ class Controller(object):
             if 'services' in environment and 'aspNetApps' in\
                     environment['services']:
                 services += environment['services']['aspNetApps']
+
+            if 'services' in environment and 'webServerFarms' in \
+                    environment['services']:
+                services += environment['services']['webServerFarms']
+
+            if 'services' in environment and 'aspNetAppFarms' in\
+                    environment['services']:
+                services += environment['services']['aspNetAppFarms']
 
             service = [service for service in services
                        if service['id'] == service_id][0]

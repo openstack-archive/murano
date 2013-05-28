@@ -22,7 +22,7 @@ log = logging.getLogger(__name__)
 
 class Controller(object):
     def index(self, request, environment_id):
-        log.debug(_('AspNetApps:List <EnvId: {0}>'.format(environment_id)))
+        log.debug(_('AspNetAppFarms:List <EnvId: {0}>'.format(environment_id)))
 
         session_id = None
         if hasattr(request, 'context') and request.context.session:
@@ -30,28 +30,28 @@ class Controller(object):
 
         get = SystemServices.get_services
 
-        services = get(environment_id, 'aspNetApps', session_id)
-        return {'aspNetApps': services}
+        services = get(environment_id, 'aspNetAppFarms', session_id)
+        return {'aspNetAppFarms': services}
 
     @utils.verify_session
     def create(self, request, environment_id, body):
-        log.debug(_('AspNetApps:Create <EnvId: {0}, Body: {1}>'.
+        log.debug(_('AspNetAppFarms:Create <EnvId: {0}, Body: {1}>'.
                     format(environment_id, body)))
 
         session_id = request.context.session
-        create = SystemServices.create_asp_application
+        create = SystemServices.create_asp_application_farm
 
         return create(body.copy(), session_id, environment_id)
 
     @utils.verify_session
-    def delete(self, request, environment_id, app_id):
-        log.debug(_('AspNetApps:Delete <EnvId: {0}, Id: {1}>'.
-                    format(environment_id, app_id)))
+    def delete(self, request, environment_id, app_farm_id):
+        log.debug(_('AspNetAppFarms:Delete <EnvId: {0}, Id: {1}>'.
+                    format(environment_id, app_farm_id)))
 
         session_id = request.context.session
         delete = SystemServices.delete_service
 
-        delete(app_id, 'aspNetApps', session_id, environment_id)
+        delete(app_farm_id, 'aspNetAppFarms', session_id, environment_id)
 
 
 def create_resource():

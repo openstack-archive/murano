@@ -108,15 +108,16 @@ class SessionServices(object):
         return True
 
     @staticmethod
-    def deploy(session, token):
+    def deploy(session, unit, token):
         """
         Prepares environment for deployment and send deployment command to
         orchestration engine
 
         :param session: session that is going to be deployed
+        :param unit: SQLalchemy session
         :param token: auth token that is going to be used by orchestration
         """
-        unit = get_session()
+        #unit = get_session()
 
         #Set X-Auth-Token for conductor
         environment = session.description

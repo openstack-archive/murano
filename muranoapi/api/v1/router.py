@@ -19,6 +19,8 @@ from muranoapi.api.v1 import sessions
 from muranoapi.api.v1 import active_directories
 from muranoapi.api.v1 import webservers
 from muranoapi.api.v1 import aspNetApps
+from muranoapi.api.v1 import webserverFarms
+from muranoapi.api.v1 import aspNetAppFarms
 
 
 class API(wsgi.Router):
@@ -115,6 +117,36 @@ class API(wsgi.Router):
         mapper.connect('/environments/{environment_id}/aspNetApps/'
                        '{app_id}',
                        controller=aspNetApps_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+
+        webServerFarms_resource = webserverFarms.create_resource()
+        mapper.connect('/environments/{environment_id}/webServerFarms',
+                       controller=webServerFarms_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/webServerFarms',
+                       controller=webServerFarms_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/webServerFarms/'
+                       '{web_server_farm_id}',
+                       controller=webServerFarms_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+
+        aspNetAppFarms_resource = aspNetAppFarms.create_resource()
+        mapper.connect('/environments/{environment_id}/aspNetAppFarms',
+                       controller=aspNetAppFarms_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/aspNetAppFarms',
+                       controller=aspNetAppFarms_resource,
+                       action='create',
+                       conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/aspNetAppFarms/'
+                       '{app_farm_id}',
+                       controller=aspNetAppFarms_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
 

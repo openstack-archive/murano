@@ -41,7 +41,7 @@ class EnvironmentServices(object):
         :return: Returns list of environments
         """
         unit = get_session()
-        environments = unit.query(Environment).filter_by(**filters)
+        environments = unit.query(Environment).filter_by(**filters).all()
 
         for env in environments:
             env['status'] = EnvironmentServices.get_status(env['id'])
