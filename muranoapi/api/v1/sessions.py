@@ -82,19 +82,24 @@ class Controller(object):
 
         return None
 
-    def deploy(self, request, session_id):
+    def deploy(self, request, environment_id, session_id):
         log.debug(_('Session:Deploy <SessionId: {0}>'.format(session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        if session.environment_id != environment_id:
+            log.error('Session <SessionId {0}> is not tied with Environment '
+                      '<EnvId {1}>'.format(session_id, environment_id))
+            raise exc.HTTPNotFound()
+
         if not SessionServices.validate(session):
-            log.info('Session <SessionId {0}> is invalid'.format(session_id))
+            log.error('Session <SessionId {0}> is invalid'.format(session_id))
             raise exc.HTTPForbidden()
 
         if session.state != SessionState.open:
-            log.info('Session <SessionId {0}> is already deployed or '
-                     'deployment is in progress'.format(session_id))
+            log.error('Session <SessionId {0}> is already deployed or '
+                      'deployment is in progress'.format(session_id))
             raise exc.HTTPForbidden()
 
         SessionServices.deploy(session, request.context.auth_token)
