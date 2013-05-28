@@ -15,7 +15,8 @@
 import eventlet
 from muranoapi.common import config
 from muranoapi.db.services.environments import EnvironmentServices
-from muranoapi.openstack.common import uuidutils, timeutils
+from muranoapi.openstack.common import timeutils
+from muranoapi.common import uuidutils
 
 
 amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
