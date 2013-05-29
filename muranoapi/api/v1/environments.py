@@ -70,11 +70,15 @@ class Controller(object):
         ad = get(environment_id, 'activeDirectories', session_id)
         webServers = get(environment_id, 'webServers', session_id)
         aspNetApps = get(environment_id, 'aspNetApps', session_id)
+        webServerFarms = get(environment_id, 'webServerFarms', session_id)
+        aspNetAppFarms = get(environment_id, 'aspNetAppFarms', session_id)
 
         env['services'] = {
             'activeDirectories': ad,
             'webServers': webServers,
-            'aspNetApps': aspNetApps
+            'aspNetApps': aspNetApps,
+            'webServerFarms': webServerFarms,
+            'aspNetAppFarms': aspNetAppFarms
         }
 
         return env
