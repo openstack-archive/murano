@@ -42,39 +42,49 @@ class Controller(object):
 
         return session.to_dict()
 
-    def show(self, request, session_id):
+    def show(self, request, environment_id, session_id):
         log.debug(_('Session:Show <SessionId: {0}>'.format(session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        if session.environment_id != environment_id:
+            log.error('Session <SessionId {0}> is not tied with Environment '
+                      '<EnvId {1}>'.format(session_id, environment_id))
+            raise exc.HTTPNotFound()
+
         user_id = request.context.user
         if session.user_id != user_id:
-            log.info('User <UserId {0}> is not authorized to access '
-                     'session <SessionId {1}>.'.format(user_id, session_id))
+            log.error('User <UserId {0}> is not authorized to access '
+                      'session <SessionId {1}>.'.format(user_id, session_id))
             raise exc.HTTPUnauthorized()
 
         if not SessionServices.validate(session):
-            log.info('Session <SessionId {0}> is invalid'.format(session_id))
+            log.error('Session <SessionId {0}> is invalid'.format(session_id))
             raise exc.HTTPForbidden()
 
         return session.to_dict()
 
-    def delete(self, request, session_id):
+    def delete(self, request, environment_id, session_id):
         log.debug(_('Session:Delete <SessionId: {0}>'.format(session_id)))
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        if session.environment_id != environment_id:
+            log.error('Session <SessionId {0}> is not tied with Environment '
+                      '<EnvId {1}>'.format(session_id, environment_id))
+            raise exc.HTTPNotFound()
+
         user_id = request.context.user
         if session.user_id != user_id:
-            log.info('User <UserId {0}> is not authorized to access '
-                     'session <SessionId {1}>.'.format(user_id, session_id))
+            log.error('User <UserId {0}> is not authorized to access '
+                      'session <SessionId {1}>.'.format(user_id, session_id))
             raise exc.HTTPUnauthorized()
 
         if session.state == SessionState.deploying:
-            log.info('Session <SessionId: {0}> is in deploying state and '
-                     'could not be deleted'.format(session_id))
+            log.error('Session <SessionId: {0}> is in deploying state and '
+                      'could not be deleted'.format(session_id))
             raise exc.HTTPForbidden()
 
         with unit.begin():
