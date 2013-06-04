@@ -1,0 +1,14 @@
+include run_tests.sh
+include ChangeLog
+include README.rst
+include MANIFEST.in
+include AUTHORS
+include LICENSE
+include ChangeLog
+include babel.cfg
+include tox.ini
+include openstack-common.conf
+include muranoapi/db/migrate_repo/README
+include muranoapi/db/migrate_repo/migrate.cfg
+include muranoapi/db/migrate_repo/versions/*.sql
+global-exclude *.pyc
