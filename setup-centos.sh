@@ -14,17 +14,15 @@
 #    under the License.
 #
 #    CentOS script.
+
 LOGLVL=1
 SERVICE_CONTENT_DIRECTORY=`cd $(dirname "$0") && pwd`
-PREREQ_PKGS="upstart wget git make python-pip python-devel mysql-connector-python"
+PREREQ_PKGS="upstart wget git make python-pip python-devel mysql-connector-python libxml2-devel libxslt-devel"
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
 ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-api.conf"
 
-if [ -z "$SERVICE_EXEC_PATH" ];then
-	SERVICE_EXEC_PATH="/usr/bin/murano-api"
-fi
 # Functions
 # Loger function
 log()
@@ -95,14 +93,27 @@ CLONE_FROM_GIT=$1
 # Setupping...
 	log "Running setup.py"
 	MRN_CND_SPY=$GIT_CLONE_DIR/$SERVICE_SRV_NAME/setup.py
-	log $MRN_CND_SPY
 	if [ -e $MRN_CND_SPY ]; then
 		chmod +x $MRN_CND_SPY
 		log "$MRN_CND_SPY output:_____________________________________________________________"
-		cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY install
-		if [ $? -ne 0 ]; then
-			log "Install of \"$MRN_CND_SPY\" FAILS, exiting!!!"
-			exit
+		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY install
+		#if [ $? -ne 0 ]; then
+		#	log "\"$MRN_CND_SPY\" python setup FAILS, exiting!"
+		#	exit 1
+		#fi
+## Setup through pip
+		# Creating tarball
+		cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY sdist
+		if [ $? -ne 0 ];then
+			log "\"$MRN_CND_SPY\" tarball creation FAILS, exiting!!!"
+			exit 1
+		fi
+		# Running tarball install
+		TRBL_FILE=$(basename `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/*.tar.gz`)
+		pip install $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/$TRBL_FILE
+		if [ $? -ne 0 ];then
+			log "pip install \"$TRBL_FILE\" FAILS, exiting!!!"
+			exit 1
 		fi
 	else
 		log "$MRN_CND_SPY not found!"
@@ -124,9 +135,31 @@ CLONE_FROM_GIT=$1
 	done
 }
 
+# searching for service executable in path
+get_service_exec_path()
+{
+	if [ -z "$SERVICE_EXEC_PATH" ]; then
+		SERVICE_EXEC_PATH=`which $SERVICE_SRV_NAME`
+		if [ $? -ne 0 ]; then
+			log "Can't find \"$SERVICE_SRV_NAME\", please install the \"$SERVICE_SRV_NAME\" by running \"$(basename "$0") install\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
+			exit 1
+		fi
+	else
+		if [ ! -x "$SERVICE_EXEC_PATH" ]; then
+			log "\"$SERVICE_EXEC_PATH\" in not executable, please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
+			exit 1
+		fi
+	fi
+}
+
 # inject init
 injectinit()
 {
+ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
+if [ $? -ne 0 ]; then
+	log "Can't create symlink, please run \"$(basename "$0") purge-init\" before \"$(basename "$0") inject-init\", exiting"
+	exit 1
+fi
 echo "description \"$SERVICE_SRV_NAME service\"
 author \"Igor Yozhikov <iyozhikov@mirantis.com>\"
 start on runlevel [2345]
@@ -151,8 +184,16 @@ purgeinit()
 # uninstall
 uninst()
 {
-	rm -f $SERVICE_EXEC_PATH
-	rm -rf $SERVICE_CONTENT_DIRECTORY
+	# Uninstall trough  pip
+	# looking up for python package installed
+	PYPKG=`echo $SERVICE_SRV_NAME | tr -d '-'`
+	pip freeze | grep $PYPKG
+	if [ $? -eq 0 ]; then
+		log "Removing package \"$PYPKG\" with pip"
+		pip uninstall $PYPKG --yes
+	else
+		log "Python package \"$PYPKG\" not found"
+	fi
 }
 
 # postinstall
@@ -164,12 +205,7 @@ postinst()
 COMMAND="$1"
 case $COMMAND in
 	inject-init )
-		# searching for daemon PATH
-		if [ ! -x $SERVICE_EXEC_PATH ]; then
-		    log "Can't find \"$SERVICE_SRV_NAME\" in at \"$SERVICE_EXEC_PATH\", please install the \"$SERVICE_SRV_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!!!"
-		    exit
-		fi
-		ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
+		get_service_exec_path
 		log "Injecting \"$SERVICE_SRV_NAME\" to init..."
 		injectinit
 		postinst
@@ -177,12 +213,14 @@ case $COMMAND in
 
 	install )
 		inst
+		get_service_exec_path
 		injectinit
 		postinst
 		;;
 
 	installfromgit )
 		inst "yes"
+		get_service_exec_path
 		injectinit
 		postinst
 		;;
@@ -201,7 +239,7 @@ case $COMMAND in
 		;;
 
 	* )
-		echo "Usage: $(basename "$0") install | installfromgit | uninstall | inject-init | purge-init"
+		echo "Usage: $(basename "$0") command \nCommands:\n\tinstall - Install $SERVICE_SRV_NAME software\n\tuninstall - Uninstall $SERVICE_SRV_NAME software\n\tinject-init - Add $SERVICE_SRV_NAME to the system start-up\n\tpurge-init - Remove $SERVICE_SRV_NAME from the system start-up"
 		exit 1
 		;;
 esac
