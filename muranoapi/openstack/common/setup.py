@@ -1,6 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack LLC.
+# Copyright 2011 OpenStack Foundation.
 # Copyright 2012-2013 Hewlett-Packard Development Company, L.P.
 # All Rights Reserved.
 #
@@ -149,7 +149,7 @@ def write_git_changelog():
     git_dir = _get_git_directory()
     if not os.getenv('SKIP_WRITE_GIT_CHANGELOG'):
         if git_dir:
-            git_log_cmd = 'git --git-dir=%s log --stat' % git_dir
+            git_log_cmd = 'git --git-dir=%s log' % git_dir
             changelog = _run_shell_command(git_log_cmd)
             mailmap = _parse_git_mailmap(git_dir)
             with open(new_changelog, "w") as changelog_file:
@@ -171,6 +171,14 @@ def generate_authors():
                            " log --format='%aN <%aE>' | sort -u | "
                            "egrep -v '" + jenkins_email + "'")
             changelog = _run_shell_command(git_log_cmd)
+            signed_cmd = ("git log --git-dir=" + git_dir +
+                          " | grep -i Co-authored-by: | sort -u")
+            signed_entries = _run_shell_command(signed_cmd)
+            if signed_entries:
+                new_entries = "\n".join(
+                    [signed.split(":", 1)[1].strip()
+                     for signed in signed_entries.split("\n") if signed])
+                changelog = "\n".join((changelog, new_entries))
             mailmap = _parse_git_mailmap(git_dir)
             with open(new_authors, 'w') as new_authors_fh:
                 new_authors_fh.write(canonicalize_emails(changelog, mailmap))
