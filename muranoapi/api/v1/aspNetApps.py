@@ -16,6 +16,7 @@ from muranoapi import utils
 from muranoapi.db.services.systemservices import SystemServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from webob.exc import HTTPNotFound
 
 log = logging.getLogger(__name__)
 
@@ -51,7 +52,10 @@ class Controller(object):
         session_id = request.context.session
         delete = SystemServices.delete_service
 
-        delete(app_id, 'aspNetApps', session_id, environment_id)
+        try:
+            delete(app_id, 'aspNetApps', session_id, environment_id)
+        except ValueError:
+            raise HTTPNotFound()
 
 
 def create_resource():

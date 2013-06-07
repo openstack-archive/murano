@@ -289,11 +289,14 @@ class SystemServices(object):
             environment_id, session_id)
 
         if not 'services' in env_description:
-            raise ValueError('This environment does not have services')
+            raise NameError('This environment does not have services')
 
         services = []
         if service_type in env_description['services']:
             services = env_description['services'][service_type]
+
+        if service_id not in [srv['id'] for srv in services]:
+            raise ValueError('Specified service does not exist')
 
         services = [srv for srv in services if srv['id'] != service_id]
         env_description['services'][service_type] = services
