@@ -206,7 +206,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServers' in env_description['services']:
+        if not 'aspNetApps' in env_description['services']:
             env_description['services']['aspNetApps'] = []
 
         env_description['services']['aspNetApps'].append(aspApp)
@@ -240,7 +240,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServerFarmss' in env_description['services']:
+        if not 'webServerFarms' in env_description['services']:
             env_description['services']['webServerFarms'] = []
 
         env_description['services']['webServerFarms'].append(web_server_farm)
@@ -274,7 +274,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServers' in env_description['services']:
+        if not 'aspNetAppFarms' in env_description['services']:
             env_description['services']['aspNetAppFarms'] = []
 
         env_description['services']['aspNetAppFarms'].append(aspApp_farm)
