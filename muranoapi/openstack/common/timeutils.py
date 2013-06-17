@@ -1,6 +1,6 @@
 # vim: tabstop=4 shiftwidth=4 softtabstop=4
 
-# Copyright 2011 OpenStack Foundation.
+# Copyright 2011 OpenStack LLC.
 # All Rights Reserved.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -32,7 +32,7 @@ PERFECT_TIME_FORMAT = _ISO8601_TIME_FORMAT_SUBSECOND
 
 
 def isotime(at=None, subsecond=False):
-    """Stringify time in ISO 8601 format"""
+    """Stringify time in ISO 8601 format."""
     if not at:
         at = utcnow()
     st = at.strftime(_ISO8601_TIME_FORMAT
@@ -44,7 +44,7 @@ def isotime(at=None, subsecond=False):
 
 
 def parse_isotime(timestr):
-    """Parse time from ISO 8601 format"""
+    """Parse time from ISO 8601 format."""
     try:
         return iso8601.parse_date(timestr)
     except iso8601.ParseError as e:

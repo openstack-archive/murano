@@ -14,6 +14,7 @@ kombu
 pycrypto>=2.1.0alpha1
 iso8601>=0.1.4
 amqplib
+six
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
@@ -28,4 +29,4 @@ passlib
 jsonschema
 python-keystoneclient>=0.2.0
 
-http://tarballs.openstack.org/oslo-config/oslo-config-2013.1b4.tar.gz#egg=oslo-config
+oslo.config
