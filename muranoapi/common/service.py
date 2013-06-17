@@ -12,35 +12,37 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import socket
+
+from amqplib.client_0_8 import AMQPConnectionException
 import anyjson
-from eventlet import patcher
+import eventlet
+from muranoapi.common.utils import retry, handle
 from muranoapi.db.models import Status, Session, Environment
 from muranoapi.db.session import get_session
-
-amqp = patcher.import_patched('amqplib.client_0_8')
-
-from muranoapi.openstack.common import service
 from muranoapi.openstack.common import log as logging
 from muranoapi.common import config
 
+amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 conf = config.CONF.reports
 rabbitmq = config.CONF.rabbitmq
 log = logging.getLogger(__name__)
-channel = None
 
 
-class TaskResultHandlerService(service.Service):
-    def __init__(self, threads=1000):
-        super(TaskResultHandlerService, self).__init__(threads)
+class TaskResultHandlerService():
+    thread = None
 
     def start(self):
-        super(TaskResultHandlerService, self).start()
-        self.tg.add_thread(self._handle_results)
+        self.thread = eventlet.spawn(self.connect)
 
     def stop(self):
-        super(TaskResultHandlerService, self).stop()
+        pass
 
-    def _handle_results(self):
+    def wait(self):
+        self.thread.wait()
+
+    @retry((socket.error, AMQPConnectionException), tries=-1)
+    def connect(self):
         connection = amqp.Connection('{0}:{1}'.
                                      format(rabbitmq.host, rabbitmq.port),
                                      virtual_host=rabbitmq.virtual_host,
@@ -67,36 +69,15 @@ class TaskResultHandlerService(service.Service):
             ch.wait()
 
 
-def handle_report(msg):
-    log.debug(_('Got report message from orchestration engine:\n{0}'.
-                format(msg.body)))
-
-    params = anyjson.deserialize(msg.body)
-    params['entity_id'] = params['id']
-    del params['id']
-
-    status = Status()
-    status.update(params)
-
-    session = get_session()
-    #connect with session
-    conf_session = session.query(Session).filter_by(
-        **{'environment_id': status.environment_id,
-           'state': 'deploying'}).first()
-    status.session_id = conf_session.id
-
-    with session.begin():
-        session.add(status)
-
-
+@handle
 def handle_result(msg):
     log.debug(_('Got result message from '
                 'orchestration engine:\n{0}'.format(msg.body)))
 
     environment_result = anyjson.deserialize(msg.body)
     if 'deleted' in environment_result:
-        log.debug(_('Result for environment {0} is dropped. '
-                    'Environment is deleted'.format(environment_result['id'])))
+        log.debug(_('Result for environment {0} is dropped. Environment '
+                    'is deleted'.format(environment_result['id'])))
 
         msg.channel.basic_ack(msg.delivery_tag)
         return
@@ -119,3 +100,26 @@ def handle_result(msg):
     conf_session.save(session)
 
     msg.channel.basic_ack(msg.delivery_tag)
+
+
+@handle
+def handle_report(msg):
+    log.debug(_('Got report message from orchestration '
+                'engine:\n{0}'.format(msg.body)))
+
+    params = anyjson.deserialize(msg.body)
+    params['entity_id'] = params['id']
+    del params['id']
+
+    status = Status()
+    status.update(params)
+
+    session = get_session()
+    #connect with session
+    conf_session = session.query(Session).filter_by(
+        **{'environment_id': status.environment_id,
+           'state': 'deploying'}).first()
+    status.session_id = conf_session.id
+
+    with session.begin():
+        session.add(status)
