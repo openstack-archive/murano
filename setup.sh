@@ -17,7 +17,7 @@
 
 LOGLVL=1
 SERVICE_CONTENT_DIRECTORY=`cd $(dirname "$0") && pwd`
-PREREQ_PKGS="upstart wget make git python-pip python-dev python-mysqldb libxml2-dev libxslt-dev"
+PREREQ_PKGS="wget make git python-pip python-dev python-mysqldb libxml2-dev libxslt-dev"
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
 ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
@@ -63,7 +63,6 @@ gitclone()
 	fi
 }
 
-
 # install
 inst()
 {
@@ -93,7 +92,8 @@ CLONE_FROM_GIT=$1
 
 # Setupping...
 	log "Running setup.py"
-	MRN_CND_SPY=$GIT_CLONE_DIR/setup.py
+	#MRN_CND_SPY=$GIT_CLONE_DIR/$SERVICE_SRV_NAME/setup.py
+	MRN_CND_SPY=$SERVICE_CONTENT_DIRECTORY/setup.py
 	if [ -e $MRN_CND_SPY ]; then
 		chmod +x $MRN_CND_SPY
 		log "$MRN_CND_SPY output:_____________________________________________________________"
@@ -104,14 +104,17 @@ CLONE_FROM_GIT=$1
 		#fi
 ## Setup through pip
 		# Creating tarball
-		cd $GIT_CLONE_DIR/ && $MRN_CND_SPY sdist
+		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY sdist
+		cd $SERVICE_CONTENT_DIRECTORY && $MRN_CND_SPY sdist
 		if [ $? -ne 0 ];then
 			log "\"$MRN_CND_SPY\" tarball creation FAILS, exiting!!!"
 			exit 1
 		fi
 		# Running tarball install
-		TRBL_FILE=$(basename `ls $GIT_CLONE_DIR/dist/*.tar.gz`)
-		pip install $GIT_CLONE_DIR/dist/$TRBL_FILE
+		#TRBL_FILE=$(basename `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/*.tar.gz`)
+		#pip install $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/$TRBL_FILE
+		TRBL_FILE=$(basename `ls $SERVICE_CONTENT_DIRECTORY/dist/*.tar.gz`)
+		pip install $SERVICE_CONTENT_DIRECTORY/dist/$TRBL_FILE
 		if [ $? -ne 0 ];then
 			log "pip install \"$TRBL_FILE\" FAILS, exiting!!!"
 			exit 1
@@ -130,9 +133,11 @@ CLONE_FROM_GIT=$1
 	fi
 # making sample configs 
 	log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	for file in `ls $GIT_CLONE_DIR/etc`
+	#for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
+	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
 	do
-		cp -f "$GIT_CLONE_DIR/etc/$file" "$ETC_CFG_DIR/$file.sample"
+		#cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
+		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
 	done
 }
 
@@ -166,8 +171,6 @@ author \"Igor Yozhikov <iyozhikov@mirantis.com>\"
 start on runlevel [2345]
 stop on runlevel [!2345]
 respawn
-env PYTHONPATH=\$PYTHONPATH:$GIT_CLONE_DIR/$SERVICE_SRV_NAME
-export PYTHONPATH
 exec start-stop-daemon --start --chuid root --user root --name $SERVICE_SRV_NAME --exec $SERVICE_EXEC_PATH -- --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
 log "Reloading initctl"
 initctl reload-configuration
