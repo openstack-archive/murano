@@ -58,12 +58,27 @@ rabbit_opts = [
     cfg.StrOpt('virtual_host', default='/'),
 ]
 
+db_opts = [
+    cfg.IntOpt('sql_idle_timeout', default=3600,
+               help=_('Period in seconds after which SQLAlchemy should '
+                      'reestablish its connection to the database.')),
+    cfg.IntOpt('sql_max_retries', default=60,
+               help=_('The number of times to retry a connection to the SQL'
+                      'server.')),
+    cfg.IntOpt('sql_retry_interval', default=1,
+               help=_('The amount of time to wait (in seconds) before '
+                      'attempting to retry the SQL connection.')),
+    cfg.BoolOpt('db_auto_create', default=False,
+                help=_('A boolean that determines if the database will be '
+                       'automatically created.')),
+]
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
-# CONF.register_opts(bind_opts)
 CONF.register_opts(reports_opts, group='reports')
 CONF.register_opts(rabbit_opts, group='rabbitmq')
+CONF.register_opts(db_opts)
 
 
 CONF.import_opt('verbose', 'muranoapi.openstack.common.log')

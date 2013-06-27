@@ -206,7 +206,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServers' in env_description['services']:
+        if not 'aspNetApps' in env_description['services']:
             env_description['services']['aspNetApps'] = []
 
         env_description['services']['aspNetApps'].append(aspApp)
@@ -240,7 +240,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServerFarmss' in env_description['services']:
+        if not 'webServerFarms' in env_description['services']:
             env_description['services']['webServerFarms'] = []
 
         env_description['services']['webServerFarms'].append(web_server_farm)
@@ -274,7 +274,7 @@ class SystemServices(object):
         if not 'services' in env_description:
             env_description['services'] = {}
 
-        if not 'webServers' in env_description['services']:
+        if not 'aspNetAppFarms' in env_description['services']:
             env_description['services']['aspNetAppFarms'] = []
 
         env_description['services']['aspNetAppFarms'].append(aspApp_farm)
@@ -289,11 +289,14 @@ class SystemServices(object):
             environment_id, session_id)
 
         if not 'services' in env_description:
-            raise ValueError('This environment does not have services')
+            raise NameError('This environment does not have services')
 
         services = []
         if service_type in env_description['services']:
             services = env_description['services'][service_type]
+
+        if service_id not in [srv['id'] for srv in services]:
+            raise ValueError('Specified service does not exist')
 
         services = [srv for srv in services if srv['id'] != service_id]
         env_description['services'][service_type] = services
