@@ -13,10 +13,86 @@
 #    under the License.
 
 import eventlet
+import types
+from collections import deque
 from functools import wraps
 from muranoapi.openstack.common import log as logging
 
 log = logging.getLogger(__name__)
+
+
+class TraverseHelper(object):
+    @staticmethod
+    def get(path, source):
+        """
+        Provides the ability to traverse a data source made up of any
+        combination of lists and dicts.  Has simple rules for selecting item of
+        the list:
+        * each item should have id property
+        * to select item from the list, specify id value
+
+        Examples:
+            source = {'obj': {'attr': True}}
+            value = TraverseHelper.get('/obj/attr', source)
+
+            source = {'obj': [
+                {'id': '1', 'value': 1},
+                {'id': '2s', 'value': 2},
+            ]}
+            value = TraverseHelper.get('/obj/2s/value', source)
+
+
+        :param path: string with path to desired value
+        :param source: python object (list or dict)
+        :return: object
+        :raise: ValueError if object is malformed
+        """
+        if path.startswith('/'):
+            path = path[1:]
+
+        queue = deque(path.split('/'))
+        obj = source
+
+        while len(queue):
+            path = queue.popleft()
+
+            if isinstance(obj, types.ListType):
+                filtered = filter(lambda i: 'id' in i and i['id'] == path, obj)
+                obj = filtered[0] if filtered else None
+            elif isinstance(obj, types.DictionaryType):
+                obj = obj[path] if path else obj
+            else:
+                raise ValueError('Object or path is malformed')
+
+        return obj
+
+    @staticmethod
+    def update(path, value, source):
+        """
+        Updates value selected with specified path.
+
+        Warning: Root object could not be updated
+
+        :param path: string with path to desired value
+        :param value: value
+        :param source: python object (list or dict)
+        """
+        parent_path = '/'.join(path.split('/')[:-1])
+        node = TraverseHelper.get(parent_path, source)
+        key = path[1:].split('/')[-1]
+        node[key] = value
+
+    @staticmethod
+    def insert(path, value, source):
+        """
+        Inserts new item to selected list.
+
+        :param path: string with path to desired value
+        :param value: value
+        :param source: python object (list or dict)
+        """
+        node = TraverseHelper.get(path, source)
+        node.append(value)
 
 
 def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
