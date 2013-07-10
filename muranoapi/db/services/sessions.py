@@ -93,16 +93,18 @@ class SessionServices(object):
 
         #if other session is deploying now current session is invalid
         unit = get_session()
-        other_is_deploying = unit.query(Session).filter_by(
-            environment_id=session.environment_id, state=SessionState.deploying
-        ).count() > 0
-        if session.state == SessionState.open and other_is_deploying:
-            return False
 
         #if environment version is higher then version on which current session
         #is created then other session was already deployed
         current_env = unit.query(Environment).get(session.environment_id)
         if current_env.version > session.version:
+            return False
+
+        #if other session is deploying now current session is invalid
+        other_is_deploying = unit.query(Session).filter_by(
+            environment_id=session.environment_id, state=SessionState.deploying
+        ).count() > 0
+        if session.state == SessionState.open and other_is_deploying:
             return False
 
         return True

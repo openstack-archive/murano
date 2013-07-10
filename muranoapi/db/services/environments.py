@@ -60,21 +60,19 @@ class EnvironmentServices(object):
         :param environment_id: Id of environment for which we checking status.
         :return: Environment status
         """
-        #Ready: there are no sessions in status `deploying` or `open`
-        status = 'ready'
-
         #Deploying: there is at least one valid session with status `deploying`
         deploying = SessionServices.get_sessions(environment_id,
                                                  SessionState.deploying)
         if len(deploying) > 0:
-            status = 'deploying'
+            return 'deploying'
 
         #Pending: there is at least one valid session with status `open`;
         open = SessionServices.get_sessions(environment_id, SessionState.open)
         if len(open) > 0:
-            status = 'pending'
+            return 'pending'
 
-        return status
+        #Ready: there are no sessions in status `deploying` or `open`
+        return 'ready'
 
     @staticmethod
     def create(environment_params, tenant_id):
