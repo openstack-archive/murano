@@ -16,6 +16,8 @@ from collections import namedtuple
 from amqplib.client_0_8 import Message
 import anyjson
 import eventlet
+from jsonschema import validate
+from muranoapi.api.v1.schemas import ENV_SCHEMA
 from muranoapi.common import config
 from muranoapi.db.models import Session, Environment
 from muranoapi.db.session import get_session
@@ -174,5 +176,6 @@ class EnvironmentServices(object):
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        validate(environment, ENV_SCHEMA)
         session.description = environment
         session.save(unit)

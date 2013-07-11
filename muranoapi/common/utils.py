@@ -13,6 +13,8 @@
 #    under the License.
 
 import eventlet
+from jsonschema import validate
+from muranoapi.common.uuidutils import generate_uuid
 import types
 from collections import deque
 from functools import wraps
@@ -95,6 +97,17 @@ class TraverseHelper(object):
         node.append(value)
 
 
+def auto_id(value):
+    if isinstance(value, types.DictionaryType):
+        value['id'] = generate_uuid()
+        for k, v in value.iteritems():
+            value[k] = auto_id(v)
+    if isinstance(value, types.ListType):
+        for item in value:
+            auto_id(item)
+    return value
+
+
 def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.
 
@@ -151,3 +164,14 @@ def handle(f):
             log.exception(e)
 
     return f_handle
+
+
+def validate_body(schema):
+    def deco_validate_body(f):
+        @wraps(f)
+        def f_validate_body(*args, **kwargs):
+            if 'body' in kwargs:
+                validate(kwargs['body'], schema)
+                return f(*args, **kwargs)
+        return f_validate_body
+    return deco_validate_body

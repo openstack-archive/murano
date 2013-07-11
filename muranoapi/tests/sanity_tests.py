@@ -18,8 +18,8 @@ from mock import MagicMock
 import muranoapi.api.v1.router as router
 
 
-def my_mock(link, controller, action, conditions):
-    return [link, controller, action, conditions]
+def my_mock(link, controller, action, conditions, path=''):
+    return [link, controller, action, conditions, path]
 
 
 def func_mock():

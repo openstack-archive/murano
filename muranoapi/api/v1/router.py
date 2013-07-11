@@ -14,7 +14,7 @@
 
 import routes
 from muranoapi.openstack.common import wsgi
-from muranoapi.api.v1 import environments
+from muranoapi.api.v1 import environments, services
 from muranoapi.api.v1 import sessions
 from muranoapi.api.v1 import active_directories
 from muranoapi.api.v1 import webservers
@@ -29,6 +29,43 @@ class API(wsgi.Router):
         return cls(routes.Mapper())
 
     def __init__(self, mapper):
+        services_resource = services.create_resource()
+        mapper.connect('/environments/{environment_id}/services',
+                       controller=services_resource,
+                       action='get',
+                       conditions={'method': ['GET']}, path='')
+        mapper.connect('/environments/{environment_id}/services/{path:.*?}',
+                       controller=services_resource,
+                       action='get',
+                       conditions={'method': ['GET']}, path='')
+
+        mapper.connect('/environments/{environment_id}/services',
+                       controller=services_resource,
+                       action='post',
+                       conditions={'method': ['POST']}, path='')
+        mapper.connect('/environments/{environment_id}/services/{path:.*?}',
+                       controller=services_resource,
+                       action='post',
+                       conditions={'method': ['POST']}, path='')
+
+        mapper.connect('/environments/{environment_id}/services',
+                       controller=services_resource,
+                       action='put',
+                       conditions={'method': ['PUT']}, path='')
+        mapper.connect('/environments/{environment_id}/services/{path:.*?}',
+                       controller=services_resource,
+                       action='put',
+                       conditions={'method': ['PUT']}, path='')
+
+        mapper.connect('/environments/{environment_id}/services',
+                       controller=services_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']}, path='')
+        mapper.connect('/environments/{environment_id}/services/{path:.*?}',
+                       controller=services_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']}, path='')
+
         environments_resource = environments.create_resource()
         mapper.connect('/environments',
                        controller=environments_resource,
