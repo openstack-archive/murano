@@ -107,8 +107,8 @@ class Environment(BASE, ModelBase):
 
     sessions = relationship("Session", backref='environment',
                             cascade='save-update, merge, delete')
-    statuses = relationship("Status", backref='environment',
-                            cascade='save-update, merge, delete')
+    deployments = relationship("Deployment", backref='environment',
+                               cascade='save-update, merge, delete')
 
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
@@ -136,23 +136,42 @@ class Session(BASE, ModelBase):
         return dictionary
 
 
+class Deployment(BASE, ModelBase):
+    __tablename__ = 'deployment'
+
+    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
+    started = Column(DateTime, default=timeutils.utcnow, nullable=False)
+    finished = Column(DateTime, default=None, nullable=True)
+    description = Column(JsonBlob(), nullable=False)
+    environment_id = Column(String(32), ForeignKey('environment.id'))
+
+    statuses = relationship("Status", backref='deployment',
+                            cascade='save-update, merge, delete')
+
+    def to_dict(self):
+        dictionary = super(Deployment, self).to_dict()
+        del dictionary["description"]
+        if 'statuses' in dictionary:
+            del dictionary['statuses']
+        if 'environment' in dictionary:
+            del dictionary['environment']
+        return dictionary
+
+
 class Status(BASE, ModelBase):
     __tablename__ = 'status'
 
     id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    entity_id = Column(String(32), nullable=False)
-    entity = Column(String(10), nullable=False)
-    environment_id = Column(String(32), ForeignKey('environment.id'))
-    session_id = Column(String(32), ForeignKey('session.id'))
+    entity_id = Column(String(32), nullable=True)
+    entity = Column(String(10), nullable=True)
+    deployment_id = Column(String(32), ForeignKey('deployment.id'))
     text = Column(Text(), nullable=False)
 
     def to_dict(self):
         dictionary = super(Status, self).to_dict()
         #object relations may be not loaded yet
-        if 'session' in dictionary:
-            del dictionary['session']
-        if 'environment' in dictionary:
-            del dictionary['environment']
+        if 'deployment' in dictionary:
+            del dictionary['deployment']
         return dictionary
 
 
@@ -160,7 +179,7 @@ def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
-    models = (Environment, Status, Session)
+    models = (Environment, Status, Session, Deployment)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -169,6 +188,6 @@ def unregister_models(engine):
     """
     Drops database tables for all models with the given engine
     """
-    models = (Environment, Status, Session)
+    models = (Environment, Status, Session, Deployment)
     for model in models:
         model.metadata.drop_all(engine)

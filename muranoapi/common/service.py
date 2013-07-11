@@ -18,10 +18,11 @@ from amqplib.client_0_8 import AMQPConnectionException
 import anyjson
 import eventlet
 from muranoapi.common.utils import retry, handle
-from muranoapi.db.models import Status, Session, Environment
+from muranoapi.db.models import Status, Session, Environment, Deployment
 from muranoapi.db.session import get_session
-from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import log as logging, timeutils
 from muranoapi.common import config
+from sqlalchemy import desc
 
 amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 conf = config.CONF.reports
@@ -99,6 +100,14 @@ def handle_result(msg):
     conf_session.state = 'deployed'
     conf_session.save(session)
 
+    #close deployment
+    deployment = get_last_deployment(session, environment.id)
+    deployment.finished = timeutils.utcnow()
+    status = Status()
+    status.deployment_id = deployment.id
+    status.text = "Deployment finished"
+    deployment.statuses.append(status)
+    deployment.save(session)
     msg.channel.basic_ack(msg.delivery_tag)
 
 
@@ -115,11 +124,16 @@ def handle_report(msg):
     status.update(params)
 
     session = get_session()
-    #connect with session
-    conf_session = session.query(Session).filter_by(
-        **{'environment_id': status.environment_id,
-           'state': 'deploying'}).first()
-    status.session_id = conf_session.id
-
+    #connect with deployment
     with session.begin():
+        running_deployment = get_last_deployment(session,
+                                                 status.environment_id)
+        status.deployment_id = running_deployment.id
         session.add(status)
+
+
+def get_last_deployment(session, env_id):
+    query = session.query(Deployment). \
+        filter_by(environment_id=env_id). \
+        order_by(desc(Deployment.started))
+    return query.first()

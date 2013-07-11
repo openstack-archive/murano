@@ -13,7 +13,7 @@
 #    under the License.
 
 from webob import exc
-from muranoapi.db.models import Session, Status
+from muranoapi.db.models import Session
 from muranoapi.db.session import get_session
 from muranoapi.db.services.sessions import SessionServices
 from muranoapi.db.services.sessions import SessionState
@@ -113,52 +113,6 @@ class Controller(object):
             raise exc.HTTPForbidden()
 
         SessionServices.deploy(session, unit, request.context.auth_token)
-
-    def reports(self, request, environment_id, session_id):
-        log.debug(_('Session:Reports <EnvId: {0}, '
-                    'SessionId: {1}>'.format(environment_id, session_id)))
-
-        unit = get_session()
-        statuses = unit.query(Status).filter_by(session_id=session_id).all()
-        result = statuses
-
-        if 'service_id' in request.GET:
-            service_id = request.GET['service_id']
-
-            environment = unit.query(Session).get(session_id).description
-            services = []
-            if 'services' in environment and 'activeDirectories' in \
-                    environment['services']:
-                services += environment['services']['activeDirectories']
-
-            if 'services' in environment and 'webServers' in \
-                    environment['services']:
-                services += environment['services']['webServers']
-
-            if 'services' in environment and 'aspNetApps' in\
-                    environment['services']:
-                services += environment['services']['aspNetApps']
-
-            if 'services' in environment and 'webServerFarms' in \
-                    environment['services']:
-                services += environment['services']['webServerFarms']
-
-            if 'services' in environment and 'aspNetAppFarms' in\
-                    environment['services']:
-                services += environment['services']['aspNetAppFarms']
-
-            service = [service for service in services
-                       if service['id'] == service_id][0]
-
-            if service:
-                entities = [u['id'] for u in service['units']]
-                entities.append(service_id)
-                result = []
-                for status in statuses:
-                    if status.entity_id in entities:
-                        result.append(status)
-
-        return {'reports': [status.to_dict() for status in result]}
 
 
 def create_resource():

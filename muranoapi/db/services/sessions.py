@@ -17,7 +17,7 @@ from amqplib.client_0_8 import Message
 import anyjson
 import eventlet
 from muranoapi.common import config
-from muranoapi.db.models import Session, Environment
+from muranoapi.db.models import Session, Environment, Deployment, Status
 from muranoapi.db.session import get_session
 
 
@@ -126,7 +126,15 @@ class SessionServices(object):
         environment['token'] = token
 
         session.state = SessionState.deploying
-        session.save(unit)
+        deployment = Deployment()
+        deployment.environment_id = environment['id']
+        deployment.description = session.description
+        status = Status()
+        status.text = "Deployment scheduled"
+        deployment.statuses.append(status)
+        with unit.begin():
+            unit.add(session)
+            unit.add(deployment)
 
         connection = amqp.Connection('{0}:{1}'.
                                      format(rabbitmq.host, rabbitmq.port),

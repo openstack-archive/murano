@@ -14,7 +14,7 @@
 
 import routes
 from muranoapi.openstack.common import wsgi
-from muranoapi.api.v1 import environments, services
+from muranoapi.api.v1 import environments, services, deployments
 from muranoapi.api.v1 import sessions
 
 
@@ -83,6 +83,17 @@ class API(wsgi.Router):
                        action='delete',
                        conditions={'method': ['DELETE']})
 
+        deployments_resource = deployments.create_resource()
+        mapper.connect('/environments/{environment_id}/deployments',
+                       controller=deployments_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/deployments/'
+                       '{deployment_id}',
+                       controller=deployments_resource,
+                       action='statuses',
+                       conditions={'method': ['GET']})
+
         sessions_resource = sessions.create_resource()
         mapper.connect('/environments/{environment_id}/configure',
                        controller=sessions_resource,
@@ -96,11 +107,6 @@ class API(wsgi.Router):
                        controller=sessions_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
-        mapper.connect('/environments/{environment_id}/sessions/'
-                       '{session_id}/reports',
-                       controller=sessions_resource,
-                       action='reports',
-                       conditions={'method': ['GET']})
         mapper.connect('/environments/{environment_id}/sessions/'
                        '{session_id}/deploy',
                        controller=sessions_resource,
