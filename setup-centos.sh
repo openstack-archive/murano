@@ -105,6 +105,13 @@ CLONE_FROM_GIT=$1
 ## Setup through pip
 		# Creating tarball
 		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY sdist
+                rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
+		cd $SERVICE_CONTENT_DIRECTORY && python $MRN_CND_SPY egg_info
+                if [ $? -ne 0 ];then
+                        log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
+                        exit 1
+                fi
+		rm -rf $SERVICE_CONTENT_DIRECTORY/dist/*
 		cd $SERVICE_CONTENT_DIRECTORY && $MRN_CND_SPY sdist
 		if [ $? -ne 0 ];then
 			log "\"$MRN_CND_SPY\" tarball creation FAILS, exiting!!!"
