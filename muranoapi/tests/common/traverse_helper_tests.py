@@ -11,7 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import unittest
+import unittest2 as unittest
 from muranoapi.common.utils import TraverseHelper
 
 
@@ -19,7 +19,7 @@ class TraverseHelperTests(unittest.TestCase):
     def test_simple_root_get(self):
         source = {"attr": True}
         value = TraverseHelper.get('/', source)
-        self.assertEqual(value, {"attr": True})
+        self.assertDictEqual(value, {"attr": True})
 
     def test_simple_attribute_get(self):
         source = {"attr": True}
@@ -61,10 +61,31 @@ class TraverseHelperTests(unittest.TestCase):
         source = {"attr": [1, 2, 3]}
         TraverseHelper.insert('/attr', 4, source)
         value = TraverseHelper.get('/attr', source)
-        self.assertEqual(value, [1, 2, 3, 4])
+        self.assertListEqual(value, [1, 2, 3, 4])
 
     def test_adding_item_to_list(self):
         source = {"obj": {"attr": [1, 2, 3]}}
         TraverseHelper.insert('/obj/attr', 4, source)
         value = TraverseHelper.get('/obj/attr', source)
-        self.assertEqual(value, [1, 2, 3, 4])
+        self.assertListEqual(value, [1, 2, 3, 4])
+
+    @unittest.skip
+    def test_simple_attribute_remove(self):
+        source = {"attr1": False, "attr2": True}
+        TraverseHelper.remove('/attr1', source)
+        value = TraverseHelper.get('/', source)
+        self.assertEqual(value, {"attr2": True})
+
+    @unittest.skip
+    def test_nested_attribute_remove_from_object(self):
+        source = {"obj": {"attr1": False, "attr2": True}}
+        TraverseHelper.remove('/obj/attr1', source)
+        value = TraverseHelper.get('/obj', source)
+        self.assertDictEqual(value, {"attr2": True})
+
+    @unittest.skip
+    def test_nested_attribute_remove_from_list(self):
+        source = {"obj": [{"id": 'id1'}, {"id": 'id2'}]}
+        TraverseHelper.remove('/obj/id1', source)
+        value = TraverseHelper.get('/', source)
+        self.assertListEqual(value, [{"id": 'id2'}])
