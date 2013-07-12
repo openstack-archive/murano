@@ -39,7 +39,8 @@ def normalize_path(f):
 class Controller(object):
     @normalize_path
     def get(self, request, environment_id, path):
-        log.debug(_('Services:Get <EnvId: {0}>'.format(environment_id)))
+        log.debug(_('Services:Get <EnvId: {0}, '
+                    'Path: {1}>'.format(environment_id, path)))
 
         session_id = None
         if hasattr(request, 'context') and request.context.session:
@@ -54,8 +55,8 @@ class Controller(object):
     @utils.verify_session
     @normalize_path
     def post(self, request, environment_id, path, body):
-        log.debug(_('Services:Post <EnvId: {0}, '
-                    'Body: {1}>'.format(environment_id, body)))
+        log.debug(_('Services:Post <EnvId: {0}, , Path: {2}, '
+                    'Body: {1}>'.format(environment_id, body, path)))
 
         post_data = CoreServices.post_data
         session_id = request.context.session
@@ -68,8 +69,8 @@ class Controller(object):
     @utils.verify_session
     @normalize_path
     def put(self, request, environment_id, path, body):
-        log.debug(_('Services:Put <EnvId: {0}, '
-                    'Body: {1}>'.format(environment_id, body)))
+        log.debug(_('Services:Put <EnvId: {0}, , Path: {2}, '
+                    'Body: {1}>'.format(environment_id, body, path)))
 
         put_data = CoreServices.put_data
         session_id = request.context.session
@@ -79,6 +80,20 @@ class Controller(object):
         except (KeyError, ValueError):
             raise HTTPNotFound
         return result
+
+    @utils.verify_session
+    @normalize_path
+    def delete(self, request, environment_id, path):
+        log.debug(_('Services:Put <EnvId: {0}, '
+                    'Path: {1}>'.format(environment_id, path)))
+
+        delete_data = CoreServices.delete_data
+        session_id = request.context.session
+
+        try:
+            delete_data(environment_id, session_id, path)
+        except (KeyError, ValueError):
+            raise HTTPNotFound
 
 
 def create_resource():

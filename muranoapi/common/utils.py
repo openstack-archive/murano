@@ -20,16 +20,21 @@ from collections import deque
 from functools import wraps
 from muranoapi.openstack.common import log as logging
 
+
 log = logging.getLogger(__name__)
 
 
 class TraverseHelper(object):
+    value_type = (types.StringTypes, types.IntType, types.FloatType,
+                  types.BooleanType)
+
     @staticmethod
     def get(path, source):
         """
         Provides the ability to traverse a data source made up of any
-        combination of lists and dicts.  Has simple rules for selecting item of
+        combination of lists and dicts. Has simple rules for selecting item of
         the list:
+
         * each item should have id property
         * to select item from the list, specify id value
 
@@ -49,24 +54,24 @@ class TraverseHelper(object):
         :return: object
         :raise: ValueError if object is malformed
         """
-        if path.startswith('/'):
-            path = path[1:]
-
-        queue = deque(path.split('/'))
-        obj = source
+        queue = deque(filter(lambda x: x, path.split('/')))
 
         while len(queue):
             path = queue.popleft()
 
-            if isinstance(obj, types.ListType):
-                filtered = filter(lambda i: 'id' in i and i['id'] == path, obj)
-                obj = filtered[0] if filtered else None
-            elif isinstance(obj, types.DictionaryType):
-                obj = obj[path] if path else obj
+            if isinstance(source, types.ListType):
+                idx_source = source
+                source = next((i for i in source if i['id'] == path), None)
+                if source is None and path.isdigit():
+                    source = idx_source[int(path)]
+            elif isinstance(source, types.DictionaryType):
+                source = source[path]
+            elif isinstance(source, TraverseHelper.value_type):
+                break
             else:
-                raise ValueError('Object or path is malformed')
+                raise ValueError('Source object or path is malformed')
 
-        return obj
+        return source
 
     @staticmethod
     def update(path, value, source):
@@ -91,10 +96,33 @@ class TraverseHelper(object):
 
         :param path: string with path to desired value
         :param value: value
-        :param source: python object (list or dict)
+        :param source: List
         """
         node = TraverseHelper.get(path, source)
         node.append(value)
+
+    @staticmethod
+    def remove(path, source):
+        """
+        Removes selected item from source.
+
+        :param path: string with path to desired value
+        :param source: python object (list or dict)
+        """
+        parent_path = '/'.join(path.split('/')[:-1])
+        node = TraverseHelper.get(parent_path, source)
+        key = path[1:].split('/')[-1]
+
+        if isinstance(node, types.ListType):
+            item = next((i for i in node if i['id'] == key), None)
+            if item is None and key.isdigit():
+                del node[int(key)]
+            else:
+                node.remove(item)
+        elif isinstance(node, types.DictionaryType):
+            del node[key]
+        else:
+            raise ValueError('Source object or path is malformed')
 
 
 def auto_id(value):

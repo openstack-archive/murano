@@ -67,3 +67,13 @@ class CoreServices(object):
         save_description(session_id, env_description)
 
         return data
+
+    @staticmethod
+    def delete_data(environment_id, session_id, path):
+        get_description = EnvironmentServices.get_environment_description
+        save_description = EnvironmentServices.save_environment_description
+
+        env_description = get_description(environment_id, session_id)
+
+        TraverseHelper.remove(path, env_description)
+        save_description(session_id, env_description)
