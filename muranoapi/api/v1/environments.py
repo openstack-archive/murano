@@ -17,8 +17,8 @@ from webob import exc
 from muranoapi.common import config
 from muranoapi.db.session import get_session
 from muranoapi.db.models import Environment
+from muranoapi.db.services.core_services import CoreServices
 from muranoapi.db.services.environments import EnvironmentServices
-from muranoapi.db.services.systemservices import SystemServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
 
@@ -65,21 +65,8 @@ class Controller(object):
             session_id = request.context.session
 
         #add services to env
-        get = SystemServices.get_services
-
-        ad = get(environment_id, 'activeDirectories', session_id)
-        webServers = get(environment_id, 'webServers', session_id)
-        aspNetApps = get(environment_id, 'aspNetApps', session_id)
-        webServerFarms = get(environment_id, 'webServerFarms', session_id)
-        aspNetAppFarms = get(environment_id, 'aspNetAppFarms', session_id)
-
-        env['services'] = {
-            'activeDirectories': ad,
-            'webServers': webServers,
-            'aspNetApps': aspNetApps,
-            'webServerFarms': webServerFarms,
-            'aspNetAppFarms': aspNetAppFarms
-        }
+        get_data = CoreServices.get_data
+        env['services'] = get_data(environment_id, '/services', session_id)
 
         return env
 

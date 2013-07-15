@@ -19,6 +19,27 @@ from muranoapi.openstack.common import timeutils
 
 class CoreServices(object):
     @staticmethod
+    def get_service_status(environment_id, service_id):
+        """
+        Service can have one of three distinguished statuses:
+
+         - Deploying: if environment has status deploying and there is at least
+            one orchestration engine report for this service;
+         - Pending: if environment has status `deploying` and there is no
+            report from orchestration engine about this service;
+         - Ready: If environment has status ready.
+
+        :param environment_id: Service environment, we always know to which
+            environment service belongs to
+        :param service_id: Id of service for which we checking status.
+        :return: Service status
+        """
+        # Now we assume that service has same status as environment.
+        # TODO: implement as designed and described above
+
+        return EnvironmentServices.get_status(environment_id)
+
+    @staticmethod
     def get_data(environment_id, path, session_id=None):
         get_description = EnvironmentServices.get_environment_description
 
@@ -28,7 +49,13 @@ class CoreServices(object):
             return []
 
         result = TraverseHelper.get(path, env_description)
-        return result if result else []
+
+        if path == '/services':
+            get_status = CoreServices.get_service_status
+            for srv in result:
+                srv['status'] = get_status(environment_id, srv['id'])
+
+        return result
 
     @staticmethod
     def post_data(environment_id, session_id, data, path):

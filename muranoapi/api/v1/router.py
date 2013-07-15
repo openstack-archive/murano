@@ -16,11 +16,6 @@ import routes
 from muranoapi.openstack.common import wsgi
 from muranoapi.api.v1 import environments, services
 from muranoapi.api.v1 import sessions
-from muranoapi.api.v1 import active_directories
-from muranoapi.api.v1 import webservers
-from muranoapi.api.v1 import aspNetApps
-from muranoapi.api.v1 import webserverFarms
-from muranoapi.api.v1 import aspNetAppFarms
 
 
 class API(wsgi.Router):
@@ -111,80 +106,5 @@ class API(wsgi.Router):
                        controller=sessions_resource,
                        action='deploy',
                        conditions={'method': ['POST']})
-
-        activeDirectories_resource = active_directories.create_resource()
-        mapper.connect('/environments/{environment_id}/activeDirectories',
-                       controller=activeDirectories_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/activeDirectories',
-                       controller=activeDirectories_resource,
-                       action='create',
-                       conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/activeDirectories/'
-                       '{active_directory_id}',
-                       controller=activeDirectories_resource,
-                       action='delete',
-                       conditions={'method': ['DELETE']})
-
-        webServers_resource = webservers.create_resource()
-        mapper.connect('/environments/{environment_id}/webServers',
-                       controller=webServers_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/webServers',
-                       controller=webServers_resource,
-                       action='create',
-                       conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/webServers/'
-                       '{web_server_id}',
-                       controller=webServers_resource,
-                       action='delete',
-                       conditions={'method': ['DELETE']})
-
-        aspNetApps_resource = aspNetApps.create_resource()
-        mapper.connect('/environments/{environment_id}/aspNetApps',
-                       controller=aspNetApps_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/aspNetApps',
-                       controller=aspNetApps_resource,
-                       action='create',
-                       conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/aspNetApps/'
-                       '{app_id}',
-                       controller=aspNetApps_resource,
-                       action='delete',
-                       conditions={'method': ['DELETE']})
-
-        webServerFarms_resource = webserverFarms.create_resource()
-        mapper.connect('/environments/{environment_id}/webServerFarms',
-                       controller=webServerFarms_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/webServerFarms',
-                       controller=webServerFarms_resource,
-                       action='create',
-                       conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/webServerFarms/'
-                       '{web_server_farm_id}',
-                       controller=webServerFarms_resource,
-                       action='delete',
-                       conditions={'method': ['DELETE']})
-
-        aspNetAppFarms_resource = aspNetAppFarms.create_resource()
-        mapper.connect('/environments/{environment_id}/aspNetAppFarms',
-                       controller=aspNetAppFarms_resource,
-                       action='index',
-                       conditions={'method': ['GET']})
-        mapper.connect('/environments/{environment_id}/aspNetAppFarms',
-                       controller=aspNetAppFarms_resource,
-                       action='create',
-                       conditions={'method': ['POST']})
-        mapper.connect('/environments/{environment_id}/aspNetAppFarms/'
-                       '{app_farm_id}',
-                       controller=aspNetAppFarms_resource,
-                       action='delete',
-                       conditions={'method': ['DELETE']})
 
         super(API, self).__init__(mapper)
