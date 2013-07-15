@@ -13,10 +13,11 @@
 #    under the License.
 
 from muranoapi.openstack.common import wsgi
-from muranoapi.db.models import Deployment, Status
+from muranoapi.db.models import Deployment, Status, Environment
 from muranoapi.db.session import get_session
 from muranoapi.openstack.common import log as logging
 from sqlalchemy import desc
+from webob import exc
 
 log = logging.getLogger(__name__)
 
@@ -24,6 +25,7 @@ log = logging.getLogger(__name__)
 class Controller(object):
     def index(self, request, environment_id):
         unit = get_session()
+        verify_and_get_env(unit, environment_id, request)
         query = unit.query(Deployment) \
             .filter_by(environment_id=environment_id) \
             .order_by(desc(Deployment.created))
@@ -36,10 +38,12 @@ class Controller(object):
         query = unit.query(Status) \
             .filter_by(deployment_id=deployment_id) \
             .order_by(Status.created)
+        deployment = verify_and_get_deployment(unit, environment_id,
+                                               deployment_id)
 
         if 'service_id' in request.GET:
             service_id_set = set(request.GET.getall('service_id'))
-            environment = unit.query(Deployment).get(deployment_id).description
+            environment = deployment.description
             entity_ids = []
             if 'services' in environment:
                 for service in environment['services']:
@@ -52,10 +56,34 @@ class Controller(object):
             if entity_ids:
                 query = query.filter(Status.entity_id.in_(entity_ids))
             else:
-                return {'reports': None}
+                return {'reports': []}
 
         result = query.all()
         return {'reports': [status.to_dict() for status in result]}
+
+
+def verify_and_get_env(db_session, environment_id, request):
+    environment = db_session.query(Environment).get(environment_id)
+    if not environment:
+        log.info('Environment with id {0} not found'.format(environment_id))
+        raise exc.HTTPNotFound
+
+    if environment.tenant_id != request.context.tenant:
+        log.info('User is not authorized to access this tenant resources.')
+        raise exc.HTTPUnauthorized
+    return environment
+
+
+def verify_and_get_deployment(db_session, environment_id, deployment_id):
+    deployment = db_session.query(Deployment).get(deployment_id)
+    if not deployment:
+        log.info('Deployment with id {0} not found'.format(deployment_id))
+        raise exc.HTTPNotFound
+    if deployment.environment_id != environment_id:
+        log.info('Deployment with id {0} not found'
+                 ' in environment {1}'.format(deployment_id, environment_id))
+        raise exc.HTTPBadRequest
+    return deployment
 
 
 def create_resource():
