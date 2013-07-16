@@ -71,6 +71,11 @@ class Controller(object):
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        if session is None:
+            log.error('Session <SessionId {0}> is not found'
+                      ''.format(session_id))
+            raise exc.HTTPNotFound()
+
         if session.environment_id != environment_id:
             log.error('Session <SessionId {0}> is not tied with Environment '
                       '<EnvId {1}>'.format(session_id, environment_id))
