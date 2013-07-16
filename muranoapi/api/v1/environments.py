@@ -53,6 +53,11 @@ class Controller(object):
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
+        if environment is None:
+            log.info('Environment <EnvId {0}> is not found'
+                     .format(environment_id))
+            raise exc.HTTPNotFound
+
         if environment.tenant_id != request.context.tenant:
             log.info('User is not authorized to access this tenant resources.')
             raise exc.HTTPUnauthorized
@@ -77,6 +82,11 @@ class Controller(object):
         session = get_session()
         environment = session.query(Environment).get(environment_id)
 
+        if environment is None:
+            log.info('Environment <EnvId {0}> is not found'
+                     .format(environment_id))
+            raise exc.HTTPNotFound
+
         if environment.tenant_id != request.context.tenant:
             log.info('User is not authorized to access this tenant resources.')
             raise exc.HTTPUnauthorized
@@ -91,6 +101,11 @@ class Controller(object):
 
         unit = get_session()
         environment = unit.query(Environment).get(environment_id)
+
+        if environment is None:
+            log.info('Environment <EnvId {0}> is not found'
+                     .format(environment_id))
+            raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
             log.info('User is not authorized to access this tenant resources.')
