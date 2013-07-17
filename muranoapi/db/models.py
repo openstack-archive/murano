@@ -150,7 +150,7 @@ class Deployment(BASE, ModelBase):
 
     def to_dict(self):
         dictionary = super(Deployment, self).to_dict()
-        del dictionary["description"]
+        # del dictionary["description"]
         if 'statuses' in dictionary:
             del dictionary['statuses']
         if 'environment' in dictionary:
