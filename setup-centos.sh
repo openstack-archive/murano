@@ -178,11 +178,6 @@ get_service_exec_path()
 # inject init
 injectinit()
 {
-ln -s /lib/init/upstart-job /etc/init.d/$SERVICE_SRV_NAME
-if [ $? -ne 0 ]; then
-	log "Can't create symlink, please run \"$(basename "$0") purge-init\" before \"$(basename "$0") inject-init\", exiting"
-	exit 1
-fi
 echo "description \"$SERVICE_SRV_NAME service\"
 author \"Igor Yozhikov <iyozhikov@mirantis.com>\"
 start on runlevel [2345]
