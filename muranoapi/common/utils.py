@@ -136,6 +136,22 @@ def auto_id(value):
     return value
 
 
+def build_entity_map(value):
+    def build_entity_map_recursive(value, id_map):
+        if isinstance(value, types.DictionaryType):
+            if 'id' in value:
+                id_map[value['id']] = value
+            for k, v in value.iteritems():
+                build_entity_map_recursive(v, id_map)
+        if isinstance(value, types.ListType):
+            for item in value:
+                build_entity_map_recursive(item, id_map)
+
+    id_map = {}
+    build_entity_map_recursive(value, id_map)
+    return id_map
+
+
 def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
     """Retry calling the decorated function using an exponential backoff.
 

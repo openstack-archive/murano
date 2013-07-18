@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from muranoapi.common.utils import build_entity_map
 
 from muranoapi.openstack.common import wsgi
 from muranoapi.db.models import Deployment, Status, Environment
@@ -48,11 +49,8 @@ class Controller(object):
             if 'services' in environment:
                 for service in environment['services']:
                     if service['id'] in service_id_set:
-                        entity_ids.append(service['id'])
-                        if 'units' in service:
-                            unit_ids = [u['id'] for u in service['units']
-                                        if 'id' in u]
-                            entity_ids = entity_ids + unit_ids
+                        id_map = build_entity_map(service)
+                        entity_ids = entity_ids + id_map.keys()
             if entity_ids:
                 query = query.filter(Status.entity_id.in_(entity_ids))
             else:
