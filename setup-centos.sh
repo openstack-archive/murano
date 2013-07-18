@@ -18,6 +18,8 @@
 LOGLVL=1
 SERVICE_CONTENT_DIRECTORY=`cd $(dirname "$0") && pwd`
 PREREQ_PKGS="upstart wget git make python-pip python-devel mysql-connector-python libxml2-devel libxslt-devel"
+PIPAPPS="pip python-pip pip-python"
+PIPCMD=""
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
 ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
@@ -45,9 +47,27 @@ in_sys_pkg()
 	    yum install $PKG --assumeyes > /dev/null 2>&1
 	    if [ $? -ne 0 ];then
 	        log "installation fails, exiting!!!"
-	        exit
+	        exit 1
 		fi
 	fi
+}
+
+# find pip
+find_pip()
+{
+        for cmd in $PIPAPPS
+        do
+                _cmd=$(which $cmd 2>/dev/null)
+                if [ $? -eq 0 ];then
+                        break
+                fi
+        done
+        if [ -z $_cmd ];then
+                echo "Can't find \"pip\" in system, please install it first, exiting!"
+                exit 1
+        else
+                PIPCMD=$_cmd
+        fi
 }
 
 # git clone
@@ -72,7 +92,8 @@ CLONE_FROM_GIT=$1
 	do
 		in_sys_pkg $PKG
 	done
-
+# Find python pip
+	find_pip
 # If clone from git set
 	if [ ! -z $CLONE_FROM_GIT ]; then
 # Preparing clone root directory
@@ -92,20 +113,13 @@ CLONE_FROM_GIT=$1
 
 # Setupping...
 	log "Running setup.py"
-	#MRN_CND_SPY=$GIT_CLONE_DIR/$SERVICE_SRV_NAME/setup.py
 	MRN_CND_SPY=$SERVICE_CONTENT_DIRECTORY/setup.py
 	if [ -e $MRN_CND_SPY ]; then
 		chmod +x $MRN_CND_SPY
-		log "$MRN_CND_SPY output:_____________________________________________________________"
-		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY install
-		#if [ $? -ne 0 ]; then
-		#	log "\"$MRN_CND_SPY\" python setup FAILS, exiting!"
-		#	exit 1
-		#fi
+		log "$MRN_CND_SPY output:_____________________________________________________________"		
 ## Setup through pip
 		# Creating tarball
-		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY sdist
-                rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
+		rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
 		cd $SERVICE_CONTENT_DIRECTORY && python $MRN_CND_SPY egg_info
                 if [ $? -ne 0 ];then
                         log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
@@ -118,12 +132,10 @@ CLONE_FROM_GIT=$1
 			exit 1
 		fi
 		# Running tarball install
-		#TRBL_FILE=$(basename `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/*.tar.gz`)
-		#pip install $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/$TRBL_FILE
 		TRBL_FILE=$(basename `ls $SERVICE_CONTENT_DIRECTORY/dist/*.tar.gz`)
-		pip install $SERVICE_CONTENT_DIRECTORY/dist/$TRBL_FILE
+		$PIPCMD install $SERVICE_CONTENT_DIRECTORY/dist/$TRBL_FILE
 		if [ $? -ne 0 ];then
-			log "pip install \"$TRBL_FILE\" FAILS, exiting!!!"
+			log "$PIPCMD install \"$TRBL_FILE\" FAILS, exiting!!!"
 			exit 1
 		fi
 	else
@@ -140,10 +152,8 @@ CLONE_FROM_GIT=$1
     fi
 # making smaple configs 
     log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	#for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
 	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
 	do
-		#cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
 		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
 	done
 }
@@ -179,29 +189,29 @@ start on runlevel [2345]
 stop on runlevel [!2345]
 respawn
 exec $SERVICE_EXEC_PATH --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
-log "Reloading initctl"
-initctl reload-configuration
+    log "Reloading initctl"
+    initctl reload-configuration
 }
 
 # purge init
 purgeinit()
 {
-	rm -f /etc/init.d/$SERVICE_SRV_NAME
-	rm -f /etc/init/$SERVICE_SRV_NAME.conf
-	log "Reloading initctl"
-	initctl reload-configuration
+    rm -f /etc/init/$SERVICE_SRV_NAME.conf
+    log "Reloading initctl"
+    initctl reload-configuration
 }
 
 # uninstall
 uninst()
 {
 	# Uninstall trough  pip
+        find_pip
 	# looking up for python package installed
 	PYPKG=`echo $SERVICE_SRV_NAME | tr -d '-'`
-	pip freeze | grep $PYPKG
+	_pkg=$($PIPCMD freeze | grep $PYPKG)
 	if [ $? -eq 0 ]; then
 		log "Removing package \"$PYPKG\" with pip"
-		pip uninstall $PYPKG --yes
+		$PIPCMD uninstall $_pkg --yes
 	else
 		log "Python package \"$PYPKG\" not found"
 	fi
@@ -250,7 +260,7 @@ case $COMMAND in
 		;;
 
 	* )
-		echo "Usage: $(basename "$0") command \nCommands:\n\tinstall - Install $SERVICE_SRV_NAME software\n\tuninstall - Uninstall $SERVICE_SRV_NAME software\n\tinject-init - Add $SERVICE_SRV_NAME to the system start-up\n\tpurge-init - Remove $SERVICE_SRV_NAME from the system start-up"
+		echo -e "Usage: $(basename "$0") command \nCommands:\n\tinstall - Install $SERVICE_SRV_NAME software\n\tuninstall - Uninstall $SERVICE_SRV_NAME software\n\tinject-init - Add $SERVICE_SRV_NAME to the system start-up\n\tpurge-init - Remove $SERVICE_SRV_NAME from the system start-up"
 		exit 1
 		;;
 esac
