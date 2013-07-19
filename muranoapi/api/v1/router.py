@@ -82,6 +82,10 @@ class API(wsgi.Router):
                        controller=environments_resource,
                        action='delete',
                        conditions={'method': ['DELETE']})
+        mapper.connect('/environments/{environment_id}/lastStatus',
+                       controller=environments_resource,
+                       action='last',
+                       conditions={'method': ['GET']})
 
         deployments_resource = deployments.create_resource()
         mapper.connect('/environments/{environment_id}/deployments',

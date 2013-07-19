@@ -13,10 +13,12 @@
 #    under the License.
 
 import eventlet
+from muranoapi.common.utils import build_entity_map
+from sqlalchemy import desc
 from webob import exc
 from muranoapi.common import config
 from muranoapi.db.session import get_session
-from muranoapi.db.models import Environment
+from muranoapi.db.models import Environment, Status
 from muranoapi.db.services.core_services import CoreServices
 from muranoapi.db.services.environments import EnvironmentServices
 from muranoapi.openstack.common import wsgi
@@ -112,6 +114,27 @@ class Controller(object):
             raise exc.HTTPUnauthorized
 
         EnvironmentServices.delete(environment_id, request.context.auth_token)
+
+    def last(self, request, environment_id):
+        session_id = None
+        if hasattr(request, 'context') and request.context.session:
+            session_id = request.context.session
+        services = CoreServices.get_data(environment_id, '/services',
+                                         session_id)
+        db_session = get_session()
+        result = {}
+        for service in services:
+            service_id = service['id']
+            entity_ids = build_entity_map(service).keys()
+            last_status = db_session.query(Status). \
+                filter(Status.entity_id.in_(entity_ids)). \
+                order_by(desc(Status.created)). \
+                first()
+            if last_status:
+                result[service_id] = last_status.to_dict()
+            else:
+                result[service_id] = None
+        return {'lastStatuses': result}
 
 
 def create_resource():
