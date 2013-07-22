@@ -92,6 +92,7 @@ def handle_result(msg):
         return
 
     environment.description = environment_result
+    environment.version += 1
     environment.save(session)
 
     #close session
