@@ -1,3 +1,5 @@
+d2to1>=0.2.10,<0.3
+pbr>=0.5,<0.6
 Babel
 SQLAlchemy>=0.7,<=0.7.9
 anyjson
@@ -13,8 +15,8 @@ httplib2
 kombu
 pycrypto>=2.1.0alpha1
 iso8601>=0.1.4
-amqplib
 six
+netaddr
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
@@ -28,5 +30,5 @@ Paste
 passlib
 jsonschema==2.0.0
 python-keystoneclient>=0.2.0
-
 oslo.config
+http://github.com/sergmelikyan/murano-common/releases/download/0.1/muranocommon-0.1.tar.gz#egg=muranocommon-0.1

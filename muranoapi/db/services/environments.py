@@ -13,18 +13,15 @@
 #    under the License.
 from collections import namedtuple
 
-from amqplib.client_0_8 import Message
-import anyjson
-import eventlet
 from jsonschema import validate
 from muranoapi.api.v1.schemas import ENV_SCHEMA
 from muranoapi.common import config
 from muranoapi.db.models import Session, Environment
+from muranoapi.db.services.sessions import SessionServices, SessionState
 from muranoapi.db.session import get_session
-from sessions import SessionServices, SessionState
+from muranocommon.mq import MqClient, Message
 
 
-amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 rabbitmq = config.CONF.rabbitmq
 
 EnvironmentStatus = namedtuple('EnvironmentStatus', [
@@ -122,18 +119,20 @@ class EnvironmentServices(object):
         #Set X-Auth-Token for conductor
         env['token'] = token
 
-        connection = amqp.Connection('{0}:{1}'.
-                                     format(rabbitmq.host, rabbitmq.port),
-                                     virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.login,
-                                     password=rabbitmq.password,
-                                     ssl=rabbitmq.use_ssl, insist=True)
-        channel = connection.channel()
-        channel.exchange_declare('tasks', 'direct', durable=True,
-                                 auto_delete=False)
+        message = Message()
+        message.body = env
 
-        channel.basic_publish(Message(body=anyjson.serialize(env)), 'tasks',
-                              'tasks')
+        connection_params = {
+            'login': rabbitmq.login,
+            'password': rabbitmq.password,
+            'host': rabbitmq.host,
+            'port': rabbitmq.port,
+            'virtual_host': rabbitmq.virtual_host
+        }
+
+        with MqClient(**connection_params) as mqClient:
+            mqClient.declare('tasks', 'tasks')
+            mqClient.send(message, 'tasks', 'tasks')
 
     @staticmethod
     def get_environment_description(environment_id, session_id=None):

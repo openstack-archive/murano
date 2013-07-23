@@ -23,7 +23,7 @@ import contextlib
 import eventlet
 from oslo.config import cfg
 
-from muranoapi.openstack.common.gettextutils import _
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
 

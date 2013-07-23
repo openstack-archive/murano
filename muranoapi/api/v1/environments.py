@@ -12,11 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import eventlet
-from muranoapi.common.utils import build_entity_map
 from sqlalchemy import desc
 from webob import exc
 from muranoapi.common import config
+from muranoapi.common.utils import build_entity_map
 from muranoapi.db.session import get_session
 from muranoapi.db.models import Environment, Status
 from muranoapi.db.services.core_services import CoreServices
@@ -24,7 +23,6 @@ from muranoapi.db.services.environments import EnvironmentServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
 
-amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 rabbitmq = config.CONF.rabbitmq
 
 log = logging.getLogger(__name__)

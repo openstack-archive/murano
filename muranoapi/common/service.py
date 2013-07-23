@@ -12,75 +12,63 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import socket
-
-from amqplib.client_0_8 import AMQPConnectionException
-import anyjson
-import eventlet
-from muranoapi.common.utils import retry, handle
+from muranoapi.common.utils import handle
 from muranoapi.db.models import Status, Session, Environment, Deployment
 from muranoapi.db.session import get_session
-from muranoapi.openstack.common import log as logging, timeutils
+from muranoapi.openstack.common import log as logging, timeutils, service
 from muranoapi.common import config
+from muranocommon.mq import MqClient
 from sqlalchemy import desc
 
-amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 conf = config.CONF.reports
 rabbitmq = config.CONF.rabbitmq
 log = logging.getLogger(__name__)
 
 
-class TaskResultHandlerService():
-    thread = None
+class TaskResultHandlerService(service.Service):
+    connection_params = {
+        'login': rabbitmq.login,
+        'password': rabbitmq.password,
+        'host': rabbitmq.host,
+        'port': rabbitmq.port,
+        'virtual_host': rabbitmq.virtual_host
+    }
+
+    def __init__(self):
+        super(TaskResultHandlerService, self).__init__()
 
     def start(self):
-        self.thread = eventlet.spawn(self.connect)
+        super(TaskResultHandlerService, self).start()
+        self.tg.add_thread(self._start_rabbitmq)
 
     def stop(self):
-        pass
+        super(TaskResultHandlerService, self).stop()
 
-    def wait(self):
-        self.thread.wait()
-
-    @retry((socket.error, AMQPConnectionException), tries=-1)
-    def connect(self):
-        connection = amqp.Connection('{0}:{1}'.
-                                     format(rabbitmq.host, rabbitmq.port),
-                                     virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.login,
-                                     password=rabbitmq.password,
-                                     ssl=rabbitmq.use_ssl, insist=True)
-        ch = connection.channel()
-
-        def bind(exchange, queue):
-            if not exchange:
-                ch.exchange_declare(exchange, 'direct', durable=True,
-                                    auto_delete=False)
-            ch.queue_declare(queue, durable=True, auto_delete=False)
-            if not exchange:
-                ch.queue_bind(queue, exchange, queue)
-
-        bind(conf.results_exchange, conf.results_queue)
-        bind(conf.reports_exchange, conf.reports_queue)
-
-        ch.basic_consume(conf.results_exchange, callback=handle_result)
-        ch.basic_consume(conf.reports_exchange, callback=handle_report,
-                         no_ack=True)
-        while ch.callbacks:
-            ch.wait()
+    def _start_rabbitmq(self):
+        while True:
+            try:
+                with MqClient(**self.connection_params) as mqClient:
+                    mqClient.declare(conf.results_exchange, conf.results_queue)
+                    mqClient.declare(conf.reports_exchange, conf.reports_queue)
+                    with mqClient.open(conf.results_queue) as results_sb:
+                        with mqClient.open(conf.reports_queue) as reports_sb:
+                            while True:
+                                report = reports_sb.get_message(timeout=1000)
+                                self.tg.add_thread(handle_report, report.body)
+                                result = results_sb.get_message(timeout=1000)
+                                self.tg.add_thread(handle_result, result.body)
+            except Exception as ex:
+                log.exception(ex)
 
 
 @handle
-def handle_result(msg):
+def handle_result(environment_result):
     log.debug(_('Got result message from '
-                'orchestration engine:\n{0}'.format(msg.body)))
+                'orchestration engine:\n{0}'.format(environment_result)))
 
-    environment_result = anyjson.deserialize(msg.body)
     if 'deleted' in environment_result:
         log.debug(_('Result for environment {0} is dropped. Environment '
                     'is deleted'.format(environment_result['id'])))
-
-        msg.channel.basic_ack(msg.delivery_tag)
         return
 
     session = get_session()
@@ -108,20 +96,18 @@ def handle_result(msg):
     status.text = "Deployment finished"
     deployment.statuses.append(status)
     deployment.save(session)
-    msg.channel.basic_ack(msg.delivery_tag)
 
 
 @handle
-def handle_report(msg):
+def handle_report(report):
     log.debug(_('Got report message from orchestration '
-                'engine:\n{0}'.format(msg.body)))
+                'engine:\n{0}'.format(report)))
 
-    params = anyjson.deserialize(msg.body)
-    params['entity_id'] = params['id']
-    del params['id']
+    report['entity_id'] = report['id']
+    del report['id']
 
     status = Status()
-    status.update(params)
+    status.update(report)
 
     session = get_session()
     #connect with deployment
