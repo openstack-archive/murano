@@ -13,15 +13,12 @@
 #    under the License.
 from collections import namedtuple
 
-from amqplib.client_0_8 import Message
-import anyjson
-import eventlet
 from muranoapi.common import config
 from muranoapi.db.models import Session, Environment, Deployment, Status
 from muranoapi.db.session import get_session
+from muranocommon.mq import MqClient, Message
 
 
-amqp = eventlet.patcher.import_patched('amqplib.client_0_8')
 rabbitmq = config.CONF.rabbitmq
 
 SessionState = namedtuple('SessionState', ['open', 'deploying', 'deployed'])(
@@ -136,16 +133,17 @@ class SessionServices(object):
             unit.add(session)
             unit.add(deployment)
 
-        connection = amqp.Connection('{0}:{1}'.
-                                     format(rabbitmq.host, rabbitmq.port),
-                                     virtual_host=rabbitmq.virtual_host,
-                                     userid=rabbitmq.login,
-                                     password=rabbitmq.password,
-                                     ssl=rabbitmq.use_ssl, insist=True)
-        channel = connection.channel()
-        channel.exchange_declare('tasks', 'direct', durable=True,
-                                 auto_delete=False)
+        message = Message()
+        message.body = environment
 
-        channel.basic_publish(
-            Message(body=anyjson.serialize(environment)), 'tasks', 'tasks'
-        )
+        connection_params = {
+            'login': rabbitmq.login,
+            'password': rabbitmq.password,
+            'host': rabbitmq.host,
+            'port': rabbitmq.port,
+            'virtual_host': rabbitmq.virtual_host
+        }
+
+        with MqClient(**connection_params) as mqClient:
+            mqClient.declare('tasks', 'tasks')
+            mqClient.send(message, 'tasks', 'tasks')

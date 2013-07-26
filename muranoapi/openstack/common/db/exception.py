@@ -18,7 +18,7 @@
 
 """DB related custom exceptions."""
 
-from muranoapi.openstack.common.gettextutils import _
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 
 class DBError(Exception):

@@ -14,3 +14,7 @@
 
 import gettext
 gettext.install('muranoapi', './muranoapi/locale', unicode=1)
+
+from pbr import version
+__version_info = version.VersionInfo('muranoapi')
+__version__ = __version_info.cached_version_string()

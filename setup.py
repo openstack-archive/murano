@@ -16,34 +16,11 @@
 
 import setuptools
 
-from muranoapi.openstack.common import setup
-
-requires = setup.parse_requirements()
-depend_links = setup.parse_dependency_links()
-project = 'muranoapi'
 
 setuptools.setup(
-    name=project,
-    version=setup.get_version(project, '2013.1'),
-    description='The Murano Project API',
-    license='Apache License (2.0)',
-    author='Mirantis, Inc',
-    author_email='smelikyan@mirantis.com',
-    url='http://muranoapi.mirantis.com/',
-    packages=setuptools.find_packages(exclude=['bin']),
-    test_suite='nose.collector',
-    cmdclass=setup.get_cmdclass(),
-    include_package_data=True,
-    install_requires=requires,
-    dependency_links=depend_links,
-    classifiers=[
-        'Development Status :: 4 - Beta',
-        'License :: OSI Approved :: Apache Software License',
-        'Operating System :: POSIX :: Linux',
-        'Programming Language :: Python :: 2.7',
-        'Environment :: No Input/Output (Daemon)',
-        'Environment :: OpenStack',
+    setup_requires=[
+        'd2to1>=0.2.10,<0.3',
+        'pbr>=0.5,<0.6'
     ],
-    scripts=['bin/murano-api'],
-    py_modules=[]
+    d2to1=True,
 )

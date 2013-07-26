@@ -4,72 +4,74 @@
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
 #
-# Copyright 2010 OpenStack LLC.
+# Copyright 2010 OpenStack Foundation
 # Copyright 2013 IBM Corp.
+# Copyright (c) 2013 Hewlett-Packard Development Company, L.P.
 #
-#    Licensed under the Apache License, Version 2.0 (the "License"); you may
-#    not use this file except in compliance with the License. You may obtain
-#    a copy of the License at
+# Licensed under the Apache License, Version 2.0 (the "License"); you may
+# not use this file except in compliance with the License. You may obtain
+# a copy of the License at
 #
-#         http://www.apache.org/licenses/LICENSE-2.0
+#      http://www.apache.org/licenses/LICENSE-2.0
 #
-#    Unless required by applicable law or agreed to in writing, software
-#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#    License for the specific language governing permissions and limitations
-#    under the License.
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+# WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+# License for the specific language governing permissions and limitations
+# under the License.
 
-"""
-Installation script for Murano API's development virtualenv
-"""
-
+import ConfigParser
 import os
-import subprocess
 import sys
 
-import install_venv_common as install_venv
+import install_venv_common as install_venv  # flake8: noqa
 
 
-def print_help():
+def print_help(project, venv, root):
     help = """
- Murano API development environment setup is complete.
+    %(project)s development environment setup is complete.
 
- Murano API development uses virtualenv to track and manage Python dependencies
- while in development and testing.
+    %(project)s development uses virtualenv to track and manage Python
+    dependencies while in development and testing.
 
- To activate the Murano API virtualenv for the extent of your current shell session
- you can run:
+    To activate the %(project)s virtualenv for the extent of your current
+    shell session you can run:
 
- $ source .venv/bin/activate
+    $ source %(venv)s/bin/activate
 
- Or, if you prefer, you can run commands in the virtualenv on a case by case
- basis by running:
+    Or, if you prefer, you can run commands in the virtualenv on a case by
+    case basis by running:
 
- $ tools/with_venv.sh <your command>
-
- Also, make test will automatically use the virtualenv.
+    $ %(root)s/tools/with_venv.sh <your command>
     """
-    print help
+    print help % dict(project=project, venv=venv, root=root)
 
 
 def main(argv):
     root = os.path.dirname(os.path.dirname(os.path.realpath(__file__)))
+
+    if os.environ.get('tools_path'):
+        root = os.environ['tools_path']
     venv = os.path.join(root, '.venv')
-    pip_requires = os.path.join(root, 'tools', 'pip-requires')
-    test_requires = os.path.join(root, 'tools', 'test-requires')
+    if os.environ.get('venv'):
+        venv = os.environ['venv']
+
+    pip_requires = os.path.join(root, 'requirements.txt')
+    test_requires = os.path.join(root, 'test-requirements.txt')
     py_version = "python%s.%s" % (sys.version_info[0], sys.version_info[1])
-    project = 'muranoapi'
-    install = install_venv.InstallVenv(root, venv, pip_requires, test_requires,
-                                       py_version, project)
+    setup_cfg = ConfigParser.ConfigParser()
+    setup_cfg.read('setup.cfg')
+    project = setup_cfg.get('metadata', 'name')
+
+    install = install_venv.InstallVenv(
+        root, venv, pip_requires, test_requires, py_version, project)
     options = install.parse_args(argv)
     install.check_python_version()
     install.check_dependencies()
     install.create_virtualenv(no_site_packages=options.no_site_packages)
     install.install_dependencies()
-    install.run_command([os.path.join(venv, 'bin/python'),
-                        'setup.py', 'develop'])
     install.post_process()
-    print_help()
+    print_help(project, venv, root)
 
 if __name__ == '__main__':
     main(sys.argv)

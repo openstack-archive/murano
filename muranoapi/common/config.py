@@ -30,7 +30,7 @@ from oslo.config import cfg
 from paste import deploy
 
 from muranoapi.openstack.common import log
-from muranoapi.version import version_info as version
+from muranoapi import __version__ as version
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor'),
@@ -84,8 +84,7 @@ CONF.import_opt('syslog_log_facility', 'muranoapi.openstack.common.log')
 
 
 cfg.set_defaults(log.log_opts,
-                 default_log_levels=['amqplib=WARN',
-                                     'qpid.messaging=INFO',
+                 default_log_levels=['qpid.messaging=INFO',
                                      'sqlalchemy=WARN',
                                      'keystoneclient=INFO',
                                      'eventlet.wsgi.server=WARN'])
@@ -94,7 +93,7 @@ cfg.set_defaults(log.log_opts,
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,
          project='muranoapi',
-         version=version.cached_version_string(),
+         version=version,
          usage=usage,
          default_config_files=default_config_files)
 

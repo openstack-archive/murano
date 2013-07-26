@@ -14,16 +14,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import os
 import sys
-
-# If ../muranoapi/__init__.py exists, add ../ to Python search path, so that
-# it will override what happens to be installed in /usr/(local/)lib/python...
-possible_topdir = os.path.normpath(os.path.join(os.path.abspath(sys.argv[0]),
-                                                os.pardir,
-                                                os.pardir))
-if os.path.exists(os.path.join(possible_topdir, 'muranoapi', '__init__.py')):
-    sys.path.insert(0, possible_topdir)
 
 from muranoapi.common import config
 from muranoapi.common.service import TaskResultHandlerService
@@ -32,7 +23,7 @@ from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import service
 
 
-if __name__ == '__main__':
+def main():
     try:
         config.parse_args()
         log.setup('muranoapi')
@@ -49,3 +40,7 @@ if __name__ == '__main__':
     except RuntimeError, e:
         sys.stderr.write("ERROR: %s\n" % e)
         sys.exit(1)
+
+
+if __name__ == '__main__':
+    main()

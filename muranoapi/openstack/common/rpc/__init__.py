@@ -29,7 +29,7 @@ import inspect
 
 from oslo.config import cfg
 
-from muranoapi.openstack.common.gettextutils import _
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import importutils
 from muranoapi.openstack.common import local
 from muranoapi.openstack.common import log as logging

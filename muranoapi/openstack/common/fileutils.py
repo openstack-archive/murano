@@ -21,7 +21,7 @@ import errno
 import os
 
 from muranoapi.openstack.common import excutils
-from muranoapi.openstack.common.gettextutils import _
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
