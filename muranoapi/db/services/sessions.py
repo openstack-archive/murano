@@ -16,7 +16,7 @@ from collections import namedtuple
 from muranoapi.common import config
 from muranoapi.db.models import Session, Environment, Deployment, Status
 from muranoapi.db.session import get_session
-from muranocommon.mq import MqClient, Message
+from muranocommon.messaging import MqClient, Message
 
 
 rabbitmq = config.CONF.rabbitmq

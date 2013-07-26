@@ -52,10 +52,11 @@ reports_opts = [
 rabbit_opts = [
     cfg.StrOpt('host', default='localhost'),
     cfg.IntOpt('port', default=5672),
-    cfg.BoolOpt('use_ssl', default=False),
     cfg.StrOpt('login', default='guest'),
     cfg.StrOpt('password', default='guest'),
     cfg.StrOpt('virtual_host', default='/'),
+    cfg.BoolOpt('ssl', default=False),
+    cfg.StrOpt('ca_certs', default='')
 ]
 
 db_opts = [

@@ -19,7 +19,7 @@ from muranoapi.common import config
 from muranoapi.db.models import Session, Environment
 from muranoapi.db.services.sessions import SessionServices, SessionState
 from muranoapi.db.session import get_session
-from muranocommon.mq import MqClient, Message
+from muranocommon.messaging import MqClient, Message
 
 
 rabbitmq = config.CONF.rabbitmq

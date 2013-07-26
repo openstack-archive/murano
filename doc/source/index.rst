@@ -75,6 +75,9 @@ Configure
     virtual_host = murano
     login = murano
     password = murano
+    ssl = False
+    ca_certs =
+
 
 3. Open second configuration file for editing::
 
