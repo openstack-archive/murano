@@ -130,6 +130,7 @@ class SessionServices(object):
             del deployment.description['token']
         status = Status()
         status.text = "Deployment scheduled"
+        status.level = "info"
         deployment.statuses.append(status)
         with unit.begin():
             unit.add(session)

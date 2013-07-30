@@ -55,10 +55,12 @@ class TaskResultHandlerService(service.Service):
             try:
                 with self._create_mq_client() as mqClient:
                     mqClient.declare(conf.results_exchange, conf.results_queue)
-                    with mqClient.open(conf.results_queue) as results_sb:
+                    with mqClient.open(conf.results_queue,
+                                       prefetch_count=100) as results_sb:
                         while True:
-                            result = results_sb.get_message()
-                            eventlet.spawn(handle_result, result)
+                            result = results_sb.get_message(timeout=1)
+                            if result:
+                                eventlet.spawn(handle_result, result)
             except Exception as ex:
                 log.exception(ex)
 
@@ -67,10 +69,12 @@ class TaskResultHandlerService(service.Service):
             try:
                 with self._create_mq_client() as mqClient:
                     mqClient.declare(conf.reports_exchange, conf.reports_queue)
-                    with mqClient.open(conf.reports_queue) as reports_sb:
+                    with mqClient.open(conf.reports_queue,
+                                       prefetch_count=100) as reports_sb:
                         while True:
-                            report = reports_sb.get_message()
-                            eventlet.spawn(handle_report, report)
+                            report = reports_sb.get_message(timeout=1)
+                            if report:
+                                eventlet.spawn(handle_report, report)
             except Exception as ex:
                 log.exception(ex)
 
@@ -108,9 +112,21 @@ def handle_result(message):
         #close deployment
         deployment = get_last_deployment(session, environment.id)
         deployment.finished = timeutils.utcnow()
+
+        num_errors = session.query(Status).filter_by(level='error').count()
+        num_warnings = session.query(Status).filter_by(level='warning').count()
+
+        final_status_text = "Deployment finished"
+        if num_errors:
+            final_status_text += " with errors"
+
+        elif num_warnings:
+            final_status_text += " with warnings"
+
         status = Status()
         status.deployment_id = deployment.id
-        status.text = "Deployment finished"
+        status.text = final_status_text
+        status.level = 'info'
         deployment.statuses.append(status)
         deployment.save(session)
     except Exception as ex:

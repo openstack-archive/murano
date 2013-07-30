@@ -31,7 +31,8 @@ class Controller(object):
             .filter_by(environment_id=environment_id) \
             .order_by(desc(Deployment.created))
         result = query.all()
-        deployments = [deployment.to_dict() for deployment in result]
+        deployments = [set_dep_state(deployment, unit).to_dict() for deployment
+                       in result]
         return {'deployments': deployments}
 
     def statuses(self, request, environment_id, deployment_id):
@@ -86,3 +87,23 @@ def verify_and_get_deployment(db_session, environment_id, deployment_id):
 
 def create_resource():
     return wsgi.Resource(Controller())
+
+
+def set_dep_state(deployment, unit):
+    num_errors = unit.query(Status).filter_by(level='error').count()
+    num_warnings = unit.query(Status).filter_by(level='warning').count()
+    if deployment.finished:
+        if num_errors:
+            deployment.state = 'completed_w_errors'
+        elif num_warnings:
+            deployment.state = 'completed_w_warnings'
+        else:
+            deployment.state = 'success'
+    else:
+        if num_errors:
+            deployment.state = 'running_w_errors'
+        elif num_warnings:
+            deployment.state = 'running_w_warnings'
+        else:
+            deployment.state = 'running'
+    return deployment
