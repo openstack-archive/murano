@@ -125,7 +125,9 @@ class SessionServices(object):
         session.state = SessionState.deploying
         deployment = Deployment()
         deployment.environment_id = environment['id']
-        deployment.description = session.description
+        deployment.description = dict(session.description)
+        if 'token' in deployment.description:
+            del deployment.description['token']
         status = Status()
         status.text = "Deployment scheduled"
         deployment.statuses.append(status)
