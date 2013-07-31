@@ -13,7 +13,7 @@
 #    under the License.
 
 from webob import exc
-from muranoapi.db.models import Session
+from muranoapi.db.models import Session, Environment
 from muranoapi.db.session import get_session
 from muranoapi.db.services.sessions import SessionServices
 from muranoapi.db.services.sessions import SessionState
@@ -28,6 +28,18 @@ log = logging.getLogger(__name__)
 class Controller(object):
     def configure(self, request, environment_id):
         log.debug(_('Session:Configure <EnvId: {0}>'.format(environment_id)))
+
+        unit = get_session()
+        environment = unit.query(Environment).get(environment_id)
+
+        if environment is None:
+            log.info('Environment <EnvId {0}> is not found'
+                     .format(environment_id))
+            raise exc.HTTPNotFound
+
+        if environment.tenant_id != request.context.tenant:
+            log.info('User is not authorized to access this tenant resources.')
+            raise exc.HTTPUnauthorized
 
         # no new session can be opened if environment has deploying status
         env_status = EnvironmentServices.get_status(environment_id)
