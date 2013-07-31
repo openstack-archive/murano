@@ -30,7 +30,7 @@ def main():
 
         launcher = service.ServiceLauncher()
 
-        api_service = wsgi.Service(config.load_paste_app(),
+        api_service = wsgi.Service(config.load_paste_app('muranoapi'),
                                    port=config.CONF.bind_port,
                                    host=config.CONF.bind_host)
 
