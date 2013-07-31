@@ -90,8 +90,12 @@ def create_resource():
 
 
 def set_dep_state(deployment, unit):
-    num_errors = unit.query(Status).filter_by(level='error').count()
-    num_warnings = unit.query(Status).filter_by(level='warning').count()
+    num_errors = unit.query(Status).filter_by(level='error',
+                                              deployment_id=deployment.id). \
+        count()
+    num_warnings = unit.query(Status).filter_by(level='warning',
+                                                deployment_id=deployment.id). \
+        count()
     if deployment.finished:
         if num_errors:
             deployment.state = 'completed_w_errors'

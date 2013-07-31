@@ -113,8 +113,12 @@ def handle_result(message):
         deployment = get_last_deployment(session, environment.id)
         deployment.finished = timeutils.utcnow()
 
-        num_errors = session.query(Status).filter_by(level='error').count()
-        num_warnings = session.query(Status).filter_by(level='warning').count()
+        num_errors = session.query(Status).filter_by(level='error',
+                                                     deployment_id=deployment.
+                                                     id).count()
+        num_warnings = session.query(Status).filter_by(level='warning',
+                                                       deployment_id=
+                                                       deployment.id).count()
 
         final_status_text = "Deployment finished"
         if num_errors:
