@@ -13,22 +13,27 @@
 #    under the License.
 
 from sqlalchemy.schema import MetaData, Table, Column
-from sqlalchemy.types import Text
+from sqlalchemy.types import Text, String
 
 meta = MetaData()
 
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
+    meta.reflect()
+
     status = Table('status', meta, autoload=True)
     details = Column('details', Text(), nullable=True)
-    level = Column('level', Text(), nullable=False, server_default='info')
+    level = Column('level', String(32), nullable=False, server_default='info')
+
     details.create(status)
     level.create(status)
 
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
+    meta.reflect()
+
     status = Table('status', meta, autoload=True)
     status.c.details.drop()
     status.c.level.drop()

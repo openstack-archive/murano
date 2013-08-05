@@ -165,8 +165,8 @@ class Status(BASE, ModelBase):
     entity_id = Column(String(32), nullable=True)
     entity = Column(String(10), nullable=True)
     deployment_id = Column(String(32), ForeignKey('deployment.id'))
-    text = Column(Text(), nullable=False)
-    level = Column(Text(), nullable=False)
+    text = Column(String(), nullable=False)
+    level = Column(String(32), nullable=False)
     details = Column(Text(), nullable=True)
 
     def to_dict(self):
