@@ -25,7 +25,7 @@ log = logging.getLogger(__name__)
 def verify_session(func):
     @functools.wraps(func)
     def __inner(self, request, *args, **kwargs):
-        if not hasattr(request, 'context') and not request.context.session:
+        if hasattr(request, 'context') and not request.context.session:
             log.info('Session is required for this call')
             raise exc.HTTPForbidden()
 
@@ -33,6 +33,10 @@ def verify_session(func):
 
         unit = get_session()
         session = unit.query(Session).get(session_id)
+
+        if session is None:
+            log.info('Session <SessionId {0}> is not found'.format(session_id))
+            raise exc.HTTPForbidden()
 
         if not SessionServices.validate(session):
             log.info('Session <SessionId {0}> is invalid'.format(session_id))
