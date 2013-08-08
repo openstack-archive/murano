@@ -11,36 +11,40 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from migrate.changeset.constraint import ForeignKeyConstraint
 
-from sqlalchemy.schema import MetaData, Table, Column, ForeignKey
+from sqlalchemy.schema import MetaData, Table, Column
 from sqlalchemy.types import String, Text, DateTime
 
 
 meta = MetaData()
 
-Table('environment', meta,
-      Column('id', String(32), primary_key=True),
-      Column('name', String(255), nullable=False),
-      Column('created', DateTime(), nullable=False),
-      Column('updated', DateTime(), nullable=False),
-      Column('tenant_id', String(32), nullable=False),
-      Column('description', Text(), nullable=False),
-      )
-
-Table('service', meta,
-      Column('id', String(32), primary_key=True),
-      Column('name', String(255), nullable=False),
-      Column('type', String(40), nullable=False),
-      Column('environment_id', String(32), ForeignKey('environment.id')),
-      Column('created', DateTime, nullable=False),
-      Column('updated', DateTime, nullable=False),
-      Column('description', Text(), nullable=False),
-      )
-
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
-    meta.create_all()
+    meta.reflect()
+
+    environment = Table('environment', meta,
+                        Column('id', String(32), primary_key=True),
+                        Column('name', String(255), nullable=False),
+                        Column('created', DateTime(), nullable=False),
+                        Column('updated', DateTime(), nullable=False),
+                        Column('tenant_id', String(32), nullable=False),
+                        Column('description', Text(), nullable=False))
+    environment.create()
+
+    service = Table('service', meta,
+                    Column('id', String(32), primary_key=True),
+                    Column('name', String(255), nullable=False),
+                    Column('type', String(40), nullable=False),
+                    Column('environment_id', String(32), nullable=False),
+                    Column('created', DateTime, nullable=False),
+                    Column('updated', DateTime, nullable=False),
+                    Column('description', Text(), nullable=False))
+    service.create()
+
+    ForeignKeyConstraint(columns=[service.c.environment_id],
+                         refcolumns=[environment.c.id]).create()
 
 
 def downgrade(migrate_engine):

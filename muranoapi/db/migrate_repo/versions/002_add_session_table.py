@@ -11,29 +11,35 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from migrate.changeset.constraint import ForeignKeyConstraint
 
-from sqlalchemy.schema import MetaData, Table, Column, ForeignKey
+from sqlalchemy.schema import MetaData, Table, Column
 from sqlalchemy.types import String, Text, DateTime
 
 meta = MetaData()
-
-session = Table('session', meta,
-                Column('id', String(32), primary_key=True),
-                Column('environment_id', String(32),
-                       ForeignKey('environment.id')),
-                Column('created', DateTime, nullable=False),
-                Column('updated', DateTime, nullable=False),
-                Column('user_id', String(32), nullable=False),
-                Column('state', Text(), nullable=False),
-                )
 
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
     meta.reflect()
+
+    session = Table('session', meta,
+                    Column('id', String(32), primary_key=True),
+                    Column('environment_id', String(32), nullable=False),
+                    Column('created', DateTime, nullable=False),
+                    Column('updated', DateTime, nullable=False),
+                    Column('user_id', String(32), nullable=False),
+                    Column('state', Text(), nullable=False))
     session.create()
+
+    environment = Table('environment', meta, autoload=True)
+    ForeignKeyConstraint(columns=[session.c.environment_id],
+                         refcolumns=[environment.c.id]).create()
 
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
+    meta.reflect()
+
+    session = Table('session', meta, autoload=True)
     session.drop()

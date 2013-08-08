@@ -11,8 +11,9 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+from migrate.changeset.constraint import ForeignKeyConstraint
 
-from sqlalchemy.schema import MetaData, Table, Column, ForeignKey
+from sqlalchemy.schema import MetaData, Table, Column
 from sqlalchemy.types import String
 
 meta = MetaData()
@@ -21,11 +22,22 @@ meta = MetaData()
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
     meta.reflect()
+
     status = Table('status', meta, autoload=True)
-    deployment_id = Column('deployment_id', String(32),
-                           ForeignKey('deployment.id'))
+    environment = Table('environment', meta, autoload=True)
+    session = Table('session', meta, autoload=True)
+    deployment = Table('deployment', meta, autoload=True)
+
+    deployment_id = Column('deployment_id', String(32), nullable=False)
     deployment_id.create(status)
+    ForeignKeyConstraint(columns=[status.c.deployment_id],
+                         refcolumns=[deployment.c.id]).create()
+
+    ForeignKeyConstraint(columns=[status.c.environment_id],
+                         refcolumns=[environment.c.id]).drop()
     status.c.environment_id.drop()
+    ForeignKeyConstraint(columns=[status.c.session_id],
+                         refcolumns=[session.c.id]).drop()
     status.c.session_id.drop()
     status.c.entity.alter(nullable=True)
 
@@ -33,11 +45,24 @@ def upgrade(migrate_engine):
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
     meta.reflect()
+
     status = Table('status', meta, autoload=True)
+    environment = Table('environment', meta, autoload=True)
+    session = Table('session', meta, autoload=True)
+    deployment = Table('deployment', meta, autoload=True)
+
+    ForeignKeyConstraint(columns=[status.c.deployment_id],
+                         refcolumns=[deployment.c.id]).drop()
     status.c.deployment_id.drop()
-    environment_id = Column('environment_id', String(32),
-                            ForeignKey('environment.id'))
+
+    environment_id = Column('environment_id', String(32), nullable=False)
     environment_id.create(status)
-    session_id = Column('session_id', String(32), ForeignKey('session.id'))
+    ForeignKeyConstraint(columns=[status.c.environment_id],
+                         refcolumns=[environment.c.id]).create()
+
+    session_id = Column('session_id', String(32), nullable=False)
     session_id.create(status)
+    ForeignKeyConstraint(columns=[status.c.session_id],
+                         refcolumns=[session.c.id]).create()
+
     status.c.entity.alter(nullable=False)
