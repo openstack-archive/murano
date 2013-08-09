@@ -70,7 +70,7 @@ def upgrade(migrate_engine):
                    Column('id', String(32), primary_key=True),
                    Column('created', DateTime, nullable=False),
                    Column('updated', DateTime, nullable=False),
-                   Column('entity', String(10), nullable=False),
+                   Column('entity', String(10), nullable=True),
                    Column('entity_id', String(32), nullable=True),
                    Column('environment_id', String(32), nullable=True),
                    Column('deployment_id', String(32), nullable=False),
