@@ -88,6 +88,18 @@ class TraverseHelperTests(unittest.TestCase):
         value = TraverseHelper.get('/obj/attr', source)
         self.assertListEqual(value, [1, 2, 3, 4])
 
+    def test_extending_list_with_list(self):
+        source = {'attr': [1, 2, 3]}
+        TraverseHelper.extend('/attr', [4, 5], source)
+        value = TraverseHelper.get('/attr', source)
+        self.assertListEqual(value, [1, 2, 3, 4, 5])
+
+    def test_nested_extending_list_with_list(self):
+        source = {'obj': {'attr': [1, 2, 3]}}
+        TraverseHelper.extend('/obj/attr', [4, 5], source)
+        value = TraverseHelper.get('/obj/attr', source)
+        self.assertListEqual(value, [1, 2, 3, 4, 5])
+
     def test_attribute_remove_from_dict(self):
         source = {'attr1': False, 'attr2': True}
         TraverseHelper.remove('/attr1', source)

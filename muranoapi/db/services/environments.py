@@ -16,9 +16,11 @@ from collections import namedtuple
 from jsonschema import validate
 from muranoapi.api.v1.schemas import ENV_SCHEMA
 from muranoapi.common import config
+from muranoapi.common.uuidutils import generate_uuid
 from muranoapi.db.models import Session, Environment
 from muranoapi.db.services.sessions import SessionServices, SessionState
 from muranoapi.db.session import get_session
+from muranoapi.openstack.common import timeutils
 from muranocommon.messaging import MqClient, Message
 
 
@@ -175,6 +177,37 @@ class EnvironmentServices(object):
         unit = get_session()
         session = unit.query(Session).get(session_id)
 
+        EnvironmentServices.normalize(environment)
         validate(environment, ENV_SCHEMA)
         session.description = environment
         session.save(unit)
+
+    @staticmethod
+    def normalize(environment):
+        if 'id' not in environment:
+            environment['id'] = generate_uuid()
+
+        if 'services' not in environment:
+            return
+
+        for service in environment['services']:
+            if 'id' not in service:
+                service['id'] = generate_uuid()
+
+            if 'created' not in service:
+                service['created'] = str(timeutils.utcnow())
+
+            if 'updated' not in service:
+                service['updated'] = str(timeutils.utcnow())
+
+            if 'units' not in service:
+                continue
+
+            for idx, unit in enumerate(service['units']):
+                if 'id' not in unit:
+                    unit['id'] = generate_uuid()
+
+                if 'name' not in unit:
+                    unit['name'] = '{srv_name}_instance_{number}'.format(
+                        srv_name=service['name'], number=idx
+                    )
