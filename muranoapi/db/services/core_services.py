@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.common.utils import TraverseHelper, auto_id
+from muranoapi.common.utils import TraverseHelper
 from muranoapi.db.services.environments import EnvironmentServices
 from muranoapi.openstack.common import timeutils
+import types
 
 
 class CoreServices(object):
@@ -66,16 +67,12 @@ class CoreServices(object):
         if not 'services' in env_description:
             env_description['services'] = []
 
-        data = auto_id(data)
-
         if path == '/services':
-            data['created'] = str(timeutils.utcnow())
-            data['updated'] = str(timeutils.utcnow())
+            if isinstance(data, types.ListType):
+                TraverseHelper.extend(path, data, env_description)
+            else:
+                TraverseHelper.insert(path, data, env_description)
 
-            for idx, unit in enumerate(data['units']):
-                unit['name'] = data['name'] + '_instance_' + str(idx)
-
-        TraverseHelper.insert(path, data, env_description)
         save_description(session_id, env_description)
 
         return data

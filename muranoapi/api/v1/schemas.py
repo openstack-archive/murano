@@ -21,5 +21,5 @@ ENV_SCHEMA = {
         "id": {"type": "string"},
         "name": {"type": "string"}
     },
-    "required": ["id"]
+    "required": ["id", "name"]
 }

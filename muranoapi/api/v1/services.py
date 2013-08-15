@@ -55,7 +55,7 @@ class Controller(object):
     @utils.verify_session
     @normalize_path
     def post(self, request, environment_id, path, body):
-        log.debug(_('Services:Post <EnvId: {0}, , Path: {2}, '
+        log.debug(_('Services:Post <EnvId: {0}, Path: {2}, '
                     'Body: {1}>'.format(environment_id, body, path)))
 
         post_data = CoreServices.post_data
@@ -69,7 +69,7 @@ class Controller(object):
     @utils.verify_session
     @normalize_path
     def put(self, request, environment_id, path, body):
-        log.debug(_('Services:Put <EnvId: {0}, , Path: {2}, '
+        log.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
                     'Body: {1}>'.format(environment_id, body, path)))
 
         put_data = CoreServices.put_data

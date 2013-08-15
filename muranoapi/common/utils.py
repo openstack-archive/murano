@@ -12,12 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import eventlet
-from jsonschema import validate
-from muranoapi.common.uuidutils import generate_uuid
-import types
 from collections import deque
 from functools import wraps
+
+import eventlet
+from jsonschema import validate
+import types
 from muranoapi.openstack.common import log as logging
 
 
@@ -102,6 +102,18 @@ class TraverseHelper(object):
         node.append(value)
 
     @staticmethod
+    def extend(path, value, source):
+        """
+        Extend list by appending elements from the iterable.
+
+        :param path: string with path to desired value
+        :param value: value
+        :param source: List
+        """
+        node = TraverseHelper.get(path, source)
+        node.extend(value)
+
+    @staticmethod
     def remove(path, source):
         """
         Removes selected item from source.
@@ -123,17 +135,6 @@ class TraverseHelper(object):
             del node[key]
         else:
             raise ValueError('Source object or path is malformed')
-
-
-def auto_id(value):
-    if isinstance(value, types.DictionaryType):
-        value['id'] = generate_uuid()
-        for k, v in value.iteritems():
-            value[k] = auto_id(v)
-    if isinstance(value, types.ListType):
-        for item in value:
-            auto_id(item)
-    return value
 
 
 def build_entity_map(value):

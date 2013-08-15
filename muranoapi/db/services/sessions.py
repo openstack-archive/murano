@@ -16,6 +16,7 @@ from collections import namedtuple
 from muranoapi.common import config
 from muranoapi.db.models import Session, Environment, Deployment, Status
 from muranoapi.db.session import get_session
+from muranocommon.helpers.token_sanitizer import TokenSanitizer
 from muranocommon.messaging import MqClient, Message
 
 
@@ -24,6 +25,11 @@ rabbitmq = config.CONF.rabbitmq
 SessionState = namedtuple('SessionState', ['open', 'deploying', 'deployed'])(
     open='open', deploying='deploying', deployed='deployed'
 )
+
+
+def secure_description(description):
+    sanitizer = TokenSanitizer()
+    return sanitizer.sanitize(description)
 
 
 class SessionServices(object):
@@ -125,9 +131,7 @@ class SessionServices(object):
         session.state = SessionState.deploying
         deployment = Deployment()
         deployment.environment_id = environment['id']
-        deployment.description = dict(session.description)
-        if 'token' in deployment.description:
-            del deployment.description['token']
+        deployment.description = secure_description(dict(session.description))
         status = Status()
         status.text = "Deployment scheduled"
         status.level = "info"
