@@ -1,7 +1,7 @@
 d2to1>=0.2.10,<0.3
 pbr>=0.5,<0.6
 Babel
-SQLAlchemy>=0.7,<=0.7.9
+SQLAlchemy>=0.7.5,<=0.7.9
 anyjson
 eventlet>=0.9.12
 PasteDeploy
