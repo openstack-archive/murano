@@ -1,7 +1,7 @@
 d2to1>=0.2.10,<0.3
 pbr>=0.5,<0.6
 Babel
-SQLAlchemy>=0.7,<=0.7.9
+SQLAlchemy>=0.7.5,<=0.7.9
 anyjson
 eventlet>=0.9.12
 PasteDeploy
@@ -31,4 +31,4 @@ passlib
 jsonschema==2.0.0
 python-keystoneclient>=0.2.0
 oslo.config
-http://tarballs.openstack.org/murano-common/murano-common-release-0.2.tar.gz#egg=muranocommon-dev
+murano-common>=0.2.2
