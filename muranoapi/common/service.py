@@ -17,6 +17,7 @@ from muranoapi.db.models import Status, Session, Environment, Deployment
 from muranoapi.db.session import get_session
 from muranoapi.openstack.common import log as logging, timeutils, service
 from muranoapi.common import config
+from muranocommon.helpers.token_sanitizer import TokenSanitizer
 from muranocommon.messaging import MqClient
 from sqlalchemy import desc
 import eventlet
@@ -83,8 +84,9 @@ class TaskResultHandlerService(service.Service):
 def handle_result(message):
     try:
         environment_result = message.body
+        secure_result = TokenSanitizer().sanitize(environment_result)
         log.debug(_('Got result message from '
-                    'orchestration engine:\n{0}'.format(environment_result)))
+                    'orchestration engine:\n{0}'.format(secure_result)))
 
         if 'deleted' in environment_result:
             log.debug(_('Result for environment {0} is dropped. Environment '

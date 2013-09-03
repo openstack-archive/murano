@@ -19,6 +19,7 @@ from muranoapi import utils
 from muranoapi.db.services.core_services import CoreServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from muranocommon.helpers.token_sanitizer import TokenSanitizer
 
 log = logging.getLogger(__name__)
 
@@ -55,8 +56,9 @@ class Controller(object):
     @utils.verify_session
     @normalize_path
     def post(self, request, environment_id, path, body):
+        secure_data = TokenSanitizer().sanitize(body)
         log.debug(_('Services:Post <EnvId: {0}, Path: {2}, '
-                    'Body: {1}>'.format(environment_id, body, path)))
+                    'Body: {1}>'.format(environment_id, secure_data, path)))
 
         post_data = CoreServices.post_data
         session_id = request.context.session
