@@ -215,7 +215,7 @@ uninst()
 # postinstall
 postinst()
 {
-	log "Please, make proper configugation,located at \"$ETC_CFG_DIR\", before starting the \"$SERVICE_SRV_NAME\" daemon!"
+	log "Please, make proper configuration, located at \"$ETC_CFG_DIR\", before starting the \"$SERVICE_SRV_NAME\" daemon!"
 }
 # Command line args'
 COMMAND="$1"
