@@ -31,4 +31,4 @@ passlib
 jsonschema==2.0.0
 python-keystoneclient>=0.2.0
 oslo.config
-http://tarballs.openstack.org/murano-common/murano-common-release-0.2.tar.gz#egg=muranocommon-dev
+murano-common>=0.2.2
