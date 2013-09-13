@@ -129,7 +129,9 @@ class EnvironmentServices(object):
             'password': rabbitmq.password,
             'host': rabbitmq.host,
             'port': rabbitmq.port,
-            'virtual_host': rabbitmq.virtual_host
+            'virtual_host': rabbitmq.virtual_host,
+            'ssl': rabbitmq.ssl,
+            'ca_certs': rabbitmq.ca_certs.strip() or None
         }
 
         with MqClient(**connection_params) as mqClient:
