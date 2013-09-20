@@ -72,9 +72,16 @@ Configure
     [rabbitmq]
     host = localhost
     port = 5672
-    virtual_host = murano
-    login = murano
-    password = murano
+
+    # RabbitMQ credentials. Fresh RabbitMQ installation has "guest" account with "guest" password.
+    # It is recommended to create dedicated user account for Murano using RabbitMQ web console or command line utility
+    login = guest
+    password = guest
+
+    # RabbitMQ virtual host (vhost). Fresh RabbitMQ installation has "/" vhost preconfigured.
+    # It is recommended to create dedicated vhost for Murano using RabbitMQ web console or command line utility
+    virtual_host = /
+
     ssl = False
     ca_certs =
 
