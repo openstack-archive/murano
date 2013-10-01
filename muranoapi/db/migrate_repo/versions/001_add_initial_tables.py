@@ -43,7 +43,7 @@ def upgrade(migrate_engine):
                     Column('user_id', String(32), nullable=False),
                     Column('version', BigInteger, nullable=False,
                            server_default='0'),
-                    Column('description', Text(), nullable=True, default='{}'),
+                    Column('description', Text(), nullable=True),
                     Column('state', Text(), nullable=False))
     session.create()
 
@@ -57,8 +57,7 @@ def upgrade(migrate_engine):
                        Column('created', DateTime, nullable=False),
                        Column('updated', DateTime, nullable=False),
                        Column('started', DateTime, nullable=False),
-                       Column('description', Text(), nullable=True,
-                              server_default='{}'),
+                       Column('description', Text(), nullable=True),
                        Column('finished', DateTime, nullable=True))
     deployment.create()
 
