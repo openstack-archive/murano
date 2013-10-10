@@ -32,3 +32,4 @@ python-keystoneclient>=0.4.1
 oslo.config>=1.2.0
 # Please, revert to murano-common>=x.x.x before release
 http://tarballs.openstack.org/murano-common/murano-common-master.tar.gz#egg=murano-common-0.4
+
