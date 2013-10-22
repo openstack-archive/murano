@@ -52,12 +52,14 @@ class TaskResultHandlerService(service.Service):
         return MqClient(**connection_params)
 
     def _handle_results(self):
+        reconnect_delay = 1
         while True:
             try:
                 with self._create_mq_client() as mqClient:
                     mqClient.declare(conf.results_exchange, conf.results_queue)
                     with mqClient.open(conf.results_queue,
                                        prefetch_count=100) as results_sb:
+                        reconnect_delay = 1
                         while True:
                             result = results_sb.get_message(timeout=1)
                             if result:
@@ -65,19 +67,27 @@ class TaskResultHandlerService(service.Service):
             except Exception as ex:
                 log.exception(ex)
 
+                eventlet.sleep(reconnect_delay)
+                reconnect_delay = min(reconnect_delay * 2, 60)
+
     def _handle_reports(self):
+        reconnect_delay = 1
         while True:
             try:
                 with self._create_mq_client() as mqClient:
                     mqClient.declare(conf.reports_exchange, conf.reports_queue)
                     with mqClient.open(conf.reports_queue,
                                        prefetch_count=100) as reports_sb:
+                        reconnect_delay = 1
                         while True:
                             report = reports_sb.get_message(timeout=1)
                             if report:
                                 eventlet.spawn(handle_report, report)
             except Exception as ex:
                 log.exception(ex)
+
+                eventlet.sleep(reconnect_delay)
+                reconnect_delay = min(reconnect_delay * 2, 60)
 
 
 @handle
