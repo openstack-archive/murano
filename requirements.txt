@@ -15,6 +15,7 @@ pycrypto>=2.6
 iso8601>=0.1.4
 six>=1.4.1
 netaddr
+MySQL-python
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
