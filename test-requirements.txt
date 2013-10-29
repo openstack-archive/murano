@@ -1,21 +1,20 @@
 # Packages needed for dev testing
-distribute>=0.6.24
 
 # Needed for testing
 unittest2
-coverage
-fixtures>=0.3.12
-mox
+coverage>=3.6
+fixtures>=0.3.14
+mox>=0.5.3
 nose
 nose-exclude
 openstack.nose_plugin>=0.7
 nosehtmloutput>=0.0.3
 pep8==1.3.3
 sphinx>=1.1.2
-requests
-testtools>=0.9.22
-mock
+requests>=1.1
+testtools>=0.9.32
+mock>=1.0
 
 # Optional packages that should be installed when testing
-xattr>=0.6.0
+xattr>=0.4
 pysendfile==2.0.0
