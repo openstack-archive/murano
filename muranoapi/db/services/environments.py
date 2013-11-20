@@ -110,9 +110,6 @@ class EnvironmentServices(object):
         unit = get_session()
         environment = unit.query(Environment).get(environment_id)
 
-        with unit.begin():
-            unit.delete(environment)
-
         #preparing data for removal from conductor
         env = environment.description
         env['services'] = {}
@@ -137,6 +134,9 @@ class EnvironmentServices(object):
         with MqClient(**connection_params) as mqClient:
             mqClient.declare('tasks', 'tasks')
             mqClient.send(message, 'tasks', 'tasks')
+
+        with unit.begin():
+            unit.delete(environment)
 
     @staticmethod
     def get_environment_description(environment_id, session_id=None):
