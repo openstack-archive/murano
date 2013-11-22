@@ -149,5 +149,5 @@ class SessionServices(object):
         }
 
         with MqClient(**connection_params) as mqClient:
-            mqClient.declare('tasks', 'tasks')
+            mqClient.declare('tasks', 'tasks', enable_ha=True)
             mqClient.send(message, 'tasks', 'tasks')

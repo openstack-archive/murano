@@ -55,7 +55,8 @@ class TaskResultHandlerService(service.Service):
         while True:
             try:
                 with self._create_mq_client() as mqClient:
-                    mqClient.declare(conf.results_exchange, conf.results_queue)
+                    mqClient.declare(conf.results_exchange, conf.results_queue,
+                                     enable_ha=True)
                     with mqClient.open(conf.results_queue,
                                        prefetch_count=100) as results_sb:
                         while True:
@@ -69,7 +70,8 @@ class TaskResultHandlerService(service.Service):
         while True:
             try:
                 with self._create_mq_client() as mqClient:
-                    mqClient.declare(conf.reports_exchange, conf.reports_queue)
+                    mqClient.declare(conf.reports_exchange, conf.reports_queue,
+                                     enable_ha=True)
                     with mqClient.open(conf.reports_queue,
                                        prefetch_count=100) as reports_sb:
                         while True:
