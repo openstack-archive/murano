@@ -20,7 +20,9 @@ SERVICE_CONTENT_DIRECTORY=`cd $(dirname "$0") && pwd`
 PREREQ_PKGS="wget make git python-pip python-dev python-mysqldb libxml2-dev libxslt-dev libffi-dev"
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
-ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
+#ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
+ETC_CFG_DIR="/etc/murano"
+LOG_DIR="/var/log/murano/"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-api.conf"
 
 # Functions
@@ -39,7 +41,7 @@ in_sys_pkg()
 	PKG=$1
 	dpkg -s $PKG > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
-	    log "Package \"$PKG\" already installed"
+		log "Package \"$PKG\" already installed"
 	else
 		log "Installing \"$PKG\"..."
 		apt-get install $PKG --yes > /dev/null 2>&1
@@ -58,8 +60,8 @@ gitclone()
 	log "Cloning from \"$FROM\" repo to \"$CLONEROOT\""
 	cd $CLONEROOT && git clone $FROM > /dev/null 2>&1
 	if [ $? -ne 0 ];then
-	    log "cloning from \"$FROM\" fails, exiting!!!"
-	    exit
+		log "cloning from \"$FROM\" fails, exiting!!!"
+		exit
 	fi
 }
 
@@ -71,7 +73,7 @@ CLONE_FROM_GIT=$1
 	for PKG in $PREREQ_PKGS
 	do
 		in_sys_pkg $PKG
-	done 
+	done
 
 # If clone from git set
 	if [ ! -z $CLONE_FROM_GIT ]; then
@@ -89,28 +91,20 @@ CLONE_FROM_GIT=$1
 		gitclone "$GIT_WEBPATH_PRFX$SERVICE_SRV_NAME.git" $GIT_CLONE_DIR
 # End clone from git section 
 	fi
-
 # Setupping...
 	log "Running setup.py"
-	#MRN_CND_SPY=$GIT_CLONE_DIR/$SERVICE_SRV_NAME/setup.py
 	MRN_CND_SPY=$SERVICE_CONTENT_DIRECTORY/setup.py
 	if [ -e $MRN_CND_SPY ]; then
 		chmod +x $MRN_CND_SPY
 		log "$MRN_CND_SPY output:_____________________________________________________________"
-		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY install
-		#if [ $? -ne 0 ]; then
-		#	log "\"$MRN_CND_SPY\" python setup FAILS, exiting!"
-		#	exit 1
-		#fi
 ## Setup through pip
 		# Creating tarball
-		#cd $GIT_CLONE_DIR/$SERVICE_SRV_NAME && $MRN_CND_SPY sdist
-                rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
+				rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
 		cd $SERVICE_CONTENT_DIRECTORY && python $MRN_CND_SPY egg_info
-                if [ $? -ne 0 ];then
-                        log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
-                        exit 1
-                fi
+		if [ $? -ne 0 ];then
+			log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
+			exit 1
+		fi
 		rm -rf $SERVICE_CONTENT_DIRECTORY/dist/*
 		cd $SERVICE_CONTENT_DIRECTORY && $MRN_CND_SPY sdist
 		if [ $? -ne 0 ];then
@@ -118,8 +112,6 @@ CLONE_FROM_GIT=$1
 			exit 1
 		fi
 		# Running tarball install
-		#TRBL_FILE=$(basename `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/*.tar.gz`)
-		#pip install $GIT_CLONE_DIR/$SERVICE_SRV_NAME/dist/$TRBL_FILE
 		TRBL_FILE=$(basename `ls $SERVICE_CONTENT_DIRECTORY/dist/*.tar.gz`)
 		pip install $SERVICE_CONTENT_DIRECTORY/dist/$TRBL_FILE
 		if [ $? -ne 0 ];then
@@ -138,12 +130,20 @@ CLONE_FROM_GIT=$1
 			exit 1
 		fi
 	fi
+# Creating log directory for the murano
+	if [ ! -d $LOG_DIR ];then
+		log "Creating $LOG_DIR direcory..."
+		mkdir -p $LOG_DIR
+		if [ $? -ne 0 ];then
+			log "Can't create $LOG_DIR, exiting!!!"
+			exit 1
+		fi
+		chmod -R a+rw $LOG_DIR
+	fi
 # making sample configs 
 	log "Making sample configuration files at \"$ETC_CFG_DIR\""
-	#for file in `ls $GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc`
-	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
+	for file in $(ls $SERVICE_CONTENT_DIRECTORY/etc)
 	do
-		#cp -f "$GIT_CLONE_DIR/$SERVICE_SRV_NAME/etc/$file" "$ETC_CFG_DIR/$file.sample"
 		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
 	done
 }
@@ -179,8 +179,8 @@ start on runlevel [2345]
 stop on runlevel [!2345]
 respawn
 exec start-stop-daemon --start --chuid root --user root --name $SERVICE_SRV_NAME --exec $SERVICE_EXEC_PATH -- --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
-log "Reloading initctl"
-initctl reload-configuration
+	log "Reloading initctl"
+	initctl reload-configuration
 }
 
 # purge init
@@ -195,8 +195,8 @@ purgeinit()
 # uninstall
 uninst()
 {
-	# Uninstall trough  pip
-	# looking up for python package installed
+# Uninstall trough  pip
+# looking up for python package installed
 	PYPKG=`echo $SERVICE_SRV_NAME | tr -d '-'`
 	pip freeze | grep $PYPKG
 	if [ $? -eq 0 ]; then

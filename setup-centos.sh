@@ -22,7 +22,9 @@ PIPAPPS="pip python-pip pip-python"
 PIPCMD=""
 SERVICE_SRV_NAME="murano-api"
 GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
-ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
+#ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
+ETC_CFG_DIR="/etc/murano"
+LOG_DIR="/var/log/murano/"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-api.conf"
 
 # Functions
@@ -41,13 +43,13 @@ in_sys_pkg()
 	PKG=$1
 	rpm -q $PKG > /dev/null 2>&1
 	if [ $? -eq 0 ]; then
-	    log "Package \"$PKG\" already installed"
+		log "Package \"$PKG\" already installed"
 	else
-	    log "Installing \"$PKG\"..."
-	    yum install $PKG --assumeyes > /dev/null 2>&1
-	    if [ $? -ne 0 ];then
-	        log "installation fails, exiting!!!"
-	        exit 1
+		log "Installing \"$PKG\"..."
+		yum install $PKG --assumeyes > /dev/null 2>&1
+		if [ $? -ne 0 ];then
+		log "installation fails, exiting!!!"
+		exit 1
 		fi
 	fi
 }
@@ -55,19 +57,19 @@ in_sys_pkg()
 # find pip
 find_pip()
 {
-        for cmd in $PIPAPPS
-        do
-                _cmd=$(which $cmd 2>/dev/null)
-                if [ $? -eq 0 ];then
-                        break
-                fi
-        done
-        if [ -z $_cmd ];then
-                echo "Can't find \"pip\" in system, please install it first, exiting!"
-                exit 1
-        else
-                PIPCMD=$_cmd
-        fi
+	for cmd in $PIPAPPS
+	do
+		_cmd=$(which $cmd 2>/dev/null)
+		if [ $? -eq 0 ];then
+			break
+		fi
+	done
+	if [ -z $_cmd ];then
+		echo "Can't find \"pip\" in system, please install it first, exiting!"
+		exit 1
+	else
+		PIPCMD=$_cmd
+	fi
 }
 
 # git clone
@@ -78,9 +80,9 @@ gitclone()
 	log "Cloning from \"$FROM\" repo to \"$CLONEROOT\""
 	cd $CLONEROOT && git clone $FROM > /dev/null 2>&1
 	if [ $? -ne 0 ];then
-        	log "cloning from \"$FROM\" fails, exiting!!!"
-        	exit
-        fi
+		log "cloning from \"$FROM\" fails, exiting!!!"
+		exit
+	fi
 }
 
 # install
@@ -121,10 +123,10 @@ CLONE_FROM_GIT=$1
 		# Creating tarball
 		rm -rf $SERVICE_CONTENT_DIRECTORY/*.egg-info
 		cd $SERVICE_CONTENT_DIRECTORY && python $MRN_CND_SPY egg_info
-                if [ $? -ne 0 ];then
-                        log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
-                        exit 1
-                fi
+		if [ $? -ne 0 ];then
+			log "\"$MRN_CND_SPY\" egg info creation FAILS, exiting!!!"
+			exit 1
+		fi
 		rm -rf $SERVICE_CONTENT_DIRECTORY/dist/*
 		cd $SERVICE_CONTENT_DIRECTORY && $MRN_CND_SPY sdist
 		if [ $? -ne 0 ];then
@@ -143,15 +145,25 @@ CLONE_FROM_GIT=$1
 	fi
 # Creating etc directory for config files
 	if [ ! -d $ETC_CFG_DIR ]; then
-	    log "Creting $ETC_CFG_DIR direcory..."
-	    mkdir -p $ETC_CFG_DIR
-	    if [ $? -ne 0 ]; then
-	        log "Can't create $ETC_CFG_DIR, exiting!!!"
-	        exit
-	    fi
-    fi
+		log "Creting $ETC_CFG_DIR direcory..."
+		mkdir -p $ETC_CFG_DIR
+		if [ $? -ne 0 ]; then
+			log "Can't create $ETC_CFG_DIR, exiting!!!"
+			exit
+		fi
+	fi
+# Creating log directory for the murano
+	if [ ! -d $LOG_DIR ];then
+		log "Creating $LOG_DIR direcory..."
+		mkdir -p $LOG_DIR
+		if [ $? -ne 0 ];then
+			log "Can't create $LOG_DIR, exiting!!!"
+			exit 1
+		fi
+		chmod -R a+rw $LOG_DIR
+	fi
 # making smaple configs 
-    log "Making sample configuration files at \"$ETC_CFG_DIR\""
+	log "Making sample configuration files at \"$ETC_CFG_DIR\""
 	for file in `ls $SERVICE_CONTENT_DIRECTORY/etc`
 	do
 		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/$file" "$ETC_CFG_DIR/$file.sample"
@@ -184,24 +196,24 @@ start on runlevel [2345]
 stop on runlevel [!2345]
 respawn
 exec $SERVICE_EXEC_PATH --config-file=$SERVICE_CONFIG_FILE_PATH" > "/etc/init/$SERVICE_SRV_NAME.conf"
-    log "Reloading initctl"
-    initctl reload-configuration
+	log "Reloading initctl"
+	initctl reload-configuration
 }
 
 # purge init
 purgeinit()
 {
-    rm -f /etc/init/$SERVICE_SRV_NAME.conf
-    log "Reloading initctl"
-    initctl reload-configuration
+	rm -f /etc/init/$SERVICE_SRV_NAME.conf
+	log "Reloading initctl"
+	initctl reload-configuration
 }
 
 # uninstall
 uninst()
 {
-	# Uninstall trough  pip
-        find_pip
-	# looking up for python package installed
+# Uninstall trough  pip
+	find_pip
+# looking up for python package installed
 	PYPKG=`echo $SERVICE_SRV_NAME | tr -d '-'`
 	_pkg=$($PIPCMD freeze | grep $PYPKG)
 	if [ $? -eq 0 ]; then
