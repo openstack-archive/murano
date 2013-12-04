@@ -104,6 +104,7 @@ class Environment(BASE, ModelBase):
     tenant_id = Column(String(32), nullable=False)
     version = Column(BigInteger, nullable=False, default=0)
     description = Column(JsonBlob(), nullable=False, default={})
+    networking = Column(JsonBlob(), nullable=True, default={})
 
     sessions = relationship("Session", backref='environment',
                             cascade='save-update, merge, delete')
