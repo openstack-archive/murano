@@ -114,6 +114,7 @@ def handle_result(message):
             return
 
         environment.description = environment_result
+        environment.networking = environment_result.get('networking', {})
         environment.version += 1
         environment.save(session)
 
