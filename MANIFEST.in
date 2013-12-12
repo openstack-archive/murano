@@ -13,4 +13,5 @@ include openstack-common.conf
 include muranoapi/db/migrate_repo/README
 include muranoapi/db/migrate_repo/migrate.cfg
 include muranoapi/db/migrate_repo/versions/*.sql
+recursive-include etc *
 global-exclude *.pyc
