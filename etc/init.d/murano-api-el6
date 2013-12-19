@@ -31,9 +31,9 @@ PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
 DESC="murano-api"
 NAME=murano-api
 DAEMON=$(which murano-api)
-PIDFILE=/var/run/$NAME.pid
+PIDFILE=/var/run/murano/$NAME.pid
 SCRIPTNAME=/etc/init.d/openstack-$NAME
-SYSTEM_USER=root
+SYSTEM_USER=murano
 CONFIG_FILE=/etc/murano/murano-api.conf
 LOCKFILE=/var/lock/subsys/$NAME
 # Exit if the package is not installed
@@ -46,6 +46,10 @@ RETVAL=0
 
 
 start() {
+    if [ ! -d "/var/run/murano" ]; then
+        mkdir -p /var/run/murano
+        chown -R $SYSTEM_USER /var/run/murano
+    fi
     echo -n "Starting $NAME: "
     daemon --user $SYSTEM_USER "$DAEMON --config-file=$CONFIG_FILE &>/dev/null & echo \$! > $PIDFILE"
     RETVAL=$?

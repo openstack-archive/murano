@@ -25,6 +25,7 @@ GIT_CLONE_DIR=`echo $SERVICE_CONTENT_DIRECTORY | sed -e "s/$SERVICE_SRV_NAME//"`
 #ETC_CFG_DIR="/etc/$SERVICE_SRV_NAME"
 ETC_CFG_DIR="/etc/murano"
 LOG_DIR="/var/log/murano/"
+DB_DIR="/var/db/murano/"
 SERVICE_CONFIG_FILE_PATH="$ETC_CFG_DIR/murano-api.conf"
 
 # Functions
@@ -168,6 +169,14 @@ CLONE_FROM_GIT=$1
 	do
 		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/murano/$file" "$ETC_CFG_DIR/$file.sample"
 	done
+        log "Creating $DB_DIR"
+        if [ ! -d "$DB_DIR" ]; then
+                mkdir -p $DB_DIR
+                if [ $? -ne 0 ];then
+                        log "Can't create \"$DB_DIR\", exiting!!!"
+                        exit 1
+                fi
+        fi
 }
 
 # searching for service executable in path
