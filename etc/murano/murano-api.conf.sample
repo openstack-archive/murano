@@ -1,9 +1,9 @@
 [DEFAULT]
 # Show more verbose log output (sets INFO log level output)
-verbose = False
+verbose = True
 
 # Show debugging output in logs (sets DEBUG log level output)
-debug = False
+debug = True
 
 # Address to bind the server to
 bind_host = 0.0.0.0
@@ -11,10 +11,10 @@ bind_host = 0.0.0.0
 # Port the bind the server to
 bind_port = 8082
 
-# Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
-log_file = /var/log/murano/murano-api.log
-use_syslog=False
-syslog-log-facility=LOG_LOCAL0
+# Set up logging. To use syslog just set use_syslog parameter value to 'True'.
+log_file = /tmp/murano-api.log
+use_syslog = False
+syslog-log-facility = LOG_LOCAL0
 
 [database]
 #A valid SQLAlchemy connection string for the metadata database
