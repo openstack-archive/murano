@@ -140,12 +140,11 @@ CLONE_FROM_GIT=$1
 			exit 1
 		fi
 		chmod -R a+rw $LOG_DIR
-	fi
-# making sample configs 
-	log "Making sample configuration files at \"$ETC_CFG_DIR\""
+	fi 
+	log "Copy sample configuration files at \"$ETC_CFG_DIR\""
 	for file in $(ls $SERVICE_CONTENT_DIRECTORY/etc/murano)
 	do
-		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/murano/$file" "$ETC_CFG_DIR/$file.sample"
+		cp -f "$SERVICE_CONTENT_DIRECTORY/etc/murano/$file" "$ETC_CFG_DIR/$file"
 	done
         log "Creating $DB_DIR"
         if [ ! -d "$DB_DIR" ]; then

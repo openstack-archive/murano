@@ -19,6 +19,7 @@ from muranoapi import utils
 from muranoapi.db.services.core_services import CoreServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranocommon.helpers.token_sanitizer import TokenSanitizer
 
 log = logging.getLogger(__name__)
@@ -38,6 +39,7 @@ def normalize_path(f):
 
 
 class Controller(object):
+    @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
         log.debug(_('Services:Get <EnvId: {0}, '
@@ -49,11 +51,12 @@ class Controller(object):
 
         try:
             result = CoreServices.get_data(environment_id, path, session_id)
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, AttributeError):
             raise HTTPNotFound
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def post(self, request, environment_id, path, body):
         secure_data = TokenSanitizer().sanitize(body)
@@ -69,6 +72,7 @@ class Controller(object):
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def put(self, request, environment_id, path, body):
         log.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
@@ -84,6 +88,7 @@ class Controller(object):
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def delete(self, request, environment_id, path):
         log.debug(_('Services:Put <EnvId: {0}, '

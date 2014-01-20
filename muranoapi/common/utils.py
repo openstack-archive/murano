@@ -19,6 +19,7 @@ import eventlet
 from jsonschema import validate
 import types
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 
 log = logging.getLogger(__name__)
@@ -69,7 +70,7 @@ class TraverseHelper(object):
             elif isinstance(source, TraverseHelper.value_type):
                 break
             else:
-                raise ValueError('Source object or path is malformed')
+                raise ValueError(_('Source object or path is malformed'))
 
         return source
 
@@ -134,7 +135,7 @@ class TraverseHelper(object):
         elif isinstance(node, types.DictionaryType):
             del node[key]
         else:
-            raise ValueError('Source object or path is malformed')
+            raise ValueError(_('Source object or path is malformed'))
 
 
 def build_entity_map(value):
@@ -182,7 +183,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
                 except ExceptionToCheck as e:
 
                     log.exception(e)
-                    log.info("Retrying in {0} seconds...".format(mdelay))
+                    log.info(_("Retrying in {0} seconds...".format(mdelay)))
 
                     eventlet.sleep(mdelay)
 
