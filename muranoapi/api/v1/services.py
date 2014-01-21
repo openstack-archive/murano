@@ -49,7 +49,7 @@ class Controller(object):
 
         try:
             result = CoreServices.get_data(environment_id, path, session_id)
-        except (KeyError, ValueError):
+        except (KeyError, ValueError, AttributeError):
             raise HTTPNotFound
         return result
 
