@@ -15,13 +15,13 @@
 #    Author: Igor Yozhikov <iyozhikov@mirantis.com>
 #
 ### BEGIN INIT INFO
-# Provides: murano-api
+# Provides:          murano-api
 # Required-Start:    $network $local_fs $remote_fs $syslog
 # Required-Stop:     $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
 # Short-Description: OpenStack Murano API Server
-# Description: This startup script launches murano-api service daemon.
+# Description:       This startup script launches murano-api service daemon.
 ### END INIT INFO
 # chkconfig: 3 90 10
 # description: This startup script launches murano-api service daemon.
