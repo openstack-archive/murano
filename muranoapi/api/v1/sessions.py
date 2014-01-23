@@ -22,6 +22,7 @@ from muranoapi.db.services.environments import EnvironmentStatus
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
 
+
 log = logging.getLogger(__name__)
 
 
@@ -33,20 +34,21 @@ class Controller(object):
         environment = unit.query(Environment).get(environment_id)
 
         if environment is None:
-            log.info('Environment <EnvId {0}> is not found'
-                     .format(environment_id))
+            log.info(_('Environment <EnvId {0}> '
+                       'is not found'.format(environment_id)))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info('User is not authorized to access this tenant resources.')
+            log.info(_('User is not authorized to access '
+                       'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
         # no new session can be opened if environment has deploying status
         env_status = EnvironmentServices.get_status(environment_id)
         if env_status == EnvironmentStatus.deploying:
-            log.info('Could not open session for environment <EnvId: {0}>,'
-                     'environment has deploying '
-                     'status.'.format(environment_id))
+            log.info(_('Could not open session for environment <EnvId: {0}>,'
+                       'environment has deploying '
+                       'status.'.format(environment_id)))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
@@ -61,23 +63,24 @@ class Controller(object):
         session = unit.query(Session).get(session_id)
 
         if session is None:
-            log.error('Session <SessionId {0}> is not found'
-                      ''.format(session_id))
+            log.error(_('Session <SessionId {0}> '
+                        'is not found'.format(session_id)))
             raise exc.HTTPNotFound()
 
         if session.environment_id != environment_id:
-            log.error('Session <SessionId {0}> is not tied with Environment '
-                      '<EnvId {1}>'.format(session_id, environment_id))
+            log.error(_('Session <SessionId {0}> is not tied with Environment '
+                        '<EnvId {1}>'.format(session_id, environment_id)))
             raise exc.HTTPNotFound()
 
         user_id = request.context.user
         if session.user_id != user_id:
-            log.error('User <UserId {0}> is not authorized to access '
-                      'session <SessionId {1}>.'.format(user_id, session_id))
+            log.error(_('User <UserId {0}> is not authorized to access session'
+                        '<SessionId {1}>.'.format(user_id, session_id)))
             raise exc.HTTPUnauthorized()
 
         if not SessionServices.validate(session):
-            log.error('Session <SessionId {0}> is invalid'.format(session_id))
+            log.error(_('Session <SessionId {0}> '
+                        'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
 
         return session.to_dict()
@@ -89,24 +92,24 @@ class Controller(object):
         session = unit.query(Session).get(session_id)
 
         if session is None:
-            log.error('Session <SessionId {0}> is not found'
-                      ''.format(session_id))
+            log.error(_('Session <SessionId {0}> '
+                        'is not found'.format(session_id)))
             raise exc.HTTPNotFound()
 
         if session.environment_id != environment_id:
-            log.error('Session <SessionId {0}> is not tied with Environment '
-                      '<EnvId {1}>'.format(session_id, environment_id))
+            log.error(_('Session <SessionId {0}> is not tied with Environment '
+                        '<EnvId {1}>'.format(session_id, environment_id)))
             raise exc.HTTPNotFound()
 
         user_id = request.context.user
         if session.user_id != user_id:
-            log.error('User <UserId {0}> is not authorized to access '
-                      'session <SessionId {1}>.'.format(user_id, session_id))
+            log.error(_('User <UserId {0}> is not authorized to access session'
+                        '<SessionId {1}>.'.format(user_id, session_id)))
             raise exc.HTTPUnauthorized()
 
         if session.state == SessionState.deploying:
-            log.error('Session <SessionId: {0}> is in deploying state and '
-                      'could not be deleted'.format(session_id))
+            log.error(_('Session <SessionId: {0}> is in deploying state and '
+                        'could not be deleted'.format(session_id)))
             raise exc.HTTPForbidden()
 
         with unit.begin():
@@ -121,22 +124,23 @@ class Controller(object):
         session = unit.query(Session).get(session_id)
 
         if session is None:
-            log.error('Session <SessionId {0}> is not found'
-                      ''.format(session_id))
+            log.error(_('Session <SessionId {0}> '
+                        'is not found'.format(session_id)))
             raise exc.HTTPNotFound()
 
         if session.environment_id != environment_id:
-            log.error('Session <SessionId {0}> is not tied with Environment '
-                      '<EnvId {1}>'.format(session_id, environment_id))
+            log.error(_('Session <SessionId {0}> is not tied with Environment '
+                        '<EnvId {1}>'.format(session_id, environment_id)))
             raise exc.HTTPNotFound()
 
         if not SessionServices.validate(session):
-            log.error('Session <SessionId {0}> is invalid'.format(session_id))
+            log.error(_('Session <SessionId {0}> '
+                        'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
 
         if session.state != SessionState.open:
-            log.error('Session <SessionId {0}> is already deployed or '
-                      'deployment is in progress'.format(session_id))
+            log.error(_('Session <SessionId {0}> is already deployed or '
+                        'deployment is in progress'.format(session_id)))
             raise exc.HTTPForbidden()
 
         SessionServices.deploy(session, unit, request.context.auth_token)

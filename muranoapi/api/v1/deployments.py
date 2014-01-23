@@ -64,11 +64,11 @@ class Controller(object):
 def verify_and_get_env(db_session, environment_id, request):
     environment = db_session.query(Environment).get(environment_id)
     if not environment:
-        log.info('Environment with id {0} not found'.format(environment_id))
+        log.info(_('Environment with id {0} not found'.format(environment_id)))
         raise exc.HTTPNotFound
 
     if environment.tenant_id != request.context.tenant:
-        log.info('User is not authorized to access this tenant resources.')
+        log.info(_('User is not authorized to access this tenant resources.'))
         raise exc.HTTPUnauthorized
     return environment
 
@@ -76,11 +76,12 @@ def verify_and_get_env(db_session, environment_id, request):
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
     deployment = db_session.query(Deployment).get(deployment_id)
     if not deployment:
-        log.info('Deployment with id {0} not found'.format(deployment_id))
+        log.info(_('Deployment with id {0} not found'.format(deployment_id)))
         raise exc.HTTPNotFound
     if deployment.environment_id != environment_id:
-        log.info('Deployment with id {0} not found'
-                 ' in environment {1}'.format(deployment_id, environment_id))
+        log.info(_('Deployment with id {0} not found'
+                   ' in environment {1}'.format(deployment_id,
+                                                environment_id)))
         raise exc.HTTPBadRequest
     return deployment
 

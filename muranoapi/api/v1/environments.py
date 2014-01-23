@@ -59,7 +59,8 @@ class Controller(object):
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info('User is not authorized to access this tenant resources.')
+            log.info(_('User is not authorized to access '
+                       'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
         env = environment.to_dict()
@@ -83,12 +84,13 @@ class Controller(object):
         environment = session.query(Environment).get(environment_id)
 
         if environment is None:
-            log.info('Environment <EnvId {0}> is not found'
-                     .format(environment_id))
+            log.info(_('Environment <EnvId {0}> is not '
+                       'found'.format(environment_id)))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info('User is not authorized to access this tenant resources.')
+            log.info(_('User is not authorized to access '
+                       'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
         environment.update(body)
@@ -103,12 +105,13 @@ class Controller(object):
         environment = unit.query(Environment).get(environment_id)
 
         if environment is None:
-            log.info('Environment <EnvId {0}> is not found'
-                     .format(environment_id))
+            log.info(_('Environment <EnvId {0}> '
+                       'is not found'.format(environment_id)))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info('User is not authorized to access this tenant resources.')
+            log.info(_('User is not authorized to access '
+                       'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
         EnvironmentServices.delete(environment_id, request.context.auth_token)

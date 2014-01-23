@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import gettext
-gettext.install('muranoapi', './muranoapi/locale', unicode=1)
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 from pbr import version
 __version_info = version.VersionInfo('murano-api')

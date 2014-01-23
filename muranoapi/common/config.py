@@ -31,6 +31,7 @@ from paste import deploy
 
 from muranoapi.openstack.common import log
 from muranoapi import __version__ as version
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor'),
@@ -110,8 +111,8 @@ def setup_logging():
             logging.config.fileConfig(CONF.log_config)
             return
         else:
-            raise RuntimeError("Unable to locate specified logging "
-                               "config file: %s" % CONF.log_config)
+            raise RuntimeError(_("Unable to locate specified logging "
+                                 "config file: %s" % CONF.log_config))
 
     root_logger = logging.root
     if CONF.debug:
@@ -174,7 +175,7 @@ def _get_deployment_config_file():
     if not path:
         path = _get_paste_config_path()
     if not path:
-        msg = "Unable to locate paste config file for %s." % CONF.prog
+        msg = _("Unable to locate paste config file for %s.") % CONF.prog
         raise RuntimeError(msg)
     return os.path.abspath(path)
 
