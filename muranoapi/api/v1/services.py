@@ -38,6 +38,7 @@ def normalize_path(f):
 
 
 class Controller(object):
+    @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
         log.debug(_('Services:Get <EnvId: {0}, '
@@ -54,6 +55,7 @@ class Controller(object):
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def post(self, request, environment_id, path, body):
         secure_data = TokenSanitizer().sanitize(body)
@@ -69,6 +71,7 @@ class Controller(object):
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def put(self, request, environment_id, path, body):
         log.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
@@ -84,6 +87,7 @@ class Controller(object):
         return result
 
     @utils.verify_session
+    @utils.verify_env
     @normalize_path
     def delete(self, request, environment_id, path):
         log.debug(_('Services:Put <EnvId: {0}, '

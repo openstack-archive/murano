@@ -16,10 +16,30 @@ import functools
 import logging
 from muranoapi.db.services.sessions import SessionServices, SessionState
 from webob import exc
-from muranoapi.db.models import Session
+from muranoapi.db.models import Session, Environment
 from muranoapi.db.session import get_session
 
 log = logging.getLogger(__name__)
+
+
+def verify_env(func):
+    @functools.wraps(func)
+    def __inner(self, request, environment_id, *args, **kwargs):
+        unit = get_session()
+        environment = unit.query(Environment).get(environment_id)
+        if environment is None:
+            log.info("Environment with id '{0}'"
+                     " not found".format(environment_id))
+            raise exc.HTTPNotFound()
+
+        if hasattr(request, 'context'):
+            if environment.tenant_id != request.context.tenant:
+                log.info('User is not authorized to access'
+                         ' this tenant resources')
+                raise exc.HTTPUnauthorized()
+
+        return func(self, request, environment_id, *args, **kwargs)
+    return __inner
 
 
 def verify_session(func):
