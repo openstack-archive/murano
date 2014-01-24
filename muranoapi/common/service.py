@@ -16,6 +16,7 @@ from muranoapi.common.utils import handle
 from muranoapi.db.models import Status, Session, Environment, Deployment
 from muranoapi.db.session import get_session
 from muranoapi.openstack.common import log as logging, timeutils, service
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.common import config
 from muranocommon.helpers.token_sanitizer import TokenSanitizer
 from muranocommon.messaging import MqClient

@@ -19,6 +19,7 @@ from muranoapi import utils
 from muranoapi.db.services.core_services import CoreServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranocommon.helpers.token_sanitizer import TokenSanitizer
 
 log = logging.getLogger(__name__)

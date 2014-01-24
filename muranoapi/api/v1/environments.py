@@ -22,6 +22,7 @@ from muranoapi.db.services.core_services import CoreServices
 from muranoapi.db.services.environments import EnvironmentServices
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 rabbitmq = config.CONF.rabbitmq
 

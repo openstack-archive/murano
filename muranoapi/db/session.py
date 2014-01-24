@@ -24,10 +24,11 @@ import os
 from migrate.versioning import api as versioning_api
 from migrate import exceptions as versioning_exceptions
 
-from muranoapi.openstack.common.db.sqlalchemy import session
 from muranoapi.common.config import CONF as conf
-from muranoapi.openstack.common import log as logging
 from muranoapi.db import migrate_repo
+from muranoapi.openstack.common.db.sqlalchemy import session
+from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
 
 log = logging.getLogger(__name__)
 

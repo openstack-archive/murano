@@ -18,6 +18,7 @@ from muranoapi.db.services.sessions import SessionServices, SessionState
 from webob import exc
 from muranoapi.db.models import Session, Environment
 from muranoapi.db.session import get_session
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 log = logging.getLogger(__name__)
 

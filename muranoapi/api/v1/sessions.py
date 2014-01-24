@@ -21,6 +21,7 @@ from muranoapi.db.services.environments import EnvironmentServices
 from muranoapi.db.services.environments import EnvironmentStatus
 from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 
 
 log = logging.getLogger(__name__)

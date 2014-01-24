@@ -17,6 +17,7 @@ from muranoapi.openstack.common import wsgi
 from muranoapi.db.models import Deployment, Status, Environment
 from muranoapi.db.session import get_session
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common.gettextutils import _  # noqa
 from sqlalchemy import desc
 from webob import exc
 
