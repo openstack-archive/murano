@@ -17,7 +17,7 @@ function log {
     if [ "$DEBUGLVL" -gt 0 ]; then
         chars=$(echo "@$" | wc -c)
         case $DEBUGLVL in
-            1 )
+            1)
                 echo -e "LOG:>$@"
                 ;;
             2)

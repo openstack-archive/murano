@@ -196,11 +196,12 @@ function inject_init()
     retval=0
     _dist=$(lowercase $DISTRO_BASED_ON)
     eval src_init_sctipt="$DAEMON_NAME-$_dist"
-    _initscript="openstack-$DAEMON_NAME"
+    _initscript="$DAEMON_NAME"
     cp -f "$RUN_DIR/etc/init.d/$src_init_sctipt" "/etc/init.d/$_initscript" || retval=$?
     chmod +x "/etc/init.d/$_initscript" || retval=$?
     iniset '' 'SYSTEM_USER' "$DAEMON_USER" "/etc/init.d/$_initscript"
     iniset '' 'DAEMON' "$(shslash $SERVICE_EXEC_PATH)" "/etc/init.d/$_initscript"
+    iniset '' 'SCRIPTNAME' "$(shslash "/etc/init.d/$_initscript")" "/etc/init.d/$_initscript"
     case $_dist in
         "debian")
             update-rc.d $_initscript defaults || retval=$?
@@ -217,7 +218,7 @@ function purge_init()
 {
     retval=0
     _dist=$(lowercase $DISTRO_BASED_ON)
-    _initscript="openstack-$DAEMON_NAME"
+    _initscript="$DAEMON_NAME"
     service $_initscript stop
     if [ $? -ne 0 ]; then
         retval=1
@@ -267,14 +268,20 @@ function install_daemon()
     _src_conf_dir="$RUN_DIR/etc/murano"
     for file in $(ls $_src_conf_dir)
     do
-        cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file.sample"
-        if [ ! -e "$DAEMON_CFG_DIR/$file" ]; then
-            log "\"$DAEMON_CFG_DIR/$file\" exists."
-            cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file"
+        #cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file.sample"
+        cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file"
+        config_file=$_prefix$(echo $file | sed -e 's/.sample$//')
+        #if [ ! -e "$DAEMON_CFG_DIR/$file" ]; then
+        if [ ! -e "$DAEMON_CFG_DIR/$config_file" ]; then
+            cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$config_file"
+        else
+            log "\"$DAEMON_CFG_DIR/$config_file\" exists, skipping copy."
         fi
     done
     log "Setting log file and sqlite db placement..."
     iniset 'DEFAULT' 'log_file' "$(shslash $DAEMON_LOG_DIR/$DAEMON_NAME.log)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
+    iniset 'DEFAULT' 'verbose' 'True' "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
+    iniset 'DEFAULT' 'debug' 'True' "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
     iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
     log "Searching daemon in \$PATH..."
     get_service_exec_path || exit $?
@@ -286,7 +293,7 @@ function install_daemon()
         iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
         log "...database configuration finished."
     fi
-    log "Everything done, please, verify \"$DAEMON_CFG_DIR/$DAEMON_NAME.conf\", service created as \"openstack-murano-api\"."
+    log "Everything done, please, verify \"$DAEMON_CFG_DIR/$DAEMON_NAME.conf\", service created as \"murano-api\"."
 }
 function uninstall_daemon()
 {
