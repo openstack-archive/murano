@@ -13,18 +13,17 @@
 #    under the License.
 import collections
 
-from muranoapi.common import config
+from muranoapi.common import rpc
 from muranoapi.db import models
 from muranoapi.db import session as db_session
 from muranocommon.helpers import token_sanitizer
-from muranocommon import messaging
 
-rabbitmq = config.CONF.rabbitmq
 
-SessionState = collections.namedtuple(
-    'SessionState', ['open', 'deploying', 'deployed'])(open='open',
-                                                       deploying='deploying',
-                                                       deployed='deployed')
+SessionState = collections.namedtuple('SessionState', [
+    'open', 'deploying', 'deployed'
+])(
+    open='open', deploying='deploying', deployed='deployed'
+)
 
 
 class SessionServices(object):
@@ -134,23 +133,9 @@ class SessionServices(object):
         status.text = "Deployment scheduled"
         status.level = "info"
         deployment.statuses.append(status)
+
         with unit.begin():
             unit.add(session)
             unit.add(deployment)
 
-        message = messaging.Message()
-        message.body = environment
-
-        connection_params = {
-            'login': rabbitmq.login,
-            'password': rabbitmq.password,
-            'host': rabbitmq.host,
-            'port': rabbitmq.port,
-            'virtual_host': rabbitmq.virtual_host,
-            'ssl': rabbitmq.ssl,
-            'ca_certs': rabbitmq.ca_certs.strip() or None
-        }
-
-        with messaging.MqClient(**connection_params) as mqClient:
-            mqClient.declare('tasks', 'tasks', enable_ha=True)
-            mqClient.send(message, 'tasks', 'tasks')
+        rpc.conductor().handle_task(environment)

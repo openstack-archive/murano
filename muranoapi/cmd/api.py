@@ -13,19 +13,21 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import os
 import sys
+
+import eventlet
+eventlet.monkey_patch()
+
 # If ../muranoapi/__init__.py exists, add ../ to Python search path, so that
 # it will override what happens to be installed in /usr/(local/)lib/python...
-possible_topdir = os.path.normpath(os.path.join(os.path.abspath(__file__),
-                                                os.pardir,
-                                                os.pardir,
-                                                os.pardir))
-if os.path.exists(os.path.join(possible_topdir, 'muranoapi', '__init__.py')):
-    sys.path.insert(0, possible_topdir)
+root = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir, os.pardir)
+if os.path.exists(os.path.join(root, 'muranoapi', '__init__.py')):
+    sys.path.insert(0, root)
 
 from muranoapi.common import config
-from muranoapi.common import service as murano_service
+from muranoapi.common import server
 from muranoapi.openstack.common import log
 from muranoapi.openstack.common import service
 from muranoapi.openstack.common import wsgi
@@ -38,12 +40,13 @@ def main():
 
         launcher = service.ServiceLauncher()
 
-        api_service = wsgi.Service(config.load_paste_app('muranoapi'),
-                                   port=config.CONF.bind_port,
-                                   host=config.CONF.bind_host)
+        app = config.load_paste_app('muranoapi')
+        port, host = (config.CONF.bind_port, config.CONF.bind_host)
 
-        launcher.launch_service(api_service)
-        launcher.launch_service(murano_service.TaskResultHandlerService())
+        launcher.launch_service(wsgi.Service(app, port, host))
+        launcher.launch_service(server.get_rpc_service())
+        launcher.launch_service(server.get_notification_service())
+
         launcher.wait()
     except RuntimeError, e:
         sys.stderr.write("ERROR: %s\n" % e)

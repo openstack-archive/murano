@@ -16,10 +16,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-"""
-Routines for configuring Glance
-"""
-
 import logging
 import logging.config
 import logging.handlers
@@ -44,23 +40,6 @@ bind_opts = [
     cfg.IntOpt('bind-port', default='8082'),
 ]
 
-reports_opts = [
-    cfg.StrOpt('results_exchange', default='task-results'),
-    cfg.StrOpt('results_queue', default='task-results'),
-    cfg.StrOpt('reports_exchange', default='task-reports'),
-    cfg.StrOpt('reports_queue', default='task-reports')
-]
-
-rabbit_opts = [
-    cfg.StrOpt('host', default='localhost'),
-    cfg.IntOpt('port', default=5672),
-    cfg.StrOpt('login', default='guest'),
-    cfg.StrOpt('password', default='guest'),
-    cfg.StrOpt('virtual_host', default='/'),
-    cfg.BoolOpt('ssl', default=False),
-    cfg.StrOpt('ca_certs', default='')
-]
-
 db_opts = [
     cfg.BoolOpt('auto_create', default=False,
                 help=_('A boolean that determines if the database will be '
@@ -70,8 +49,6 @@ db_opts = [
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
-CONF.register_opts(reports_opts, group='reports')
-CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(db_opts, group='database')
 
 CONF.import_opt('connection',

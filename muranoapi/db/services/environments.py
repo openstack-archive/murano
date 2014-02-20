@@ -11,27 +11,25 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import collections
 
 import jsonschema
 
 from muranoapi.api.v1 import schemas
-from muranoapi.common import config
+from muranoapi.common import rpc
 from muranoapi.common import uuidutils
 from muranoapi.db import models
 from muranoapi.db.services import sessions
 from muranoapi.db import session as db_session
 from muranoapi.openstack.common import timeutils
-from muranocommon import messaging
 
 
-rabbitmq = config.CONF.rabbitmq
-
-EnvironmentStatus = collections.namedtuple(
-    'EnvironmentStatus',
-    ['ready', 'pending', 'deploying'])(ready='ready',
-                                       pending='pending',
-                                       deploying='deploying')
+EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
+    'ready', 'pending', 'deploying'
+])(
+    ready='ready', pending='pending', deploying='deploying'
+)
 
 
 class EnvironmentServices(object):
@@ -123,22 +121,7 @@ class EnvironmentServices(object):
         #Set X-Auth-Token for conductor
         env['token'] = token
 
-        message = messaging.Message()
-        message.body = env
-
-        connection_params = {
-            'login': rabbitmq.login,
-            'password': rabbitmq.password,
-            'host': rabbitmq.host,
-            'port': rabbitmq.port,
-            'virtual_host': rabbitmq.virtual_host,
-            'ssl': rabbitmq.ssl,
-            'ca_certs': rabbitmq.ca_certs.strip() or None
-        }
-
-        with messaging.MqClient(**connection_params) as mqClient:
-            mqClient.declare('tasks', 'tasks', enable_ha=True)
-            mqClient.send(message, 'tasks', 'tasks')
+        rpc.conductor().handle_task(env)
 
         with unit.begin():
             unit.delete(environment)

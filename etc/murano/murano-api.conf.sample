@@ -28,6 +28,70 @@ use_syslog = False
 #Syslog facility to receive log lines
 syslog_log_facility = LOG_LOCAL0
 
+# Use durable queues in amqp. (boolean value)
+# Deprecated group/name - [DEFAULT]/rabbit_durable_queues
+#amqp_durable_queues=false
+
+# Auto-delete queues in amqp. (boolean value)
+#amqp_auto_delete=false
+
+
+# SSL version to use (valid only if SSL enabled). valid values
+# are TLSv1, SSLv23 and SSLv3. SSLv2 may be available on some
+# distributions (string value)
+#kombu_ssl_version=
+
+# SSL key file (valid only if SSL enabled) (string value)
+#kombu_ssl_keyfile=
+
+# SSL cert file (valid only if SSL enabled) (string value)
+#kombu_ssl_certfile=
+
+# SSL certification authority file (valid only if SSL enabled)
+# (string value)
+#kombu_ssl_ca_certs=
+
+# The RabbitMQ broker address where a single node is used
+# (string value)
+#rabbit_host=localhost
+
+# The RabbitMQ broker port where a single node is used
+# (integer value)
+#rabbit_port=5672
+
+# RabbitMQ HA cluster host:port pairs (list value)
+#rabbit_hosts=$rabbit_host:$rabbit_port
+
+# connect over SSL for RabbitMQ (boolean value)
+#rabbit_use_ssl=false
+
+# the RabbitMQ userid (string value)
+#rabbit_userid=guest
+
+# the RabbitMQ password (string value)
+#rabbit_password=guest
+
+# the RabbitMQ virtual host (string value)
+#rabbit_virtual_host=/
+
+# how frequently to retry connecting with RabbitMQ (integer
+# value)
+#rabbit_retry_interval=1
+
+# how long to backoff for between retries when connecting to
+# RabbitMQ (integer value)
+#rabbit_retry_backoff=2
+
+# maximum retries with trying to connect to RabbitMQ (the
+# default of 0 implies an infinite retry count) (integer
+# value)
+#rabbit_max_retries=0
+
+# use H/A queues in RabbitMQ (x-ha-policy: all).You need to
+# wipe RabbitMQ database when changing this option. (boolean
+# value)
+#rabbit_ha_queues=false
+
 [database]
 #A valid SQLAlchemy connection string for the metadata database
 #connection = mysql://root:password@localhost:3306/murano
@@ -35,37 +99,6 @@ connection = sqlite:///murano.sqlite
 
 #A boolean that determines if the database will be automatically created
 auto_create = True
-
-[reports]
-#Change this params only when you know what you are doing
-results_exchange = task-results
-results_queue = task-results
-reports_exchange = task-reports
-reports_queue = task-reports
-
-[rabbitmq]
-# Connection parameters to RabbitMQ service
-
-# Hostname or IP address where RabbitMQ is located.
-host = localhost
-
-# RabbitMQ port (5672 is a default)
-port = 5672
-
-# RabbitMQ credentials. Fresh RabbitMQ installation has "guest" account with "guest" password.
-# It is recommended to create dedicated user account for Murano using RabbitMQ web console or command line utility
-login = guest
-password = guest
-
-# RabbitMQ virtual host (vhost). Fresh RabbitMQ installation has "/" vhost preconfigured.
-# It is recommended to create dedicated vhost for Murano using RabbitMQ web console or command line utility
-virtual_host = /
-
-# Use SSL for RabbitMQ connections (True or False)
-ssl = False
-
-# Path to SSL CA certificate or empty to allow self signed server certificate
-#ca_certs =
 
 [ssl]
 #Parameters to configure SSL for trusted HTTPS connection
