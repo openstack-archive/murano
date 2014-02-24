@@ -30,7 +30,7 @@ DESC="murano-api"
 NAME=murano-api
 DAEMON=$(which murano-api)
 PIDFILE=/var/run/murano/$NAME.pid
-SCRIPTNAME=/etc/init.d/openstack-$NAME
+SCRIPTNAME=/etc/init.d/$NAME
 SYSTEM_USER=murano
 CONFIG_FILE=/etc/murano/murano-api.conf
 # Exit if the package is not installed
@@ -102,3 +102,4 @@ case "$1" in
         exit 3
         ;;
 esac
+
