@@ -26,6 +26,7 @@ root = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir, os.pardir)
 if os.path.exists(os.path.join(root, 'muranoapi', '__init__.py')):
     sys.path.insert(0, root)
 
+from muranoapi.api.v1 import statistics
 from muranoapi.common import config
 from muranoapi.common import server
 from muranoapi.common import statservice as stats
@@ -38,6 +39,7 @@ def main():
     try:
         config.parse_args()
         log.setup('muranoapi')
+        statistics.init_stats()
 
         launcher = service.ServiceLauncher()
 

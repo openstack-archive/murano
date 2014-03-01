@@ -15,7 +15,10 @@ import functools as func
 
 from webob import exc
 
+
+from muranoapi.api.v1 import statistics
 from muranoapi.db.services import core_services
+
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
@@ -23,6 +26,8 @@ from muranoapi import utils
 from muranocommon.helpers import token_sanitizer
 
 log = logging.getLogger(__name__)
+
+API_NAME = 'Services'
 
 
 def normalize_path(f):
@@ -39,6 +44,7 @@ def normalize_path(f):
 
 
 class Controller(object):
+    @statistics.stats_count(API_NAME, 'Index')
     @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
@@ -57,6 +63,7 @@ class Controller(object):
             raise exc.HTTPNotFound
         return result
 
+    @statistics.stats_count(API_NAME, 'Create')
     @utils.verify_session
     @utils.verify_env
     @normalize_path
@@ -73,6 +80,7 @@ class Controller(object):
             raise exc.HTTPNotFound
         return result
 
+    @statistics.stats_count(API_NAME, 'Update')
     @utils.verify_session
     @utils.verify_env
     @normalize_path
@@ -89,6 +97,7 @@ class Controller(object):
             raise exc.HTTPNotFound
         return result
 
+    @statistics.stats_count(API_NAME, 'Delete')
     @utils.verify_session
     @utils.verify_env
     @normalize_path

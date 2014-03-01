@@ -186,11 +186,29 @@ class Status(BASE, ModelBase):
         return dictionary
 
 
+class ApiStats(BASE, ModelBase):
+    __tablename__ = 'apistats'
+
+    id = sa.Column(sa.Integer(), primary_key=True)
+    host = sa.Column(sa.String(80))
+    request_count = sa.Column(sa.BigInteger())
+    error_count = sa.Column(sa.BigInteger())
+    average_response_time = sa.Column(sa.Float())
+    requests_per_tenant = sa.Column(sa.Text())
+    requests_per_second = sa.Column(sa.Float())
+    errors_per_second = sa.Column(sa.Float())
+
+    def to_dict(self):
+        dictionary = super(ApiStats, self).to_dict()
+        return dictionary
+
+
 def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
-    models = (Environment, Status, Session, Deployment)
+    models = (Environment, Status, Session, Deployment,
+              ApiStats)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -199,6 +217,7 @@ def unregister_models(engine):
     """
     Drops database tables for all models with the given engine
     """
-    models = (Environment, Status, Session, Deployment)
+    models = (Environment, Status, Session, Deployment,
+              ApiStats)
     for model in models:
         model.metadata.drop_all(engine)

@@ -15,6 +15,8 @@
 from muranoapi.db import models
 from muranoapi.db import session as db_session
 
+stats = None
+
 
 def get_draft(environment_id=None, session_id=None):
     unit = db_session.get_session()
