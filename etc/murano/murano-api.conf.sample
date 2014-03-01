@@ -122,3 +122,8 @@ admin_tenant_name = admin
 admin_user = admin
 admin_password = swordfish
 signing_dir = /tmp/keystone-signing-muranoapi
+
+#This section controls statistics collection
+[stats]
+#Stats collection period in minutes
+period = 5

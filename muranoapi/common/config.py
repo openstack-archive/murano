@@ -46,10 +46,17 @@ db_opts = [
                        'automatically created.')),
 ]
 
+stats_opt = [
+    cfg.IntOpt('period', default=5,
+               help=_('Statistics collection interval in minutes.'
+                      'Default value is 5 minutes.'))
+]
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
 CONF.register_opts(db_opts, group='database')
+CONF.register_opts(stats_opt, group='stats')
 
 CONF.import_opt('connection',
                 'muranoapi.openstack.common.db.options',
