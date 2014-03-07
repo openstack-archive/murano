@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Copyright 2011 Cloudscaling Group, Inc
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 """
 The MatchMaker classes should except a Topic or Fanout exchange key and
 return keys for direct exchanges, per (approximate) AMQP parlance.
@@ -23,7 +22,7 @@ import contextlib
 import eventlet
 from oslo.config import cfg
 
-from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common.gettextutils import _, _LI
 from muranoapi.openstack.common import log as logging
 
 
@@ -92,7 +91,7 @@ class MatchMakerBase(object):
         """Acknowledge that a key.host is alive.
 
         Used internally for updating heartbeats, but may also be used
-        publically to acknowledge a system is alive (i.e. rpc message
+        publicly to acknowledge a system is alive (i.e. rpc message
         successfully sent to host)
         """
         pass
@@ -174,7 +173,7 @@ class HeartbeatMatchMakerBase(MatchMakerBase):
         """Acknowledge that a host.topic is alive.
 
         Used internally for updating heartbeats, but may also be used
-        publically to acknowledge a system is alive (i.e. rpc message
+        publicly to acknowledge a system is alive (i.e. rpc message
         successfully sent to host)
         """
         raise NotImplementedError("Must implement ack_alive")
@@ -214,7 +213,7 @@ class HeartbeatMatchMakerBase(MatchMakerBase):
         self.hosts.discard(host)
         self.backend_unregister(key, '.'.join((key, host)))
 
-        LOG.info(_("Matchmaker unregistered: %(key)s, %(host)s"),
+        LOG.info(_LI("Matchmaker unregistered: %(key)s, %(host)s"),
                  {'key': key, 'host': host})
 
     def start_heartbeat(self):
@@ -248,9 +247,7 @@ class DirectBinding(Binding):
     that it maps directly to a host, thus direct.
     """
     def test(self, key):
-        if '.' in key:
-            return True
-        return False
+        return '.' in key
 
 
 class TopicBinding(Binding):
@@ -262,17 +259,13 @@ class TopicBinding(Binding):
     matches that of a direct exchange.
     """
     def test(self, key):
-        if '.' not in key:
-            return True
-        return False
+        return '.' not in key
 
 
 class FanoutBinding(Binding):
     """Match on fanout keys, where key starts with 'fanout.' string."""
     def test(self, key):
-        if key.startswith('fanout~'):
-            return True
-        return False
+        return key.startswith('fanout~')
 
 
 class StubExchange(Exchange):

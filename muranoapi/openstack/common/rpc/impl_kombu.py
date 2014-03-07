@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Copyright 2011 OpenStack Foundation
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -28,9 +26,10 @@ import kombu.connection
 import kombu.entity
 import kombu.messaging
 from oslo.config import cfg
+import six
 
 from muranoapi.openstack.common import excutils
-from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common.gettextutils import _, _LE, _LI
 from muranoapi.openstack.common import network_utils
 from muranoapi.openstack.common.rpc import amqp as rpc_amqp
 from muranoapi.openstack.common.rpc import common as rpc_common
@@ -39,9 +38,9 @@ from muranoapi.openstack.common import sslutils
 kombu_opts = [
     cfg.StrOpt('kombu_ssl_version',
                default='',
-               help='SSL version to use (valid only if SSL enabled). '
-                    'valid values are TLSv1, SSLv23 and SSLv3. SSLv2 may '
-                    'be available on some distributions'
+               help='If SSL is enabled, the SSL version to use. Valid '
+                    'values are TLSv1, SSLv23 and SSLv3. SSLv2 might '
+                    'be available on some distributions.'
                ),
     cfg.StrOpt('kombu_ssl_keyfile',
                default='',
@@ -64,33 +63,33 @@ kombu_opts = [
                 help='RabbitMQ HA cluster host:port pairs'),
     cfg.BoolOpt('rabbit_use_ssl',
                 default=False,
-                help='connect over SSL for RabbitMQ'),
+                help='Connect over SSL for RabbitMQ'),
     cfg.StrOpt('rabbit_userid',
                default='guest',
-               help='the RabbitMQ userid'),
+               help='The RabbitMQ userid'),
     cfg.StrOpt('rabbit_password',
                default='guest',
-               help='the RabbitMQ password',
+               help='The RabbitMQ password',
                secret=True),
     cfg.StrOpt('rabbit_virtual_host',
                default='/',
-               help='the RabbitMQ virtual host'),
+               help='The RabbitMQ virtual host'),
     cfg.IntOpt('rabbit_retry_interval',
                default=1,
-               help='how frequently to retry connecting with RabbitMQ'),
+               help='How frequently to retry connecting with RabbitMQ'),
     cfg.IntOpt('rabbit_retry_backoff',
                default=2,
-               help='how long to backoff for between retries when connecting '
+               help='How long to backoff for between retries when connecting '
                     'to RabbitMQ'),
     cfg.IntOpt('rabbit_max_retries',
                default=0,
-               help='maximum retries with trying to connect to RabbitMQ '
-                    '(the default of 0 implies an infinite retry count)'),
+               help='Maximum number of RabbitMQ connection retries. '
+                    'Default is 0 (infinite retry count)'),
     cfg.BoolOpt('rabbit_ha_queues',
                 default=False,
-                help='use H/A queues in RabbitMQ (x-ha-policy: all).'
-                     'You need to wipe RabbitMQ database when '
-                     'changing this option.'),
+                help='Use HA queues in RabbitMQ (x-ha-policy: all). '
+                     'If you change this option, you must wipe the '
+                     'RabbitMQ database.'),
 
 ]
 
@@ -146,29 +145,23 @@ class ConsumerBase(object):
         Messages that are processed without exception are ack'ed.
 
         If the message processing generates an exception, it will be
-        ack'ed if ack_on_error=True. Otherwise it will be .reject()'ed.
-        Rejection is better than waiting for the message to timeout.
-        Rejected messages are immediately requeued.
+        ack'ed if ack_on_error=True. Otherwise it will be .requeue()'ed.
         """
 
-        ack_msg = False
         try:
             msg = rpc_common.deserialize_msg(message.payload)
             callback(msg)
-            ack_msg = True
         except Exception:
             if self.ack_on_error:
-                ack_msg = True
-                LOG.exception(_("Failed to process message"
-                                " ... skipping it."))
-            else:
-                LOG.exception(_("Failed to process message"
-                                " ... will requeue."))
-        finally:
-            if ack_msg:
+                LOG.exception(_LE("Failed to process message"
+                                  " ... skipping it."))
                 message.ack()
             else:
-                message.reject()
+                LOG.exception(_LE("Failed to process message"
+                                  " ... will requeue."))
+                message.requeue()
+        else:
+            message.ack()
 
     def consume(self, *args, **kwargs):
         """Actually declare the consumer on the amqp channel.  This will
@@ -452,7 +445,7 @@ class Connection(object):
                 'virtual_host': self.conf.rabbit_virtual_host,
             }
 
-            for sp_key, value in server_params.iteritems():
+            for sp_key, value in six.iteritems(server_params):
                 p_key = server_params_to_kombu_params.get(sp_key, sp_key)
                 params[p_key] = value
 
@@ -490,12 +483,8 @@ class Connection(object):
             # future with this?
             ssl_params['cert_reqs'] = ssl.CERT_REQUIRED
 
-        if not ssl_params:
-            # Just have the default behavior
-            return True
-        else:
-            # Return the extended behavior
-            return ssl_params
+        # Return the extended behavior or just have the default behavior
+        return ssl_params or True
 
     def _connect(self, params):
         """Connect to rabbit.  Re-establish any queues that may have
@@ -503,7 +492,7 @@ class Connection(object):
         be handled by the caller.
         """
         if self.connection:
-            LOG.info(_("Reconnecting to AMQP server on "
+            LOG.info(_LI("Reconnecting to AMQP server on "
                      "%(hostname)s:%(port)d") % params)
             try:
                 self.connection.release()
@@ -525,7 +514,7 @@ class Connection(object):
             self.channel._new_queue('ae.undeliver')
         for consumer in self.consumers:
             consumer.reconnect(self.channel)
-        LOG.info(_('Connected to AMQP server on %(hostname)s:%(port)d') %
+        LOG.info(_LI('Connected to AMQP server on %(hostname)s:%(port)d') %
                  params)
 
     def reconnect(self):
@@ -576,9 +565,9 @@ class Connection(object):
                 sleep_time = min(sleep_time, self.interval_max)
 
             log_info['sleep_time'] = sleep_time
-            LOG.error(_('AMQP server on %(hostname)s:%(port)d is '
-                        'unreachable: %(err_str)s. Trying again in '
-                        '%(sleep_time)d seconds.') % log_info)
+            LOG.error(_LE('AMQP server on %(hostname)s:%(port)d is '
+                          'unreachable: %(err_str)s. Trying again in '
+                          '%(sleep_time)d seconds.') % log_info)
             time.sleep(sleep_time)
 
     def ensure(self, error_callback, method, *args, **kwargs):
@@ -630,12 +619,12 @@ class Connection(object):
 
         def _connect_error(exc):
             log_info = {'topic': topic, 'err_str': str(exc)}
-            LOG.error(_("Failed to declare consumer for topic '%(topic)s': "
+            LOG.error(_LE("Failed to declare consumer for topic '%(topic)s': "
                       "%(err_str)s") % log_info)
 
         def _declare_consumer():
             consumer = consumer_cls(self.conf, self.channel, topic, callback,
-                                    self.consumer_num.next())
+                                    six.next(self.consumer_num))
             self.consumers.append(consumer)
             return consumer
 
@@ -648,11 +637,11 @@ class Connection(object):
 
         def _error_callback(exc):
             if isinstance(exc, socket.timeout):
-                LOG.debug(_('Timed out waiting for RPC response: %s') %
+                LOG.debug('Timed out waiting for RPC response: %s' %
                           str(exc))
                 raise rpc_common.Timeout()
             else:
-                LOG.exception(_('Failed to consume message from queue: %s') %
+                LOG.exception(_LE('Failed to consume message from queue: %s') %
                               str(exc))
                 info['do_consume'] = True
 
@@ -691,7 +680,7 @@ class Connection(object):
 
         def _error_callback(exc):
             log_info = {'topic': topic, 'err_str': str(exc)}
-            LOG.exception(_("Failed to publish message to topic "
+            LOG.exception(_LE("Failed to publish message to topic "
                           "'%(topic)s': %(err_str)s") % log_info)
 
         def _publish():
@@ -742,7 +731,7 @@ class Connection(object):
         it = self.iterconsume(limit=limit)
         while True:
             try:
-                it.next()
+                six.next(it)
             except StopIteration:
                 return
 
@@ -793,6 +782,7 @@ class Connection(object):
             callback=callback,
             connection_pool=rpc_amqp.get_connection_pool(self.conf,
                                                          Connection),
+            wait_for_consumers=not ack_on_error
         )
         self.proxy_callbacks.append(callback_wrapper)
         self.declare_topic_consumer(

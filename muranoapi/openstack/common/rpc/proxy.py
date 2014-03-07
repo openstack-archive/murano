@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2012-2013 Red Hat, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -21,6 +19,7 @@ For more information about rpc API version numbers, see:
     rpc/dispatcher.py
 """
 
+import six
 
 from muranoapi.openstack.common import rpc
 from muranoapi.openstack.common.rpc import common as rpc_common
@@ -36,7 +35,7 @@ class RpcProxy(object):
     rpc API.
     """
 
-    # The default namespace, which can be overriden in a subclass.
+    # The default namespace, which can be overridden in a subclass.
     RPC_API_NAMESPACE = None
 
     def __init__(self, topic, default_version, version_cap=None,
@@ -100,7 +99,7 @@ class RpcProxy(object):
         :returns: A new set of serialized arguments
         """
         new_kwargs = dict()
-        for argname, arg in kwargs.iteritems():
+        for argname, arg in six.iteritems(kwargs):
             new_kwargs[argname] = self.serializer.serialize_entity(context,
                                                                    arg)
         return new_kwargs

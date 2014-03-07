@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
@@ -20,9 +18,9 @@
 """
 Shared code between AMQP based openstack.common.rpc implementations.
 
-The code in this module is shared between the rpc implemenations based on AMQP.
-Specifically, this includes impl_kombu and impl_qpid.  impl_carrot also uses
-AMQP, but is deprecated and predates this code.
+The code in this module is shared between the rpc implementations based on
+AMQP. Specifically, this includes impl_kombu and impl_qpid. impl_carrot also
+uses AMQP, but is deprecated and predates this code.
 """
 
 import collections
@@ -35,9 +33,11 @@ from eventlet import pools
 from eventlet import queue
 from eventlet import semaphore
 from oslo.config import cfg
+import six
+
 
 from muranoapi.openstack.common import excutils
-from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common.gettextutils import _, _LE
 from muranoapi.openstack.common import local
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common.rpc import common as rpc_common
@@ -72,7 +72,7 @@ class Pool(pools.Pool):
 
     # TODO(comstud): Timeout connections not used in a while
     def create(self):
-        LOG.debug(_('Pool creating new connection'))
+        LOG.debug('Pool creating new connection')
         return self.connection_cls(self.conf)
 
     def empty(self):
@@ -189,7 +189,7 @@ class ReplyProxy(ConnectionContext):
     def __init__(self, conf, connection_pool):
         self._call_waiters = {}
         self._num_call_waiters = 0
-        self._num_call_waiters_wrn_threshhold = 10
+        self._num_call_waiters_wrn_threshold = 10
         self._reply_q = 'reply_' + uuid.uuid4().hex
         super(ReplyProxy, self).__init__(conf, connection_pool, pooled=False)
         self.declare_direct_consumer(self._reply_q, self._process_data)
@@ -208,11 +208,11 @@ class ReplyProxy(ConnectionContext):
 
     def add_call_waiter(self, waiter, msg_id):
         self._num_call_waiters += 1
-        if self._num_call_waiters > self._num_call_waiters_wrn_threshhold:
+        if self._num_call_waiters > self._num_call_waiters_wrn_threshold:
             LOG.warn(_('Number of call waiters is greater than warning '
-                       'threshhold: %d. There could be a MulticallProxyWaiter '
-                       'leak.') % self._num_call_waiters_wrn_threshhold)
-            self._num_call_waiters_wrn_threshhold *= 2
+                       'threshold: %d. There could be a MulticallProxyWaiter '
+                       'leak.') % self._num_call_waiters_wrn_threshold)
+            self._num_call_waiters_wrn_threshold *= 2
         self._call_waiters[msg_id] = waiter
 
     def del_call_waiter(self, msg_id):
@@ -241,7 +241,7 @@ def msg_reply(conf, msg_id, reply_q, connection_pool, reply=None,
         _add_unique_id(msg)
         # If a reply_q exists, add the msg_id to the reply and pass the
         # reply_q to direct_send() to use it as the response queue.
-        # Otherwise use the msg_id for backward compatibilty.
+        # Otherwise use the msg_id for backward compatibility.
         if reply_q:
             msg['_msg_id'] = msg_id
             conn.direct_send(reply_q, rpc_common.serialize_msg(msg))
@@ -287,7 +287,7 @@ def unpack_context(conf, msg):
     context_dict['reply_q'] = msg.pop('_reply_q', None)
     context_dict['conf'] = conf
     ctx = RpcContext.from_dict(context_dict)
-    rpc_common._safe_log(LOG.debug, _('unpacked context: %s'), ctx.to_dict())
+    rpc_common._safe_log(LOG.debug, 'unpacked context: %s', ctx.to_dict())
     return ctx
 
 
@@ -300,8 +300,14 @@ def pack_context(msg, context):
     for args at some point.
 
     """
-    context_d = dict([('_context_%s' % key, value)
-                      for (key, value) in context.to_dict().iteritems()])
+    if isinstance(context, dict):
+        context_d = dict([('_context_%s' % key, value)
+                          for (key, value) in six.iteritems(context)])
+    else:
+        context_d = dict([('_context_%s' % key, value)
+                          for (key, value) in
+                          six.iteritems(context.to_dict())])
+
     msg.update(context_d)
 
 
@@ -333,7 +339,7 @@ def _add_unique_id(msg):
     """Add unique_id for checking duplicate messages."""
     unique_id = uuid.uuid4().hex
     msg.update({UNIQUE_ID: unique_id})
-    LOG.debug(_('UNIQUE_ID is %s.') % (unique_id))
+    LOG.debug('UNIQUE_ID is %s.' % (unique_id))
 
 
 class _ThreadPoolWithWait(object):
@@ -359,22 +365,43 @@ class CallbackWrapper(_ThreadPoolWithWait):
     Allows it to be invoked in a green thread.
     """
 
-    def __init__(self, conf, callback, connection_pool):
+    def __init__(self, conf, callback, connection_pool,
+                 wait_for_consumers=False):
         """Initiates CallbackWrapper object.
 
         :param conf: cfg.CONF instance
         :param callback: a callable (probably a function)
         :param connection_pool: connection pool as returned by
                                 get_connection_pool()
+        :param wait_for_consumers: wait for all green threads to
+                                   complete and raise the last
+                                   caught exception, if any.
+
         """
         super(CallbackWrapper, self).__init__(
             conf=conf,
             connection_pool=connection_pool,
         )
         self.callback = callback
+        self.wait_for_consumers = wait_for_consumers
+        self.exc_info = None
+
+    def _wrap(self, message_data, **kwargs):
+        """Wrap the callback invocation to catch exceptions.
+        """
+        try:
+            self.callback(message_data, **kwargs)
+        except Exception:
+            self.exc_info = sys.exc_info()
 
     def __call__(self, message_data):
-        self.pool.spawn_n(self.callback, message_data)
+        self.exc_info = None
+        self.pool.spawn_n(self._wrap, message_data)
+
+        if self.wait_for_consumers:
+            self.pool.waitall()
+            if self.exc_info:
+                six.reraise(self.exc_info[1], None, self.exc_info[2])
 
 
 class ProxyCallback(_ThreadPoolWithWait):
@@ -405,7 +432,7 @@ class ProxyCallback(_ThreadPoolWithWait):
         # the previous context is stored in local.store.context
         if hasattr(local.store, 'context'):
             del local.store.context
-        rpc_common._safe_log(LOG.debug, _('received %s'), message_data)
+        rpc_common._safe_log(LOG.debug, 'received %s', message_data)
         self.msg_id_cache.check_duplicate_message(message_data)
         ctxt = unpack_context(self.conf, message_data)
         method = message_data.get('method')
@@ -442,7 +469,7 @@ class ProxyCallback(_ThreadPoolWithWait):
             # This final None tells multicall that it is done.
             ctxt.reply(ending=True, connection_pool=self.connection_pool)
         except rpc_common.ClientException as e:
-            LOG.debug(_('Expected exception during message handling (%s)') %
+            LOG.debug('Expected exception during message handling (%s)' %
                       e._exc_info[1])
             ctxt.reply(None, e._exc_info,
                        connection_pool=self.connection_pool,
@@ -450,7 +477,7 @@ class ProxyCallback(_ThreadPoolWithWait):
         except Exception:
             # sys.exc_info() is deleted by LOG.exception().
             exc_info = sys.exc_info()
-            LOG.error(_('Exception during message handling'),
+            LOG.error(_LE('Exception during message handling'),
                       exc_info=exc_info)
             ctxt.reply(None, exc_info, connection_pool=self.connection_pool)
 
@@ -524,10 +551,10 @@ _reply_proxy_create_sem = semaphore.Semaphore()
 
 def multicall(conf, context, topic, msg, timeout, connection_pool):
     """Make a call that returns multiple times."""
-    LOG.debug(_('Making synchronous call on %s ...'), topic)
+    LOG.debug('Making synchronous call on %s ...', topic)
     msg_id = uuid.uuid4().hex
     msg.update({'_msg_id': msg_id})
-    LOG.debug(_('MSG_ID is %s') % (msg_id))
+    LOG.debug('MSG_ID is %s' % (msg_id))
     _add_unique_id(msg)
     pack_context(msg, context)
 
@@ -553,7 +580,7 @@ def call(conf, context, topic, msg, timeout, connection_pool):
 
 def cast(conf, context, topic, msg, connection_pool):
     """Sends a message on a topic without waiting for a response."""
-    LOG.debug(_('Making asynchronous cast on %s...'), topic)
+    LOG.debug('Making asynchronous cast on %s...', topic)
     _add_unique_id(msg)
     pack_context(msg, context)
     with ConnectionContext(conf, connection_pool) as conn:
@@ -562,7 +589,7 @@ def cast(conf, context, topic, msg, connection_pool):
 
 def fanout_cast(conf, context, topic, msg, connection_pool):
     """Sends a message on a fanout exchange without waiting for a response."""
-    LOG.debug(_('Making asynchronous fanout cast...'))
+    LOG.debug('Making asynchronous fanout cast...')
     _add_unique_id(msg)
     pack_context(msg, context)
     with ConnectionContext(conf, connection_pool) as conn:
@@ -590,7 +617,7 @@ def fanout_cast_to_server(conf, context, server_params, topic, msg,
 
 def notify(conf, context, topic, msg, connection_pool, envelope):
     """Sends a notification event on a topic."""
-    LOG.debug(_('Sending %(event_type)s on %(topic)s'),
+    LOG.debug('Sending %(event_type)s on %(topic)s',
               dict(event_type=msg.get('event_type'),
                    topic=topic))
     _add_unique_id(msg)

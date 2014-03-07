@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
@@ -17,7 +15,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import rpc
 from muranoapi.openstack.common.rpc import dispatcher as rpc_dispatcher
@@ -46,7 +43,7 @@ class Service(service.Service):
         super(Service, self).start()
 
         self.conn = rpc.create_connection(new=True)
-        LOG.debug(_("Creating Consumer connection for Service %s") %
+        LOG.debug("Creating Consumer connection for Service %s" %
                   self.topic)
 
         dispatcher = rpc_dispatcher.RpcDispatcher([self.manager],

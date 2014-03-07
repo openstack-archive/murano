@@ -26,7 +26,7 @@ from migrate import exceptions as versioning_exceptions
 
 from muranoapi.common.config import CONF as conf
 from muranoapi.db import migrate_repo
-from muranoapi.openstack.common.db.sqlalchemy import session
+from muranoapi.openstack.common.db.sqlalchemy import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
@@ -34,13 +34,15 @@ log = logging.getLogger(__name__)
 
 
 def get_session(autocommit=True, expire_on_commit=False):
-    if not session._MAKER:
+    s = _create_facade_lazily().get_session(autocommit=autocommit,
+                                            expire_on_commit=expire_on_commit)
+    if s:
         if conf.database.auto_create:
             log.info(_('auto-creating DB'))
             _auto_create_db()
         else:
             log.info(_('not auto-creating DB'))
-    return session.get_session(autocommit, expire_on_commit)
+    return s
 
 
 def _auto_create_db():
@@ -50,3 +52,17 @@ def _auto_create_db():
     except versioning_exceptions.DatabaseNotControlledError:
         versioning_api.version_control(conf.database.connection, repo_path)
         versioning_api.upgrade(conf.database.connection, repo_path)
+
+
+_FACADE = None
+
+
+def _create_facade_lazily():
+    global _FACADE
+
+    if _FACADE is None:
+        _FACADE = db_session.EngineFacade(
+            conf.database.connection,
+            **dict(conf.database.iteritems())
+        )
+    return _FACADE

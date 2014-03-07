@@ -12,6 +12,7 @@ boto>=2.12.0,!=2.13.0
 sqlalchemy-migrate>=0.8.2,!=0.8.4
 httplib2>=0.7.5
 kombu>=2.4.8
+lockfile>=0.8
 pycrypto>=2.6
 iso8601>=0.1.8
 six>=1.5.2

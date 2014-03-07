@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright (c) 2011 X.commerce, a business unit of eBay Inc.
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
@@ -28,7 +26,6 @@ from sqlalchemy import Column, Integer
 from sqlalchemy import DateTime
 from sqlalchemy.orm import object_mapper
 
-from muranoapi.openstack.common.db.sqlalchemy import session as sa
 from muranoapi.openstack.common import timeutils
 
 
@@ -36,18 +33,17 @@ class ModelBase(object):
     """Base class for models."""
     __table_initialized__ = False
 
-    def save(self, session=None):
+    def save(self, session):
         """Save this object."""
-        if not session:
-            session = sa.get_session()
+
         # NOTE(boris-42): This part of code should be look like:
-        #                       sesssion.add(self)
+        #                       session.add(self)
         #                       session.flush()
         #                 But there is a bug in sqlalchemy and eventlet that
         #                 raises NoneType exception if there is no running
         #                 transaction and rollback is called. As long as
         #                 sqlalchemy has this bug we have to create transaction
-        #                 explicity.
+        #                 explicitly.
         with session.begin(subtransactions=True):
             session.add(self)
             session.flush()
@@ -61,13 +57,24 @@ class ModelBase(object):
     def get(self, key, default=None):
         return getattr(self, key, default)
 
+    @property
+    def _extra_keys(self):
+        """Specifies custom fields
+
+        Subclasses can override this property to return a list
+        of custom fields that should be included in their dict
+        representation.
+
+        For reference check tests/db/sqlalchemy/test_models.py
+        """
+        return []
+
     def __iter__(self):
         columns = dict(object_mapper(self).columns).keys()
         # NOTE(russellb): Allow models to specify other keys that can be looked
         # up, beyond the actual db columns.  An example would be the 'name'
         # property for an Instance.
-        if hasattr(self, '_extra_keys'):
-            columns.extend(self._extra_keys())
+        columns.extend(self._extra_keys)
         self._i = iter(columns)
         return self
 
@@ -89,19 +96,19 @@ class ModelBase(object):
         joined = dict([(k, v) for k, v in six.iteritems(self.__dict__)
                       if not k[0] == '_'])
         local.update(joined)
-        return local.iteritems()
+        return six.iteritems(local)
 
 
 class TimestampMixin(object):
-    created_at = Column(DateTime, default=timeutils.utcnow)
-    updated_at = Column(DateTime, onupdate=timeutils.utcnow)
+    created_at = Column(DateTime, default=lambda: timeutils.utcnow())
+    updated_at = Column(DateTime, onupdate=lambda: timeutils.utcnow())
 
 
 class SoftDeleteMixin(object):
     deleted_at = Column(DateTime)
     deleted = Column(Integer, default=0)
 
-    def soft_delete(self, session=None):
+    def soft_delete(self, session):
         """Mark this object as deleted."""
         self.deleted = self.id
         self.deleted_at = timeutils.utcnow()
