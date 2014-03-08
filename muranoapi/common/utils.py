@@ -12,14 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from collections import deque
-from functools import wraps
+import collections
+import functools as func
+import types
 
 import eventlet
-from jsonschema import validate
-import types
-from muranoapi.openstack.common import log as logging
+import jsonschema
+
 from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
 
 
 log = logging.getLogger(__name__)
@@ -55,7 +56,7 @@ class TraverseHelper(object):
         :return: object
         :raise: ValueError if object is malformed
         """
-        queue = deque(filter(lambda x: x, path.split('/')))
+        queue = collections.deque(filter(lambda x: x, path.split('/')))
 
         while len(queue):
             path = queue.popleft()
@@ -173,7 +174,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
     """
 
     def deco_retry(f):
-        @wraps(f)
+        @func.wraps(f)
         def f_retry(*args, **kwargs):
             mtries, mdelay = tries, delay
             forever = mtries == -1
@@ -202,7 +203,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
 def handle(f):
     """Handles exception in wrapped function and writes to log."""
 
-    @wraps(f)
+    @func.wraps(f)
     def f_handle(*args, **kwargs):
         try:
             return f(*args, **kwargs)
@@ -214,10 +215,10 @@ def handle(f):
 
 def validate_body(schema):
     def deco_validate_body(f):
-        @wraps(f)
+        @func.wraps(f)
         def f_validate_body(*args, **kwargs):
             if 'body' in kwargs:
-                validate(kwargs['body'], schema)
+                jsonschema.validate(kwargs['body'], schema)
                 return f(*args, **kwargs)
         return f_validate_body
     return deco_validate_body

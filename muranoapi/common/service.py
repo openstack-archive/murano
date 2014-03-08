@@ -11,17 +11,23 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+# TODO(ruhe): rename this file to avoid collisions
+# with openstack.common.service
 
-from muranoapi.common.utils import handle
-from muranoapi.db.models import Status, Session, Environment, Deployment
-from muranoapi.db.session import get_session
-from muranoapi.openstack.common import log as logging, timeutils, service
-from muranoapi.openstack.common.gettextutils import _  # noqa
-from muranoapi.common import config
-from muranocommon.helpers.token_sanitizer import TokenSanitizer
-from muranocommon.messaging import MqClient
-from sqlalchemy import desc
 import eventlet
+from sqlalchemy import desc
+
+from muranocommon.helpers import token_sanitizer
+from muranocommon import messaging
+
+from muranoapi.common import config
+from muranoapi.common import utils
+from muranoapi.db import models
+from muranoapi.db import session as db_session
+from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import service
+from muranoapi.openstack.common import timeutils
 
 conf = config.CONF.reports
 log = logging.getLogger(__name__)
@@ -50,7 +56,7 @@ class TaskResultHandlerService(service.Service):
             'ssl': rabbitmq.ssl,
             'ca_certs': rabbitmq.ca_certs.strip() or None
         }
-        return MqClient(**connection_params)
+        return messaging.MqClient(**connection_params)
 
     def _handle_results(self):
         reconnect_delay = 1
@@ -93,11 +99,12 @@ class TaskResultHandlerService(service.Service):
                 reconnect_delay = min(reconnect_delay * 2, 60)
 
 
-@handle
+@utils.handle
 def handle_result(message):
     try:
         environment_result = message.body
-        secure_result = TokenSanitizer().sanitize(environment_result)
+        secure_result = token_sanitizer.TokenSanitizer().\
+            sanitize(environment_result)
         log.debug(_('Got result message from '
                     'orchestration engine:\n{0}'.format(secure_result)))
 
@@ -106,8 +113,9 @@ def handle_result(message):
                         'is deleted'.format(environment_result['id'])))
             return
 
-        session = get_session()
-        environment = session.query(Environment).get(environment_result['id'])
+        session = db_session.get_session()
+        environment = session.query(models.Environment).get(
+            environment_result['id'])
 
         if not environment:
             log.warning(_('Environment result could not be handled, specified '
@@ -120,7 +128,7 @@ def handle_result(message):
         environment.save(session)
 
         #close session
-        conf_session = session.query(Session).filter_by(
+        conf_session = session.query(models.Session).filter_by(
             **{'environment_id': environment.id, 'state': 'deploying'}).first()
         conf_session.state = 'deployed'
         conf_session.save(session)
@@ -129,12 +137,13 @@ def handle_result(message):
         deployment = get_last_deployment(session, environment.id)
         deployment.finished = timeutils.utcnow()
 
-        num_errors = session.query(Status).filter_by(level='error',
-                                                     deployment_id=deployment.
-                                                     id).count()
-        num_warnings = session.query(Status).filter_by(level='warning',
-                                                       deployment_id=
-                                                       deployment.id).count()
+        num_errors = session.query(models.Status).filter_by(
+            level='error',
+            deployment_id=deployment.id).count()
+
+        num_warnings = session.query(models.Status).filter_by(
+            level='warning',
+            deployment_id=deployment.id).count()
 
         final_status_text = "Deployment finished"
         if num_errors:
@@ -143,7 +152,7 @@ def handle_result(message):
         elif num_warnings:
             final_status_text += " with warnings"
 
-        status = Status()
+        status = models.Status()
         status.deployment_id = deployment.id
         status.text = final_status_text
         status.level = 'info'
@@ -155,7 +164,7 @@ def handle_result(message):
         message.ack()
 
 
-@handle
+@utils.handle
 def handle_report(message):
     try:
         report = message.body
@@ -165,10 +174,10 @@ def handle_report(message):
         report['entity_id'] = report['id']
         del report['id']
 
-        status = Status()
+        status = models.Status()
         status.update(report)
 
-        session = get_session()
+        session = db_session.get_session()
         #connect with deployment
         with session.begin():
             running_deployment = get_last_deployment(session,
@@ -182,7 +191,7 @@ def handle_report(message):
 
 
 def get_last_deployment(session, env_id):
-    query = session.query(Deployment). \
+    query = session.query(models.Deployment). \
         filter_by(environment_id=env_id). \
-        order_by(desc(Deployment.started))
+        order_by(desc(models.Deployment.started))
     return query.first()

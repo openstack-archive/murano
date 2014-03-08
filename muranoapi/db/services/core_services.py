@@ -11,11 +11,11 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
-from muranoapi.common.utils import TraverseHelper
-from muranoapi.db.services.environments import EnvironmentServices
-from muranoapi.openstack.common import timeutils
 import types
+
+from muranoapi.common import utils
+from muranoapi.db.services import environments as envs
+from muranoapi.openstack.common import timeutils
 
 
 class CoreServices(object):
@@ -38,18 +38,18 @@ class CoreServices(object):
         # Now we assume that service has same status as environment.
         # TODO: implement as designed and described above
 
-        return EnvironmentServices.get_status(environment_id)
+        return envs.EnvironmentServices.get_status(environment_id)
 
     @staticmethod
     def get_data(environment_id, path, session_id=None):
-        get_description = EnvironmentServices.get_environment_description
+        get_description = envs.EnvironmentServices.get_environment_description
 
         env_description = get_description(environment_id, session_id)
 
         if not 'services' in env_description:
             return []
 
-        result = TraverseHelper.get(path, env_description)
+        result = utils.TraverseHelper.get(path, env_description)
 
         if path == '/services':
             get_status = CoreServices.get_service_status
@@ -60,8 +60,9 @@ class CoreServices(object):
 
     @staticmethod
     def post_data(environment_id, session_id, data, path):
-        get_description = EnvironmentServices.get_environment_description
-        save_description = EnvironmentServices.save_environment_description
+        get_description = envs.EnvironmentServices.get_environment_description
+        save_description = envs.EnvironmentServices.\
+            save_environment_description
 
         env_description = get_description(environment_id, session_id)
         if not 'services' in env_description:
@@ -69,9 +70,9 @@ class CoreServices(object):
 
         if path == '/services':
             if isinstance(data, types.ListType):
-                TraverseHelper.extend(path, data, env_description)
+                utils.TraverseHelper.extend(path, data, env_description)
             else:
-                TraverseHelper.insert(path, data, env_description)
+                utils.TraverseHelper.insert(path, data, env_description)
 
         save_description(session_id, env_description)
 
@@ -79,12 +80,13 @@ class CoreServices(object):
 
     @staticmethod
     def put_data(environment_id, session_id, data, path):
-        get_description = EnvironmentServices.get_environment_description
-        save_description = EnvironmentServices.save_environment_description
+        get_description = envs.EnvironmentServices.get_environment_description
+        save_description = envs.EnvironmentServices.\
+            save_environment_description
 
         env_description = get_description(environment_id, session_id)
 
-        TraverseHelper.update(path, data, env_description)
+        utils.TraverseHelper.update(path, data, env_description)
         if path == '/services':
             data['updated'] = str(timeutils.utcnow())
 
@@ -94,10 +96,11 @@ class CoreServices(object):
 
     @staticmethod
     def delete_data(environment_id, session_id, path):
-        get_description = EnvironmentServices.get_environment_description
-        save_description = EnvironmentServices.save_environment_description
+        get_description = envs.EnvironmentServices.get_environment_description
+        save_description = envs.EnvironmentServices.\
+            save_environment_description
 
         env_description = get_description(environment_id, session_id)
 
-        TraverseHelper.remove(path, env_description)
+        utils.TraverseHelper.remove(path, env_description)
         save_description(session_id, env_description)

@@ -17,20 +17,20 @@ SQLAlchemy models for muranoapi data
 """
 import anyjson
 
-from sqlalchemy import Column, String, BigInteger, TypeDecorator, ForeignKey
-from sqlalchemy.ext.compiler import compiles
-from sqlalchemy.ext.declarative import declarative_base
-from sqlalchemy import DateTime, Text
-from sqlalchemy.orm import relationship, object_mapper
+import sqlalchemy as sa
+from sqlalchemy.ext import compiler as sa_compiler
+from sqlalchemy.ext import declarative as sa_decl
+from sqlalchemy import orm as sa_orm
+
 from muranoapi.common import uuidutils
-
+from muranoapi.db import session as db_session
 from muranoapi.openstack.common import timeutils
-from muranoapi.db.session import get_session
-
-BASE = declarative_base()
 
 
-@compiles(BigInteger, 'sqlite')
+BASE = sa_decl.declarative_base()
+
+
+@sa_compiler.compiles(sa.BigInteger, 'sqlite')
 def compile_big_int_sqlite(type_, compiler, **kw):
     return 'INTEGER'
 
@@ -38,14 +38,14 @@ def compile_big_int_sqlite(type_, compiler, **kw):
 class ModelBase(object):
     __protected_attributes__ = set(["created", "updated"])
 
-    created = Column(DateTime, default=timeutils.utcnow,
-                     nullable=False)
-    updated = Column(DateTime, default=timeutils.utcnow,
-                     nullable=False, onupdate=timeutils.utcnow)
+    created = sa.Column(sa.DateTime, default=timeutils.utcnow,
+                        nullable=False)
+    updated = sa.Column(sa.DateTime, default=timeutils.utcnow,
+                        nullable=False, onupdate=timeutils.utcnow)
 
     def save(self, session=None):
         """Save this object"""
-        session = session or get_session()
+        session = session or db_session.get_session()
         session.add(self)
         session.flush()
 
@@ -63,7 +63,7 @@ class ModelBase(object):
         return getattr(self, key)
 
     def __iter__(self):
-        self._i = iter(object_mapper(self).columns)
+        self._i = iter(sa_orm.object_mapper(self).columns)
         return self
 
     def next(self):
@@ -85,8 +85,8 @@ class ModelBase(object):
                     if k != '_sa_instance_state')
 
 
-class JsonBlob(TypeDecorator):
-    impl = Text
+class JsonBlob(sa.TypeDecorator):
+    impl = sa.Text
 
     def process_bind_param(self, value, dialect):
         return anyjson.serialize(value)
@@ -99,17 +99,19 @@ class Environment(BASE, ModelBase):
     """Represents a Environment in the metadata-store"""
     __tablename__ = 'environment'
 
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    name = Column(String(255), nullable=False)
-    tenant_id = Column(String(32), nullable=False)
-    version = Column(BigInteger, nullable=False, default=0)
-    description = Column(JsonBlob(), nullable=False, default={})
-    networking = Column(JsonBlob(), nullable=True, default={})
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(255), nullable=False)
+    tenant_id = sa.Column(sa.String(32), nullable=False)
+    version = sa.Column(sa.BigInteger, nullable=False, default=0)
+    description = sa.Column(JsonBlob(), nullable=False, default={})
+    networking = sa.Column(JsonBlob(), nullable=True, default={})
 
-    sessions = relationship("Session", backref='environment',
-                            cascade='save-update, merge, delete')
-    deployments = relationship("Deployment", backref='environment',
-                               cascade='save-update, merge, delete')
+    sessions = sa_orm.relationship("Session", backref='environment',
+                                   cascade='save-update, merge, delete')
+    deployments = sa_orm.relationship("Deployment", backref='environment',
+                                      cascade='save-update, merge, delete')
 
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
@@ -120,13 +122,15 @@ class Environment(BASE, ModelBase):
 class Session(BASE, ModelBase):
     __tablename__ = 'session'
 
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    environment_id = Column(String(32), ForeignKey('environment.id'))
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    environment_id = sa.Column(sa.String(32), sa.ForeignKey('environment.id'))
 
-    user_id = Column(String(36), nullable=False)
-    state = Column(String(36), nullable=False)
-    description = Column(JsonBlob(), nullable=False)
-    version = Column(BigInteger, nullable=False, default=0)
+    user_id = sa.Column(sa.String(36), nullable=False)
+    state = sa.Column(sa.String(36), nullable=False)
+    description = sa.Column(JsonBlob(), nullable=False)
+    version = sa.Column(sa.BigInteger, nullable=False, default=0)
 
     def to_dict(self):
         dictionary = super(Session, self).to_dict()
@@ -140,14 +144,16 @@ class Session(BASE, ModelBase):
 class Deployment(BASE, ModelBase):
     __tablename__ = 'deployment'
 
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    started = Column(DateTime, default=timeutils.utcnow, nullable=False)
-    finished = Column(DateTime, default=None, nullable=True)
-    description = Column(JsonBlob(), nullable=False)
-    environment_id = Column(String(32), ForeignKey('environment.id'))
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    started = sa.Column(sa.DateTime, default=timeutils.utcnow, nullable=False)
+    finished = sa.Column(sa.DateTime, default=None, nullable=True)
+    description = sa.Column(JsonBlob(), nullable=False)
+    environment_id = sa.Column(sa.String(32), sa.ForeignKey('environment.id'))
 
-    statuses = relationship("Status", backref='deployment',
-                            cascade='save-update, merge, delete')
+    statuses = sa_orm.relationship("Status", backref='deployment',
+                                   cascade='save-update, merge, delete')
 
     def to_dict(self):
         dictionary = super(Deployment, self).to_dict()
@@ -162,13 +168,15 @@ class Deployment(BASE, ModelBase):
 class Status(BASE, ModelBase):
     __tablename__ = 'status'
 
-    id = Column(String(32), primary_key=True, default=uuidutils.generate_uuid)
-    entity_id = Column(String(32), nullable=True)
-    entity = Column(String(10), nullable=True)
-    deployment_id = Column(String(32), ForeignKey('deployment.id'))
-    text = Column(String(), nullable=False)
-    level = Column(String(32), nullable=False)
-    details = Column(Text(), nullable=True)
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    entity_id = sa.Column(sa.String(32), nullable=True)
+    entity = sa.Column(sa.String(10), nullable=True)
+    deployment_id = sa.Column(sa.String(32), sa.ForeignKey('deployment.id'))
+    text = sa.Column(sa.String(), nullable=False)
+    level = sa.Column(sa.String(32), nullable=False)
+    details = sa.Column(sa.Text(), nullable=True)
 
     def to_dict(self):
         dictionary = super(Status, self).to_dict()

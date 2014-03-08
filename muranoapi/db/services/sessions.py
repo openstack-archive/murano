@@ -11,19 +11,20 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from collections import namedtuple
+import collections
 
 from muranoapi.common import config
-from muranoapi.db.models import Session, Environment, Deployment, Status
-from muranoapi.db.session import get_session
-from muranocommon.helpers.token_sanitizer import TokenSanitizer
-from muranocommon.messaging import MqClient, Message
+from muranoapi.db import models
+from muranoapi.db import session as db_session
+from muranocommon.helpers import token_sanitizer
+from muranocommon import messaging
 
 rabbitmq = config.CONF.rabbitmq
 
-SessionState = namedtuple('SessionState', ['open', 'deploying', 'deployed'])(
-    open='open', deploying='deploying', deployed='deployed'
-)
+SessionState = collections.namedtuple(
+    'SessionState', ['open', 'deploying', 'deployed'])(open='open',
+                                                       deploying='deploying',
+                                                       deployed='deployed')
 
 
 class SessionServices(object):
@@ -38,18 +39,19 @@ class SessionServices(object):
         not defined all sessions for specified environment is returned.
         """
 
-        unit = get_session()
+        unit = db_session.get_session()
         # Here we duplicate logic for reducing calls to database
         # Checks for validation is same as in validate.
-        environment = unit.query(Environment).get(environment_id)
+        environment = unit.query(models.Environment).get(environment_id)
 
-        return unit.query(Session).filter(
+        return unit.query(models.Session).filter(
             #Get all session for this environment
-            Session.environment_id == environment_id,
+            models.Session.environment_id == environment_id,
             #in this state, if state is not specified return in all states
-            Session.state.in_(SessionState if state is None else [state]),
+            models.Session.state.in_(SessionState
+                                     if state is None else [state]),
             #Only sessions with same version as current env version are valid
-            Session.version == environment.version
+            models.Session.version == environment.version
         ).all()
 
     @staticmethod
@@ -61,10 +63,10 @@ class SessionServices(object):
         :param user_id: User Id
         :return: Created session
         """
-        unit = get_session()
-        environment = unit.query(Environment).get(environment_id)
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
 
-        session = Session()
+        session = models.Session()
         session.environment_id = environment.id
         session.user_id = user_id
         session.state = SessionState.open
@@ -89,16 +91,17 @@ class SessionServices(object):
         """
 
         #if other session is deploying now current session is invalid
-        unit = get_session()
+        unit = db_session.get_session()
 
         #if environment version is higher then version on which current session
         #is created then other session was already deployed
-        current_env = unit.query(Environment).get(session.environment_id)
+        current_env = unit.query(models.Environment).\
+            get(session.environment_id)
         if current_env.version > session.version:
             return False
 
         #if other session is deploying now current session is invalid
-        other_is_deploying = unit.query(Session).filter_by(
+        other_is_deploying = unit.query(models.Session).filter_by(
             environment_id=session.environment_id, state=SessionState.deploying
         ).count() > 0
         if session.state == SessionState.open and other_is_deploying:
@@ -123,11 +126,11 @@ class SessionServices(object):
         environment['token'] = token
 
         session.state = SessionState.deploying
-        deployment = Deployment()
+        deployment = models.Deployment()
         deployment.environment_id = environment['id']
-        deployment.description = TokenSanitizer().sanitize(
+        deployment.description = token_sanitizer.TokenSanitizer().sanitize(
             dict(session.description))
-        status = Status()
+        status = models.Status()
         status.text = "Deployment scheduled"
         status.level = "info"
         deployment.statuses.append(status)
@@ -135,7 +138,7 @@ class SessionServices(object):
             unit.add(session)
             unit.add(deployment)
 
-        message = Message()
+        message = messaging.Message()
         message.body = environment
 
         connection_params = {
@@ -148,6 +151,6 @@ class SessionServices(object):
             'ca_certs': rabbitmq.ca_certs.strip() or None
         }
 
-        with MqClient(**connection_params) as mqClient:
+        with messaging.MqClient(**connection_params) as mqClient:
             mqClient.declare('tasks', 'tasks', enable_ha=True)
             mqClient.send(message, 'tasks', 'tasks')

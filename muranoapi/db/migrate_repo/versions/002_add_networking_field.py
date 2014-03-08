@@ -11,23 +11,24 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from migrate.changeset.constraint import ForeignKeyConstraint
-
-from sqlalchemy.schema import MetaData, Table, Column
-from sqlalchemy.types import String, Text, DateTime, BigInteger
+from sqlalchemy import schema
+from sqlalchemy import types
 
 
-meta = MetaData()
+meta = schema.MetaData()
 
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
-    environment = Table('environment', meta, autoload=True)
-    networking = Column('networking', Text(), nullable=True, default='{}')
+    environment = schema.Table('environment', meta, autoload=True)
+    networking = schema.Column('networking',
+                               types.Text(),
+                               nullable=True,
+                               default='{}')
     networking.create(environment)
 
 
 def downgrade(migrate_engine):
     meta.bind = migrate_engine
-    environment = Table('environment', meta, autoload=True)
+    environment = schema.Table('environment', meta, autoload=True)
     environment.c.networking.drop()

@@ -12,24 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.db.models import Session, Environment, Status
-from muranoapi.db.session import get_session
+from muranoapi.db import models
+from muranoapi.db import session as db_session
 
 
 def get_draft(environment_id=None, session_id=None):
-    unit = get_session()
+    unit = db_session.get_session()
     #TODO: When session is deployed should be returned env.description
     if session_id:
-        session = unit.query(Session).get(session_id)
+        session = unit.query(models.Session).get(session_id)
         return session.description
     else:
-        environment = unit.query(Environment).get(environment_id)
+        environment = unit.query(models.Environment).get(environment_id)
         return environment.description
 
 
 def save_draft(session_id, draft):
-    unit = get_session()
-    session = unit.query(Session).get(session_id)
+    unit = db_session.get_session()
+    session = unit.query(models.Session).get(session_id)
 
     session.description = draft
     session.save(unit)
@@ -38,14 +38,14 @@ def save_draft(session_id, draft):
 def get_service_status(environment_id, session_id, service):
     status = 'draft'
 
-    unit = get_session()
-    session_state = unit.query(Session).get(session_id).state
+    unit = db_session.get_session()
+    session_state = unit.query(models.Session).get(session_id).state
 
     entities = [u['id'] for u in service['units']]
-    reports_count = unit.query(Status).filter(
-        Status.environment_id == environment_id
-        and Status.session_id == session_id
-        and Status.entity_id.in_(entities)
+    reports_count = unit.query(models.Status).filter(
+        models.Status.environment_id == environment_id
+        and models.Status.session_id == session_id
+        and models.Status.entity_id.in_(entities)
     ).count()
 
     if session_state == 'deployed':

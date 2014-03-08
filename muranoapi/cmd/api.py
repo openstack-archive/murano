@@ -25,10 +25,10 @@ if os.path.exists(os.path.join(possible_topdir, 'muranoapi', '__init__.py')):
     sys.path.insert(0, possible_topdir)
 
 from muranoapi.common import config
-from muranoapi.common.service import TaskResultHandlerService
+from muranoapi.common import service as murano_service
 from muranoapi.openstack.common import log
-from muranoapi.openstack.common import wsgi
 from muranoapi.openstack.common import service
+from muranoapi.openstack.common import wsgi
 
 
 def main():
@@ -43,7 +43,7 @@ def main():
                                    host=config.CONF.bind_host)
 
         launcher.launch_service(api_service)
-        launcher.launch_service(TaskResultHandlerService())
+        launcher.launch_service(murano_service.TaskResultHandlerService())
         launcher.wait()
     except RuntimeError, e:
         sys.stderr.write("ERROR: %s\n" % e)

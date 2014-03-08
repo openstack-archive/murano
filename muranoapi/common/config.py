@@ -29,9 +29,10 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-from muranoapi.openstack.common import log
-from muranoapi import __version__ as version
+from muranoapi import __version__ as version  # noqa
 from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log
+
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor'),

@@ -14,15 +14,17 @@
 
 from sqlalchemy import desc
 from webob import exc
+
 from muranoapi.common import config
-from muranoapi.common.utils import build_entity_map
-from muranoapi.db.session import get_session
-from muranoapi.db.models import Environment, Status
-from muranoapi.db.services.core_services import CoreServices
-from muranoapi.db.services.environments import EnvironmentServices
-from muranoapi.openstack.common import wsgi
-from muranoapi.openstack.common import log as logging
+from muranoapi.common import utils
+from muranoapi.db import models
+from muranoapi.db.services import core_services
+from muranoapi.db.services import environments as envs
+from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import wsgi
+
 
 rabbitmq = config.CONF.rabbitmq
 
@@ -35,7 +37,7 @@ class Controller(object):
 
         #Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
-        environments = EnvironmentServices.get_environments_by(filters)
+        environments = envs.EnvironmentServices.get_environments_by(filters)
         environments = [env.to_dict() for env in environments]
 
         return {"environments": environments}
@@ -43,16 +45,16 @@ class Controller(object):
     def create(self, request, body):
         log.debug(_('Environments:Create <Body {0}>'.format(body)))
 
-        environment = EnvironmentServices.create(body.copy(),
-                                                 request.context.tenant)
+        environment = envs.EnvironmentServices.create(body.copy(),
+                                                      request.context.tenant)
 
         return environment.to_dict()
 
     def show(self, request, environment_id):
         log.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
 
-        session = get_session()
-        environment = session.query(Environment).get(environment_id)
+        session = db_session.get_session()
+        environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
             log.info('Environment <EnvId {0}> is not found'
@@ -65,14 +67,14 @@ class Controller(object):
             raise exc.HTTPUnauthorized
 
         env = environment.to_dict()
-        env['status'] = EnvironmentServices.get_status(env['id'])
+        env['status'] = envs.EnvironmentServices.get_status(env['id'])
 
         session_id = None
         if hasattr(request, 'context') and request.context.session:
             session_id = request.context.session
 
         #add services to env
-        get_data = CoreServices.get_data
+        get_data = core_services.CoreServices.get_data
         env['services'] = get_data(environment_id, '/services', session_id)
 
         return env
@@ -81,8 +83,8 @@ class Controller(object):
         log.debug(_('Environments:Update <Id: {0}, '
                     'Body: {1}>'.format(environment_id, body)))
 
-        session = get_session()
-        environment = session.query(Environment).get(environment_id)
+        session = db_session.get_session()
+        environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
             log.info(_('Environment <EnvId {0}> is not '
@@ -102,8 +104,8 @@ class Controller(object):
     def delete(self, request, environment_id):
         log.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
 
-        unit = get_session()
-        environment = unit.query(Environment).get(environment_id)
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
             log.info(_('Environment <EnvId {0}> '
@@ -115,22 +117,24 @@ class Controller(object):
                        'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
-        EnvironmentServices.delete(environment_id, request.context.auth_token)
+        envs.EnvironmentServices.delete(environment_id,
+                                        request.context.auth_token)
 
     def last(self, request, environment_id):
         session_id = None
         if hasattr(request, 'context') and request.context.session:
             session_id = request.context.session
-        services = CoreServices.get_data(environment_id, '/services',
-                                         session_id)
-        db_session = get_session()
+        services = core_services.CoreServices.get_data(environment_id,
+                                                       '/services',
+                                                       session_id)
+        session = db_session.get_session()
         result = {}
         for service in services:
             service_id = service['id']
-            entity_ids = build_entity_map(service).keys()
-            last_status = db_session.query(Status). \
-                filter(Status.entity_id.in_(entity_ids)). \
-                order_by(desc(Status.created)). \
+            entity_ids = utils.build_entity_map(service).keys()
+            last_status = session.query(models.Status). \
+                filter(models.Status.entity_id.in_(entity_ids)). \
+                order_by(desc(models.Status.created)). \
                 first()
             if last_status:
                 result[service_id] = last_status.to_dict()

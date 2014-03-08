@@ -13,15 +13,14 @@
 #    under the License.
 
 from webob import exc
-from muranoapi.db.models import Session, Environment
-from muranoapi.db.session import get_session
-from muranoapi.db.services.sessions import SessionServices
-from muranoapi.db.services.sessions import SessionState
-from muranoapi.db.services.environments import EnvironmentServices
-from muranoapi.db.services.environments import EnvironmentStatus
-from muranoapi.openstack.common import wsgi
-from muranoapi.openstack.common import log as logging
+
+from muranoapi.db import models
+from muranoapi.db.services import environments as envs
+from muranoapi.db.services import sessions
+from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import wsgi
 
 
 log = logging.getLogger(__name__)
@@ -31,8 +30,8 @@ class Controller(object):
     def configure(self, request, environment_id):
         log.debug(_('Session:Configure <EnvId: {0}>'.format(environment_id)))
 
-        unit = get_session()
-        environment = unit.query(Environment).get(environment_id)
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
             log.info(_('Environment <EnvId {0}> '
@@ -45,23 +44,23 @@ class Controller(object):
             raise exc.HTTPUnauthorized
 
         # no new session can be opened if environment has deploying status
-        env_status = EnvironmentServices.get_status(environment_id)
-        if env_status == EnvironmentStatus.deploying:
+        env_status = envs.EnvironmentServices.get_status(environment_id)
+        if env_status == envs.EnvironmentStatus.deploying:
             log.info(_('Could not open session for environment <EnvId: {0}>,'
                        'environment has deploying '
                        'status.'.format(environment_id)))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
-        session = SessionServices.create(environment_id, user_id)
+        session = sessions.SessionServices.create(environment_id, user_id)
 
         return session.to_dict()
 
     def show(self, request, environment_id, session_id):
         log.debug(_('Session:Show <SessionId: {0}>'.format(session_id)))
 
-        unit = get_session()
-        session = unit.query(Session).get(session_id)
+        unit = db_session.get_session()
+        session = unit.query(models.Session).get(session_id)
 
         if session is None:
             log.error(_('Session <SessionId {0}> '
@@ -79,7 +78,7 @@ class Controller(object):
                         '<SessionId {1}>.'.format(user_id, session_id)))
             raise exc.HTTPUnauthorized()
 
-        if not SessionServices.validate(session):
+        if not sessions.SessionServices.validate(session):
             log.error(_('Session <SessionId {0}> '
                         'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
@@ -89,8 +88,8 @@ class Controller(object):
     def delete(self, request, environment_id, session_id):
         log.debug(_('Session:Delete <SessionId: {0}>'.format(session_id)))
 
-        unit = get_session()
-        session = unit.query(Session).get(session_id)
+        unit = db_session.get_session()
+        session = unit.query(models.Session).get(session_id)
 
         if session is None:
             log.error(_('Session <SessionId {0}> '
@@ -108,7 +107,7 @@ class Controller(object):
                         '<SessionId {1}>.'.format(user_id, session_id)))
             raise exc.HTTPUnauthorized()
 
-        if session.state == SessionState.deploying:
+        if session.state == sessions.SessionState.deploying:
             log.error(_('Session <SessionId: {0}> is in deploying state and '
                         'could not be deleted'.format(session_id)))
             raise exc.HTTPForbidden()
@@ -121,8 +120,8 @@ class Controller(object):
     def deploy(self, request, environment_id, session_id):
         log.debug(_('Session:Deploy <SessionId: {0}>'.format(session_id)))
 
-        unit = get_session()
-        session = unit.query(Session).get(session_id)
+        unit = db_session.get_session()
+        session = unit.query(models.Session).get(session_id)
 
         if session is None:
             log.error(_('Session <SessionId {0}> '
@@ -134,17 +133,19 @@ class Controller(object):
                         '<EnvId {1}>'.format(session_id, environment_id)))
             raise exc.HTTPNotFound()
 
-        if not SessionServices.validate(session):
+        if not sessions.SessionServices.validate(session):
             log.error(_('Session <SessionId {0}> '
                         'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
 
-        if session.state != SessionState.open:
+        if session.state != sessions.SessionState.open:
             log.error(_('Session <SessionId {0}> is already deployed or '
                         'deployment is in progress'.format(session_id)))
             raise exc.HTTPForbidden()
 
-        SessionServices.deploy(session, unit, request.context.auth_token)
+        sessions.SessionServices.deploy(session,
+                                        unit,
+                                        request.context.auth_token)
 
 
 def create_resource():

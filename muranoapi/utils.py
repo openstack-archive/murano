@@ -14,10 +14,12 @@
 
 import functools
 import logging
-from muranoapi.db.services.sessions import SessionServices, SessionState
+
 from webob import exc
-from muranoapi.db.models import Session, Environment
-from muranoapi.db.session import get_session
+
+from muranoapi.db import models
+from muranoapi.db.services import sessions
+from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 
 log = logging.getLogger(__name__)
@@ -26,8 +28,8 @@ log = logging.getLogger(__name__)
 def verify_env(func):
     @functools.wraps(func)
     def __inner(self, request, environment_id, *args, **kwargs):
-        unit = get_session()
-        environment = unit.query(Environment).get(environment_id)
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
         if environment is None:
             log.info(_("Environment with id '{0}'"
                        " not found".format(environment_id)))
@@ -52,20 +54,20 @@ def verify_session(func):
 
         session_id = request.context.session
 
-        unit = get_session()
-        session = unit.query(Session).get(session_id)
+        unit = db_session.get_session()
+        session = unit.query(models.Session).get(session_id)
 
         if session is None:
             log.info(_('Session <SessionId {0}> '
                        'is not found'.format(session_id)))
             raise exc.HTTPForbidden()
 
-        if not SessionServices.validate(session):
+        if not sessions.SessionServices.validate(session):
             log.info(_('Session <SessionId {0}> '
                        'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
 
-        if session.state == SessionState.deploying:
+        if session.state == sessions.SessionState.deploying:
             log.info(_('Session <SessionId {0}> is already in '
                        'deployment state'.format(session_id)))
             raise exc.HTTPForbidden()

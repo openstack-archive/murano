@@ -13,9 +13,12 @@
 #    under the License.
 
 import routes
-from muranoapi.openstack.common import wsgi
-from muranoapi.api.v1 import environments, services, deployments
+
+from muranoapi.api.v1 import deployments
+from muranoapi.api.v1 import environments
+from muranoapi.api.v1 import services
 from muranoapi.api.v1 import sessions
+from muranoapi.openstack.common import wsgi
 
 
 class API(wsgi.Router):

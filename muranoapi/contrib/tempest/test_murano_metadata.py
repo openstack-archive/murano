@@ -15,10 +15,10 @@
 # under the License.
 
 import testtools
-import json
-from tempest.test import attr
+
 from tempest.api.murano import base
 from tempest import exceptions
+from tempest.test import attr
 
 
 class SanityMuranoTest(base.MuranoMeta):

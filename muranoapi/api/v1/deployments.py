@@ -11,36 +11,38 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from muranoapi.common.utils import build_entity_map
 
-from muranoapi.openstack.common import wsgi
-from muranoapi.db.models import Deployment, Status, Environment
-from muranoapi.db.session import get_session
-from muranoapi.openstack.common import log as logging
-from muranoapi.openstack.common.gettextutils import _  # noqa
 from sqlalchemy import desc
 from webob import exc
+
+from muranoapi.common import utils
+from muranoapi.db import models
+from muranoapi.db import session as db_session
+from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import wsgi
+
 
 log = logging.getLogger(__name__)
 
 
 class Controller(object):
     def index(self, request, environment_id):
-        unit = get_session()
+        unit = db_session.get_session()
         verify_and_get_env(unit, environment_id, request)
-        query = unit.query(Deployment) \
+        query = unit.query(models.Deployment) \
             .filter_by(environment_id=environment_id) \
-            .order_by(desc(Deployment.created))
+            .order_by(desc(models.Deployment.created))
         result = query.all()
         deployments = [set_dep_state(deployment, unit).to_dict() for deployment
                        in result]
         return {'deployments': deployments}
 
     def statuses(self, request, environment_id, deployment_id):
-        unit = get_session()
-        query = unit.query(Status) \
+        unit = db_session.get_session()
+        query = unit.query(models.Status) \
             .filter_by(deployment_id=deployment_id) \
-            .order_by(Status.created)
+            .order_by(models.Status.created)
         deployment = verify_and_get_deployment(unit, environment_id,
                                                deployment_id)
 
@@ -51,10 +53,10 @@ class Controller(object):
             if 'services' in environment:
                 for service in environment['services']:
                     if service['id'] in service_id_set:
-                        id_map = build_entity_map(service)
+                        id_map = utils.build_entity_map(service)
                         entity_ids = entity_ids + id_map.keys()
             if entity_ids:
-                query = query.filter(Status.entity_id.in_(entity_ids))
+                query = query.filter(models.Status.entity_id.in_(entity_ids))
             else:
                 return {'reports': []}
 
@@ -63,7 +65,7 @@ class Controller(object):
 
 
 def verify_and_get_env(db_session, environment_id, request):
-    environment = db_session.query(Environment).get(environment_id)
+    environment = db_session.query(models.Environment).get(environment_id)
     if not environment:
         log.info(_('Environment with id {0} not found'.format(environment_id)))
         raise exc.HTTPNotFound
@@ -75,7 +77,7 @@ def verify_and_get_env(db_session, environment_id, request):
 
 
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
-    deployment = db_session.query(Deployment).get(deployment_id)
+    deployment = db_session.query(models.Deployment).get(deployment_id)
     if not deployment:
         log.info(_('Deployment with id {0} not found'.format(deployment_id)))
         raise exc.HTTPNotFound
@@ -92,12 +94,14 @@ def create_resource():
 
 
 def set_dep_state(deployment, unit):
-    num_errors = unit.query(Status).filter_by(level='error',
-                                              deployment_id=deployment.id). \
-        count()
-    num_warnings = unit.query(Status).filter_by(level='warning',
-                                                deployment_id=deployment.id). \
-        count()
+    num_errors = unit.query(models.Status).filter_by(
+        level='error',
+        deployment_id=deployment.id).count()
+
+    num_warnings = unit.query(models.Status).filter_by(
+        level='warning',
+        deployment_id=deployment.id).count()
+
     if deployment.finished:
         if num_errors:
             deployment.state = 'completed_w_errors'

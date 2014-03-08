@@ -16,8 +16,8 @@
 
 
 from tempest.api.murano import base
-from tempest.test import attr
 from tempest import exceptions
+from tempest.test import attr
 
 
 class SanityMuranoTest(base.MuranoTest):

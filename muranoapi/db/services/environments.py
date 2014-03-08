@@ -11,26 +11,27 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-from collections import namedtuple
+import collections
 
-from jsonschema import validate
-from muranoapi.api.v1.schemas import ENV_SCHEMA
+import jsonschema
+
+from muranoapi.api.v1 import schemas
 from muranoapi.common import config
-from muranoapi.common.uuidutils import generate_uuid
-from muranoapi.db.models import Session, Environment
-from muranoapi.db.services.sessions import SessionServices, SessionState
-from muranoapi.db.session import get_session
+from muranoapi.common import uuidutils
+from muranoapi.db import models
+from muranoapi.db.services import sessions
+from muranoapi.db import session as db_session
 from muranoapi.openstack.common import timeutils
-from muranocommon.messaging import MqClient, Message
+from muranocommon import messaging
 
 
 rabbitmq = config.CONF.rabbitmq
 
-EnvironmentStatus = namedtuple('EnvironmentStatus', [
-    'ready', 'pending', 'deploying'
-])(
-    ready='ready', pending='pending', deploying='deploying'
-)
+EnvironmentStatus = collections.namedtuple(
+    'EnvironmentStatus',
+    ['ready', 'pending', 'deploying'])(ready='ready',
+                                       pending='pending',
+                                       deploying='deploying')
 
 
 class EnvironmentServices(object):
@@ -41,8 +42,9 @@ class EnvironmentServices(object):
         :param filters: property filters
         :return: Returns list of environments
         """
-        unit = get_session()
-        environments = unit.query(Environment).filter_by(**filters).all()
+        unit = db_session.get_session()
+        environments = unit.query(models.Environment).\
+            filter_by(**filters).all()
 
         for env in environments:
             env['status'] = EnvironmentServices.get_status(env['id'])
@@ -62,13 +64,16 @@ class EnvironmentServices(object):
         :return: Environment status
         """
         #Deploying: there is at least one valid session with status `deploying`
-        deploying = SessionServices.get_sessions(environment_id,
-                                                 SessionState.deploying)
+        deploying = sessions.SessionServices.get_sessions(
+            environment_id,
+            sessions.SessionState.deploying)
         if len(deploying) > 0:
             return 'deploying'
 
         #Pending: there is at least one valid session with status `open`;
-        open = SessionServices.get_sessions(environment_id, SessionState.open)
+        open = sessions.SessionServices.get_sessions(
+            environment_id,
+            sessions.SessionState.open)
         if len(open) > 0:
             return 'pending'
 
@@ -86,10 +91,10 @@ class EnvironmentServices(object):
         """
         environment_params['tenant_id'] = tenant_id
 
-        environment = Environment()
+        environment = models.Environment()
         environment.update(environment_params)
 
-        unit = get_session()
+        unit = db_session.get_session()
         with unit.begin():
             unit.add(environment)
 
@@ -107,8 +112,8 @@ class EnvironmentServices(object):
         :param environment_id: Environment that is going to be deleted
         :param token: OpenStack auth token
         """
-        unit = get_session()
-        environment = unit.query(Environment).get(environment_id)
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
 
         #preparing data for removal from conductor
         env = environment.description
@@ -118,7 +123,7 @@ class EnvironmentServices(object):
         #Set X-Auth-Token for conductor
         env['token'] = token
 
-        message = Message()
+        message = messaging.Message()
         message.body = env
 
         connection_params = {
@@ -131,7 +136,7 @@ class EnvironmentServices(object):
             'ca_certs': rabbitmq.ca_certs.strip() or None
         }
 
-        with MqClient(**connection_params) as mqClient:
+        with messaging.MqClient(**connection_params) as mqClient:
             mqClient.declare('tasks', 'tasks', enable_ha=True)
             mqClient.send(message, 'tasks', 'tasks')
 
@@ -149,21 +154,23 @@ class EnvironmentServices(object):
         :param session_id: Session Id
         :return: Environment Description Object
         """
-        unit = get_session()
+        unit = db_session.get_session()
 
         if session_id:
-            session = unit.query(Session).get(session_id)
-            if SessionServices.validate(session):
-                if session.state != SessionState.deployed:
+            session = unit.query(models.Session).get(session_id)
+            if sessions.SessionServices.validate(session):
+                if session.state != sessions.SessionState.deployed:
                     env_description = session.description
                 else:
-                    env = unit.query(Environment).get(session.environment_id)
+                    env = unit.query(models.Environment)\
+                        .get(session.environment_id)
                     env_description = env.description
             else:
-                env = unit.query(Environment).get(session.environment_id)
+                env = unit.query(models.Environment)\
+                    .get(session.environment_id)
                 env_description = env.description
         else:
-            env = (unit.query(Environment).get(environment_id))
+            env = (unit.query(models.Environment).get(environment_id))
             env_description = env.description
 
         return env_description
@@ -176,25 +183,25 @@ class EnvironmentServices(object):
         :param session_id: Session Id
         :param environment: Environment Description
         """
-        unit = get_session()
-        session = unit.query(Session).get(session_id)
+        unit = db_session.get_session()
+        session = unit.query(models.Session).get(session_id)
 
         EnvironmentServices.normalize(environment)
-        validate(environment, ENV_SCHEMA)
+        jsonschema.validate(environment, schemas.ENV_SCHEMA)
         session.description = environment
         session.save(unit)
 
     @staticmethod
     def normalize(environment):
         if 'id' not in environment:
-            environment['id'] = generate_uuid()
+            environment['id'] = uuidutils.generate_uuid()
 
         if 'services' not in environment:
             return
 
         for service in environment['services']:
             if 'id' not in service:
-                service['id'] = generate_uuid()
+                service['id'] = uuidutils.generate_uuid()
 
             if 'created' not in service:
                 service['created'] = str(timeutils.utcnow())
@@ -207,7 +214,7 @@ class EnvironmentServices(object):
 
             for idx, unit in enumerate(service['units']):
                 if 'id' not in unit:
-                    unit['id'] = generate_uuid()
+                    unit['id'] = uuidutils.generate_uuid()
 
                 if 'name' not in unit:
                     unit['name'] = '{srv_name}_instance_{number}'.format(

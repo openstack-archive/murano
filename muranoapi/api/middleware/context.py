@@ -15,8 +15,8 @@
 from oslo.config import cfg
 
 import muranoapi.context
-import muranoapi.openstack.common.wsgi as wsgi
 import muranoapi.openstack.common.log as logging
+from muranoapi.openstack.common import wsgi
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)

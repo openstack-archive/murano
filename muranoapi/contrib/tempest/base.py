@@ -14,16 +14,16 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+import os
+import socket
 
 import json
-import socket
 import requests
-import os
+
 import novaclient.v1_1.client as nvclient
-import tempest.test
 import tempest.api.murano.config as cfg
-from tempest import clients
 from tempest.common import rest_client
+import tempest.test
 
 
 class MuranoTest(tempest.test.BaseTestCase):
