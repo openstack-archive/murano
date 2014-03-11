@@ -15,14 +15,12 @@
 from sqlalchemy import desc
 from webob import exc
 
-
 from muranoapi.api.v1 import statistics
 from muranoapi.common import utils
 from muranoapi.db import models
 from muranoapi.db.services import core_services
 from muranoapi.db.services import environments as envs
 from muranoapi.db import session as db_session
-
 
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
