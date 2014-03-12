@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2010 United States Government as represented by the
 # Administrator of the National Aeronautics and Space Administration.
 # Copyright 2010-2011 OpenStack Foundation.
@@ -18,6 +16,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import logging
+import re
+
+from migrate.changeset import UniqueConstraint
 import sqlalchemy
 from sqlalchemy import Boolean
 from sqlalchemy import CheckConstraint
@@ -28,6 +30,7 @@ from sqlalchemy import func
 from sqlalchemy import Index
 from sqlalchemy import Integer
 from sqlalchemy import MetaData
+from sqlalchemy import or_
 from sqlalchemy.sql.expression import literal_column
 from sqlalchemy.sql.expression import UpdateBase
 from sqlalchemy.sql import select
@@ -35,14 +38,22 @@ from sqlalchemy import String
 from sqlalchemy import Table
 from sqlalchemy.types import NullType
 
-from muranoapi.openstack.common.gettextutils import _  # noqa
-
-from muranoapi.openstack.common import exception
-from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import context as request_context
+from muranoapi.openstack.common.db.sqlalchemy import models
+from muranoapi.openstack.common.gettextutils import _, _LI, _LW
 from muranoapi.openstack.common import timeutils
 
 
 LOG = logging.getLogger(__name__)
+
+_DBURL_REGEX = re.compile(r"[^:]+://([^:]+):([^@]+)@.+")
+
+
+def sanitize_db_url(url):
+    match = _DBURL_REGEX.match(url)
+    if match:
+        return '%s****:****%s' % (url[:match.start(1)], url[match.end(2):])
+    return url
 
 
 class InvalidSortKey(Exception):
@@ -85,7 +96,7 @@ def paginate_query(query, model, limit, sort_keys, marker=None,
     if 'id' not in sort_keys:
         # TODO(justinsb): If this ever gives a false-positive, check
         # the actual primary key, rather than assuming its id
-        LOG.warn(_('Id not in sort_keys; is sort_keys unique?'))
+        LOG.warning(_LW('Id not in sort_keys; is sort_keys unique?'))
 
     assert(not (sort_dir and sort_dirs))
 
@@ -124,9 +135,9 @@ def paginate_query(query, model, limit, sort_keys, marker=None,
 
         # Build up an array of sort criteria as in the docstring
         criteria_list = []
-        for i in range(0, len(sort_keys)):
+        for i in range(len(sort_keys)):
             crit_attrs = []
-            for j in range(0, i):
+            for j in range(i):
                 model_attr = getattr(model, sort_keys[j])
                 crit_attrs.append((model_attr == marker_values[j]))
 
@@ -144,6 +155,94 @@ def paginate_query(query, model, limit, sort_keys, marker=None,
 
     if limit is not None:
         query = query.limit(limit)
+
+    return query
+
+
+def _read_deleted_filter(query, db_model, read_deleted):
+    if 'deleted' not in db_model.__table__.columns:
+        raise ValueError(_("There is no `deleted` column in `%s` table. "
+                           "Project doesn't use soft-deleted feature.")
+                         % db_model.__name__)
+
+    default_deleted_value = db_model.__table__.c.deleted.default.arg
+    if read_deleted == 'no':
+        query = query.filter(db_model.deleted == default_deleted_value)
+    elif read_deleted == 'yes':
+        pass  # omit the filter to include deleted and active
+    elif read_deleted == 'only':
+        query = query.filter(db_model.deleted != default_deleted_value)
+    else:
+        raise ValueError(_("Unrecognized read_deleted value '%s'")
+                         % read_deleted)
+    return query
+
+
+def _project_filter(query, db_model, context, project_only):
+    if project_only and 'project_id' not in db_model.__table__.columns:
+        raise ValueError(_("There is no `project_id` column in `%s` table.")
+                         % db_model.__name__)
+
+    if request_context.is_user_context(context) and project_only:
+        if project_only == 'allow_none':
+            is_none = None
+            query = query.filter(or_(db_model.project_id == context.project_id,
+                                     db_model.project_id == is_none))
+        else:
+            query = query.filter(db_model.project_id == context.project_id)
+
+    return query
+
+
+def model_query(context, model, session, args=None, project_only=False,
+                read_deleted=None):
+    """Query helper that accounts for context's `read_deleted` field.
+
+    :param context:      context to query under
+
+    :param model:        Model to query. Must be a subclass of ModelBase.
+    :type model:         models.ModelBase
+
+    :param session:      The session to use.
+    :type session:       sqlalchemy.orm.session.Session
+
+    :param args:         Arguments to query. If None - model is used.
+    :type args:          tuple
+
+    :param project_only: If present and context is user-type, then restrict
+                         query to match the context's project_id. If set to
+                         'allow_none', restriction includes project_id = None.
+    :type project_only:  bool
+
+    :param read_deleted: If present, overrides context's read_deleted field.
+    :type read_deleted:   bool
+
+    Usage:
+        result = (utils.model_query(context, models.Instance, session=session)
+                       .filter_by(uuid=instance_uuid)
+                       .all())
+
+        query = utils.model_query(
+                    context, Node,
+                    session=session,
+                    args=(func.count(Node.id), func.sum(Node.ram))
+            ).filter_by(project_id=project_id)
+    """
+
+    if not read_deleted:
+        if hasattr(context, 'read_deleted'):
+            # NOTE(viktors): some projects use `read_deleted` attribute in
+            # their contexts instead of `show_deleted`.
+            read_deleted = context.read_deleted
+        else:
+            read_deleted = context.show_deleted
+
+    if not issubclass(model, models.ModelBase):
+        raise TypeError(_("model should be a subclass of ModelBase"))
+
+    query = session.query(model) if not args else session.query(*args)
+    query = _read_deleted_filter(query, model, read_deleted)
+    query = _project_filter(query, model, context, project_only)
 
     return query
 
@@ -174,6 +273,10 @@ def visit_insert_from_select(element, compiler, **kw):
         compiler.process(element.select))
 
 
+class ColumnError(Exception):
+    """Error raised when no column or an invalid column is found."""
+
+
 def _get_not_supported_column(col_name_col_instance, column_name):
     try:
         column = col_name_col_instance[column_name]
@@ -181,14 +284,51 @@ def _get_not_supported_column(col_name_col_instance, column_name):
         msg = _("Please specify column %s in col_name_col_instance "
                 "param. It is required because column has unsupported "
                 "type by sqlite).")
-        raise exception.OpenstackException(message=msg % column_name)
+        raise ColumnError(msg % column_name)
 
     if not isinstance(column, Column):
         msg = _("col_name_col_instance param has wrong type of "
                 "column instance for column %s It should be instance "
                 "of sqlalchemy.Column.")
-        raise exception.OpenstackException(message=msg % column_name)
+        raise ColumnError(msg % column_name)
     return column
+
+
+def drop_unique_constraint(migrate_engine, table_name, uc_name, *columns,
+                           **col_name_col_instance):
+    """Drop unique constraint from table.
+
+    This method drops UC from table and works for mysql, postgresql and sqlite.
+    In mysql and postgresql we are able to use "alter table" construction.
+    Sqlalchemy doesn't support some sqlite column types and replaces their
+    type with NullType in metadata. We process these columns and replace
+    NullType with the correct column type.
+
+    :param migrate_engine: sqlalchemy engine
+    :param table_name:     name of table that contains uniq constraint.
+    :param uc_name:        name of uniq constraint that will be dropped.
+    :param columns:        columns that are in uniq constraint.
+    :param col_name_col_instance:   contains pair column_name=column_instance.
+                            column_instance is instance of Column. These params
+                            are required only for columns that have unsupported
+                            types by sqlite. For example BigInteger.
+    """
+
+    meta = MetaData()
+    meta.bind = migrate_engine
+    t = Table(table_name, meta, autoload=True)
+
+    if migrate_engine.name == "sqlite":
+        override_cols = [
+            _get_not_supported_column(col_name_col_instance, col.name)
+            for col in t.columns
+            if isinstance(col.type, NullType)
+        ]
+        for col in override_cols:
+            t.columns.replace(col)
+
+    uc = UniqueConstraint(*columns, table=t, name=uc_name)
+    uc.drop()
 
 
 def drop_old_duplicate_entries_from_table(migrate_engine, table_name,
@@ -227,8 +367,8 @@ def drop_old_duplicate_entries_from_table(migrate_engine, table_name,
 
         rows_to_delete_select = select([table.c.id]).where(delete_condition)
         for row in migrate_engine.execute(rows_to_delete_select).fetchall():
-            LOG.info(_("Deleting duplicated row with id: %(id)s from table: "
-                       "%(table)s") % dict(id=row[0], table=table_name))
+            LOG.info(_LI("Deleting duplicated row with id: %(id)s from table: "
+                         "%(table)s") % dict(id=row[0], table=table_name))
 
         if use_soft_delete:
             delete_statement = table.update().\
@@ -248,8 +388,7 @@ def _get_default_deleted_value(table):
         return 0
     if isinstance(table.c.id.type, String):
         return ""
-    raise exception.OpenstackException(
-        message=_("Unsupported id columns type"))
+    raise ColumnError(_("Unsupported id columns type"))
 
 
 def _restore_indexes_on_deleted_columns(migrate_engine, table_name, indexes):
@@ -319,7 +458,7 @@ def _change_deleted_column_type_to_boolean_sqlite(migrate_engine, table_name,
 
     constraints = [constraint.copy() for constraint in table.constraints]
 
-    meta = MetaData(bind=migrate_engine)
+    meta = table.metadata
     new_table = Table(table_name + "__tmp__", meta,
                       *(columns + constraints))
     new_table.create()
@@ -448,3 +587,52 @@ def _change_deleted_column_type_to_id_type_sqlite(migrate_engine, table_name,
         where(new_table.c.deleted == deleted).\
         values(deleted=default_deleted_value).\
         execute()
+
+
+def get_connect_string(backend, database, user=None, passwd=None):
+    """Get database connection
+
+    Try to get a connection with a very specific set of values, if we get
+    these then we'll run the tests, otherwise they are skipped
+    """
+    args = {'backend': backend,
+            'user': user,
+            'passwd': passwd,
+            'database': database}
+    if backend == 'sqlite':
+        template = '%(backend)s:///%(database)s'
+    else:
+        template = "%(backend)s://%(user)s:%(passwd)s@localhost/%(database)s"
+    return template % args
+
+
+def is_backend_avail(backend, database, user=None, passwd=None):
+    try:
+        connect_uri = get_connect_string(backend=backend,
+                                         database=database,
+                                         user=user,
+                                         passwd=passwd)
+        engine = sqlalchemy.create_engine(connect_uri)
+        connection = engine.connect()
+    except Exception:
+        # intentionally catch all to handle exceptions even if we don't
+        # have any backend code loaded.
+        return False
+    else:
+        connection.close()
+        engine.dispose()
+        return True
+
+
+def get_db_connection_info(conn_pieces):
+    database = conn_pieces.path.strip('/')
+    loc_pieces = conn_pieces.netloc.split('@')
+    host = loc_pieces[1]
+
+    auth_pieces = loc_pieces[0].split(':')
+    user = auth_pieces[0]
+    password = ""
+    if len(auth_pieces) > 1:
+        password = auth_pieces[1].strip()
+
+    return (user, password, database, host)

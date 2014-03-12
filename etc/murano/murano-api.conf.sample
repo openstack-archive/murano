@@ -13,7 +13,19 @@ bind_port = 8082
 
 # Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-api.log
+
+# Use syslog for logging. Existing syslog format is DEPRECATED
+# during I, and then will be changed in J to honor RFC5424
+
 use_syslog = False
+
+# (Optional) Use syslog rfc5424 format for logging. If
+# enabled, will add APP-NAME (RFC5424) before the MSG part of
+# the syslog message.  The old format without APP-NAME is
+# deprecated in I, and will be removed in J.
+#use_syslog_rfc_format=false
+
+#Syslog facility to receive log lines
 syslog_log_facility = LOG_LOCAL0
 
 [database]

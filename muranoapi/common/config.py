@@ -73,17 +73,9 @@ CONF.register_opts(reports_opts, group='reports')
 CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(db_opts, group='database')
 
-
-CONF.import_opt('verbose', 'muranoapi.openstack.common.log')
-CONF.import_opt('debug', 'muranoapi.openstack.common.log')
-CONF.import_opt('log_dir', 'muranoapi.openstack.common.log')
-CONF.import_opt('log_file', 'muranoapi.openstack.common.log')
-CONF.import_opt('log_config', 'muranoapi.openstack.common.log')
-CONF.import_opt('log_format', 'muranoapi.openstack.common.log')
-CONF.import_opt('log_date_format', 'muranoapi.openstack.common.log')
-CONF.import_opt('use_syslog', 'muranoapi.openstack.common.log')
-CONF.import_opt('syslog_log_facility', 'muranoapi.openstack.common.log')
-
+CONF.import_opt('connection',
+                'muranoapi.openstack.common.db.options',
+                group='database')
 
 cfg.set_defaults(log.log_opts,
                  default_log_levels=['qpid.messaging=INFO',

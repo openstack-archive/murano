@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright (c) 2012 OpenStack Foundation.
 # Administrator of the National Aeronautics and Space Administration.
 # All Rights Reserved.
@@ -31,7 +29,7 @@ import eventlet.backdoor
 import greenlet
 from oslo.config import cfg
 
-from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common.gettextutils import _LI
 from muranoapi.openstack.common import log as logging
 
 help_for_backdoor_port = (
@@ -66,7 +64,7 @@ def _dont_use_this():
 
 
 def _find_objects(t):
-    return filter(lambda o: isinstance(o, t), gc.get_objects())
+    return [o for o in gc.get_objects() if isinstance(o, t)]
 
 
 def _print_greenthreads():
@@ -104,7 +102,7 @@ def _listen(host, start_port, end_port, listen_func):
         try:
             return listen_func((host, try_port))
         except socket.error as exc:
-            if (exc.errno != errno.EADDRINUSE or try_port >= end_port):
+            if exc.errno != errno.EADDRINUSE or try_port >= end_port:
                 raise
             try_port += 1
 
@@ -138,8 +136,10 @@ def initialize_if_enabled():
     # In the case of backdoor port being zero, a port number is assigned by
     # listen().  In any case, pull the port number out here.
     port = sock.getsockname()[1]
-    LOG.info(_('Eventlet backdoor listening on %(port)s for process %(pid)d') %
-             {'port': port, 'pid': os.getpid()})
+    LOG.info(
+        _LI('Eventlet backdoor listening on %(port)s for process %(pid)d') %
+        {'port': port, 'pid': os.getpid()}
+    )
     eventlet.spawn_n(eventlet.backdoor.backdoor_server, sock,
                      locals=backdoor_locals)
     return port

@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 #    Copyright 2011-2013 Cloudscaling Group, Inc
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -13,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 """
 The MatchMaker classes should except a Topic or Fanout exchange key and
 return keys for direct exchanges, per (approximate) AMQP parlance.
@@ -23,7 +22,7 @@ import json
 
 from oslo.config import cfg
 
-from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common.gettextutils import _LW
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common.rpc import matchmaker as mm
 
@@ -54,18 +53,15 @@ class RingExchange(mm.Exchange):
         if ring:
             self.ring = ring
         else:
-            fh = open(CONF.matchmaker_ring.ringfile, 'r')
-            self.ring = json.load(fh)
-            fh.close()
+            with open(CONF.matchmaker_ring.ringfile, 'r') as fh:
+                self.ring = json.load(fh)
 
         self.ring0 = {}
         for k in self.ring.keys():
             self.ring0[k] = itertools.cycle(self.ring[k])
 
     def _ring_has(self, key):
-        if key in self.ring0:
-            return True
-        return False
+        return key in self.ring0
 
 
 class RoundRobinRingExchange(RingExchange):
@@ -76,8 +72,8 @@ class RoundRobinRingExchange(RingExchange):
     def run(self, key):
         if not self._ring_has(key):
             LOG.warn(
-                _("No key defining hosts for topic '%s', "
-                  "see ringfile") % (key, )
+                _LW("No key defining hosts for topic '%s', "
+                    "see ringfile") % (key, )
             )
             return []
         host = next(self.ring0[key])
@@ -94,8 +90,8 @@ class FanoutRingExchange(RingExchange):
         nkey = key.split('fanout~')[1:][0]
         if not self._ring_has(nkey):
             LOG.warn(
-                _("No key defining hosts for topic '%s', "
-                  "see ringfile") % (nkey, )
+                _LW("No key defining hosts for topic '%s', "
+                    "see ringfile") % (nkey, )
             )
             return []
         return map(lambda x: (key + '.' + x, x), self.ring[nkey])
