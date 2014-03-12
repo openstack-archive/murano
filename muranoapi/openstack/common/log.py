@@ -163,6 +163,10 @@ log_opts = [
                     'qpid=WARN',
                     'sqlalchemy=WARN',
                     'suds=INFO',
+                    'keystone=INFO',
+                    'eventlet.wsgi.server=WARN',
+                    'qpid.messaging=INFO',
+                    'keystoneclient=INFO',
                     'iso8601=WARN',
                     'requests.packages.urllib3.connectionpool=WARN'
                 ],

@@ -25,10 +25,8 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-from muranoapi import __version__ as version  # noqa
+import muranoapi
 from muranoapi.openstack.common.gettextutils import _  # noqa
-from muranoapi.openstack.common import log
-
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor'),
@@ -62,17 +60,11 @@ CONF.import_opt('connection',
                 'muranoapi.openstack.common.db.options',
                 group='database')
 
-cfg.set_defaults(log.log_opts,
-                 default_log_levels=['qpid.messaging=INFO',
-                                     'sqlalchemy=WARN',
-                                     'keystoneclient=INFO',
-                                     'eventlet.wsgi.server=WARN'])
-
 
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,
          project='muranoapi',
-         version=version,
+         version=muranoapi.__version__,
          usage=usage,
          default_config_files=default_config_files)
 
