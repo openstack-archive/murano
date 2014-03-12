@@ -202,13 +202,105 @@ class ApiStats(BASE, ModelBase):
         dictionary = super(ApiStats, self).to_dict()
         return dictionary
 
+package_to_category = sa.Table('package_to_category',
+                               BASE.metadata,
+                               sa.Column('package_id',
+                                         sa.String(32),
+                                         sa.ForeignKey('package.id')),
+                               sa.Column('category_id',
+                                         sa.String(32),
+                                         sa.ForeignKey('category.id'))
+                               )
+
+package_to_tag = sa.Table('package_to_tag',
+                          BASE.metadata,
+                          sa.Column('package_id',
+                                    sa.String(32),
+                                    sa.ForeignKey('package.id')),
+                          sa.Column('tag_id',
+                                    sa.String(32),
+                                    sa.ForeignKey('tag.id'))
+                          )
+
+
+class Package(BASE, ModelBase):
+    """
+    Represents a meta information about application package.
+    """
+    __tablename__ = 'package'
+
+    id = sa.Column(sa.String(36),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    archive = sa.Column(sa.BLOB)
+    fully_qualified_name = sa.Column(sa.String(512),
+                                     nullable=False,
+                                     index=True)
+    type = sa.Column(sa.String(20), nullable=False, default='class')
+    author = sa.Column(sa.String(80), default='Openstack')
+    name = sa.Column(sa.String(20), nullable=False)
+    enabled = sa.Column(sa.Boolean, default=True)
+    description = sa.Column(sa.String(512),
+                            nullable=False,
+                            default='The description is not provided')
+    is_public = sa.Column(sa.Boolean, default=True)
+    tags = sa_orm.relationship("Tag",
+                               secondary=package_to_tag,
+                               cascade='save-update, merge, delete',
+                               lazy='joined')
+    logo = sa.Column(sa.BLOB, nullable=True)
+    owner_id = sa.Column(sa.String(36), nullable=False)
+    ui_definition = sa.Column(sa.Text)
+    categories = sa_orm.relationship("Category",
+                                     secondary=package_to_category,
+                                     cascade='save-update, merge, delete',
+                                     lazy='joined')
+    class_definition = sa_orm.relationship("Class")
+
+
+class Category(BASE, ModelBase):
+    """
+    Represents an application categories in the datastore.
+    """
+    __tablename__ = 'category'
+
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
+
+
+class Tag(BASE, ModelBase):
+    """
+    Represents tags in the datastore.
+    """
+    __tablename__ = 'tag'
+
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(80), nullable=False, unique=True)
+
+
+class Class(BASE, ModelBase):
+    """
+    Represents a class definition in the datastore.
+    """
+    __tablename__ = 'class_definition'
+
+    id = sa.Column(sa.String(32),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(80), nullable=False, index=True)
+    package_id = sa.Column(sa.String(32), sa.ForeignKey('package.id'))
+
 
 def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
     models = (Environment, Status, Session, Deployment,
-              ApiStats)
+              ApiStats, Package, Category, Class)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -218,6 +310,6 @@ def unregister_models(engine):
     Drops database tables for all models with the given engine
     """
     models = (Environment, Status, Session, Deployment,
-              ApiStats)
+              ApiStats, Package, Category, Class)
     for model in models:
         model.metadata.drop_all(engine)
