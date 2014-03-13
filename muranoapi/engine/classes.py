@@ -17,8 +17,16 @@ import inspect
 
 from muranoapi.engine import consts
 from muranoapi.engine import helpers
+from muranoapi.engine import methods as engine_methods
 from muranoapi.engine import objects
 from muranoapi.engine import typespec
+
+
+def classname(name):
+    def wrapper(cls):
+        cls._murano_class_name = name
+        return cls
+    return wrapper
 
 
 class MuranoClass(object):
@@ -70,6 +78,25 @@ class MuranoClass(object):
                 return mc.get_property(name)
             types.extend(mc.parents)
         return None
+
+    @property
+    def methods(self):
+        return self._methods
+
+    def get_method(self, name):
+        return self._methods.get(name)
+
+    def add_method(self, name, payload):
+        #name = self._namespace_resolver.resolve_name(name, self.name)
+        method = engine_methods.MuranoMethod(
+            self._namespace_resolver,
+            self, name, payload)
+        self._methods[name] = method
+        return method
+
+    def invoke(self, name, executor, this, parameters):
+        args = executor.to_yaql_args(parameters)
+        return executor.invoke_method(name, this, None, self, *args)
 
     def is_compatible(self, obj):
         if isinstance(obj, objects.MuranoObject):
