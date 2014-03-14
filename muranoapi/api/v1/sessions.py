@@ -14,19 +14,23 @@
 
 from webob import exc
 
+from muranoapi.api.v1 import statistics
 from muranoapi.db import models
 from muranoapi.db.services import environments as envs
 from muranoapi.db.services import sessions
 from muranoapi.db import session as db_session
+
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
 
 
 log = logging.getLogger(__name__)
+API_NAME = 'Sessions'
 
 
 class Controller(object):
+    @statistics.stats_count(API_NAME, 'Create')
     def configure(self, request, environment_id):
         log.debug(_('Session:Configure <EnvId: {0}>'.format(environment_id)))
 
@@ -56,6 +60,7 @@ class Controller(object):
 
         return session.to_dict()
 
+    @statistics.stats_count(API_NAME, 'Index')
     def show(self, request, environment_id, session_id):
         log.debug(_('Session:Show <SessionId: {0}>'.format(session_id)))
 
@@ -85,6 +90,7 @@ class Controller(object):
 
         return session.to_dict()
 
+    @statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id, session_id):
         log.debug(_('Session:Delete <SessionId: {0}>'.format(session_id)))
 
@@ -117,6 +123,7 @@ class Controller(object):
 
         return None
 
+    @statistics.stats_count(API_NAME, 'Deploy')
     def deploy(self, request, environment_id, session_id):
         log.debug(_('Session:Deploy <SessionId: {0}>'.format(session_id)))
 

@@ -15,20 +15,27 @@
 from sqlalchemy import desc
 from webob import exc
 
+
+from muranoapi.api.v1 import statistics
 from muranoapi.common import utils
 from muranoapi.db import models
 from muranoapi.db.services import core_services
 from muranoapi.db.services import environments as envs
 from muranoapi.db import session as db_session
+
+
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
 
 
 log = logging.getLogger(__name__)
+API_NAME = 'Environments'
 
 
 class Controller(object):
+
+    @statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         log.debug(_('Environments:List'))
 
@@ -39,6 +46,7 @@ class Controller(object):
 
         return {"environments": environments}
 
+    @statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
         log.debug(_('Environments:Create <Body {0}>'.format(body)))
 
@@ -47,6 +55,7 @@ class Controller(object):
 
         return environment.to_dict()
 
+    @statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
         log.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
 
@@ -76,6 +85,7 @@ class Controller(object):
 
         return env
 
+    @statistics.stats_count(API_NAME, 'Update')
     def update(self, request, environment_id, body):
         log.debug(_('Environments:Update <Id: {0}, '
                     'Body: {1}>'.format(environment_id, body)))
@@ -98,6 +108,7 @@ class Controller(object):
 
         return environment.to_dict()
 
+    @statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
         log.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
 
@@ -117,6 +128,7 @@ class Controller(object):
         envs.EnvironmentServices.delete(environment_id,
                                         request.context.auth_token)
 
+    @statistics.stats_count(API_NAME, 'LastStatus')
     def last(self, request, environment_id):
         session_id = None
         if hasattr(request, 'context') and request.context.session:

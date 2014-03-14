@@ -11,13 +11,15 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 from sqlalchemy import desc
 from webob import exc
 
+from muranoapi.api.v1 import statistics
 from muranoapi.common import utils
 from muranoapi.db import models
 from muranoapi.db import session as db_session
+
+
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
@@ -25,8 +27,11 @@ from muranoapi.openstack.common import wsgi
 
 log = logging.getLogger(__name__)
 
+API_NAME = 'Deployments'
+
 
 class Controller(object):
+    @statistics.stats_count(API_NAME, 'Index')
     def index(self, request, environment_id):
         unit = db_session.get_session()
         verify_and_get_env(unit, environment_id, request)
@@ -38,6 +43,7 @@ class Controller(object):
                        in result]
         return {'deployments': deployments}
 
+    @statistics.stats_count(API_NAME, 'Statuses')
     def statuses(self, request, environment_id, deployment_id):
         unit = db_session.get_session()
         query = unit.query(models.Status) \
