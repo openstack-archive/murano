@@ -28,6 +28,7 @@ if os.path.exists(os.path.join(root, 'muranoapi', '__init__.py')):
 
 from muranoapi.common import config
 from muranoapi.common import server
+from muranoapi.common import statservice as stats
 from muranoapi.openstack.common import log
 from muranoapi.openstack.common import service
 from muranoapi.openstack.common import wsgi
@@ -46,6 +47,7 @@ def main():
         launcher.launch_service(wsgi.Service(app, port, host))
         launcher.launch_service(server.get_rpc_service())
         launcher.launch_service(server.get_notification_service())
+        launcher.launch_service(stats.StatsCollectingService())
 
         launcher.wait()
     except RuntimeError, e:
