@@ -138,4 +138,4 @@ class SessionServices(object):
             unit.add(session)
             unit.add(deployment)
 
-        rpc.conductor().handle_task(environment)
+        rpc.engine().handle_task(environment)

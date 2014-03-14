@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-ROOT_CLASS = 'org.openstack.murano.Object'
+
+NoValue = object()
 
 EVALUATION_MAX_DEPTH = 100

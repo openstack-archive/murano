@@ -1,0 +1,191 @@
+# Copyright (c) 2013 Mirantis Inc.
+#
+# Licensed under the Apache License, Version 2.0 (the "License");
+# you may not use this file except in compliance with the License.
+# You may obtain a copy of the License at
+#
+#    http://www.apache.org/licenses/LICENSE-2.0
+#
+# Unless required by applicable law or agreed to in writing, software
+# distributed under the License is distributed on an "AS IS" BASIS,
+# WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or
+# implied.
+# See the License for the specific language governing permissions and
+# limitations under the License.
+
+import eventlet
+from heatclient import client as hclient
+from heatclient import exc as heat_exc
+from keystoneclient.v2_0 import client as ksclient
+
+from muranoapi.common import config
+from muranoapi.engine import classes
+from muranoapi.engine import helpers
+from muranoapi.engine import objects
+from muranoapi.openstack.common import log as logging
+
+log = logging.getLogger(__name__)
+
+
+@classes.classname('org.openstack.murano.system.HeatStack')
+class HeatStack(objects.MuranoObject):
+    def initialize(self, _context, name):
+        self._name = name
+        self._template = None
+        self._parameters = {}
+        self._applied = True
+        environment = helpers.get_environment(_context)
+        keystone_settings = config.CONF.keystone
+        heat_settings = config.CONF.heat
+
+        client = ksclient.Client(
+            endpoint=keystone_settings.auth_url,
+            cacert=keystone_settings.ca_file or None,
+            cert=keystone_settings.cert_file or None,
+            key=keystone_settings.key_file or None,
+            insecure=keystone_settings.insecure)
+
+        if not client.authenticate(
+                auth_url=keystone_settings.auth_url,
+                tenant_id=environment.tenant_id,
+                token=environment.token):
+            raise heat_exc.HTTPUnauthorized()
+
+        heat_url = client.service_catalog.url_for(
+            service_type='orchestration',
+            endpoint_type=heat_settings.endpoint_type)
+
+        self._heat_client = hclient.Client(
+            '1',
+            heat_url,
+            username='badusername',
+            password='badpassword',
+            token_only=True,
+            token=client.auth_token,
+            ca_file=heat_settings.ca_file or None,
+            cert_file=heat_settings.cert_file or None,
+            key_file=heat_settings.key_file or None,
+            insecure=heat_settings.insecure)
+
+    def current(self):
+        if self._template is not None:
+            return self._template
+        try:
+            stack_info = self._heat_client.stacks.get(stack_id=self._name)
+            template = self._heat_client.stacks.template(
+                stack_id='{0}/{1}'.format(
+                    stack_info.stack_name,
+                    stack_info.id))
+            # template = {}
+            self._template = template
+            self._parameters.update(stack_info.parameters)
+            self._applied = True
+            return self._template.copy()
+        except heat_exc.HTTPNotFound:
+            self._applied = True
+            self._template = {}
+            self._parameters.clear()
+            return {}
+
+    def parameters(self):
+        self.current()
+        return self._parameters.copy()
+
+    def reload(self):
+        self._template = None
+        self._parameters.clear()
+        self._load()
+        return self._template
+
+    def setTemplate(self, template):
+        self._template = template
+        self._parameters.clear()
+        self._applied = False
+
+    def updateTemplate(self, template):
+        self.current()
+        self._template = helpers.merge_dicts(self._template, template)
+        self._applied = False
+
+    def _get_status(self):
+        status = [None]
+
+        def status_func(state_value):
+            status[0] = state_value
+            return True
+
+        self._wait_state(status_func)
+        return status[0]
+
+    def _wait_state(self, status_func):
+        tries = 4
+        delay = 1
+        while tries > 0:
+            while True:
+                try:
+                    stack_info = self._heat_client.stacks.get(
+                        stack_id=self._name)
+                    status = stack_info.stack_status
+                    tries = 4
+                    delay = 1
+                except heat_exc.HTTPNotFound:
+                    stack_info = None
+                    status = 'NOT_FOUND'
+                except Exception:
+                    tries -= 1
+                    delay *= 2
+                    if not tries:
+                        raise
+                    eventlet.sleep(delay)
+                    break
+
+                if 'IN_PROGRESS' in status:
+                    eventlet.sleep(2)
+                    continue
+                if not status_func(status):
+                    raise EnvironmentError(
+                        "Unexpected stack state {0}".format(status))
+
+                try:
+                    return dict([(t['output_key'], t['output_value'])
+                                 for t in stack_info.outputs])
+                except Exception:
+                    return {}
+        return {}
+
+    def output(self):
+        return self._wait_state(lambda: True)
+
+    def push(self):
+        if self._applied or self._template is None:
+            return
+
+        log.info('Pushing: {0}'.format(self._template))
+
+        current_status = self._get_status()
+        if current_status == 'NOT_FOUND':
+            self._heat_client.stacks.create(
+                stack_name=self._name,
+                parameters=self._parameters,
+                template=self._template,
+                disable_rollback=False)
+
+            self._wait_state(
+                lambda status: status == 'CREATE_COMPLETE')
+        else:
+            self._heat_client.stacks.update(
+                stack_id=self._name,
+                parameters=self._parameters,
+                template=self._template)
+            self._wait_state(
+                lambda status: status == 'UPDATE_COMPLETE')
+
+        self._applied = True
+
+    def delete(self):
+        if not self.current():
+            return
+        self._heat_client.stacks.delete(
+            stack_id=self._name)
+        self._wait_state(
+            lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))

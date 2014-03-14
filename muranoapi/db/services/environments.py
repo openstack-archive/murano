@@ -121,7 +121,7 @@ class EnvironmentServices(object):
         #Set X-Auth-Token for conductor
         env['token'] = token
 
-        rpc.conductor().handle_task(env)
+        rpc.engine().handle_task(env)
 
         with unit.begin():
             unit.delete(environment)

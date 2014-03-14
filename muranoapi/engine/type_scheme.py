@@ -18,11 +18,10 @@ import uuid
 
 from yaql import context as y_context
 
+from muranoapi.engine import consts
 from muranoapi.engine import helpers
 from muranoapi.engine import objects
 from muranoapi.engine import yaql_expression
-
-NoValue = object()
 
 
 class TypeScheme(object):
@@ -38,7 +37,7 @@ class TypeScheme(object):
                         namespace_resolver, default):
         def _int(value):
             value = value()
-            if value is NoValue:
+            if value is consts.NoValue:
                 value = default
             if value is None:
                 return None
@@ -49,7 +48,7 @@ class TypeScheme(object):
 
         def _string(value):
             value = value()
-            if value is NoValue:
+            if value is consts.NoValue:
                 value = default
             if value is None:
                 return None
@@ -60,7 +59,7 @@ class TypeScheme(object):
 
         def _bool(value):
             value = value()
-            if value is NoValue:
+            if value is consts.NoValue:
                 value = default
             if value is None:
                 return None
@@ -125,7 +124,7 @@ class TypeScheme(object):
             else:
                 default_name = namespace_resolver.resolve_name(default_name)
             value = value()
-            if value is NoValue:
+            if value is consts.NoValue:
                 value = default
                 if isinstance(default, types.DictionaryType):
                     value = {'?': {
@@ -177,7 +176,7 @@ class TypeScheme(object):
         return context
 
     def _map_dict(self, data, spec, context):
-        if data is None or data is NoValue:
+        if data is None or data is consts.NoValue:
             data = {}
         if not isinstance(data, types.DictionaryType):
             raise TypeError()
@@ -206,7 +205,7 @@ class TypeScheme(object):
 
     def _map_list(self, data, spec, context):
         if not isinstance(data, types.ListType):
-            if data is None or data is NoValue:
+            if data is None or data is consts.NoValue:
                 data = []
             else:
                 data = [data]
@@ -259,6 +258,6 @@ class TypeScheme(object):
             context, this, object_store, namespace_resolver,
             default)
         result = self._map(data, self._spec, context)
-        if result is NoValue:
+        if result is consts.NoValue:
             raise TypeError('No type specified')
         return result

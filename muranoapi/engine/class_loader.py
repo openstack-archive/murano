@@ -61,9 +61,8 @@ class MuranoClassLoader(object):
             spec = typespec.PropertySpec(property_spec, namespace_resolver)
             type_obj.add_property(property_name, spec)
 
-        # TODO(slagun): can we remove this block?
-        #for method_name, payload in data.get('Workflow', {}).iteritems():
-        #    method = type_obj.add_method(method_name, payload)
+        for method_name, payload in data.get('Workflow', {}).iteritems():
+            type_obj.add_method(method_name, payload)
 
         self._loaded_types[name] = type_obj
         return type_obj
