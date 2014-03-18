@@ -27,8 +27,8 @@ from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import service
 
 
-conf = config.CONF.stats
-log = logging.getLogger(__name__)
+CONF_STATS = config.CONF.stats
+LOG = logging.getLogger(__name__)
 
 
 class StatsCollectingService(service.Service):
@@ -47,15 +47,15 @@ class StatsCollectingService(service.Service):
         self(StatsCollectingService, self).stop()
 
     def _collect_stats_loop(self):
-        period = conf.period * 60
+        period = CONF_STATS.period * 60
         while True:
             self.update_stats()
             eventlet.sleep(period)
 
     def update_stats(self):
-        log.debug(_("Updating statistic information."))
-        log.debug("Stats object: %s" % v1.stats)
-        log.debug("Stats: Requests:%s  Errors: %s Ave.Res.Time %2.4f\n"
+        LOG.debug(_("Updating statistic information."))
+        LOG.debug("Stats object: %s" % v1.stats)
+        LOG.debug("Stats: Requests:%s  Errors: %s Ave.Res.Time %2.4f\n"
                   "Per tenant: %s" %
                   (v1.stats.request_count,
                    v1.stats.error_count,
@@ -87,5 +87,5 @@ class StatsCollectingService(service.Service):
             stats.errors_per_second = errors_per_second
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
-            log.error(_("Failed to get statistics object "
+            LOG.error(_("Failed to get statistics object "
                         "form a database. %s" % e))

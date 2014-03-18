@@ -18,8 +18,8 @@ import muranoapi.context
 import muranoapi.openstack.common.log as logging
 from muranoapi.openstack.common import wsgi
 
-CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 class ContextMiddleware(wsgi.Middleware):

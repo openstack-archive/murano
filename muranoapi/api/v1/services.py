@@ -25,7 +25,7 @@ from muranoapi.openstack.common import wsgi
 from muranoapi import utils
 from muranocommon.helpers import token_sanitizer
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 API_NAME = 'Services'
 
@@ -48,7 +48,7 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
-        log.debug(_('Services:Get <EnvId: {0}, '
+        LOG.debug(_('Services:Get <EnvId: {0}, '
                     'Path: {1}>'.format(environment_id, path)))
 
         session_id = None
@@ -69,7 +69,7 @@ class Controller(object):
     @normalize_path
     def post(self, request, environment_id, path, body):
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
-        log.debug(_('Services:Post <EnvId: {0}, Path: {2}, '
+        LOG.debug(_('Services:Post <EnvId: {0}, Path: {2}, '
                     'Body: {1}>'.format(environment_id, secure_data, path)))
 
         post_data = core_services.CoreServices.post_data
@@ -85,7 +85,7 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def put(self, request, environment_id, path, body):
-        log.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
+        LOG.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
                     'Body: {1}>'.format(environment_id, body, path)))
 
         put_data = core_services.CoreServices.put_data
@@ -102,7 +102,7 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def delete(self, request, environment_id, path):
-        log.debug(_('Services:Put <EnvId: {0}, '
+        LOG.debug(_('Services:Put <EnvId: {0}, '
                     'Path: {1}>'.format(environment_id, path)))
 
         delete_data = core_services.CoreServices.delete_data

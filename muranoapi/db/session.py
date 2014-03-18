@@ -30,8 +30,7 @@ from muranoapi.openstack.common.db.sqlalchemy import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
-log = logging.getLogger(__name__)
-
+LOG = logging.getLogger(__name__)
 CONF = config.CONF
 
 
@@ -40,10 +39,10 @@ def get_session(autocommit=True, expire_on_commit=False):
                                             expire_on_commit=expire_on_commit)
     if s:
         if CONF.database.auto_create:
-            log.info(_('auto-creating DB'))
+            LOG.info(_('auto-creating DB'))
             _auto_create_db()
         else:
-            log.info(_('not auto-creating DB'))
+            LOG.info(_('not auto-creating DB'))
     return s
 
 

@@ -32,18 +32,18 @@ from muranocommon.helpers import token_sanitizer
 RPC_SERVICE = None
 NOTIFICATION_SERVICE = None
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class ResultEndpoint(object):
     @staticmethod
     def process_result(context, result):
         secure_result = token_sanitizer.TokenSanitizer().sanitize(result)
-        log.debug(_('Got result from orchestration '
+        LOG.debug(_('Got result from orchestration '
                     'engine:\n{0}'.format(secure_result)))
 
         if 'deleted' in result:
-            log.debug(_('Result for environment {0} is dropped. Environment '
+            LOG.debug(_('Result for environment {0} is dropped. Environment '
                         'is deleted'.format(result['id'])))
             return
 
@@ -51,7 +51,7 @@ class ResultEndpoint(object):
         environment = unit.query(models.Environment).get(result['id'])
 
         if not environment:
-            log.warning(_('Environment result could not be handled, specified '
+            LOG.warning(_('Environment result could not be handled, specified '
                           'environment was not found in database'))
             return
 
@@ -93,7 +93,7 @@ class ResultEndpoint(object):
 class ReportNotificationEndpoint(object):
     @staticmethod
     def report_notification(context, report):
-        log.debug(_('Got report from orchestration '
+        LOG.debug(_('Got report from orchestration '
                     'engine:\n{0}'.format(report)))
 
         report['entity_id'] = report['id']

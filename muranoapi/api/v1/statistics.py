@@ -17,7 +17,7 @@ import time
 from muranoapi.api import v1
 from muranoapi.openstack.common import log as logging
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class StatisticsCollection(object):
@@ -67,7 +67,7 @@ def stats_count(api, method):
 
 
 def update_count(api, method, ex_time, tenant=None):
-    log.debug("Updating count stats for %s, %s on object %s" % (api,
+    LOG.debug("Updating count stats for %s, %s on object %s" % (api,
                                                                 method,
                                                                 v1.stats))
     v1.stats.add_api_request(tenant, ex_time)
@@ -75,7 +75,7 @@ def update_count(api, method, ex_time, tenant=None):
 
 
 def update_error_count(api, method, ex_time, tenant=None):
-    log.debug("Updating count stats for %s, %s on object %s" % (api,
+    LOG.debug("Updating count stats for %s, %s on object %s" % (api,
                                                                 method,
                                                                 v1.stats))
     v1.stats.add_api_error(tenant, ex_time)
