@@ -58,6 +58,26 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
+    def create_session(self, environment_id):
+        post_body = None
+
+        resp, body = self.post(
+            'environments/{0}/configure'.format(environment_id),
+            post_body
+        )
+
+        return resp, json.loads(body)
+
+    def delete_session(self, environment_id, session_id):
+        return self.delete(
+            'environments/{0}/sessions/{1}'.format(environment_id, session_id))
+
+    def get_session(self, environment_id, session_id):
+        resp, body = self.get(
+            'environments/{0}/sessions/{1}'.format(environment_id, session_id))
+
+        return resp, json.loads(body)
+
 
 class TestCase(testtools.TestCase):
     @classmethod
