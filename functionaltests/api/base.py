@@ -12,9 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import json
 from tempest import clients
 from tempest.common import rest_client
 from tempest import config
+from tempest import exceptions
 import testtools
 
 CONF = config.CONF
@@ -24,16 +26,63 @@ class MuranoClient(rest_client.RestClient):
 
     def __init__(self, auth_provider):
         super(MuranoClient, self).__init__(auth_provider)
+
         self.service = 'application_catalog'
         self.endpoint_url = 'publicURL'
 
+    def get_environments_list(self):
+        resp, body = self.get('environments')
+
+        return resp, json.loads(body)
+
+    def create_environment(self, name):
+        post_body = '{"name": "%s"}' % name
+
+        resp, body = self.post('environments', post_body)
+
+        return resp, json.loads(body)
+
+    def delete_environment(self, environment_id):
+        return self.delete('environments/{0}'.format(environment_id))
+
+    def update_environment(self, environment_id):
+        post_body = '{"name": "%s"}' % ("changed-environment-name")
+
+        resp, body = self.put('environments/{0}'.format(environment_id),
+                              post_body)
+
+        return resp, json.loads(body)
+
+    def get_environment(self, environment_id):
+        resp, body = self.get('environments/{0}'.format(environment_id))
+
+        return resp, json.loads(body)
+
 
 class TestCase(testtools.TestCase):
-    def setUp(self):
-        super(TestCase, self).setUp()
+    @classmethod
+    def setUpClass(cls):
+        super(TestCase, cls).setUpClass()
+
         username = CONF.identity.username
         password = CONF.identity.password
         tenant_name = CONF.identity.tenant_name
+
         mgr = clients.Manager(username, password, tenant_name)
-        auth_provider = mgr.get_auth_provider()
-        self.client = MuranoClient(auth_provider)
+        auth_provider = mgr.get_auth_provider(mgr.get_default_credentials())
+
+        cls.client = MuranoClient(auth_provider)
+
+    def setUp(self):
+        super(TestCase, self).setUp()
+
+        self.environments = []
+
+    def tearDown(self):
+        super(TestCase, self).tearDown()
+
+        for environment in self.environments:
+            try:
+                self.client.delete_environment(environment['id'])
+            except exceptions.NotFound:
+                pass

@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest import exceptions
 from tempest.test import attr
 
 from functionaltests.api import base
@@ -21,5 +22,85 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='smoke')
     def test_list_environments(self):
-        resp, body = self.client.get('/environments')
+        resp, body = self.client.get_environments_list()
+
+        self.assertIn('environments', body)
         self.assertEqual(resp.status, 200)
+
+    @attr(type='smoke')
+    def test_create_and_delete_environment(self):
+        _, environments_list_start = self.client.get_environments_list()
+
+        resp, env = self.client.create_environment('test')
+        self.environments.append(env)
+
+        self.assertEqual(resp.status, 200)
+        self.assertEqual('test', env['name'])
+
+        _, environments_list = self.client.get_environments_list()
+
+        self.assertEqual(len(environments_list_start['environments']) + 1,
+                         len(environments_list['environments']))
+
+        self.client.delete_environment(env['id'])
+
+        _, environments_list = self.client.get_environments_list()
+
+        self.assertEqual(len(environments_list_start['environments']),
+                         len(environments_list['environments']))
+
+        self.environments.pop(self.environments.index(env))
+
+    @attr(type='smoke')
+    def test_get_environment(self):
+        _, env = self.client.create_environment('test')
+        self.environments.append(env)
+
+        resp, environment = self.client.get_environment(env['id'])
+
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(environment['name'], 'test')
+
+    @attr(type='smoke')
+    def test_update_environment(self):
+        _, env = self.client.create_environment('test')
+        self.environments.append(env)
+
+        resp, environment = self.client.update_environment(env['id'])
+
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(environment['name'], 'changed-environment-name')
+
+    @attr(type='negative')
+    def test_update_environment_with_wrong_env_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.update_environment,
+                          None)
+
+    @attr(type='negative')
+    def test_delete_environment_with_wrong_env_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_environment,
+                          None)
+
+    @attr(type='negative')
+    def test_double_delete_environment(self):
+        _, env = self.client.create_environment('test')
+        self.environments.append(env)
+
+        self.client.delete_environment(env['id'])
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_environment,
+                          env['id'])
+
+    @attr(type='negative')
+    def test_get_deleted_environment(self):
+        _, env = self.client.create_environment('test')
+        self.environments.append(env)
+
+        self.client.delete_environment(env['id'])
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_environment,
+                          env['id'])
