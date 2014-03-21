@@ -1,0 +1,6 @@
+Namespaces:
+    =: org.openstack.murano
+Name: Object
+
+Workflow:
+  initialize:

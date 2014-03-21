@@ -1,0 +1,29 @@
+Namespaces:
+    =: org.openstack.murano
+    sys: org.openstack.murano.system
+
+Name: Environment
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+  applications:
+    Contract: [$.class(Application).owned().notNull()]
+  agentListener:
+    Contract: $.class(sys:AgentListener)
+    Type: Runtime
+  stack:
+    Contract: $.class(sys:HeatStack)
+    Type: Runtime
+
+Workflow:
+  initialize:
+    Body:
+      - $this.agentListener: new(sys:AgentListener, name => $.name)
+      - $this.stack: new(sys:HeatStack, name => $.name)
+
+  deploy:
+    Body:
+      - $.agentListener.start()
+      - $.applications.pselect($.deploy())
+      - $.agentListener.stop()

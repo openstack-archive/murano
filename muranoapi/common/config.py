@@ -44,16 +44,57 @@ db_opts = [
                        'automatically created.')),
 ]
 
+rabbit_opts = [
+    cfg.StrOpt('host', default='localhost'),
+    cfg.IntOpt('port', default=5672),
+    cfg.StrOpt('login', default='guest'),
+    cfg.StrOpt('password', default='guest'),
+    cfg.StrOpt('virtual_host', default='/'),
+    cfg.BoolOpt('ssl', default=False),
+    cfg.StrOpt('ca_certs', default='')
+]
+
+heat_opts = [
+    cfg.BoolOpt('insecure', default=False),
+    cfg.StrOpt('ca_file'),
+    cfg.StrOpt('cert_file'),
+    cfg.StrOpt('key_file'),
+    cfg.StrOpt('endpoint_type', default='publicURL')
+]
+
+neutron_opts = [
+    cfg.BoolOpt('insecure', default=False),
+    cfg.StrOpt('ca_cert'),
+    cfg.StrOpt('endpoint_type', default='publicURL')
+]
+
+keystone_opts = [
+    cfg.StrOpt('auth_url'),
+    cfg.BoolOpt('insecure', default=False),
+    cfg.StrOpt('ca_file'),
+    cfg.StrOpt('cert_file'),
+    cfg.StrOpt('key_file')
+]
+
 stats_opt = [
     cfg.IntOpt('period', default=5,
                help=_('Statistics collection interval in minutes.'
                       'Default value is 5 minutes.'))
 ]
 
+metadata_dir = cfg.StrOpt('metadata-dir', default='./meta')
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
 CONF.register_opts(db_opts, group='database')
+CONF.register_opts(rabbit_opts, group='rabbitmq')
+CONF.register_opts(heat_opts, group='heat')
+CONF.register_opts(neutron_opts, group='neutron')
+CONF.register_opts(keystone_opts, group='keystone')
+CONF.register_opt(cfg.StrOpt('file_server'))
+CONF.register_cli_opt(cfg.StrOpt('murano_metadata_url'))
+CONF.register_cli_opt(metadata_dir)
 CONF.register_opts(stats_opt, group='stats')
 
 CONF.import_opt('connection',

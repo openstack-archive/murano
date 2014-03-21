@@ -21,7 +21,16 @@ from muranoapi.common import config
 TRANSPORT = None
 
 
-class ConductorClient(object):
+class ApiClient(object):
+    def __init__(self, transport):
+        client_target = target.Target('murano', 'results')
+        self._client = rpc.RPCClient(transport, client_target, timeout=15)
+
+    def process_result(self, result):
+        return self._client.call({}, 'process_result', result=result)
+
+
+class EngineClient(object):
     def __init__(self, transport):
         client_target = target.Target('murano', 'tasks')
         self._client = rpc.RPCClient(transport, client_target, timeout=15)
@@ -30,9 +39,17 @@ class ConductorClient(object):
         return self._client.cast({}, 'handle_task', task=task)
 
 
-def conductor():
+def api():
     global TRANSPORT
     if TRANSPORT is None:
         TRANSPORT = messaging.get_transport(config.CONF)
 
-    return ConductorClient(TRANSPORT)
+    return ApiClient(TRANSPORT)
+
+
+def engine():
+    global TRANSPORT
+    if TRANSPORT is None:
+        TRANSPORT = messaging.get_transport(config.CONF)
+
+    return EngineClient(TRANSPORT)

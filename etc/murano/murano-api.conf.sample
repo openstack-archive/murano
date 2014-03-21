@@ -127,3 +127,18 @@ signing_dir = /tmp/keystone-signing-muranoapi
 [stats]
 #Stats collection period in minutes
 period = 5
+
+[keystone]
+# URL of OpenStack KeyStone service REST API.
+# Typically only hostname (or IP) needs to be changed
+auth_url = http://localhost:5000/v2.0
+
+# Keystone SSL parameters
+# Optional CA cert file to use in SSL connections
+#ca_file =
+# Optional PEM-formatted certificate chain file
+#cert_file =
+# Optional PEM-formatted file that contains the private key
+#key_file =
+# If set then the server's certificate will not be verified
+insecure = False

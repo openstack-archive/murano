@@ -16,7 +16,7 @@ from muranoapi.engine import classes
 from muranoapi.engine import helpers
 
 
-@classes.classname('com.mirantis.murano.Object')
+@classes.classname('org.openstack.murano.Object')
 class SysObject(object):
     def setAttr(self, _context, name, value, owner=None):
         if owner is None:

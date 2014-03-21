@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
 import inspect
+import ordereddict
 import types
+
 
 from muranoapi.engine import macros
 from muranoapi.engine import typespec
@@ -37,7 +38,7 @@ class MuranoMethod(object):
             if isinstance(arguments_scheme, types.DictionaryType):
                 arguments_scheme = [{key: value} for key, value in
                                     arguments_scheme.iteritems()]
-            self._arguments_scheme = collections.OrderedDict()
+            self._arguments_scheme = ordereddict.OrderedDict()
             for record in arguments_scheme:
                 if not isinstance(record, types.DictionaryType) \
                         or len(record) > 1:
@@ -73,7 +74,7 @@ class MuranoMethod(object):
         defaults = func_info.defaults or tuple()
         for i in xrange(len(defaults)):
             data[i + len(data) - len(defaults)][1]['Default'] = defaults[i]
-        result = collections.OrderedDict([
+        result = ordereddict.OrderedDict([
             (name, typespec.ArgumentSpec(
                 declaration, self._namespace_resolver))
             for name, declaration in data])

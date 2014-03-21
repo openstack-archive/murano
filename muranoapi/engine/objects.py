@@ -14,6 +14,7 @@
 
 from yaql import context
 
+from muranoapi.engine import consts
 from muranoapi.engine import exceptions
 from muranoapi.engine import helpers
 
@@ -53,7 +54,7 @@ class MuranoObject(object):
                         or i == 1 and property_name in used_names:
                     continue
                 used_names.add(property_name)
-                property_value = kwargs.get(property_name)
+                property_value = kwargs.get(property_name, consts.NoValue)
                 self.set_property(property_name, property_value)
         for parent in self.__parents.values():
             parent.initialize(**kwargs)

@@ -8,7 +8,7 @@ Routes>=1.12.3
 WebOb>=1.2.3
 wsgiref>=0.1.2
 argparse
-boto>=2.12.0,!=2.13.0
+ordereddict
 sqlalchemy-migrate>=0.8.2,!=0.8.4
 httplib2>=0.7.5
 kombu>=2.4.8
@@ -17,6 +17,7 @@ pycrypto>=2.6
 iso8601>=0.1.8
 six>=1.5.2
 netaddr>=0.7.6
+PyYAML>=3.1.0
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully
@@ -30,10 +31,11 @@ Paste
 passlib
 jsonschema>=2.0.0,<3.0.0
 python-keystoneclient>=0.6.0
+python-heatclient>=0.2.3
 oslo.config>=1.2.0
-oslo.messaging>=1.3.0a4
+oslo.messaging>=1.3.0a9
 
 # not listed in global requirements
 murano-common==0.4.1
-yaql==0.2
+yaql>=0.2.2,<0.3
 deep

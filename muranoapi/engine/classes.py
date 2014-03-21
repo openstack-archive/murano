@@ -15,7 +15,6 @@
 import collections
 import inspect
 
-from muranoapi.engine import consts
 from muranoapi.engine import helpers
 from muranoapi.engine import methods as engine_methods
 from muranoapi.engine import objects
@@ -32,14 +31,15 @@ def classname(name):
 class MuranoClass(object):
     def __init__(self, class_loader, namespace_resolver, name, parents=None):
         self._class_loader = class_loader
+        self._methods = {}
         self._namespace_resolver = namespace_resolver
         self._name = namespace_resolver.resolve_name(name)
         self._properties = {}
-        if self._name == consts.ROOT_CLASS:
+        if self._name == 'org.openstack.murano.Object':
             self._parents = []
         else:
             self._parents = parents if parents is not None else [
-                class_loader.get_class(consts.ROOT_CLASS)]
+                class_loader.get_class('org.openstack.murano.Object')]
         self.object_class = type(
             'mc' + helpers.generate_id(),
             tuple([p.object_class for p in self._parents]) or (
@@ -69,6 +69,15 @@ class MuranoClass(object):
 
     def get_property(self, name):
         return self._properties[name]
+
+    def find_method(self, name):
+        if name in self._methods:
+            return [(self, name)]
+        if not self._parents:
+            return []
+        return list(set(reduce(
+            lambda x, y: x + y,
+            [p.find_method(name) for p in self._parents])))
 
     def find_property(self, name):
         types = collections.deque([self])
