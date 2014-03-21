@@ -78,6 +78,59 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
+    def create_service(self, environment_id, session_id, post_body):
+        post_body = json.dumps(post_body)
+
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+
+        resp, body = self.post(
+            'environments/{0}/services'.format(environment_id),
+            post_body,
+            headers
+        )
+
+        return resp, json.loads(body)
+
+    def delete_service(self, environment_id, session_id, service_id):
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+
+        return self.delete(
+            'environments/{0}/services/{1}'.format(environment_id, service_id),
+            headers
+        )
+
+    def get_services_list(self, environment_id, session_id):
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+
+        resp, body = self.get(
+            'environments/{0}/services'.format(environment_id),
+            headers
+        )
+
+        return resp, json.loads(body)
+
+    def get_service(self, environment_id, session_id, service_id):
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+
+        resp, body = self.get(
+            'environments/{0}/services/{1}'.format(environment_id, service_id),
+            headers
+        )
+
+        return resp, json.loads(body)
+
 
 class TestCase(testtools.TestCase):
     @classmethod
@@ -106,3 +159,23 @@ class TestCase(testtools.TestCase):
                 self.client.delete_environment(environment['id'])
             except exceptions.NotFound:
                 pass
+
+    def create_demo_service(self, environment_id, session_id):
+        post_body = {
+            "availabilityZone": "nova",
+            "name": "demo",
+            "unitNamingPattern": "host",
+            "osImage": {
+                "type": "cirros.demo",
+                "name": "demo",
+                "title": "Demo"
+            },
+            "units": [{}],
+            "flavor": "m1.small",
+            "configuration": "standalone",
+            "type": "demoService"
+        }
+
+        return self.client.create_service(environment_id,
+                                          session_id,
+                                          post_body)
