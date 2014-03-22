@@ -13,6 +13,7 @@
 #    under the License.
 import routes
 
+from muranoapi.api.v1 import catalog
 from muranoapi.api.v1 import deployments
 from muranoapi.api.v1 import environments
 from muranoapi.api.v1 import services
@@ -119,4 +120,13 @@ class API(wsgi.Router):
                        action='deploy',
                        conditions={'method': ['POST']})
 
+        catalog_resource = catalog.create_resource()
+        mapper.connect('/catalog/packages/{package_id}',
+                       controller=catalog_resource,
+                       action='get',
+                       conditions={'method': ['GET']})
+        mapper.connect('/catalog/packages/{package_id}',
+                       controller=catalog_resource,
+                       action='update',
+                       conditions={'method': ['PATCH']})
         super(API, self).__init__(mapper)

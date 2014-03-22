@@ -28,6 +28,9 @@ use_syslog = False
 #Syslog facility to receive log lines
 syslog_log_facility = LOG_LOCAL0
 
+# Role used to identify an authenticated user as administrator
+#admin_role = admin
+
 # Use durable queues in amqp. (boolean value)
 # Deprecated group/name - [DEFAULT]/rabbit_durable_queues
 #amqp_durable_queues=false

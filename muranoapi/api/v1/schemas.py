@@ -23,3 +23,28 @@ ENV_SCHEMA = {
     },
     "required": ["id", "name"]
 }
+
+PKG_UPDATE_SCHEMA = {
+    "$schema": "http://json-schema.org/draft-04/schema#",
+
+    "type": "object",
+    "properties": {
+        "tags": {
+            "type": "array",
+            "items": {"type": "string"},
+            "uniqueItems": True
+        },
+        "categories": {
+            "type": "array",
+            "minItems": 1,
+            "items": {"type": "string"},
+            "uniqueItems": True
+        },
+        "description": {"type": "string"},
+        "name": {"type": "string"},
+        "is_public": {"type": "boolean"},
+        "enabled": {"type": "boolean"}
+    },
+    "additionalProperties": False,
+    "minProperties": 1,
+}

@@ -15,9 +15,17 @@
 from oslo.config import cfg
 
 import muranoapi.context
+from muranoapi.openstack.common.gettextutils import _  # noqa
 import muranoapi.openstack.common.log as logging
 from muranoapi.openstack.common import wsgi
 
+context_opts = [
+    cfg.StrOpt('admin_role', default='admin',
+               help=_('Role used to identify an authenticated user as '
+                      'administrator.'))]
+
+CONF = cfg.CONF
+CONF.register_opts(context_opts)
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
@@ -32,11 +40,14 @@ class ContextMiddleware(wsgi.Middleware):
 
         :param req: wsgi request object that will be given the context object
         """
+
         kwargs = {
             'user': req.headers.get('X-User-Id'),
             'tenant': req.headers.get('X-Tenant-Id'),
             'auth_token': req.headers.get('X-Auth-Token'),
-            'session': req.headers.get('X-Configuration-Session')
+            'session': req.headers.get('X-Configuration-Session'),
+            'is_admin': CONF.admin_role in [
+                role.strip() for role in req.headers.get('X-Roles').split(',')]
         }
         req.context = muranoapi.context.RequestContext(**kwargs)
 

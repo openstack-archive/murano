@@ -19,11 +19,13 @@ class RequestContext(object):
     accesses the system, as well as additional request information.
     """
 
-    def __init__(self, auth_token=None, user=None, tenant=None, session=None):
+    def __init__(self, auth_token=None, user=None,
+                 tenant=None, session=None, is_admin=None):
         self.auth_token = auth_token
         self.user = user
         self.tenant = tenant
         self.session = session
+        self.is_admin = is_admin
 
     def to_dict(self):
         return {

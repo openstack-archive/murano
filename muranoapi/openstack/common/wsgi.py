@@ -22,6 +22,8 @@ eventlet.patcher.monkey_patch(all=False, socket=True)
 
 import datetime
 import errno
+import re
+import jsonschema
 import socket
 import sys
 import time
@@ -35,6 +37,7 @@ import webob.exc
 from xml.dom import minidom
 from xml.parsers import expat
 
+from muranoapi.api.v1 import schemas
 from muranoapi.openstack.common import exception
 from muranoapi.openstack.common.gettextutils import _
 from muranoapi.openstack.common import jsonutils
@@ -108,7 +111,7 @@ class Service(service.Service):
                 eventlet.sleep(0.1)
         if not sock:
             raise RuntimeError(_("Could not bind to %(host)s:%(port)s "
-                               "after trying for 30 seconds") %
+                                 "after trying for 30 seconds") %
                                {'host': host, 'port': port})
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # sockets can hang around forever without keepalive
@@ -233,7 +236,6 @@ class Debug(Middleware):
 
 
 class Router(object):
-
     """
     WSGI middleware that maps incoming requests to WSGI apps.
     """
@@ -292,7 +294,9 @@ class Router(object):
 class Request(webob.Request):
     """Add some Openstack API-specific logic to the base webob.Request."""
 
-    default_request_content_types = ('application/json', 'application/xml')
+    default_request_content_types = ('application/json',
+                                     'application/xml',
+                                     'application/murano-packages-json-patch')
     default_accept_types = ('application/json', 'application/xml')
     default_accept_type = 'application/json'
 
@@ -350,6 +354,7 @@ class Resource(object):
     may raise a webob.exc exception or return a dict, which will be
     serialized by requested content type.
     """
+
     def __init__(self, controller, deserializer=None, serializer=None):
         """
         :param controller: object that implement methods created by routes lib
@@ -452,11 +457,11 @@ class JSONDictSerializer(DictSerializer):
                 _dtime = obj - datetime.timedelta(microseconds=obj.microsecond)
                 return _dtime.isoformat()
             return unicode(obj)
+
         return jsonutils.dumps(data, default=sanitizer)
 
 
 class XMLDictSerializer(DictSerializer):
-
     def __init__(self, metadata=None, xmlns=None):
         """
         :param metadata: information needed to deserialize xml into
@@ -627,6 +632,7 @@ class RequestDeserializer(object):
         self.body_deserializers = {
             'application/xml': XMLDeserializer(),
             'application/json': JSONDeserializer(),
+            'application/murano-packages-json-patch': JSONPatchDeserializer()
         }
         self.body_deserializers.update(body_deserializers or {})
 
@@ -718,7 +724,6 @@ class TextDeserializer(ActionDispatcher):
 
 
 class JSONDeserializer(TextDeserializer):
-
     def _from_json(self, datastring):
         try:
             return jsonutils.loads(datastring)
@@ -730,8 +735,142 @@ class JSONDeserializer(TextDeserializer):
         return {'body': self._from_json(datastring)}
 
 
-class XMLDeserializer(TextDeserializer):
+class JSONPatchDeserializer(TextDeserializer):
+    allowed_operations = {"categories": ["add", "replace", "remove"],
+                          "tags": ["add", "replace", "remove"],
+                          "is_public": ["replace"],
+                          "enabled": ["replace"],
+                          "description": ["replace"],
+                          "name": ["replace"]}
 
+    def _from_json_patch(self, datastring):
+        try:
+            operations = jsonutils.loads(datastring)
+        except ValueError:
+            msg = _("cannot understand JSON")
+            raise exception.MalformedRequestBody(reason=msg)
+
+        changes = []
+        for raw_change in operations:
+            if not isinstance(raw_change, dict):
+                msg = _('Operations must be JSON objects.')
+                raise webob.exc.HTTPBadRequest(explanation=msg)
+
+            (op, path) = self._parse_json_schema_change(raw_change)
+
+            self._validate_path(path)
+            change = {'op': op, 'path': path}
+
+            change['value'] = self._get_change_value(raw_change, op)
+            self._validate_change(change)
+
+            changes.append(change)
+        return changes
+
+    def _get_change_value(self, raw_change, op):
+        if 'value' not in raw_change:
+            msg = _('Operation "%s" requires a member named "value".')
+            raise webob.exc.HTTPBadRequest(explanation=msg % op)
+        return raw_change['value']
+
+    def _get_change_operation(self, raw_change):
+        try:
+            return raw_change['op']
+        except KeyError:
+            msg = _("Unable to find '%s' in JSON Schema change") % 'op'
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+
+    def _get_change_path(self, raw_change):
+        try:
+            return raw_change['path']
+        except KeyError:
+            msg = _("Unable to find '%s' in JSON Schema change") % 'path'
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+
+    def _validate_change(self, change):
+        change_path = change['path'][0]
+        change_op = change['op']
+        allowed_methods = self.allowed_operations.get(change_path)
+
+        if not allowed_methods:
+            msg = _("Attribute '{0}' is invalid").format(change_path)
+            raise webob.exc.HTTPForbidden(explanation=unicode(msg))
+
+        if change_op not in allowed_methods:
+            msg = _("Method '{method}' is not allowed for a path with name "
+                    "'{name}'. Allowed operations are: '{ops}'").format(
+                    method=change_op,
+                    name=change_path,
+                    ops=', '.join(allowed_methods))
+
+            raise webob.exc.HTTPForbidden(explanation=unicode(msg))
+
+        property_to_update = {change_path: change['value']}
+
+        try:
+            jsonschema.validate(property_to_update, schemas.PKG_UPDATE_SCHEMA)
+        except jsonschema.ValidationError as e:
+            LOG.exception(e)
+            raise webob.exc.HTTPBadRequest(explanation=e.message)
+
+    def _decode_json_pointer(self, pointer):
+        """Parse a json pointer.
+
+            Json Pointers are defined in
+            http://tools.ietf.org/html/draft-pbryan-zyp-json-pointer .
+            The pointers use '/' for separation between object attributes, such
+            that '/A/B' would evaluate to C in {"A": {"B": "C"}}. A '/'
+            character
+            in an attribute name is encoded as "~1" and a '~' character is
+            encoded
+            as "~0".
+            """
+        self._validate_json_pointer(pointer)
+        ret = []
+        for part in pointer.lstrip('/').split('/'):
+            ret.append(part.replace('~1', '/').replace('~0', '~').strip())
+        return ret
+
+
+    def _validate_json_pointer(self, pointer):
+        """Validate a json pointer.
+
+        Only limited form of json pointers is accepted.
+        """
+        if not pointer.startswith('/'):
+            msg = _('Pointer `%s` does not start with "/".') % pointer
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+        if re.search('/\s*?/', pointer[1:]):
+            msg = _('Pointer `%s` contains adjacent "/".') % pointer
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+        if len(pointer) > 1 and pointer.endswith('/'):
+            msg = _('Pointer `%s` end with "/".') % pointer
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+        if pointer[1:].strip() == '/':
+            msg = _('Pointer `%s` does not contains valid token.') % pointer
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+        if re.search('~[^01]', pointer) or pointer.endswith('~'):
+            msg = _('Pointer `%s` contains "~" not part of'
+                    ' a recognized escape sequence.') % pointer
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+
+    def _parse_json_schema_change(self, raw_change):
+        op = self._get_change_operation(raw_change)
+        path = self._get_change_path(raw_change)
+
+        path_list = self._decode_json_pointer(path)
+        return op, path_list
+
+    def _validate_path(self, path):
+        if len(path) > 1:
+            msg = _('Nested paths are not allowed')
+            raise webob.exc.HTTPBadRequest(explanation=msg)
+
+    def default(self, datastring):
+        return {'body': self._from_json_patch(datastring)}
+
+
+class XMLDeserializer(TextDeserializer):
     def __init__(self, metadata=None):
         """
         :param metadata: information needed to deserialize xml into

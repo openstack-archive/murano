@@ -257,6 +257,20 @@ class Package(BASE, ModelBase):
                                      lazy='joined')
     class_definition = sa_orm.relationship("Class")
 
+    def to_dict(self):
+        d = self.__dict__.copy()
+        not_serializable = ['_sa_instance_state',
+                            'archive',
+                            'logo',
+                            'ui_definition']
+        nested_objects = ['categories', 'tags']
+        for key in not_serializable:
+            if key in d.keys():
+                del d[key]
+        for key in nested_objects:
+            d[key] = [a.name for a in d.get(key)]
+        return d
+
 
 class Category(BASE, ModelBase):
     """
