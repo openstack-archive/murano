@@ -17,13 +17,13 @@ from webob import exc
 
 
 from muranoapi.api.v1 import statistics
+from muranoapi.common.helpers import token_sanitizer
 from muranoapi.db.services import core_services
-
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
 from muranoapi import utils
-from muranocommon.helpers import token_sanitizer
+
 
 log = logging.getLogger(__name__)
 

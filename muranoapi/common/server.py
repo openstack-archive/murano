@@ -22,12 +22,13 @@ from oslo.messaging import target
 from sqlalchemy import desc
 
 from muranoapi.common import config
+from muranoapi.common.helpers import token_sanitizer
 from muranoapi.db import models
 from muranoapi.db import session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import timeutils
-from muranocommon.helpers import token_sanitizer
+
 
 RPC_SERVICE = None
 NOTIFICATION_SERVICE = None

@@ -20,6 +20,7 @@ from oslo import messaging
 from oslo.messaging import target
 
 from muranoapi.common import config
+from muranoapi.common.helpers import token_sanitizer
 from muranoapi.common import rpc
 from muranoapi.engine import environment
 from muranoapi.engine import executor
@@ -28,7 +29,6 @@ from muranoapi.engine import system
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi import simple_cloader
-from muranocommon.helpers import token_sanitizer
 
 RPC_SERVICE = None
 

@@ -20,11 +20,11 @@ import uuid
 
 import eventlet.event
 
+from muranoapi.common import messaging
 from muranoapi.engine import classes
 from muranoapi.engine import objects
 from muranoapi.engine.system import common
 from muranoapi.engine import yaql_expression
-from muranocommon import messaging
 
 
 class AgentException(Exception):

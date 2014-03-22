@@ -13,19 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from muranoapi.common import config
-from muranoapi.common import messaging
+from message import Message
+from mqclient import MqClient
+from subscription import Subscription
 
-
-def create_rmq_client():
-    rabbitmq = config.CONF.rabbitmq
-    connection_params = {
-        'login': rabbitmq.login,
-        'password': rabbitmq.password,
-        'host': rabbitmq.host,
-        'port': rabbitmq.port,
-        'virtual_host': rabbitmq.virtual_host,
-        'ssl': rabbitmq.ssl,
-        'ca_certs': rabbitmq.ca_certs.strip() or None
-    }
-    return messaging.MqClient(**connection_params)
+__all__ = ['Message', 'Subscription', 'MqClient']

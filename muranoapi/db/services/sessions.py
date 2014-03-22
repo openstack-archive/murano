@@ -13,10 +13,10 @@
 #    under the License.
 import collections
 
+from muranoapi.common.helpers import token_sanitizer
 from muranoapi.common import rpc
 from muranoapi.db import models
 from muranoapi.db import session as db_session
-from muranocommon.helpers import token_sanitizer
 
 
 SessionState = collections.namedtuple('SessionState', [

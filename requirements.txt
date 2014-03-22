@@ -36,6 +36,5 @@ oslo.config>=1.2.0
 oslo.messaging>=1.3.0a9
 
 # not listed in global requirements
-murano-common==0.4.1
 yaql>=0.2.2,<0.3
 deep
