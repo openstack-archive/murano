@@ -83,15 +83,19 @@ function create_murano_accounts() {
 }
 
 
+function mkdir_chown_stack {
+    if [[ ! -d "$1" ]]; then
+        sudo mkdir -p "$1"
+    fi
+    sudo chown $STACK_USER "$1"
+}
+
 # Entry points
 # ------------
 
 # configure_murano() - Set config files, create data dirs, etc
 function configure_murano {
-    if [[ ! -d $MURANO_CONF_DIR ]]; then
-        sudo mkdir -p $MURANO_CONF_DIR
-    fi
-    sudo chown $STACK_USER $MURANO_CONF_DIR
+    mkdir_chown_stack "$MURANO_CONF_DIR"
 
     # Copy over Murano configuration file and configure common parameters.
     cp $MURANO_DIR/etc/murano/murano-api.conf.sample $MURANO_CONF_FILE
@@ -136,10 +140,6 @@ function init_murano() {
 
 # install_murano() - Collect source and prepare
 function install_murano() {
-    # temporary workaround until we get rid of this repo
-    git_clone $MURANO_COMMON_REPO $MURANO_COMMON_DIR $MURANO_BRANCH
-    setup_develop $MURANO_COMMON_DIR
-
     git_clone $MURANO_REPO $MURANO_DIR $MURANO_BRANCH
     setup_develop $MURANO_DIR
 }
