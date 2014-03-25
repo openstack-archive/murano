@@ -23,7 +23,7 @@ from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class TraverseHelper(object):
@@ -183,8 +183,8 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
                     return f(*args, **kwargs)
                 except ExceptionToCheck as e:
 
-                    log.exception(e)
-                    log.info(_("Retrying in {0} seconds...".format(mdelay)))
+                    LOG.exception(e)
+                    LOG.info(_("Retrying in {0} seconds...".format(mdelay)))
 
                     eventlet.sleep(mdelay)
 
@@ -201,14 +201,14 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
 
 
 def handle(f):
-    """Handles exception in wrapped function and writes to log."""
+    """Handles exception in wrapped function and writes to LOG."""
 
     @func.wraps(f)
     def f_handle(*args, **kwargs):
         try:
             return f(*args, **kwargs)
         except Exception as e:
-            log.exception(e)
+            LOG.exception(e)
 
     return f_handle
 

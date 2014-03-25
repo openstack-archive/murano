@@ -26,8 +26,8 @@ from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
 
+LOG = logging.getLogger(__name__)
 
-log = logging.getLogger(__name__)
 API_NAME = 'Environments'
 
 
@@ -35,7 +35,7 @@ class Controller(object):
 
     @statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
-        log.debug(_('Environments:List'))
+        LOG.debug(_('Environments:List'))
 
         #Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
@@ -46,7 +46,7 @@ class Controller(object):
 
     @statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        log.debug(_('Environments:Create <Body {0}>'.format(body)))
+        LOG.debug(_('Environments:Create <Body {0}>'.format(body)))
 
         environment = envs.EnvironmentServices.create(body.copy(),
                                                       request.context.tenant)
@@ -55,18 +55,18 @@ class Controller(object):
 
     @statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
-        log.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
+        LOG.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
-            log.info('Environment <EnvId {0}> is not found'
+            LOG.info('Environment <EnvId {0}> is not found'
                      .format(environment_id))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info(_('User is not authorized to access '
+            LOG.info(_('User is not authorized to access '
                        'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
@@ -85,19 +85,19 @@ class Controller(object):
 
     @statistics.stats_count(API_NAME, 'Update')
     def update(self, request, environment_id, body):
-        log.debug(_('Environments:Update <Id: {0}, '
+        LOG.debug(_('Environments:Update <Id: {0}, '
                     'Body: {1}>'.format(environment_id, body)))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
-            log.info(_('Environment <EnvId {0}> is not '
+            LOG.info(_('Environment <EnvId {0}> is not '
                        'found'.format(environment_id)))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info(_('User is not authorized to access '
+            LOG.info(_('User is not authorized to access '
                        'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
@@ -108,18 +108,18 @@ class Controller(object):
 
     @statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
-        log.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
+        LOG.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
 
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
-            log.info(_('Environment <EnvId {0}> '
+            LOG.info(_('Environment <EnvId {0}> '
                        'is not found'.format(environment_id)))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            log.info(_('User is not authorized to access '
+            LOG.info(_('User is not authorized to access '
                        'this tenant resources.'))
             raise exc.HTTPUnauthorized
 

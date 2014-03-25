@@ -13,7 +13,6 @@
 #    under the License.
 
 import functools
-import logging
 
 from webob import exc
 
@@ -21,8 +20,9 @@ from muranoapi.db import models
 from muranoapi.db.services import sessions
 from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
+from muranoapi.openstack.common import log as logging
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 def verify_env(func):
@@ -31,13 +31,13 @@ def verify_env(func):
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
         if environment is None:
-            log.info(_("Environment with id '{0}'"
+            LOG.info(_("Environment with id '{0}'"
                        " not found".format(environment_id)))
             raise exc.HTTPNotFound()
 
         if hasattr(request, 'context'):
             if environment.tenant_id != request.context.tenant:
-                log.info(_('User is not authorized to access'
+                LOG.info(_('User is not authorized to access'
                            ' this tenant resources'))
                 raise exc.HTTPUnauthorized()
 
@@ -49,7 +49,7 @@ def verify_session(func):
     @functools.wraps(func)
     def __inner(self, request, *args, **kwargs):
         if hasattr(request, 'context') and not request.context.session:
-            log.info(_('Session is required for this call'))
+            LOG.info(_('Session is required for this call'))
             raise exc.HTTPForbidden()
 
         session_id = request.context.session
@@ -58,17 +58,17 @@ def verify_session(func):
         session = unit.query(models.Session).get(session_id)
 
         if session is None:
-            log.info(_('Session <SessionId {0}> '
+            LOG.info(_('Session <SessionId {0}> '
                        'is not found'.format(session_id)))
             raise exc.HTTPForbidden()
 
         if not sessions.SessionServices.validate(session):
-            log.info(_('Session <SessionId {0}> '
+            LOG.info(_('Session <SessionId {0}> '
                        'is invalid'.format(session_id)))
             raise exc.HTTPForbidden()
 
         if session.state == sessions.SessionState.deploying:
-            log.info(_('Session <SessionId {0}> is already in '
+            LOG.info(_('Session <SessionId {0}> is already in '
                        'deployment state'.format(session_id)))
             raise exc.HTTPForbidden()
         return func(self, request, *args, **kwargs)
