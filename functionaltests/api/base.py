@@ -131,6 +131,46 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
+    def get_list_packages(self):
+        resp, body = self.get('catalog/packages')
+
+        return resp, json.loads(body)
+
+    def get_package(self, id):
+        resp, body = self.get('catalog/packages/{0}'.format(id))
+
+        return resp, json.loads(body)
+
+    def update_package(self, id):
+        post_body = [
+            {
+                "op": "add",
+                "path": "/tags",
+                "value": ["i'm a test"]
+            }
+        ]
+
+        resp, body = self.patch('catalog/packages/{0}'.format(id), post_body)
+
+        return resp, json.loads(body)
+
+    def delete_package(self, id):
+        return self.delete('catalog/packages/{0}'.format(id))
+
+    def download_package(self, id):
+        return self.get('catalog/packages/{0}/download'.format(id))
+
+    def get_ui_definition(self, id):
+        return self.get('catalog/packages/{0}/ui'.format(id))
+
+    def get_logo(self, id):
+        return self.get('catalog/packages/{0}/logo'.format(id))
+
+    def list_categories(self):
+        resp, body = self.get('catalog/packages/categories')
+
+        return resp, json.loads(body)
+
 
 class TestCase(testtools.TestCase):
     @classmethod
