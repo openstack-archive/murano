@@ -14,15 +14,11 @@
 
 import collections
 
-import jsonschema
-
-from muranoapi.api.v1 import schemas
 from muranoapi.common import rpc
 from muranoapi.common import uuidutils
 from muranoapi.db import models
 from muranoapi.db.services import sessions
 from muranoapi.db import session as db_session
-from muranoapi.openstack.common import timeutils
 
 
 EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
@@ -87,7 +83,18 @@ class EnvironmentServices(object):
         :param tenant_id: Tenant Id
         :return: Created Environment
         """
+
+        objects = {'?': {
+            'id': uuidutils.generate_uuid(),
+        }}
+        objects.update(environment_params)
+        objects['?']['type'] = 'io.murano.Environment'
         environment_params['tenant_id'] = tenant_id
+
+        data = {
+            'Objects': objects,
+            'Attributes': []
+        }
 
         environment = models.Environment()
         environment.update(environment_params)
@@ -97,7 +104,7 @@ class EnvironmentServices(object):
             unit.add(environment)
 
         #saving environment as Json to itself
-        environment.update({"description": environment.to_dict()})
+        environment.update({'description': data})
         environment.save(unit)
 
         return environment
@@ -127,7 +134,8 @@ class EnvironmentServices(object):
             unit.delete(environment)
 
     @staticmethod
-    def get_environment_description(environment_id, session_id=None):
+    def get_environment_description(environment_id, session_id=None,
+                                    inner=True):
         """
         Returns environment description for specified environment. If session
         is specified and not in deploying state function returns modified
@@ -135,6 +143,8 @@ class EnvironmentServices(object):
 
         :param environment_id: Environment Id
         :param session_id: Session Id
+        :param inner: return contents of environment rather than whole
+         Object Model structure
         :return: Environment Description Object
         """
         unit = db_session.get_session()
@@ -156,50 +166,27 @@ class EnvironmentServices(object):
             env = (unit.query(models.Environment).get(environment_id))
             env_description = env.description
 
-        return env_description
+        if not inner:
+            return env_description
+        else:
+            return env_description['Objects']
 
     @staticmethod
-    def save_environment_description(session_id, environment):
+    def save_environment_description(session_id, environment, inner=True):
         """
         Saves environment description to specified session
 
         :param session_id: Session Id
         :param environment: Environment Description
+        :param inner: save modifications to only content of environment
+         rather than whole Object Model structure
         """
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
-
-        EnvironmentServices.normalize(environment)
-        jsonschema.validate(environment, schemas.ENV_SCHEMA)
-        session.description = environment
+        if inner:
+            data = session.description.copy()
+            data['Objects'] = environment
+            session.description = data
+        else:
+            session.description = environment
         session.save(unit)
-
-    @staticmethod
-    def normalize(environment):
-        if 'id' not in environment:
-            environment['id'] = uuidutils.generate_uuid()
-
-        if 'services' not in environment:
-            return
-
-        for service in environment['services']:
-            if 'id' not in service:
-                service['id'] = uuidutils.generate_uuid()
-
-            if 'created' not in service:
-                service['created'] = str(timeutils.utcnow())
-
-            if 'updated' not in service:
-                service['updated'] = str(timeutils.utcnow())
-
-            if 'units' not in service:
-                continue
-
-            for idx, unit in enumerate(service['units']):
-                if 'id' not in unit:
-                    unit['id'] = uuidutils.generate_uuid()
-
-                if 'name' not in unit:
-                    unit['name'] = '{srv_name}_instance_{number}'.format(
-                        srv_name=service['name'], number=idx
-                    )

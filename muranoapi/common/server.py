@@ -42,13 +42,15 @@ class ResultEndpoint(object):
         LOG.debug(_('Got result from orchestration '
                     'engine:\n{0}'.format(secure_result)))
 
+        result_id = result['Objects']['?']['id']
+
         if 'deleted' in result:
             LOG.debug(_('Result for environment {0} is dropped. Environment '
-                        'is deleted'.format(result['id'])))
+                        'is deleted'.format(result_id)))
             return
 
         unit = session.get_session()
-        environment = unit.query(models.Environment).get(result['id'])
+        environment = unit.query(models.Environment).get(result_id)
 
         if not environment:
             LOG.warning(_('Environment result could not be handled, specified '

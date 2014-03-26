@@ -63,7 +63,11 @@ class TraverseHelper(object):
 
             if isinstance(source, types.ListType):
                 idx_source = source
-                source = next((i for i in source if i['id'] == path), None)
+                iterator = (
+                    i for i in source
+                    if i.get('?', {}).get('id') == path
+                )
+                source = next(iterator, None)
                 if source is None and path.isdigit():
                     source = idx_source[int(path)]
             elif isinstance(source, types.DictionaryType):
@@ -128,7 +132,8 @@ class TraverseHelper(object):
         key = path[1:].split('/')[-1]
 
         if isinstance(node, types.ListType):
-            item = next((i for i in node if i['id'] == key), None)
+            iterator = (i for i in node if i.get('?', {}).get('id') == key)
+            item = next(iterator, None)
             if item is None and key.isdigit():
                 del node[int(key)]
             else:
@@ -142,8 +147,8 @@ class TraverseHelper(object):
 def build_entity_map(value):
     def build_entity_map_recursive(value, id_map):
         if isinstance(value, types.DictionaryType):
-            if 'id' in value:
-                id_map[value['id']] = value
+            if '?' in value and 'id' in value['?']:
+                id_map[value['?']['id']] = value
             for k, v in value.iteritems():
                 build_entity_map_recursive(v, id_map)
         if isinstance(value, types.ListType):

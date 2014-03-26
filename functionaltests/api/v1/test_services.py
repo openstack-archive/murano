@@ -94,7 +94,7 @@ class TestServices(base.TestCase):
 
         resp, _ = self.client.delete_service(env['id'],
                                              sess['id'],
-                                             service['id'])
+                                             service['?']['id'])
 
         _, services_list_ = self.client.get_services_list(env['id'],
                                                           sess['id'])
@@ -139,7 +139,7 @@ class TestServices(base.TestCase):
                           self.client.delete_service,
                           None,
                           sess['id'],
-                          service['id'])
+                          service['?']['id'])
 
     @attr(type='negative')
     def test_delete_demo_service_without_session_id(self):
@@ -154,7 +154,7 @@ class TestServices(base.TestCase):
                           self.client.delete_service,
                           env['id'],
                           "",
-                          service['id'])
+                          service['?']['id'])
 
     @attr(type='negative')
     def test_double_delete_service(self):
@@ -165,13 +165,13 @@ class TestServices(base.TestCase):
 
         _, service = self.create_demo_service(env['id'], sess['id'])
 
-        self.client.delete_service(env['id'], sess['id'], service['id'])
+        self.client.delete_service(env['id'], sess['id'], service['?']['id'])
 
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_service,
                           env['id'],
                           sess['id'],
-                          service['id'])
+                          service['?']['id'])
 
     @attr(type='smoke')
     def test_get_service(self):
@@ -184,7 +184,7 @@ class TestServices(base.TestCase):
 
         resp, service_ = self.client.get_service(env['id'],
                                                  sess['id'],
-                                                 service['id'])
+                                                 service['?']['id'])
 
         self.assertEqual(resp.status, 200)
         self.assertEqual(service, service_)
@@ -202,7 +202,7 @@ class TestServices(base.TestCase):
                           self.client.get_service,
                           None,
                           sess['id'],
-                          service['id'])
+                          service['?']['id'])
 
     @testtools.skip("https://bugs.launchpad.net/murano/+bug/1295573")
     @attr(type='negative')
@@ -218,4 +218,4 @@ class TestServices(base.TestCase):
                           self.client.get_service,
                           env['id'],
                           "",
-                          service['id'])
+                          service['?']['id'])

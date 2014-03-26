@@ -18,6 +18,7 @@ from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
 import testtools
+import uuid
 
 CONF = config.CONF
 
@@ -202,6 +203,10 @@ class TestCase(testtools.TestCase):
 
     def create_demo_service(self, environment_id, session_id):
         post_body = {
+            "?": {
+                "id": uuid.uuid4().hex,
+                "type": "io.murano.tests.demoService"
+            },
             "availabilityZone": "nova",
             "name": "demo",
             "unitNamingPattern": "host",
@@ -212,8 +217,7 @@ class TestCase(testtools.TestCase):
             },
             "units": [{}],
             "flavor": "m1.small",
-            "configuration": "standalone",
-            "type": "demoService"
+            "configuration": "standalone"
         }
 
         return self.client.create_service(environment_id,

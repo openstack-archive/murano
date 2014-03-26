@@ -45,16 +45,16 @@ class TraverseHelperTests(unittest.TestCase):
 
     def test_list_item_attribute_get(self):
         source = {'obj': [
-            {'id': '1', 'value': 1},
-            {'id': '2s', 'value': 2},
+            {'?': {'id': '1'}, 'value': 1},
+            {'?': {'id': '2s'}, 'value': 2},
         ]}
         value = utils.TraverseHelper.get('/obj/2s/value', source)
         self.assertEqual(value, 2)
 
     def test_list_item_attribute_get_by_index(self):
         source = {'obj': [
-            {'id': 'guid1', 'value': 1},
-            {'id': 'guid2', 'value': 2},
+            {'?': {'id': 'guid1'}, 'value': 1},
+            {'?': {'id': 'guid2'}, 'value': 2}
         ]}
         value = utils.TraverseHelper.get('/obj/1/value', source)
         self.assertEqual(value, 2)
@@ -114,13 +114,13 @@ class TraverseHelperTests(unittest.TestCase):
         self.assertDictEqual(value, {'attr2': True})
 
     def test_nested_attribute_remove_from_list_by_id(self):
-        source = {'obj': [{'id': 'id1'}, {'id': 'id2'}]}
+        source = {'obj': [{'?': {'id': 'id1'}}, {'?': {'id': 'id2'}}]}
         utils.TraverseHelper.remove('/obj/id1', source)
         value = utils.TraverseHelper.get('/obj', source)
-        self.assertListEqual(value, [{'id': 'id2'}])
+        self.assertListEqual(value, [{'?': {'id': 'id2'}}])
 
     def test_nested_attribute_remove_from_list_by_index(self):
-        source = {'obj': [{'id': 'id1'}, {'id': 'id2'}]}
+        source = {'obj': [{'?': {'id': 'id1'}}, {'?': {'id': 'id2'}}]}
         utils.TraverseHelper.remove('/obj/0', source)
         value = utils.TraverseHelper.get('/obj', source)
-        self.assertListEqual(value, [{'id': 'id2'}])
+        self.assertListEqual(value, [{'?': {'id': 'id2'}}])

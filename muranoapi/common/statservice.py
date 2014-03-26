@@ -44,7 +44,7 @@ class StatsCollectingService(service.Service):
         self.tg.add_thread(self._collect_stats_loop)
 
     def stop(self):
-        self(StatsCollectingService, self).stop()
+        super(StatsCollectingService, self).stop()
 
     def _collect_stats_loop(self):
         period = CONF_STATS.period * 60

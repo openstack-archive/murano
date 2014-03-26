@@ -42,14 +42,14 @@ class TaskProcessingEndpoint(object):
         log.info('Starting processing task: {0}'.format(anyjson.dumps(s_task)))
 
         env = environment.Environment()
-        env.token = task['Objects']['?']['token']
-        env.tenant_id = task['Objects']['?']['tenant_id']
+        env.token = task['token']
+        env.tenant_id = task['tenant_id']
 
         cl = simple_cloader.SimpleClassLoader(config.CONF.metadata_dir)
         system.register(cl, config.CONF.metadata_dir)
 
         exc = executor.MuranoDslExecutor(cl, env)
-        obj = exc.load(task)
+        obj = exc.load(task['model'])
 
         obj.type.invoke('deploy', exc, obj, {})
 

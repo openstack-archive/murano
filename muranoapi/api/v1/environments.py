@@ -137,7 +137,7 @@ class Controller(object):
         session = db_session.get_session()
         result = {}
         for service in services:
-            service_id = service['id']
+            service_id = service['?']['id']
             entity_ids = utils.build_entity_map(service).keys()
             last_status = session.query(models.Status). \
                 filter(models.Status.entity_id.in_(entity_ids)). \

@@ -56,7 +56,7 @@ class Controller(object):
             entity_ids = []
             if 'services' in environment:
                 for service in environment['services']:
-                    if service['id'] in service_id_set:
+                    if service['?']['id'] in service_id_set:
                         id_map = utils.build_entity_map(service)
                         entity_ids = entity_ids + id_map.keys()
             if entity_ids:

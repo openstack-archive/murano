@@ -19,6 +19,7 @@ import socket
 
 import json
 import requests
+import uuid
 
 import novaclient.v1_1.client as nvclient
 import tempest.api.murano.config as cfg
@@ -225,17 +226,29 @@ class MuranoTest(tempest.test.BaseTestCase):
               environment_id - ID of current environment
               session_id - ID of current session
         """
-        post_body = {"type": "activeDirectory", "name": "ad.local",
-                     "adminPassword": "P@ssw0rd", "domain": "ad.local",
-                     "availabilityZone": "nova",
-                     "unitNamingPattern": "adinstance",
-                     "flavor": "m1.medium", "osImage":
-                     {"type": "ws-2012-std", "name": self.windows, "title":
-                         "Windows Server 2012 Standard"},
-                     "configuration": "standalone",
-                     "units": [{"isMaster": True,
-                                "recoveryPassword": "P@ssw0rd",
-                                "location": "west-dc"}]}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.activeDirectory",
+                'id': uuid.uuid4().hex
+            },
+            "name": "ad.local",
+            "adminPassword": "P@ssw0rd",
+            "domain": "ad.local",
+            "availabilityZone": "nova",
+            "unitNamingPattern": "adinstance",
+            "flavor": "m1.medium",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "configuration": "standalone",
+            "units": [{
+                "isMaster": True,
+                "recoveryPassword": "P@ssw0rd",
+                "location": "west-dc"
+            }]
+        }
 
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
@@ -255,14 +268,25 @@ class MuranoTest(tempest.test.BaseTestCase):
         iis_name = "IISSERVICE"
         creds = {'username': 'Administrator',
                  'password': 'P@ssw0rd'}
-        post_body = {"type": "webServer", "domain": domain_name,
-                     "availabilityZone": "nova", "name": iis_name,
-                     "adminPassword": "P@ssw0rd",
-                     "unitNamingPattern": "iisinstance",
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "units": [{}], "credentials": creds,
-                     "flavor": "m1.medium"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.webServer",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "availabilityZone": "nova",
+            "name": iis_name,
+            "adminPassword": "P@ssw0rd",
+            "unitNamingPattern": "iisinstance",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "units": [{}],
+            "credentials": creds,
+            "flavor": "m1.medium"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -280,16 +304,27 @@ class MuranoTest(tempest.test.BaseTestCase):
         """
         creds = {'username': 'Administrator',
                  'password': 'P@ssw0rd'}
-        post_body = {"type": "aspNetApp", "domain": domain_name,
-                     "availabilityZone": "nova",
-                     "name": "someasp", "repository":
-                     "git://github.com/Mirantis/murano-mvc-demo.git",
-                     "adminPassword": "P@ssw0rd",
-                     "unitNamingPattern": "aspnetinstance",
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "units": [{}], "credentials": creds,
-                     "flavor": "m1.medium"}
+        repo = 'git://github.com/murano-project/murano-mvc-demo.git',
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.aspNetApp",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "availabilityZone": "nova",
+            "name": "someasp",
+            "repository": repo,
+            "adminPassword": "P@ssw0rd",
+            "unitNamingPattern": "aspnetinstance",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "units": [{}],
+            "credentials": creds,
+            "flavor": "m1.medium"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -306,14 +341,26 @@ class MuranoTest(tempest.test.BaseTestCase):
               session_id - ID of current session
         """
         creds = {'username': 'Administrator', 'password': 'P@ssw0rd'}
-        post_body = {"type": "webServerFarm", "domain": domain_name,
-                     "availabilityZone": "nova", "name": "someIISFARM",
-                     "adminPassword": "P@ssw0rd", "loadBalancerPort": 80,
-                     "unitNamingPattern": "",
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "units": [{}, {}],
-                     "credentials": creds, "flavor": "m1.medium"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.webServerFarm",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "availabilityZone": "nova",
+            "name": "someIISFARM",
+            "adminPassword": "P@ssw0rd",
+            "loadBalancerPort": 80,
+            "unitNamingPattern": "",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "units": [{}, {}],
+            "credentials": creds,
+            "flavor": "m1.medium"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -330,16 +377,28 @@ class MuranoTest(tempest.test.BaseTestCase):
               session_id - ID of current session
         """
         creds = {'username': 'Administrator', 'password': 'P@ssw0rd'}
-        post_body = {"type": "aspNetAppFarm", "domain": domain_name,
-                     "availabilityZone": "nova", "name": "SomeApsFarm",
-                     "repository":
-                             "git://github.com/Mirantis/murano-mvc-demo.git",
-                     "adminPassword": "P@ssw0rd", "loadBalancerPort": 80,
-                     "unitNamingPattern": "",
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "units": [{}, {}],
-                     "credentials": creds, "flavor": "m1.medium"}
+        repo = 'git://github.com/murano-project/murano-mvc-demo.git'
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.aspNetAppFarm",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "availabilityZone": "nova",
+            "name": "SomeApsFarm",
+            "repository": repo,
+            "adminPassword": "P@ssw0rd",
+            "loadBalancerPort": 80,
+            "unitNamingPattern": "",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "units": [{}, {}],
+            "credentials": creds,
+            "flavor": "m1.medium"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -355,17 +414,30 @@ class MuranoTest(tempest.test.BaseTestCase):
               environment_id - ID of current environment
               session_id - ID of current session
         """
-        post_body = {"type": "msSqlServer", "domain": domain_name,
-                     "availabilityZone": "nova", "name": "SQLSERVER",
-                     "adminPassword": "P@ssw0rd",
-                     "unitNamingPattern": "sqlinstance",
-                     "saPassword": "P@ssw0rd", "mixedModeAuth": True,
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "units": [{}],
-                     "credentials": {"username": "Administrator",
-                                     "password": "P@ssw0rd"},
-                     "flavor": "m1.medium"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.msSqlServer",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "availabilityZone": "nova",
+            "name": "SQLSERVER",
+            "adminPassword": "P@ssw0rd",
+            "unitNamingPattern": "sqlinstance",
+            "saPassword": "P@ssw0rd",
+            "mixedModeAuth": True,
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "units": [{}],
+            "credentials": {
+                "username": "Administrator",
+                "password": "P@ssw0rd"
+            },
+            "flavor": "m1.medium"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -383,28 +455,48 @@ class MuranoTest(tempest.test.BaseTestCase):
         """
         AG = cfg.murano.agListnerIP
         clIP = cfg.murano.clusterIP
-        post_body = {"domain": domain_name, "domainAdminPassword": "P@ssw0rd",
-                     "externalAD": False,
-                     "sqlServiceUserName": "Administrator",
-                     "sqlServicePassword": "P@ssw0rd",
-                     "osImage": {"type": "ws-2012-std", "name": self.windows,
-                                 "title": "Windows Server 2012 Standard"},
-                     "agListenerName": "SomeSQL_AGListner",
-                     "flavor": "m1.medium",
-                     "agGroupName": "SomeSQL_AG",
-                     "domainAdminUserName": "Administrator",
-                     "agListenerIP": AG,
-                     "clusterIP": clIP,
-                     "type": "msSqlClusterServer", "availabilityZone": "nova",
-                     "adminPassword": "P@ssw0rd",
-                     "clusterName": "SomeSQL", "mixedModeAuth": True,
-                     "unitNamingPattern": "",
-                     "units": [{"isMaster": True, "name": "node1",
-                                "isSync": True},
-                               {"isMaster": False, "name": "node2",
-                                "isSync": True}],
-                     "name": "Sqlname", "saPassword": "P@ssw0rd",
-                     "databases": ['NewDB']}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.msSqlClusterServer",
+                'id': uuid.uuid4().hex
+            },
+            "domain": domain_name,
+            "domainAdminPassword": "P@ssw0rd",
+            "externalAD": False,
+            "sqlServiceUserName": "Administrator",
+            "sqlServicePassword": "P@ssw0rd",
+            "osImage": {
+                "type": "ws-2012-std",
+                "name": self.windows,
+                "title": "Windows Server 2012 Standard"
+            },
+            "agListenerName": "SomeSQL_AGListner",
+            "flavor": "m1.medium",
+            "agGroupName": "SomeSQL_AG",
+            "domainAdminUserName": "Administrator",
+            "agListenerIP": AG,
+            "clusterIP": clIP,
+            "availabilityZone": "nova",
+            "adminPassword": "P@ssw0rd",
+            "clusterName": "SomeSQL",
+            "mixedModeAuth": True,
+            "unitNamingPattern": "",
+            "units": [
+                {
+                    "isMaster": True,
+                    "name": "node1",
+                    "isSync": True
+                },
+                {
+                    "isMaster": False,
+                    "name": "node2",
+                    "isSync": True
+                }
+            ],
+            "name": "Sqlname",
+            "saPassword": "P@ssw0rd",
+            "databases": ['NewDB']
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -413,13 +505,24 @@ class MuranoTest(tempest.test.BaseTestCase):
         return resp, json.loads(body)
 
     def create_linux_telnet(self, environment_id, session_id):
-        post_body = {"availabilityZone": "nova", "name": "LinuxTelnet",
-                     "deployTelnet": True, "unitNamingPattern": "telnet",
-                     "keyPair": "murano-lb-key",
-                     "osImage": {"type": "linux", "name": self.linux,
-                                 "title": "Linux Image"},
-                     "units": [{}],
-                     "flavor": "m1.small", "type": "linuxTelnetService"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.linuxTelnetService",
+                'id': uuid.uuid4().hex
+            },
+            "availabilityZone": "nova",
+            "name": "LinuxTelnet",
+            "deployTelnet": True,
+            "unitNamingPattern": "telnet",
+            "keyPair": "murano-lb-key",
+            "osImage": {
+                "type": "linux",
+                "name": self.linux,
+                "title": "Linux Image"
+            },
+            "units": [{}],
+            "flavor": "m1.small"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -428,14 +531,25 @@ class MuranoTest(tempest.test.BaseTestCase):
         return resp, json.loads(body)
 
     def create_linux_apache(self, environment_id, session_id):
-        post_body = {"availabilityZone": "nova", "name": "LinuxApache",
-                     "deployApachePHP": True, "unitNamingPattern": "apache",
-                     "keyPair": "murano-lb-key",
-                     "instanceCount": [{}],
-                     "osImage": {"type": "linux", "name": self.linux,
-                                 "title": "Linux Image"},
-                     "units": [{}],
-                     "flavor": "m1.small", "type": "linuxApacheService"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.linuxApacheService",
+                'id': uuid.uuid4().hex
+            },
+            "availabilityZone": "nova",
+            "name": "LinuxApache",
+            "deployApachePHP": True,
+            "unitNamingPattern": "apache",
+            "keyPair": "murano-lb-key",
+            "instanceCount": [{}],
+            "osImage": {
+                "type": "linux",
+                "name": self.linux,
+                "title": "Linux Image"
+            },
+            "units": [{}],
+            "flavor": "m1.small"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +
@@ -444,12 +558,23 @@ class MuranoTest(tempest.test.BaseTestCase):
         return resp, json.loads(body)
 
     def create_demo_service(self, environment_id, session_id):
-        post_body = {"availabilityZone": "nova", "name": "demo",
-                     "unitNamingPattern": "host",
-                     "osImage": {"type": "cirros.demo", "name": self.demo,
-                                 "title": "Demo"},
-                     "units": [{}], "flavor": "m1.small",
-                     "configuration": "standalone", "type": "demoService"}
+        post_body = {
+            '?': {
+                'type': "io.murano.tests.demoService",
+                'id': uuid.uuid4().hex
+            },
+            "availabilityZone": "nova",
+            "name": "demo",
+            "unitNamingPattern": "host",
+            "osImage": {
+                "type": "cirros.demo",
+                "name": self.demo,
+                "title": "Demo"
+            },
+            "units": [{}],
+            "flavor": "m1.small",
+            "configuration": "standalone"
+        }
         post_body = json.dumps(post_body)
         self.client.headers.update({'X-Configuration-Session': session_id})
         resp, body = self.client.post('environments/' + str(environment_id) +

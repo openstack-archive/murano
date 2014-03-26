@@ -54,7 +54,7 @@ class CoreServices(object):
         if path == '/services':
             get_status = CoreServices.get_service_status
             for srv in result:
-                srv['status'] = get_status(environment_id, srv['id'])
+                srv['?']['status'] = get_status(environment_id, srv['?']['id'])
 
         return result
 
@@ -87,8 +87,7 @@ class CoreServices(object):
         env_description = get_description(environment_id, session_id)
 
         utils.TraverseHelper.update(path, data, env_description)
-        if path == '/services':
-            data['updated'] = str(timeutils.utcnow())
+        env_description['?']['updated'] = str(timeutils.utcnow())
 
         save_description(session_id, env_description)
 

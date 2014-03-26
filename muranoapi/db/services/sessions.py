@@ -121,14 +121,28 @@ class SessionServices(object):
         #unit = get_session()
 
         #Set X-Auth-Token for conductor
-        environment = session.description
-        environment['token'] = token
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(
+            session.environment_id)
+
+        data = {
+            'model': session.description,
+            'token': token,
+            'tenant_id': environment.tenant_id
+        }
+
+        data['model']['Objects']['?']['id'] = environment.id
+        data['model']['Objects']['applications'] = \
+            data['model']['Objects'].get('services', [])
+
+        if 'services' in data['model']['Objects']:
+            del data['model']['Objects']['services']
 
         session.state = SessionState.deploying
         deployment = models.Deployment()
-        deployment.environment_id = environment['id']
+        deployment.environment_id = session.environment_id
         deployment.description = token_sanitizer.TokenSanitizer().sanitize(
-            dict(session.description))
+            dict(session.description.get('Objects')))
         status = models.Status()
         status.text = "Deployment scheduled"
         status.level = "info"
@@ -138,4 +152,4 @@ class SessionServices(object):
             unit.add(session)
             unit.add(deployment)
 
-        rpc.engine().handle_task(environment)
+        rpc.engine().handle_task(data)
