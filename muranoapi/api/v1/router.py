@@ -129,4 +129,8 @@ class API(wsgi.Router):
                        controller=catalog_resource,
                        action='update',
                        conditions={'method': ['PATCH']})
+        mapper.connect('/catalog/packages',
+                       controller=catalog_resource,
+                       action='search',
+                       conditions={'method': ['GET']})
         super(API, self).__init__(mapper)

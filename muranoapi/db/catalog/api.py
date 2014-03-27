@@ -12,13 +12,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from sqlalchemy import or_
+from sqlalchemy import sql
 from webob import exc
 
+import muranoapi
 from muranoapi.db import models
 from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
+SEARCH_MAPPING = muranoapi.api.v1.SEARCH_MAPPING
 LOG = logging.getLogger(__name__)
 
 
@@ -204,3 +208,104 @@ def package_update(pkg_id, changes, context):
     with session.begin():
         session.add(pkg)
     return pkg
+
+
+def package_search(filters, context):
+    """
+    Search packages with different filters
+      * Admin is allowed to browse all the packages
+      * Regular user is allowed to browse all packages belongs to user tenant
+        and all other packages marked is_public.
+        Also all packages should be enabled.
+      * Use marker and limit for pagination:
+        The typical pattern of limit and marker is to make an initial limited
+        request and then to use the ID of the last package from the response
+        as the marker parameter in a subsequent limited request.
+    """
+
+    def _validate_limit(value):
+        if value is None:
+            return
+        try:
+            value = int(value)
+        except ValueError:
+            msg = _("limit param must be an integer")
+            raise exc.HTTPBadRequest(explanation=msg)
+
+        if value < 0:
+            msg = _("limit param must be positive")
+            raise exc.HTTPBadRequest(explanation=msg)
+
+        return value
+
+    def get_pkg_attr(package_obj, search_attr_name):
+        return getattr(package_obj, SEARCH_MAPPING[search_attr_name])
+
+    limit = _validate_limit(filters.get('limit'))
+
+    session = db_session.get_session()
+    pkg = models.Package
+
+    if 'owned' in filters.keys():
+        query = session.query(pkg).filter(pkg.owner_id == context.tenant)
+    elif context.is_admin:
+        query = session.query(pkg)
+    else:
+        query = session.query(pkg).filter(or_((pkg.is_public & pkg.enabled),
+                                              pkg.owner_id == context.tenant))
+
+    if 'category' in filters.keys():
+        query = query.filter(pkg.categories.any(
+            models.Category.name.in_(filters['category'])))
+    if 'tag' in filters.keys():
+        query = query.filter(pkg.tags.any(
+            models.Tag.name.in_(filters['tag'])))
+    if 'class' in filters.keys():
+        query = query.filter(pkg.class_definition.any(
+            models.Class.name.in_(filters['class'])))
+    if 'fqn' in filters.keys():
+        query = query.filter(pkg.fully_qualified_name == filters['fqn'])
+
+    sort_keys = filters.get('order_by', []) or ['created']
+    for key in sort_keys:
+        query = query.order_by(get_pkg_attr(pkg, key))
+
+    marker = filters.get('marker')
+    if marker is not None:
+        # Note(efedorova): Copied from Glance
+        #   Pagination works by requiring a unique sort_key, specified by sort_
+        #   keys. (If sort_keys is not unique, then we risk looping through
+        #   values.) We use the last row in the previous page as the 'marker'
+        #   for pagination. So we must return values that follow the passed
+        #   marker in the order. With a single-valued sort_key, this would
+        #   be easy: sort_key > X. With a compound-values sort_key,
+        #   (k1, k2, k3) we must do this to repeat the lexicographical
+        #   ordering: (k1 > X1) or (k1 == X1 && k2 > X2) or
+        #   (k1 == X1 && k2 == X2 && k3 > X3)
+
+        model_marker = _package_get(marker, session)
+        marker_values = []
+        for sort_key in sort_keys:
+            v = getattr(model_marker, sort_key)
+            marker_values.append(v)
+
+        # Build up an array of sort criteria as in the docstring
+        criteria_list = []
+        for i in range(len(sort_keys)):
+            crit_attrs = []
+            for j in range(i):
+                model_attr = get_pkg_attr(pkg, sort_keys[j])
+                crit_attrs.append((model_attr == marker_values[j]))
+
+            model_attr = get_pkg_attr(pkg, sort_keys[i])
+            crit_attrs.append((model_attr > marker_values[i]))
+
+            criteria = sql.and_(*crit_attrs)
+            criteria_list.append(criteria)
+            f = sql.or_(*criteria_list)
+            query = query.filter(f)
+
+    if limit is not None:
+        query = query.limit(limit)
+
+    return query.all()

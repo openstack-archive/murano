@@ -17,6 +17,15 @@ from muranoapi.db import session as db_session
 
 stats = None
 
+SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class',
+                    'limit', 'type', 'fqn', 'category', 'owned')
+LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
+ORDER_VALUES = ('fqn', 'name', 'created')
+SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
+                  'name': 'name',
+                  'created': 'created'
+                  }
+
 
 def get_draft(environment_id=None, session_id=None):
     unit = db_session.get_session()
