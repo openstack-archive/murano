@@ -15,10 +15,10 @@
 import collections
 import inspect
 
-from muranoapi.engine import helpers
-from muranoapi.engine import methods as engine_methods
-from muranoapi.engine import objects
-from muranoapi.engine import typespec
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_method as murano_method
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.typespec as typespec
 
 
 def classname(name):
@@ -35,16 +35,17 @@ class MuranoClass(object):
         self._namespace_resolver = namespace_resolver
         self._name = namespace_resolver.resolve_name(name)
         self._properties = {}
-        if self._name == 'org.openstack.murano.Object':
+        if self._name == 'io.murano.Object':
             self._parents = []
         else:
-            self._parents = parents if parents is not None else [
-                class_loader.get_class('org.openstack.murano.Object')]
-        self.object_class = type(
-            'mc' + helpers.generate_id(),
-            tuple([p.object_class for p in self._parents]) or (
-                objects.MuranoObject,),
-            {})
+            self._parents = parents or [
+                class_loader.get_class('io.murano.Object')]
+
+        class_name = 'mc' + helpers.generate_id()
+        parents_class = [p.object_class for p in self._parents]
+        bases = tuple(parents_class) or (murano_object.MuranoObject,)
+
+        self.object_class = type(class_name, bases, {})
 
     @property
     def name(self):
@@ -59,6 +60,19 @@ class MuranoClass(object):
         return self._parents
 
     @property
+    def methods(self):
+        return self._methods
+
+    def get_method(self, name):
+        return self._methods.get(name)
+
+    def add_method(self, name, payload):
+        method = murano_method.MuranoMethod(self._namespace_resolver,
+                                            self, name, payload)
+        self._methods[name] = method
+        return method
+
+    @property
     def properties(self):
         return self._properties.keys()
 
@@ -71,6 +85,7 @@ class MuranoClass(object):
         return self._properties[name]
 
     def find_method(self, name):
+        #resolved_name = self._namespace_resolver.resolve_name(name, self.name)
         if name in self._methods:
             return [(self, name)]
         if not self._parents:
@@ -88,27 +103,12 @@ class MuranoClass(object):
             types.extend(mc.parents)
         return None
 
-    @property
-    def methods(self):
-        return self._methods
-
-    def get_method(self, name):
-        return self._methods.get(name)
-
-    def add_method(self, name, payload):
-        #name = self._namespace_resolver.resolve_name(name, self.name)
-        method = engine_methods.MuranoMethod(
-            self._namespace_resolver,
-            self, name, payload)
-        self._methods[name] = method
-        return method
-
     def invoke(self, name, executor, this, parameters):
         args = executor.to_yaql_args(parameters)
         return executor.invoke_method(name, this, None, self, *args)
 
     def is_compatible(self, obj):
-        if isinstance(obj, objects.MuranoObject):
+        if isinstance(obj, murano_object.MuranoObject):
             return self.is_compatible(obj.type)
         if obj is self:
             return True

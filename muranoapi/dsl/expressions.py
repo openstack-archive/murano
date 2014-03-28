@@ -14,10 +14,9 @@
 
 import types
 
-from muranoapi.engine import helpers
-from muranoapi.engine import lhs_expression as lhs
-from muranoapi.engine import yaql_expression
-
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.lhs_expression as lhs_expression
+import muranoapi.dsl.yaql_expression as yaql_expression
 
 _macros = []
 
@@ -44,7 +43,7 @@ class Statement(DslExpression):
         else:
             raise SyntaxError()
 
-        self._destination = None if not key else lhs.LhsExpression(key)
+        self._destination = lhs_expression.LhsExpression(key) if key else None
         self._expression = value
 
     @property

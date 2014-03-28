@@ -12,16 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.engine import classes
-from muranoapi.engine import helpers
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_class as murano_class
 
 
-@classes.classname('org.openstack.murano.Object')
+@murano_class.classname('io.murano.Object')
 class SysObject(object):
     def setAttr(self, _context, name, value, owner=None):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(_context))
-        if not isinstance(owner, classes.MuranoClass):
+        if not isinstance(owner, murano_class.MuranoClass):
             raise TypeError()
 
         attribute_store = helpers.get_attribute_store(_context)
@@ -30,7 +30,7 @@ class SysObject(object):
     def getAttr(self, _context, name, owner=None):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(_context))
-        if not isinstance(owner, classes.MuranoClass):
+        if not isinstance(owner, murano_class.MuranoClass):
             raise TypeError()
 
         attribute_store = helpers.get_attribute_store(_context)

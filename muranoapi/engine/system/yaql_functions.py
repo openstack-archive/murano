@@ -17,10 +17,10 @@ import base64
 import re
 import types
 
-from yaql import context
+import yaql.context
 
-from muranoapi.common import config as cfg
-from muranoapi.engine import helpers
+import muranoapi.common.config as cfg
+import muranoapi.dsl.helpers as helpers
 
 
 def _transform_json(json, mappings):
@@ -62,20 +62,20 @@ def _convert_macro_parameter(macro, mappings):
         return mappings[macro]
 
 
-@context.EvalArg('format', types.StringTypes)
+@yaql.context.EvalArg('format', types.StringTypes)
 def _format(format, *args):
     return format.format(*[t() for t in args])
 
 
-@context.EvalArg('src', types.StringTypes)
-@context.EvalArg('substring', types.StringTypes)
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('src', types.StringTypes)
+@yaql.context.EvalArg('substring', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _replace_str(src, substring, value):
     return src.replace(substring, value)
 
 
-@context.EvalArg('src', types.StringTypes)
-@context.EvalArg('replacements', dict)
+@yaql.context.EvalArg('src', types.StringTypes)
+@yaql.context.EvalArg('replacements', dict)
 def _replace_dict(src, replacements):
     for key, value in replacements.iteritems():
         if isinstance(src, str):
@@ -97,74 +97,74 @@ def _coalesce(*args):
     return None
 
 
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _base64encode(value):
     return base64.b64encode(value)
 
 
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _base64decode(value):
     return base64.b64decode(value)
 
 
-@context.EvalArg('group', types.StringTypes)
-@context.EvalArg('setting', types.StringTypes)
+@yaql.context.EvalArg('group', types.StringTypes)
+@yaql.context.EvalArg('setting', types.StringTypes)
 def _config(group, setting):
     return cfg.CONF[group][setting]
 
 
-@context.EvalArg('setting', types.StringTypes)
+@yaql.context.EvalArg('setting', types.StringTypes)
 def _config_default(setting):
     return cfg.CONF[setting]
 
 
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _upper(value):
     return value.upper()
 
 
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _lower(value):
     return value.lower()
 
 
-@context.EvalArg('separator', types.StringTypes)
+@yaql.context.EvalArg('separator', types.StringTypes)
 def _join(separator, *args):
     return separator.join([t() for t in args])
 
 
-@context.EvalArg('value', types.StringTypes)
-@context.EvalArg('separator', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('separator', types.StringTypes)
 def _split(value, separator):
     return value.split(separator)
 
 
-@context.EvalArg('value', types.StringTypes)
-@context.EvalArg('prefix', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('prefix', types.StringTypes)
 def _startswith(value, prefix):
     return value.startswith(prefix)
 
 
-@context.EvalArg('value', types.StringTypes)
-@context.EvalArg('suffix', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('suffix', types.StringTypes)
 def _endswith(value, suffix):
     return value.endswith(suffix)
 
 
-@context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
 def _trim(value):
     return value.strip()
 
 
-@context.EvalArg('value', types.StringTypes)
-@context.EvalArg('pattern', types.StringTypes)
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('pattern', types.StringTypes)
 def _mathces(value, pattern):
     return re.match(pattern, value) is not None
 
 
-@context.EvalArg('value', types.StringTypes)
-@context.EvalArg('index', int)
-@context.EvalArg('length', int)
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('index', int)
+@yaql.context.EvalArg('length', int)
 def _substr(value, index=0, length=-1):
     if length < 0:
         return value[index:]

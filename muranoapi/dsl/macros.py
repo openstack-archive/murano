@@ -14,13 +14,13 @@
 
 import types
 
-from eventlet import greenpool
-from yaql import context as y_context
+import eventlet.greenpool as greenpool
+import yaql.context
 
-from muranoapi.engine import exceptions
-from muranoapi.engine import expressions
-from muranoapi.engine import helpers
-from muranoapi.engine import yaql_expression
+import muranoapi.dsl.exceptions as exceptions
+import muranoapi.dsl.expressions as expressions
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.yaql_expression as yaql_expression
 
 
 class CodeBlock(expressions.DslExpression):
@@ -81,10 +81,10 @@ class ParallelMacro(CodeBlock):
     def execute(self, context, murano_class):
         if not self.code_block:
             return
-        gp = greenpool.GreenPool(helpers.evaluate(self._limit, context))
+        gpool = greenpool.GreenPool(helpers.evaluate(self._limit, context))
         for expr in self.code_block:
-            gp.spawn_n(expr.execute, context, murano_class)
-        gp.waitall()
+            gpool.spawn_n(expr.execute, context, murano_class)
+        gpool.waitall()
 
 
 class IfMacro(expressions.DslExpression):
@@ -136,7 +136,7 @@ class ForMacro(expressions.DslExpression):
 
     def execute(self, context, murano_class):
         collection = helpers.evaluate(self._collection, context)
-        child_context = y_context.Context(context)
+        child_context = yaql.context.Context(context)
         for t in collection:
             child_context.set_data(t, self._var)
             try:
@@ -189,16 +189,15 @@ class SwitchMacro(expressions.DslExpression):
     def execute(self, context, murano_class):
         matched = False
         for key, value in self._switch.iteritems():
-            if not isinstance(key,
-                              (yaql_expression.YaqlExpression,
-                               types.BooleanType)):
+            if not isinstance(key, (yaql_expression.YaqlExpression,
+                                    types.BooleanType)):
                 raise SyntaxError()
             res = helpers.evaluate(key, context)
             if not isinstance(res, types.BooleanType):
                 raise TypeError()
             if res:
                 matched = True
-                child_context = y_context.Context(context)
+                child_context = yaql.context.Context(context)
                 CodeBlock(value).execute(child_context, murano_class)
 
         if self._default is not None and not matched:
@@ -210,7 +209,7 @@ class DoMacro(expressions.DslExpression):
         self._code = CodeBlock(Do)
 
     def execute(self, context, murano_class):
-        child_context = y_context.Context(context)
+        child_context = yaql.context.Context(context)
         self._code.execute(child_context, murano_class)
 
 

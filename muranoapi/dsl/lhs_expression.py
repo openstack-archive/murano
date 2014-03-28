@@ -15,12 +15,12 @@
 import types
 
 import yaql
-from yaql import context as y_context
+import yaql.context
 import yaql.expressions
 
-from muranoapi.engine import objects
-from muranoapi.engine import type_scheme
-from muranoapi.engine import yaql_expression as y_expression
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.type_scheme as type_scheme
+import muranoapi.dsl.yaql_expression as yaql_expression
 
 
 class LhsExpression(object):
@@ -36,7 +36,7 @@ class LhsExpression(object):
             self._setter(value)
 
     def __init__(self, expression):
-        if isinstance(expression, (y_expression.YaqlExpression,
+        if isinstance(expression, (yaql_expression.YaqlExpression,
                                    yaql.expressions.Expression)):
             self._expression = expression
         else:
@@ -51,7 +51,7 @@ class LhsExpression(object):
             elif isinstance(src, types.ListType) and isinstance(
                     key, types.IntType):
                 return src[key]
-            elif isinstance(src, objects.MuranoObject) and isinstance(
+            elif isinstance(src, murano_object.MuranoObject) and isinstance(
                     key, types.StringTypes):
                 self._current_obj = src
                 self._current_obj_name = key
@@ -89,7 +89,7 @@ class LhsExpression(object):
                         src[key] = old_value
                         raise e
 
-            elif isinstance(src, objects.MuranoObject) and isinstance(
+            elif isinstance(src, murano_object.MuranoObject) and isinstance(
                     key, types.StringTypes):
                 self._current_spec = src.type.find_property(key)
                 src.set_property(key, value, murano_class)
@@ -107,20 +107,20 @@ class LhsExpression(object):
             return LhsExpression.Property(
                 lambda: root_context.get_data(path), set_data)
 
-        @y_context.EvalArg('this', arg_type=LhsExpression.Property)
+        @yaql.context.EvalArg('this', arg_type=LhsExpression.Property)
         def attribution(this, arg_name):
             arg_name = arg_name()
             return LhsExpression.Property(
                 lambda: _get_value(this.get(), arg_name),
                 lambda value: _set_value(this.get(), arg_name, value))
 
-        @y_context.EvalArg("this", LhsExpression.Property)
+        @yaql.context.EvalArg("this", LhsExpression.Property)
         def indexation(this, index):
             return LhsExpression.Property(
                 lambda: _get_value(this.get(), index()),
                 lambda value: _set_value(this.get(), index(), value))
 
-        context = y_context.Context()
+        context = yaql.context.Context()
         context.register_function(get_context_data, '#get_context_data')
         context.register_function(attribution, '#operator_.')
         context.register_function(indexation, "where")

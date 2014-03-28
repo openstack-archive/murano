@@ -16,12 +16,14 @@ import sys
 import types
 import uuid
 
-from yaql import context as y_context
+import yaql.context
 
-from muranoapi.engine import consts
-from muranoapi.engine import helpers
-from muranoapi.engine import objects
-from muranoapi.engine import yaql_expression
+import muranoapi.dsl.helpers
+import muranoapi.dsl.murano_object
+import muranoapi.dsl.yaql_expression as yaql_expression
+
+
+NoValue = object()
 
 
 class TypeScheme(object):
@@ -37,7 +39,7 @@ class TypeScheme(object):
                         namespace_resolver, default):
         def _int(value):
             value = value()
-            if value is consts.NoValue:
+            if value is NoValue:
                 value = default
             if value is None:
                 return None
@@ -48,7 +50,7 @@ class TypeScheme(object):
 
         def _string(value):
             value = value()
-            if value is consts.NoValue:
+            if value is NoValue:
                 value = default
             if value is None:
                 return None
@@ -59,7 +61,7 @@ class TypeScheme(object):
 
         def _bool(value):
             value = value()
-            if value is consts.NoValue:
+            if value is NoValue:
                 value = default
             if value is None:
                 return None
@@ -85,8 +87,11 @@ class TypeScheme(object):
             else:
                 raise TypeError(value)
 
-        @y_context.EvalArg('obj', arg_type=(objects.MuranoObject,
-                           TypeScheme.ObjRef, types.NoneType))
+        @yaql.context.EvalArg('obj', arg_type=(
+            muranoapi.dsl.murano_object.MuranoObject,
+            TypeScheme.ObjRef,
+            types.NoneType
+        ))
         def _owned(obj):
             if isinstance(obj, TypeScheme.ObjRef):
                 return obj
@@ -98,8 +103,11 @@ class TypeScheme(object):
             else:
                 raise TypeError()
 
-        @y_context.EvalArg('obj', arg_type=(objects.MuranoObject,
-                           TypeScheme.ObjRef, types.NoneType))
+        @yaql.context.EvalArg('obj', arg_type=(
+            muranoapi.dsl.murano_object.MuranoObject,
+            TypeScheme.ObjRef,
+            types.NoneType
+        ))
         def _not_owned(obj):
             if isinstance(obj, TypeScheme.ObjRef):
                 return obj
@@ -111,12 +119,12 @@ class TypeScheme(object):
             else:
                 return obj
 
-        @y_context.EvalArg('name', arg_type=str)
+        @yaql.context.EvalArg('name', arg_type=str)
         def _class(value, name):
             return _class2(value, name, None)
 
-        @y_context.EvalArg('name', arg_type=str)
-        @y_context.EvalArg('default_name', arg_type=(str, types.NoneType))
+        @yaql.context.EvalArg('name', arg_type=str)
+        @yaql.context.EvalArg('default_name', arg_type=(str, types.NoneType))
         def _class2(value, name, default_name):
             name = namespace_resolver.resolve_name(name)
             if not default_name:
@@ -124,20 +132,20 @@ class TypeScheme(object):
             else:
                 default_name = namespace_resolver.resolve_name(default_name)
             value = value()
-            if value is consts.NoValue:
+            if value is NoValue:
                 value = default
                 if isinstance(default, types.DictionaryType):
                     value = {'?': {
                         'id': uuid.uuid4().hex,
                         'type': default_name
                     }}
-            class_loader = helpers.get_class_loader(root_context)
+            class_loader = muranoapi.dsl.helpers.get_class_loader(root_context)
             murano_class = class_loader.get_class(name)
             if not murano_class:
                 raise TypeError()
             if value is None:
                 return None
-            if isinstance(value, objects.MuranoObject):
+            if isinstance(value, muranoapi.dsl.murano_object.MuranoObject):
                 obj = value
             elif isinstance(value, types.DictionaryType):
                 obj = object_store.load(value, this, root_context,
@@ -155,13 +163,13 @@ class TypeScheme(object):
                 raise TypeError()
             return obj
 
-        @y_context.EvalArg('prefix', str)
-        @y_context.EvalArg('name', str)
+        @yaql.context.EvalArg('prefix', str)
+        @yaql.context.EvalArg('name', str)
         def _validate(prefix, name):
             return namespace_resolver.resolve_name(
                 '%s:%s' % (prefix, name))
 
-        context = y_context.Context(parent_context=root_context)
+        context = yaql.context.Context(parent_context=root_context)
         context.register_function(_validate, '#validate')
         context.register_function(_int, 'int')
         context.register_function(_string, 'string')
@@ -176,7 +184,7 @@ class TypeScheme(object):
         return context
 
     def _map_dict(self, data, spec, context):
-        if data is None or data is consts.NoValue:
+        if data is None or data is NoValue:
             data = {}
         if not isinstance(data, types.DictionaryType):
             raise TypeError()
@@ -205,7 +213,7 @@ class TypeScheme(object):
 
     def _map_list(self, data, spec, context):
         if not isinstance(data, types.ListType):
-            if data is None or data is consts.NoValue:
+            if data is None or data is NoValue:
                 data = []
             else:
                 data = [data]
@@ -239,7 +247,7 @@ class TypeScheme(object):
             return data
 
     def _map(self, data, spec, context):
-        child_context = y_context.Context(parent_context=context)
+        child_context = yaql.context.Context(parent_context=context)
         if isinstance(spec, yaql_expression.YaqlExpression):
             child_context.set_data(data)
             return spec.evaluate(context=child_context)
@@ -258,6 +266,6 @@ class TypeScheme(object):
             context, this, object_store, namespace_resolver,
             default)
         result = self._map(data, self._spec, context)
-        if result is consts.NoValue:
+        if result is NoValue:
             raise TypeError('No type specified')
         return result

@@ -14,7 +14,7 @@
 
 import inspect
 
-from muranoapi.engine import helpers
+import muranoapi.dsl.helpers as helpers
 
 
 class ObjectStore(object):
@@ -48,7 +48,6 @@ class ObjectStore(object):
         if '?' not in value or 'type' not in value['?']:
             raise ValueError()
         system_key = value['?']
-        #del value['?']
         object_id = system_key['id']
         obj_type = system_key['type']
         class_obj = self._class_loader.get_class(obj_type)
@@ -83,5 +82,4 @@ class ObjectStore(object):
             methods = obj.type.find_method('initialize')
             for cls, method in methods:
                 cls.invoke(method, executor, obj, {})
-#        self._store.update(tmp_store._store)
         return obj

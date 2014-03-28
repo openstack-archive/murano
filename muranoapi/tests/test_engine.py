@@ -19,44 +19,44 @@ import mock
 import unittest2 as unittest
 import yaql
 
-from muranoapi.engine import classes
-from muranoapi.engine import exceptions
-from muranoapi.engine import helpers
-from muranoapi.engine import namespaces
-from muranoapi.engine import objects
-from muranoapi.engine import typespec
-from muranoapi.engine import yaql_expression
+import muranoapi.dsl.exceptions as exceptions
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_class as murano_class
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.namespace_resolver as ns_resolver
+import muranoapi.dsl.typespec as typespec
+import muranoapi.dsl.yaql_expression as yaql_expression
 
-ROOT_CLASS = 'org.openstack.murano.Object'
+ROOT_CLASS = 'io.murano.Object'
 
 
 class TestNamespaceResolving(unittest.TestCase):
     def test_fails_w_empty_name(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
 
         self.assertRaises(ValueError, resolver.resolve_name, None)
 
     def test_fails_w_unknown_prefix(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         name = 'unknown_prefix:example.murano'
 
         self.assertRaises(KeyError, resolver.resolve_name, name)
 
     def test_fails_w_prefix_wo_name(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         name = 'sys:'
 
         self.assertRaises(NameError, resolver.resolve_name, name)
 
     def test_fails_w_excessive_prefix(self):
         ns = {'sys': 'com.example.murano.system'}
-        resolver = namespaces.NamespaceResolver(ns)
+        resolver = ns_resolver.NamespaceResolver(ns)
         invalid_name = 'sys:excessive_ns:muranoResource'
 
         self.assertRaises(NameError, resolver.resolve_name, invalid_name)
 
     def test_cuts_empty_prefix(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         # name without prefix delimiter
         name = 'some.arbitrary.name'
 
@@ -66,7 +66,7 @@ class TestNamespaceResolving(unittest.TestCase):
 
     def test_resolves_specified_ns_prefix(self):
         ns = {'sys': 'com.example.murano.system'}
-        resolver = namespaces.NamespaceResolver(ns)
+        resolver = ns_resolver.NamespaceResolver(ns)
         short_name, full_name = 'sys:File', 'com.example.murano.system.File'
 
         resolved_name = resolver.resolve_name(short_name)
@@ -74,7 +74,7 @@ class TestNamespaceResolving(unittest.TestCase):
         self.assertEqual(full_name, resolved_name)
 
     def test_resolves_current_ns(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         short_name, full_name = 'Resource', 'com.example.murano.Resource'
 
         resolved_name = resolver.resolve_name(short_name)
@@ -82,21 +82,21 @@ class TestNamespaceResolving(unittest.TestCase):
         self.assertEqual(full_name, resolved_name)
 
     def test_resolves_explicit_base(self):
-        resolver = namespaces.NamespaceResolver({'=': 'com.example.murano'})
+        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
 
         resolved_name = resolver.resolve_name('Resource', relative='com.base')
 
         self.assertEqual('com.base.Resource', resolved_name)
 
     def test_resolves_explicit_base_w_empty_namespaces(self):
-        resolver = namespaces.NamespaceResolver({})
+        resolver = ns_resolver.NamespaceResolver({})
 
         resolved_name = resolver.resolve_name('File', 'com.base')
 
         self.assertEqual('com.base.File', resolved_name)
 
     def test_resolves_w_empty_namespaces(self):
-        resolver = namespaces.NamespaceResolver({})
+        resolver = ns_resolver.NamespaceResolver({})
 
         resolved_name = resolver.resolve_name('Resource')
 
@@ -114,38 +114,38 @@ class TestClassesManipulation(unittest.TestCase):
     resolver = mock.Mock(resolve_name=lambda name: name)
 
     def test_class_name(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
 
         self.assertEqual(ROOT_CLASS, cls.name)
 
     def test_class_namespace_resolver(self):
-        resolver = namespaces.NamespaceResolver({})
-        cls = classes.MuranoClass(None, resolver, ROOT_CLASS)
+        resolver = ns_resolver.NamespaceResolver({})
+        cls = murano_class.MuranoClass(None, resolver, ROOT_CLASS)
 
         self.assertEqual(resolver, cls.namespace_resolver)
 
     def test_root_class_has_no_parents(self):
-        root_class = classes.MuranoClass(
+        root_class = murano_class.MuranoClass(
             None, self.resolver, ROOT_CLASS, ['You should not see me!'])
 
         self.assertEqual([], root_class.parents)
 
     def test_non_root_class_resolves_parents(self):
-        root_cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        root_cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         class_loader = mock.Mock(get_class=lambda name: root_cls)
-        desc_cls1 = classes.MuranoClass(class_loader, self.resolver, 'Obj')
-        desc_cls2 = classes.MuranoClass(
+        desc_cl1 = murano_class.MuranoClass(class_loader, self.resolver, 'Obj')
+        desc_cl2 = murano_class.MuranoClass(
             class_loader, self.resolver, 'Obj', [root_cls])
 
-        self.assertEqual([root_cls], desc_cls1.parents)
-        self.assertEqual([root_cls], desc_cls2.parents)
+        self.assertEqual([root_cls], desc_cl1.parents)
+        self.assertEqual([root_cls], desc_cl2.parents)
 
     def test_class_initial_properties(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         self.assertEqual([], cls.properties)
 
     def test_fails_add_incompatible_property_to_class(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         kwargs = {'name': 'sampleProperty', 'property_typespec': {}}
 
         self.assertRaises(TypeError, cls.add_property, **kwargs)
@@ -153,7 +153,7 @@ class TestClassesManipulation(unittest.TestCase):
     @unittest.skip
     def test_add_property_to_class(self):
         prop = typespec.PropertySpec({'Default': 1}, self.resolver)
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.add_property('firstPrime', prop)
 
         class_properties = cls.properties
@@ -171,10 +171,12 @@ class TestClassesManipulation(unittest.TestCase):
                                             self.resolver)
         child_prop = typespec.PropertySpec({'Default': 'Child'},
                                            self.resolver)
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        mother = classes.MuranoClass(None, self.resolver, 'Mother', [root])
-        father = classes.MuranoClass(None, self.resolver, 'Father', [root])
-        child = classes.MuranoClass(
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        mother = murano_class.MuranoClass(None, self.resolver,
+                                          'Mother', [root])
+        father = murano_class.MuranoClass(None, self.resolver,
+                                          'Father', [root])
+        child = murano_class.MuranoClass(
             None, self.resolver, 'Child', [mother, father])
 
         root.add_property('Void', void_prop)
@@ -188,11 +190,11 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertEqual(void_prop, child.find_property('Void'))
 
     def test_class_is_compatible(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        descendant_cls = classes.MuranoClass(
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        descendant_cls = murano_class.MuranoClass(
             None, self.resolver, 'DescendantCls', [cls])
-        obj = mock.Mock(spec=objects.MuranoObject)
-        descendant_obj = mock.Mock(spec=objects.MuranoObject)
+        obj = mock.Mock(spec=murano_object.MuranoObject)
+        descendant_obj = mock.Mock(spec=murano_object.MuranoObject)
         obj.type = cls
         descendant_obj.type = descendant_cls
         descendant_obj.parents = [obj]
@@ -202,7 +204,7 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertFalse(descendant_cls.is_compatible(obj))
 
     def test_new_method_calls_initialize(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.object_class = mock.Mock()
 
         with mock.patch('inspect.getargspec') as spec_mock:
@@ -212,7 +214,7 @@ class TestClassesManipulation(unittest.TestCase):
             self.assertTrue(obj.initialize.called)
 
     def test_new_method_not_calls_initialize(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.object_class = mock.Mock()
 
         obj = cls.new(None, None, None)
@@ -228,7 +230,7 @@ class TestObjectsManipulation(unittest.TestCase):
         self.cls.parents = []
 
     def test_object_valid_type_instantiation(self):
-        obj = objects.MuranoObject(self.cls, None, None, None)
+        obj = murano_object.MuranoObject(self.cls, None, None, None)
 
         self.assertEqual(self.cls, obj.type)
 
@@ -239,11 +241,12 @@ class TestObjectsManipulation(unittest.TestCase):
         pass
 
     def test_object_parent_properties_initialization(self):
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        cls = classes.MuranoClass(None, self.resolver, 'SomeClass', [root])
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver,
+                                       'SomeClass', [root])
         root.new = mock.Mock()
         init_kwargs = {'theArg': 0}
-        obj = objects.MuranoObject(cls, None, None, None)
+        obj = murano_object.MuranoObject(cls, None, None, None)
         expected_calls = [mock.call().initialize(**init_kwargs)]
 
         obj.initialize(**init_kwargs)
@@ -253,35 +256,36 @@ class TestObjectsManipulation(unittest.TestCase):
 
     def test_object_id(self):
         _id = 'some_id'
-        patch_at = 'muranoapi.engine.objects.helpers.generate_id'
+        patch_at = 'muranoapi.dsl.helpers.generate_id'
 
-        obj = objects.MuranoObject(self.cls, None, None, None, object_id=_id)
+        obj = murano_object.MuranoObject(self.cls, None, None, None,
+                                         object_id=_id)
         with mock.patch(patch_at) as gen_id_mock:
             gen_id_mock.return_value = _id
-            obj1 = objects.MuranoObject(self.cls, None, None, None)
+            obj1 = murano_object.MuranoObject(self.cls, None, None, None)
 
         self.assertEqual(_id, obj.object_id)
         self.assertEqual(_id, obj1.object_id)
 
     def test_parent_obj(self):
         parent = mock.Mock()
-        obj = objects.MuranoObject(self.cls, parent, None, None)
+        obj = murano_object.MuranoObject(self.cls, parent, None, None)
 
         self.assertEqual(parent, obj.parent)
 
     @unittest.skip
     def test_fails_internal_property_access(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
 
         cls.add_property('__hidden',
                          typespec.PropertySpec({'Default': 10}, self.resolver))
-        obj = objects.MuranoObject(cls, None, None, None)
+        obj = murano_object.MuranoObject(cls, None, None, None)
 
         self.assertRaises(AttributeError, lambda: obj.__hidden)
 
     @unittest.skip
     def test_proper_property_access(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
 
         cls.add_property('someProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
@@ -291,8 +295,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
     @unittest.skip
     def test_parent_class_property_access(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        child_cls = classes.MuranoClass(None, self.resolver, 'Child', [cls])
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        child_cls = murano_class.MuranoClass(None, self.resolver,
+                                             'Child', [cls])
 
         cls.add_property('anotherProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
@@ -302,10 +307,12 @@ class TestObjectsManipulation(unittest.TestCase):
 
     @unittest.skip
     def test_fails_on_parents_property_collision(self):
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        mother = classes.MuranoClass(None, self.resolver, 'Mother', [root])
-        father = classes.MuranoClass(None, self.resolver, 'Father', [root])
-        child = classes.MuranoClass(
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        mother = murano_class.MuranoClass(None, self.resolver,
+                                          'Mother', [root])
+        father = murano_class.MuranoClass(None, self.resolver,
+                                          'Father', [root])
+        child = murano_class.MuranoClass(
             None, self.resolver, 'Child', [mother, father])
 
         mother.add_property(
@@ -319,13 +326,13 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertRaises(LookupError, lambda: obj.conflictProp)
 
     def test_fails_setting_undeclared_property(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         obj = cls.new(None, None, None, {})
 
         self.assertRaises(AttributeError, obj.set_property, 'newOne', 10)
 
     def test_set_undeclared_property_as_internal(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         obj = cls.new(None, None, None, {})
         obj.cast = mock.Mock(return_value=obj)
         prop_value = 10
@@ -337,7 +344,7 @@ class TestObjectsManipulation(unittest.TestCase):
 
     @unittest.skip
     def test_fails_forbidden_set_property(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.add_property('someProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
         cls.is_compatible = mock.Mock(return_value=False)
@@ -348,7 +355,7 @@ class TestObjectsManipulation(unittest.TestCase):
 
     @unittest.skip
     def test_set_property(self):
-        cls = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.add_property('someProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
         obj = cls.new(None, None, None, {})
@@ -362,8 +369,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
     @unittest.skip
     def test_set_parent_property(self):
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        cls = classes.MuranoClass(None, self.resolver, 'SomeClass', [root])
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver,
+                                       'SomeClass', [root])
         root.add_property('rootProperty',
                           typespec.PropertySpec({'Default': 0}, self.resolver))
         obj = cls.new(None, None, None, {})
@@ -375,10 +383,11 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(20, obj.rootProperty)
 
+    @unittest.skip
     def test_object_up_cast(self):
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        root_alt = classes.MuranoClass(None, self.resolver, 'RootAlt', [])
-        cls = classes.MuranoClass(
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        root_alt = murano_class.MuranoClass(None, self.resolver, 'RootAlt', [])
+        cls = murano_class.MuranoClass(
             None, self.resolver, 'SomeClass', [root, root_alt])
         root_obj = root.new(None, None, None)
         cls_obj = cls.new(None, None, None)
@@ -394,8 +403,8 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertEqual(root_alt, cls_obj_casted2root_alt.type)
 
     def test_fails_object_down_cast(self):
-        root = classes.MuranoClass(None, self.resolver, ROOT_CLASS)
-        cls = classes.MuranoClass(
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(
             None, self.resolver, 'SomeClass', [root])
         root_obj = root.new(None, None, None)
 

@@ -12,21 +12,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import eventlet
 import itertools
 import types
 
-from yaql import context as y_context
+import eventlet
+import yaql.context
 import yaql.exceptions
 
-from muranoapi.engine import exceptions
-from muranoapi.engine import helpers
-from muranoapi.engine import objects
+import muranoapi.dsl.exceptions as exceptions
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_object as murano_object
 
 
 def _resolve(name, obj):
-    @y_context.EvalArg('this', objects.MuranoObject)
-    @y_context.ContextAware()
+    @yaql.context.EvalArg('this', murano_object.MuranoObject)
+    @yaql.context.ContextAware()
     def invoke(context, this, *args):
         try:
             executor = helpers.get_executor(context)
@@ -38,20 +38,20 @@ def _resolve(name, obj):
         except exceptions.AmbiguousMethodName:
             raise yaql.exceptions.YaqlExecutionException()
 
-    if not isinstance(obj, objects.MuranoObject):
+    if not isinstance(obj, murano_object.MuranoObject):
         return None
 
     return invoke
 
 
-@y_context.EvalArg('value', objects.MuranoObject)
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
 def _id(value):
     return value.object_id
 
 
-@y_context.EvalArg('value', objects.MuranoObject)
-@y_context.EvalArg('type', str)
-@y_context.ContextAware()
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
+@yaql.context.EvalArg('type', str)
+@yaql.context.ContextAware()
 def _cast(context, value, type):
     if not '.' in type:
         murano_class = context.get_data('$?type')
@@ -60,8 +60,8 @@ def _cast(context, value, type):
     return value.cast(class_loader.get_class(type))
 
 
-@y_context.EvalArg('name', str)
-@y_context.ContextAware()
+@yaql.context.EvalArg('name', str)
+@yaql.context.ContextAware()
 def _new(context, name, *args):
     murano_class = helpers.get_type(context)
     name = murano_class.namespace_resolver.resolve_name(name)
@@ -79,38 +79,38 @@ def _new(context, name, *args):
 
     object_store = helpers.get_object_store(context)
     class_loader = helpers.get_class_loader(context)
-    new_context = y_context.Context(parent_context=context)
+    new_context = yaql.context.Context(parent_context=context)
     for key, value in parameters.iteritems():
         new_context.set_data(value, key)
     return class_loader.get_class(name).new(
         None, object_store, new_context, parameters=parameters)
 
 
-@y_context.EvalArg('value', objects.MuranoObject)
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
 def _super(value):
     return [value.cast(type) for type in value.type.parents]
 
 
-@y_context.EvalArg('value', objects.MuranoObject)
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
 def _super2(value, func):
     return itertools.imap(func, _super(value))
 
 
-@y_context.EvalArg('value', objects.MuranoObject)
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
 def _psuper2(value, func):
     helpers.parallel_select(_super(value), func)
 
 
-@y_context.EvalArg('value', object)
+@yaql.context.EvalArg('value', object)
 def _require(value):
     if value is None:
         raise ValueError()
     return value
 
 
-@y_context.EvalArg('obj', objects.MuranoObject)
-@y_context.EvalArg('class_name', str)
-@y_context.ContextAware()
+@yaql.context.EvalArg('obj', murano_object.MuranoObject)
+@yaql.context.EvalArg('class_name', str)
+@yaql.context.ContextAware()
 def _get_container(context, obj, class_name):
     namespace_resolver = helpers.get_type(context).namespace_resolver
     class_loader = helpers.get_class_loader(context)
@@ -124,7 +124,7 @@ def _get_container(context, obj, class_name):
     return None
 
 
-@y_context.EvalArg('seconds', (int, float))
+@yaql.context.EvalArg('seconds', (int, float))
 def _sleep(seconds):
     eventlet.sleep(seconds)
 

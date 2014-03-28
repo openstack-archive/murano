@@ -17,9 +17,9 @@ import os.path
 
 import yaml
 
-from muranoapi.engine import class_loader
-from muranoapi.engine.system import yaql_functions
-from muranoapi.engine import yaql_expression
+import muranoapi.dsl.class_loader as class_loader
+import muranoapi.dsl.yaql_expression as yaql_expression
+import muranoapi.engine.system.yaql_functions as yaql_functions
 
 
 def yaql_constructor(loader, node):
