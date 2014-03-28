@@ -63,7 +63,7 @@ def _create_facade_lazily():
 
     if _FACADE is None:
         _FACADE = db_session.EngineFacade(
-            CONF.database.connection,
+            CONF.database.connection, sqlite_fk=True,
             **dict(CONF.database.iteritems())
         )
     return _FACADE
