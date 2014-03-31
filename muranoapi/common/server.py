@@ -15,8 +15,7 @@
 import uuid
 
 from oslo import messaging
-from oslo.messaging import localcontext
-from oslo.messaging import serializer as msg_serializer
+from oslo.messaging.notify import dispatcher as oslo_dispatcher
 from oslo.messaging import target
 
 from sqlalchemy import desc
@@ -91,59 +90,41 @@ class ResultEndpoint(object):
         deployment.save(unit)
 
 
-class ReportNotificationEndpoint(object):
-    @staticmethod
-    def report_notification(context, report):
-        LOG.debug(_('Got report from orchestration '
-                    'engine:\n{0}'.format(report)))
+def notification_endpoint_wrapper(priority='info'):
+    def wrapper(func):
+        class NotificationEndpoint(object):
+            def __init__(self):
+                setattr(self, priority, self._handler)
 
-        report['entity_id'] = report['id']
-        del report['id']
+            def _handler(self, ctxt, publisher_id, event_type,
+                         payload, metadata):
+                if event_type == ('murano.%s' % func.__name__):
+                    func(payload)
 
-        status = models.Status()
-        status.update(report)
-
-        unit = session.get_session()
-        #connect with deployment
-        with unit.begin():
-            running_deployment = get_last_deployment(unit,
-                                                     status.environment_id)
-            status.deployment_id = running_deployment.id
-            unit.add(status)
+            def __call__(self, payload):
+                return func(payload)
+        return NotificationEndpoint()
+    return wrapper
 
 
-class NotificationDispatcher(object):
-    def __init__(self, srv_target, endpoints, serializer):
-        self.endpoints = endpoints
-        self.serializer = serializer or msg_serializer.NoOpSerializer()
-        self._default_target = target.Target()
-        self._target = srv_target
+@notification_endpoint_wrapper()
+def report_notification(report):
+    LOG.debug(_('Got report from orchestration '
+                'engine:\n{0}'.format(report)))
 
-    def _listen(self, transport):
-        return transport._listen(self._target)
+    report['entity_id'] = report['id']
+    del report['id']
 
-    def _dispatch(self, endpoint, method, ctxt, payload):
-        ctxt = self.serializer.deserialize_context(ctxt)
-        result = getattr(endpoint, method)(ctxt, payload)
-        return self.serializer.serialize_entity(ctxt, result)
+    status = models.Status()
+    status.update(report)
 
-    def __call__(self, ctxt, message):
-        event_type = message.get('event_type')
-        if not event_type.startswith('murano.'):
-            return
-
-        method = '{0}_notification'.format(event_type[7:])
-        for endpoint in self.endpoints:
-            if hasattr(endpoint, method):
-                localcontext.set_local_context(ctxt)
-                try:
-                    payload = message.get('payload')
-                    return self._dispatch(endpoint, method, ctxt, payload)
-                finally:
-                    localcontext.clear_local_context()
-
-            msg = 'Could not find notification handler for event \'{0}\''
-            raise Exception(msg.format(method))
+    unit = session.get_session()
+    #connect with deployment
+    with unit.begin():
+        running_deployment = get_last_deployment(unit,
+                                                 status.environment_id)
+        status.deployment_id = running_deployment.id
+        unit.add(status)
 
 
 def get_last_deployment(unit, env_id):
@@ -162,11 +143,12 @@ def _prepare_rpc_service(server_id):
 
 
 def _prepare_notification_service(server_id):
-    endpoints = [ReportNotificationEndpoint()]
+    endpoints = [report_notification]
 
     transport = messaging.get_transport(config.CONF)
-    s_target = target.Target(topic='notifications.info', server=server_id)
-    dispatcher = NotificationDispatcher(s_target, endpoints, None)
+    s_target = target.Target(topic='murano', server=server_id)
+    dispatcher = oslo_dispatcher.NotificationDispatcher(
+        [s_target], endpoints, None, True)
     return messaging.MessageHandlingServer(transport, dispatcher, 'eventlet')
 
 
