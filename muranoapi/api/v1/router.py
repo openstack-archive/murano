@@ -133,4 +133,8 @@ class API(wsgi.Router):
                        controller=catalog_resource,
                        action='search',
                        conditions={'method': ['GET']})
+        mapper.connect('/catalog/packages',
+                       controller=catalog_resource,
+                       action='upload',
+                       conditions={'method': ['POST']})
         super(API, self).__init__(mapper)

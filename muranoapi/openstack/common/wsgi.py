@@ -296,7 +296,8 @@ class Request(webob.Request):
 
     default_request_content_types = ('application/json',
                                      'application/xml',
-                                     'application/murano-packages-json-patch')
+                                     'application/murano-packages-json-patch',
+                                     'multipart/form-data')
     default_accept_types = ('application/json', 'application/xml')
     default_accept_type = 'application/json'
 
@@ -632,7 +633,8 @@ class RequestDeserializer(object):
         self.body_deserializers = {
             'application/xml': XMLDeserializer(),
             'application/json': JSONDeserializer(),
-            'application/murano-packages-json-patch': JSONPatchDeserializer()
+            'application/murano-packages-json-patch': JSONPatchDeserializer(),
+            'multipart/form-data': FormDataDeserializer()
         }
         self.body_deserializers.update(body_deserializers or {})
 
@@ -682,7 +684,7 @@ class RequestDeserializer(object):
             LOG.debug(_("Unable to deserialize body as provided Content-Type"))
             raise
 
-        return deserializer.deserialize(request.body, action)
+        return deserializer.deserialize(request, action)
 
     def get_body_deserializer(self, content_type):
         try:
@@ -716,10 +718,10 @@ class RequestDeserializer(object):
 class TextDeserializer(ActionDispatcher):
     """Default request body deserialization"""
 
-    def deserialize(self, datastring, action='default'):
-        return self.dispatch(datastring, action=action)
+    def deserialize(self, request, action='default'):
+        return self.dispatch(request, action=action)
 
-    def default(self, datastring):
+    def default(self, request):
         return {}
 
 
@@ -731,7 +733,8 @@ class JSONDeserializer(TextDeserializer):
             msg = _("cannot understand JSON")
             raise exception.MalformedRequestBody(reason=msg)
 
-    def default(self, datastring):
+    def default(self, request):
+        datastring = request.body
         return {'body': self._from_json(datastring)}
 
 
@@ -831,7 +834,6 @@ class JSONPatchDeserializer(TextDeserializer):
             ret.append(part.replace('~1', '/').replace('~0', '~').strip())
         return ret
 
-
     def _validate_json_pointer(self, pointer):
         """Validate a json pointer.
 
@@ -866,8 +868,8 @@ class JSONPatchDeserializer(TextDeserializer):
             msg = _('Nested paths are not allowed')
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
-    def default(self, datastring):
-        return {'body': self._from_json_patch(datastring)}
+    def default(self, request):
+        return {'body': self._from_json_patch(request.body)}
 
 
 class XMLDeserializer(TextDeserializer):
@@ -879,7 +881,8 @@ class XMLDeserializer(TextDeserializer):
         super(XMLDeserializer, self).__init__()
         self.metadata = metadata or {}
 
-    def _from_xml(self, datastring):
+    def _from_xml(self, request):
+        datastring = request.body
         plurals = set(self.metadata.get('plurals', {}))
 
         try:
@@ -934,3 +937,22 @@ class XMLDeserializer(TextDeserializer):
 
     def default(self, datastring):
         return {'body': self._from_xml(datastring)}
+
+
+class FormDataDeserializer(TextDeserializer):
+    def _from_json(self, datastring):
+        value = datastring
+        try:
+            LOG.debug(_("Trying deserialize '{0}' to json".format(datastring)))
+            value = jsonutils.loads(datastring)
+        except ValueError:
+            LOG.debug(_("Unable deserialize to json, using raw text"))
+        return value
+
+    def default(self, request):
+        form_data_parts = request.POST
+        result = []
+        for key, value in form_data_parts.iteritems():
+            if isinstance(value, basestring):
+                form_data_parts[key] = self._from_json(value)
+        return {'body': form_data_parts}

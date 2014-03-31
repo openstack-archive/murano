@@ -206,6 +206,9 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
             raise e.PackageLoadError('Target directory is not empty')
 
     try:
+        if not tarfile.is_tarfile(archive_path):
+            raise e.PackageFormatError("Uploading file should be a"
+                                       " 'tar.gz' archive")
         package = tarfile.open(archive_path)
         package.extractall(path=target_dir)
         return load_from_dir(target_dir, preload=True)
