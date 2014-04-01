@@ -22,8 +22,7 @@ class TestSessions(base.TestCase):
 
     @attr(type='smoke')
     def test_create_session(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
         resp, sess = self.client.create_session(env['id'])
 
@@ -38,21 +37,19 @@ class TestSessions(base.TestCase):
 
     @attr(type='smoke')
     def test_delete_session(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
-        resp, _ = self.client.delete_session(env['id'], sess['id'])
+        resp = self.client.delete_session(env['id'], sess['id'])[0]
 
         self.assertEqual(resp.status, 200)
 
     @attr(type='negative')
     def test_delete_session_without_env_id(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_session,
@@ -61,10 +58,9 @@ class TestSessions(base.TestCase):
 
     @attr(type='smoke')
     def test_get_session(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
         resp, session = self.client.get_session(env['id'], sess['id'])
 
@@ -73,10 +69,9 @@ class TestSessions(base.TestCase):
 
     @attr(type='negative')
     def test_get_session_without_env_id(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
         self.assertRaises(exceptions.NotFound,
                           self.client.get_session,
@@ -85,10 +80,9 @@ class TestSessions(base.TestCase):
 
     @attr(type='negative')
     def test_get_session_after_delete_env(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
         self.client.delete_environment(env['id'])
 
@@ -99,10 +93,9 @@ class TestSessions(base.TestCase):
 
     @attr(type='negative')
     def test_double_delete_session(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
-        _, sess = self.client.create_session(env['id'])
+        sess = self.client.create_session(env['id'])[1]
 
         self.client.delete_session(env['id'], sess['id'])
 
