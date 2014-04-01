@@ -23,6 +23,7 @@ from sqlalchemy import desc
 from muranoapi.common import config
 from muranoapi.common.helpers import token_sanitizer
 from muranoapi.db import models
+from muranoapi.db.services import instances
 from muranoapi.db import session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
@@ -110,6 +111,27 @@ def notification_endpoint_wrapper(priority='info'):
 
 
 @notification_endpoint_wrapper()
+def track_instance(payload):
+    LOG.debug(_('Got track instance request from orchestration '
+                'engine:\n{0}'.format(payload)))
+    instance_id = payload['instance']
+    instance_type = payload.get('instance_type', 0)
+    environment_id = payload['environment']
+    instances.InstanceStatsServices.track_instance(
+        instance_id, environment_id, instance_type)
+
+
+@notification_endpoint_wrapper()
+def untrack_instance(payload):
+    LOG.debug(_('Got untrack instance request from orchestration '
+                'engine:\n{0}'.format(payload)))
+    instance_id = payload['instance']
+    environment_id = payload['environment']
+    instances.InstanceStatsServices.destroy_instance(
+        instance_id, environment_id)
+
+
+@notification_endpoint_wrapper()
 def report_notification(report):
     LOG.debug(_('Got report from orchestration '
                 'engine:\n{0}'.format(report)))
@@ -145,7 +167,7 @@ def _prepare_rpc_service(server_id):
 
 
 def _prepare_notification_service(server_id):
-    endpoints = [report_notification]
+    endpoints = [report_notification, track_instance, untrack_instance]
 
     transport = messaging.get_transport(config.CONF)
     s_target = target.Target(topic='murano', server=server_id)

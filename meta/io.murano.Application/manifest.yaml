@@ -1,3 +1,14 @@
 Namespaces:
     =: io.murano
+
 Name: Application
+
+Workflow:
+  reportDeployed:
+      Body:
+        - $this.find(Environment).instanceNotifier.trackApplication($this)
+
+  reportDestroyed:
+      Body:
+        - $this.find(Environment).instanceNotifier.untrackApplication($this)
+

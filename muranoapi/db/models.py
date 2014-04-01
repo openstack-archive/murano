@@ -36,13 +36,6 @@ def compile_big_int_sqlite(type_, compiler, **kw):
 
 
 class ModelBase(object):
-    __protected_attributes__ = set(["created", "updated"])
-
-    created = sa.Column(sa.DateTime, default=timeutils.utcnow,
-                        nullable=False)
-    updated = sa.Column(sa.DateTime, default=timeutils.utcnow,
-                        nullable=False, onupdate=timeutils.utcnow)
-
     def save(self, session=None):
         """Save this object"""
         session = session or db_session.get_session()
@@ -51,12 +44,10 @@ class ModelBase(object):
 
     def update(self, values):
         """dict.update() behaviour."""
-        self.updated = timeutils.utcnow()
         for k, v in values.iteritems():
             self[k] = v
 
     def __setitem__(self, key, value):
-        self.updated = timeutils.utcnow()
         setattr(self, key, value)
 
     def __getitem__(self, key):
@@ -85,6 +76,24 @@ class ModelBase(object):
                     if k != '_sa_instance_state')
 
 
+class ModificationsTrackedObject(ModelBase):
+    __protected_attributes__ = set(["created", "updated"])
+
+    created = sa.Column(sa.DateTime, default=timeutils.utcnow,
+                        nullable=False)
+    updated = sa.Column(sa.DateTime, default=timeutils.utcnow,
+                        nullable=False, onupdate=timeutils.utcnow)
+
+    def update(self, values):
+        """dict.update() behaviour."""
+        self.updated = timeutils.utcnow()
+        super(ModificationsTrackedObject, self).update(values)
+
+    def __setitem__(self, key, value):
+        self.updated = timeutils.utcnow()
+        super(ModificationsTrackedObject, self).__setitem__(key, value)
+
+
 class JsonBlob(sa.TypeDecorator):
     impl = sa.Text
 
@@ -95,7 +104,7 @@ class JsonBlob(sa.TypeDecorator):
         return anyjson.deserialize(value)
 
 
-class Environment(BASE, ModelBase):
+class Environment(BASE, ModificationsTrackedObject):
     """Represents a Environment in the metadata-store"""
     __tablename__ = 'environment'
 
@@ -119,7 +128,7 @@ class Environment(BASE, ModelBase):
         return dictionary
 
 
-class Session(BASE, ModelBase):
+class Session(BASE, ModificationsTrackedObject):
     __tablename__ = 'session'
 
     id = sa.Column(sa.String(32),
@@ -141,7 +150,7 @@ class Session(BASE, ModelBase):
         return dictionary
 
 
-class Deployment(BASE, ModelBase):
+class Deployment(BASE, ModificationsTrackedObject):
     __tablename__ = 'deployment'
 
     id = sa.Column(sa.String(32),
@@ -165,7 +174,7 @@ class Deployment(BASE, ModelBase):
         return dictionary
 
 
-class Status(BASE, ModelBase):
+class Status(BASE, ModificationsTrackedObject):
     __tablename__ = 'status'
 
     id = sa.Column(sa.String(32),
@@ -186,7 +195,7 @@ class Status(BASE, ModelBase):
         return dictionary
 
 
-class ApiStats(BASE, ModelBase):
+class ApiStats(BASE, ModificationsTrackedObject):
     __tablename__ = 'apistats'
 
     id = sa.Column(sa.Integer(), primary_key=True)
@@ -223,7 +232,23 @@ package_to_tag = sa.Table('package_to_tag',
                           )
 
 
-class Package(BASE, ModelBase):
+class Instance(BASE, ModelBase):
+    __tablename__ = 'instance'
+
+    environment_id = sa.Column(
+        sa.String(100), primary_key=True, nullable=False)
+    instance_id = sa.Column(
+        sa.String(100), primary_key=True, nullable=False)
+    instance_type = sa.Column(sa.Integer, default=0, nullable=False)
+    created = sa.Column(sa.Integer, nullable=False)
+    destroyed = sa.Column(sa.Integer, nullable=True)
+
+    def to_dict(self):
+        dictionary = super(Instance, self).to_dict()
+        return dictionary
+
+
+class Package(BASE, ModificationsTrackedObject):
     """
     Represents a meta information about application package.
     """
@@ -272,7 +297,7 @@ class Package(BASE, ModelBase):
         return d
 
 
-class Category(BASE, ModelBase):
+class Category(BASE, ModificationsTrackedObject):
     """
     Represents an application categories in the datastore.
     """
@@ -284,7 +309,7 @@ class Category(BASE, ModelBase):
     name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
 
 
-class Tag(BASE, ModelBase):
+class Tag(BASE, ModificationsTrackedObject):
     """
     Represents tags in the datastore.
     """
@@ -296,7 +321,7 @@ class Tag(BASE, ModelBase):
     name = sa.Column(sa.String(80), nullable=False, unique=True)
 
 
-class Class(BASE, ModelBase):
+class Class(BASE, ModificationsTrackedObject):
     """
     Represents a class definition in the datastore.
     """
@@ -314,7 +339,7 @@ def register_models(engine):
     Creates database tables for all models with the given engine
     """
     models = (Environment, Status, Session, Deployment,
-              ApiStats, Package, Category, Class)
+              ApiStats, Package, Category, Class, Instance)
     for model in models:
         model.metadata.create_all(engine)
 
