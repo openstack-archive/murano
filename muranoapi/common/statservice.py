@@ -18,7 +18,7 @@ import socket
 import time
 
 from muranoapi.api import v1
-from muranoapi.api.v1 import statistics
+from muranoapi.api.v1 import request_statistics
 from muranoapi.common import config
 
 from muranoapi.db.services import stats as db_stats
@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 class StatsCollectingService(service.Service):
     def __init__(self):
         super(StatsCollectingService, self).__init__()
-        statistics.init_stats()
+        request_statistics.init_stats()
         self._hostname = socket.gethostname()
         self._stats_db = db_stats.Statistics()
         self._prev_time = time.time()

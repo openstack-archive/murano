@@ -20,7 +20,7 @@ from muranoapi.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 
-class StatisticsCollection(object):
+class RequestStatisticsCollection(object):
     request_count = 0
     error_count = 0
     average_time = 0.0
@@ -85,4 +85,4 @@ def update_error_count(api, method, ex_time, tenant=None):
 
 def init_stats():
     if not v1.stats:
-        v1.stats = StatisticsCollection()
+        v1.stats = RequestStatisticsCollection()

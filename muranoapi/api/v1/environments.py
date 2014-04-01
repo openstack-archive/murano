@@ -15,7 +15,7 @@
 from sqlalchemy import desc
 from webob import exc
 
-from muranoapi.api.v1 import statistics
+from muranoapi.api.v1 import request_statistics
 from muranoapi.common import utils
 from muranoapi.db import models
 from muranoapi.db.services import core_services
@@ -33,7 +33,7 @@ API_NAME = 'Environments'
 
 class Controller(object):
 
-    @statistics.stats_count(API_NAME, 'Index')
+    @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         LOG.debug(_('Environments:List'))
 
@@ -44,7 +44,7 @@ class Controller(object):
 
         return {"environments": environments}
 
-    @statistics.stats_count(API_NAME, 'Create')
+    @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
         LOG.debug(_('Environments:Create <Body {0}>'.format(body)))
 
@@ -53,7 +53,7 @@ class Controller(object):
 
         return environment.to_dict()
 
-    @statistics.stats_count(API_NAME, 'Show')
+    @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
         LOG.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
 
@@ -83,7 +83,7 @@ class Controller(object):
 
         return env
 
-    @statistics.stats_count(API_NAME, 'Update')
+    @request_statistics.stats_count(API_NAME, 'Update')
     def update(self, request, environment_id, body):
         LOG.debug(_('Environments:Update <Id: {0}, '
                     'Body: {1}>'.format(environment_id, body)))
@@ -106,7 +106,7 @@ class Controller(object):
 
         return environment.to_dict()
 
-    @statistics.stats_count(API_NAME, 'Delete')
+    @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
         LOG.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
 
@@ -126,7 +126,7 @@ class Controller(object):
         envs.EnvironmentServices.delete(environment_id,
                                         request.context.auth_token)
 
-    @statistics.stats_count(API_NAME, 'LastStatus')
+    @request_statistics.stats_count(API_NAME, 'LastStatus')
     def last(self, request, environment_id):
         session_id = None
         if hasattr(request, 'context') and request.context.session:
