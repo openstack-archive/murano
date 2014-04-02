@@ -26,11 +26,6 @@ SEARCH_MAPPING = muranoapi.api.v1.SEARCH_MAPPING
 LOG = logging.getLogger(__name__)
 
 
-def get_category_by_name(name):
-    session = db_session.get_session()
-    return session.query(models.Category).filter_by(name=name).first()
-
-
 def category_get_names():
     session = db_session.get_session()
     categories = []
@@ -38,11 +33,6 @@ def category_get_names():
         for name in row:
             categories.append(name)
     return categories
-
-
-def get_tag_by_name(name):
-    session = db_session.get_session()
-    return session.query(models.Tag).filter_by(name=name).first()
 
 
 def _package_get(package_id, session):
@@ -83,15 +73,18 @@ def package_get(package_id, context):
     return package
 
 
-def _get_categories(category_names):
+def _get_categories(category_names, session=None):
     """
     Return existing category objects or raise an exception
     :param category_names: name of categories to associate with package, list
     :returns: list of Category objects to associate with package, list
     """
+    if session is None:
+        session = db_session.get_session()
     categories = []
     for ctg_name in category_names:
-        ctg_obj = get_category_by_name(ctg_name)
+        ctg_obj = session.query(models.Category).filter_by(
+            name=ctg_name).first()
         if not ctg_obj:
             # it's not allowed to specify non-existent categories
             raise exc.HTTPBadRequest(
@@ -100,22 +93,37 @@ def _get_categories(category_names):
     return categories
 
 
-def _get_tags(tag_names):
+def _get_tags(tag_names, session=None):
     """
     Return existing tags object or create new ones
     :param tag_names: name of tags to associate with package, list
     :returns: list of Tag objects to associate with package, list
     """
+    if session is None:
+        session = db_session.get_session()
     tags = []
-    if tag_names:
-        for tag_name in tag_names:
-            tag_obj = get_tag_by_name(tag_name)
-            if tag_obj:
-                tags.append(tag_obj)
-            else:
-                tag_record = models.Tag(name=tag_name)
-                tags.append(tag_record)
+    for tag_name in tag_names:
+        tag_obj = session.query(models.Tag).filter_by(name=tag_name).first()
+        if tag_obj:
+            tags.append(tag_obj)
+        else:
+            tag_record = models.Tag(name=tag_name)
+            tags.append(tag_record)
     return tags
+
+
+def _get_class_definitions(class_names, session):
+    if session is None:
+        session = db_session.get_session()
+    classes = []
+    for name in class_names:
+        class_obj = session.query(models.Class).filter_by(name=name).first()
+        if class_obj:
+            classes.append(class_obj)
+        else:
+            class_record = models.Class(name=name)
+            classes.append(class_record)
+    return classes
 
 
 def _do_replace(package, change):
@@ -199,13 +207,12 @@ def package_update(pkg_id, changes, context):
                          'replace': _do_replace,
                          'remove': _do_remove}
     session = db_session.get_session()
-    pkg = _package_get(pkg_id, session)
-    _authorize_package(pkg, context)
-
-    for change in changes:
-        pkg = operation_methods[change['op']](pkg, change)
-
     with session.begin():
+        pkg = _package_get(pkg_id, session)
+        _authorize_package(pkg, context)
+
+        for change in changes:
+            pkg = operation_methods[change['op']](pkg, change)
         session.add(pkg)
     return pkg
 
@@ -309,3 +316,28 @@ def package_search(filters, context):
         query = query.limit(limit)
 
     return query.all()
+
+
+def package_upload(values, tenant_id):
+    """
+    Upload a package with new application
+    :param values: parameters describing the new package
+    :returns: detailed information about new package, dict
+    """
+    session = db_session.get_session()
+    package = models.Package()
+
+    composite_attr_to_func = {'categories': _get_categories,
+                              'tags': _get_tags,
+                              'class_definition': _get_class_definitions}
+    with session.begin():
+        for attr, func in composite_attr_to_func.iteritems():
+            if values.get(attr):
+                result = func(values[attr], session)
+                setattr(package, attr, result)
+                del values[attr]
+
+        package.update(values)
+        package.owner_id = tenant_id
+        package.save(session)
+    return package

@@ -263,12 +263,12 @@ class Package(BASE, ModelBase):
                             'archive',
                             'logo',
                             'ui_definition']
-        nested_objects = ['categories', 'tags']
+        nested_objects = ['categories', 'tags', 'class_definition']
         for key in not_serializable:
             if key in d.keys():
                 del d[key]
         for key in nested_objects:
-            d[key] = [a.name for a in d.get(key)]
+            d[key] = [a.name for a in d.get(key, [])]
         return d
 
 

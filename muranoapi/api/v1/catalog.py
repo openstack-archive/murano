@@ -13,16 +13,23 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import cgi
+import jsonschema
+import tempfile
+
 from oslo.config import cfg
+from sqlalchemy import exc as sql_exc
 from webob import exc
 
 import muranoapi.api.v1
+from muranoapi.api.v1 import schemas
 from muranoapi.db.catalog import api as db_api
 from muranoapi.openstack.common import exception
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 from muranoapi.openstack.common import wsgi
-
+from muranoapi.packages import application_package as app_pkg
+from muranoapi.packages import exceptions as pkg_exc
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -30,6 +37,7 @@ CONF = cfg.CONF
 SUPPORTED_PARAMS = muranoapi.api.v1.SUPPORTED_PARAMS
 LIST_PARAMS = muranoapi.api.v1.LIST_PARAMS
 ORDER_VALUES = muranoapi.api.v1.ORDER_VALUES
+PKG_PARAMS_MAP = muranoapi.api.v1.PKG_PARAMS_MAP
 
 
 def _check_content_type(req, content_type):
@@ -61,8 +69,32 @@ def _get_filters(query_params):
                 LOG.warning(_("Value of 'order_by' parameter is not valid. "
                               "Allowed values are: {0}. Skipping it.").format(
                             ", ".join(ORDER_VALUES)))
-
     return filters
+
+
+def _validate_body(body):
+    if len(body.keys()) != 2:
+        msg = "multipart/form-data request should contain " \
+              "two parts: json and tar.gz archive"
+        LOG.error(msg)
+        raise exc.HTTPBadRequest(msg)
+    file_obj = None
+    package_meta = None
+    for part in body.values():
+        if isinstance(part, cgi.FieldStorage):
+            file_obj = part
+            # dict if json deserialized successfully
+        if isinstance(part, dict):
+            package_meta = part
+    if file_obj is None:
+        msg = _("There is no file package with application description")
+        LOG.error(msg)
+        raise exc.HTTPBadRequest(msg)
+    if package_meta is None:
+        msg = _("There is no json with meta information about package")
+        LOG.error(msg)
+        raise exc.HTTPBadRequest(msg)
+    return file_obj, package_meta
 
 
 class Controller(object):
@@ -99,6 +131,46 @@ class Controller(object):
         filters = _get_filters(req.GET._items)
         packages = db_api.package_search(filters, req.context)
         return {"packages": [package.to_dict() for package in packages]}
+
+    def upload(self, req, body=None):
+        """
+        Upload new file archive for the new package
+        together with package metadata
+        """
+        _check_content_type(req, 'multipart/form-data')
+        file_obj, package_meta = _validate_body(body)
+        try:
+            jsonschema.validate(package_meta, schemas.PKG_UPLOAD_SCHEMA)
+        except jsonschema.ValidationError as e:
+            LOG.exception(e)
+            raise exc.HTTPBadRequest(explanation=e.message)
+
+        with tempfile.NamedTemporaryFile() as tempf:
+            content = file_obj.file.read()
+            if not content:
+                msg = _("Uploading file can't be empty")
+                raise exc.HTTPBadRequest(msg)
+            tempf.write(content)
+            package_meta['archive'] = content
+            try:
+                pkg_to_upload = app_pkg.load_from_file(tempf.name,
+                                                       target_dir=None,
+                                                       drop_dir=True)
+            except pkg_exc.PackageLoadError as e:
+                LOG.exception(e)
+                raise exc.HTTPBadRequest(e.message)
+
+        # extend dictionary for update db
+        for k, v in PKG_PARAMS_MAP.iteritems():
+            if hasattr(pkg_to_upload, k):
+                package_meta[v] = getattr(pkg_to_upload, k)
+        try:
+            package = db_api.package_upload(package_meta, req.context.tenant)
+        except sql_exc.SQLAlchemyError:
+            msg = _('Unable to save package in database')
+            LOG.exception(msg)
+            raise exc.HTTPServerError(msg)
+        return package.to_dict()
 
 
 def create_resource():

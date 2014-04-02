@@ -25,6 +25,14 @@ SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
                   'name': 'name',
                   'created': 'created'
                   }
+PKG_PARAMS_MAP = {'display_name': 'name',
+                  'full_name': 'fully_qualified_name',
+                  'raw_ui': 'ui_definition',
+                  'logo': 'logo',
+                  'package_type': 'type',
+                  'description': 'description',
+                  'author': 'author',
+                  'classes': 'class_definition'}
 
 
 def get_draft(environment_id=None, session_id=None):
