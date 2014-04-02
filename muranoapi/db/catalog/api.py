@@ -341,3 +341,8 @@ def package_upload(values, tenant_id):
         package.owner_id = tenant_id
         package.save(session)
     return package
+
+
+def categories_list():
+    session = db_session.get_session()
+    return session.query(models.Category).all()

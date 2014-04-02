@@ -172,6 +172,34 @@ class Controller(object):
             raise exc.HTTPServerError(msg)
         return package.to_dict()
 
+    def get_ui(self, req, package_id):
+        package = db_api.package_get(package_id, req.context)
+        return package.ui_definition
+
+    def get_logo(self, req, package_id):
+        package = db_api.package_get(package_id, req.context)
+        return package.logo
+
+    def download(self, req, package_id):
+        package = db_api.package_get(package_id, req.context)
+        return package.archive
+
+    def show_categories(self, req):
+        categories = db_api.categories_list()
+        return {"categories": [category.to_dict() for category in categories]}
+
+
+class PackageSerializer(wsgi.ResponseSerializer):
+    def serialize(self, action_result, accept, action):
+        if action == 'get_ui':
+            accept = 'text/plain'
+        elif action in ('download', 'get_logo'):
+            accept = 'application/octet-stream'
+        return super(PackageSerializer, self).serialize(action_result,
+                                                        accept,
+                                                        action)
+
 
 def create_resource():
-    return wsgi.Resource(Controller())
+    serializer = PackageSerializer()
+    return wsgi.Resource(Controller(), serializer=serializer)

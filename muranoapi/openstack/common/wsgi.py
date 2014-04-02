@@ -561,6 +561,13 @@ class XMLDictSerializer(DictSerializer):
         return link_nodes
 
 
+class BlankSerializer(DictSerializer):
+    """Return raw data.
+    """
+    def default(self, data):
+        return data
+
+
 class ResponseHeadersSerializer(ActionDispatcher):
     """Default response headers serialization"""
 
@@ -578,6 +585,8 @@ class ResponseSerializer(object):
         self.body_serializers = {
             'application/xml': XMLDictSerializer(),
             'application/json': JSONDictSerializer(),
+            'text/plain': BlankSerializer(),
+            'application/octet-stream': BlankSerializer()
         }
         self.body_serializers.update(body_serializers or {})
 

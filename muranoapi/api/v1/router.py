@@ -121,6 +121,10 @@ class API(wsgi.Router):
                        conditions={'method': ['POST']})
 
         catalog_resource = catalog.create_resource()
+        mapper.connect('/catalog/packages/categories',
+                       controller=catalog_resource,
+                       action='show_categories',
+                       conditions={'method': ['GET']})
         mapper.connect('/catalog/packages/{package_id}',
                        controller=catalog_resource,
                        action='get',
@@ -137,4 +141,17 @@ class API(wsgi.Router):
                        controller=catalog_resource,
                        action='upload',
                        conditions={'method': ['POST']})
+        mapper.connect('/catalog/packages/{package_id}/ui',
+                       controller=catalog_resource,
+                       action='get_ui',
+                       conditions={'method': ['GET']})
+        mapper.connect('/catalog/packages/{package_id}/logo',
+                       controller=catalog_resource,
+                       action='get_logo',
+                       conditions={'method': ['GET']})
+        mapper.connect('/catalog/packages/{package_id}/download',
+                       controller=catalog_resource,
+                       action='download',
+                       conditions={'method': ['GET']})
+
         super(API, self).__init__(mapper)
