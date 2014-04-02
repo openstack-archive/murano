@@ -184,6 +184,9 @@ class Controller(object):
         package = db_api.package_get(package_id, req.context)
         return package.archive
 
+    def delete(self, req, package_id):
+        db_api.package_delete(package_id)
+
     def show_categories(self, req):
         categories = db_api.categories_list()
         return {"categories": [category.to_dict() for category in categories]}

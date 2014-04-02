@@ -343,6 +343,18 @@ def package_upload(values, tenant_id):
     return package
 
 
+def package_delete(package_id):
+    """
+    Delete package information from the system ID of a package, string
+    parameters to update
+    """
+    session = db_session.get_session()
+    with session.begin():
+        package = session.query(models.Package).get(package_id)
+
+        session.delete(package)
+
+
 def categories_list():
     session = db_session.get_session()
     return session.query(models.Category).all()

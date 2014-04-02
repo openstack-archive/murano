@@ -209,8 +209,8 @@ package_to_category = sa.Table('package_to_category',
                                          sa.ForeignKey('package.id')),
                                sa.Column('category_id',
                                          sa.String(32),
-                                         sa.ForeignKey('category.id'))
-                               )
+                                         sa.ForeignKey('category.id',
+                                                       ondelete="RESTRICT")))
 
 package_to_tag = sa.Table('package_to_tag',
                           BASE.metadata,
@@ -219,8 +219,8 @@ package_to_tag = sa.Table('package_to_tag',
                                     sa.ForeignKey('package.id')),
                           sa.Column('tag_id',
                                     sa.String(32),
-                                    sa.ForeignKey('tag.id'))
-                          )
+                                    sa.ForeignKey('tag.id',
+                                    ondelete="CASCADE")))
 
 
 class Package(BASE, ModelBase):
@@ -246,14 +246,14 @@ class Package(BASE, ModelBase):
     is_public = sa.Column(sa.Boolean, default=True)
     tags = sa_orm.relationship("Tag",
                                secondary=package_to_tag,
-                               cascade='save-update, merge, delete',
+                               cascade='save-update, merge',
                                lazy='joined')
     logo = sa.Column(sa.BLOB, nullable=True)
     owner_id = sa.Column(sa.String(36), nullable=False)
     ui_definition = sa.Column(sa.Text)
     categories = sa_orm.relationship("Category",
                                      secondary=package_to_category,
-                                     cascade='save-update, merge, delete',
+                                     cascade='save-update, merge',
                                      lazy='joined')
     class_definition = sa_orm.relationship("Class")
 

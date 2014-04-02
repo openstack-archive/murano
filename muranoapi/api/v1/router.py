@@ -131,6 +131,10 @@ class API(wsgi.Router):
                        conditions={'method': ['GET']})
         mapper.connect('/catalog/packages/{package_id}',
                        controller=catalog_resource,
+                       action='delete',
+                       conditions={'method': ['DELETE']})
+        mapper.connect('/catalog/packages/{package_id}',
+                       controller=catalog_resource,
                        action='update',
                        conditions={'method': ['PATCH']})
         mapper.connect('/catalog/packages',
