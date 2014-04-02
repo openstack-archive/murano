@@ -20,11 +20,11 @@ import uuid
 
 import eventlet.event
 
-from muranoapi.common import messaging
-from muranoapi.engine import classes
-from muranoapi.engine import objects
-from muranoapi.engine.system import common
-from muranoapi.engine import yaql_expression
+import muranoapi.common.messaging as messaging
+import muranoapi.dsl.murano_class as murano_class
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.yaql_expression as yaql_expression
+import muranoapi.engine.system.common as common
 
 
 class AgentException(Exception):
@@ -32,11 +32,11 @@ class AgentException(Exception):
         self.message_info = message_info
 
 
-@classes.classname('org.openstack.murano.system.Agent')
-class Agent(objects.MuranoObject):
+@murano_class.classname('io.murano.system.Agent')
+class Agent(murano_object.MuranoObject):
     def initialize(self, _context, host):
         environment = yaql_expression.YaqlExpression(
-            "$host.find('org.openstack.murano.Environment').require()"
+            "$host.find('io.murano.Environment').require()"
         ).evaluate(_context)
 
         self._queue = str('e%s-h%s' % (

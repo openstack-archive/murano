@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from muranoapi.engine import objects
+import muranoapi.dsl.murano_object as murano_object
 
 
 class AttributeStore(object):
@@ -20,7 +20,7 @@ class AttributeStore(object):
         self._attributes = {}
 
     def set(self, tagged_object, owner_type, name, value):
-        if isinstance(value, objects.MuranoObject):
+        if isinstance(value, murano_object.MuranoObject):
             value = value.object_id
 
         key = (tagged_object.object_id, owner_type.name, name)

@@ -18,13 +18,13 @@ import types
 import yaql
 import yaql.context
 
-from muranoapi.engine import classes
-from muranoapi.engine import exceptions
-from muranoapi.engine import helpers
-from muranoapi.engine import namespaces
-from muranoapi.engine import objects
-from muranoapi.engine import principal_objects
-from muranoapi.engine import typespec
+import muranoapi.dsl.exceptions as exceptions
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_class as murano_class
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.namespace_resolver as namespace_resolver
+import muranoapi.dsl.principal_objects as principal_objects
+import muranoapi.dsl.typespec as typespec
 
 
 class MuranoClassLoader(object):
@@ -43,22 +43,23 @@ class MuranoClassLoader(object):
             else:
                 raise exceptions.NoClassFound(name)
 
-        namespace_resolver = namespaces.NamespaceResolver(
-            data.get('Namespaces', {}))
+        namespaces = data.get('Namespaces', {})
+        ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
 
         class_parents = data.get('Extends')
         if class_parents:
             if not isinstance(class_parents, types.ListType):
                 class_parents = [class_parents]
-            for i, parent in enumerate(class_parents):
-                class_parents[i] = self.get_class(
-                    namespace_resolver.resolve_name(parent))
-        type_obj = classes.MuranoClass(self, namespace_resolver, name,
-                                       class_parents)
+            for i, parent_name in enumerate(class_parents):
+                full_name = ns_resolver.resolve_name(parent_name)
+                class_parents[i] = self.get_class(full_name)
 
-        p_iter = data.get('Properties', {}).iteritems()
-        for property_name, property_spec in p_iter:
-            spec = typespec.PropertySpec(property_spec, namespace_resolver)
+        type_obj = murano_class.MuranoClass(self, ns_resolver, name,
+                                            class_parents)
+
+        properties = data.get('Properties', {})
+        for property_name, property_spec in properties.iteritems():
+            spec = typespec.PropertySpec(property_spec, ns_resolver)
             type_obj.add_property(property_name, spec)
 
         for method_name, payload in data.get('Workflow', {}).iteritems():
@@ -96,16 +97,16 @@ class MuranoClassLoader(object):
             else:
                 name = cls.__class__._murano_class_name
 
-        murano_class = self.get_class(name, create_missing=True)
+        m_class = self.get_class(name, create_missing=True)
         if inspect.isclass(cls):
-            if issubclass(cls, objects.MuranoObject):
-                murano_class.object_class = cls
+            if issubclass(cls, murano_object.MuranoObject):
+                m_class.object_class = cls
             else:
-                murano_class.object_class = type(
-                    'mpc' + helpers.generate_id(),
-                    (cls, objects.MuranoObject), {})
+                mpc_name = 'mpc' + helpers.generate_id()
+                bases = (cls, murano_object.MuranoObject)
+                m_class.object_class = type(mpc_name, bases, {})
 
         for item in dir(cls):
             method = getattr(cls, item)
             if callable(method) and not item.startswith('_'):
-                murano_class.add_method(item, method)
+                m_class.add_method(item, method)

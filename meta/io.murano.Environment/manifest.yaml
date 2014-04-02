@@ -1,6 +1,6 @@
 Namespaces:
-    =: org.openstack.murano
-    sys: org.openstack.murano.system
+    =: io.murano
+    sys: io.murano.system
 
 Name: Environment
 

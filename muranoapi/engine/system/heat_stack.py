@@ -14,21 +14,23 @@
 # limitations under the License.
 
 import eventlet
-from heatclient import client as hclient
-from heatclient import exc as heat_exc
-from keystoneclient.v2_0 import client as ksclient
+import heatclient.client as hclient
+import heatclient.exc as heat_exc
+import keystoneclient.v2_0.client as ksclient
 
-from muranoapi.common import config
-from muranoapi.engine import classes
-from muranoapi.engine import helpers
-from muranoapi.engine import objects
-from muranoapi.openstack.common import log as logging
+
+import muranoapi.common.config as config
+
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_class as murano_class
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.openstack.common.log as logging
 
 log = logging.getLogger(__name__)
 
 
-@classes.classname('org.openstack.murano.system.HeatStack')
-class HeatStack(objects.MuranoObject):
+@murano_class.classname('io.murano.system.HeatStack')
+class HeatStack(murano_object.MuranoObject):
     def initialize(self, _context, name):
         self._name = name
         self._template = None

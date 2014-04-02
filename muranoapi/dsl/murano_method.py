@@ -13,13 +13,16 @@
 #    under the License.
 
 import inspect
-import ordereddict
 import types
 
+import muranoapi.dsl.macros as macros
+import muranoapi.dsl.typespec as typespec
+import muranoapi.dsl.yaql_expression as yaql_expression
 
-from muranoapi.engine import macros
-from muranoapi.engine import typespec
-from muranoapi.engine import yaql_expression
+try:
+    from collections import OrderedDict  # noqa
+except ImportError:  # python2.6
+    from ordereddict import OrderedDict  # noqa
 
 
 class MuranoMethod(object):
@@ -38,11 +41,11 @@ class MuranoMethod(object):
             if isinstance(arguments_scheme, types.DictionaryType):
                 arguments_scheme = [{key: value} for key, value in
                                     arguments_scheme.iteritems()]
-            self._arguments_scheme = ordereddict.OrderedDict()
+            self._arguments_scheme = OrderedDict()
             for record in arguments_scheme:
                 if not isinstance(record, types.DictionaryType) \
                         or len(record) > 1:
-                        raise ValueError()
+                    raise ValueError()
                 name = record.keys()[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
                     record[name], self._namespace_resolver)
@@ -74,7 +77,7 @@ class MuranoMethod(object):
         defaults = func_info.defaults or tuple()
         for i in xrange(len(defaults)):
             data[i + len(data) - len(defaults)][1]['Default'] = defaults[i]
-        result = ordereddict.OrderedDict([
+        result = OrderedDict([
             (name, typespec.ArgumentSpec(
                 declaration, self._namespace_resolver))
             for name, declaration in data])

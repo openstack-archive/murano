@@ -17,10 +17,10 @@ import json as jsonlib
 import os.path
 import yaml as yamllib
 
-from muranoapi.engine import objects
+import muranoapi.dsl.murano_object as murano_object
 
 
-class ResourceManager(objects.MuranoObject):
+class ResourceManager(murano_object.MuranoObject):
     def initialize(self, base_path, _context, _class):
         if _class is None:
             _class = _context.get_data('$')

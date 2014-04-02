@@ -15,13 +15,13 @@
 
 import eventlet
 
-from muranoapi.engine import classes
-from muranoapi.engine import objects
-from muranoapi.engine.system import common
+import muranoapi.dsl.murano_class as murano_class
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.engine.system.common as common
 
 
-@classes.classname('org.openstack.murano.system.AgentListener')
-class AgentListener(objects.MuranoObject):
+@murano_class.classname('io.murano.system.AgentListener')
+class AgentListener(murano_object.MuranoObject):
     def initialize(self, _context, name):
         self._results_queue = str('-execution-results-%s' % name.lower())
         self._subscriptions = {}

@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from muranoapi.common import config
-from muranoapi.common import messaging
+import muranoapi.common.config as config
+import muranoapi.common.messaging as messaging
 
 
 def create_rmq_client():

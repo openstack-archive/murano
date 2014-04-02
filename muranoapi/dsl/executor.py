@@ -18,23 +18,23 @@ import types
 import uuid
 
 import eventlet
-from eventlet import event as e_event
-from yaql import context as y_context
+import eventlet.event
+import yaql.context
 
-from muranoapi.engine import attribute_store as attr_store
-from muranoapi.engine import exceptions
-from muranoapi.engine import expressions
-from muranoapi.engine import helpers
-from muranoapi.engine import object_store
-from muranoapi.engine import objects
-from muranoapi.engine import yaql_functions
+import muranoapi.dsl.attribute_store as attribute_store
+import muranoapi.dsl.exceptions as exceptions
+import muranoapi.dsl.expressions as expressions
+import muranoapi.dsl.helpers as helpers
+import muranoapi.dsl.murano_object as murano_object
+import muranoapi.dsl.object_store as object_store
+import muranoapi.dsl.yaql_functions as yaql_functions
 
 
 class MuranoDslExecutor(object):
     def __init__(self, class_loader, environment=None):
         self._class_loader = class_loader
         self._object_store = object_store.ObjectStore(class_loader)
-        self._attribute_store = attr_store.AttributeStore()
+        self._attribute_store = attribute_store.AttributeStore()
         self._root_context = class_loader.create_root_context()
         self._root_context.set_data(self, '?executor')
         self._root_context.set_data(self._class_loader, '?classLoader')
@@ -43,7 +43,7 @@ class MuranoDslExecutor(object):
         self._root_context.set_data(self._attribute_store, '?attributeStore')
         self._locks = {}
         yaql_functions.register(self._root_context)
-        self._root_context = y_context.Context(self._root_context)
+        self._root_context = yaql.context.Context(self._root_context)
 
     @property
     def object_store(self):
@@ -80,7 +80,6 @@ class MuranoDslExecutor(object):
                     params = self._evaluate_parameters(
                         arguments_scheme, context, this, *args)
                 except Exception:
-                    # TODO(slagun): print exception
                     params = self._evaluate_parameters(
                         arguments_scheme, context, this, *args)
                 delegates.append(functools.partial(
@@ -118,7 +117,7 @@ class MuranoDslExecutor(object):
                     body, this, params, murano_class, context)
             event.wait()
 
-        event = e_event.Event()
+        event = eventlet.event.Event()
         self._locks[(method_id, this_id)] = (event, thread_marker)
         gt = eventlet.spawn(self._invoke_method_implementation_gt, body,
                             this, params, murano_class, context,
@@ -191,13 +190,13 @@ class MuranoDslExecutor(object):
         new_context.set_data(murano_class, '?type')
         new_context.set_data(context, '?callerContext')
 
-        @y_context.EvalArg('obj', arg_type=objects.MuranoObject)
-        @y_context.EvalArg('property_name', arg_type=str)
+        @yaql.context.EvalArg('obj', arg_type=murano_object.MuranoObject)
+        @yaql.context.EvalArg('property_name', arg_type=str)
         def obj_attribution(obj, property_name):
             return obj.get_property(property_name, murano_class)
 
-        @y_context.EvalArg('prefix', str)
-        @y_context.EvalArg('name', str)
+        @yaql.context.EvalArg('prefix', str)
+        @yaql.context.EvalArg('name', str)
         def validate(prefix, name):
             return murano_class.namespace_resolver.resolve_name(
                 '%s:%s' % (prefix, name))

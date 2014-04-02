@@ -1,5 +1,5 @@
 Namespaces:
-    =: org.openstack.murano
+    =: io.murano
 Name: Object
 
 Workflow:

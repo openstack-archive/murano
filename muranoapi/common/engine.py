@@ -22,13 +22,13 @@ from oslo.messaging import target
 from muranoapi.common import config
 from muranoapi.common.helpers import token_sanitizer
 from muranoapi.common import rpc
+from muranoapi.dsl import executor
+from muranoapi.dsl import results_serializer
 from muranoapi.engine import environment
-from muranoapi.engine import executor
-from muranoapi.engine import results_serializer
-from muranoapi.engine import system
+from muranoapi.engine import simple_cloader
+import muranoapi.engine.system.system_objects as system_objects
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
-from muranoapi import simple_cloader
 
 RPC_SERVICE = None
 
@@ -46,7 +46,7 @@ class TaskProcessingEndpoint(object):
         env.tenant_id = task['tenant_id']
 
         cl = simple_cloader.SimpleClassLoader(config.CONF.metadata_dir)
-        system.register(cl, config.CONF.metadata_dir)
+        system_objects.register(cl, config.CONF.metadata_dir)
 
         exc = executor.MuranoDslExecutor(cl, env)
         obj = exc.load(task['model'])

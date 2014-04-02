@@ -14,7 +14,7 @@
 
 import types
 
-from muranoapi.engine import objects
+import muranoapi.dsl.murano_object as murano_object
 
 
 class ObjRef(object):
@@ -45,7 +45,7 @@ def _pass1_serialize(value, parent, serialized_objects):
     if isinstance(value, (types.StringTypes, types.IntType, types.FloatType,
                           types.BooleanType, types.NoneType)):
         return value
-    elif isinstance(value, objects.MuranoObject):
+    elif isinstance(value, murano_object.MuranoObject):
         if not _cmp_objects(value.parent, parent) \
                 or value.object_id in serialized_objects:
             return ObjRef(value)
