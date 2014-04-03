@@ -17,9 +17,9 @@ from muranoapi.db import session as db_session
 
 stats = None
 
-SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class',
+SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class_name',
                     'limit', 'type', 'fqn', 'category', 'owned')
-LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
+LIST_PARAMS = ('category', 'tag', 'class_name', 'order_by')
 ORDER_VALUES = ('fqn', 'name', 'created')
 SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
                   'name': 'name',

@@ -115,17 +115,11 @@ def _get_tags(tag_names, session=None):
     return tags
 
 
-def _get_class_definitions(class_names, session):
-    if session is None:
-        session = db_session.get_session()
+def _get_class_definitions(class_names, session=None):
     classes = []
     for name in class_names:
-        class_obj = session.query(models.Class).filter_by(name=name).first()
-        if class_obj:
-            classes.append(class_obj)
-        else:
-            class_record = models.Class(name=name)
-            classes.append(class_record)
+        class_record = models.Class(name=name)
+        classes.append(class_record)
     return classes
 
 
@@ -272,9 +266,9 @@ def package_search(filters, context):
     if 'tag' in filters.keys():
         query = query.filter(pkg.tags.any(
             models.Tag.name.in_(filters['tag'])))
-    if 'class' in filters.keys():
+    if 'class_name' in filters.keys():
         query = query.filter(pkg.class_definition.any(
-            models.Class.name.in_(filters['class'])))
+            models.Class.name.in_(filters['class_name'])))
     if 'fqn' in filters.keys():
         query = query.filter(pkg.fully_qualified_name == filters['fqn'])
 
