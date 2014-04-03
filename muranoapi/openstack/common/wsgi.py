@@ -670,8 +670,9 @@ class RequestDeserializer(object):
 
         try:
             content_type = request.get_content_type()
-        except exception.InvalidContentType:
-            LOG.debug(_("Unrecognized Content-Type provided in request"))
+        except exception.InvalidContentType as e:
+            msg = _("Unrecognized Content-Type provided in request: {0}")
+            LOG.debug(unicode(msg).format(str(e)))
             raise
 
         if content_type is None:
