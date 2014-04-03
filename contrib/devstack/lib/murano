@@ -133,8 +133,7 @@ function init_murano() {
     # (re)create Murano database
     recreate_database murano utf8
 
-    # TODO(ruhe): run DB migration script. it doesn't exist yet!!!
-    # $MURANO_BIN_DIR/murano-db-manage --config-file $MURANO_CONF_FILE upgrade head
+    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE db_sync
 }
 
 
