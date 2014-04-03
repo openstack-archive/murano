@@ -15,11 +15,12 @@
 
 import inspect
 
-import muranoapi.dsl.murano_class as murano_class
-import muranoapi.engine.system.agent as agent
-import muranoapi.engine.system.agent_listener as agent_listener
-import muranoapi.engine.system.heat_stack as heat_stack
-import muranoapi.engine.system.resource_manager as resource_manager
+from muranoapi.dsl import murano_class
+from muranoapi.engine.system import agent
+from muranoapi.engine.system import agent_listener
+from muranoapi.engine.system import heat_stack
+from muranoapi.engine.system import instance_reporter
+from muranoapi.engine.system import resource_manager
 
 
 def _auto_register(class_loader):
@@ -46,3 +47,4 @@ def register(class_loader, path):
     class_loader.import_class(agent_listener.AgentListener)
     class_loader.import_class(heat_stack.HeatStack)
     class_loader.import_class(ResourceManagerWrapper)
+    class_loader.import_class(instance_reporter.InstanceReportNotifier)
