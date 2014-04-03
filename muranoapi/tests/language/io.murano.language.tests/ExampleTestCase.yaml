@@ -1,0 +1,17 @@
+Namespaces:
+    =: io.murano.language.tests
+
+Name: ExampleTestCase
+
+Extends: TestCase
+
+Workflow:
+  testSum:
+    Body:
+      - $sum: 1 + 2
+      - $.assertEqual(3, $sum)
+
+  testUpper:
+    Body:
+      - $uppedValue: toUpper('test')
+      - $.assertEqual('TEST', $uppedValue)

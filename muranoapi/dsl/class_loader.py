@@ -108,5 +108,6 @@ class MuranoClassLoader(object):
 
         for item in dir(cls):
             method = getattr(cls, item)
-            if callable(method) and not item.startswith('_'):
+            if ((inspect.isfunction(method) or inspect.ismethod(method)) and
+                    not item.startswith('_')):
                 m_class.add_method(item, method)
