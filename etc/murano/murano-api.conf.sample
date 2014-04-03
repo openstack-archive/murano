@@ -100,9 +100,6 @@ syslog_log_facility = LOG_LOCAL0
 #connection = mysql://root:password@localhost:3306/murano
 connection = sqlite:///murano.sqlite
 
-#A boolean that determines if the database will be automatically created
-auto_create = True
-
 [ssl]
 #Parameters to configure SSL for trusted HTTPS connection
 
