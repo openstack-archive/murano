@@ -255,7 +255,7 @@ class Package(BASE, ModelBase):
                                      secondary=package_to_category,
                                      cascade='save-update, merge',
                                      lazy='joined')
-    class_definition = sa_orm.relationship("Class")
+    class_definition = sa_orm.relationship("Class", lazy='joined')
 
     def to_dict(self):
         d = self.__dict__.copy()
