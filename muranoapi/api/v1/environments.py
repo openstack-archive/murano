@@ -46,7 +46,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        LOG.debug(_('Environments:Create <Body {0}>'.format(body)))
+        LOG.debug(_('Environments:Create <Body {0}>').format(body))
 
         environment = envs.EnvironmentServices.create(body.copy(),
                                                       request.context.tenant)
@@ -55,14 +55,14 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
-        LOG.debug(_('Environments:Show <Id: {0}>'.format(environment_id)))
+        LOG.debug(_('Environments:Show <Id: {0}>').format(environment_id))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
-            LOG.info('Environment <EnvId {0}> is not found'
-                     .format(environment_id))
+            LOG.info(_('Environment <EnvId {0}> is not found').format(
+                environment_id))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
@@ -86,14 +86,14 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Update')
     def update(self, request, environment_id, body):
         LOG.debug(_('Environments:Update <Id: {0}, '
-                    'Body: {1}>'.format(environment_id, body)))
+                    'Body: {1}>').format(environment_id, body))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
             LOG.info(_('Environment <EnvId {0}> is not '
-                       'found'.format(environment_id)))
+                       'found').format(environment_id))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
@@ -108,14 +108,14 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
-        LOG.debug(_('Environments:Delete <Id: {0}>'.format(environment_id)))
+        LOG.debug(_('Environments:Delete <Id: {0}>').format(environment_id))
 
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
             LOG.info(_('Environment <EnvId {0}> '
-                       'is not found'.format(environment_id)))
+                       'is not found').format(environment_id))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:

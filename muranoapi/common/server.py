@@ -41,13 +41,13 @@ class ResultEndpoint(object):
     def process_result(context, result):
         secure_result = token_sanitizer.TokenSanitizer().sanitize(result)
         LOG.debug(_('Got result from orchestration '
-                    'engine:\n{0}'.format(secure_result)))
+                    'engine:\n{0}').format(secure_result))
 
         result_id = result['Objects']['?']['id']
 
         if 'deleted' in result:
             LOG.debug(_('Result for environment {0} is dropped. Environment '
-                        'is deleted'.format(result_id)))
+                        'is deleted').format(result_id))
             return
 
         unit = session.get_session()
@@ -113,7 +113,7 @@ def notification_endpoint_wrapper(priority='info'):
 @notification_endpoint_wrapper()
 def track_instance(payload):
     LOG.debug(_('Got track instance request from orchestration '
-                'engine:\n{0}'.format(payload)))
+                'engine:\n{0}').format(payload))
     instance_id = payload['instance']
     instance_type = payload.get('instance_type', 0)
     environment_id = payload['environment']
@@ -124,7 +124,7 @@ def track_instance(payload):
 @notification_endpoint_wrapper()
 def untrack_instance(payload):
     LOG.debug(_('Got untrack instance request from orchestration '
-                'engine:\n{0}'.format(payload)))
+                'engine:\n{0}').format(payload))
     instance_id = payload['instance']
     environment_id = payload['environment']
     instances.InstanceStatsServices.destroy_instance(
@@ -134,7 +134,7 @@ def untrack_instance(payload):
 @notification_endpoint_wrapper()
 def report_notification(report):
     LOG.debug(_('Got report from orchestration '
-                'engine:\n{0}'.format(report)))
+                'engine:\n{0}').format(report))
 
     report['entity_id'] = report['id']
     del report['id']

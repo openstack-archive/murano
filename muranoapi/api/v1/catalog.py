@@ -74,9 +74,9 @@ def _get_filters(query_params):
 
 def _validate_body(body):
     if len(body.keys()) != 2:
-        msg = "'multipart/form-data' request body should contain " \
-              "2 parts: json string and zip archivel. Current body consist " \
-              "of {0} parts".format(len(body.keys()))
+        msg = _("'multipart/form-data' request body should contain "
+                "2 parts: json string and zip archivel. Current body consist "
+                "of {0} part(s)").format(len(body.keys()))
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
     file_obj = None

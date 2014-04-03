@@ -38,7 +38,7 @@ def category_get_names():
 def _package_get(package_id, session):
     package = session.query(models.Package).get(package_id)
     if not package:
-        msg = _("Package id '{0}' is not found".format(package_id))
+        msg = _("Package id '{0}' is not found").format(package_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
 
@@ -52,12 +52,12 @@ def _authorize_package(package, context, allow_public=False):
     if package.owner_id != context.tenant:
         if not allow_public:
             msg = _("Package '{0}' is not owned by "
-                    "tenant '{1}'".format(package.id, context.tenant))
+                    "tenant '{1}'").format(package.id, context.tenant)
             LOG.error(msg)
             raise exc.HTTPForbidden(msg)
         if not package.is_public:
             msg = _("Package '{0}' is not public and not owned by "
-                    "tenant '{1}' ".format(package.id, context.tenant))
+                    "tenant '{1}' ").format(package.id, context.tenant)
             LOG.error(msg)
             raise exc.HTTPForbidden(msg)
 
@@ -87,7 +87,7 @@ def _get_categories(category_names, session=None):
         ctg_obj = session.query(models.Category).filter_by(
             name=ctg_name).first()
         if not ctg_obj:
-            msg = _("Category '{name}' doesn't exist".format(name=ctg_name))
+            msg = _("Category '{name}' doesn't exist").format(name=ctg_name)
             LOG.error(msg)
             # it's not allowed to specify non-existent categories
             raise exc.HTTPBadRequest(msg)

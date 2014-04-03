@@ -32,7 +32,7 @@ def verify_env(func):
         environment = unit.query(models.Environment).get(environment_id)
         if environment is None:
             LOG.info(_("Environment with id '{0}'"
-                       " not found".format(environment_id)))
+                       " not found").format(environment_id))
             raise exc.HTTPNotFound()
 
         if hasattr(request, 'context'):
@@ -59,17 +59,17 @@ def verify_session(func):
 
         if session is None:
             LOG.info(_('Session <SessionId {0}> '
-                       'is not found'.format(session_id)))
+                       'is not found').format(session_id))
             raise exc.HTTPForbidden()
 
         if not sessions.SessionServices.validate(session):
             LOG.info(_('Session <SessionId {0}> '
-                       'is invalid'.format(session_id)))
+                       'is invalid').format(session_id))
             raise exc.HTTPForbidden()
 
         if session.state == sessions.SessionState.deploying:
             LOG.info(_('Session <SessionId {0}> is already in '
-                       'deployment state'.format(session_id)))
+                       'deployment state').format(session_id))
             raise exc.HTTPForbidden()
         return func(self, request, *args, **kwargs)
     return __inner
