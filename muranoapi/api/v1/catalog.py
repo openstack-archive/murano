@@ -45,7 +45,7 @@ def _check_content_type(req, content_type):
         req.get_content_type((content_type,))
     except exception.InvalidContentType:
         msg = _("Content-Type must be '{0}'").format(content_type)
-        LOG.debug(msg)
+        LOG.error(msg)
         raise exc.HTTPBadRequest(explanation=msg)
 
 
@@ -74,8 +74,9 @@ def _get_filters(query_params):
 
 def _validate_body(body):
     if len(body.keys()) != 2:
-        msg = "multipart/form-data request should contain " \
-              "two parts: json and tar.gz archive"
+        msg = "'multipart/form-data' request body should contain " \
+              "2 parts: json string and zip archivel. Current body consist " \
+              "of {0} parts".format(len(body.keys()))
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
     file_obj = None
@@ -149,6 +150,7 @@ class Controller(object):
             content = file_obj.file.read()
             if not content:
                 msg = _("Uploading file can't be empty")
+                LOG.error(msg)
                 raise exc.HTTPBadRequest(msg)
             tempf.write(content)
             package_meta['archive'] = content
@@ -158,7 +160,7 @@ class Controller(object):
                                                        drop_dir=True)
             except pkg_exc.PackageLoadError as e:
                 LOG.exception(e)
-                raise exc.HTTPBadRequest(e.message)
+                raise exc.HTTPBadRequest(e)
 
         # extend dictionary for update db
         for k, v in PKG_PARAMS_MAP.iteritems():
@@ -189,7 +191,7 @@ class Controller(object):
 
     def show_categories(self, req):
         categories = db_api.categories_list()
-        return {"categories": [category.to_dict() for category in categories]}
+        return {'categories': [category.name for category in categories]}
 
 
 class PackageSerializer(wsgi.ResponseSerializer):

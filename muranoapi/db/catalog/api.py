@@ -41,6 +41,7 @@ def _package_get(package_id, session):
         msg = _("Package id '{0}' is not found".format(package_id))
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
+
     return package
 
 
@@ -86,9 +87,11 @@ def _get_categories(category_names, session=None):
         ctg_obj = session.query(models.Category).filter_by(
             name=ctg_name).first()
         if not ctg_obj:
+            msg = _("Category '{name}' doesn't exist".format(name=ctg_name))
+            LOG.error(msg)
             # it's not allowed to specify non-existent categories
-            raise exc.HTTPBadRequest(
-                "Category '{name}' doesn't exist".format(name=ctg_name))
+            raise exc.HTTPBadRequest(msg)
+
         categories.append(ctg_obj)
     return categories
 
@@ -237,10 +240,12 @@ def package_search(filters, context):
             value = int(value)
         except ValueError:
             msg = _("limit param must be an integer")
+            LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
         if value < 0:
             msg = _("limit param must be positive")
+            LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
         return value
