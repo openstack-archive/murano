@@ -12,19 +12,63 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+import zipfile
+
 from tempest.test import attr
+
+#from tempest import exceptions
+#Need uncomment after fix https://bugs.launchpad.net/murano/+bug/1309413
+#it will be use in tearDown method
 
 from functionaltests.api import base
 
 
-class TestRepository(base.TestCase):
+class TestCaseRepository(base.TestCase):
 
     @classmethod
     def setUpClass(cls):
 
-        super(TestRepository, cls).setUpClass()
+        super(TestCaseRepository, cls).setUpClass()
 
-        raise cls.skipException("Murano Repository tests are disabled")
+        cls.location = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        __folderpath__ = os.path.join(cls.location, "DummyTestApp")
+        __rootlen__ = len(__folderpath__) + 1
+
+        with zipfile.ZipFile(os.path.join(cls.location,
+                                          "DummyTestApp.zip"), "w") as zf:
+            for dirname, _, files in os.walk(__folderpath__):
+                for filename in files:
+                    fn = os.path.join(dirname, filename)
+                    zf.write(fn, fn[__rootlen__:])
+
+    def setUp(self):
+        super(TestCaseRepository, self).setUp()
+
+        self.packages = []
+
+    def tearDown(self):
+        super(TestCaseRepository, self).tearDown()
+
+        for package in self.packages:
+            try:
+                self.client.delete_package(package['id'])
+            except Exception:
+            #except exceptions.NotFound: Need to uncomment after fix the
+            #following bug https://bugs.launchpad.net/murano/+bug/1309413
+                pass
+
+    @classmethod
+    def tearDownClass(cls):
+
+        super(TestCaseRepository, cls).tearDownClass()
+
+        os.remove(os.path.join(cls.location, "DummyTestApp.zip"))
+
+
+class TestRepositorySanity(TestCaseRepository):
 
     @attr(type='smoke')
     def test_get_list_packages(self):
@@ -34,64 +78,175 @@ class TestRepository(base.TestCase):
         self.assertTrue(isinstance(body['packages'], list))
 
     @attr(type='smoke')
-    def test_get_package(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, body = self.client.get_package(package['id'])
-
-        self.assertEqual(200, resp.status)
-        self.assertEqual(package, body)
-
-    @attr(type='smoke')
-    def test_update_package(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, body = self.client.update_package(package['id'])
-
-        self.assertEqual(200, resp.status)
-        self.assertIn("i'm a test", body['tags'])
-
-    @attr(type='smoke')
-    def test_delete_package(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, _ = self.client.delete_package(package['id'])
-
-        self.assertEqual(200, resp.status)
-
-    @attr(type='smoke')
-    def test_download_package(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, _ = self.client.download_package(package['id'])
-
-        self.assertEqual(200, resp.status)
-
-    @attr(type='smoke')
-    def test_get_ui_definitions(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, _ = self.client.get_ui_definition(package['id'])
-
-        self.assertEqual(200, resp.status)
-
-    @attr(type='smoke')
-    def test_get_logo(self):
-        _, body = self.client.get_list_packages()
-        package = body['packages'][0]
-
-        resp, _ = self.client.get_logo(package['id'])
-
-        self.assertEqual(200, resp.status)
-
-    @attr(type='smoke')
     def test_get_list_categories(self):
         resp, body = self.client.list_categories()
 
         self.assertEqual(200, resp.status)
         self.assertTrue(isinstance(body['categories'], list))
+
+    @attr(type='smoke')
+    def test_upload_and_delete_package(self):
+        packages_list = self.client.get_list_packages()[1]
+        for package in packages_list['packages']:
+            if 'Dummy' in package['fully_qualified_name']:
+                self.client.delete_package(package['id'])
+        categorie = self.client.list_categories()[1]['categories'][0]
+        packages_list = self.client.get_list_packages()[1]['packages']
+
+        resp = self.client.upload_package(
+            'testpackage',
+            {"categories": [categorie], "tags": ["windows"]})
+        self.packages.append(resp.json())
+
+        _packages_list = self.client.get_list_packages()[1]['packages']
+
+        self.assertEqual(200, resp.status_code)
+        self.assertEqual(len(packages_list) + 1, len(_packages_list))
+
+        resp = self.client.delete_package(resp.json()['id'])[0]
+
+        _packages_list = self.client.get_list_packages()[1]['packages']
+
+        self.assertEqual(200, resp.status)
+        self.assertEqual(len(packages_list), len(_packages_list))
+
+
+class TestRepository(TestCaseRepository):
+
+    @classmethod
+    def setUpClass(cls):
+
+        super(TestRepository, cls).setUpClass()
+        cls.categorie = cls.client.list_categories()[1]['categories'][0]
+
+    def setUp(self):
+        super(TestRepository, self).setUp()
+
+        packages_list = self.client.get_list_packages()[1]
+        for package in packages_list['packages']:
+            if 'Dummy' in package['fully_qualified_name']:
+                self.client.delete_package(package['id'])
+        self.package = self.client.upload_package(
+            'testpackage',
+            {"categories": [self.categorie], "tags": ["windows"]}).json()
+        self.packages.append(self.package)
+
+    @attr(type='smoke')
+    def test_get_package(self):
+        resp, body = self.client.get_package(self.package['id'])
+
+        self.assertEqual(200, resp.status)
+        self.assertEqual(self.package['tags'], body['tags'])
+
+    @attr(type='smoke')
+    def test_update_package(self):
+        post_body = [
+            {
+                "op": "add",
+                "path": "/tags",
+                "value": ["im a test"]
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertIn("im a test", body['tags'])
+
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/tags",
+                "value": ["im bad:D"]
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertNotIn("im a test", body['tags'])
+        self.assertIn("im bad:D", body['tags'])
+
+        post_body = [
+            {
+                "op": "remove",
+                "path": "/tags",
+                "value": ["im bad:D"]
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertNotIn("im bad:D", body['tags'])
+
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/is_public",
+                "value": True
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertTrue(body['is_public'])
+
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/enabled",
+                "value": True
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertTrue(body['enabled'])
+
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/description",
+                "value": "New description"
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertEqual("New description", body['description'])
+
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/name",
+                "value": "New name"
+            }
+        ]
+
+        resp, body = self.client.update_package(self.package['id'], post_body)
+
+        self.assertEqual(200, resp.status)
+        self.assertEqual("New name", body['name'])
+
+    @attr(type='smoke')
+    def test_download_package(self):
+        resp = self.client.download_package(self.package['id'])[0]
+
+        self.assertEqual(200, resp.status)
+
+    @attr(type='smoke')
+    def test_get_ui_definitions(self):
+        resp = self.client.get_ui_definition(self.package['id'])[0]
+
+        self.assertEqual(200, resp.status)
+
+    @attr(type='smoke')
+    def test_get_logo(self):
+        resp, body = self.client.get_logo(self.package['id'])
+
+        self.assertEqual(200, resp.status)
+        self.assertTrue(isinstance(body, str))

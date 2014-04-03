@@ -1,0 +1,18 @@
+{
+  "Scripts": [
+    "ImportCoreFunctions.ps1",
+    "Install-RoleSecondaryDomainController.ps1"
+  ],
+  "Commands": [
+    {
+      "Name": "Install-RoleSecondaryDomainController",
+      "Arguments": {
+        "DomainName": "$domain",
+        "UserName": "$domainAccountName",
+        "Password": "$domainPassword",
+        "SafeModePassword": "$recoveryPassword"
+      }
+    }
+  ],
+  "RebootOnCompletion": 1
+}

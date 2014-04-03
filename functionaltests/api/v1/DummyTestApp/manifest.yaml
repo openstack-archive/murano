@@ -1,0 +1,26 @@
+Format: 1.0
+
+Type: Application
+
+FullName: io.murano.windows.Dummy
+
+Name: Dummy
+
+Description: |
+  Dummy
+
+Author: 'murano.io'
+
+Tags: [Dummy]
+
+Classes:
+  io.murano.windows.Host: Host.yaml
+  io.murano.windows.DomainHost: DomainHost.yaml
+  io.murano.windows.Dummy.Dummy: Dummy.yaml
+  io.murano.windows.Dummy.Controller: Controller.yaml
+  io.murano.windows.Dummy.PrimaryController: PrimaryController.yaml
+  io.murano.windows.Dummy.SecondaryController: SecondaryController.yaml
+
+# UI: ui.yaml     # default to ui.yaml, will use default if skipped
+
+Logo: logo2.png # defaults to logo.png, will use default if skipped

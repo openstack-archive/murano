@@ -1,0 +1,33 @@
+Namespaces:
+    =: io.murano.windows.Dummy
+    std: io.murano
+    sys: io.murano.system
+
+Name: PrimaryController
+
+Extends: Controller
+
+Properties:
+
+  dnsIp:
+    Contract: $.string()
+
+Workflow:
+  initialize:
+    Body:
+      - $.super($.initialize())
+      - $.domain: $.find(Dummy).require()
+
+  deploy:
+    Arguments:
+    Body:
+      - $.super($.deploy())
+      - $resources: new(io.murano.system.Resources)
+      - $template: $resources.json('CreatePrimaryDC.template').bind(dict(
+            domain => $.domain.name,
+            recoveryPassword => $.recoveryPassword
+          ))
+      - $.host.agent.call($template, $resources)
+
+      - $template: $resources.json('AskDnsIp.template')
+      - $.dnsIp: $.host.agent.call($template, $resources)[0]

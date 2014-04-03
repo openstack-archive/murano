@@ -1,0 +1,49 @@
+Namespaces:
+    =: io.murano.windows
+    ad: io.murano.windows.Dummy
+    res: io.murano.resources
+    sys: io.murano.system
+
+Name: Host
+
+Extends: res:Instance
+
+Properties:
+  adminAccountName:
+    Contract: $.string().notNull()
+    Default: Administrator
+
+  adminPassword:
+    Contract: $.string().notNull()
+
+Workflow:
+  initialize:
+    Body:
+      - $.super($.initialize())
+
+  deploy:
+    Body:
+      - $.super($.deploy())
+
+      - $resources: new(sys:Resources)
+      - $template: $resources.json('SetPassword.template').bind(dict(
+            adminPassword => $.adminPassword
+          ))
+      - $.agent.send($template, $resources)
+
+  joinDomain:
+    Arguments:
+      - domain:
+          Contract: $.class(ad:Dummy).notNull()
+    Body:
+
+      - $resources: new(sys:Resources)
+      - $template: $resources.json('JoinDomain.template').bind(dict(
+            domain         => $domain.name,
+            domainUser     => $domain.adminAccountName,
+            domainPassword => $domain.adminPassword,
+            ouPath         => '',
+            dnsIp          => $domain.primaryController.dnsIp
+          ))
+      - $.agent.call($template, $resources)
+

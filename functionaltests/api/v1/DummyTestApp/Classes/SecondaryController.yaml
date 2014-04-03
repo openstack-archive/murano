@@ -1,0 +1,28 @@
+Namespaces:
+  =: io.murano.windows.Dummy
+  std: io.murano
+  sys: io.murano.system
+
+Name: SecondaryController
+
+Extends: Controller
+
+Workflow:
+  initialize:
+    Body:
+      - $.super($.initialize())
+      - $.domain: $.find(ActiveDirectory).require()
+
+  deploy:
+    Body:
+      - $.super($.deploy())
+      - $.host.joinDomain($.domain)
+      - $resources: new(sys:Resources)
+      - $template: $resources.json('CreateSecondaryDC.template').bind(dict(
+            domain => $.domain.name,
+            recoveryPassword => $.recoveryPassword,
+            domainAccountName => $.domain.adminAccountName,
+            domainPassword => $.domain.adminPassword
+          ))
+      - $.host.agent.call($template, $resources)
+#

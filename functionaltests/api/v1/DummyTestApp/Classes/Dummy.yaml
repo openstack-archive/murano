@@ -1,0 +1,37 @@
+Namespaces:
+  =: io.murano.windows.Dummy
+  std: io.murano
+  sys: io.murano.system
+
+Name: Dummy
+
+Extends: std:Application
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  primaryController:
+    Contract: $.class(PrimaryController).notNull()
+
+  secondaryControllers:
+    Contract: [$.class(SecondaryController).notNull()]
+
+  adminAccountName:
+    Contract: $.string().notNull()
+    Default: Administrator
+
+  adminPassword:
+    Contract: $.string().notNull()
+    Default: P@ssw0rd
+
+Workflow:
+  deploy:
+    Body:
+      - $.primaryController.deploy()
+      - $.secondaryControllers.pselect($.deploy())
+      - $.reportDeployed(title => 'Dummy',
+                         unitCount => len(secondaryControllers) + 1)
+
+  destroy:
+    - $.reportDestroyed()

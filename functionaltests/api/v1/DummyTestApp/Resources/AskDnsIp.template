@@ -1,0 +1,12 @@
+{
+  "Scripts": [
+    "Get-DnsListeningIpAddress.ps1"
+  ],
+  "Commands": [
+    {
+      "Name": "Get-DnsListeningIpAddress",
+      "Arguments": {}
+    }
+  ],
+  "RebootOnCompletion": 0
+}
