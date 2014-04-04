@@ -1,4 +1,4 @@
-# Copyright (c) 2013 Mirantis Inc.
+# Copyright (c) 2014 Mirantis Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -25,38 +25,40 @@ from muranoapi.common import rpc
 from muranoapi.dsl import executor
 from muranoapi.dsl import results_serializer
 from muranoapi.engine import environment
-from muranoapi.engine import simple_cloader
+from muranoapi.engine import package_class_loader
+from muranoapi.engine import package_loader
 import muranoapi.engine.system.system_objects as system_objects
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
 RPC_SERVICE = None
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 class TaskProcessingEndpoint(object):
     @staticmethod
     def handle_task(context, task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        log.info(_('Starting processing task: {0}').format(
-            anyjson.dumps(s_task)))
+        LOG.info(_('Starting processing task: {task_desc}').format(
+            task_desc=anyjson.dumps(s_task)))
 
         env = environment.Environment()
         env.token = task['token']
         env.tenant_id = task['tenant_id']
 
-        cl = simple_cloader.SimpleClassLoader(config.CONF.metadata_dir)
-        system_objects.register(cl, config.CONF.metadata_dir)
+        with package_loader.ApiPackageLoader(task['token']) as pkg_loader:
+            class_loader = package_class_loader.PackageClassLoader(pkg_loader)
+            system_objects.register(class_loader, pkg_loader)
 
-        exc = executor.MuranoDslExecutor(cl, env)
-        obj = exc.load(task['model'])
+            exc = executor.MuranoDslExecutor(class_loader, env)
+            obj = exc.load(task['model'])
 
-        if obj is not None:
-            obj.type.invoke('deploy', exc, obj, {})
+            if obj is not None:
+                obj.type.invoke('deploy', exc, obj, {})
 
-        s_res = results_serializer.serialize(obj, exc)
-        rpc.api().process_result(s_res)
+            s_res = results_serializer.serialize(obj, exc)
+            rpc.api().process_result(s_res)
 
 
 def _prepare_rpc_service(server_id):

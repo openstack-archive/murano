@@ -36,6 +36,17 @@ class NoClassFound(Exception):
         super(NoClassFound, self).__init__('Class %s is not found' % name)
 
 
+class NoPackageFound(Exception):
+    def __init__(self, name):
+        super(NoPackageFound, self).__init__('Package %s is not found' % name)
+
+
+class NoPackageForClassFound(Exception):
+    def __init__(self, name):
+        super(NoPackageForClassFound, self).__init__('Package for class %s '
+                                                     'is not found' % name)
+
+
 class AmbiguousMethodName(Exception):
     def __init__(self, name):
         super(AmbiguousMethodName, self).__init__(

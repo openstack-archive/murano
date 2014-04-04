@@ -12,6 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import imghdr
 import os
 import shutil
@@ -24,6 +25,17 @@ import muranoapi.packages.exceptions as e
 import muranoapi.packages.versions.v1
 
 
+class DummyLoader(yaml.Loader):
+    pass
+
+
+def yaql_constructor(loader, node):
+    value = loader.construct_scalar(node)
+    return value
+
+yaml.add_constructor(u'!yaql', yaql_constructor, DummyLoader)
+
+
 class PackageTypes(object):
     Library = 'Library'
     Application = 'Application'
@@ -31,7 +43,8 @@ class PackageTypes(object):
 
 
 class ApplicationPackage(object):
-    def __init__(self, source_directory, yaml_content):
+    def __init__(self, source_directory, manifest, loader=DummyLoader):
+        self.yaml_loader = loader
         self._source_directory = source_directory
         self._full_name = None
         self._package_type = None
@@ -42,7 +55,7 @@ class ApplicationPackage(object):
         self._classes = None
         self._ui = None
         self._logo = None
-        self._format = yaml_content.get('Format')
+        self._format = manifest.get('Format')
         self._ui_cache = None
         self._raw_ui_cache = None
         self._logo_cache = None
@@ -99,6 +112,9 @@ class ApplicationPackage(object):
             self._load_class(name)
         return self._classes_cache[name]
 
+    def get_resource(self, name):
+        return os.path.join(self._source_directory, 'Resources', name)
+
     def validate(self):
         self._classes_cache.clear()
         for class_name in self._classes:
@@ -109,7 +125,7 @@ class ApplicationPackage(object):
     # Private methods
     def _load_ui(self, load_yaml=False):
         if self._raw_ui_cache and load_yaml:
-            self._ui_cache = yaml.load(self._raw_ui_cache)
+            self._ui_cache = yaml.load(self._raw_ui_cache, self.yaml_loader)
         else:
             ui_file = self._ui
             full_path = os.path.join(self._source_directory, 'UI', ui_file)
@@ -121,7 +137,8 @@ class ApplicationPackage(object):
                 with open(full_path) as stream:
                     self._raw_ui_cache = stream.read()
                     if load_yaml:
-                        self._ui_cache = yaml.load(self._raw_ui_cache)
+                        self._ui_cache = yaml.load(self._raw_ui_cache,
+                                                   self.yaml_loader)
             except Exception as ex:
                 trace = sys.exc_info()[2]
                 raise e.PackageUILoadError(str(ex)), None, trace
@@ -154,7 +171,7 @@ class ApplicationPackage(object):
                                                 'definition not found')
         try:
             with open(full_path) as stream:
-                self._classes_cache[name] = yaml.load(stream)
+                self._classes_cache[name] = yaml.load(stream, self.yaml_loader)
         except Exception as ex:
             trace = sys.exc_info()[2]
             msg = 'Unable to load class definition due to "{0}"'.format(
@@ -162,7 +179,8 @@ class ApplicationPackage(object):
             raise e.PackageClassLoadError(name, msg), None, trace
 
 
-def load_from_dir(source_directory, filename='manifest.yaml', preload=False):
+def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
+                  loader=DummyLoader):
     formats = {'1.0': muranoapi.packages.versions.v1}
 
     if not os.path.isdir(source_directory) or not os.path.exists(
@@ -174,7 +192,7 @@ def load_from_dir(source_directory, filename='manifest.yaml', preload=False):
 
     try:
         with open(full_path) as stream:
-            content = yaml.load(stream)
+            content = yaml.load(stream, DummyLoader)
     except Exception as ex:
         trace = sys.exc_info()[2]
         raise e.PackageLoadError(
@@ -184,14 +202,15 @@ def load_from_dir(source_directory, filename='manifest.yaml', preload=False):
         if not p_format or p_format not in formats:
             raise e.PackageFormatError(
                 'Unknown or missing format version')
-        package = ApplicationPackage(source_directory, content)
+        package = ApplicationPackage(source_directory, content, loader)
         formats[p_format].load(package, content)
         if preload:
             package.validate()
         return package
 
 
-def load_from_file(archive_path, target_dir=None, drop_dir=False):
+def load_from_file(archive_path, target_dir=None, drop_dir=False,
+                   loader=DummyLoader):
     if not os.path.isfile(archive_path):
         raise e.PackageLoadError('Unable to find package file')
     created = False
@@ -211,7 +230,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
                                        "zip' archive")
         package = zipfile.ZipFile(archive_path)
         package.extractall(path=target_dir)
-        return load_from_dir(target_dir, preload=True)
+        return load_from_dir(target_dir, preload=True, loader=loader)
     finally:
         if drop_dir:
             if created:

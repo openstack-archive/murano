@@ -29,7 +29,9 @@ def classname(name):
 
 
 class MuranoClass(object):
-    def __init__(self, class_loader, namespace_resolver, name, parents=None):
+    def __init__(self, class_loader, namespace_resolver, name, package,
+                 parents=None):
+        self._package = package
         self._class_loader = class_loader
         self._methods = {}
         self._namespace_resolver = namespace_resolver
@@ -50,6 +52,10 @@ class MuranoClass(object):
     @property
     def name(self):
         return self._name
+
+    @property
+    def package(self):
+        return self._package
 
     @property
     def namespace_resolver(self):

@@ -14,21 +14,19 @@
 # limitations under the License.
 
 import json as jsonlib
-import os.path
 import yaml as yamllib
 
 import muranoapi.dsl.murano_object as murano_object
 
 
 class ResourceManager(murano_object.MuranoObject):
-    def initialize(self, base_path, _context, _class):
+    def initialize(self, package_loader, _context, _class):
         if _class is None:
             _class = _context.get_data('$')
-        class_name = _class.type.name
-        self._base_path = os.path.join(base_path, class_name, 'resources')
+        self._package = package_loader.get_package(_class.type.package.name)
 
     def string(self, name):
-        path = os.path.join(self._base_path, name)
+        path = self._package.get_resource(name)
         with open(path) as file:
             return file.read()
 

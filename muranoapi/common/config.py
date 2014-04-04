@@ -21,6 +21,7 @@ import logging.config
 import logging.handlers
 import os
 import sys
+import tempfile
 
 from oslo.config import cfg
 from paste import deploy
@@ -76,6 +77,16 @@ keystone_opts = [
     cfg.StrOpt('key_file')
 ]
 
+murano_opts = [
+    cfg.StrOpt('url', help=_('Optional murano url in format '
+                             'like http://0.0.0.0:8082')),
+    cfg.BoolOpt('insecure', default=False),
+    cfg.StrOpt('cacert'),
+    cfg.StrOpt('cert_file'),
+    cfg.StrOpt('key_file'),
+    cfg.StrOpt('endpoint_type', default='publicURL')
+]
+
 stats_opt = [
     cfg.IntOpt('period', default=5,
                help=_('Statistics collection interval in minutes.'
@@ -83,6 +94,9 @@ stats_opt = [
 ]
 
 metadata_dir = cfg.StrOpt('metadata-dir', default='./meta')
+
+temp_pkg_cache = os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
+packages_cache = cfg.StrOpt('packages-cache', default=temp_pkg_cache)
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
@@ -92,9 +106,11 @@ CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(heat_opts, group='heat')
 CONF.register_opts(neutron_opts, group='neutron')
 CONF.register_opts(keystone_opts, group='keystone')
+CONF.register_opts(murano_opts, group='murano')
 CONF.register_opt(cfg.StrOpt('file_server'))
 CONF.register_cli_opt(cfg.StrOpt('murano_metadata_url'))
 CONF.register_cli_opt(metadata_dir)
+CONF.register_cli_opt(packages_cache)
 CONF.register_opts(stats_opt, group='stats')
 
 CONF.import_opt('connection',

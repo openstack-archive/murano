@@ -34,14 +34,14 @@ def _auto_register(class_loader):
                     class_loader.import_class(class_def)
 
 
-def register(class_loader, path):
+def register(class_loader, package_loader):
     _auto_register(class_loader)
 
     @murano_class.classname('io.murano.system.Resources')
     class ResourceManagerWrapper(resource_manager.ResourceManager):
         def initialize(self, _context, _class=None):
             super(ResourceManagerWrapper, self).initialize(
-                path, _context, _class)
+                package_loader, _context, _class)
 
     class_loader.import_class(agent.Agent)
     class_loader.import_class(agent_listener.AgentListener)

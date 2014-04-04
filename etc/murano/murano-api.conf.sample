@@ -11,6 +11,9 @@ bind_host = 0.0.0.0
 # Port the bind the server to
 bind_port = 8082
 
+# Directory to store application package cache
+# packages_cache =
+
 # Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-api.log
 
@@ -136,6 +139,17 @@ auth_url = http://localhost:5000/v2.0
 # Keystone SSL parameters
 # Optional CA cert file to use in SSL connections
 #ca_file =
+# Optional PEM-formatted certificate chain file
+#cert_file =
+# Optional PEM-formatted file that contains the private key
+#key_file =
+# If set then the server's certificate will not be verified
+insecure = False
+
+[murano_opts]
+url = http:/localhost:8082
+# Optional CA cert file to use in SSL connections
+#cacert =
 # Optional PEM-formatted certificate chain file
 #cert_file =
 # Optional PEM-formatted file that contains the private key

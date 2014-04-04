@@ -30,18 +30,31 @@ import muranoapi.dsl.typespec as typespec
 class MuranoClassLoader(object):
     def __init__(self):
         self._loaded_types = {}
+        self._packages_cache = {}
         principal_objects.register(self)
+
+    def _get_package(self, class_name):
+        package_name = self.find_package_name(class_name)
+        if package_name is None:
+            raise exceptions.NoPackageForClassFound(class_name)
+        if package_name not in self._packages_cache:
+            package = self.load_package(package_name)
+            self._packages_cache[package_name] = package
+        return self._packages_cache[package_name]
 
     def get_class(self, name, create_missing=False):
         if name in self._loaded_types:
             return self._loaded_types[name]
 
-        data = self.load_definition(name)
-        if data is None:
+        try:
+            data = self.load_definition(name)
+            package = self._get_package(name)
+        except (exceptions.NoPackageForClassFound, exceptions.NoClassFound):
             if create_missing:
                 data = {'Name': name}
+                package = None
             else:
-                raise exceptions.NoClassFound(name)
+                raise
 
         namespaces = data.get('Namespaces', {})
         ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
@@ -55,7 +68,7 @@ class MuranoClassLoader(object):
                 class_parents[i] = self.get_class(full_name)
 
         type_obj = murano_class.MuranoClass(self, ns_resolver, name,
-                                            class_parents)
+                                            package, class_parents)
 
         properties = data.get('Properties', {})
         for property_name, property_spec in properties.iteritems():
@@ -69,6 +82,12 @@ class MuranoClassLoader(object):
         return type_obj
 
     def load_definition(self, name):
+        raise NotImplementedError()
+
+    def find_package_name(self, class_name):
+        raise NotImplementedError()
+
+    def load_package(self, class_name):
         raise NotImplementedError()
 
     def create_root_context(self):

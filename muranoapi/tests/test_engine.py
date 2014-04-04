@@ -114,13 +114,13 @@ class TestClassesManipulation(unittest.TestCase):
     resolver = mock.Mock(resolve_name=lambda name: name)
 
     def test_class_name(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
 
         self.assertEqual(ROOT_CLASS, cls.name)
 
     def test_class_namespace_resolver(self):
         resolver = ns_resolver.NamespaceResolver({})
-        cls = murano_class.MuranoClass(None, resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, resolver, ROOT_CLASS, None)
 
         self.assertEqual(resolver, cls.namespace_resolver)
 
@@ -131,21 +131,23 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertEqual([], root_class.parents)
 
     def test_non_root_class_resolves_parents(self):
-        root_cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        root_cls = murano_class.MuranoClass(None, self.resolver,
+                                            ROOT_CLASS, None)
         class_loader = mock.Mock(get_class=lambda name: root_cls)
-        desc_cl1 = murano_class.MuranoClass(class_loader, self.resolver, 'Obj')
+        desc_cl1 = murano_class.MuranoClass(class_loader, self.resolver,
+                                            'Obj', None)
         desc_cl2 = murano_class.MuranoClass(
-            class_loader, self.resolver, 'Obj', [root_cls])
+            class_loader, self.resolver, 'Obj', None, [root_cls])
 
         self.assertEqual([root_cls], desc_cl1.parents)
         self.assertEqual([root_cls], desc_cl2.parents)
 
     def test_class_initial_properties(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         self.assertEqual([], cls.properties)
 
     def test_fails_add_incompatible_property_to_class(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         kwargs = {'name': 'sampleProperty', 'property_typespec': {}}
 
         self.assertRaises(TypeError, cls.add_property, **kwargs)
@@ -153,7 +155,7 @@ class TestClassesManipulation(unittest.TestCase):
     @unittest.skip
     def test_add_property_to_class(self):
         prop = typespec.PropertySpec({'Default': 1}, self.resolver)
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls.add_property('firstPrime', prop)
 
         class_properties = cls.properties
@@ -190,9 +192,9 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertEqual(void_prop, child.find_property('Void'))
 
     def test_class_is_compatible(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         descendant_cls = murano_class.MuranoClass(
-            None, self.resolver, 'DescendantCls', [cls])
+            None, self.resolver, 'DescendantCls', None, [cls])
         obj = mock.Mock(spec=murano_object.MuranoObject)
         descendant_obj = mock.Mock(spec=murano_object.MuranoObject)
         obj.type = cls
@@ -204,7 +206,7 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertFalse(descendant_cls.is_compatible(obj))
 
     def test_new_method_calls_initialize(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls.object_class = mock.Mock()
 
         with mock.patch('inspect.getargspec') as spec_mock:
@@ -214,7 +216,7 @@ class TestClassesManipulation(unittest.TestCase):
             self.assertTrue(obj.initialize.called)
 
     def test_new_method_not_calls_initialize(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls.object_class = mock.Mock()
 
         obj = cls.new(None, None, None)
@@ -241,9 +243,9 @@ class TestObjectsManipulation(unittest.TestCase):
         pass
 
     def test_object_parent_properties_initialization(self):
-        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls = murano_class.MuranoClass(None, self.resolver,
-                                       'SomeClass', [root])
+                                       'SomeClass', None, [root])
         root.new = mock.Mock()
         init_kwargs = {'theArg': 0}
         obj = murano_object.MuranoObject(cls, None, None, None)
@@ -326,13 +328,13 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertRaises(LookupError, lambda: obj.conflictProp)
 
     def test_fails_setting_undeclared_property(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         obj = cls.new(None, None, None, {})
 
         self.assertRaises(AttributeError, obj.set_property, 'newOne', 10)
 
     def test_set_undeclared_property_as_internal(self):
-        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         obj = cls.new(None, None, None, {})
         obj.cast = mock.Mock(return_value=obj)
         prop_value = 10
@@ -403,9 +405,9 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertEqual(root_alt, cls_obj_casted2root_alt.type)
 
     def test_fails_object_down_cast(self):
-        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
+        root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls = murano_class.MuranoClass(
-            None, self.resolver, 'SomeClass', [root])
+            None, self.resolver, 'SomeClass', None, [root])
         root_obj = root.new(None, None, None)
 
         self.assertRaises(TypeError, root_obj.cast, cls)
