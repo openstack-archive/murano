@@ -71,7 +71,7 @@ class Controller(object):
 def verify_and_get_env(db_session, environment_id, request):
     environment = db_session.query(models.Environment).get(environment_id)
     if not environment:
-        LOG.info(_('Environment with id {0} not found'.format(environment_id)))
+        LOG.info(_('Environment with id {0} not found').format(environment_id))
         raise exc.HTTPNotFound
 
     if environment.tenant_id != request.context.tenant:
@@ -83,12 +83,12 @@ def verify_and_get_env(db_session, environment_id, request):
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
     deployment = db_session.query(models.Deployment).get(deployment_id)
     if not deployment:
-        LOG.info(_('Deployment with id {0} not found'.format(deployment_id)))
+        LOG.info(_('Deployment with id {0} not found').format(deployment_id))
         raise exc.HTTPNotFound
     if deployment.environment_id != environment_id:
         LOG.info(_('Deployment with id {0} not found'
-                   ' in environment {1}'.format(deployment_id,
-                                                environment_id)))
+                   ' in environment {1}').format(deployment_id,
+                                                 environment_id))
         raise exc.HTTPBadRequest
     return deployment
 

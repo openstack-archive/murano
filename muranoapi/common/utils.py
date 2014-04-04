@@ -189,7 +189,7 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
                 except ExceptionToCheck as e:
 
                     LOG.exception(e)
-                    LOG.info(_("Retrying in {0} seconds...".format(mdelay)))
+                    LOG.info(_("Retrying in {0} seconds...").format(mdelay))
 
                     eventlet.sleep(mdelay)
 

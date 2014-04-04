@@ -39,7 +39,8 @@ class TaskProcessingEndpoint(object):
     @staticmethod
     def handle_task(context, task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        log.info('Starting processing task: {0}'.format(anyjson.dumps(s_task)))
+        log.info(_('Starting processing task: {0}').format(
+            anyjson.dumps(s_task)))
 
         env = environment.Environment()
         env.token = task['token']
