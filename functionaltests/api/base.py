@@ -201,6 +201,12 @@ class TestCase(testtools.TestCase):
             except exceptions.NotFound:
                 pass
 
+    def create_environment(self, name):
+        environment = self.client.create_environment(name)[1]
+        self.environments.append(environment)
+
+        return environment
+
     def create_demo_service(self, environment_id, session_id):
         post_body = {
             "?": {

@@ -29,7 +29,7 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='smoke')
     def test_create_and_delete_environment(self):
-        _, environments_list_start = self.client.get_environments_list()
+        environments_list_start = self.client.get_environments_list()[1]
 
         resp, env = self.client.create_environment('test')
         self.environments.append(env)
@@ -37,14 +37,14 @@ class TestEnvironments(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual('test', env['name'])
 
-        _, environments_list = self.client.get_environments_list()
+        environments_list = self.client.get_environments_list()[1]
 
         self.assertEqual(len(environments_list_start['environments']) + 1,
                          len(environments_list['environments']))
 
         self.client.delete_environment(env['id'])
 
-        _, environments_list = self.client.get_environments_list()
+        environments_list = self.client.get_environments_list()[1]
 
         self.assertEqual(len(environments_list_start['environments']),
                          len(environments_list['environments']))
@@ -53,8 +53,7 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='smoke')
     def test_get_environment(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
         resp, environment = self.client.get_environment(env['id'])
 
@@ -63,8 +62,7 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='smoke')
     def test_update_environment(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
         resp, environment = self.client.update_environment(env['id'])
 
@@ -85,8 +83,7 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='negative')
     def test_double_delete_environment(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
         self.client.delete_environment(env['id'])
 
@@ -96,8 +93,7 @@ class TestEnvironments(base.TestCase):
 
     @attr(type='negative')
     def test_get_deleted_environment(self):
-        _, env = self.client.create_environment('test')
-        self.environments.append(env)
+        env = self.create_environment('test')
 
         self.client.delete_environment(env['id'])
 
