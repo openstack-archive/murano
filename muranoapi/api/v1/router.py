@@ -17,6 +17,7 @@ from muranoapi.api.v1 import catalog
 from muranoapi.api.v1 import deployments
 from muranoapi.api.v1 import environment_statistics
 from muranoapi.api.v1 import environments
+from muranoapi.api.v1 import request_statistics
 from muranoapi.api.v1 import services
 from muranoapi.api.v1 import sessions
 from muranoapi.openstack.common import wsgi
@@ -169,6 +170,12 @@ class API(wsgi.Router):
         mapper.connect('/catalog/packages/{package_id}/download',
                        controller=catalog_resource,
                        action='download',
+                       conditions={'method': ['GET']})
+
+        req_stats_resource = request_statistics.create_resource()
+        mapper.connect('/stats',
+                       controller=req_stats_resource,
+                       action='get',
                        conditions={'method': ['GET']})
 
         super(API, self).__init__(mapper)

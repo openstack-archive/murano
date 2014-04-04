@@ -18,6 +18,13 @@ from muranoapi.db import session as db_session
 
 
 class Statistics(object):
+
+    @staticmethod
+    def get_all():
+        db = db_session.get_session()
+        stats = db.query(m.ApiStats).all()
+        return stats
+
     @staticmethod
     def get_stats_by_id(stats_id):
         db = db_session.get_session()

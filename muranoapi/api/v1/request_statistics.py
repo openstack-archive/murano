@@ -15,7 +15,9 @@
 import time
 
 from muranoapi.api import v1
+from muranoapi.db.services import stats
 from muranoapi.openstack.common import log as logging
+from muranoapi.openstack.common import wsgi
 
 LOG = logging.getLogger(__name__)
 
@@ -86,3 +88,17 @@ def update_error_count(api, method, ex_time, tenant=None):
 def init_stats():
     if not v1.stats:
         v1.stats = RequestStatisticsCollection()
+
+
+class Controller(object):
+    def get(self, request):
+        model = stats.Statistics()
+        entries = model.get_all()
+        ent_list = []
+        for entry in entries:
+            ent_list.append(entry.to_dict())
+        return ent_list
+
+
+def create_resource():
+    return wsgi.Resource(Controller())
