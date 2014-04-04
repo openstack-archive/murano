@@ -12,6 +12,3 @@ sphinx>=1.1.2,<1.2
 requests>=1.1
 testtools>=0.9.34
 mock>=1.0
-
-# Optional packages that should be installed when testing
-xattr>=0.4
