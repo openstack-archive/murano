@@ -1,5 +1,5 @@
 #!/bin/sh
-#    Copyright (c) 2013 Mirantis, Inc.
+#    Copyright (c) 2014 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -15,20 +15,20 @@
 #    Author: Igor Yozhikov <iyozhikov@mirantis.com>
 #
 ### BEGIN INIT INFO
-# Provides:          murano-api
+# Provides:          murano-engine
 # Required-Start:    $network $local_fs $remote_fs $syslog
 # Required-Stop:     $remote_fs
 # Default-Start:     2 3 4 5
 # Default-Stop:      0 1 6
-# Short-Description: OpenStack Murano API Server
-# Description:       This startup script launches murano-api service daemon.
+# Short-Description: OpenStack Murano Engine Server
+# Description:       This startup script launches murano-engine service daemon.
 ### END INIT INFO
 
 
 PATH=/sbin:/usr/sbin:/bin:/usr/bin:/usr/local/bin
-DESC="murano-api"
-NAME=murano-api
-DAEMON=$(which murano-api)
+DESC="murano-engine"
+NAME=murano-engine
+DAEMON=$(which murano-engine)
 PIDFILE=/var/run/murano/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
 SYSTEM_USER=murano
