@@ -14,8 +14,11 @@
 
 # This script is executed inside post_test_hook function in devstack gate.
 
-# Install packages from test-requirements.txt
-sudo pip install -r /opt/stack/new/murano-api/test-requirements.txt
-
 cd /opt/stack/new/murano-api/functionaltests
 sudo ./run_tests.sh
+RETVAL=$?
+
+# Copy tempest log files to be published among other logs upon job completion
+sudo cp /opt/stack/new/murano-api/functionaltests/tempest.log /opt/stack/logs
+
+exit $RETVAL
