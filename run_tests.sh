@@ -28,7 +28,7 @@ function process_option {
     -P|--no-pep8) let no_pep8=1;;
     -f|--force) let force=1;;
     -u|--update) update=1;;
-    --unittests-only) noseopts="$noseopts --exclude-dir=muranoapi/tests/functional";;
+    --unittests-only) noseopts="$noseopts --exclude-dir=functionaltests";;
     -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=muranoapi";;
     -*) noseopts="$noseopts $1";;
     *) noseargs="$noseargs $1"
