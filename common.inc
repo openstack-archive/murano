@@ -363,15 +363,21 @@ function mk_dir()
 function get_service_exec_path()
 {
     retval=0
+    if [ -z "$1" ]; then
+        _daemon=$DAEMON_NAME
+    else
+        _daemon=$1
+        SERVICE_EXEC_PATH=''
+    fi
     if [ -z "$SERVICE_EXEC_PATH" ]; then
-        SERVICE_EXEC_PATH=$(which $DAEMON_NAME)
+        SERVICE_EXEC_PATH=$(which $_daemon)
         if [ $? -ne 0 ]; then
-            log "Can't find \"$DAEMON_NAME\", please install the \"$SERVICE_SRV_NAME\" by running \"$(basename "$0") install\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
+            log "Can't find \"$_daemon\", please install the \"$SERVICE_SRV_NAME\" by running \"$(basename "$0") install\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
             retval=1
         fi
     else
         if [ ! -x "$SERVICE_EXEC_PATH" ]; then
-            log "\"$SERVICE_EXEC_PATH\" in not executable, please install the \"$DAEMON_NAME\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
+            log "\"$SERVICE_EXEC_PATH\" in not executable, please install the \"$_daemon\" or set variable SERVICE_EXEC_PATH=/path/to/daemon before running setup script, exiting!"
             retval=1
         fi
     fi

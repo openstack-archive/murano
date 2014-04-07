@@ -83,7 +83,7 @@ function make_tarball()
         fi
         rm -rf $RUN_DIR/dist/*
         log "...\"setup.py sdist\" output will be recorded in \"$LOGFILE\""
-        cd $RUN_DIR && $setuppy sdist >> $LOGFILE 2>&1
+        cd $RUN_DIR && python $setuppy sdist >> $LOGFILE 2>&1
         if [ $? -ne 0 ];then
             log "...\"$setuppy\" tarball creation fails, exiting!!!"
             retval=1
@@ -126,7 +126,10 @@ function prepare_db()
     _mysql_db_user="muranoUser"
     _mysql_db_pass="$(genpass)"
     _mysql_root_pass="swordfish"
-    _mysql_cmd="CREATE DATABASE IF NOT EXISTS $_mysql_db_name DEFAULT CHARACTER SET=utf8; GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'localhost' IDENTIFIED BY '$_mysql_db_pass'; GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'%' IDENTIFIED BY '$_mysql_db_pass';"
+    _mysql_cmd="CREATE DATABASE IF NOT EXISTS $_mysql_db_name DEFAULT CHARACTER SET=utf8; \
+               DROP USER '$_mysql_db_user'@'localhost'; DROP USER '$_mysql_db_user'@'%'; \
+               GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'localhost' IDENTIFIED BY '$_mysql_db_pass'; \
+               GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'%' IDENTIFIED BY '$_mysql_db_pass';"
     mysql_packages="mysql-server"
     case $_dist in
         "debian")
@@ -142,8 +145,8 @@ function prepare_db()
             retval=1
             break
         elif [ $_ret -eq 2 ]; then
-            log "MySQL server already installed, so create db manually with command like this!"
-            log "$_mysql_cmd"
+            log "MySQL server already installed..."
+            #log "$_mysql_cmd"
             break
         fi
         unset _ret
@@ -170,23 +173,27 @@ function prepare_db()
     esac
     mysqladmin -u root password "$_mysql_root_pass"
     if [ $? -ne 0 ]; then
-        log "Trying with default password..."
-        mysqladmin -u root -p$_mysql_root_pass password "$_mysql_root_pass"
+        log "Trying connect with default password..."
+        #mysqladmin -u root -p$_mysql_root_pass password "$_mysql_root_pass"
+        mysql -u root -p$_mysql_root_pass -e "status"
         if [ $? -ne 0 ]; then
-            log "Can't set MySQL root user password, please run manually:"
+            log "Can't reach MySQL server with \"\$_mysql_root_pass value\" from prepare_db function root user password, please run manually:"
             log "$_mysql_cmd"
-            log "Set connection sting to \"mysql://$_mysql_db_user:$_mysql_db_pass@localhost:3306/$_mysql_db_name\" if you plan to use MySQL, sqlite will be used by default!"
+            log "Set connection string to \"mysql://$_mysql_db_user:$_mysql_db_pass@localhost:3306/$_mysql_db_name\" if you plan to use MySQL, sqlite will be used by default!"
             retval=1
             return $retval
         else
-            log "...success, MySQL root password reset \"\$_mysql_root_pass value\""
+            log "...success, MySQL reached with root password=\"\$_mysql_root_pass value\" from prepare_db function."
         fi
     fi
     mysql -uroot -p$_mysql_root_pass -e "$_mysql_cmd"
     if [ $? -ne 0 ]; then
         log "DB creation fails, please run manually:"
         log "$_mysql_cmd"
-        retval 1
+        retval=1
+    else
+        log "...db created"
+        retval=0
     fi
     DAEMON_DB_CONSTR="mysql://$_mysql_db_user:$_mysql_db_pass@localhost:3306/$_mysql_db_name"
     return $retval
@@ -195,45 +202,58 @@ function inject_init()
 {
     retval=0
     _dist=$(lowercase $DISTRO_BASED_ON)
-    eval src_init_sctipt="$DAEMON_NAME-$_dist"
-    _initscript="$DAEMON_NAME"
-    cp -f "$RUN_DIR/etc/init.d/$src_init_sctipt" "/etc/init.d/$_initscript" || retval=$?
-    chmod +x "/etc/init.d/$_initscript" || retval=$?
-    iniset '' 'SYSTEM_USER' "$DAEMON_USER" "/etc/init.d/$_initscript"
-    iniset '' 'DAEMON' "$(shslash $SERVICE_EXEC_PATH)" "/etc/init.d/$_initscript"
-    iniset '' 'SCRIPTNAME' "$(shslash "/etc/init.d/$_initscript")" "/etc/init.d/$_initscript"
-    case $_dist in
-        "debian")
-            update-rc.d $_initscript defaults || retval=$?
-            update-rc.d $_initscript enable || retval=$?
-            ;;
-        *)
-            chkconfig --add $_initscript || retval=$?
-            chkconfig $_initscript on || retval=$?
-            ;;
-    esac
+    #
+    DAEMONS="$DAEMON_NAME murano-engine"
+    #
+    for DAEMON in $DAEMONS
+    do
+        get_service_exec_path $DAEMON || exit $?
+        eval src_init_sctipt="$DAEMON-$_dist"
+        _initscript="$DAEMON"
+        cp -f "$RUN_DIR/etc/init.d/$src_init_sctipt" "/etc/init.d/$_initscript" || retval=$?
+        chmod +x "/etc/init.d/$_initscript" || retval=$?
+        iniset '' 'SYSTEM_USER' "$DAEMON_USER" "/etc/init.d/$_initscript"
+        iniset '' 'DAEMON' "$(shslash $SERVICE_EXEC_PATH)" "/etc/init.d/$_initscript"
+        iniset '' 'SCRIPTNAME' "$(shslash "/etc/init.d/$_initscript")" "/etc/init.d/$_initscript"
+        case $_dist in
+            "debian")
+                update-rc.d $_initscript defaults || retval=$?
+                update-rc.d $_initscript enable || retval=$?
+                ;;
+            *)
+                chkconfig --add $_initscript || retval=$?
+                chkconfig $_initscript on || retval=$?
+                ;;
+        esac
+    done
     return $retval
 }
 function purge_init()
 {
     retval=0
     _dist=$(lowercase $DISTRO_BASED_ON)
-    _initscript="$DAEMON_NAME"
-    service $_initscript stop
-    if [ $? -ne 0 ]; then
-        retval=1
-    fi
-    case $_dist in
-        "debian")
-            update-rc.d  $_initscript disable
-            update-rc.d -f $_initscript remove || retval=$?
-            ;;
-        *)
-            chkconfig $_initscript off || retval=$?
-            chkconfig --del $_initscript || retval=$?
-            ;;
-    esac
-    rm -f "/etc/init.d/$_initscript" || retval=$?
+    #
+    DAEMONS="$DAEMON_NAME murano-engine"
+    #
+    for DAEMON in $DAEMONS
+    do
+        _initscript="$DAEMON"
+        service $_initscript stop
+        if [ $? -ne 0 ]; then
+            retval=1
+        fi
+        case $_dist in
+            "debian")
+                update-rc.d  $_initscript disable
+                update-rc.d -f $_initscript remove || retval=$?
+                ;;
+            *)
+                chkconfig $_initscript off || retval=$?
+                chkconfig --del $_initscript || retval=$?
+                ;;
+        esac
+        rm -f "/etc/init.d/$_initscript" || retval=$?
+    done
     return $retval
 }
 function run_pip_uninstall()
@@ -270,7 +290,7 @@ function install_daemon()
     do
         #cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file.sample"
         cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$file"
-        config_file=$_prefix$(echo $file | sed -e 's/.sample$//')
+        config_file=$(echo $file | sed -e 's/.sample$//')
         #if [ ! -e "$DAEMON_CFG_DIR/$file" ]; then
         if [ ! -e "$DAEMON_CFG_DIR/$config_file" ]; then
             cp -f "$_src_conf_dir/$file" "$DAEMON_CFG_DIR/$config_file"
@@ -278,22 +298,34 @@ function install_daemon()
             log "\"$DAEMON_CFG_DIR/$config_file\" exists, skipping copy."
         fi
     done
+    #daemon_conf="$DAEMON_CFG_DIR/${DAEMON_NAME}.conf"
+    #daemon_log="$DAEMON_LOG_DIR/${DAEMON_NAME}.log"
+    #renaming of murano-api.conf->murano.conf and log file
+    daemon_conf="$(echo $DAEMON_CFG_DIR/${DAEMON_NAME}.conf | sed 's/-api//')"
+    daemon_conf_paste="$(echo $DAEMON_CFG_DIR/${DAEMON_NAME}-paste.ini | sed 's/-api//')"
+    daemon_log="$(echo $DAEMON_LOG_DIR/${DAEMON_NAME}.log | sed 's/-api//')"
+    mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}.conf $daemon_conf
+    mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}-paste.ini $daemon_conf_paste
+    #
     log "Setting log file and sqlite db placement..."
-    iniset 'DEFAULT' 'log_file' "$(shslash $DAEMON_LOG_DIR/$DAEMON_NAME.log)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
-    iniset 'DEFAULT' 'verbose' 'True' "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
-    iniset 'DEFAULT' 'debug' 'True' "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
-    iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
+    iniset 'DEFAULT' 'log_file' "$(shslash $daemon_log)" "$daemon_conf"
+    iniset 'DEFAULT' 'verbose' 'True' "$daemon_conf"
+    iniset 'DEFAULT' 'debug' 'True' "$daemon_conf"
+    iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$daemon_conf"
     log "Searching daemon in \$PATH..."
-    get_service_exec_path || exit $?
-    log "...found at \"$SERVICE_EXEC_PATH\""
+    #get_service_exec_path || exit $?
+    #log "...found at \"$SERVICE_EXEC_PATH\""
     log "Installing SysV init script."
     inject_init || exit $?
     prepare_db
     if [ $? -eq 0 ]; then
-        iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$DAEMON_CFG_DIR/$DAEMON_NAME.conf"
+        iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$daemon_conf"
         log "...database configuration finished."
     fi
-    log "Everything done, please, verify \"$DAEMON_CFG_DIR/$DAEMON_NAME.conf\", service created as \"murano-api\"."
+    get_service_exec_path "murano-manage" || exit $?
+    log "Running murano-manage under $DAEMON_USER..."
+    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db_sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+    log "Everything done, please, verify \"$daemon_conf\", services created as \"murano-api,murano-engine\"."
 }
 function uninstall_daemon()
 {
