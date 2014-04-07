@@ -118,10 +118,8 @@ class SessionServices(object):
         :param unit: SQLalchemy session
         :param token: auth token that is going to be used by orchestration
         """
-        #unit = get_session()
 
         #Set X-Auth-Token for conductor
-        unit = db_session.get_session()
         environment = unit.query(models.Environment).get(
             session.environment_id)
 
