@@ -16,13 +16,16 @@ from sqlalchemy import or_
 from sqlalchemy import sql
 from webob import exc
 
-import muranoapi
 from muranoapi.db import models
 from muranoapi.db import session as db_session
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
 
-SEARCH_MAPPING = muranoapi.api.v1.SEARCH_MAPPING
+SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
+                  'name': 'name',
+                  'created': 'created'
+                  }
+
 LOG = logging.getLogger(__name__)
 
 
