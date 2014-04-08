@@ -18,10 +18,10 @@ import sys
 import types
 import uuid
 
-import deep
 import eventlet.greenpool
 import yaql.expressions
 
+from muranoapi.common import utils
 import muranoapi.dsl.murano_object
 import muranoapi.dsl.yaql_expression as yaql_expression
 
@@ -97,7 +97,7 @@ def merge_lists(list1, list2):
     for item in list1 + list2:
         exists = False
         for old_item in result:
-            if deep.diff(item, old_item) is None:
+            if not utils.is_different(item, old_item):
                 exists = True
                 break
         if not exists:
