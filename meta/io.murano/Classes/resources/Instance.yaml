@@ -1,0 +1,81 @@
+Namespaces:
+  =: io.murano.resources
+  sys: io.murano.system
+
+
+Name: Instance
+
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+  flavor:
+    Contract: $.string().notNull()
+  image:
+    Contract: $.string().notNull()
+
+  agent:
+    Contract: $.class(sys:Agent)
+    Type: Runtime
+
+
+Workflow:
+  initialize:
+    Body:
+      - $.environment: $.find(Environment).require()
+      - $.agent: new(sys:Agent, host => $)
+      - $.resources: new(sys:Resources)
+
+  deploy:
+    Body:
+      - $userData: $.prepareUserData()
+      - $template:
+          Resources:
+            $.name:
+              Type: 'AWS::EC2::Instance'
+              Properties:
+                InstanceType: $.flavor
+                ImageId: $.image
+                UserData: $userData
+      - $.environment.stack.updateTemplate($template)
+      - $.environment.stack.push()
+      - $.environment.instanceNotifier.trackApplication($this)
+
+  destroy:
+    Body:
+      - $template: $.environment.stack.current()
+      - $patchBlock:
+          op: remove,
+          path: format('/Resources/{0}', $.name)
+      - $template: patch($template, $patchBlock)
+      - $.environment.stack.setTemplate($template)
+      - $.environment.stack.push()
+      - $.environment.instanceNotifier.untrackApplication($this)
+
+  prepareUserData:
+    Body:
+      - If: !yaql "'w' in toLower($.image)"
+        Then:
+          - $configFile: $.resources.string('Agent-v1.template')
+          - $initScript: $.resources.string('windows-init.ps1')
+        Else:
+          - $configFile: $.resources.string('Agent-v2.template')
+          - $initScript: $.resources.string('linux-init.sh')
+
+      - $configReplacements:
+          "%RABBITMQ_HOST%": config(rabbitmq, host)
+          "%RABBITMQ_PORT%": config(rabbitmq, port)
+          "%RABBITMQ_USER%": config(rabbitmq, login)
+          "%RABBITMQ_PASSWORD%": config(rabbitmq, password)
+          "%RABBITMQ_VHOST%": config(rabbitmq, virtual_host)
+          "%RABBITMQ_SSL%": str(config(rabbitmq, ssl)).toLower()
+          "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
+          "%RESULT_QUEUE%": $.environment.agentListener.queueName()
+
+      - $scriptReplacements:
+          "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
+          "%INTERNAL_HOSTNAME%": $.name
+          "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), config(rabbitmq, host))
+          "%CA_ROOT_CERT_BASE64%": ""
+
+      - Return: $initScript.replace($scriptReplacements)

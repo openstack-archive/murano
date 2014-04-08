@@ -166,21 +166,25 @@ class HeatStack(murano_object.MuranoObject):
 
         current_status = self._get_status()
         if current_status == 'NOT_FOUND':
-            self._heat_client.stacks.create(
-                stack_name=self._name,
-                parameters=self._parameters,
-                template=self._template,
-                disable_rollback=False)
+            if self._template.get('Resources'):
+                self._heat_client.stacks.create(
+                    stack_name=self._name,
+                    parameters=self._parameters,
+                    template=self._template,
+                    disable_rollback=False)
 
-            self._wait_state(
-                lambda status: status == 'CREATE_COMPLETE')
+                self._wait_state(
+                    lambda status: status == 'CREATE_COMPLETE')
         else:
-            self._heat_client.stacks.update(
-                stack_id=self._name,
-                parameters=self._parameters,
-                template=self._template)
-            self._wait_state(
-                lambda status: status == 'UPDATE_COMPLETE')
+            if self._template.get('Resources'):
+                self._heat_client.stacks.update(
+                    stack_id=self._name,
+                    parameters=self._parameters,
+                    template=self._template)
+                self._wait_state(
+                    lambda status: status == 'UPDATE_COMPLETE')
+            else:
+                self.delete()
 
         self._applied = True
 
@@ -191,3 +195,5 @@ class HeatStack(murano_object.MuranoObject):
             stack_id=self._name)
         self._wait_state(
             lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
+        self._template = {}
+        self._applied = True

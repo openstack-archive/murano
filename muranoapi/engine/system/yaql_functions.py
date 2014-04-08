@@ -17,6 +17,8 @@ import base64
 import re
 import types
 
+import jsonpatch
+import jsonpointer
 import yaql.context
 
 import muranoapi.common.config as cfg
@@ -188,6 +190,18 @@ def _pselect(collection, composer):
     return helpers.parallel_select(collection(), composer)
 
 
+def _patch(obj, patch):
+    obj = obj()
+    patch = patch()
+    if not isinstance(patch, types.ListType):
+        patch = [patch]
+    patch = jsonpatch.JsonPatch(patch)
+    try:
+        return patch.apply(obj)
+    except jsonpointer.JsonPointerException:
+        return obj
+
+
 def register(context):
     context.register_function(
         lambda json, mappings: _transform_json(json(), mappings()), 'bind')
@@ -213,3 +227,4 @@ def register(context):
     context.register_function(_substr, 'substr')
     context.register_function(_str, 'str')
     context.register_function(_int, 'int')
+    context.register_function(_patch, 'patch')

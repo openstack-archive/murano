@@ -1,0 +1,35 @@
+[DEFAULT]
+debug=True
+verbose=True
+log_file = /var/log/murano-agnet.log
+
+storage=/var/murano/plans
+
+[rabbitmq]
+
+# Input queue name
+input_queue = %RABBITMQ_INPUT_QUEUE%
+
+# Output routing key (usually queue name)
+result_routing_key = %RESULT_QUEUE%
+
+# Connection parameters to RabbitMQ service
+
+# Hostname or IP address where RabbitMQ is located.
+host = %RABBITMQ_HOST%
+
+# RabbitMQ port (5672 is a default)
+port = %RABBITMQ_PORT%
+
+# Use SSL for RabbitMQ connections (True or False)
+ssl = %RABBITMQ_SSL%
+
+# Path to SSL CA certificate or empty to allow self signed server certificate
+ca_certs =
+
+# RabbitMQ credentials. Fresh RabbitMQ installation has "guest" account with "guest" password.
+login = %RABBITMQ_USER%
+password = %RABBITMQ_PASSWORD%
+
+# RabbitMQ virtual host (vhost). Fresh RabbitMQ installation has "/" vhost preconfigured.
+virtual_host = %RABBITMQ_VHOST%

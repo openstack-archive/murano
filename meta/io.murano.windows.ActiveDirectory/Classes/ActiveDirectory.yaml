@@ -1,8 +1,7 @@
 Namespaces:
-  =: io.murano.services.windows.activeDirectory
+  =: io.murano.windows.activeDirectory
   std: io.murano
   sys: io.murano.system
-  win: io.murano.services.windows
 
 Name: ActiveDirectory
 
@@ -29,5 +28,9 @@ Properties:
 Workflow:
   deploy:
     Body:
-      -  $.primaryController.deploy()
-      -  $.secondaryControllers.pselect($.deploy())
+      - $.primaryController.deploy()
+      - $.secondaryControllers.pselect($.deploy())
+      - $.reportDeployed()
+
+  destroy:
+    - $.reportDestroyed()

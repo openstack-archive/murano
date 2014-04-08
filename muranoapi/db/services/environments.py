@@ -122,13 +122,15 @@ class EnvironmentServices(object):
 
         #preparing data for removal from conductor
         env = environment.description
-        env['services'] = {}
-        env['deleted'] = True
+        env['Objects'] = None
 
-        #Set X-Auth-Token for conductor
-        env['token'] = token
+        data = {
+            'model': env,
+            'token': token,
+            'tenant_id': environment.tenant_id
+        }
 
-        rpc.engine().handle_task(env)
+        rpc.engine().handle_task(data)
 
         with unit.begin():
             unit.delete(environment)

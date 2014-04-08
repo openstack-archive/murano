@@ -134,8 +134,8 @@ function init_murano() {
     recreate_database murano utf8
 
     $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE db-sync
-    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/packages/core
-    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/packages/activedirectory
+    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/io.murano
+    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/io.murano.windows.ActiveDirectory
 }
 
 
