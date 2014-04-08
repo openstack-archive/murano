@@ -1,8 +1,8 @@
 Namespaces:
-    =: io.murano.services.windows.activeDirectory
+    =: io.murano.windows.activeDirectory
     std: io.murano
     sys: io.murano.system
-    win: io.murano.services.windows
+    win: io.murano.windows
 
 Name: Controller
 

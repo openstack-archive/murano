@@ -92,3 +92,7 @@ def main():
         CONF.command.func()
     except Exception as e:
         sys.exit("ERROR: %s" % e)
+
+
+if __name__ == '__main__':
+    main()

@@ -1,5 +1,5 @@
 Namespaces:
-  =: io.murano.services.windows.activeDirectory
+  =: io.murano.windows.activeDirectory
   std: io.murano
   sys: io.murano.system
 
@@ -15,7 +15,6 @@ Workflow:
 
   deploy:
     Body:
-      - $.debugPrint('Deploying Secondary Controller for domain {0}'.format($this.domain.name))
       - $.super($.deploy())
       - $.host.joinDomain($.domain)
       - $resources: new(sys:Resources)

@@ -23,13 +23,19 @@ class ObjRef(object):
 
 
 def serialize(root_object, executor):
-    serialized_objects = set()
-    tree = _pass1_serialize(root_object, None, serialized_objects)
-    _pass2_serialize(tree, serialized_objects)
+    if root_object is None:
+        tree = None
+        attributes = []
+    else:
+        serialized_objects = set()
+        tree = _pass1_serialize(root_object, None, serialized_objects)
+        _pass2_serialize(tree, serialized_objects)
+        attributes = executor.attribute_store.serialize(serialized_objects)
 
     return {
         'Objects': tree,
-        'Attributes': executor.attribute_store.serialize(serialized_objects)
+        'ObjectsCopy': tree,
+        'Attributes': attributes
     }
 
 

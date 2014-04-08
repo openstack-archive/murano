@@ -39,12 +39,17 @@ class ObjectStore(object):
             return self._parent_store.get(object_id)
         return None
 
+    def has(self, object_id):
+        return object_id in self._store
+
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
     def load(self, value, parent, context, defaults=None):
         #tmp_store = ObjectStore(self._class_loader, self)
 
+        if value is None:
+            return None
         if '?' not in value or 'type' not in value['?']:
             raise ValueError()
         system_key = value['?']

@@ -1,0 +1,21 @@
+Format: 1.0
+
+Type: Library
+
+FullName: io.murano
+
+Name: Core library
+
+Description: |
+  Core MuranoPL library
+
+Author: 'murano.io'
+
+Tags: [MuranoPL]
+
+Classes:
+  io.murano.Object: Object.yaml
+  io.murano.Environment: Environment.yaml
+  io.murano.Application: Application.yaml
+
+  io.murano.resources.Instance: resources/Instance.yaml

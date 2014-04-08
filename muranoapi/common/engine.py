@@ -52,7 +52,8 @@ class TaskProcessingEndpoint(object):
         exc = executor.MuranoDslExecutor(cl, env)
         obj = exc.load(task['model'])
 
-        obj.type.invoke('deploy', exc, obj, {})
+        if obj is not None:
+            obj.type.invoke('deploy', exc, obj, {})
 
         s_res = results_serializer.serialize(obj, exc)
         rpc.api().process_result(s_res)

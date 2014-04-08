@@ -18,6 +18,7 @@ iso8601>=0.1.8
 six>=1.5.2
 netaddr>=0.7.6
 PyYAML>=3.1.0
+jsonpatch>=1.1
 
 # Note you will need gcc buildtools installed and must
 # have installed libxml headers for lxml to be successfully

@@ -124,7 +124,7 @@ class OpenstackException(Exception):
             if _FATAL_EXCEPTION_FORMAT_ERRORS:
                 raise
             else:
-                # at least get the core message out if something happened
+                # at least get the io.murano message out if something happened
                 self._error_string = self.msg_fmt
 
     def __str__(self):

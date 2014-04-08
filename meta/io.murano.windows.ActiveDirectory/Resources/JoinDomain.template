@@ -1,0 +1,25 @@
+{
+  "Scripts": [
+    "ImportCoreFunctions.ps1",
+    "Join-Domain.ps1"
+  ],
+  "Commands": [
+    {
+      "Name": "Set-NetworkAdapterConfiguration",
+      "Arguments": {
+        "FirstAvailable": true,
+        "DNSServer": "$dnsIp"
+      }
+    },
+    {
+      "Name": "Join-Domain",
+      "Arguments": {
+        "Username": "$domainUser",
+        "Password": "$domainPassword",
+        "DomainName": "$domain",
+        "OUPath": "$ouPath"
+      }
+    }
+  ],
+  "RebootOnCompletion": 1
+}

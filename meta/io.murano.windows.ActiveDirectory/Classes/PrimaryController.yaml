@@ -1,8 +1,7 @@
 Namespaces:
-    =: io.murano.services.windows.activeDirectory
+    =: io.murano.windows.activeDirectory
     std: io.murano
     sys: io.murano.system
-    win: io.murano.services.windows
 
 Name: PrimaryController
 
@@ -22,7 +21,6 @@ Workflow:
   deploy:
     Arguments:
     Body:
-      - $.debugPrint('Deploying Primary Controller for domain {0}'.format($this.domain.name))
       - $.super($.deploy())
       - $resources: new(io.murano.system.Resources)
       - $template: $resources.json('CreatePrimaryDC.template').bind(dict(

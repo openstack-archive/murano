@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import functools
 import inspect
 import types
@@ -216,5 +217,49 @@ class MuranoDslExecutor(object):
         if not isinstance(data, types.DictionaryType):
             raise TypeError()
         self._attribute_store.load(data.get('Attributes') or [])
-        return self._object_store.load(data.get('Objects') or {},
-                                       None, self._root_context)
+        result = self._object_store.load(data.get('Objects') or {},
+                                         None, self._root_context)
+        self.cleanup(data)
+        return result
+
+    def cleanup(self, data):
+        objects_copy = data.get('ObjectsCopy')
+        if not objects_copy:
+            return
+        gc_object_store = object_store.ObjectStore(self._class_loader)
+        gc_object_store.load(objects_copy, None, self._root_context)
+        objects_to_clean = []
+        for object_id in self._list_potential_object_ids(objects_copy):
+            if gc_object_store.has(object_id) \
+                    and not self._object_store.has(object_id):
+                obj = gc_object_store.get(object_id)
+                objects_to_clean.append(obj)
+        if objects_to_clean:
+            backup = self._object_store
+            try:
+                self._object_store = gc_object_store
+                for obj in objects_to_clean:
+                    methods = obj.type.find_method('destroy')
+                    for cls, method in methods:
+                        try:
+                            cls.invoke(method, self, obj, {})
+                        except Exception:
+                            pass
+            finally:
+                self._object_store = backup
+
+    def _list_potential_object_ids(self, data):
+        if isinstance(data, types.DictionaryType):
+            for val in data.values():
+                for res in self._list_potential_object_ids(val):
+                    yield res
+            sys_dict = data.get('?')
+            if isinstance(sys_dict, types.DictionaryType) \
+                    and sys_dict.get('id') \
+                    and sys_dict.get('type'):
+                yield sys_dict['id']
+        elif isinstance(data, collections.Iterable) and not isinstance(
+                data, types.StringTypes):
+            for val in data:
+                for res in self._list_potential_object_ids(val):
+                    yield res
