@@ -260,7 +260,8 @@ class Package(BASE, ModificationsTrackedObject):
     archive = sa.Column(sa.BLOB)
     fully_qualified_name = sa.Column(sa.String(512),
                                      nullable=False,
-                                     index=True)
+                                     index=True,
+                                     unique=True)
     type = sa.Column(sa.String(20), nullable=False, default='class')
     author = sa.Column(sa.String(80), default='Openstack')
     name = sa.Column(sa.String(20), nullable=False)
