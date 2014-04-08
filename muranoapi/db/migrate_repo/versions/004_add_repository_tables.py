@@ -14,6 +14,7 @@
 
 from migrate.changeset import constraint
 
+from sqlalchemy.dialects.mysql import mysqldb
 from sqlalchemy import schema
 from sqlalchemy import types
 meta = schema.MetaData()
@@ -21,6 +22,9 @@ meta = schema.MetaData()
 
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
+    collation = 'ascii_general_ci' \
+        if isinstance(migrate_engine.dialect, mysqldb.MySQLDialect) \
+        else None
     package = schema.Table(
         'package',
         meta,
@@ -28,9 +32,9 @@ def upgrade(migrate_engine):
                       types.String(32),
                       primary_key=True,
                       nullable=False),
-        schema.Column('archive', types.BLOB),
+        schema.Column('archive', types.LargeBinary),
         schema.Column('fully_qualified_name',
-                      types.String(512, collation='latin1_swedish_ci'),
+                      types.String(512, collation=collation),
                       index=True, unique=True),
         schema.Column('type', types.String(20)),
         schema.Column('author', types.String(80)),
@@ -38,7 +42,7 @@ def upgrade(migrate_engine):
         schema.Column('enabled', types.Boolean),
         schema.Column('description', types.String(512)),
         schema.Column('is_public', types.Boolean),
-        schema.Column('logo', types.BLOB),
+        schema.Column('logo', types.LargeBinary),
         schema.Column('owner_id', types.String(36)),
         schema.Column('ui_definition', types.Text),
         schema.Column('created', types.DateTime, nullable=False),

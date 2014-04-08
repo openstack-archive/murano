@@ -257,7 +257,7 @@ class Package(BASE, ModificationsTrackedObject):
     id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    archive = sa.Column(sa.BLOB)
+    archive = sa.Column(sa.LargeBinary)
     fully_qualified_name = sa.Column(sa.String(512),
                                      nullable=False,
                                      index=True,
@@ -274,7 +274,7 @@ class Package(BASE, ModificationsTrackedObject):
                                secondary=package_to_tag,
                                cascade='save-update, merge',
                                lazy='joined')
-    logo = sa.Column(sa.BLOB, nullable=True)
+    logo = sa.Column(sa.LargeBinary, nullable=True)
     owner_id = sa.Column(sa.String(36), nullable=False)
     ui_definition = sa.Column(sa.Text)
     categories = sa_orm.relationship("Category",
