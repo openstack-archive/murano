@@ -17,14 +17,10 @@ from muranoapi.db import session as db_session
 
 stats = None
 
-SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class_name',
-                    'limit', 'type', 'fqn', 'category', 'owned')
-LIST_PARAMS = ('category', 'tag', 'class_name', 'order_by')
+SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class',
+                    'limit', 'type', 'fqn', 'category', 'owned', 'search')
+LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
 ORDER_VALUES = ('fqn', 'name', 'created')
-SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
-                  'name': 'name',
-                  'created': 'created'
-                  }
 PKG_PARAMS_MAP = {'display_name': 'name',
                   'full_name': 'fully_qualified_name',
                   'raw_ui': 'ui_definition',

@@ -13,6 +13,7 @@
 #    under the License.
 
 from sqlalchemy import or_
+from sqlalchemy.orm import attributes
 from sqlalchemy import sql
 from webob import exc
 
@@ -262,6 +263,8 @@ def package_search(filters, context):
     else:
         query = session.query(pkg).filter(or_((pkg.is_public & pkg.enabled),
                                               pkg.owner_id == context.tenant))
+    if 'type' in filters.keys():
+        query = query.filter(pkg.type == filters['type'].title())
 
     if 'category' in filters.keys():
         query = query.filter(pkg.categories.any(
@@ -274,6 +277,30 @@ def package_search(filters, context):
             models.Class.name.in_(filters['class_name'])))
     if 'fqn' in filters.keys():
         query = query.filter(pkg.fully_qualified_name == filters['fqn'])
+
+    if 'search' in filters.keys():
+        fk_fields = {'categories': 'Category',
+                     'tags': 'Tag',
+                     'class_definition': 'Class'}
+        conditions = []
+
+        for attr in dir(pkg):
+            if attr.startswith('_'):
+                continue
+            if isinstance(getattr(pkg, attr),
+                          attributes.InstrumentedAttribute):
+                search_str = filters['search']
+                for delim in ',;':
+                    search_str = search_str.replace(delim, ' ')
+                for key_word in search_str.split():
+                    _word = '%{value}%'.format(value=key_word)
+                    if attr in fk_fields.keys():
+                        condition = getattr(pkg, attr).any(
+                            getattr(models, fk_fields[attr]).name.like(_word))
+                        conditions.append(condition)
+                    else:
+                        conditions.append(getattr(pkg, attr).like(_word))
+        query = query.filter(or_(*conditions))
 
     sort_keys = filters.get('order_by', []) or ['created']
     for key in sort_keys:
