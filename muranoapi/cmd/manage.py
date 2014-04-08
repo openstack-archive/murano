@@ -17,10 +17,12 @@
 """
 
 import sys
+import traceback
 
 from oslo.config import cfg
 
 import muranoapi
+from muranoapi.common import consts
 from muranoapi.db.catalog import api as db_catalog_api
 from muranoapi.db import session as db_session
 from muranoapi.openstack.common import log as logging
@@ -40,20 +42,38 @@ def do_db_sync():
     db_session.db_sync()
 
 
-def _do_import_package(_dir):
+def _do_import_package(_dir, categories):
     LOG.info("Going to import Murano package from {0}".format(_dir))
     pkg = application_package.load_from_dir(_dir)
-    result = db_catalog_api.package_upload(pkg.__dict__, None)
+    package = {
+        'fully_qualified_name': pkg.full_name,
+        'type': pkg.package_type,
+        'author': pkg.author,
+        'name': pkg.display_name,
+        'description': pkg.description,
+        # note: we explicitly mark all the imported packages as public,
+        # until a parameter added to control visibility scope of a package
+        'is_public': True,
+        #'tags': pkg.tags,
+        'logo': pkg.logo,
+        'ui_definition': pkg.raw_ui,
+        'class_definition': pkg.classes,
+        'archive': pkg.blob,
+        'categories': categories or []
+    }
+
+    # note(ruhe): the second parameter is tenant_id
+    # it is a required field in the DB, that's why we pass an empty string
+    result = db_catalog_api.package_upload(package, '')
     LOG.info("Finished import of package {0}".format(result.id))
 
 
 # TODO(ruhe): proper error handling
 def do_import_package():
     """
-    Import Murano packages from local directories.
+    Import Murano package from local directory.
     """
-    for _dir in CONF.command.directories:
-        _do_import_package(_dir)
+    _do_import_package(CONF.command.directory, CONF.command.categories)
 
 
 def add_command_parsers(subparsers):
@@ -64,10 +84,14 @@ def add_command_parsers(subparsers):
 
     parser = subparsers.add_parser('import-package')
     parser.set_defaults(func=do_import_package)
-    parser.add_argument('directories',
-                        nargs='+',
-                        help="list of directories with Murano packages "
-                             "separated by space")
+    parser.add_argument('directory',
+                        help='A directory with Murano package.')
+
+    parser.add_argument('-c', '--categories',
+                        choices=consts.CATEGORIES,
+                        nargs='*',
+                        help='An optional list of categories this package '
+                             'to be assigned to.')
 
 
 command_opt = cfg.SubCommandOpt('command',
@@ -85,13 +109,16 @@ def main():
              default_config_files=default_config_files)
         logging.setup("murano-api")
     except RuntimeError as e:
-        LOG.error("murano-manage command failed: %s" % e)
+        LOG.error("failed to initialize murano-manage: %s" % e)
         sys.exit("ERROR: %s" % e)
 
     try:
         CONF.command.func()
     except Exception as e:
-        sys.exit("ERROR: %s" % e)
+        tb = traceback.format_exc()
+        err_msg = "murano-manage command failed: {0}\n{1}".format(e, tb)
+        LOG.error(err_msg)
+        sys.exit(err_msg)
 
 
 if __name__ == '__main__':

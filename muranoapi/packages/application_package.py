@@ -21,6 +21,8 @@ import tempfile
 import yaml
 import zipfile
 
+from sqlalchemy.util import byte_buffer
+
 import muranoapi.packages.exceptions as e
 import muranoapi.packages.versions.v1
 
@@ -60,6 +62,7 @@ class ApplicationPackage(object):
         self._raw_ui_cache = None
         self._logo_cache = None
         self._classes_cache = {}
+        self._blob_cache = None
 
     @property
     def full_name(self):
@@ -106,6 +109,12 @@ class ApplicationPackage(object):
         if not self._logo_cache:
             self._load_logo(False)
         return self._logo_cache
+
+    @property
+    def blob(self):
+        if not self._blob_cache:
+            self._blob_cache = _pack_dir(self._source_directory)
+        return self._blob_cache
 
     def get_class(self, name):
         if name not in self._classes_cache:
@@ -207,6 +216,23 @@ def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
         if preload:
             package.validate()
         return package
+
+
+def _zipdir(path, zipf):
+    for root, dirs, files in os.walk(path):
+        for f in files:
+            abspath = os.path.join(root, f)
+            relpath = os.path.relpath(abspath, path)
+            zipf.write(abspath, relpath)
+
+
+def _pack_dir(source_directory):
+    blob = byte_buffer()
+    zipf = zipfile.ZipFile(blob, mode='w')
+    _zipdir(source_directory, zipf)
+    zipf.close()
+
+    return blob.getvalue()
 
 
 def load_from_file(archive_path, target_dir=None, drop_dir=False,
