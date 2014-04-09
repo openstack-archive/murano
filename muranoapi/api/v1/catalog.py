@@ -15,6 +15,7 @@
 
 import cgi
 import jsonschema
+import os
 import tempfile
 
 from oslo.config import cfg
@@ -146,7 +147,8 @@ class Controller(object):
             LOG.exception(e)
             raise exc.HTTPBadRequest(explanation=e.message)
 
-        with tempfile.NamedTemporaryFile() as tempf:
+        with tempfile.NamedTemporaryFile(delete=False) as tempf:
+            LOG.debug("Storing package archive in a temporary file")
             content = file_obj.file.read()
             if not content:
                 msg = _("Uploading file can't be empty")
@@ -154,13 +156,16 @@ class Controller(object):
                 raise exc.HTTPBadRequest(msg)
             tempf.write(content)
             package_meta['archive'] = content
-            try:
-                pkg_to_upload = app_pkg.load_from_file(tempf.name,
-                                                       target_dir=None,
-                                                       drop_dir=True)
-            except pkg_exc.PackageLoadError as e:
-                LOG.exception(e)
-                raise exc.HTTPBadRequest(e)
+        try:
+            LOG.debug("Deleting package archive temporary file")
+            pkg_to_upload = app_pkg.load_from_file(tempf.name,
+                                                   target_dir=None,
+                                                   drop_dir=True)
+        except pkg_exc.PackageLoadError as e:
+            LOG.exception(e)
+            raise exc.HTTPBadRequest(e)
+        finally:
+            os.remove(tempf.name)
 
         # extend dictionary for update db
         for k, v in PKG_PARAMS_MAP.iteritems():
