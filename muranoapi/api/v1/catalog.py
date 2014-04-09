@@ -19,12 +19,12 @@ import os
 import tempfile
 
 from oslo.config import cfg
-from sqlalchemy import exc as sql_exc
 from webob import exc
 
 import muranoapi.api.v1
 from muranoapi.api.v1 import schemas
 from muranoapi.db.catalog import api as db_api
+from muranoapi.openstack.common.db import exception as db_exc
 from muranoapi.openstack.common import exception
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
@@ -173,8 +173,8 @@ class Controller(object):
                 package_meta[v] = getattr(pkg_to_upload, k)
         try:
             package = db_api.package_upload(package_meta, req.context.tenant)
-        except sql_exc.SQLAlchemyError:
-            msg = _('Unable to save package in database')
+        except db_exc.DBDuplicateEntry:
+            msg = _('Package with specified full name is already registered')
             LOG.exception(msg)
             raise exc.HTTPServerError(msg)
         return package.to_dict()
