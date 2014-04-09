@@ -17,7 +17,7 @@ from muranoapi.db import session as db_session
 
 stats = None
 
-SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class',
+SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class_name',
                     'limit', 'type', 'fqn', 'category', 'owned', 'search')
 LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
 ORDER_VALUES = ('fqn', 'name', 'created')
