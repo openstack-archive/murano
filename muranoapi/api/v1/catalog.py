@@ -74,9 +74,26 @@ def _get_filters(query_params):
 
 
 def _validate_body(body):
+    """
+    Check multipart/form-data has two parts: text (which is json string and
+    should parsed into dictionary in serializer) and file, which stores as
+    cgi.FieldStorage instance. Also validate file size doesn't exceed
+    the limit: seek to the end of the file, get the position of EOF and
+    reset the file position to the beginning
+    """
+    def check_file_size(f):
+        pkg_size_limit = CONF.package_size_limit * 1024 * 1024
+        f.seek(0, 2)
+        size = f.tell()
+        f.seek(0)
+        if size > pkg_size_limit:
+            raise exc.HTTPBadRequest('Uploading file is too large.'
+                                     ' The limit is {0}'
+                                     ' Mb'.format(CONF.package_size_limit))
+
     if len(body.keys()) != 2:
         msg = _("'multipart/form-data' request body should contain "
-                "2 parts: json string and zip archivel. Current body consist "
+                "2 parts: json string and zip archive. Current body consist "
                 "of {0} part(s)").format(len(body.keys()))
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
@@ -85,15 +102,16 @@ def _validate_body(body):
     for part in body.values():
         if isinstance(part, cgi.FieldStorage):
             file_obj = part
-            # dict if json deserialized successfully
+            check_file_size(file_obj.file)
+
         if isinstance(part, dict):
             package_meta = part
     if file_obj is None:
-        msg = _("There is no file package with application description")
+        msg = _('There is no file package with application description')
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
     if package_meta is None:
-        msg = _("There is no json with meta information about package")
+        msg = _('There is no json with meta information about package')
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
     return file_obj, package_meta
