@@ -280,7 +280,7 @@ def package_search(filters, context):
     if 'search' in filters.keys():
         fk_fields = {'categories': 'Category',
                      'tags': 'Tag',
-                     'class_definition': 'Class'}
+                     'class_definitions': 'Class'}
         conditions = []
 
         for attr in dir(pkg):
@@ -357,7 +357,7 @@ def package_upload(values, tenant_id):
 
     composite_attr_to_func = {'categories': _get_categories,
                               'tags': _get_tags,
-                              'class_definition': _get_class_definitions}
+                              'class_definitions': _get_class_definitions}
     with session.begin():
         for attr, func in composite_attr_to_func.iteritems():
             if values.get(attr):
