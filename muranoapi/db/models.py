@@ -281,7 +281,8 @@ class Package(BASE, ModificationsTrackedObject):
                                      secondary=package_to_category,
                                      cascade='save-update, merge',
                                      lazy='joined')
-    class_definition = sa_orm.relationship("Class", lazy='joined')
+    class_definitions = sa_orm.relationship(
+        "Class", cascade='save-update, merge, delete', lazy='joined')
 
     def to_dict(self):
         d = self.__dict__.copy()
@@ -289,7 +290,7 @@ class Package(BASE, ModificationsTrackedObject):
                             'archive',
                             'logo',
                             'ui_definition']
-        nested_objects = ['categories', 'tags', 'class_definition']
+        nested_objects = ['categories', 'tags', 'class_definitions']
         for key in not_serializable:
             if key in d.keys():
                 del d[key]
