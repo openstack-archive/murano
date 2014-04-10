@@ -32,7 +32,7 @@ OS_INSTANCE = 200
 class InstanceReportNotifier(object):
     transport = None
 
-    def __init__(self):
+    def initialize(self, environment):
         if InstanceReportNotifier.transport is None:
             InstanceReportNotifier.transport = \
                 messaging.get_transport(config.CONF)
@@ -40,8 +40,6 @@ class InstanceReportNotifier(object):
             InstanceReportNotifier.transport,
             publisher_id=uuidutils.generate_uuid(),
             topic='murano')
-
-    def initialize(self, environment):
         self._environment_id = environment.object_id
 
     def _track_instance(self, instance, instance_type, untrack=False):
