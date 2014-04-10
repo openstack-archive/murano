@@ -15,10 +15,10 @@
 
 import collections
 import socket
+import time
 
 from eventlet import patcher
 kombu = patcher.import_patched('kombu')
-five = patcher.import_patched('kombu.five')
 from muranoapi.common.messaging import message
 
 
@@ -51,14 +51,14 @@ class Subscription(object):
         elapsed = 0.0
         remaining = timeout
         while True:
-            time_start = five.monotonic()
+            time_start = time.time()
             if self._buffer:
                 return self._buffer.pop()
             try:
                 self._connection.drain_events(timeout=timeout and remaining)
             except socket.timeout:
                 return None
-            elapsed += five.monotonic() - time_start
+            elapsed += time.time() - time_start
             remaining = timeout and timeout - elapsed or None
 
     def _receive(self, message_data, message):
