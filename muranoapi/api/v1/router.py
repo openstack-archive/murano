@@ -15,8 +15,8 @@ import routes
 
 from muranoapi.api.v1 import catalog
 from muranoapi.api.v1 import deployments
-from muranoapi.api.v1 import environment_statistics
 from muranoapi.api.v1 import environments
+from muranoapi.api.v1 import instance_statistics
 from muranoapi.api.v1 import request_statistics
 from muranoapi.api.v1 import services
 from muranoapi.api.v1 import sessions
@@ -122,16 +122,22 @@ class API(wsgi.Router):
                        action='deploy',
                        conditions={'method': ['POST']})
 
-        statistics_resource = environment_statistics.create_resource()
+        statistics_resource = instance_statistics.create_resource()
         mapper.connect(
-            '/environments/{environment_id}/statistics/{instance_id}',
+            '/environments/{environment_id}/instance-statistics/raw/'
+            '{instance_id}',
             controller=statistics_resource,
             action='get_for_instance',
             conditions={'method': ['GET']})
         mapper.connect(
-            '/environments/{environment_id}/statistics',
+            '/environments/{environment_id}/instance-statistics/raw',
             controller=statistics_resource,
             action='get_for_environment',
+            conditions={'method': ['GET']})
+        mapper.connect(
+            '/environments/{environment_id}/instance-statistics/aggregated',
+            controller=statistics_resource,
+            action='get_aggregated',
             conditions={'method': ['GET']})
 
         catalog_resource = catalog.create_resource()

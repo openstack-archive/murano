@@ -233,7 +233,7 @@ package_to_tag = sa.Table('package_to_tag',
 
 
 class Instance(BASE, ModelBase):
-    __tablename__ = 'instance'
+    __tablename__ = 'instance_stats'
 
     environment_id = sa.Column(
         sa.String(100), primary_key=True, nullable=False)
@@ -242,6 +242,10 @@ class Instance(BASE, ModelBase):
     instance_type = sa.Column(sa.Integer, default=0, nullable=False)
     created = sa.Column(sa.Integer, nullable=False)
     destroyed = sa.Column(sa.Integer, nullable=True)
+    type_name = sa.Column('type_name', sa.String(512), nullable=False)
+    type_title = sa.Column('type_title', sa.String(512))
+    unit_count = sa.Column('unit_count', sa.Integer())
+    tenant_id = sa.Column('tenant_id', sa.String(32), nullable=False)
 
     def to_dict(self):
         dictionary = super(Instance, self).to_dict()

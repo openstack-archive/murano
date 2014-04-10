@@ -25,14 +25,14 @@ API_NAME = 'EnvironmentStatistics'
 
 
 class Controller(object):
-    @request_statistics.stats_count(API_NAME, 'GetForEnvironment')
-    def get_for_environment(self, request, environment_id):
-        LOG.debug(_('EnvironmentStatistics:GetForEnvironment'))
+    @request_statistics.stats_count(API_NAME, 'GetAggregated')
+    def get_aggregated(self, request, environment_id):
+        LOG.debug(_('EnvironmentStatistics:GetAggregated'))
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
 
-        return instances.InstanceStatsServices.get_environment_stats(
+        return instances.InstanceStatsServices.get_aggregated_stats(
             environment_id)
 
     @request_statistics.stats_count(API_NAME, 'GetForInstance')
@@ -42,8 +42,18 @@ class Controller(object):
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
 
-        return instances.InstanceStatsServices.get_environment_stats(
+        return instances.InstanceStatsServices.get_raw_environment_stats(
             environment_id, instance_id)
+
+    @request_statistics.stats_count(API_NAME, 'GetForEnvironment')
+    def get_for_environment(self, request, environment_id):
+        LOG.debug(_('EnvironmentStatistics:GetForEnvironment'))
+
+        # TODO (stanlagun): Check that caller is authorized to access
+        #  tenant's statistics
+
+        return instances.InstanceStatsServices.get_raw_environment_stats(
+            environment_id)
 
 
 def create_resource():

@@ -5,8 +5,15 @@ Name: Application
 
 Workflow:
   reportDeployed:
+      Arguments:
+        - title:
+            Contract: $.string()
+            Default: null
+        - unitCount:
+            Contract: $.int()
+            Default: null
       Body:
-        - $this.find(Environment).instanceNotifier.trackApplication($this)
+        - $this.find(Environment).instanceNotifier.trackApplication($this, $title, $unitCount)
 
   reportDestroyed:
       Body:
