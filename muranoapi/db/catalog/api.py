@@ -267,13 +267,14 @@ def package_search(filters, context):
         query = query.filter(pkg.type == filters['type'].title())
 
     if 'category' in filters.keys():
-        query = query.filter(pkg.categories.any(models.Category.name ==
-                                                filters['category']))
+        query = query.filter(pkg.categories.any(
+            models.Category.name.in_(filters['category'])))
     if 'tag' in filters.keys():
-        query = query.filter(pkg.tags.any(models.Tag.name == filters['tag']))
+        query = query.filter(pkg.tags.any(
+            models.Tag.name.in_(filters['tag'])))
     if 'class_name' in filters.keys():
-        query = query.filter(pkg.class_definition.any(models.Class.name ==
-                                                      filters['class_name']))
+        query = query.filter(pkg.class_definitions.any(
+            models.Class.name == filters['class_name']))
     if 'fqn' in filters.keys():
         query = query.filter(pkg.fully_qualified_name == filters['fqn'])
 
