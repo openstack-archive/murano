@@ -1,5 +1,6 @@
 Namespaces:
   =: io.murano.resources
+  std: io.murano
   sys: io.murano.system
 
 
@@ -22,7 +23,7 @@ Properties:
 Workflow:
   initialize:
     Body:
-      - $.environment: $.find(Environment).require()
+      - $.environment: $.find(std:Environment).require()
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
 
