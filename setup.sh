@@ -29,7 +29,7 @@ DAEMON_CFG_DIR="/etc/murano"
 DAEMON_LOG_DIR="/var/log/murano"
 LOGFILE="/tmp/${DAEMON_NAME}_install.log"
 DAEMON_DB_CONSTR="sqlite:///$DAEMON_CFG_DIR/$DAEMON_NAME.sqlite"
-common_pkgs="wget git make gcc python-pip python-setuptools"
+common_pkgs="wget git make gcc python-pip python-setuptools ntpdate"
 # Distro-specific package namings
 debian_pkgs="python-dev python-mysqldb libxml2-dev libxslt1-dev libffi-dev mysql-client"
 redhat_pkgs="python-devel MySQL-python libxml2-devel libxslt-devel libffi-devel mysql"
@@ -186,6 +186,13 @@ function prepare_db()
             log "...success, MySQL reached with root password=\"\$_mysql_root_pass value\" from prepare_db function."
         fi
     fi
+    #checking if users exists
+    _db_has_users=$(mysql -uroot -p$_mysql_root_pass -D mysql -e "select count('User') from user where User='$_mysql_db_user';" -BN)
+    if [ $_db_has_users -eq 0 ]; then
+        _mysql_cmd="CREATE DATABASE IF NOT EXISTS $_mysql_db_name DEFAULT CHARACTER SET=utf8; \
+               GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'localhost' IDENTIFIED BY '$_mysql_db_pass'; \
+               GRANT ALL PRIVILEGES ON $_mysql_db_name.* TO '$_mysql_db_user'@'%' IDENTIFIED BY '$_mysql_db_pass';"
+    fi
     mysql -uroot -p$_mysql_root_pass -e "$_mysql_cmd"
     if [ $? -ne 0 ]; then
         log "DB creation fails, please run manually:"
@@ -277,7 +284,15 @@ function run_pip_uninstall()
 }
 function install_daemon()
 {
+    #small cleanup
+    rm -rf /tmp/pip-build-*
     install_prerequisites || exit 1
+    if [ -n "$1" ]; then
+        #syncing clock
+        log "Syncing clock..."
+        ntpdate -u pool.ntp.org
+        log "Continuing installation..."
+    fi
     make_tarball || exit $?
     run_pip_install || exit $?
     add_daemon_credentials "$DAEMON_USER" "$DAEMON_GROUP" || exit $?
@@ -337,11 +352,16 @@ function uninstall_daemon()
 }
 # Command line args'
 COMMAND="$1"
+SUB_COMMAND="$2"
 case $COMMAND in
     install)
         rm -rf $LOGFILE
         log "Installing \"$DAEMON_NAME\" to system..."
-        install_daemon
+        if [ "$SUB_COMMAND" == "timesync" ]; then
+            install_daemon $SUB_COMMAND || exit $?
+        else
+            install_daemon || exit $?
+        fi
         ;;
 
     uninstall )
