@@ -25,6 +25,7 @@ import muranoapi
 from muranoapi.common import consts
 from muranoapi.db.catalog import api as db_catalog_api
 from muranoapi.db import session as db_session
+from muranoapi.openstack.common.db import exception as db_exception
 from muranoapi.openstack.common import log as logging
 from muranoapi.packages import application_package
 
@@ -76,6 +77,27 @@ def do_import_package():
     _do_import_package(CONF.command.directory, CONF.command.categories)
 
 
+def do_list_categories():
+    categories = db_catalog_api.category_get_names()
+
+    if categories:
+        print(">> Murano package categories:")
+        for c in categories:
+            print("* {0}".format(c))
+    else:
+        print("No categories were found")
+
+
+def do_add_category():
+    category_name = CONF.command.category_name
+
+    try:
+        db_catalog_api.category_add(category_name)
+        print(">> Successfully added category {0}".format(category_name))
+    except db_exception.DBDuplicateEntry:
+        print(">> ERROR: Category '{0}' already exists".format(category_name))
+
+
 def add_command_parsers(subparsers):
     parser = subparsers.add_parser('db-sync')
     parser.set_defaults(func=do_db_sync)
@@ -92,6 +114,14 @@ def add_command_parsers(subparsers):
                         nargs='*',
                         help='An optional list of categories this package '
                              'to be assigned to.')
+
+    parser = subparsers.add_parser('category-list')
+    parser.set_defaults(func=do_list_categories)
+
+    parser = subparsers.add_parser('category-add')
+    parser.set_defaults(func=do_add_category)
+    parser.add_argument('category_name',
+                        help='Name of the new category.')
 
 
 command_opt = cfg.SubCommandOpt('command',
