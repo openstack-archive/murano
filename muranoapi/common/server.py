@@ -117,8 +117,13 @@ def track_instance(payload):
     instance_id = payload['instance']
     instance_type = payload.get('instance_type', 0)
     environment_id = payload['environment']
+    unit_count = payload.get('unit_count')
+    type_name = payload['type_name']
+    type_title = payload.get('type_title')
+
     instances.InstanceStatsServices.track_instance(
-        instance_id, environment_id, instance_type)
+        instance_id, environment_id, instance_type,
+        type_name, type_title, unit_count)
 
 
 @notification_endpoint_wrapper()

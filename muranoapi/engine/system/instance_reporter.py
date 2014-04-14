@@ -42,26 +42,36 @@ class InstanceReportNotifier(object):
             topic='murano')
         self._environment_id = environment.object_id
 
-    def _track_instance(self, instance, instance_type, untrack=False):
+    def _track_instance(self, instance, instance_type,
+                        type_title, unit_count):
         payload = {
             'instance': instance.object_id,
             'environment': self._environment_id,
-            'instance_type': instance_type
+            'instance_type': instance_type,
+            'type_name': instance.type.name,
+            'type_title': type_title,
+            'unit_count': unit_count
         }
 
-        event_type = 'murano.untrack_instance' \
-            if untrack else 'murano.track_instance'
+        self._notifier.info({}, 'murano.track_instance', payload)
 
-        self._notifier.info({}, event_type, payload)
+    def _untrack_instance(self, instance, instance_type):
+        payload = {
+            'instance': instance.object_id,
+            'environment': self._environment_id,
+            'instance_type': instance_type,
+        }
 
-    def trackApplication(self, instance):
-        self._track_instance(instance, APPLICATION, False)
+        self._notifier.info({}, 'murano.untrack_instance', payload)
+
+    def trackApplication(self, instance, title=None, unitCount=None):
+        self._track_instance(instance, APPLICATION, title, unitCount)
 
     def untrackApplication(self, instance):
-        self._track_instance(instance, APPLICATION, True)
+        self._untrack_instance(instance, APPLICATION)
 
     def trackCloudInstance(self, instance):
-        self._track_instance(instance, OS_INSTANCE, False)
+        self._track_instance(instance, OS_INSTANCE, None, 1)
 
     def untrackCloudInstance(self, instance):
-        self._track_instance(instance, OS_INSTANCE, True)
+        self._untrack_instance(instance, OS_INSTANCE)

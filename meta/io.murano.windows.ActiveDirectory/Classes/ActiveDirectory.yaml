@@ -30,7 +30,8 @@ Workflow:
     Body:
       - $.primaryController.deploy()
       - $.secondaryControllers.pselect($.deploy())
-      - $.reportDeployed()
+      - $.reportDeployed(title => 'MS Active Directory',
+                         unitCount => len(secondaryControllers) + 1)
 
   destroy:
     - $.reportDestroyed()

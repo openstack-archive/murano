@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sqlalchemy
+
 from sqlalchemy.sql import func
 
 from muranoapi.db import models
@@ -27,20 +29,31 @@ OS_INSTANCE = 200
 
 class InstanceStatsServices(object):
     @staticmethod
-    def track_instance(instance_id, environment_id, instance_type):
-        instance = models.Instance()
-        instance.instance_id = instance_id
-        instance.environment_id = environment_id
-        instance.instance_type = instance_type
-        instance.created = timeutils.utcnow_ts()
-        instance.destroyed = None
+    def track_instance(instance_id, environment_id, instance_type,
+                       type_name, type_title=None, unit_count=None):
 
         unit = db_session.get_session()
         try:
             with unit.begin():
+                env = unit.query(models.Environment).get(environment_id)
+                instance = models.Instance()
+                instance.instance_id = instance_id
+                instance.environment_id = environment_id
+                instance.tenant_id = env.tenant_id
+                instance.instance_type = instance_type
+                instance.created = timeutils.utcnow_ts()
+                instance.destroyed = None
+                instance.type_name = type_name
+                instance.type_title = type_title
+                instance.unit_count = unit_count
+
                 unit.add(instance)
         except exception.DBDuplicateEntry:
-            pass  # expected behaviour when record already exists
+            unit.execute(
+                sqlalchemy.update(models.Instance).where(
+                    models.Instance.instance_id == instance_id and
+                    models.Instance.environment_id == environment_id).values(
+                        unit_count=unit_count))
 
     @staticmethod
     def destroy_instance(instance_id, environment_id):
@@ -52,16 +65,13 @@ class InstanceStatsServices(object):
             instance.save(unit)
 
     @staticmethod
-    def get_environment_stats(environment_id, instance_id=None):
+    def get_aggregated_stats(environment_id):
         unit = db_session.get_session()
         now = timeutils.utcnow_ts()
         query = unit.query(models.Instance.instance_type, func.sum(
             func.coalesce(models.Instance.destroyed, now) -
             models.Instance.created), func.count()).filter(
                 models.Instance.environment_id == environment_id)
-        if instance_id is not None:
-            query = query.filter(
-                models.Instance.instance_id == instance_id)
 
         res = query.group_by(models.Instance.instance_type).all()
 
@@ -69,4 +79,26 @@ class InstanceStatsServices(object):
                 'type': int(record[0]),
                 'duration': int(record[1]),
                 'count': int(record[2])
+                } for record in res]
+
+    @staticmethod
+    def get_raw_environment_stats(environment_id, instance_id=None):
+        unit = db_session.get_session()
+        now = timeutils.utcnow_ts()
+        query = unit.query(models.Instance).filter(
+            models.Instance.environment_id == environment_id)
+
+        if instance_id:
+            query = query.filter(models.Instance.instance_id == instance_id)
+
+        res = query.all()
+
+        return [{
+                'type': record.instance_type,
+                'duration': (record.destroyed or now) - record.created,
+                'type_name': record.type_name,
+                'unit_count': record.unit_count,
+                'instance_id': record.instance_id,
+                'type_title': record.type_title,
+                'active': True if not record.destroyed else False
                 } for record in res]
