@@ -7,10 +7,10 @@ Templates:
     host:
       ?:
         type: io.murano.services.windows.Host
-        adminPassword: $.serviceConfiguration.adminPassword
-        name: interpolate($.serviceConfiguration.unitNamingPattern, 1)
-        flavor: $.instanceConfiguration.flavor
-        image: $.instanceConfiguration.osImage
+      adminPassword: $.serviceConfiguration.adminPassword
+      name: interpolate($.serviceConfiguration.unitNamingPattern, 1)
+      flavor: $.instanceConfiguration.flavor
+      image: $.instanceConfiguration.osImage
 
   secondaryController:
     ?:
@@ -18,10 +18,10 @@ Templates:
     host:
       ?:
         type: io.murano.services.windows.Host
-        adminPassword: $.serviceConfiguration.adminPassword
-        name: interpolate($.serviceConfiguration.unitNamingPattern, $index + 1)
-        flavor: $.instanceConfiguration.flavor
-        image: $.instanceConfiguration.osImage
+      adminPassword: $.serviceConfiguration.adminPassword
+      name: interpolate($.serviceConfiguration.unitNamingPattern, $index + 1)
+      flavor: $.instanceConfiguration.flavor
+      image: $.instanceConfiguration.osImage
 
 Application:
   ?:
