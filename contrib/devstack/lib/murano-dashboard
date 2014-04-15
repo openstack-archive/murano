@@ -24,6 +24,7 @@ source $TOP_DIR/lib/horizon
 # --------
 
 HORIZON_CONFIG=${HORIZON_CONFIG:-$HORIZON_DIR/openstack_dashboard/settings.py}
+HORIZON_LOCAL_CONFIG=${HORIZON_LOCAL_CONFIG:-$HORIZON_DIR/openstack_dashboard/local/local_settings.py}
 
 # Set up default repos
 MURANO_DASHBOARD_REPO=${MURANO_DASHBOARD_REPO:-${GIT_BASE}/stackforge/murano-dashboard.git}
@@ -34,43 +35,34 @@ MURANO_PYTHONCLIENT_REPO=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/stackforge/pyth
 MURANO_PYTHONCLIENT_BRANCH=${MURANO_PYTHONCLIENT_BRANCH:-$MURANO_BRANCH}
 MURANO_PYTHONCLIENT_DIR=$DEST/murano-pythonclient
 
-MURANO_METADATACLIENT_REPO=${MURANO_METADATACLIENT_REPO:-${GIT_BASE}/stackforge/murano-metadataclient.git}
-MURANO_METADATACLIENT_BRANCH=${MURANO_METADATACLIENT_BRANCH:-$MURANO_BRANCH}
-MURANO_METADATACLIENT_DIR=$DEST/murano-metadataclient
-
 # Set up default directories
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
 MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
-
-# Murano metadata endpoint
-MURANO_METADATA_PROTOCOL='http'
-MURANO_METADATA_HOST=${MURANO_METADATA_HOST:-'localhost'}
-MURANO_METADATA_PORT=${MURANO_METADATA_PORT:-8084}
-
-MURANO_ADVNET_MAX_HOSTS=${MURANO_ADVNET_MAX_HOSTS:-250}
-MURANO_ADVNET_MAX_ENVS=${MURANO_ADVNET_MAX_ENVS:-100}
-MURANO_ADVNET_ENV_NETWORK=${MURANO_ADVNET_ENV_NETWORK:-'10.0.0.0'}
-MURANO_ADVNET_TOPOLOGY=${MURANO_ADVNET_TOPOLOGY:-'routed'}
 
 MURANO_DASHBOARD_CACHE_DIR=${MURANO_DASHBOARD_CACHE_DIR:-/tmp/murano}
 
 # Functions
 # ---------
 
-function insert_murano_configuration() {
-    local pattern="$1"
+function insert_config_block() {
+    local target_file="$1"
     local insert_file="$2"
-    local target_file="$3"
+    local pattern="$3"
 
-    sed -ne "/$pattern/r  $insert_file" -e 1x  -e '2,${x;p}' -e '${x;p}' -i $target_file
+    if [[ -z "$pattern" ]]; then
+        cat "$insert_file" >> "$target_file"
+    else
+        sed -ne "/$pattern/r  $insert_file" -e 1x  -e '2,${x;p}' -e '${x;p}' -i "$target_file"
+    fi
 }
 
 
-function remove_murano_configuration() {
+function remove_config_block() {
     local config_file="$1"
+    local label="$2"
 
-    if [[ -f "$config_file" ]]; then
-        sed -e '/^#MURANO_CONFIG_SECTION_BEGIN/,/^#MURANO_CONFIG_SECTION_END/ d' -i "$config_file"
+    if [[ -f "$config_file" ]] && [[ -n "$label" ]]; then
+        sed -e "/^#${label}_BEGIN/,/^#${label}_END/ d" -i "$config_file"
     fi
 }
 
@@ -80,16 +72,25 @@ function remove_murano_configuration() {
 
 # configure_murano_dashboard() - Set config files, create data dirs, etc
 function configure_murano_dashboard() {
+    remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
+
+    configure_settings_py
+    configure_local_settings_py
+
+    restart_service $APACHE_NAME
+}
+
+
+function configure_settings_py() {
     local horizon_config_part=$(mktemp)
 
     mkdir_chown_stack "$MURANO_DASHBOARD_CACHE_DIR"
 
-    # Opening Murano Configuration Section
+    # Write changes for dashboard config to a separate file
     cat << EOF >> "$horizon_config_part"
 
 #MURANO_CONFIG_SECTION_BEGIN
 #-------------------------------------------------------------------------------
-
 METADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'
 DATABASES = {
     'default': {
@@ -101,20 +102,20 @@ SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 HORIZON_CONFIG['dashboards'] += ('murano',)
 INSTALLED_APPS += ('muranodashboard','floppyforms',)
 MIDDLEWARE_CLASSES += ('muranodashboard.middleware.ExceptionMiddleware',)
-
-ADVANCED_NETWORKING_CONFIG = {
-    'max_environments': $MURANO_ADVNET_MAX_ENVS,
-    'max_hosts': $MURANO_ADVNET_MAX_HOSTS,
-    'env_ip_template': '$MURANO_ADVNET_ENV_NETWORK'
-}
-NETWORK_TOPOLOGY = '$MURANO_ADVNET_TOPOLOGY'
-
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
 
 EOF
 
-    insert_murano_configuration "from openstack_dashboard import policy" "$horizon_config_part" "$HORIZON_CONFIG"
+    # Insert changes into dashboard config before the line matching the pattern
+    insert_config_block "$HORIZON_CONFIG" "$horizon_config_part" "from openstack_dashboard import policy"
+}
+
+
+function configure_local_settings_py() {
+    if [[ -f "$HORIZON_LOCAL_CONFIG" ]]; then
+        sed -e "s/\(^\s*OPENSTACK_HOST\s*=\).*$/\1 '$HOST_IP'/" -i "$HORIZON_LOCAL_CONFIG"
+    fi
 }
 
 
@@ -136,16 +137,13 @@ function init_murano_dashboard() {
 function install_murano_dashboard() {
     echo_summary "Install Murano Dashboard"
 
-    # Keep this until it appears in global requirements.
-    sudo pip install django-floppyforms>=1.1
-    sudo pip install bunch
-    sudo pip install yaql==0.2.2
-
     install_murano_pythonclient
-    install_murano_metadataclient
 
     git_clone $MURANO_DASHBOARD_REPO $MURANO_DASHBOARD_DIR $MURANO_DASHBOARD_BRANCH
-    setup_develop $MURANO_DASHBOARD_DIR
+    # TODO(dteselkin): use setup_develop once Murano requirements match with global-requirement.txt
+    # both functions (setup_develop and setup_package) are defined at:
+    # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
+    setup_package $MURANO_DASHBOARD_DIR -e
 }
 
 
@@ -155,17 +153,11 @@ function install_murano_pythonclient() {
 }
 
 
-function install_murano_metadataclient() {
-    #TODO (dteselkin): remove ASAP. For now it's a required dependency for murano-dashboard.
-    git_clone $MURANO_METADATACLIENT_REPO $MURANO_METADATACLIENT_DIR $MURANO_METADATACLIENT_BRANCH
-    setup_develop $MURANO_METADATACLIENT_DIR
-}
-
 # cleanup_murano_dashboard() - Remove residual data files, anything left over from previous
 # runs that a clean run would need to clean up
 function cleanup_murano_dashboard() {
     echo_summary "Cleanup Murano Dashboard"
-    remove_murano_configuration "$HORIZON_CONFIG"
+    remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
 }
 
 
