@@ -147,7 +147,7 @@ auth_url = http://localhost:5000/v2.0
 insecure = False
 
 [murano_opts]
-url = http:/localhost:8082
+url = http://localhost:8082
 # Optional CA cert file to use in SSL connections
 #cacert =
 # Optional PEM-formatted certificate chain file
