@@ -51,6 +51,9 @@ fi
 # ------------------------------
 # service     murano     admin
 function create_murano_accounts() {
+    if ! is_service_enabled key; then
+        return
+    fi
 
     SERVICE_TENANT=$(openstack project list | awk "/ $SERVICE_TENANT_NAME / { print \$2 }")
     ADMIN_ROLE=$(openstack role list | awk "/ admin / { print \$2 }")
