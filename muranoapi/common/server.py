@@ -59,6 +59,9 @@ class ResultEndpoint(object):
             return
 
         environment.description = result
+        environment.description['Objects']['services'] = \
+            environment.description['Objects'].get('applications', [])
+        del environment.description['Objects']['applications']
         environment.networking = result.get('networking', {})
         environment.version += 1
         environment.save(unit)
