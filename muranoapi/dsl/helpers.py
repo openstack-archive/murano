@@ -107,25 +107,26 @@ def merge_lists(list1, list2):
 
 def merge_dicts(dict1, dict2, max_levels=0):
     result = {}
-    for key, value in dict1.items():
-        result[key] = value
+    for key, value1 in dict1.items():
+        result[key] = value1
         if key in dict2:
-            other_value = dict2[key]
-            if type(other_value) != type(value):
+            value2 = dict2[key]
+            if type(value2) != type(value1):
+                if (isinstance(value1, types.StringTypes) and
+                        isinstance(value2, types.StringTypes)):
+                    continue
                 raise TypeError()
-            if max_levels != 1 and isinstance(
-                    other_value, types.DictionaryType):
+            if max_levels != 1 and isinstance(value2, types.DictionaryType):
                 result[key] = merge_dicts(
-                    value, other_value,
+                    value1, value2,
                     0 if max_levels == 0 else max_levels - 1)
-            elif max_levels != 1 and isinstance(
-                    other_value, types.ListType):
-                result[key] = merge_lists(value, other_value)
+            elif max_levels != 1 and isinstance(value2, types.ListType):
+                result[key] = merge_lists(value1, value2)
             else:
-                result[key] = other_value
-    for key, value in dict2.items():
+                result[key] = value2
+    for key, value1 in dict2.items():
         if key not in result:
-            result[key] = value
+            result[key] = value1
     return result
 
 
