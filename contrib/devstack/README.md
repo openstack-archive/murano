@@ -4,6 +4,7 @@ To install:
 
     $ DEVSTACK_DIR=.../path/to/devstack
     $ cp lib/murano ${DEVSTACK_DIR}/lib
+    $ cp lib/murano-dashboard ${DEVSTACK_DIR}/lib
     $ cp extras.d/70-murano.sh ${DEVSTACK_DIR}/extras.d
 
 To configure Devstack to run Murano:
