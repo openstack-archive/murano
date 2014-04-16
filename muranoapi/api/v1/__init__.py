@@ -28,7 +28,8 @@ PKG_PARAMS_MAP = {'display_name': 'name',
                   'package_type': 'type',
                   'description': 'description',
                   'author': 'author',
-                  'classes': 'class_definitions'}
+                  'classes': 'class_definitions',
+                  'tags': 'tags'}
 
 
 def get_draft(environment_id=None, session_id=None):

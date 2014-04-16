@@ -36,6 +36,7 @@ def load(package, yaml_content):
     package._classes = yaml_content.get('Classes')
     package._ui = yaml_content.get('UI', 'ui.yaml')
     package._logo = yaml_content.get('Logo')
+    package._tags = yaml_content.get('Tags')
 
 
 def _check_full_name(full_name):
