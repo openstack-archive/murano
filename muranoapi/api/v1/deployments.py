@@ -120,4 +120,8 @@ def set_dep_state(deployment, unit):
             deployment.state = 'running_w_warnings'
         else:
             deployment.state = 'running'
+
+    deployment.description['services'] = deployment.description.get(
+        'applications', [])
+    del deployment.description['applications']
     return deployment
