@@ -36,13 +36,12 @@ from muranoapi import __version_info as version
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = [
-    'sphinx.ext.intersphinx',
-]
+extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
+              'sphinx.ext.coverage', 'sphinx.ext.pngmath',
+              'sphinx.ext.viewcode']
 
-intersphinx_mapping = {
-    'sphinx': ('http://sphinx.pocoo.org', None)
-}
+# Add any paths that contain templates here, relative to this directory.
+templates_path = ['_templates']
 
 # The suffix of source filenames.
 source_suffix = '.rst'
@@ -74,7 +73,15 @@ show_authors = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme = 'default'
+html_theme_path = ['.']
+html_theme = '_theme'
+
+# Custom sidebar templates, maps document names to template names.
+html_sidebars = {
+    'index':    ['sidebarlinks.html', 'localtoc.html', 'searchbox.html', 'sourcelink.html'],
+    '**':       ['localtoc.html', 'relations.html',
+                 'searchbox.html', 'sourcelink.html']
+}
 
 # -- Options for man page output --------------------------------------------
 
