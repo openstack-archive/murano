@@ -34,6 +34,8 @@ MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
 MURANO_SERVICE_PORT=${MURANO_SERVICE_PORT:-8082}
 MURANO_SERVICE_PROTOCOL=${MURANO_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
+MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
+
 # Support entry points installation of console scripts
 if [[ -d $MURANO_DIR/bin ]]; then
     MURANO_BIN_DIR=$MURANO_DIR/bin
@@ -56,7 +58,7 @@ function create_murano_accounts() {
     ADMIN_ROLE=$(openstack role list | awk "/ admin / { print \$2 }")
 
     MURANO_USER=$(openstack user create \
-        murano \
+        $MURANO_ADMIN_USER \
         --password "$SERVICE_PASSWORD" \
         --project $SERVICE_TENANT \
         --email murano@example.com \
@@ -114,7 +116,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
     iniset $MURANO_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
     iniset $MURANO_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
-    iniset $MURANO_CONF_FILE keystone_authtoken admin_user murano
+    iniset $MURANO_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
     iniset $MURANO_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
 
     # configure the rpc service.
@@ -125,6 +127,9 @@ function configure_murano {
 
     # configure the database.
     iniset $MURANO_CONF_FILE database connection `database_connection_url murano`
+
+    # Configure keystone auth url
+    iniset $MURANO_CONF_FILE keystone auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
 }
 
 
