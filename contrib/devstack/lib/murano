@@ -24,9 +24,6 @@ set -o xtrace
 MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/stackforge/murano-api.git}
 MURANO_BRANCH=${MURANO_BRANCH:-master}
 
-MURANO_COMMON_REPO=${MURANO_COMMON_REPO:-${GIT_BASE}/stackforge/murano-common.git}
-MURANO_COMMON_DIR=$DEST/murano-common
-
 # Set up default directories
 MURANO_DIR=$DEST/murano-api
 MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
