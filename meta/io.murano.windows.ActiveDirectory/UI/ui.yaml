@@ -8,7 +8,7 @@ Templates:
       ?:
         type: io.murano.services.windows.Host
       adminPassword: $.serviceConfiguration.adminPassword
-      name: interpolate($.serviceConfiguration.unitNamingPattern, 1)
+      name: generateHostname($.serviceConfiguration.unitNamingPattern, 1)
       flavor: $.instanceConfiguration.flavor
       image: $.instanceConfiguration.osImage
 
@@ -19,7 +19,7 @@ Templates:
       ?:
         type: io.murano.services.windows.Host
       adminPassword: $.serviceConfiguration.adminPassword
-      name: interpolate($.serviceConfiguration.unitNamingPattern, $index + 1)
+      name: generateHostname($.serviceConfiguration.unitNamingPattern, $index + 1)
       flavor: $.instanceConfiguration.flavor
       image: $.instanceConfiguration.osImage
 
@@ -44,7 +44,7 @@ Forms:
             Enter a desired name for a new domain. This name should fit to
             DNS Domain Name requirements: it should contain
             only A-Z, a-z, 0-9, (.) and (-) and should not end with a dash.
-            DNS server will be automatically set up on each of the Domain 
+            DNS server will be automatically set up on each of the Domain
             Controller instances. Note: Only first 15 characters or characters
             before first period is used as NetBIOS name.
           minLength: 2
@@ -75,8 +75,8 @@ Forms:
           type: integer
           label: Instance Count
           description: >-
-            You can create several Active Directory instances by setting 
-            instance number larger than one. One primary Domain Controller 
+            You can create several Active Directory instances by setting
+            instance number larger than one. One primary Domain Controller
             and a few secondary DCs will be created.
           minValue: 1
           maxValue: 100
@@ -95,12 +95,12 @@ Forms:
           descriptionTitle: Passwords
           description: >-
             Windows requires strong password for service administration.
-            Your password should have at least one letter in each 
-            register, a number and a special character. Password length should be 
+            Your password should have at least one letter in each
+            register, a number and a special character. Password length should be
             a minimum of 7 characters.
-    
-            Once you forget your password you won't be able to 
-            operate  the service until recovery password would be entered. So it's 
+
+            Once you forget your password you won't be able to
+            operate  the service until recovery password would be entered. So it's
             better for Recovery and Administrator password to be different.
         - name: recoveryPassword
           type: password
@@ -120,8 +120,8 @@ Forms:
           label: Hostname template
           description: >-
             For your convenience all instance hostnames can be named
-            in the same way. Enter a name and use # character for incrementation. 
-            For example, host# turns into host1, host2, etc. Please follow Windows 
+            in the same way. Enter a name and use # character for incrementation.
+            For example, host# turns into host1, host2, etc. Please follow Windows
             hostname restrictions.
           required: false
           regexpValidator: '^(([a-zA-Z0-9#][a-zA-Z0-9-#]*[a-zA-Z0-9#])\.)*([A-Za-z0-9#]|[A-Za-z0-9#][A-Za-z0-9-#]*[A-Za-z0-9#])$'
@@ -148,7 +148,7 @@ Forms:
           type: flavor
           label: Instance flavor
           description: >-
-            Select registered in Openstack flavor. Consider that service performance 
+            Select registered in Openstack flavor. Consider that service performance
             depends on this parameter.
           required: false
         - name: osImage
@@ -156,7 +156,7 @@ Forms:
           imageType: windows
           label: Instance image
           description: >-
-            Select valid image for a service. Image should already be prepared and 
+            Select valid image for a service. Image should already be prepared and
             registered in glance.
         - name: availabilityZone
           type: azone
