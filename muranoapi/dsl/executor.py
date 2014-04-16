@@ -175,8 +175,10 @@ class MuranoDslExecutor(object):
             if name not in parameter_values:
                 if not arg_spec.has_default:
                     raise TypeError()
+                parameter_context = self._create_context(
+                    this, this.type, context)
                 parameter_values[name] = arg_spec.validate(
-                    helpers.evaluate(arg_spec.default, context),
+                    helpers.evaluate(arg_spec.default, parameter_context),
                     this, self._root_context, self._object_store)
 
         return parameter_values
