@@ -3,7 +3,7 @@ Version: 2
 Templates:
   primaryController:
     ?:
-      type: io.murano.services.windows.activeDirectory.PrimaryController
+      type: io.murano.windows.activeDirectory.PrimaryController
     host:
       ?:
         type: io.murano.services.windows.Host
@@ -14,7 +14,7 @@ Templates:
 
   secondaryController:
     ?:
-      type: io.murano.services.windows.activeDirectory.SecondaryController
+      type: io.murano.windows.activeDirectory.SecondaryController
     host:
       ?:
         type: io.murano.services.windows.Host
@@ -25,7 +25,7 @@ Templates:
 
 Application:
   ?:
-    type: io.murano.services.windows.activeDirectory.ActiveDirectory
+    type: io.murano.windows.activeDirectory.ActiveDirectory
   name: $.serviceConfiguration.name
   primaryController: $primaryController
   secondaryControllers: repeat($secondaryController, $.serviceConfiguration.dcInstances - 1)
