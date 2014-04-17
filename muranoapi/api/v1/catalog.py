@@ -130,7 +130,7 @@ class Controller(object):
         return package.to_dict()
 
     def search(self, req):
-        filters = _get_filters(req.GET._items)
+        filters = _get_filters(req.GET.items())
         packages = db_api.package_search(filters, req.context)
         return {"packages": [package.to_dict() for package in packages]}
 
