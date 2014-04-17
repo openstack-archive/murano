@@ -14,6 +14,7 @@ httplib2>=0.7.5
 kombu>=2.4.8
 lockfile>=0.8
 pycrypto>=2.6
+psutil>=1.1.1
 iso8601>=0.1.9
 six>=1.5.2
 netaddr>=0.7.6

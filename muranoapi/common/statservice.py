@@ -14,6 +14,7 @@
 
 import eventlet
 import json
+import psutil
 import socket
 import time
 
@@ -68,7 +69,9 @@ class StatsCollectingService(service.Service):
                                       v1.stats.request_count,
                                       v1.stats.error_count,
                                       v1.stats.average_time,
-                                      v1.stats.requests_per_tenant)
+                                      v1.stats.requests_per_tenant,
+                                      psutil.NUM_CPUS,
+                                      psutil.cpu_percent())
                 return
 
             now = time.time()
@@ -85,6 +88,7 @@ class StatsCollectingService(service.Service):
                                                    requests_per_tenant)
             stats.requests_per_second = requests_per_second
             stats.errors_per_second = errors_per_second
+            stats.cpu_percent = psutil.cpu_percent()
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
             LOG.error(_("Failed to get statistics object "
