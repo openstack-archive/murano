@@ -36,6 +36,15 @@ MURANO_SERVICE_PROTOCOL=${MURANO_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
 MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
 
+# MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
+# This is not required if all OpenStack services are deployed by devstack scripts
+#   on a single node. In this case '/' virtual host (which is the default) is enough.
+# The problem arise when Murano installed in 'devbox' mode, allowing two or more
+#   devboxes to use one common OpenStack host. In this case it's better devboxes
+#   use separated virtual hosts, to avoid conflicts between Murano services.
+# This couldn't be done using exitsting variables, so that's why this variable was added.
+MURANO_RABBIT_VHOST=${MURANO_RABBIT_VHOST:-''}
+
 # Support entry points installation of console scripts
 if [[ -d $MURANO_DIR/bin ]]; then
     MURANO_BIN_DIR=$MURANO_DIR/bin
@@ -124,6 +133,11 @@ function configure_murano {
 
     # TODO(ruhe): get rid of this ugly workaround
     inicomment $MURANO_CONF_FILE DEFAULT rpc_backend
+
+    # Set non-default rabbit virtual host if required
+    if [[ -n "$MURANO_RABBIT_VHOST" ]]; then
+        iniset $MURANO_CONF_FILE DEFAULT rabbit_virtual_host $MURANO_RABBIT_VHOST
+    fi
 
     # configure the database.
     iniset $MURANO_CONF_FILE database connection `database_connection_url murano`
