@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import imghdr
+import io
 import os
 import shutil
 import sys
@@ -21,7 +22,6 @@ import tempfile
 import yaml
 import zipfile
 
-from sqlalchemy.util import byte_buffer
 
 import muranoapi.packages.exceptions as e
 import muranoapi.packages.versions.v1
@@ -227,7 +227,7 @@ def _zipdir(path, zipf):
 
 
 def _pack_dir(source_directory):
-    blob = byte_buffer()
+    blob = io.BytesIO()
     zipf = zipfile.ZipFile(blob, mode='w')
     _zipdir(source_directory, zipf)
     zipf.close()
