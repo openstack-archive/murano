@@ -17,7 +17,7 @@ Properties:
 
   agent:
     Contract: $.class(sys:Agent)
-    Type: Runtime
+    Usage: Runtime
 
 
 Workflow:

@@ -13,15 +13,15 @@ Properties:
 
   agentListener:
     Contract: $.class(sys:AgentListener)
-    Type: Runtime
+    Usage: Runtime
 
   stack:
     Contract: $.class(sys:HeatStack)
-    Type: Runtime
+    Usage: Runtime
 
   instanceNotifier:
     Contract: $.class(sys:InstanceNotifier)
-    Type: Runtime
+    Usage: Runtime
 
 Workflow:
   initialize:

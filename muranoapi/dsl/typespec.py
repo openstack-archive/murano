@@ -15,7 +15,7 @@
 import muranoapi.dsl.type_scheme as type_scheme
 
 
-class PropertyTypes(object):
+class PropertyUsages(object):
     In = 'In'
     Out = 'Out'
     InOut = 'InOut'
@@ -31,10 +31,10 @@ class Spec(object):
         self._contract = type_scheme.TypeScheme(declaration['Contract'])
         self._default = declaration.get('Default')
         self._has_default = 'Default' in declaration
-        self._type = declaration.get('Type') or 'In'
-        if self._type not in PropertyTypes.All:
+        self._usage = declaration.get('Usage') or 'In'
+        if self._usage not in PropertyUsages.All:
             raise SyntaxError('Unknown type {0}. Must be one of ({1})'.format(
-                self._type, ', '.join(PropertyTypes.All)))
+                self._usage, ', '.join(PropertyUsages.All)))
 
     def validate(self, value, this, context, object_store, default=None):
         if default is None:
@@ -51,8 +51,8 @@ class Spec(object):
         return self._has_default
 
     @property
-    def type(self):
-        return self._type
+    def usage(self):
+        return self._usage
 
 
 class PropertySpec(Spec):
