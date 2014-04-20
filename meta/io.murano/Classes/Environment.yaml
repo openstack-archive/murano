@@ -33,5 +33,9 @@ Workflow:
   deploy:
     Body:
       - $.agentListener.start()
-      - $.applications.pselect($.deploy())
+      - If: len($.applications) = 0
+        Then:
+          - $.stack.delete()
+        Else:
+          - $.applications.pselect($.deploy())
       - $.agentListener.stop()
