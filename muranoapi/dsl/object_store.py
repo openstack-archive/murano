@@ -22,6 +22,7 @@ class ObjectStore(object):
         self._class_loader = class_loader
         self._parent_store = parent_store
         self._store = {}
+        self._designer_attributes_store = {}
         self._initializing = False
 
     @property
@@ -64,6 +65,8 @@ class ObjectStore(object):
             obj = class_obj.new(parent, self, context=context,
                                 object_id=object_id, defaults=defaults)
             self._store[object_id] = obj
+            self._designer_attributes_store[object_id] = \
+                ObjectStore._get_designer_attributes(system_key)
 
         argspec = inspect.getargspec(obj.initialize).args
         if '_context' in argspec:
@@ -88,3 +91,11 @@ class ObjectStore(object):
             for cls, method in methods:
                 cls.invoke(method, executor, obj, {})
         return obj
+
+    @staticmethod
+    def _get_designer_attributes(header):
+        return dict((k, v) for k, v in header.iteritems()
+                    if str(k).startswith('_'))
+
+    def designer_attributes(self, object_id):
+        return self._designer_attributes_store.get(object_id, {})

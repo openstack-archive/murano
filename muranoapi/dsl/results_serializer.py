@@ -22,19 +22,28 @@ class ObjRef(object):
         self.ref_obj = obj
 
 
+def _serialize_tree(root_object, designer_attributes):
+    serialized_objects = set()
+    tree = _pass1_serialize(
+        root_object, None, serialized_objects, designer_attributes)
+    _pass2_serialize(tree, serialized_objects)
+    return tree, serialized_objects
+
+
 def serialize(root_object, executor):
     if root_object is None:
         tree = None
+        tree_copy = None
         attributes = []
     else:
-        serialized_objects = set()
-        tree = _pass1_serialize(root_object, None, serialized_objects)
-        _pass2_serialize(tree, serialized_objects)
+        tree, serialized_objects = _serialize_tree(
+            root_object, executor.object_store.designer_attributes)
+        tree_copy, _ = _serialize_tree(root_object, None)
         attributes = executor.attribute_store.serialize(serialized_objects)
 
     return {
         'Objects': tree,
-        'ObjectsCopy': tree,
+        'ObjectsCopy': tree_copy,
         'Attributes': attributes
     }
 
@@ -47,7 +56,8 @@ def _cmp_objects(obj1, obj2):
     return obj1.object_id == obj2.object_id
 
 
-def _pass1_serialize(value, parent, serialized_objects):
+def _pass1_serialize(value, parent, serialized_objects,
+                     designer_attributes_getter):
     if isinstance(value, (types.StringTypes, types.IntType, types.FloatType,
                           types.BooleanType, types.NoneType)):
         return value
@@ -57,20 +67,27 @@ def _pass1_serialize(value, parent, serialized_objects):
             return ObjRef(value)
         else:
             result = value.to_dictionary()
+            if designer_attributes_getter is not None:
+                result['?'].update(designer_attributes_getter(value.object_id))
             serialized_objects.add(value.object_id)
-            return _pass1_serialize(result, value, serialized_objects)
+            return _pass1_serialize(
+                result, value, serialized_objects, designer_attributes_getter)
 
     elif isinstance(value, types.DictionaryType):
         result = {}
         for d_key, d_value in value.iteritems():
             result_key = str(d_key)
             result[result_key] = _pass1_serialize(
-                d_value, parent, serialized_objects)
+                d_value, parent, serialized_objects,
+                designer_attributes_getter)
         return result
     elif isinstance(value, types.ListType):
-        return [_pass1_serialize(t, parent, serialized_objects) for t in value]
+        return [_pass1_serialize(t, parent, serialized_objects,
+                                 designer_attributes_getter) for t in value]
     elif isinstance(value, types.TupleType):
-        return _pass1_serialize(list(value), parent, serialized_objects)
+        return _pass1_serialize(
+            list(value), parent, serialized_objects,
+            designer_attributes_getter)
     else:
         raise ValueError()
 
