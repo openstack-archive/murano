@@ -23,7 +23,7 @@ Workflow:
     Arguments:
     Body:
       - $.super($.deploy())
-      - $resources: new(io.murano.system.Resources)
+      - $resources: new(sys:Resources)
       - $template: $resources.json('CreatePrimaryDC.template').bind(dict(
             domain => $.domain.name,
             recoveryPassword => $.recoveryPassword
