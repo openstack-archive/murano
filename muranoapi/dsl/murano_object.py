@@ -130,7 +130,7 @@ class MuranoObject(object):
         if key in self.__type.properties:
             spec = self.__type.get_property(key)
             if caller_class is not None \
-                    and (spec.type not in typespec.PropertyTypes.Writable
+                    and (spec.usage not in typespec.PropertyUsages.Writable
                          or not caller_class.is_compatible(self)):
                 raise exceptions.NoWriteAccess(key)
 
@@ -174,7 +174,7 @@ class MuranoObject(object):
             for property_name in self.type.properties:
                 if property_name in self.__properties:
                     spec = self.type.get_property(property_name)
-                    if spec.type != typespec.PropertyTypes.Runtime:
+                    if spec.usage != typespec.PropertyUsages.Runtime:
                         result[property_name] = \
                             self.__properties[property_name]
         return result
