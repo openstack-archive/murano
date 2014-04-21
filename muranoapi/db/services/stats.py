@@ -39,7 +39,8 @@ class Statistics(object):
 
     @staticmethod
     def create(host, request_count, error_count,
-               average_response_time, request_per_tenant):
+               average_response_time, request_per_tenant, cpu_count,
+               cpu_percent):
         stats = m.ApiStats()
         stats.host = host
         stats.request_count = request_count
@@ -48,6 +49,8 @@ class Statistics(object):
         stats.request_per_tenant = request_per_tenant
         stats.request_per_second = 0.0
         stats.errors_per_second = 0.0
+        stats.cpu_count = cpu_count
+        stats.cpu_percent = cpu_percent
 
         db = db_session.get_session()
         stats.save(db)

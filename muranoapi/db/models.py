@@ -206,6 +206,8 @@ class ApiStats(BASE, ModificationsTrackedObject):
     requests_per_tenant = sa.Column(sa.Text())
     requests_per_second = sa.Column(sa.Float())
     errors_per_second = sa.Column(sa.Float())
+    cpu_count = sa.Column(sa.Integer())
+    cpu_percent = sa.Column(sa.Float())
 
     def to_dict(self):
         dictionary = super(ApiStats, self).to_dict()
