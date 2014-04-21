@@ -59,9 +59,9 @@ class PackageLoader(six.with_metaclass(abc.ABCMeta)):
 
 
 class ApiPackageLoader(PackageLoader):
-    def __init__(self, token_id):
+    def __init__(self, token_id, tenant_id):
         self._cache_directory = self._get_cache_directory()
-        self._client = self._get_murano_client(token_id)
+        self._client = self._get_murano_client(token_id, tenant_id)
 
     def get_package_by_class(self, name):
         filter_opts = {'class_name': name, 'limit': 1}
@@ -92,7 +92,7 @@ class ApiPackageLoader(PackageLoader):
         return directory
 
     @staticmethod
-    def _get_murano_client(token_id):
+    def _get_murano_client(token_id, tenant_id):
         murano_settings = config.CONF.murano
 
         endpoint_url = murano_settings.url
@@ -106,8 +106,14 @@ class ApiPackageLoader(PackageLoader):
                 insecure=keystone_settings.insecure
             )
 
-            endpoint_url = keystone_client.url_for(
-                service_type='murano',
+            if not keystone_client.authenticate(
+                    auth_url=keystone_settings.auth_url,
+                    tenant_id=tenant_id,
+                    token=token_id):
+                raise muranoclient_exc.HTTPUnauthorized()
+
+            endpoint_url = keystone_client.service_catalog.url_for(
+                service_type='application_catalog',
                 endpoint_type=murano_settings.endpoint_type
             )
 
