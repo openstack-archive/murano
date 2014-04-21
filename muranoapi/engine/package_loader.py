@@ -200,11 +200,12 @@ class DirectoryPackageLoader(PackageLoader):
 
     def _build_index(self):
         for entry in os.listdir(self._base_path):
-            if not os.path.isdir(entry) or entry in self._processed_entries:
+            folder = os.path.join(self._base_path, entry)
+            if not os.path.isdir(folder) or entry in self._processed_entries:
                 continue
 
             try:
-                package = app_pkg.load_from_dir(entry, preload=True,
+                package = app_pkg.load_from_dir(folder, preload=True,
                                                 loader=YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
                 LOG.exception('Unable to load package from path: '
