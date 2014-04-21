@@ -96,8 +96,7 @@ class HeatStack(murano_object.MuranoObject):
     def reload(self):
         self._template = None
         self._parameters.clear()
-        self._load()
-        return self._template
+        return self.current()
 
     def setTemplate(self, template):
         self._template = template
