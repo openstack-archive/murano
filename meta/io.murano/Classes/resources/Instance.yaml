@@ -46,7 +46,7 @@ Workflow:
     Body:
       - $template: $.environment.stack.current()
       - $patchBlock:
-          op: remove,
+          op: remove
           path: format('/Resources/{0}', $.name)
       - $template: patch($template, $patchBlock)
       - $.environment.stack.setTemplate($template)
