@@ -31,15 +31,6 @@ SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
 LOG = logging.getLogger(__name__)
 
 
-def category_get_names():
-    session = db_session.get_session()
-    categories = []
-    for row in session.query(models.Category.name).all():
-        for name in row:
-            categories.append(name)
-    return categories
-
-
 def _package_get(package_id, session):
     package = session.query(models.Package).get(package_id)
     if not package:
@@ -390,3 +381,23 @@ def package_delete(package_id):
 def categories_list():
     session = db_session.get_session()
     return session.query(models.Category).all()
+
+
+def category_get_names():
+    session = db_session.get_session()
+    categories = []
+    for row in session.query(models.Category.name).all():
+        for name in row:
+            categories.append(name)
+    return categories
+
+
+def category_add(category_name):
+    session = db_session.get_session()
+    category = models.Category()
+
+    with session.begin():
+        category.update({'name': category_name})
+        category.save(session)
+
+    return category
