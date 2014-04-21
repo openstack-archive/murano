@@ -34,4 +34,5 @@ Workflow:
                          unitCount => len(secondaryControllers) + 1)
 
   destroy:
-    - $.reportDestroyed()
+    Body:
+      - $.reportDestroyed()
