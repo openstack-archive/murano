@@ -18,7 +18,8 @@ from muranoapi.db import session as db_session
 stats = None
 
 SUPPORTED_PARAMS = ('order_by', 'category', 'marker', 'tag', 'class_name',
-                    'limit', 'type', 'fqn', 'category', 'owned', 'search')
+                    'limit', 'type', 'fqn', 'category', 'owned', 'search',
+                    'include_disabled')
 LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
 ORDER_VALUES = ('fqn', 'name', 'created')
 PKG_PARAMS_MAP = {'display_name': 'name',
