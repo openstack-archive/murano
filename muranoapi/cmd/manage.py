@@ -58,7 +58,7 @@ def _do_import_package(_dir, categories):
         #'tags': pkg.tags,
         'logo': pkg.logo,
         'ui_definition': pkg.raw_ui,
-        'class_definition': pkg.classes,
+        'class_definitions': pkg.classes,
         'archive': pkg.blob,
         'categories': categories or []
     }
