@@ -47,7 +47,8 @@ class TaskProcessingEndpoint(object):
         env.token = task['token']
         env.tenant_id = task['tenant_id']
 
-        with package_loader.ApiPackageLoader(task['token']) as pkg_loader:
+        with package_loader.ApiPackageLoader(env.token, env.tenant_id) as \
+                pkg_loader:
             class_loader = package_class_loader.PackageClassLoader(pkg_loader)
             system_objects.register(class_loader, pkg_loader)
 
