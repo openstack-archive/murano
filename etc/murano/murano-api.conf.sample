@@ -14,6 +14,9 @@ bind_port = 8082
 # Directory to store application package cache
 # packages_cache =
 
+# Maximum application package size, Mb
+package_size_limit = 5
+
 # Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-api.log
 

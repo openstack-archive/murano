@@ -98,6 +98,8 @@ metadata_dir = cfg.StrOpt('metadata-dir', default='./meta')
 temp_pkg_cache = os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
 packages_cache = cfg.StrOpt('packages-cache', default=temp_pkg_cache)
 
+package_size_limit = cfg.IntOpt('package_size_limit', default=5)
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
@@ -111,6 +113,7 @@ CONF.register_opt(cfg.StrOpt('file_server'))
 CONF.register_cli_opt(cfg.StrOpt('murano_metadata_url'))
 CONF.register_cli_opt(metadata_dir)
 CONF.register_cli_opt(packages_cache)
+CONF.register_cli_opt(package_size_limit)
 CONF.register_opts(stats_opt, group='stats')
 
 CONF.import_opt('connection',
