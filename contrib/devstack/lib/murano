@@ -172,6 +172,7 @@ function install_murano() {
 # start_murano() - Start running processes, including screen
 function start_murano() {
     screen_it murano-api "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano-api.conf"
+    screen_it murano-engine "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano-api.conf"
 }
 
 
