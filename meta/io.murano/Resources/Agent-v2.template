@@ -1,7 +1,7 @@
 [DEFAULT]
 debug=True
 verbose=True
-log_file = /var/log/murano-agnet.log
+log_file = /var/log/murano-agent.log
 
 storage=/var/murano/plans
 
