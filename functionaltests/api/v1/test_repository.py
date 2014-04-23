@@ -13,13 +13,13 @@
 #    under the License.
 
 import os
+import testtools
+import uuid
 import zipfile
 
 from tempest.test import attr
 
-#from tempest import exceptions
-#Need uncomment after fix https://bugs.launchpad.net/murano/+bug/1309413
-#it will be use in tearDown method
+from tempest import exceptions
 
 from functionaltests.api import base
 
@@ -109,6 +109,62 @@ class TestRepositorySanity(TestCaseRepository):
 
         self.assertEqual(200, resp.status)
         self.assertEqual(len(packages_list), len(_packages_list))
+
+
+class TestRepositoryNegative(base.TestCase):
+
+    @classmethod
+    def setUpClass(cls):
+        super(TestRepositoryNegative, cls).setUpClass()
+
+        cls.id = uuid.uuid4().hex
+
+    @attr(type='negative')
+    def test_update_package_with_incorrect_id(self):
+
+        post_body = [
+            {
+                "op": "add",
+                "path": "/tags",
+                "value": ["im a test"]
+            }
+        ]
+
+        self.assertRaises(exceptions.NotFound,
+                          self.client.update_package,
+                          self.id,
+                          post_body)
+
+    @attr(type='negative')
+    def test_get_package_with_incorrect_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_package,
+                          self.id)
+
+    @testtools.skip("https://bugs.launchpad.net/murano/+bug/1309413")
+    @attr(type='negative')
+    def test_delete_package_with_incorrect_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.delete_package,
+                          self.id)
+
+    @attr(type='negative')
+    def test_download_package_with_incorrect_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.download_package,
+                          self.id)
+
+    @attr(type='negative')
+    def test_get_ui_definition_with_incorrect_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_ui_definition,
+                          self.id)
+
+    @attr(type='negative')
+    def test_get_logo_with_incorrect_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.client.get_logo,
+                          self.id)
 
 
 class TestRepository(TestCaseRepository):
