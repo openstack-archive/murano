@@ -27,6 +27,7 @@ from muranoapi.dsl import results_serializer
 from muranoapi.engine import environment
 from muranoapi.engine import package_class_loader
 from muranoapi.engine import package_loader
+from muranoapi.engine.system import status_reporter
 import muranoapi.engine.system.system_objects as system_objects
 from muranoapi.openstack.common.gettextutils import _  # noqa
 from muranoapi.openstack.common import log as logging
@@ -46,20 +47,35 @@ class TaskProcessingEndpoint(object):
         env = environment.Environment()
         env.token = task['token']
         env.tenant_id = task['tenant_id']
+        LOG.debug('Processing new task: {0}'.format(task))
+        try:
+            with package_loader.ApiPackageLoader(env.token, env.tenant_id) as \
+                    pkg_loader:
+                class_loader = package_class_loader.PackageClassLoader(
+                    pkg_loader)
+                system_objects.register(class_loader, pkg_loader)
 
-        with package_loader.ApiPackageLoader(env.token, env.tenant_id) as \
-                pkg_loader:
-            class_loader = package_class_loader.PackageClassLoader(pkg_loader)
-            system_objects.register(class_loader, pkg_loader)
+                exc = executor.MuranoDslExecutor(class_loader, env)
+                obj = exc.load(task['model'])
 
-            exc = executor.MuranoDslExecutor(class_loader, env)
-            obj = exc.load(task['model'])
-
-            if obj is not None:
-                obj.type.invoke('deploy', exc, obj, {})
-
-            s_res = results_serializer.serialize(obj, exc)
-            rpc.api().process_result(s_res)
+                try:
+                    if obj is not None:
+                        obj.type.invoke('deploy', exc, obj, {})
+                except Exception as e:
+                    reporter = status_reporter.StatusReporter()
+                    reporter.initialize(obj)
+                    reporter.report_error(obj, '{0}'.format(e))
+                finally:
+                    s_res = results_serializer.serialize(obj, exc)
+                    rpc.api().process_result(s_res)
+        except Exception as e:
+            # TODO(gokrokve) report error here
+            # TODO(slagun) code below needs complete rewrite and redesign
+            msg_env = Environment(task['model']['Objects']['?']['id'])
+            reporter = status_reporter.StatusReporter()
+            reporter.initialize(msg_env)
+            reporter.report_error(msg_env, '{0}'.format(e))
+            rpc.api().process_result(task['model'])
 
 
 def _prepare_rpc_service(server_id):
@@ -76,3 +92,8 @@ def get_rpc_service():
     if RPC_SERVICE is None:
         RPC_SERVICE = _prepare_rpc_service(str(uuid.uuid4()))
     return RPC_SERVICE
+
+
+class Environment:
+    def __init__(self, object_id):
+        self.object_id = object_id
