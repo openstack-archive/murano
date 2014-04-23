@@ -55,7 +55,7 @@ def _do_import_package(_dir, categories):
         # note: we explicitly mark all the imported packages as public,
         # until a parameter added to control visibility scope of a package
         'is_public': True,
-        #'tags': pkg.tags,
+        'tags': pkg.tags,
         'logo': pkg.logo,
         'ui_definition': pkg.raw_ui,
         'class_definitions': pkg.classes,
