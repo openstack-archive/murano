@@ -155,7 +155,7 @@ class HeatStack(murano_object.MuranoObject):
         return {}
 
     def output(self):
-        return self._wait_state(lambda: True)
+        return self._wait_state(lambda status: True)
 
     def push(self):
         if self._applied or self._template is None:
