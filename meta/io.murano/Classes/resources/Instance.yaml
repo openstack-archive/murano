@@ -14,11 +14,12 @@ Properties:
     Contract: $.string().notNull()
   image:
     Contract: $.string().notNull()
-
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
-
+  ipAddresses:
+    Contract: [$.string()]
+    Usage: Out
 
 Workflow:
   initialize:
@@ -38,8 +39,17 @@ Workflow:
                 InstanceType: $.flavor
                 ImageId: $.image
                 UserData: $userData
+          Outputs:
+            format('{0}-PublicIp', $.name):
+              Value:
+                - Fn::GetAtt: [$.name, PublicIp]
+
       - $.environment.stack.updateTemplate($template)
       - $.environment.stack.push()
+
+      - $outputs: $.environment.stack.output()
+      - $.ipAddresses: $outputs.get(format('{0}-PublicIp', $this.name))
+
       - $.environment.instanceNotifier.trackApplication($this)
 
   destroy:
