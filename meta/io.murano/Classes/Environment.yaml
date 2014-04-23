@@ -29,6 +29,7 @@ Workflow:
       - $this.agentListener: new(sys:AgentListener, name => $.name)
       - $this.stack: new(sys:HeatStack, name => $.name)
       - $this.instanceNotifier: new(sys:InstanceNotifier, environment => $this)
+      - $this.reporter: new(sys:StatusReporter, environment => $this)
 
   deploy:
     Body:
