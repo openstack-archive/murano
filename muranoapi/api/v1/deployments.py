@@ -54,11 +54,10 @@ class Controller(object):
             service_id_set = set(request.GET.getall('service_id'))
             environment = deployment.description
             entity_ids = []
-            if 'services' in environment:
-                for service in environment['services']:
-                    if service['?']['id'] in service_id_set:
-                        id_map = utils.build_entity_map(service)
-                        entity_ids = entity_ids + id_map.keys()
+            for service in environment.get('services', []):
+                if service['?']['id'] in service_id_set:
+                    id_map = utils.build_entity_map(service)
+                    entity_ids = entity_ids + id_map.keys()
             if entity_ids:
                 query = query.filter(models.Status.entity_id.in_(entity_ids))
             else:
@@ -80,6 +79,11 @@ def verify_and_get_env(db_session, environment_id, request):
     return environment
 
 
+def _patch_description(description):
+    description['services'] = description.get('applications', [])
+    del description['applications']
+
+
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
     deployment = db_session.query(models.Deployment).get(deployment_id)
     if not deployment:
@@ -90,6 +94,8 @@ def verify_and_get_deployment(db_session, environment_id, deployment_id):
                    ' in environment {1}').format(deployment_id,
                                                  environment_id))
         raise exc.HTTPBadRequest
+
+    _patch_description(deployment.description)
     return deployment
 
 
@@ -121,7 +127,5 @@ def set_dep_state(deployment, unit):
         else:
             deployment.state = 'running'
 
-    deployment.description['services'] = deployment.description.get(
-        'applications', [])
-    del deployment.description['applications']
+    _patch_description(deployment.description)
     return deployment
