@@ -248,3 +248,18 @@ class TestCase(testtools.TestCase):
         return self.client.create_service(environment_id,
                                           session_id,
                                           post_body)
+
+
+class NegativeTestCase(TestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(NegativeTestCase, cls).setUpClass()
+
+        username = CONF.identity.alt_username
+        password = CONF.identity.alt_password
+        tenant_name = CONF.identity.alt_tenant_name
+
+        mgr = clients.Manager(username, password, tenant_name)
+        auth_provider = mgr.get_auth_provider(mgr.get_default_credentials())
+
+        cls.alt_client = MuranoClient(auth_provider)

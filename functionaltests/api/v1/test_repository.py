@@ -111,11 +111,11 @@ class TestRepositorySanity(TestCaseRepository):
         self.assertEqual(len(packages_list), len(_packages_list))
 
 
-class TestRepositoryNegative(base.TestCase):
+class TestRepositoryNegativeNotFound(base.NegativeTestCase):
 
     @classmethod
     def setUpClass(cls):
-        super(TestRepositoryNegative, cls).setUpClass()
+        super(TestRepositoryNegativeNotFound, cls).setUpClass()
 
         cls.id = uuid.uuid4().hex
 
@@ -165,6 +165,84 @@ class TestRepositoryNegative(base.TestCase):
         self.assertRaises(exceptions.NotFound,
                           self.client.get_logo,
                           self.id)
+
+
+class TestRepositoryNegativeForbidden(base.NegativeTestCase,
+                                      TestCaseRepository):
+    @classmethod
+    def setUpClass(cls):
+        super(TestRepositoryNegativeForbidden, cls).setUpClass()
+
+        raise cls.skipException(
+            "https://bugs.launchpad.net/murano/+bug/1312190")
+
+        cls.categorie = cls.client.list_categories()[1]['categories'][0]
+
+        packages_list = cls.client.get_list_packages()[1]
+        for package in packages_list['packages']:
+            if 'Dummy' in package['fully_qualified_name']:
+                cls.client.delete_package(package['id'])
+
+        cls.package = cls.client.upload_package(
+            'testpackage',
+            {
+                "categories": [cls.categorie],
+                "tags": ["windows"],
+                "is_public": False
+            }
+        ).json()
+
+    @classmethod
+    def tearDownClass(cls):
+
+        super(TestRepositoryNegativeForbidden, cls).tearDownClass()
+
+        cls.client.delete_package(cls.package['id'])
+
+    @attr(type='negative')
+    def test_update_package_from_another_tenant(self):
+        post_body = [
+            {
+                "op": "add",
+                "path": "/tags",
+                "value": ["im a test"]
+            }
+        ]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.update_package,
+                          self.package['id'],
+                          post_body)
+
+    @attr(type='negative')
+    def test_get_package_from_another_tenant(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_package,
+                          self.package['id'])
+
+    @attr(type='negative')
+    def test_delete_package_from_another_tenant(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.delete_package,
+                          self.package['id'])
+
+    @attr(type='negative')
+    def test_download_package_from_another_tenant(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.download_package,
+                          self.package['id'])
+
+    @attr(type='negative')
+    def test_get_ui_definition_from_another_tenant(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_ui_definition,
+                          self.package['id'])
+
+    @attr(type='negative')
+    def test_get_logo_from_another_tenant(self):
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_logo,
+                          self.package['id'])
 
 
 class TestRepository(TestCaseRepository):
