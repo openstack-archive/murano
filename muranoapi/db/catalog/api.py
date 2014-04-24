@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from sqlalchemy import inspection
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
 from sqlalchemy import sql
@@ -271,29 +270,27 @@ def package_search(filters, context):
         query = query.filter(pkg.fully_qualified_name == filters['fqn'])
 
     if 'search' in filters.keys():
+        fk_fields = {'categories': 'Category',
+                     'tags': 'Tag',
+                     'class_definitions': 'Class'}
         conditions = []
-        search_str = filters['search']
-        for delimiter in ',;':
-            search_str = search_str.replace(delimiter, ' ')
-        key_words = ['%{0}%'.format(word) for word in search_str.split()]
-        relationships = inspection.inspect(pkg).relationships
 
-        searchable_attrs = set([
-            'fully_qualified_name', 'author', 'name', 'description', 'tags',
-            'categories', 'class_definitions'])
-        searchable_pkg_attrs = set(dir(pkg)) & searchable_attrs
-
-        for attr_name in searchable_pkg_attrs:
-            attr = getattr(pkg, attr_name)
-            if isinstance(attr, attributes.InstrumentedAttribute):
-                if attr_name in relationships:
-                    model = relationships[attr_name].mapper.class_
-                    for key_word in key_words:
-                        condition = attr.any(model.name.like(key_word))
+        for attr in dir(pkg):
+            if attr.startswith('_'):
+                continue
+            if isinstance(getattr(pkg, attr),
+                          attributes.InstrumentedAttribute):
+                search_str = filters['search']
+                for delim in ',;':
+                    search_str = search_str.replace(delim, ' ')
+                for key_word in search_str.split():
+                    _word = '%{value}%'.format(value=key_word)
+                    if attr in fk_fields.keys():
+                        condition = getattr(pkg, attr).any(
+                            getattr(models, fk_fields[attr]).name.like(_word))
                         conditions.append(condition)
-                else:
-                    for key_word in key_words:
-                        conditions.append(attr.like(key_word))
+                    else:
+                        conditions.append(getattr(pkg, attr).like(_word))
         query = query.filter(or_(*conditions))
 
     sort_keys = filters.get('order_by', []) or ['created']
