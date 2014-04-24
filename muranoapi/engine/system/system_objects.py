@@ -20,6 +20,7 @@ from muranoapi.engine.system import agent
 from muranoapi.engine.system import agent_listener
 from muranoapi.engine.system import heat_stack
 from muranoapi.engine.system import instance_reporter
+from muranoapi.engine.system import net_explorer
 from muranoapi.engine.system import resource_manager
 from muranoapi.engine.system import status_reporter
 
@@ -50,3 +51,4 @@ def register(class_loader, package_loader):
     class_loader.import_class(ResourceManagerWrapper)
     class_loader.import_class(instance_reporter.InstanceReportNotifier)
     class_loader.import_class(status_reporter.StatusReporter)
+    class_loader.import_class(net_explorer.NetworkExplorer)

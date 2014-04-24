@@ -87,6 +87,12 @@ murano_opts = [
     cfg.StrOpt('endpoint_type', default='publicURL')
 ]
 
+networking_opts = [
+    cfg.IntOpt('max_environments', default=20),
+    cfg.IntOpt('max_hosts', default=250),
+    cfg.StrOpt('env_ip_template', default='10.0.0.0'),
+]
+
 stats_opt = [
     cfg.IntOpt('period', default=5,
                help=_('Statistics collection interval in minutes.'
@@ -115,6 +121,7 @@ CONF.register_cli_opt(metadata_dir)
 CONF.register_cli_opt(packages_cache)
 CONF.register_cli_opt(package_size_limit)
 CONF.register_opts(stats_opt, group='stats')
+CONF.register_opts(networking_opts, group='networking')
 
 CONF.import_opt('connection',
                 'muranoapi.openstack.common.db.options',

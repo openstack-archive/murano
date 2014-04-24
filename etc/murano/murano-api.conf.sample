@@ -159,3 +159,13 @@ url = http://localhost:8082
 #key_file =
 # If set then the server's certificate will not be verified
 insecure = False
+
+[networking]
+# Maximum number of environments that use a single router per tenant
+max_environments = 20
+
+# Maximum number of VMs per environment
+max_hosts = 250
+
+# Template IP address for generating environment subnet cidrs
+env_ip_template = 10.0.0.0
