@@ -1,0 +1,19 @@
+Namespaces:
+    =: io.murano.windows.Dummy
+    std: io.murano
+    sys: io.murano.system
+    win: io.murano.windows
+
+Name: Controller
+
+Properties:
+  host:
+    Contract: $.class(win:Host).notNull()
+
+  recoveryPassword:
+    Contract: $.string().notNull()
+    Default: P@ssw0rd
+
+Workflow:
+  deploy:
+    Body: $.host.deploy()

@@ -13,12 +13,15 @@
 # under the License.
 
 import json
+import os
+import requests
+import testtools
+import uuid
+
 from tempest import clients
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
-import testtools
-import uuid
 
 CONF = config.CONF
 
@@ -142,16 +145,32 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
-    def update_package(self, id):
-        post_body = [
-            {
-                "op": "add",
-                "path": "/tags",
-                "value": ["i'm a test"]
-            }
-        ]
+    def upload_package(self, package_name, body):
+        __location__ = os.path.realpath(os.path.join(
+            os.getcwd(), os.path.dirname(__file__)))
 
-        resp, body = self.patch('catalog/packages/{0}'.format(id), post_body)
+        headers = {'X-Auth-Token': self.auth_provider.get_token()}
+
+        files = {'%s' % package_name: open(
+            os.path.join(__location__, 'v1/DummyTestApp.zip'), 'rb')}
+
+        post_body = {'JsonString': json.dumps(body)}
+        request_url = '{endpoint}{url}'.format(endpoint=self.base_url,
+                                               url='/catalog/packages')
+
+        resp = requests.post(request_url, files=files, data=post_body,
+                             headers=headers)
+
+        return resp
+
+    def update_package(self, id, post_body):
+        headers = {
+            'X-Auth-Token': self.auth_provider.get_token(),
+            'content-type': 'application/murano-packages-json-patch'
+        }
+
+        resp, body = self.patch('catalog/packages/{0}'.format(id),
+                                json.dumps(post_body), headers=headers)
 
         return resp, json.loads(body)
 

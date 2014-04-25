@@ -1,0 +1,20 @@
+Namespaces:
+    =: io.murano.windows
+    ad: io.murano.windows.Dummy
+
+Name: DomainHost
+
+Extends: Host
+
+Properties:
+  domain:
+    Contract: $.class(ad:Dummy).notNull()
+
+Workflow:
+  deploy:
+    Arguments:
+    Body:
+      - $.super($.deploy())
+      #- $.joinDomain($.domain)
+      # Workaround against broken ResourceManager:
+      - $.super($.joinDomain($this.domain))
