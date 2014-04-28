@@ -98,6 +98,10 @@ class NetworkExplorer(murano_object.MuranoObject):
                 return str(cidr)
         return None
 
+    # noinspection PyPep8Naming
+    def getDefaultDns(self):
+        return self._settings.default_dns
+
     def _get_cidrs_taken_by_router(self, router_id):
         if not router_id:
             return []

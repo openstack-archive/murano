@@ -1,0 +1,131 @@
+Namespaces:
+  =: io.murano.lib.networks.neutron
+  res: io.murano.resources
+  std: io.murano
+  sys: io.murano.system
+
+Name: NewNetwork
+
+Extends: res:Network
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  externalRouterId:
+    Contract: $.string()
+    Usage: InOut
+
+  autoUplink:
+    Contract: $.bool().notNull()
+    Default: true
+
+  autogenerateSubnet:
+    Contract: $.bool().notNull()
+    Default: true
+
+  subnetCidr:
+    Contract: $.string()
+    Usage: InOut
+
+  dnsNameserver:
+    Contract: $.string()
+    Usage: InOut
+
+  useDefaultDns:
+    Contract: $.bool().notNull()
+    Default: true
+
+Workflow:
+  initialize:
+    Body:
+      - $.environment: $.find(std:Environment).require()
+      - $.netExplorer: new(sys:NetworkExplorer)
+
+  deploy:
+    Body:
+      - $.ensureNetworkConfigured()
+      - $.environment.instanceNotifier.untrackApplication($this)
+
+  addHostToNetwork:
+    Arguments:
+      - instance:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - $.ensureNetworkConfigured()
+      - $portname: $instance.name + '-port-to-' + $.id()
+      - $template:
+          Resources:
+            $portname:
+              Type: 'OS::Neutron::Port'
+              Properties:
+                network_id: {Ref: $.net_res_name}
+                fixed_ips: [{subnet_id: {Ref: $.subnet_res_name}}]
+            $instance.name:
+              Properties:
+                NetworkInterfaces:
+                  - Ref: $portname
+      - $.environment.stack.updateTemplate($template)
+
+
+  ensureNetworkConfigured:
+    Body:
+      - If: !yaql "not bool($.getAttr(networkConfigured))"
+        Then:
+          - If: $.useDefaultDns and (not bool($.dnsNameserver))
+            Then:
+              - $.dnsNameserver: $.netExplorer.getDefaultDns()
+
+          - $.net_res_name: $.name + '-net-' + $.id()
+          - $.subnet_res_name: $.name + '-subnet-' + $.id()
+          - $.createNetwork()
+          - If: $.autoUplink and (not bool($.externalRouterId))
+            Then:
+              - $.externalRouterId: $.netExplorer.getDefaultRouter()
+          - If: $.autogenerateSubnet and (not bool($.subnetCidr))
+            Then:
+              - $.subnetCidr: $.netExplorer.getAvailableCidr($.externalRouterId, $.id())
+          - $.createSubnet()
+          - If: !yaql "bool($.externalRouterId)"
+            Then:
+              - $.createRouterInterface()
+
+          - $.environment.stack.push()
+          - $.setAttr(networkConfigured, true)
+
+
+  createNetwork:
+    Body:
+      - $template:
+          Resources:
+            $.net_res_name:
+              Type: 'OS::Neutron::Net'
+              Properties:
+                name: $.name
+      - $.environment.stack.updateTemplate($template)
+
+  createSubnet:
+    Body:
+      - $template:
+          Resources:
+            $.subnet_res_name:
+              Type: 'OS::Neutron::Subnet'
+              Properties:
+                network_id: {Ref: $.net_res_name}
+                ip_version: 4
+                dns_nameservers: [$.dnsNameserver]
+                cidr: $.subnetCidr
+      - $.environment.stack.updateTemplate($template)
+
+  createRouterInterface:
+    Body:
+      - $template:
+          Resources:
+            $.name + '-ri-' + $.id():
+              Type: 'OS::Neutron::RouterInterface'
+              Properties:
+                router_id: $.externalRouterId
+                subnet_id: {Ref: $.subnet_res_name}
+      - $.environment.stack.updateTemplate($template)
+
+

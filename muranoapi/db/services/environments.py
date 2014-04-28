@@ -16,6 +16,7 @@ import collections
 
 from muranoapi.common import rpc
 from muranoapi.common import uuidutils
+
 from muranoapi.db import models
 from muranoapi.db.services import sessions
 from muranoapi.db import session as db_session
@@ -26,6 +27,11 @@ EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
 ])(
     ready='ready', pending='pending', deploying='deploying'
 )
+
+DEFAULT_NETWORKS = {
+    'environment': 'io.murano.lib.networks.neutron.NewNetwork',
+    # 'flat': 'io.murano.lib.networks.ExistingNetworkConnector'
+}
 
 
 class EnvironmentServices(object):
@@ -88,6 +94,8 @@ class EnvironmentServices(object):
             'id': uuidutils.generate_uuid(),
         }}
         objects.update(environment_params)
+        objects.update(
+            EnvironmentServices.generate_default_networks(objects['name']))
         objects['?']['type'] = 'io.murano.Environment'
         environment_params['tenant_id'] = tenant_id
 
@@ -192,3 +200,23 @@ class EnvironmentServices(object):
         else:
             session.description = environment
         session.save(unit)
+
+    @staticmethod
+    def generate_default_networks(env_name):
+        # TODO(ativelkov):
+        # This is a temporary workaround. Need to find a better way:
+        # These objects have to be created in runtime when the environment is
+        # deployed for the first time. Currently there is no way to persist
+        # such changes, so we have to create the objects on the API side
+        return {
+            'defaultNetworks': {
+                'environment': {
+                    '?': {
+                        'id': uuidutils.generate_uuid(),
+                        'type': DEFAULT_NETWORKS['environment']
+                    },
+                    'name': env_name + '-network'
+                },
+                'flat': None
+            }
+        }

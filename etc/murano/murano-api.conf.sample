@@ -169,3 +169,6 @@ max_hosts = 250
 
 # Template IP address for generating environment subnet cidrs
 env_ip_template = 10.0.0.0
+
+# Default DNS nameserver to be assigned to created Networks
+default_dns = 8.8.8.8
