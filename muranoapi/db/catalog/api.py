@@ -247,13 +247,41 @@ def package_search(filters, context):
     session = db_session.get_session()
     pkg = models.Package
 
-    if 'owned' in filters.keys():
-        query = session.query(pkg).filter(pkg.owner_id == context.tenant)
-    elif context.is_admin:
-        query = session.query(pkg)
+    # If the packages search specifies the inclusion of disabled packages,
+    # we handle this differently for admins vs non-admins:
+    # For admins: *don't* require pkg.enabled == True (no changes to query)
+    # For non-admins: add an OR-condition to filter for packages that are owned
+    #                 by the tenant in the current context
+    # Otherwise: in all other cases, we return only enabled packages
+    if filters.get('include_disabled', '').lower() == 'true':
+        include_disabled = True
     else:
-        query = session.query(pkg).filter(or_((pkg.is_public & pkg.enabled),
-                                              pkg.owner_id == context.tenant))
+        include_disabled = False
+
+    if context.is_admin:
+        if not include_disabled:
+            query = session.query(pkg).filter(pkg.enabled)
+        else:
+            query = session.query(pkg)
+    elif filters.get('owned', '').lower() == 'true':
+        if not include_disabled:
+            query = session.query(pkg).filter(
+                pkg.owner_id == context.tenant & pkg.enabled
+            )
+        else:
+            query = session.query(pkg).filter(pkg.owner_id == context.tenant)
+    else:
+        if not include_disabled:
+            query = session.query(pkg).filter(
+                or_((pkg.is_public & pkg.enabled),
+                    (pkg.owner_id == context.tenant and pkg.enabled))
+            )
+        else:
+            query = session.query(pkg).filter(
+                or_((pkg.is_public & pkg.enabled),
+                    pkg.owner_id == context.tenant)
+            )
+
     if 'type' in filters.keys():
         query = query.filter(pkg.type == filters['type'].title())
 
