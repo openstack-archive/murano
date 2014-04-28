@@ -262,6 +262,13 @@ class TypeScheme(object):
 
     def __call__(self, data, context, this, object_store,
                  namespace_resolver, default):
+        # TODO(ativelkov, slagun): temporary fix, need a better way of handling
+        # composite defaults
+        # A bug (#1313694) has been filed
+
+        if data is NoValue:
+            data = default
+
         context = self.prepare_context(
             context, this, object_store, namespace_resolver,
             default)

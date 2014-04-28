@@ -1,5 +1,6 @@
 Namespaces:
     =: io.murano
+    res: io.murano.resources
     sys: io.murano.system
 
 Name: Environment
@@ -22,6 +23,12 @@ Properties:
   instanceNotifier:
     Contract: $.class(sys:InstanceNotifier)
     Usage: Runtime
+
+  defaultNetworks:
+    Contract:
+      environment: $.class(res:Network)
+      flat: $.class(res:Network)
+    Usage: In
 
 Workflow:
   initialize:
