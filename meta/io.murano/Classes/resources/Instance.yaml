@@ -29,6 +29,12 @@ Properties:
       useEnvironmentNetwork: true
       useFlatNetwork: false
       customNetworks: []
+  assignFloatingIp:
+    Contract: $.bool().notNull()
+    Default: false
+  floatingIpAddress:
+    Contract: $.string()
+    Usage: Out
 
 Workflow:
   initialize:
@@ -64,7 +70,7 @@ Workflow:
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-PublicIp', $this.name))
-
+      - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
       - $.environment.instanceNotifier.trackApplication($this)
 
   joinNet:
@@ -74,7 +80,13 @@ Workflow:
     Body:
       - If: $net != null
         Then:
-          $net.addHostToNetwork($)
+          - If: $.assignFloatingIp and (not bool($.getAttr(fipAssigned)))
+            Then:
+              - $assignFip: true
+              - $.setAttr(fipAssigned, true)
+            Else:
+              - $assignFip: false
+          - $net.addHostToNetwork($, $assignFip)
 
   destroy:
     Body:
