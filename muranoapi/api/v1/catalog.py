@@ -210,7 +210,7 @@ class Controller(object):
         return package.archive
 
     def delete(self, req, package_id):
-        db_api.package_delete(package_id)
+        db_api.package_delete(package_id, req.context)
 
     def show_categories(self, req):
         categories = db_api.categories_list()
