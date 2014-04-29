@@ -91,6 +91,7 @@ networking_opts = [
     cfg.IntOpt('max_environments', default=20),
     cfg.IntOpt('max_hosts', default=250),
     cfg.StrOpt('env_ip_template', default='10.0.0.0'),
+    cfg.StrOpt('default_dns', default='8.8.8.8')
 ]
 
 stats_opt = [
