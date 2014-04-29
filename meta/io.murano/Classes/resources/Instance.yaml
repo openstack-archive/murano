@@ -20,6 +20,15 @@ Properties:
   ipAddresses:
     Contract: [$.string()]
     Usage: Out
+  networks:
+    Contract:
+      useEnvironmentNetwork: $.bool().notNull()
+      useFlatNetwork: $.bool().notNull()
+      customNetworks: [$.class(Network).notNull()]
+    Default:
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+      customNetworks: []
 
 Workflow:
   initialize:
@@ -30,6 +39,14 @@ Workflow:
 
   deploy:
     Body:
+      - If: $.networks.useEnvironmentNetwork
+        Then:
+          $.joinNet($.environment.defaultNetworks.environment)
+      - If: $.networks.useFlatNetwork
+        Then:
+          $.joinNet($.environment.defaultNetworks.flat)
+      - $.networks.customNetworks.select($this.joinNet($))
+
       - $userData: $.prepareUserData()
       - $template:
           Resources:
@@ -43,14 +60,21 @@ Workflow:
             format('{0}-PublicIp', $.name):
               Value:
                 - Fn::GetAtt: [$.name, PublicIp]
-
       - $.environment.stack.updateTemplate($template)
       - $.environment.stack.push()
-
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-PublicIp', $this.name))
 
       - $.environment.instanceNotifier.trackApplication($this)
+
+  joinNet:
+    Arguments:
+      - net:
+          Contract: $.class(Network)
+    Body:
+      - If: $net != null
+        Then:
+          $net.addHostToNetwork($)
 
   destroy:
     Body:

@@ -1,0 +1,10 @@
+Namespaces:
+    =: io.murano.resources
+
+Name: Network
+
+Workflow:
+  addHostToNetwork:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
