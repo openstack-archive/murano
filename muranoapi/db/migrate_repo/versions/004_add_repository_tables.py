@@ -20,6 +20,12 @@ from sqlalchemy import types
 meta = schema.MetaData()
 
 
+class StringWithCollation(types.String):
+    def __init__(self, length, collation=None, **kwargs):
+        super(StringWithCollation, self).__init__(length, **kwargs)
+        self.collation = collation
+
+
 def upgrade(migrate_engine):
     meta.bind = migrate_engine
     collation = 'ascii_general_ci' \
@@ -34,7 +40,7 @@ def upgrade(migrate_engine):
                       nullable=False),
         schema.Column('archive', types.LargeBinary),
         schema.Column('fully_qualified_name',
-                      types.String(512, collation=collation),
+                      StringWithCollation(512, collation=collation),
                       index=True, unique=True),
         schema.Column('type', types.String(20)),
         schema.Column('author', types.String(80)),
