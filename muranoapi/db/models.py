@@ -270,7 +270,7 @@ class Package(BASE, ModificationsTrackedObject):
                                      unique=True)
     type = sa.Column(sa.String(20), nullable=False, default='class')
     author = sa.Column(sa.String(80), default='Openstack')
-    name = sa.Column(sa.String(20), nullable=False)
+    name = sa.Column(sa.String(80), nullable=False)
     enabled = sa.Column(sa.Boolean, default=True)
     description = sa.Column(sa.String(512),
                             nullable=False,
