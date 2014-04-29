@@ -391,15 +391,16 @@ def package_upload(values, tenant_id):
     return package
 
 
-def package_delete(package_id):
+def package_delete(package_id, context):
     """
     Delete package information from the system ID of a package, string
     parameters to update
     """
     session = db_session.get_session()
+
     with session.begin():
         package = session.query(models.Package).get(package_id)
-
+        _authorize_package(package, context)
         session.delete(package)
 
 
