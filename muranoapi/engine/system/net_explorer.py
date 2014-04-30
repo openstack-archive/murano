@@ -102,6 +102,33 @@ class NetworkExplorer(murano_object.MuranoObject):
     def getDefaultDns(self):
         return self._settings.default_dns
 
+    # noinspection PyPep8Naming
+    def getExternalNetworkIdForRouter(self, routerId):
+        router = self._neutron.show_router(routerId).get('router')
+        if not router or 'external_gateway_info' not in router:
+            return None
+        return router['external_gateway_info'].get('network_id')
+
+    # noinspection PyPep8Naming
+    def getExternalNetworkIdForNetwork(self, networkId):
+        network = self._neutron.show_network(networkId).get('network')
+        if network.get('router:external', False):
+            return networkId
+
+        # Get router interfaces of the network
+        router_ports = self._neutron.list_ports(
+            **{'device_owner': 'network:router_interface',
+               'network_id': networkId}).get('ports')
+
+        # For each router this network is connected to
+        # check if the router has external_gateway set
+        for router_port in router_ports:
+            ext_net_id = self.getExternalNetworkIdForRouter(
+                router_port.get('device_id'))
+            if ext_net_id:
+                return ext_net_id
+        return None
+
     def _get_cidrs_taken_by_router(self, router_id):
         if not router_id:
             return []

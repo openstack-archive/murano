@@ -51,6 +51,9 @@ Workflow:
     Arguments:
       - instance:
           Contract: $.class(res:Instance).notNull()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+          Default: false
     Body:
       - $.ensureNetworkConfigured()
       - $portname: $instance.name + '-port-to-' + $.id()
@@ -67,6 +70,33 @@ Workflow:
                   - Ref: $portname
       - $.environment.stack.updateTemplate($template)
 
+      - If: $assignFloatingIp
+        Then:
+          - $extNetId: $.netExplorer.getExternalNetworkIdForRouter($.externalRouterId)
+          - If: $extNetId != null
+            Then:
+              - $fip_name: $instance.name + '-FloatingIP-' + $.id()
+              - $template:
+                  Resources:
+                    $fip_name:
+                      Type: 'OS::Neutron::FloatingIP'
+                      Properties:
+                        floating_network_id: $extNetId
+                    $instance.name + '-FloatingIpAssoc-' + $.id():
+                      Type: 'OS::Neutron::FloatingIPAssociation'
+                      Properties:
+                        floatingip_id:
+                          Ref: $fip_name
+                        port_id:
+                          Ref: $portname
+                  Outputs:
+                    $instance.name + '-FloatingIPaddress':
+                      Value:
+                        Fn::GetAtt:
+                          - $fip_name
+                          - floating_ip_address
+                      Description: Floating IP assigned
+              - $.environment.stack.updateTemplate($template)
 
   ensureNetworkConfigured:
     Body:
@@ -127,5 +157,3 @@ Workflow:
                 router_id: $.externalRouterId
                 subnet_id: {Ref: $.subnet_res_name}
       - $.environment.stack.updateTemplate($template)
-
-
