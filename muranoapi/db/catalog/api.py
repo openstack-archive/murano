@@ -260,13 +260,15 @@ def package_search(filters, context):
 
     if context.is_admin:
         if not include_disabled:
-            query = session.query(pkg).filter(pkg.enabled)
+            #NOTE(efedorova): is needed for SA 0.7.9, but could be done
+            # simpler in SA 0.8. See http://goo.gl/9stlKu for a details
+            query = session.query(pkg).filter(pkg.__table__.c.enabled)
         else:
             query = session.query(pkg)
     elif filters.get('owned', '').lower() == 'true':
         if not include_disabled:
             query = session.query(pkg).filter(
-                pkg.owner_id == context.tenant & pkg.enabled
+                (pkg.owner_id == context.tenant) & pkg.enabled
             )
         else:
             query = session.query(pkg).filter(pkg.owner_id == context.tenant)
@@ -274,7 +276,7 @@ def package_search(filters, context):
         if not include_disabled:
             query = session.query(pkg).filter(
                 or_((pkg.is_public & pkg.enabled),
-                    (pkg.owner_id == context.tenant and pkg.enabled))
+                    ((pkg.owner_id == context.tenant) & pkg.enabled))
             )
         else:
             query = session.query(pkg).filter(
