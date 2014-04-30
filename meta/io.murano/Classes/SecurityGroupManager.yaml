@@ -1,0 +1,69 @@
+Namespaces:
+    =: io.murano.system
+    std: io.murano
+
+Name: SecurityGroupManager
+
+Properties:
+  environment:
+    Contract: $.class(std:Environment).notNull()
+
+  defaultGroupName:
+    Contract: $.string()
+    Usage: Runtime
+    Default: format('MuranoSecurityGroup-{0}', $.environment.name)
+
+Workflow:
+  addGroupIngress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+    Body:
+      - $ext_keys:
+          true:
+            ext_key: remote_ip_prefix
+            ext_val: '0.0.0.0/0'
+          false:
+            ext_key: remote_mode
+            ext_val: remote_group_id
+
+      - $stack: $.environment.stack
+      - $template:
+          Resources:
+            $groupName:
+              Type: 'OS::Neutron::SecurityGroup'
+              Properties:
+                description: format('Composite security group of Murano environment {0}', $.environment.name)
+                rules:
+                  - port_range_min: null
+                    port_range_max: null
+                    protocol: icmp
+                    remote_ip_prefix: '0.0.0.0/0'
+      - $.environment.stack.updateTemplate($template)
+
+      - $ingress: $rules.select(dict(
+            port_range_min => $.FromPort,
+            port_range_max => $.ToPort,
+            protocol => $.IpProtocol,
+            $ext_keys.get($.External).ext_key => $ext_keys.get($.External).ext_val
+          ))
+
+      - $template:
+          Resources:
+            $groupName:
+              Type: 'OS::Neutron::SecurityGroup'
+              Properties:
+                rules: $ingress
+      - $.environment.stack.updateTemplate($template)
+
+
+
+
+

@@ -26,8 +26,16 @@ Properties:
     Default: P@ssw0rd
 
 Workflow:
+  initialize:
+    Body:
+      - $.environment: $.find(std:Environment).require()
+      - $.resources: new(sys:Resources)
+
   deploy:
     Body:
+      - $securityGroupIngress: $.resources.json('DomainSecurity.json')
+      - $.environment.securityGroups.addGroupIngress($securityGroupIngress)
+
       - $.primaryController.deploy()
       - $.secondaryControllers.pselect($.deploy())
       - $.reportDeployed(title => 'Dummy',
