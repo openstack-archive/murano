@@ -8,3 +8,9 @@ Workflow:
     Arguments:
       - instance:
           Contract: $.class(Instance).notNull()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+          Default: false
+      - securityGroupName:
+          Contract: $.string()
+          Default: null

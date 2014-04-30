@@ -30,6 +30,10 @@ Properties:
       flat: $.class(res:Network)
     Usage: In
 
+  securityGroupManager:
+    Contract: $.class(sys:SecurityGroupManager)
+    Usage: Runtime
+
 Workflow:
   initialize:
     Body:
@@ -37,6 +41,8 @@ Workflow:
       - $this.stack: new(sys:HeatStack, name => $.name)
       - $this.instanceNotifier: new(sys:InstanceNotifier, environment => $this)
       - $this.reporter: new(sys:StatusReporter, environment => $this)
+      - $this.securityGroupManager: new(sys:SecurityGroupManager, environment => $this)
+
 
   deploy:
     Body:
