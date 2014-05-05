@@ -88,16 +88,6 @@ Workflow:
               - $assignFip: false
           - $net.addHostToNetwork($, $assignFip)
 
-  destroy:
-    Body:
-      - $template: $.environment.stack.current()
-      - $patchBlock:
-          op: remove
-          path: format('/Resources/{0}', $.name)
-      - $template: patch($template, $patchBlock)
-      - $.environment.stack.setTemplate($template)
-      - $.environment.stack.push()
-      - $.environment.instanceNotifier.untrackApplication($this)
 
   prepareUserData:
     Body:

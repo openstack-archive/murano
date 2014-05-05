@@ -130,7 +130,9 @@ class EnvironmentServices(object):
 
         #preparing data for removal from conductor
         env = environment.description
-        env['Objects'] = None
+        if 'Objects' in env and 'services' in env['Objects']:
+            env['Objects'].pop('services')
+        env['applications'] = []
 
         data = {
             'model': env,
