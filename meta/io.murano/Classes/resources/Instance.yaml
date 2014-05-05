@@ -14,6 +14,10 @@ Properties:
     Contract: $.string().notNull()
   image:
     Contract: $.string().notNull()
+  keyname:
+    Contract: $.string()
+    Default: null
+
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
@@ -62,6 +66,8 @@ Workflow:
                 InstanceType: $.flavor
                 ImageId: $.image
                 UserData: $userData
+                KeyName: $.keyname
+                    
           Outputs:
             format('{0}-PublicIp', $.name):
               Value:
