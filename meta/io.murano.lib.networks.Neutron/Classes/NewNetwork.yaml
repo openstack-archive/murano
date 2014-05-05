@@ -54,6 +54,9 @@ Workflow:
       - assignFloatingIp:
           Contract: $.bool().notNull()
           Default: false
+      - securityGroupName:
+          Contract: $.string()
+          Default: null
     Body:
       - $.ensureNetworkConfigured()
       - $portname: $instance.name + '-port-to-' + $.id()
@@ -64,6 +67,8 @@ Workflow:
               Properties:
                 network_id: {Ref: $.net_res_name}
                 fixed_ips: [{subnet_id: {Ref: $.subnet_res_name}}]
+                security_groups:
+                  - Ref: $securityGroupName
             $instance.name:
               Properties:
                 NetworkInterfaces:

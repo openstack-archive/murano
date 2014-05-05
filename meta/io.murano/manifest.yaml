@@ -18,5 +18,7 @@ Classes:
   io.murano.Environment: Environment.yaml
   io.murano.Application: Application.yaml
 
+  io.murano.system.SecurityGroupManager: SecurityGroupManager.yaml
+
   io.murano.resources.Network: resources/Network.yaml
   io.murano.resources.Instance: resources/Instance.yaml
