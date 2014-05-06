@@ -71,6 +71,8 @@ class TaskProcessingEndpoint(object):
         except Exception as e:
             # TODO(gokrokve) report error here
             # TODO(slagun) code below needs complete rewrite and redesign
+            LOG.exception("Error during task execution for tenant %s",
+                          env.tenant_id)
             msg_env = Environment(task['model']['Objects']['?']['id'])
             reporter = status_reporter.StatusReporter()
             reporter.initialize(msg_env)
