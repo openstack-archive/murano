@@ -13,11 +13,6 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-.. _MuranoPL Spec:
-
-======================
-MuranoPL specification
-======================
 
 YAML
 ====
@@ -34,6 +29,7 @@ MuranoPL engine relies on host deserialization code to automatically detect YAQL
      "$.something()" - string (because of quote marks)
      !!str $ - a string (because of YAML tag)
      !yaql "text" - YAQL  (because of YAML tag)
+
 
 YAQL
 ====

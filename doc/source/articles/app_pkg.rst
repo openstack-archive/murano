@@ -110,16 +110,16 @@ Example *telnet.yaml*
 
 Note, that
 
-* *io.murano.system.Resources* is a system class, defined in MuranoPL.
-* *io.murano.resources.Instance* is a class, defined in the core Murano library, which is available here. This library contains Murano agent templates and init scripts.
-* $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instace.') - this is the way of sending reports to Murano dashboard during deployment
+* *io.murano.system.Resources* is a system class, defined in MuranoPL. More information about MuranoPL system classes is available here: :ref:`class_definitions`.
+* *io.murano.resources.Instance* is a class, defined in the core Murano library, which is available here. :ref:`This library <cory_library>` contains Murano Agent templates and virtual machine initialization scripts.
+* $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instance.') - this is the way of sending reports to Murano dashboard during deployment
 
 Step 3.  Prepare dynamic UI form definition
 ===========================================
 Create a form definition in a yaml format. Before configuring a form, compose a list of parameters that will be required to set by a user.
 Some form fields that are responsible for choosing a flavor, image and availability zone are better to use in every application creation wizard.
 Syntax of  Dynamic UI can be found see here: :ref:`Dynamic UI Spec`
-Full example with Telnet application form definition is available here :ref:`telnet-yaml`
+Full example with Telnet application form definition :ref:`telnet-yaml`.
 
 Step 4.  Prepare application logo
 =================================
