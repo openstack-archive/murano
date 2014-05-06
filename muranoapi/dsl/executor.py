@@ -30,6 +30,10 @@ import muranoapi.dsl.murano_object as murano_object
 import muranoapi.dsl.object_store as object_store
 import muranoapi.dsl.yaql_functions as yaql_functions
 
+from muranoapi.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
+
 
 class MuranoDslExecutor(object):
     def __init__(self, class_loader, environment=None):
@@ -111,20 +115,30 @@ class MuranoDslExecutor(object):
         method_id = id(body)
         this_id = this.object_id
 
-        event, marker = self._locks.get((method_id, this_id), (None, None))
-        if event:
-            if marker == thread_marker:
-                return self._invoke_method_implementation_gt(
-                    body, this, params, murano_class, context)
-            event.wait()
+        while True:
+            event, marker = self._locks.get((method_id, this_id), (None, None))
+            if event:
+                if marker == thread_marker:
+                    return self._invoke_method_implementation_gt(
+                        body, this, params, murano_class, context)
+                event.wait()
+            else:
+                break
 
         event = eventlet.event.Event()
         self._locks[(method_id, this_id)] = (event, thread_marker)
+        # noinspection PyProtectedMember
+        method_info = "{0}.{1} ({2})".format(murano_class.name, method._name,
+                                             hash((method_id, this_id)))
+        LOG.debug(
+            "{0}: Begin execution: {1}".format(thread_marker, method_info))
         gt = eventlet.spawn(self._invoke_method_implementation_gt, body,
                             this, params, murano_class, context,
                             thread_marker)
         result = gt.wait()
         del self._locks[(method_id, this_id)]
+        LOG.debug(
+            "{0}: End execution: {1}".format(thread_marker, method_info))
         event.send()
         return result
 
