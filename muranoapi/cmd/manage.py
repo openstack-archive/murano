@@ -43,9 +43,30 @@ def do_db_sync():
     db_session.db_sync()
 
 
-def _do_import_package(_dir, categories):
+class AdminContext(object):
+    def __init__(self):
+        self.is_admin = True
+
+
+def _do_import_package(_dir, categories, update=False):
     LOG.info("Going to import Murano package from {0}".format(_dir))
     pkg = application_package.load_from_dir(_dir)
+
+    LOG.info("Checking for existing")
+    existing = db_catalog_api.package_search(
+        {'fqn': pkg.full_name},
+        AdminContext())
+    if existing:
+        existing_pkg = existing[0]
+        if update:
+            LOG.info("Deleting existing package {0}".format(existing_pkg.id))
+            db_catalog_api.package_delete(existing_pkg.id, AdminContext())
+        else:
+            LOG.error("Package '{0}' exists ({1}). Use --update.".format(
+                pkg.full_name,
+                existing_pkg.id))
+            return
+
     package = {
         'fully_qualified_name': pkg.full_name,
         'type': pkg.package_type,
@@ -66,6 +87,7 @@ def _do_import_package(_dir, categories):
     # note(ruhe): the second parameter is tenant_id
     # it is a required field in the DB, that's why we pass an empty string
     result = db_catalog_api.package_upload(package, '')
+
     LOG.info("Finished import of package {0}".format(result.id))
 
 
@@ -74,7 +96,10 @@ def do_import_package():
     """
     Import Murano package from local directory.
     """
-    _do_import_package(CONF.command.directory, CONF.command.categories)
+    _do_import_package(
+        CONF.command.directory,
+        CONF.command.categories,
+        CONF.command.update)
 
 
 def do_list_categories():
@@ -108,7 +133,10 @@ def add_command_parsers(subparsers):
     parser.set_defaults(func=do_import_package)
     parser.add_argument('directory',
                         help='A directory with Murano package.')
-
+    parser.add_argument('-u', '--update',
+                        action="store_true",
+                        default=False,
+                        help='If a package already exists, delete and update')
     parser.add_argument('-c', '--categories',
                         choices=consts.CATEGORIES,
                         nargs='*',
