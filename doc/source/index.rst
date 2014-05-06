@@ -57,6 +57,7 @@ Table of contents
    contributing
    guidelines
    install/index
+   articles/index
 
 
 Indices and tables
