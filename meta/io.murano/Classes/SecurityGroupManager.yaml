@@ -36,10 +36,11 @@ Workflow:
 
       - $stack: $.environment.stack
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $groupName:
-              Type: 'OS::Neutron::SecurityGroup'
-              Properties:
+              type: 'OS::Neutron::SecurityGroup'
+              properties:
                 description: format('Composite security group of Murano environment {0}', $.environment.name)
                 rules:
                   - port_range_min: null
@@ -56,10 +57,10 @@ Workflow:
           ))
 
       - $template:
-          Resources:
+          resources:
             $groupName:
-              Type: 'OS::Neutron::SecurityGroup'
-              Properties:
+              type: 'OS::Neutron::SecurityGroup'
+              properties:
                 rules: $ingress
       - $.environment.stack.updateTemplate($template)
 

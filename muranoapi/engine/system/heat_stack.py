@@ -165,7 +165,9 @@ class HeatStack(murano_object.MuranoObject):
 
         current_status = self._get_status()
         if current_status == 'NOT_FOUND':
-            if self._template.get('Resources'):
+            # For now, allow older CFN style templates as well, but this
+            # should be removed to avoid mixing them
+            if 'resources' in self._template or 'Resources' in self._template:
                 self._heat_client.stacks.create(
                     stack_name=self._name,
                     parameters=self._parameters,
@@ -175,7 +177,9 @@ class HeatStack(murano_object.MuranoObject):
                 self._wait_state(
                     lambda status: status == 'CREATE_COMPLETE')
         else:
-            if self._template.get('Resources'):
+            # For now, allow older CFN style templates as well, but this
+            # should be removed to avoid mixing them
+            if 'resources' in self._template or 'Resources' in self._template:
                 self._heat_client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,

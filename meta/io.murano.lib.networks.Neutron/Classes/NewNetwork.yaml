@@ -61,18 +61,19 @@ Workflow:
       - $.ensureNetworkConfigured()
       - $portname: $instance.name + '-port-to-' + $.id()
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $portname:
-              Type: 'OS::Neutron::Port'
-              Properties:
-                network_id: {Ref: $.net_res_name}
-                fixed_ips: [{subnet_id: {Ref: $.subnet_res_name}}]
+              type: 'OS::Neutron::Port'
+              properties:
+                network_id: { get_resource: $.net_res_name }
+                fixed_ips: [{ subnet_id: { get_resource: $.subnet_res_name } }]
                 security_groups:
-                  - Ref: $securityGroupName
+                  - get_resource: $securityGroupName
             $instance.name:
-              Properties:
-                NetworkInterfaces:
-                  - Ref: $portname
+              properties:
+                networks:
+                  - port: { get_resource: $portname }
       - $.environment.stack.updateTemplate($template)
 
       - If: $assignFloatingIp
@@ -82,25 +83,23 @@ Workflow:
             Then:
               - $fip_name: $instance.name + '-FloatingIP-' + $.id()
               - $template:
-                  Resources:
+                  resources:
                     $fip_name:
-                      Type: 'OS::Neutron::FloatingIP'
-                      Properties:
+                      type: 'OS::Neutron::FloatingIP'
+                      properties:
                         floating_network_id: $extNetId
                     $instance.name + '-FloatingIpAssoc-' + $.id():
-                      Type: 'OS::Neutron::FloatingIPAssociation'
-                      Properties:
+                      type: 'OS::Neutron::FloatingIPAssociation'
+                      properties:
                         floatingip_id:
-                          Ref: $fip_name
+                          get_resource: $fip_name
                         port_id:
-                          Ref: $portname
-                  Outputs:
+                          get_resource: $portname
+                  outputs:
                     $instance.name + '-FloatingIPaddress':
-                      Value:
-                        Fn::GetAtt:
-                          - $fip_name
-                          - floating_ip_address
-                      Description: Floating IP assigned
+                      value:
+                        get_attr: [$fip_name, floating_ip_address]
+                      description: Floating IP assigned
               - $.environment.stack.updateTemplate($template)
 
   ensureNetworkConfigured:
@@ -132,33 +131,36 @@ Workflow:
   createNetwork:
     Body:
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $.net_res_name:
-              Type: 'OS::Neutron::Net'
-              Properties:
+              type: 'OS::Neutron::Net'
+              properties:
                 name: $.name
       - $.environment.stack.updateTemplate($template)
 
   createSubnet:
     Body:
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $.subnet_res_name:
-              Type: 'OS::Neutron::Subnet'
-              Properties:
-                network_id: {Ref: $.net_res_name}
+              type: 'OS::Neutron::Subnet'
+              properties:
+                network_id: { get_resource: $.net_res_name }
                 ip_version: 4
-                dns_nameservers: [$.dnsNameserver]
+                dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
       - $.environment.stack.updateTemplate($template)
 
   createRouterInterface:
     Body:
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $.name + '-ri-' + $.id():
-              Type: 'OS::Neutron::RouterInterface'
-              Properties:
+              type: 'OS::Neutron::RouterInterface'
+              properties:
                 router_id: $.externalRouterId
-                subnet_id: {Ref: $.subnet_res_name}
+                subnet_id: { get_resource: $.subnet_res_name }
       - $.environment.stack.updateTemplate($template)
