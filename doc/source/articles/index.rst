@@ -23,3 +23,5 @@ App Catalog
    murano_pl_index
    dynamic_ui
    app_pkg
+
+   workflow

@@ -41,6 +41,8 @@ Besides the *Scripts* section the following sections must be presented in a reso
     * **Files** This is an optional array of additional files required for the script. Use *<>* to specify a relative path to the file. The root directory is *Resource/scripts*.
     * **Options** an optional argument of type contains additional options
 
+.. _Telnet Agent:
+
 Example *DeployTelnet.template*
 
 .. code-block:: yaml
@@ -72,6 +74,7 @@ Step 2.  Prepare MuranoPL class definitions
 ===========================================
 MuranoPL classes control application deployment workflow execution. Full information about MuranoPL classes see here: :ref:`MuranoPL Spec`
 
+.. _Telnet Class:
 
 Example *telnet.yaml*
 
@@ -111,7 +114,7 @@ Example *telnet.yaml*
 Note, that
 
 * *io.murano.system.Resources* is a system class, defined in MuranoPL. More information about MuranoPL system classes is available here: :ref:`class_definitions`.
-* *io.murano.resources.Instance* is a class, defined in the core Murano library, which is available here. :ref:`This library <cory_library>` contains Murano Agent templates and virtual machine initialization scripts.
+* *io.murano.resources.Instance* is a class, defined in the core Murano library, which is available here. :ref:`This library <core_library>` contains Murano Agent templates and virtual machine initialization scripts.
 * $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instance.') - this is the way of sending reports to Murano dashboard during deployment
 
 Step 3.  Prepare dynamic UI form definition
@@ -136,6 +139,8 @@ General application metadata should be described in the application manifest fil
 * **Author** - person or company name which created an application package
 * **Classes** - MuranoPL class list, on which application deployment is based
 * **Tags** - list of words, associated with this application. Will be helpful during the search. *Optional* parameter
+
+.. _Telnet Manifest:
 
 Example *manifest.yaml*
 
