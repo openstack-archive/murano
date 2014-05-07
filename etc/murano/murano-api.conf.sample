@@ -101,6 +101,9 @@ syslog_log_facility = LOG_LOCAL0
 # value)
 #rabbit_ha_queues=false
 
+# Use RPC for status reporting between engine and API
+notification_driver=messagingv2
+
 [database]
 #A valid SQLAlchemy connection string for the metadata database
 #connection = mysql://root:password@localhost:3306/murano
