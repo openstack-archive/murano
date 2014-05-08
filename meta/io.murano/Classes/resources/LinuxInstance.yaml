@@ -1,0 +1,21 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+
+Name: LinuxInstance
+
+Extends: Instance
+
+Workflow:
+  createDefaultInstanceSecurityGroupRules:
+    Arguments:
+      - groupName:
+          Contract: $.string().notNull()
+    Body:
+      - $rules:
+        - ToPort: 22
+          IpProtocol: tcp
+          FromPort: 22
+          External: true
+      - $.environment.securityGroupManager.addGroupIngress(
+          rules => $rules, groupName => $groupName)

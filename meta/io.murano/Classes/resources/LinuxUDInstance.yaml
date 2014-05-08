@@ -1,0 +1,26 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+
+Name: LinuxUDInstance
+
+Extends:
+  - LinuxInstance
+
+Properties:
+  customUserData:
+    Contract: $.string()
+    Usage: InOut
+    Default: null
+
+Workflow:
+  prepareUserData:
+    Body:
+      - Return: $.customUserData
+
+  setCustomUserData:
+    Arguments:
+      - data:
+          Contract: $.string().notNull()
+    Body:
+      - $.customUserData: $data
