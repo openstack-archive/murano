@@ -13,16 +13,13 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-.. _install:
-
-==================
- Installing Murano
-==================
+=====================
+Building Murano Image
+=====================
 
 .. toctree::
    :maxdepth: 2
 
-   prepare
-   development
-   manual
-   ssl
+   windows
+   linux
+   upload

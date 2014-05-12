@@ -58,7 +58,7 @@ Table of contents
    guidelines
    install/index
    articles/index
-
+   image_builders/index
 
 Indices and tables
 ==================
