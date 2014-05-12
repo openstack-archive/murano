@@ -28,8 +28,7 @@ import muranoapi.engine.system.common as common
 
 
 class AgentException(Exception):
-    def __init__(self, message_info):
-        self.message_info = message_info
+    pass
 
 
 @murano_class.classname('io.murano.system.Agent')
