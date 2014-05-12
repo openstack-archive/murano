@@ -197,14 +197,10 @@ class TestCase(testtools.TestCase):
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
 
-        username = CONF.identity.username
-        password = CONF.identity.password
-        tenant_name = CONF.identity.tenant_name
-
-        mgr = clients.Manager(username, password, tenant_name)
-        auth_provider = mgr.get_auth_provider(mgr.get_default_credentials())
-
-        cls.client = MuranoClient(auth_provider)
+        # If no credentials are provided, the Manager will use those
+        # in CONF.identity and generate an auth_provider from them
+        mgr = clients.Manager()
+        cls.client = MuranoClient(mgr.auth_provider)
 
     def setUp(self):
         super(TestCase, self).setUp()
@@ -255,11 +251,7 @@ class NegativeTestCase(TestCase):
     def setUpClass(cls):
         super(NegativeTestCase, cls).setUpClass()
 
-        username = CONF.identity.alt_username
-        password = CONF.identity.alt_password
-        tenant_name = CONF.identity.alt_tenant_name
-
-        mgr = clients.Manager(username, password, tenant_name)
-        auth_provider = mgr.get_auth_provider(mgr.get_default_credentials())
-
-        cls.alt_client = MuranoClient(auth_provider)
+        # If no credentials are provided, the Manager will use those
+        # in CONF.identity and generate an auth_provider from them
+        mgr = clients.Manager()
+        cls.alt_client = MuranoClient(mgr.auth_provider)
