@@ -48,8 +48,8 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
-        LOG.debug(_('Services:Get <EnvId: {0}, '
-                    'Path: {1}>').format(environment_id, path))
+        LOG.debug('Services:Get <EnvId: {0}, '
+                  'Path: {1}>'.format(environment_id, path))
 
         session_id = None
         if hasattr(request, 'context') and request.context.session:
@@ -69,8 +69,8 @@ class Controller(object):
     @normalize_path
     def post(self, request, environment_id, path, body):
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
-        LOG.debug(_('Services:Post <EnvId: {0}, Path: {2}, '
-                    'Body: {1}>').format(environment_id, secure_data, path))
+        LOG.debug('Services:Post <EnvId: {0}, Path: {2}, '
+                  'Body: {1}>'.format(environment_id, secure_data, path))
 
         post_data = core_services.CoreServices.post_data
         session_id = request.context.session
@@ -85,8 +85,8 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def put(self, request, environment_id, path, body):
-        LOG.debug(_('Services:Put <EnvId: {0}, Path: {2}, '
-                    'Body: {1}>').format(environment_id, body, path))
+        LOG.debug('Services:Put <EnvId: {0}, Path: {2}, '
+                  'Body: {1}>'.format(environment_id, body, path))
 
         put_data = core_services.CoreServices.put_data
         session_id = request.context.session
@@ -102,8 +102,8 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def delete(self, request, environment_id, path):
-        LOG.debug(_('Services:Put <EnvId: {0}, '
-                    'Path: {1}>').format(environment_id, path))
+        LOG.debug('Services:Put <EnvId: {0}, '
+                  'Path: {1}>'.format(environment_id, path))
 
         delete_data = core_services.CoreServices.delete_data
         session_id = request.context.session

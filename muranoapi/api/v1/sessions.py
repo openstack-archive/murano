@@ -32,7 +32,7 @@ API_NAME = 'Sessions'
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Create')
     def configure(self, request, environment_id):
-        LOG.debug(_('Session:Configure <EnvId: {0}>').format(environment_id))
+        LOG.debug('Session:Configure <EnvId: {0}>'.format(environment_id))
 
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
@@ -62,7 +62,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Index')
     def show(self, request, environment_id, session_id):
-        LOG.debug(_('Session:Show <SessionId: {0}>').format(session_id))
+        LOG.debug('Session:Show <SessionId: {0}>'.format(session_id))
 
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
@@ -92,7 +92,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id, session_id):
-        LOG.debug(_('Session:Delete <SessionId: {0}>').format(session_id))
+        LOG.debug('Session:Delete <SessionId: {0}>'.format(session_id))
 
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
@@ -125,7 +125,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Deploy')
     def deploy(self, request, environment_id, session_id):
-        LOG.debug(_('Session:Deploy <SessionId: {0}>').format(session_id))
+        LOG.debug('Session:Deploy <SessionId: {0}>'.format(session_id))
 
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)

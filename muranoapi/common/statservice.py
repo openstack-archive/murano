@@ -54,7 +54,7 @@ class StatsCollectingService(service.Service):
             eventlet.sleep(period)
 
     def update_stats(self):
-        LOG.debug(_("Updating statistic information."))
+        LOG.debug("Updating statistic information.")
         LOG.debug("Stats object: %s" % v1.stats)
         LOG.debug("Stats: Requests:%s  Errors: %s Ave.Res.Time %2.4f\n"
                   "Per tenant: %s" %

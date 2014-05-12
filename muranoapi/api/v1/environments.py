@@ -35,7 +35,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
-        LOG.debug(_('Environments:List'))
+        LOG.debug('Environments:List')
 
         #Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
@@ -46,7 +46,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        LOG.debug(_('Environments:Create <Body {0}>').format(body))
+        LOG.debug('Environments:Create <Body {0}>'.format(body))
 
         environment = envs.EnvironmentServices.create(body.copy(),
                                                       request.context.tenant)
@@ -55,7 +55,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
-        LOG.debug(_('Environments:Show <Id: {0}>').format(environment_id))
+        LOG.debug('Environments:Show <Id: {0}>'.format(environment_id))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
@@ -85,8 +85,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Update')
     def update(self, request, environment_id, body):
-        LOG.debug(_('Environments:Update <Id: {0}, '
-                    'Body: {1}>').format(environment_id, body))
+        LOG.debug('Environments:Update <Id: {0}, '
+                  'Body: {1}>'.format(environment_id, body))
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
@@ -108,7 +108,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
-        LOG.debug(_('Environments:Delete <Id: {0}>').format(environment_id))
+        LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
 
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)

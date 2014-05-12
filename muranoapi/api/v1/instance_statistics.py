@@ -27,7 +27,7 @@ API_NAME = 'EnvironmentStatistics'
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'GetAggregated')
     def get_aggregated(self, request, environment_id):
-        LOG.debug(_('EnvironmentStatistics:GetAggregated'))
+        LOG.debug('EnvironmentStatistics:GetAggregated')
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
@@ -37,7 +37,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'GetForInstance')
     def get_for_instance(self, request, environment_id, instance_id):
-        LOG.debug(_('EnvironmentStatistics:GetForInstance'))
+        LOG.debug('EnvironmentStatistics:GetForInstance')
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
@@ -47,7 +47,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'GetForEnvironment')
     def get_for_environment(self, request, environment_id):
-        LOG.debug(_('EnvironmentStatistics:GetForEnvironment'))
+        LOG.debug('EnvironmentStatistics:GetForEnvironment')
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics

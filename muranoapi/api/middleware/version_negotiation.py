@@ -47,19 +47,19 @@ class VersionNegotiationFilter(wsgi.Middleware):
         args = {'method': req.method, 'path': req.path, 'accept': req.accept}
         LOG.debug(msg % args)
 
-        LOG.debug(_("Using url versioning"))
+        LOG.debug("Using url versioning")
         # Remove version in url so it doesn't conflict later
         req_version = self._pop_path_info(req)
 
         try:
             version = self._match_version_string(req_version)
         except ValueError:
-            LOG.debug(_("Unknown version. Returning version choices."))
+            LOG.debug("Unknown version. Returning version choices.")
             return self.versions_app
 
         req.environ['api.version'] = version
         req.path_info = ''.join(('/v', str(version), req.path_info))
-        LOG.debug(_("Matched version: v%d"), version)
+        LOG.debug("Matched version: v%d", version)
         LOG.debug('new path %s' % req.path_info)
         return None
 
