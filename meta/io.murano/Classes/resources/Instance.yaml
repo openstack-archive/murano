@@ -69,20 +69,22 @@ Workflow:
       - $userData: $.prepareUserData()
 
       - $template:
-          Resources:
+          heat_template_version: '2013-05-23'
+          resources:
             $.name:
-              Type: 'AWS::EC2::Instance'
-              Properties:
-                InstanceType: $.flavor
-                ImageId: $.image
-                UserData: $userData
-                KeyName: $.keyname
+              type: 'OS::Nova::Server'
+              properties:
+                flavor: $.flavor
+                image: $.image
+                user_data: $userData
+                key_name: $.keyname
 
 
-          Outputs:
+          outputs:
             format('{0}-PublicIp', $.name):
-              Value:
-                - Fn::GetAtt: [$.name, PublicIp]
+              description: format('Public IP assigned to {0} instance', $.name)
+              value:
+                get_attr: [$.name, PublicIp]
       - $.environment.stack.updateTemplate($template)
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
