@@ -22,3 +22,8 @@ Classes:
 
   io.murano.resources.Network: resources/Network.yaml
   io.murano.resources.Instance: resources/Instance.yaml
+  io.murano.resources.LinuxInstance: resources/LinuxInstance.yaml
+  io.murano.resources.LinuxMuranoInstance: resources/LinuxMuranoInstance.yaml
+  io.murano.resources.LinuxUDInstance: resources/LinuxUDInstance.yaml
+  io.murano.resources.WindowsInstance: resources/WindowsInstance.yaml
+

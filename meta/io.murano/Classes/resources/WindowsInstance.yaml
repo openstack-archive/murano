@@ -1,0 +1,41 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+
+Name: WindowsInstance
+
+Extends: Instance
+
+Workflow:
+  createDefaultInstanceSecurityGroupRules:
+    Arguments:
+      - groupName:
+          Contract: $.string().notNull()
+    Body:
+      - $rules:
+        - ToPort: 3389
+          IpProtocol: tcp
+          FromPort: 3389
+          External: true
+      - $.environment.securityGroupManager.addGroupIngress(
+          rules => $rules, groupName => $groupName)
+
+  prepareUserData:
+    Body:
+      - $configFile: $.resources.string('Agent-v1.template')
+      - $initScript: $.resources.string('windows-init.ps1')
+      - $configReplacements:
+          "%RABBITMQ_HOST%": config(rabbitmq, host)
+          "%RABBITMQ_PORT%": config(rabbitmq, port)
+          "%RABBITMQ_USER%": config(rabbitmq, login)
+          "%RABBITMQ_PASSWORD%": config(rabbitmq, password)
+          "%RABBITMQ_VHOST%": config(rabbitmq, virtual_host)
+          "%RABBITMQ_SSL%": str(config(rabbitmq, ssl)).toLower()
+          "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
+          "%RESULT_QUEUE%": $.environment.agentListener.queueName()
+      - $scriptReplacements:
+          "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
+          "%INTERNAL_HOSTNAME%": $.name
+          "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), config(rabbitmq, host))
+          "%CA_ROOT_CERT_BASE64%": ""
+      - Return: $initScript.replace($scriptReplacements)
