@@ -13,7 +13,6 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-
 YAML
 ====
 
@@ -206,6 +205,7 @@ Workflows are the methods that together describe how the entities that are repre
 In typical scenario root object in input data model is of type io.murano.Environment and has a "deploy" method. Invoking this method causes a series of infrastructure activities (typically by modifying Heat stack) and VM agents commands that cause execution of deployment scripts. Workflow role is to map data from input object model (or result of previously executed actions) to parameters of those activities and to initiate those activities in correct order.
 Methods have input parameters and can return value to the caller.
 Methods defined in Workflow section of the class using the following template:
+
    ::
 
     methodName:
