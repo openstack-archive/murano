@@ -19,10 +19,13 @@
 Dynamic UI Definition specification
 ===================================
 
-The main purpose of Dynamic UI is to generate application creation forms "on-the-fly".
- Murano dashboard doesn't know anything about what applications can be deployed and which web form are needed to create application instance.
- So all application definitions should contain a yaml file which tells dashboard how to create an application and what validations are to be applied.
- This document will help you to compose a valid UI definition for your application.
+The main purpose of Dynamic UI is to generate application creation
+forms "on-the-fly".  Murano dashboard doesn't know anything about what
+applications can be deployed and which web form are needed to create
+application instance.  So all application definitions should contain a
+yaml file which tells dashboard how to create an application and what
+validations are to be applied.  This document will help you to compose
+a valid UI definition for your application.
 
 Structure
 =========
@@ -45,15 +48,40 @@ Murano 0.5 - version 2
 
 Application and Templates
 =========================
-In the Application *application object model* section is described. This model will be translated into json and according to that json application will be deployed.
-Application section should contain all necessary keys that are required by murano-engine to deploy an application. Note that under ''?'' section goes system part of the model.
-You can pick parameters you got from the user (they should be described in the Forms section) and pick the right place where they should be set.
-To do this `YAQL <https://github.com/tsufiev/yaql/blob/master/README.md>`_ is used. All lines are going to be checked for a yaql expressions. Thus, *generateHostname* will be recognized as yaql function and will generate machine hostname .
+In the Application section an *application object model* is
+described. This model will be translated into json and according to
+that json application will be deployed. Application section should
+contain all necessary keys that are required by murano-engine to
+deploy an application. Note that under *?* section goes system part
+of the model. You can pick parameters you got from the user (they
+should be described in the Forms section) and pick the right place
+where they should be set. To do this `YAQL
+<https://github.com/ativelkov/yaql/blob/master/README.md>`_ is
+used. All lines are going to be checked for a yaql
+expressions. Currently, 2 yaql functions are provided for object model
+generation:
+* **generateHostname** is used for machine hostname generation; it
+   accepts 2 arguments: name pattern (string) and index (integer). If
+   '#' symbol is present in name pattern, it will be replaced with the
+   index provided. If pattern is not given, a random name will be
+   generated.
+* **repeat** is used to produce a list of data snippets, given the
+   template snippet (first argument) and number of times it should be
+   reproduced (second argument). Inside that template snippet current
+   step can be referenced as *$index*.
+
+Note that while evaluating YAQL expressions referenced from
+**Application** section (as well as almost all attributes inside
+**Forms** section, see later) *$* root object is set to the list of
+dictionaries with cleaned forms' data. So to obtain cleaned value of
+e.g. field *name* of form *appConfiguration* , you should reference it
+as *$.appConfiguration.name*. This context will be called as
+**standard context** throughout the text.
 
 *Example:*
 
 .. code-block:: yaml
-
+   Templates:
      primaryController:
         ?:
           type: io.murano.windows.activeDirectory.PrimaryController
@@ -76,6 +104,14 @@ To do this `YAQL <https://github.com/tsufiev/yaql/blob/master/README.md>`_ is us
           flavor: $.instanceConfiguration.flavor
           image: $.instanceConfiguration.osImage
 
+   Application:
+     ?:
+       type: io.murano.windows.activeDirectory.ActiveDirectory
+     name: $.serviceConfiguration.name
+     primaryController: $primaryController
+     secondaryControllers: repeat($secondaryController, $.serviceConfiguration.dcInstances - 1)
+
+
 Forms
 =====
 
@@ -83,63 +119,138 @@ This section describes Django forms. Set name for your form and provide fields a
 Each field should contain:
 
 * **name** -  system field name, could be any
-* **label** - name, that will be displayed in the form
-* **description** - description, that will be displayed in the form description area. Use  yaml line folding character >- to keep the correct formatting during data transferring.
 * **type** - system field type
 
-    * string - Django string field
-    * boolean - Django boolean field
-    * text - Django boolean field
-    * integer - Django integer field
+Currently supported options for **type** attribute are:
+
+    * string - Django CharField with one-line text input
+    * boolean - Django BooleanField
+    * text - Django CharField with multi-line text input
+    * integer - Django IntegerField
     * password - Specific field with validation for strong password
     * clusterip - Specific field, used for cluster IP
     * domain - Specific field, used for Active Directory domain
-    * databaselist - Specific field, a list of databases (comma-separated list of database names, where each name has the following syntax first symbol should be latin letter or underscore; subsequent symbols can be Latin letter, numeric, underscore, at the sign, number sign or dollar sign)
+    * databaselist - Specific field, a list of databases
+      (comma-separated list of databases' names, where each name has the
+      following syntax first symbol should be latin letter or
+      underscore; subsequent symbols can be latin letter, numeric,
+      underscore, at the sign, number sign or dollar sign)
     * table - Specific field, used for defining table in a form
     * flavor - Specific field, used for defining flavor in a form
     * keypair - Specific field, used for defining KeyPair in a form
     * image- Specific field, used for defining image in a form
-    * azone - Specific field, used for defining availability zone in a form
+    * azone - Specific field, used for defining availability zone in a
+      form
+
+Other arguments (and whether they are required or not) depends on
+field's type and other attributes values. Among the most common
+attributes are:
+* **label** - name, that will be displayed in the form; defaults to
+    **name** being capitalized.
+* **description** - description, that will be displayed in the form
+    description area. Use yaml line folding character >- to keep the
+    correct formatting during data transferring.
+* **descriptionTitle** - title of the description, defaults to
+    **label**.
+* **hidden** whether field should be visible or not in the form's left
+    side. Note that hidden field's description will still be visible
+    in the form's right side (if given). Hidden fields are used
+    storing some data to be used by other, visible fields.
+* **minLength**, **maxLength** (for string fields) and **minValue**,
+    **maxValue** (for integer fields) are transparently translated
+    into django validation properties.
+* **validators** is a list of validators dictionaries, each validator
+    should at least have *expr* key, under that key either some `YAQL
+    <https://github.com/ativelkov/yaql/blob/master/README.md>`
+    expression is stored, either one-element dictionary with
+    *regexpValidator* key (and some regexp string as value). Another
+    possible key of a validator dictionary is *message*, and although
+    it is not required, it is highly desirable to specify it -
+    otherwise, when validator fails (i.e. regexp doesn't match or YAQL
+    expression evaluates to false) no message will be shown. Note that
+    field-level validators use YAQL context different from all other
+    attributes and section: here *$* root object is set to the value
+    of field being validated (to make expressions shorter).
+* **widgetMedia** sets some custom *CSS* and *JavaScript* used for the
+    field's widget rendering. Mostly they are used to do some
+    client-side field enabling/disabling, hiding/unhiding etc. This is
+    a temporary field which will be dropped once Version 3 of Dynamic
+    UI is implemented (since it will transparently translate YAQL
+    expressions into the appropriate *JavaScript*).
+
+Besides field-level validators form-level validators also exist. They
+use **standard context** for YAQL evaluation and are required when
+there is need to validate some form's constraint across several
+fields.
 
 *Example*
 
 .. code-block:: yaml
 
-    Forms:
-      - serviceConfiguration:
-          fields:
-            - name: name
-              type: string
-              label: Service Name
-              description: >-
-                To identify your service in logs please specify a service name
-            - name: dcInstances
-              type: integer
-              hidden: true
-              initial: 1
-              required: false
-              maxLength: 15
-              helpText: Optional field for a machine hostname template
-      - instanceConfiguration:
-              fields:
-                - name: flavor
-                  type: flavor
-                  label: Instance flavor
-                  description: >-
-                    Select registered in Openstack flavor. Consider that service performance
-                    depends on this parameter.
-                  required: false
-                - name: osImage
-                  type: image
-                  imageType: linux
-                  label: Instance image
-                  description: >-
-                    Select valid image for a service. Image should already be prepared and
-                    registered in glance.
-                - name: availabilityZone
-                  type: azone
-                  label: Availability zone
-                  description: Select availability zone where service would be installed.
-                  required: false
+ Forms:
+   - serviceConfiguration:
+       fields:
+         - name: name
+           type: string
+           label: Service Name
+           description: >-
+             To identify your service in logs please specify a service name
+         - name: dcInstances
+           type: integer
+           hidden: true
+           initial: 1
+           required: false
+           maxLength: 15
+           helpText: Optional field for a machine hostname template
+         - name: unitNamingPattern
+           type: string
+           label: Hostname template
+           description: >-
+             For your convenience all instance hostnames can be named
+             in the same way. Enter a name and use # character for incrementation.
+             For example, host# turns into host1, host2, etc. Please follow Windows
+             hostname restrictions.
+           required: false
+           regexpValidator: '^(([a-zA-Z0-9#][a-zA-Z0-9-#]*[a-zA-Z0-9#])\.)*([A-Za-z0-9#]|[A-Za-z0-9#][A-Za-z0-9-#]*[A-Za-z0-9#])$'
+           # FIXME: does not work for # turning into 2-digit numbers
+           maxLength: 15
+           helpText: Optional field for a machine hostname template
+           # temporaryHack
+           widgetMedia:
+             js: ['muranodashboard/js/support_placeholder.js']
+             css: {all: ['muranodashboard/css/support_placeholder.css']}
+       validators:
+         # if unitNamingPattern is given and dcInstances > 1, then '#' should occur in unitNamingPattern
+         - expr: $.serviceConfiguration.dcInstances < 2 or not $.serviceConfiguration.unitNamingPattern.bool() or '#' in$.serviceConfiguration.unitNamingPattern
+           message: Incrementation symbol "#" is required in the Hostname template
+   - instanceConfiguration:
+         fields:
+           - name: title
+             type: string
+             required: false
+             hidden: true
+             descriptionTitle: Instance Configuration
+             description: Specify some instance parameters on which service would be created.
+           - name: flavor
+             type: flavor
+             label: Instance flavor
+             description: >-
+               Select registered in Openstack flavor. Consider that service performance
+               depends on this parameter.
+             required: false
+           - name: osImage
+             type: image
+             imageType: windows
+             label: Instance image
+             description: >-
+               Select valid image for a service. Image should already be prepared and
+               registered in glance.
+           - name: availabilityZone
+             type: azone
+             label: Availability zone
+             description: Select availability zone where service would be installed.
+             required: false
 
-Full example with Telnet application form definitions is available here :ref:`telnet-yaml`
+Full example with Active Directory application form definitions is available here :ref:`active-directory-yaml`
+
+
