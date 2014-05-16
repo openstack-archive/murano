@@ -83,7 +83,8 @@ class ApiPackageLoader(PackageLoader):
 
     @staticmethod
     def _get_cache_directory():
-        directory = os.path.join(config.CONF.packages_cache, str(uuid.uuid4()))
+        directory = os.path.join(config.CONF.packages_opts.packages_cache,
+                                 str(uuid.uuid4()))
         directory = os.path.abspath(directory)
         os.makedirs(directory)
 

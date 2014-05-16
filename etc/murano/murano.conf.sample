@@ -17,6 +17,14 @@ bind_port = 8082
 # Maximum application package size, Mb
 package_size_limit = 5
 
+# If a `limit` query param is not provided in an api request, it will
+# default to `limit_param_default`
+limit_param_default = 20
+
+# Limit the api to return `api_limit_max` items in a call to a container. If
+# a larger `limit` query param is provided, it will be reduced to this value.
+api_limit_max = 100
+
 # Set up logging. Make sure the user has permissions to write to this file! To use syslog just set use_syslog parameter value to 'True'.
 log_file = /tmp/murano-api.log
 
