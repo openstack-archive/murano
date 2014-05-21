@@ -101,6 +101,25 @@ function mkdir_chown_stack {
     sudo chown $STACK_USER "$1"
 }
 
+
+function configure_murano_rpc_backend() {
+    # Configure the rpc service.
+    iniset_rpc_backend muranoapi $MURANO_CONF_FILE DEFAULT
+
+    # TODO(ruhe): get rid of this ugly workaround.
+    inicomment $MURANO_CONF_FILE DEFAULT rpc_backend
+
+    iniset $MURANO_CONF_FILE rabbitmq host $RABBIT_HOST
+    iniset $MURANO_CONF_FILE rabbitmq password $RABBIT_PASSWORD
+
+    # Set non-default rabbit virtual host if required.
+    if [[ -n "$MURANO_RABBIT_VHOST" ]]; then
+        iniset $MURANO_CONF_FILE DEFAULT rabbit_virtual_host $MURANO_RABBIT_VHOST
+        iniset $MURANO_CONF_FILE rabbitmq virtual_host $MURANO_RABBIT_VHOST
+    fi
+}
+
+
 # Entry points
 # ------------
 
@@ -128,16 +147,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
     iniset $MURANO_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
 
-    # configure the rpc service.
-    iniset_rpc_backend muranoapi $MURANO_CONF_FILE DEFAULT
-
-    # TODO(ruhe): get rid of this ugly workaround
-    inicomment $MURANO_CONF_FILE DEFAULT rpc_backend
-
-    # Set non-default rabbit virtual host if required
-    if [[ -n "$MURANO_RABBIT_VHOST" ]]; then
-        iniset $MURANO_CONF_FILE DEFAULT rabbit_virtual_host $MURANO_RABBIT_VHOST
-    fi
+    configure_murano_rpc_backend
 
     # Configure notifications for status information during provisioning
     iniset $MURANO_CONF_FILE DEFAULT notification_driver messagingv2
