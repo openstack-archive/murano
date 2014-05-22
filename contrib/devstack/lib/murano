@@ -87,9 +87,9 @@ function create_murano_accounts() {
         openstack endpoint create \
             $MURANO_SERVICE \
             --region RegionOne \
-            --publicurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT/v1" \
-            --adminurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT/v1" \
-            --internalurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT/v1"
+            --publicurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+            --adminurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+            --internalurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
     fi
 }
 

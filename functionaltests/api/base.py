@@ -27,7 +27,6 @@ CONF = config.CONF
 
 
 class MuranoClient(rest_client.RestClient):
-
     def __init__(self, auth_provider):
         super(MuranoClient, self).__init__(auth_provider)
 
@@ -35,30 +34,30 @@ class MuranoClient(rest_client.RestClient):
         self.endpoint_url = 'publicURL'
 
     def get_environments_list(self):
-        resp, body = self.get('environments')
+        resp, body = self.get('v1/environments')
 
         return resp, json.loads(body)
 
     def create_environment(self, name):
         post_body = '{"name": "%s"}' % name
 
-        resp, body = self.post('environments', post_body)
+        resp, body = self.post('v1/environments', post_body)
 
         return resp, json.loads(body)
 
     def delete_environment(self, environment_id):
-        return self.delete('environments/{0}'.format(environment_id))
+        return self.delete('v1/environments/{0}'.format(environment_id))
 
     def update_environment(self, environment_id):
         post_body = '{"name": "%s"}' % ("changed-environment-name")
 
-        resp, body = self.put('environments/{0}'.format(environment_id),
+        resp, body = self.put('v1/environments/{0}'.format(environment_id),
                               post_body)
 
         return resp, json.loads(body)
 
     def get_environment(self, environment_id):
-        resp, body = self.get('environments/{0}'.format(environment_id))
+        resp, body = self.get('v1/environments/{0}'.format(environment_id))
 
         return resp, json.loads(body)
 
@@ -66,7 +65,7 @@ class MuranoClient(rest_client.RestClient):
         post_body = None
 
         resp, body = self.post(
-            'environments/{0}/configure'.format(environment_id),
+            'v1/environments/{0}/configure'.format(environment_id),
             post_body
         )
 
@@ -74,11 +73,13 @@ class MuranoClient(rest_client.RestClient):
 
     def delete_session(self, environment_id, session_id):
         return self.delete(
-            'environments/{0}/sessions/{1}'.format(environment_id, session_id))
+            'v1/environments/{0}/sessions/{1}'.format(environment_id,
+                                                      session_id))
 
     def get_session(self, environment_id, session_id):
         resp, body = self.get(
-            'environments/{0}/sessions/{1}'.format(environment_id, session_id))
+            'v1/environments/{0}/sessions/{1}'.format(environment_id,
+                                                      session_id))
 
         return resp, json.loads(body)
 
@@ -91,7 +92,7 @@ class MuranoClient(rest_client.RestClient):
         )
 
         resp, body = self.post(
-            'environments/{0}/services'.format(environment_id),
+            'v1/environments/{0}/services'.format(environment_id),
             post_body,
             headers
         )
@@ -105,7 +106,8 @@ class MuranoClient(rest_client.RestClient):
         )
 
         return self.delete(
-            'environments/{0}/services/{1}'.format(environment_id, service_id),
+            'v1/environments/{0}/services/{1}'.format(environment_id,
+                                                      service_id),
             headers
         )
 
@@ -116,7 +118,7 @@ class MuranoClient(rest_client.RestClient):
         )
 
         resp, body = self.get(
-            'environments/{0}/services'.format(environment_id),
+            'v1/environments/{0}/services'.format(environment_id),
             headers
         )
 
@@ -129,19 +131,20 @@ class MuranoClient(rest_client.RestClient):
         )
 
         resp, body = self.get(
-            'environments/{0}/services/{1}'.format(environment_id, service_id),
+            'v1/environments/{0}/services/{1}'.format(environment_id,
+                                                      service_id),
             headers
         )
 
         return resp, json.loads(body)
 
     def get_list_packages(self):
-        resp, body = self.get('catalog/packages')
+        resp, body = self.get('v1/catalog/packages')
 
         return resp, json.loads(body)
 
     def get_package(self, id):
-        resp, body = self.get('catalog/packages/{0}'.format(id))
+        resp, body = self.get('v1/catalog/packages/{0}'.format(id))
 
         return resp, json.loads(body)
 
@@ -156,7 +159,7 @@ class MuranoClient(rest_client.RestClient):
 
         post_body = {'JsonString': json.dumps(body)}
         request_url = '{endpoint}{url}'.format(endpoint=self.base_url,
-                                               url='/catalog/packages')
+                                               url='/v1/catalog/packages')
 
         resp = requests.post(request_url, files=files, data=post_body,
                              headers=headers)
@@ -169,25 +172,25 @@ class MuranoClient(rest_client.RestClient):
             'content-type': 'application/murano-packages-json-patch'
         }
 
-        resp, body = self.patch('catalog/packages/{0}'.format(id),
+        resp, body = self.patch('v1/catalog/packages/{0}'.format(id),
                                 json.dumps(post_body), headers=headers)
 
         return resp, json.loads(body)
 
     def delete_package(self, id):
-        return self.delete('catalog/packages/{0}'.format(id))
+        return self.delete('v1/catalog/packages/{0}'.format(id))
 
     def download_package(self, id):
-        return self.get('catalog/packages/{0}/download'.format(id))
+        return self.get('v1/catalog/packages/{0}/download'.format(id))
 
     def get_ui_definition(self, id):
-        return self.get('catalog/packages/{0}/ui'.format(id))
+        return self.get('v1/catalog/packages/{0}/ui'.format(id))
 
     def get_logo(self, id):
-        return self.get('catalog/packages/{0}/logo'.format(id))
+        return self.get('v1/catalog/packages/{0}/logo'.format(id))
 
     def list_categories(self):
-        resp, body = self.get('catalog/packages/categories')
+        resp, body = self.get('v1/catalog/packages/categories')
 
         return resp, json.loads(body)
 
