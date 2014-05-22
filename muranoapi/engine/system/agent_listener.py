@@ -19,6 +19,10 @@ import muranoapi.dsl.murano_class as murano_class
 import muranoapi.dsl.murano_object as murano_object
 import muranoapi.engine.system.common as common
 
+from muranoapi.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
+
 
 @murano_class.classname('io.murano.system.AgentListener')
 class AgentListener(murano_object.MuranoObject):
@@ -52,6 +56,8 @@ class AgentListener(murano_object.MuranoObject):
                         continue
                     msg.ack()
                     msg_id = msg.body.get('SourceID', msg.id)
+                    LOG.debug("Got execution result: id '{0}'"
+                              " body '{1}'".format(msg_id, msg.body))
                     if msg_id in self._subscriptions:
                         event = self._subscriptions.pop(msg_id)
                         event.send(msg.body)
