@@ -25,7 +25,7 @@ Methods for application package management
 
 **Package Properties**
 
-- ``id``: guid corresponds to database record
+- ``id``: guid of a package (``fully_qualified_name`` can also be used for some API functions)
 - ``fully_qualified_name``: fully qualified domain name -  domain name that specifies exact application location
 - ``name``: user-friendly name
 - ``type``: package type, "library" or "application"
@@ -181,9 +181,11 @@ Get package details
 """""""""""""""""""
 `/v1/catalog/packages/{id} [GET]`
 
+Display details for a package.
+
 **Parameters**
 
-``id`` (required)  Numeric `id` of the package to perform action with
+``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/json)**
 
@@ -225,6 +227,10 @@ Update a Package
 
 Allows to edit mutable fields (categories, tags, name, description, is_public, enabled).
 See the full specification `here <http://tools.ietf.org/html/rfc6902>`_.
+
+**Parameters**
+
+``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 Allowed operations:
 
@@ -288,19 +294,23 @@ Note, that replacing categories with empty list is not allowed as well as the re
 
 **Response 400**
 
-* In attempt to replace categories with empty list or remove last category
+* An attempt to replace categories with empty list or remove last category
 
 **Response 404**
 
-* In attempt to update package that doesn't exist
+* An attempt to update package that doesn't exist
 
 Delete application definition from the catalog
 """"""""""""""""""""""""""""""""""""""""""""""
 `/v1/catalog/packages/{id} [DELETE]`
 
+**Parameters**
+
+``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package to delete
+
 **Response 404**
 
-* In attempt to delete package that doesn't exist
+* An attempt to delete package that doesn't exist
 
 Download application data
 -------------------------
@@ -313,7 +323,7 @@ Get application definition package
 
 **Parameters**
 
-* id (required)  Numeric `id` of the package to perform action with
+* id (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octetstream)**
 
@@ -331,7 +341,7 @@ Retrieve UI definition for a application which described in a package with provi
 
 **Parameters**
 
-* id (required)  Numeric `id` of the package to perform action with
+* id (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octet-stream)**
 
@@ -357,8 +367,7 @@ Retrieve application logo which described in a package with provided id
 
 **Parameters**
 
-id (required)  Numeric `id` of the package to perform action with
-
+id (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octet-stream)**
 

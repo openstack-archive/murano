@@ -33,10 +33,25 @@ SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
 LOG = logging.getLogger(__name__)
 
 
-def _package_get(package_id, session):
-    package = session.query(models.Package).get(package_id)
+def _package_get(package_id_or_name, session):
+    # TODO (sjmc7): update openstack/common and pull in
+    # uuidutils, check that package_id_or_name resembles a
+    # UUID before trying to treat it as one
+    package = session.query(models.Package).get(package_id_or_name)
     if not package:
-        msg = _("Package id '{0}' is not found").format(package_id)
+        # Try using the FQN name instead. Since FQNs right now are unique,
+        # don't need to do any logic to figure out if we have the right one.
+        # # TODO (sjmc7): Revisit for precedence rules.
+        #  Heat does this in nicer way, giving each stack an unambiguous ID of
+        # stack_name/id and redirecting to it in the API. We need to do some
+        # reworking for precedence rules later, so maybe take a look at this
+        package = session.query(models.Package).filter_by(
+            fully_qualified_name=package_id_or_name
+        ).first()
+
+    if not package:
+        msg = _("Package id or name '{0}' not found").\
+            format(package_id_or_name)
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
 
@@ -60,14 +75,14 @@ def _authorize_package(package, context, allow_public=False):
             raise exc.HTTPForbidden(msg)
 
 
-def package_get(package_id, context):
+def package_get(package_id_or_name, context):
     """
     Return package details
-    :param package_id: ID of a package, string
+    :param package_id: ID or name of a package, string
     :returns: detailed information about package, dict
     """
     session = db_session.get_session()
-    package = _package_get(package_id, session)
+    package = _package_get(package_id_or_name, session)
     _authorize_package(package, context, allow_public=True)
     return package
 
@@ -191,7 +206,7 @@ def _do_remove(package, change):
     return package
 
 
-def package_update(pkg_id, changes, context):
+def package_update(pkg_id_or_name, changes, context):
     """
     Update package information
     :param changes: parameters to update
@@ -203,7 +218,7 @@ def package_update(pkg_id, changes, context):
                          'remove': _do_remove}
     session = db_session.get_session()
     with session.begin():
-        pkg = _package_get(pkg_id, session)
+        pkg = _package_get(pkg_id_or_name, session)
         _authorize_package(pkg, context)
 
         for change in changes:
@@ -338,15 +353,12 @@ def package_upload(values, tenant_id):
     return package
 
 
-def package_delete(package_id, context):
-    """
-    Delete package information from the system ID of a package, string
-    parameters to update
-    """
+def package_delete(package_id_or_name, context):
+    """Delete a package by name or by ID"""
     session = db_session.get_session()
 
     with session.begin():
-        package = _package_get(package_id, session)
+        package = _package_get(package_id_or_name, session)
         _authorize_package(package, context)
         session.delete(package)
 
