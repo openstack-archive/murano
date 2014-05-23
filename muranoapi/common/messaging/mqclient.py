@@ -91,14 +91,12 @@ class MqClient(object):
         if not self._connected:
             raise RuntimeError('Not connected to RabbitMQ')
 
-        headers = {'message_id': str(message.id)}
-
         producer = kombu.Producer(self._connection)
         producer.publish(
             exchange=str(exchange),
             routing_key=str(key),
             body=anyjson.dumps(message.body),
-            headers=headers
+            message_id=str(message.id)
         )
 
     def open(self, queue, prefetch_count=1):

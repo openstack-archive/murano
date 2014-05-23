@@ -25,7 +25,7 @@ class Message(object):
         self._connection = connection
         self._message_handle = message_handle
         self.id = None if message_handle is None else \
-            message_handle.headers.get('message_id')
+            message_handle.properties.get('message_id')
         try:
             self.body = None if message_handle is None else \
                 anyjson.loads(message_handle.body)
