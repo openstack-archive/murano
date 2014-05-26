@@ -17,7 +17,7 @@ Project status, bugs, and blueprints are tracked on Launchpad:
 
 Developer documentation can be found here:
 
-  https://murano-api.readthedocs.org
+  https://murano.readthedocs.org
 
 Additional resources are linked from the project wiki page:
 

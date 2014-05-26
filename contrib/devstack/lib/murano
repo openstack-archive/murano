@@ -21,13 +21,13 @@ set -o xtrace
 # --------
 
 # Set up default repos
-MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/stackforge/murano-api.git}
+MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/stackforge/murano.git}
 MURANO_BRANCH=${MURANO_BRANCH:-master}
 
 # Set up default directories
-MURANO_DIR=$DEST/murano-api
+MURANO_DIR=$DEST/murano
 MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
-MURANO_CONF_FILE=${MURANO_CONF_DIR}/murano-api.conf
+MURANO_CONF_FILE=${MURANO_CONF_DIR}/murano.conf
 MURANO_DEBUG=${MURANO_DEBUG:-True}
 
 MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
@@ -128,8 +128,8 @@ function configure_murano {
     mkdir_chown_stack "$MURANO_CONF_DIR"
 
     # Copy over Murano configuration file and configure common parameters.
-    cp $MURANO_DIR/etc/murano/murano-api.conf.sample $MURANO_CONF_FILE
-    cp $MURANO_DIR/etc/murano/murano-api-paste.ini $MURANO_CONF_DIR
+    cp $MURANO_DIR/etc/murano/murano.conf.sample $MURANO_CONF_FILE
+    cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
 
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG
@@ -183,8 +183,8 @@ function install_murano() {
 
 # start_murano() - Start running processes, including screen
 function start_murano() {
-    screen_it murano-api "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano-api.conf"
-    screen_it murano-engine "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano-api.conf"
+    screen_it murano-api "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
+    screen_it murano-engine "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano.conf"
 }
 
 
@@ -192,6 +192,7 @@ function start_murano() {
 function stop_murano() {
     # Kill the Murano screen windows
     screen -S $SCREEN_NAME -p murano-api -X kill
+    screen -S $SCREEN_NAME -p murano-engine -X kill
 }
 
 

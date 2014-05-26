@@ -15,7 +15,7 @@
 # This script is executed inside pre_test_hook function in desvstack gate.
 
 # Install Murano devstack integration
-MURANO_BASE=/opt/stack/new/murano-api/contrib/devstack
+MURANO_BASE=/opt/stack/new/murano/contrib/devstack
 DEVSTACK_BASE=/opt/stack/new/devstack
 cp $MURANO_BASE/lib/* $DEVSTACK_BASE/lib
 cp $MURANO_BASE/extras.d/* $DEVSTACK_BASE/extras.d
