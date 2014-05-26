@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import base64
+import collections
 import re
 import types
 
@@ -203,6 +204,26 @@ def _patch(obj, patch):
         return obj
 
 
+@yaql.context.EvalArg('self', dict)
+def _values(self):
+    return self.values()
+
+
+@yaql.context.EvalArg('self', dict)
+def _keys(self):
+    return self.keys()
+
+
+@yaql.context.EvalArg('self', collections.Iterable)
+def _flatten(self):
+    for i in self:
+        if isinstance(i, collections.Iterable):
+            for ii in i:
+                yield ii
+        else:
+            yield i
+
+
 def register(context):
     context.register_function(
         lambda json, mappings: _transform_json(json(), mappings()), 'bind')
@@ -232,3 +253,7 @@ def register(context):
     # Temporary workaround as YAQL does not provide "where" function for
     # dictionaries, and there is no easy way to implement it there.
     context.register_function(yaql_builtin.dict_attribution, 'get')
+    # Temporary workaround, these functions should be moved to YAQL
+    context.register_function(_keys, 'keys')
+    context.register_function(_values, 'values')
+    context.register_function(_flatten, 'flatten')

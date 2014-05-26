@@ -81,14 +81,14 @@ Workflow:
 
 
           outputs:
-            format('{0}-PublicIp', $.name):
-              description: format('Public IP assigned to {0} instance', $.name)
+            format('{0}-assigned-ip', $.name):
+              description: format('IP address assigned to {0} instance', $.name)
               value:
-                get_attr: [$.name, PublicIp]
+                get_attr: [$.name, addresses]
       - $.environment.stack.updateTemplate($template)
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
-      - $.ipAddresses: $outputs.get(format('{0}-PublicIp', $this.name))
+      - $.ipAddresses: $outputs.get(format('{0}-assigned-ip', $this.name)).values().flatten().addr.list()
       - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
       - $.environment.instanceNotifier.trackApplication($this)
 
@@ -114,7 +114,7 @@ Workflow:
       - $template: $.environment.stack.current()
       - $patchBlock:
           op: remove
-          path: format('/Resources/{0}', $.name)
+          path: format('/resources/{0}', $.name)
       - $template: patch($template, $patchBlock)
       - $.environment.stack.setTemplate($template)
       - $.environment.stack.push()
