@@ -29,7 +29,7 @@ function process_option {
     -f|--force) let force=1;;
     -u|--update) update=1;;
     --unittests-only) noseopts="$noseopts --exclude-dir=functionaltests";;
-    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=muranoapi";;
+    -c|--coverage) noseopts="$noseopts --with-coverage --cover-package=murano";;
     -*) noseopts="$noseopts $1";;
     *) noseargs="$noseargs $1"
   esac

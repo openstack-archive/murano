@@ -33,11 +33,13 @@ Project Hosting Details
     * https://wiki.openstack.org/wiki/Meetings#Murano_meeting
 
 * Code Hosting
-    * https://git.openstack.org/cgit/stackforge/murano-api
+    * https://git.openstack.org/cgit/stackforge/murano
 
     * https://git.openstack.org/cgit/stackforge/murano-agent
 
     * https://git.openstack.org/cgit/stackforge/murano-dashboard
+
+    * https://git.openstack.org/cgit/stackforge/python-muranoclient
 
 * Code Review
     * https://review.openstack.org/#/q/murano+AND+status:+open,n,z

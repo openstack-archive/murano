@@ -23,7 +23,7 @@ sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('./'))
 sys.path.insert(0, os.path.abspath('.'))
 
-from muranoapi import __version_info as version
+from murano import __version_info as version
 
 # Supress warnings for docs that aren't used yet
 #unused_docs = [
@@ -82,13 +82,3 @@ html_sidebars = {
     '**':       ['localtoc.html', 'relations.html',
                  'searchbox.html', 'sourcelink.html']
 }
-
-# -- Options for man page output --------------------------------------------
-
-# Grouping the document tree for man pages.
-# List of tuples 'sourcefile', 'target', u'title', u'Authors name', 'manual'
-
-man_pages = [
-    ('man/muranoapi', 'murano-api', u'Murano API Server',
-     [u'OpenStack Foundation'], 1)
-]

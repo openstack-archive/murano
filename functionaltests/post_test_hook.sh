@@ -14,11 +14,11 @@
 
 # This script is executed inside post_test_hook function in devstack gate.
 
-cd /opt/stack/new/murano-api/functionaltests
+cd /opt/stack/new/murano/functionaltests
 sudo ./run_tests.sh
 RETVAL=$?
 
 # Copy tempest log files to be published among other logs upon job completion
-sudo cp /opt/stack/new/murano-api/functionaltests/tempest.log /opt/stack/logs
+sudo cp /opt/stack/new/murano/functionaltests/tempest.log /opt/stack/logs
 
 exit $RETVAL
