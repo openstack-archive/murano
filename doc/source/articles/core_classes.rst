@@ -13,7 +13,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-.. _cory_library:
+.. _core_library:
 
 =====================
 MuranoPL Core Library
