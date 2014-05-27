@@ -203,8 +203,8 @@ function find_pip()
             _pip_ver=$($_cmd --version | grep -oE "[0-9]\.[0-9]" | head -n1)
             version_ge $_pip_ver "1.5"
             if [ $? -eq 0 ]; then
-                log "For future use, sorry, use pip v$pip_min_ver, exiting!"
-                exit 1
+                log "For future use, experimental, use pip v$pip_min_ver!"
+                #exit 1
                 ##_pipargs="--allow-unverified --allow-external"
                 #_pipargs="--allow-all-external"
                 #mk_dir "/root/.pip"

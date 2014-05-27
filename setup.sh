@@ -29,10 +29,10 @@ DAEMON_CFG_DIR="/etc/murano"
 DAEMON_LOG_DIR="/var/log/murano"
 LOGFILE="/tmp/${DAEMON_NAME}_install.log"
 DAEMON_DB_CONSTR="sqlite:///$DAEMON_CFG_DIR/$DAEMON_NAME.sqlite"
-common_pkgs="wget git make gcc python-pip python-setuptools ntpdate"
+common_pkgs="wget git make gcc python-pip python-setuptools python-lxml python-crypto ntpdate"
 # Distro-specific package namings
-debian_pkgs="python-dev python-mysqldb libxml2-dev libxslt1-dev libffi-dev mysql-client"
-redhat_pkgs="python-devel MySQL-python libxml2-devel libxslt-devel libffi-devel mysql"
+debian_pkgs="python-dev python-mysqldb libxml2-dev libxslt1-dev libffi-dev python-openssl mysql-client "
+redhat_pkgs="python-devel MySQL-python libxml2-devel libxslt-devel libffi-devel pyOpenSSL mysql"
 #
 get_os
 eval req_pkgs="\$$(lowercase $DISTRO_BASED_ON)_pkgs"
@@ -42,19 +42,41 @@ function install_prerequisites()
 {
     retval=0
     _dist=$(lowercase $DISTRO_BASED_ON)
-    if [ $_dist = "redhat" ]; then
-        yum repolist | grep -qoE "epel"
-        if [ $? -ne 0 ]; then
-            log "Enabling EPEL6..."
-            rpm -ivh http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm >> $LOGFILE 2>&1
-            if [ $? -ne 0 ]; then
-                log "... can't enable EPEL6, exiting!"
+    case $_dist in
+        "debian")
+            find_or_install "python-software-properties"
+            if [ $? -eq 1 ]; then
                 retval=1
                 return $retval
             fi
-        fi
-        yum --quiet makecache
-    fi
+            find /var/lib/apt/lists/ -name "*cloud.archive*" | grep -q "icehouse_main"
+            if [ $? -ne 0 ]; then
+                # Ubuntu 14.04 already has icehouse repos.
+                if [ $REV != "14.04" ]; then
+                    add-apt-repository -y cloud-archive:icehouse >> $LOGFILE 2>&1
+                    if [ $? -ne 0 ]; then
+                        log "... can't enable \"cloud-archive:havana\", exiting !"
+                        retval=1
+                        return $retval
+                    fi
+                    apt-get update -y
+                    apt-get upgrade -y -o Dpkg::Options::="--force-confnew"
+                    log "..success"
+                fi
+            fi
+            ;;
+        "redhat")
+            log "Enabling EPEL6 and RDO..."
+            $(yum repolist | grep -qoE "epel") || rpm -ivh "http://dl.fedoraproject.org/pub/epel/6/x86_64/epel-release-6-8.noarch.rpm" >> $LOGFILE 2>&1
+            $(yum repolist | grep -qoE "openstack-icehouse") || rpm -ivh "http://rdo.fedorapeople.org/openstack-icehouse/rdo-release-icehouse.rpm" >> $LOGFILE 2>&1
+            if [ $? -ne 0 ]; then
+                log "... can't enable EPEL6 or RDO, exiting!"
+                retval=1
+                return $retval
+            fi
+            yum --quiet makecache
+            ;;
+    esac
     for pack in $REQ_PKGS
     do
         find_or_install "$pack"
@@ -326,6 +348,11 @@ function install_daemon()
     iniset 'DEFAULT' 'log_file' "$(shslash $daemon_log)" "$daemon_conf"
     iniset 'DEFAULT' 'verbose' 'True' "$daemon_conf"
     iniset 'DEFAULT' 'debug' 'True' "$daemon_conf"
+    iniset 'rabbitmq' 'virtual_host' '/' "$daemon_conf"
+    iniset 'rabbitmq' 'password' 'guest' "$daemon_conf"
+    iniset 'rabbitmq' 'login' 'guest' "$daemon_conf"
+    iniset 'rabbitmq' 'port' '5672' "$daemon_conf"
+    iniset 'rabbitmq' 'host' 'localhost' "$daemon_conf"
     iniset 'database' 'connection' "$(shslash $DAEMON_DB_CONSTR)" "$daemon_conf"
     log "Searching daemon in \$PATH..."
     #get_service_exec_path || exit $?
@@ -339,7 +366,18 @@ function install_daemon()
     fi
     get_service_exec_path "murano-manage" || exit $?
     log "Running murano-manage under $DAEMON_USER..."
-    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db_sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db-sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+    core_meta_dir="$RUN_DIR/meta"
+    if [ -d "$core_meta_dir" ]; then
+        for package_dir in $(ls $core_meta_dir); do
+            if [ -d "${core_meta_dir}/${package_dir}" ]; then
+                su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf import-package ${core_meta_dir}/${package_dir}" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+            fi
+        done
+    else
+        log "Warning: $core_meta_dir not found!"
+    fi
+    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db-sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
     log "Everything done, please, verify \"$daemon_conf\", services created as \"murano-api,murano-engine\"."
 }
 function uninstall_daemon()
