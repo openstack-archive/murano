@@ -14,15 +14,18 @@
 # limitations under the License.
 
 import json
+import mock
 from webob import exc
 
 from murano.api.v1 import environments
+from murano.common import policy
 from murano.db import models
 from murano.openstack.common import timeutils
 import murano.tests.api.base as test_base
 import murano.tests.utils as test_utils
 
 
+@mock.patch.object(policy, 'check')
 class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
     RPC_IMPORT = 'murano.db.services.environments.rpc'
 
@@ -30,14 +33,18 @@ class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
 
-    def test_list_empty_environments(self):
+    def test_list_empty_environments(self, mock_policy_check):
         """Check that with no environments an empty list is returned"""
+        self._mock_policy_setup(mock_policy_check, 'list_environments')
+
         req = self._get('/environments')
         result = self.controller.index(req)
         self.assertEqual({'environments': []}, result)
 
-    def test_create_environment(self):
+    def test_create_environment(self, mock_policy_check):
         """Create an environment, test environment.show()"""
+        self._mock_policy_setup(mock_policy_check, 'create_environment')
+
         fake_now = timeutils.utcnow()
         timeutils.utcnow.override_time = fake_now
 
@@ -59,6 +66,9 @@ class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
 
         expected['status'] = 'ready'
 
+        # Reset the policy expectation
+        self._mock_policy_setup(mock_policy_check, 'list_environments')
+
         req = self._get('/environments')
         result = self.controller.index(req)
 
@@ -66,20 +76,30 @@ class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
 
         expected['services'] = []
 
+        # Reset the policy expectation
+        self._mock_policy_setup(mock_policy_check, 'show_environment',
+                                target={'environment_id': uuids[-1]})
+
         req = self._get('/environments/%s' % uuids[-1])
         result = self.controller.show(req, uuids[-1])
 
         self.assertEqual(expected, result)
         self.assertEqual(3, mock_uuid.call_count)
 
-    def test_missing_environment(self):
+    def test_missing_environment(self, mock_policy_check):
         """Check that a missing environment results in an HTTPNotFound"""
+        self._mock_policy_setup(mock_policy_check, 'show_environment',
+                                target={'environment_id': 'no-such-id'})
+
         req = self._get('/environments/no-such-id')
         self.assertRaises(exc.HTTPNotFound, self.controller.show,
                           req, 'no-such-id')
 
-    def test_update_environment(self):
+    def test_update_environment(self, mock_policy_check):
         """Check that environment rename works"""
+        self._mock_policy_setup(mock_policy_check, 'update_environment',
+                                target={'environment_id': '12345'})
+
         fake_now = timeutils.utcnow()
         timeutils.utcnow.override_time = fake_now
 
@@ -116,13 +136,18 @@ class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
         req = self._post('/environments/12345', json.dumps(body))
         result = self.controller.update(req, '12345', body)
 
-        req = self._get('/environments/%s' % '12345')
+        self._mock_policy_setup(mock_policy_check, 'show_environment',
+                                target={'environment_id': '12345'})
+        req = self._get('/environments/12345')
         result = self.controller.show(req, '12345')
 
         self.assertEqual(expected, result)
 
-    def test_delete_environment(self):
+    def test_delete_environment(self, mock_policy_check):
         """Test that environment deletion results in the correct rpc call"""
+        self._mock_policy_setup(mock_policy_check, 'delete_environment',
+                                target={'environment_id': '12345'})
+
         fake_now = timeutils.utcnow()
         expected = dict(
             id='12345',

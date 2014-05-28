@@ -35,6 +35,7 @@ if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
 
 from murano.api.v1 import request_statistics
 from murano.common import config
+from murano.common import policy
 from murano.common import server
 from murano.common import statservice as stats
 from murano.openstack.common import log
@@ -47,6 +48,7 @@ def main():
         config.parse_args()
         log.setup('murano')
         request_statistics.init_stats()
+        policy.init()
 
         launcher = service.ServiceLauncher()
 

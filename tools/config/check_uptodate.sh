@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 PROJECT_NAME=${PROJECT_NAME:-murano}
-CFGFILE_NAME=murano.conf.sample
+CFGFILE_NAME=${PROJECT_NAME}.conf.sample
 
 if [ -e etc/${PROJECT_NAME}/${CFGFILE_NAME} ]; then
     CFGFILE=etc/${PROJECT_NAME}/${CFGFILE_NAME}
@@ -15,7 +15,7 @@ fi
 TEMPDIR=`mktemp -d /tmp/${PROJECT_NAME}.XXXXXX`
 trap "rm -rf $TEMPDIR" EXIT
 
-tools/config/generate_sample.sh -b ./ -p murano -o ${TEMPDIR}
+tools/config/generate_sample.sh -b ./ -p ${PROJECT_NAME} -o ${TEMPDIR}
 
 if ! diff -u ${TEMPDIR}/${CFGFILE_NAME} ${CFGFILE}
 then

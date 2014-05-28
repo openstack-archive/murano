@@ -20,6 +20,7 @@ import os
 import subprocess
 
 import lockfile
+from oslotest import base as test_base
 from six import moves
 from six.moves.urllib import parse
 import sqlalchemy
@@ -27,7 +28,6 @@ import sqlalchemy.exc
 
 from murano.openstack.common.db.sqlalchemy import utils
 from murano.openstack.common.gettextutils import _LE
-from murano.openstack.common import test
 
 LOG = logging.getLogger(__name__)
 
@@ -57,7 +57,7 @@ def _set_db_lock(lock_path=None, lock_prefix=None):
         @functools.wraps(f)
         def wrapper(*args, **kwargs):
             try:
-                path = lock_path or os.environ.get("MURANOAPI_LOCK_PATH")
+                path = lock_path or os.environ.get("MURANO_LOCK_PATH")
                 lock = lockfile.FileLock(os.path.join(path, lock_prefix))
                 with lock:
                     LOG.debug('Got lock "%s"' % f.__name__)
@@ -68,7 +68,7 @@ def _set_db_lock(lock_path=None, lock_prefix=None):
     return decorator
 
 
-class BaseMigrationTestCase(test.BaseTestCase):
+class BaseMigrationTestCase(test_base.BaseTestCase):
     """Base class fort testing of migration utils."""
 
     def __init__(self, *args, **kwargs):

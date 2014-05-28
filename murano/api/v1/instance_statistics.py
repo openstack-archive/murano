@@ -13,6 +13,7 @@
 #    under the License.
 
 from murano.api.v1 import request_statistics
+from murano.common import policy
 from murano.db.services import instances
 
 from murano.openstack.common.gettextutils import _  # noqa
@@ -28,6 +29,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'GetAggregated')
     def get_aggregated(self, request, environment_id):
         LOG.debug('EnvironmentStatistics:GetAggregated')
+        target = {"environment_id": environment_id}
+        policy.check("get_aggregated_statistics", request.context, target)
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
@@ -38,6 +41,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'GetForInstance')
     def get_for_instance(self, request, environment_id, instance_id):
         LOG.debug('EnvironmentStatistics:GetForInstance')
+        target = {"environment_id": environment_id, "instance_id": instance_id}
+        policy.check("get_instance_statistics", request.context, target)
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics
@@ -48,6 +53,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'GetForEnvironment')
     def get_for_environment(self, request, environment_id):
         LOG.debug('EnvironmentStatistics:GetForEnvironment')
+        target = {"environment_id": environment_id}
+        policy.check("get_statistics", request.context, target)
 
         # TODO (stanlagun): Check that caller is authorized to access
         #  tenant's statistics

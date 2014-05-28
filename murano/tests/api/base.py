@@ -108,7 +108,7 @@ class ControllerTest(object):
         #cfg.CONF.set_default('host', 'server.test')
         self.api_version = '1.0'
         self.tenant = 'test_tenant'
-        self.mock_enforce = None
+        self.mock_policy_check = None
 
         request_statistics.init_stats()
 
@@ -161,6 +161,30 @@ class ControllerTest(object):
     def _put(self, path, data, content_type='application/json'):
         return self._data_request(path, data, content_type, method='PUT')
 
+    def _mock_policy_setup(self, mocker, action, allowed=True,
+                           target=None, expected_request_count=1):
+        if self.mock_policy_check is not None:
+            # Test existing policy check record
+            self._check_policy()
+            self.mock_policy_check.reset_mock()
+
+        self.mock_policy_check = mocker
+        self.policy_action = action
+        self.mock_policy_check.return_value = allowed
+        self.policy_target = target
+        self.expected_request_count = expected_request_count
+
+    def _check_policy(self):
+        """Assert policy checks called as expected"""
+        if self.mock_policy_check:
+            # Check that policy enforcement got called as expected
+            self.mock_policy_check.assert_called_with(
+                self.policy_action,
+                self.context,
+                self.policy_target or {})
+            self.assertEqual(self.expected_request_count,
+                             len(self.mock_policy_check.call_args_list))
+
     def tearDown(self):
-        # TODO(sjmc7): Add policy check once it's implemented
+        self._check_policy()
         super(ControllerTest, self).tearDown()
