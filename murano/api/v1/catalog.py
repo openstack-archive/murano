@@ -82,14 +82,14 @@ def _validate_body(body):
     reset the file position to the beginning
     """
     def check_file_size(f):
-        pkg_size_limit = CONF.package_size_limit * 1024 * 1024
+        mb_limit = CONF.packages_opts.package_size_limit
+        pkg_size_limit = mb_limit * 1024 * 1024
         f.seek(0, 2)
         size = f.tell()
         f.seek(0)
         if size > pkg_size_limit:
             raise exc.HTTPBadRequest('Uploading file is too large.'
-                                     ' The limit is {0}'
-                                     ' Mb'.format(CONF.package_size_limit))
+                                     ' The limit is {0} Mb'.format(mb_limit))
 
     if len(body.keys()) != 2:
         msg = _("'multipart/form-data' request body should contain "
@@ -148,9 +148,35 @@ class Controller(object):
         return package.to_dict()
 
     def search(self, req):
+        def _validate_limit(value):
+            if value is None:
+                return
+            try:
+                value = int(value)
+            except ValueError:
+                msg = _("limit param must be an integer")
+                LOG.error(msg)
+                raise exc.HTTPBadRequest(explanation=msg)
+
+            if value <= 0:
+                msg = _("limit param must be positive")
+                LOG.error(msg)
+                raise exc.HTTPBadRequest(explanation=msg)
+
+            return value
+
         filters = _get_filters(req.GET.items())
-        packages = db_api.package_search(filters, req.context)
-        return {"packages": [package.to_dict() for package in packages]}
+        limit = _validate_limit(filters.get('limit'))
+        if limit is None:
+            limit = CONF.packages_opts.limit_param_default
+        limit = min(CONF.packages_opts.api_limit_max, limit)
+
+        result = {}
+        packages = db_api.package_search(filters, req.context, limit)
+        if len(packages) == limit:
+            result['next_marker'] = packages[-1].id
+        result['packages'] = [package.to_dict() for package in packages]
+        return result
 
     def upload(self, req, body=None):
         """

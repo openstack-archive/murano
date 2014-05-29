@@ -12,15 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo.config import cfg
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
-from sqlalchemy import sql
 from webob import exc
 
 from murano.db import models
 from murano.db import session as db_session
+from murano.openstack.common.db.sqlalchemy import utils
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
+
+CONF = cfg.CONF
 
 SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
                   'name': 'name',
@@ -209,41 +212,18 @@ def package_update(pkg_id, changes, context):
     return pkg
 
 
-def package_search(filters, context):
+def package_search(filters, context, limit=None):
     """
     Search packages with different filters
       * Admin is allowed to browse all the packages
       * Regular user is allowed to browse all packages belongs to user tenant
         and all other packages marked is_public.
         Also all packages should be enabled.
-      * Use marker and limit for pagination:
+      * Use marker (inside filters param) and limit for pagination:
         The typical pattern of limit and marker is to make an initial limited
         request and then to use the ID of the last package from the response
         as the marker parameter in a subsequent limited request.
     """
-
-    def _validate_limit(value):
-        if value is None:
-            return
-        try:
-            value = int(value)
-        except ValueError:
-            msg = _("limit param must be an integer")
-            LOG.error(msg)
-            raise exc.HTTPBadRequest(explanation=msg)
-
-        if value < 0:
-            msg = _("limit param must be positive")
-            LOG.error(msg)
-            raise exc.HTTPBadRequest(explanation=msg)
-
-        return value
-
-    def get_pkg_attr(package_obj, search_attr_name):
-        return getattr(package_obj, SEARCH_MAPPING[search_attr_name])
-
-    limit = _validate_limit(filters.get('limit'))
-
     session = db_session.get_session()
     pkg = models.Package
 
@@ -323,47 +303,12 @@ def package_search(filters, context):
                         conditions.append(getattr(pkg, attr).like(_word))
         query = query.filter(or_(*conditions))
 
-    sort_keys = filters.get('order_by', []) or ['created']
-    for key in sort_keys:
-        query = query.order_by(get_pkg_attr(pkg, key))
-
+    sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
+                 filters.get('order_by', []) or ['created']]
     marker = filters.get('marker')
-    if marker is not None:
-        # Note(efedorova): Copied from Glance
-        #   Pagination works by requiring a unique sort_key, specified by sort_
-        #   keys. (If sort_keys is not unique, then we risk looping through
-        #   values.) We use the last row in the previous page as the 'marker'
-        #   for pagination. So we must return values that follow the passed
-        #   marker in the order. With a single-valued sort_key, this would
-        #   be easy: sort_key > X. With a compound-values sort_key,
-        #   (k1, k2, k3) we must do this to repeat the lexicographical
-        #   ordering: (k1 > X1) or (k1 == X1 && k2 > X2) or
-        #   (k1 == X1 && k2 == X2 && k3 > X3)
-
-        model_marker = _package_get(marker, session)
-        marker_values = []
-        for sort_key in sort_keys:
-            v = getattr(model_marker, sort_key)
-            marker_values.append(v)
-
-        # Build up an array of sort criteria as in the docstring
-        criteria_list = []
-        for i in range(len(sort_keys)):
-            crit_attrs = []
-            for j in range(i):
-                model_attr = get_pkg_attr(pkg, sort_keys[j])
-                crit_attrs.append((model_attr == marker_values[j]))
-
-            model_attr = get_pkg_attr(pkg, sort_keys[i])
-            crit_attrs.append((model_attr > marker_values[i]))
-
-            criteria = sql.and_(*crit_attrs)
-            criteria_list.append(criteria)
-            f = sql.or_(*criteria_list)
-            query = query.filter(f)
-
-    if limit is not None:
-        query = query.limit(limit)
+    if marker is not None:  # set marker to real object instead of its id
+        marker = _package_get(marker, session)
+    query = utils.paginate_query(query, pkg, limit, sort_keys, marker)
 
     return query.all()
 
