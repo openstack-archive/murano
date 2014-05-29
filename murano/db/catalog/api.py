@@ -346,7 +346,7 @@ def package_delete(package_id, context):
     session = db_session.get_session()
 
     with session.begin():
-        package = session.query(models.Package).get(package_id)
+        package = _package_get(package_id, session)
         _authorize_package(package, context)
         session.delete(package)
 
