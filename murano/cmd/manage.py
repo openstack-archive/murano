@@ -27,7 +27,7 @@ from murano.db.catalog import api as db_catalog_api
 from murano.db import session as db_session
 from murano.openstack.common.db import exception as db_exception
 from murano.openstack.common import log as logging
-from murano.packages import application_package
+from murano.packages import load_utils
 
 
 CONF = cfg.CONF
@@ -50,7 +50,7 @@ class AdminContext(object):
 
 def _do_import_package(_dir, categories, update=False):
     LOG.info("Going to import Murano package from {0}".format(_dir))
-    pkg = application_package.load_from_dir(_dir)
+    pkg = load_utils.load_from_dir(_dir)
 
     LOG.info("Checking for existing")
     existing = db_catalog_api.package_search(

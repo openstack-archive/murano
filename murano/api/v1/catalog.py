@@ -29,8 +29,8 @@ from murano.openstack.common import exception
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
 from murano.openstack.common import wsgi
-from murano.packages import application_package as app_pkg
 from murano.packages import exceptions as pkg_exc
+from murano.packages import load_utils
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -201,14 +201,13 @@ class Controller(object):
             tempf.write(content)
             package_meta['archive'] = content
         try:
-            LOG.debug("Deleting package archive temporary file")
-            pkg_to_upload = app_pkg.load_from_file(tempf.name,
-                                                   target_dir=None,
-                                                   drop_dir=True)
+            pkg_to_upload = load_utils.load_from_file(
+                tempf.name, target_dir=None, drop_dir=True)
         except pkg_exc.PackageLoadError as e:
             LOG.exception(e)
             raise exc.HTTPBadRequest(e)
         finally:
+            LOG.debug("Deleting package archive temporary file")
             os.remove(tempf.name)
 
         # extend dictionary for update db

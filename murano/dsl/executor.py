@@ -233,7 +233,7 @@ class MuranoDslExecutor(object):
         if not isinstance(data, types.DictionaryType):
             raise TypeError()
         self._attribute_store.load(data.get('Attributes') or [])
-        result = self._object_store.load(data.get('Objects') or {},
+        result = self._object_store.load(data.get('Objects'),
                                          None, self._root_context)
         self.cleanup(data)
         return result
