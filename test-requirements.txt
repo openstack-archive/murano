@@ -4,10 +4,16 @@ coverage>=3.6
 discover
 fixtures>=0.3.14
 mock>=1.0
+posix_ipc
+sqlalchemy-migrate>=0.8.2,!=0.8.4
 testrepository>=0.0.18
 testscenarios>=0.4
 testtools>=0.9.34
 unittest2
+
+# Some of the tests use real MySQL and Postgres databases
+MySQL-python
+psycopg2
 
 # doc build requirements
 sphinx>=1.1.2,<1.2

@@ -89,7 +89,7 @@ Installing the API service and Engine
 
    ::
 
-      $ tox -e venv -- murano-manage --config-file /etc/murano/murano-api.conf db-sync
+      $ tox -e venv -- murano-db-manage --config-file /etc/murano/murano-api.conf upgrade
 
 6. Launch Murano API service:
 

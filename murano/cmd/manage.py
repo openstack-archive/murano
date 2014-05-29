@@ -13,7 +13,9 @@
 #    under the License.
 
 """
-  CLI interface for murano management.
+  *** Deprecation warning ***
+  This file is about to be deprecated, please use python-muranoclient.
+  *** Deprecation warning ***
 """
 
 import sys
@@ -24,7 +26,6 @@ from oslo.config import cfg
 import murano
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
-from murano.db import session as db_session
 from murano.openstack.common.db import exception as db_exception
 from murano.openstack.common import log as logging
 from murano.packages import load_utils
@@ -32,15 +33,6 @@ from murano.packages import load_utils
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
-
-
-# TODO(ruhe): proper error handling
-def do_db_sync():
-    """
-    Place a database under migration control and upgrade,
-    creating first if necessary.
-    """
-    db_session.db_sync()
 
 
 class AdminContext(object):
@@ -124,11 +116,6 @@ def do_add_category():
 
 
 def add_command_parsers(subparsers):
-    parser = subparsers.add_parser('db-sync')
-    parser.set_defaults(func=do_db_sync)
-    parser.add_argument('version', nargs='?')
-    parser.add_argument('current_version', nargs='?')
-
     parser = subparsers.add_parser('import-package')
     parser.set_defaults(func=do_import_package)
     parser.add_argument('directory',
@@ -160,6 +147,7 @@ command_opt = cfg.SubCommandOpt('command',
 
 def main():
     CONF.register_cli_opt(command_opt)
+
     try:
         default_config_files = cfg.find_config_files('murano', 'murano')
         CONF(sys.argv[1:], project='murano', prog='murano-manage',

@@ -10,8 +10,8 @@ include ChangeLog
 include babel.cfg
 include tox.ini
 include openstack-common.conf
-include muranoapi/db/migrate_repo/README
-include muranoapi/db/migrate_repo/migrate.cfg
-include muranoapi/db/migrate_repo/versions/*.sql
+include murano/db/migration/alembic.ini
+include murano/db/migration/alembic_migrations/README
+include murano/db/migration/alembic_migrations/script.py.mako
 recursive-include etc *
 global-exclude *.pyc
