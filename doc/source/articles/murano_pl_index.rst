@@ -16,7 +16,7 @@
 .. _MuranoPL Spec:
 
 =====================================
-Murano Program Language Specification
+MuranoPL: Murano Programming Language
 =====================================
 
 Content
