@@ -130,13 +130,14 @@ class ApiPackageLoader(PackageLoader):
     def _get_definition(self, filter_opts):
         try:
             packages = self._client.packages.filter(**filter_opts)
-            if not packages:
+            try:
+                return packages.next()
+            except StopIteration:
                 LOG.debug('There are no packages matching filter '
                           '{0}'.format(filter_opts))
                 # TODO(smelikyan): This exception should be replaced with one
                 # defined in python-muranoclient
                 raise LookupError()
-            return packages[0]
         except muranoclient_exc.HTTPException:
             LOG.debug('Failed to get package definition from repository')
             raise LookupError()
