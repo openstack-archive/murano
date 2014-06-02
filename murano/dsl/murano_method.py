@@ -25,6 +25,19 @@ except ImportError:  # python2.6
     from ordereddict import OrderedDict  # noqa
 
 
+class MethodUsages(object):
+    Action = 'Action'
+    Runtime = 'Runtime'
+    All = set([Action, Runtime])
+
+
+def methodusage(usage):
+    def wrapper(method):
+        method._murano_method_usage = usage
+        return method
+    return wrapper
+
+
 class MuranoMethod(object):
     def __init__(self, namespace_resolver,
                  murano_class, name, payload):
@@ -34,9 +47,12 @@ class MuranoMethod(object):
         if callable(payload):
             self._body = payload
             self._arguments_scheme = self._generate_arguments_scheme(payload)
+            self._usage = getattr(payload, '_murano_method_usage',
+                                  MethodUsages.Runtime)
         else:
             payload = payload or {}
             self._body = self._prepare_body(payload.get('Body') or [])
+            self._usage = payload.get('Usage') or MethodUsages.Runtime
             arguments_scheme = payload.get('Arguments') or []
             if isinstance(arguments_scheme, types.DictionaryType):
                 arguments_scheme = [{key: value} for key, value in
@@ -63,6 +79,10 @@ class MuranoMethod(object):
     @property
     def arguments_scheme(self):
         return self._arguments_scheme
+
+    @property
+    def usage(self):
+        return self._usage
 
     @property
     def body(self):

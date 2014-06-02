@@ -23,6 +23,7 @@ from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.common import rpc
 from murano.dsl import executor
+from murano.dsl import murano_method
 from murano.dsl import results_serializer
 from murano.engine import environment
 from murano.engine import package_class_loader
@@ -44,40 +45,20 @@ class TaskProcessingEndpoint(object):
         LOG.info(_('Starting processing task: {task_desc}').format(
             task_desc=anyjson.dumps(s_task)))
 
-        env = environment.Environment()
-        env.token = task['token']
-        env.tenant_id = task['tenant_id']
-        LOG.debug('Processing new task: {0}'.format(task))
         try:
-            with package_loader.ApiPackageLoader(env.token, env.tenant_id) as \
-                    pkg_loader:
-                class_loader = package_class_loader.PackageClassLoader(
-                    pkg_loader)
-                system_objects.register(class_loader, pkg_loader)
-
-                exc = executor.MuranoDslExecutor(class_loader, env)
-                obj = exc.load(task['model'])
-
-                try:
-                    if obj is not None:
-                        obj.type.invoke('deploy', exc, obj, {})
-                except Exception as e:
-                    reporter = status_reporter.StatusReporter()
-                    reporter.initialize(obj)
-                    reporter.report_error(obj, '{0}'.format(e))
-                finally:
-                    s_res = results_serializer.serialize(obj, exc)
-                    rpc.api().process_result(s_res)
+            task_executor = TaskExecutor(task)
+            result = task_executor.execute()
+            rpc.api().process_result(result)
         except Exception as e:
             # TODO(gokrokve) report error here
             # TODO(slagun) code below needs complete rewrite and redesign
             LOG.exception("Error during task execution for tenant %s",
-                          env.tenant_id)
+                          task['tenant_id'])
             if task['model']['Objects']:
                 msg_env = Environment(task['model']['Objects']['?']['id'])
                 reporter = status_reporter.StatusReporter()
                 reporter.initialize(msg_env)
-                reporter.report_error(msg_env, '{0}'.format(e))
+                reporter.report_error(msg_env, str(e))
             rpc.api().process_result(task['model'])
 
 
@@ -100,3 +81,67 @@ def get_rpc_service():
 class Environment:
     def __init__(self, object_id):
         self.object_id = object_id
+
+
+class TaskExecutor(object):
+    @property
+    def action(self):
+        return self._action
+
+    @property
+    def environment(self):
+        return self._environment
+
+    @property
+    def model(self):
+        return self._model
+
+    def __init__(self, task):
+        self._action = task.get('action')
+        self._model = task['model']
+        self._environment = environment.Environment()
+        self._environment.token = task['token']
+        self._environment.tenant_id = task['tenant_id']
+
+    def execute(self):
+        token, tenant_id = self.environment.token, self.environment.tenant_id
+        with package_loader.ApiPackageLoader(token, tenant_id) as pkg_loader:
+            class_loader = package_class_loader.PackageClassLoader(pkg_loader)
+            system_objects.register(class_loader, pkg_loader)
+
+            exc = executor.MuranoDslExecutor(class_loader, self.environment)
+            obj = exc.load(self.model)
+
+            try:
+                # Skip execution of action in case of no action is provided.
+                # Model will be just loaded, cleaned-up and unloaded.
+                # Most of the time this is used for deletion of environments.
+                if self.action:
+                    self._invoke(exc)
+            except Exception as e:
+                reporter = status_reporter.StatusReporter()
+                reporter.initialize(obj)
+                reporter.report_error(obj, str(e))
+
+            return results_serializer.serialize(obj, exc)
+
+    def _invoke(self, mpl_executor):
+        obj = mpl_executor.object_store.get(self.action['object_id'])
+        method_name, args = self.action['method'], self.action['args']
+
+        if obj is not None:
+            if self._is_action(obj, method_name) is False:
+                raise Exception('%s is not an action' % (method_name,))
+
+            obj.type.invoke(method_name, mpl_executor, obj, args)
+
+    @staticmethod
+    def _is_action(obj, method_name):
+        implementations = obj.type.find_method(method_name)
+        if len(implementations) < 1:
+            raise Exception('Action %s is not found' % (method_name,))
+        if len(implementations) > 1:
+            raise Exception('Action %s name is ambiguous' % (method_name,))
+        declaring_class, _ = implementations[0]
+        method = declaring_class.get_method(method_name)
+        return method.usage == murano_method.MethodUsages.Action
