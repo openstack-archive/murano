@@ -27,11 +27,13 @@ class SysObject(object):
         attribute_store = helpers.get_attribute_store(_context)
         attribute_store.set(self, owner, name, value)
 
-    def getAttr(self, _context, name, owner=None):
+    def getAttr(self, _context, name, default=None, owner=None):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(_context))
         if not isinstance(owner, murano_class.MuranoClass):
             raise TypeError()
 
         attribute_store = helpers.get_attribute_store(_context)
-        return attribute_store.get(self, owner, name)
+
+        result = attribute_store.get(self, owner, name)
+        return default if result is None else result
