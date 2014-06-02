@@ -13,6 +13,7 @@
 # under the License.
 
 import json
+import os
 import requests
 import testresources
 import testtools
@@ -30,13 +31,12 @@ CONF = cfg.cfg.CONF
 
 class Client(object):
 
-    def __init__(self, user, password, tenant, auth_url):
+    def __init__(self, user, password, tenant, auth_url, murano_url):
 
         self.auth = ksclient.Client(username=user, password=password,
                                     tenant_name=tenant, auth_url=auth_url)
 
-        self.endpoint = self.auth.service_catalog.url_for(
-            service_type='application_catalog', endpoint_type='publicURL')
+        self.endpoint = murano_url
 
         self.headers = {
             'X-Auth-Token': self.auth.auth_token,
@@ -130,7 +130,48 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         cls.client = Client(user=CONF.murano.user,
                             password=CONF.murano.password,
                             tenant=CONF.murano.tenant,
-                            auth_url=CONF.murano.auth_url)
+                            auth_url=CONF.murano.auth_url,
+                            murano_url=CONF.murano.murano_url)
+
+        cls.location = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        cls.packages_path = '/'.join(cls.location.split('/')[:-1:])
+
+        def upload_package(package_name, body, app):
+            files = {'%s' % package_name: open(
+                os.path.join(cls.packages_path, app), 'rb')}
+
+            post_body = {'JsonString': json.dumps(body)}
+            request_url = '{endpoint}{url}'.format(
+                endpoint=CONF.murano.murano_url,
+                url='catalog/packages')
+
+            return requests.post(request_url,
+                                 files=files,
+                                 data=post_body,
+                                 headers=cls.client.headers).json()['id']
+
+        cls.postgre_id = upload_package(
+            'PostgreSQL',
+            {"categories": ["Databases"], "tags": ["tag"]},
+            'murano-app-incubator/io.murano.apps.PostgreSql.zip')
+        cls.apache_id = upload_package(
+            'Apache',
+            {"categories": ["Application Servers"], "tags": ["tag"]},
+            'murano-app-incubator/io.murano.apps.apache.Apache.zip')
+        cls.tomcat_id = upload_package(
+            'Tomcat',
+            {"categories": ["Application Servers"], "tags": ["tag"]},
+            'murano-app-incubator/io.murano.apps.apache.Tomcat.zip')
+        cls.telnet_id = upload_package(
+            'Telnet',
+            {"categories": ["Web"], "tags": ["tag"]},
+            'murano-app-incubator/io.murano.apps.linux.Telnet.zip')
+        cls.ad_id = upload_package(
+            'Active Directory',
+            {"categories": ["Microsoft Services"], "tags": ["tag"]},
+            'murano-app-incubator/io.murano.windows.ActiveDirectory.zip')
 
     def setUp(self):
         super(MuranoBase, self).setUp()
@@ -138,6 +179,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.environments = []
 
     def tearDown(self):
+        super(MuranoBase, self).tearDown()
 
         for env in self.environments:
             try:
@@ -151,16 +193,13 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 "flavor": "m1.medium",
                 "image": self.client.linux,
                 "?": {
-                    "type": "io.murano.resources.Instance",
+                    "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
                 },
                 "name": "testMurano"
             },
             "name": "teMurano",
             "?": {
-                "_{id}".format(id=uuid.uuid4().hex): {
-                    "name": "Telnet"
-                },
                 "type": "io.murano.apps.linux.Telnet",
                 "id": str(uuid.uuid4())
             }
@@ -188,22 +227,87 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 "flavor": "m1.medium",
                 "image": self.client.linux,
                 "?": {
-                    "type": "io.murano.resources.Instance",
+                    "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
                 },
                 "name": "testMurano"
             },
             "name": "teMurano",
             "?": {
-                "_{id}".format(id=uuid.uuid4().hex): {
-                    "name": "Apache"
-                },
                 "type": "io.murano.apps.apache.Apache",
                 "id": str(uuid.uuid4())
             }
         }
 
         environment = self.client.create_environment('Apacheenv')
+        self.environments.append(environment['id'])
+
+        session = self.client.create_session(environment['id'])
+
+        self.client.create_service(environment['id'], session['id'], post_body)
+        self.client.deploy_session(environment['id'], session['id'])
+
+        status = self.client.status_check(environment['id'])
+
+        self.assertEqual('OK', status)
+
+        deployments = self.client.deployments_list(environment['id'])
+        for deployment in deployments:
+            self.assertEqual('success', deployment['state'])
+
+    def test_deploy_postgresql(self):
+        post_body = {
+            "instance": {
+                "flavor": "m1.medium",
+                "image": self.client.linux,
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": str(uuid.uuid4())
+                },
+                "name": "testMurano"
+            },
+            "name": "teMurano",
+            "?": {
+                "type": "io.murano.apps.PostgreSql",
+                "id": str(uuid.uuid4())
+            }
+        }
+
+        environment = self.client.create_environment('Postgreenv')
+        self.environments.append(environment['id'])
+
+        session = self.client.create_session(environment['id'])
+
+        self.client.create_service(environment['id'], session['id'], post_body)
+        self.client.deploy_session(environment['id'], session['id'])
+
+        status = self.client.status_check(environment['id'])
+
+        self.assertEqual('OK', status)
+
+        deployments = self.client.deployments_list(environment['id'])
+        for deployment in deployments:
+            self.assertEqual('success', deployment['state'])
+
+    def test_deploy_tomcat(self):
+        post_body = {
+            "instance": {
+                "flavor": "m1.medium",
+                "image": self.client.linux,
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": str(uuid.uuid4())
+                },
+                "name": "testMurano"
+            },
+            "name": "teMurano",
+            "?": {
+                "type": "io.murano.apps.apache.Tomcat",
+                "id": str(uuid.uuid4())
+            }
+        }
+
+        environment = self.client.create_environment('Tomcatenv')
         self.environments.append(environment['id'])
 
         session = self.client.create_session(environment['id'])
