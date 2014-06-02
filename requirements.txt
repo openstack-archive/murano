@@ -10,7 +10,6 @@ wsgiref>=0.1.2
 argparse
 ordereddict
 sqlalchemy-migrate>=0.8.2,!=0.8.4
-httplib2>=0.7.5
 kombu>=2.4.8
 lockfile>=0.8
 pycrypto>=2.6
@@ -20,12 +19,6 @@ six>=1.5.2
 netaddr>=0.7.6
 PyYAML>=3.1.0
 jsonpatch>=1.1
-
-# Note you will need gcc buildtools installed and must
-# have installed libxml headers for lxml to be successfully
-# installed using pip, therefore you will need to install the
-# libxml2-dev and libxslt-dev Ubuntu packages.
-lxml>=2.3
 
 # For paste.util.template used in keystone.common.template
 Paste
