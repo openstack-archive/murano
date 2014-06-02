@@ -22,6 +22,7 @@ from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db import session as db_session
 
+from murano.openstack.common.db import exception as db_exc
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
 from murano.openstack.common import wsgi
@@ -48,9 +49,14 @@ class Controller(object):
     def create(self, request, body):
         LOG.debug('Environments:Create <Body {0}>'.format(body))
 
-        environment = envs.EnvironmentServices.create(body.copy(),
-                                                      request.context.tenant)
-
+        try:
+            environment = envs.EnvironmentServices.create(
+                body.copy(),
+                request.context.tenant)
+        except db_exc.DBDuplicateEntry:
+            msg = _('Environment with specified name already exists')
+            LOG.exception(msg)
+            raise exc.HTTPConflict(msg)
         return environment.to_dict()
 
     @request_statistics.stats_count(API_NAME, 'Show')
