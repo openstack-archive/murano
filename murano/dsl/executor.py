@@ -74,6 +74,8 @@ class MuranoDslExecutor(object):
         if context is None:
             context = self._root_context
         implementations = this.type.find_method(name)
+        # restore this from upcast object (no change if there was no upcast)
+        this = this.real_this
         delegates = []
         for declaring_class, name in implementations:
             method = declaring_class.get_method(name)
@@ -81,12 +83,8 @@ class MuranoDslExecutor(object):
                 continue
             arguments_scheme = method.arguments_scheme
             try:
-                try:
-                    params = self._evaluate_parameters(
-                        arguments_scheme, context, this, *args)
-                except Exception:
-                    params = self._evaluate_parameters(
-                        arguments_scheme, context, this, *args)
+                params = self._evaluate_parameters(
+                    arguments_scheme, context, this, *args)
                 delegates.append(functools.partial(
                     self._invoke_method_implementation,
                     method, this, declaring_class, context, params))

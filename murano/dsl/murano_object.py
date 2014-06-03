@@ -25,7 +25,7 @@ import murano.dsl.typespec as typespec
 
 class MuranoObject(object):
     def __init__(self, murano_class, parent_obj, object_store, context,
-                 object_id=None, known_classes=None, defaults=None):
+                 object_id=None, known_classes=None, defaults=None, this=None):
 
         if known_classes is None:
             known_classes = {}
@@ -37,6 +37,7 @@ class MuranoObject(object):
         self.__parents = {}
         self.__context = context
         self.__defaults = defaults or {}
+        self.__this = this
         known_classes[murano_class.name] = self
         for parent_class in murano_class.parents:
             name = parent_class.name
@@ -44,7 +45,7 @@ class MuranoObject(object):
                 obj = parent_class.new(parent_obj, object_store, context,
                                        None, object_id=self.__object_id,
                                        known_classes=known_classes,
-                                       defaults=defaults)
+                                       defaults=defaults, this=self.real_this)
 
                 self.__parents[name] = known_classes[name] = obj
             else:
@@ -77,6 +78,10 @@ class MuranoObject(object):
     def parent(self):
         return self.__parent_obj
 
+    @property
+    def real_this(self):
+        return self.__this or self
+
     def __getattr__(self, item):
         if item.startswith('__'):
             raise AttributeError('Access to internal attributes is '
@@ -98,7 +103,7 @@ class MuranoObject(object):
                 raise AttributeError(item)
 
     def __get_property(self, item, caller_class=None):
-        if item in self.__properties:
+        if item in self.__properties and item in self.type.properties:
             return self.__properties[item]
         i = 0
         result = None
