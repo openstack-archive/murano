@@ -16,26 +16,10 @@
 import imghdr
 import io
 import os
-import shutil
 import sys
-import tempfile
-import yaml
 import zipfile
 
-
 import murano.packages.exceptions as e
-import murano.packages.versions.v1
-
-
-class DummyLoader(yaml.Loader):
-    pass
-
-
-def yaql_constructor(loader, node):
-    value = loader.construct_scalar(node)
-    return value
-
-yaml.add_constructor(u'!yaql', yaql_constructor, DummyLoader)
 
 
 class PackageTypes(object):
@@ -45,7 +29,7 @@ class PackageTypes(object):
 
 
 class ApplicationPackage(object):
-    def __init__(self, source_directory, manifest, loader=DummyLoader):
+    def __init__(self, source_directory, manifest, loader):
         self.yaml_loader = loader
         self._source_directory = source_directory
         self._full_name = None
@@ -54,14 +38,9 @@ class ApplicationPackage(object):
         self._description = None
         self._author = None
         self._tags = None
-        self._classes = None
-        self._ui = None
         self._logo = None
         self._format = manifest.get('Format')
-        self._ui_cache = None
-        self._raw_ui_cache = None
         self._logo_cache = None
-        self._classes_cache = {}
         self._blob_cache = None
 
     @property
@@ -89,22 +68,6 @@ class ApplicationPackage(object):
         return tuple(self._tags)
 
     @property
-    def classes(self):
-        return tuple(self._classes.keys())
-
-    @property
-    def ui(self):
-        if not self._ui_cache:
-            self._load_ui(True)
-        return self._ui_cache
-
-    @property
-    def raw_ui(self):
-        if not self._raw_ui_cache:
-            self._load_ui(False)
-        return self._raw_ui_cache
-
-    @property
     def logo(self):
         if not self._logo_cache:
             self._load_logo(False)
@@ -116,41 +79,14 @@ class ApplicationPackage(object):
             self._blob_cache = _pack_dir(self._source_directory)
         return self._blob_cache
 
-    def get_class(self, name):
-        if name not in self._classes_cache:
-            self._load_class(name)
-        return self._classes_cache[name]
-
     def get_resource(self, name):
-        return os.path.join(self._source_directory, 'Resources', name)
+        resources_dir = os.path.join(self._source_directory, 'Resources')
+        if not os.path.exists(resources_dir):
+            os.makedirs(resources_dir)
+        return os.path.join(resources_dir, name)
 
     def validate(self):
-        self._classes_cache.clear()
-        for class_name in self._classes:
-            self.get_class(class_name)
-        self._load_ui(True)
         self._load_logo(True)
-
-    # Private methods
-    def _load_ui(self, load_yaml=False):
-        if self._raw_ui_cache and load_yaml:
-            self._ui_cache = yaml.load(self._raw_ui_cache, self.yaml_loader)
-        else:
-            ui_file = self._ui
-            full_path = os.path.join(self._source_directory, 'UI', ui_file)
-            if not os.path.isfile(full_path):
-                self._raw_ui_cache = None
-                self._ui_cache = None
-                return
-            try:
-                with open(full_path) as stream:
-                    self._raw_ui_cache = stream.read()
-                    if load_yaml:
-                        self._ui_cache = yaml.load(self._raw_ui_cache,
-                                                   self.yaml_loader)
-            except Exception as ex:
-                trace = sys.exc_info()[2]
-                raise e.PackageUILoadError(str(ex)), None, trace
 
     def _load_logo(self, validate=False):
         logo_file = self._logo or 'logo.png'
@@ -169,54 +105,6 @@ class ApplicationPackage(object):
             raise e.PackageLoadError(
                 "Unable to load logo: " + str(ex)), None, trace
 
-    def _load_class(self, name):
-        if name not in self._classes:
-            raise e.PackageClassLoadError(name, 'Class not defined '
-                                                'in this package')
-        def_file = self._classes[name]
-        full_path = os.path.join(self._source_directory, 'Classes', def_file)
-        if not os.path.isfile(full_path):
-            raise e.PackageClassLoadError(name, 'File with class '
-                                                'definition not found')
-        try:
-            with open(full_path) as stream:
-                self._classes_cache[name] = yaml.load(stream, self.yaml_loader)
-        except Exception as ex:
-            trace = sys.exc_info()[2]
-            msg = 'Unable to load class definition due to "{0}"'.format(
-                str(ex))
-            raise e.PackageClassLoadError(name, msg), None, trace
-
-
-def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
-                  loader=DummyLoader):
-    formats = {'1.0': murano.packages.versions.v1}
-
-    if not os.path.isdir(source_directory) or not os.path.exists(
-            source_directory):
-        raise e.PackageLoadError('Invalid package directory')
-    full_path = os.path.join(source_directory, filename)
-    if not os.path.isfile(full_path):
-        raise e.PackageLoadError('Unable to find package manifest')
-
-    try:
-        with open(full_path) as stream:
-            content = yaml.load(stream, DummyLoader)
-    except Exception as ex:
-        trace = sys.exc_info()[2]
-        raise e.PackageLoadError(
-            "Unable to load due to '{0}'".format(str(ex))), None, trace
-    if content:
-        p_format = str(content.get('Format'))
-        if not p_format or p_format not in formats:
-            raise e.PackageFormatError(
-                'Unknown or missing format version')
-        package = ApplicationPackage(source_directory, content, loader)
-        formats[p_format].load(package, content)
-        if preload:
-            package.validate()
-        return package
-
 
 def _zipdir(path, zipf):
     for root, dirs, files in os.walk(path):
@@ -233,34 +121,3 @@ def _pack_dir(source_directory):
     zipf.close()
 
     return blob.getvalue()
-
-
-def load_from_file(archive_path, target_dir=None, drop_dir=False,
-                   loader=DummyLoader):
-    if not os.path.isfile(archive_path):
-        raise e.PackageLoadError('Unable to find package file')
-    created = False
-    if not target_dir:
-        target_dir = tempfile.mkdtemp()
-        created = True
-    elif not os.path.exists(target_dir):
-        os.mkdir(target_dir)
-        created = True
-    else:
-        if os.listdir(target_dir):
-            raise e.PackageLoadError('Target directory is not empty')
-
-    try:
-        if not zipfile.is_zipfile(archive_path):
-            raise e.PackageFormatError("Uploading file should be a "
-                                       "zip' archive")
-        package = zipfile.ZipFile(archive_path)
-        package.extractall(path=target_dir)
-        return load_from_dir(target_dir, preload=True, loader=loader)
-    finally:
-        if drop_dir:
-            if created:
-                shutil.rmtree(target_dir)
-            else:
-                for f in os.listdir(target_dir):
-                    os.unlink(os.path.join(target_dir, f))

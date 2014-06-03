@@ -17,9 +17,12 @@ import re
 
 import murano.packages.application_package
 import murano.packages.exceptions as e
+import murano.packages.mpl_package
 
 
 # noinspection PyProtectedMember
+
+
 def load(package, yaml_content):
     package._full_name = yaml_content.get('FullName')
     if not package._full_name:
@@ -37,6 +40,11 @@ def load(package, yaml_content):
     package._ui = yaml_content.get('UI', 'ui.yaml')
     package._logo = yaml_content.get('Logo')
     package._tags = yaml_content.get('Tags')
+
+
+def create(source_directory, content, loader):
+    return murano.packages.mpl_package.MuranoPlPackage(
+        source_directory, content, loader)
 
 
 def _check_full_name(full_name):

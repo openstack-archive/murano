@@ -129,6 +129,11 @@ def _sleep(seconds):
     eventlet.sleep(seconds)
 
 
+@yaql.context.EvalArg('value', murano_object.MuranoObject)
+def _type(value):
+    return value.type.name
+
+
 def register(context):
     context.register_function(_resolve, '#resolve')
     context.register_function(_cast, 'cast')
@@ -140,3 +145,4 @@ def register(context):
     context.register_function(_require, 'require')
     context.register_function(_get_container, 'find')
     context.register_function(_sleep, 'sleep')
+    context.register_function(_type, 'type')

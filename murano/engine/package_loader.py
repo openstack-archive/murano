@@ -23,29 +23,15 @@ from keystoneclient.v2_0 import client as keystoneclient
 from muranoclient.common import exceptions as muranoclient_exc
 from muranoclient.v1 import client as muranoclient
 import six
-import yaml
 
 from murano.common import config
 from murano.dsl import exceptions
-from murano.dsl import yaql_expression
+from murano.engine import yaql_yaml_loader
 from murano.openstack.common import log as logging
-from murano.packages import application_package as app_pkg
 from murano.packages import exceptions as pkg_exc
+from murano.packages import load_utils
 
 LOG = logging.getLogger(__name__)
-
-
-class YaqlYamlLoader(yaml.Loader):
-    pass
-
-
-def yaql_constructor(loader, node):
-    value = loader.construct_scalar(node)
-    return yaql_expression.YaqlExpression(value)
-
-yaml.add_constructor(u'!yaql', yaql_constructor, YaqlYamlLoader)
-yaml.add_implicit_resolver(u'!yaql', yaql_expression.YaqlExpression,
-                           Loader=YaqlYamlLoader)
 
 
 class PackageLoader(six.with_metaclass(abc.ABCMeta)):
@@ -149,34 +135,36 @@ class ApiPackageLoader(PackageLoader):
 
         if os.path.exists(package_directory):
             try:
-                return app_pkg.load_from_dir(package_directory, preload=True,
-                                             loader=YaqlYamlLoader)
+                return load_utils.load_from_dir(
+                    package_directory, preload=True,
+                    loader=yaql_yaml_loader.YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
                 LOG.exception('Unable to load package from cache. Clean-up...')
                 shutil.rmtree(package_directory, ignore_errors=True)
-
         try:
             package_data = self._client.packages.download(package_id)
         except muranoclient_exc.HTTPException:
             LOG.exception('Unable to download '
                           'package with id {0}'.format(package_id))
             raise pkg_exc.PackageLoadError()
+        package_file = None
         try:
             with tempfile.NamedTemporaryFile(delete=False) as package_file:
                 package_file.write(package_data)
 
-            return app_pkg.load_from_file(
+            return load_utils.load_from_file(
                 package_file.name,
                 target_dir=package_directory,
                 drop_dir=False,
-                loader=YaqlYamlLoader
+                loader=yaql_yaml_loader.YaqlYamlLoader
             )
         except IOError:
             LOG.exception('Unable to write package file')
             raise pkg_exc.PackageLoadError()
         finally:
             try:
-                os.remove(package_file.name)
+                if package_file:
+                    os.remove(package_file.name)
             except OSError:
                 pass
 
@@ -213,8 +201,9 @@ class DirectoryPackageLoader(PackageLoader):
                 continue
 
             try:
-                package = app_pkg.load_from_dir(folder, preload=True,
-                                                loader=YaqlYamlLoader)
+                package = load_utils.load_from_dir(
+                    folder, preload=True,
+                    loader=yaql_yaml_loader.YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
                 LOG.exception('Unable to load package from path: '
                               '{0}'.format(entry))

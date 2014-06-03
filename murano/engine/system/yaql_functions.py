@@ -15,7 +15,10 @@
 
 import base64
 import collections
+import random
 import re
+import string
+import time
 import types
 
 import jsonpatch
@@ -25,6 +28,9 @@ import yaql.functions.builtin as yaql_builtin
 
 import murano.common.config as cfg
 import murano.dsl.helpers as helpers
+
+
+_random_string_counter = None
 
 
 def _transform_json(json, mappings):
@@ -204,6 +210,55 @@ def _patch(obj, patch):
         return obj
 
 
+def _int2base(x, base):
+    """Converts decimal integers into another number base
+     from base-2 to base-36.
+
+    :param x: decimal integer
+    :param base: number base, max value is 36
+    :return: integer converted to the specified base
+    """
+    digs = string.digits + string.lowercase
+    if x < 0:
+        sign = -1
+    elif x == 0:
+        return '0'
+    else:
+        sign = 1
+    x *= sign
+    digits = []
+    while x:
+        digits.append(digs[x % base])
+        x /= base
+    if sign < 0:
+        digits.append('-')
+    digits.reverse()
+    return ''.join(digits)
+
+
+def _random_name():
+    """Replace '#' char in pattern with supplied number, if no pattern is
+       supplied generate short and unique name for the host.
+
+    :param pattern: hostname pattern
+    :param number: number to replace with in pattern
+    :return: hostname
+    """
+    global _random_string_counter
+
+    counter = _random_string_counter or 1
+    # generate first 5 random chars
+    prefix = ''.join(random.choice(string.lowercase) for _ in range(5))
+    # convert timestamp to higher base to shorten hostname string
+    # (up to 8 chars)
+    timestamp = _int2base(int(time.time() * 1000), 36)[:8]
+    # third part of random name up to 2 chars
+    # (1295 is last 2-digit number in base-36, 1296 is first 3-digit number)
+    suffix = _int2base(counter, 36)
+    _random_string_counter = (counter + 1) % 1296
+    return prefix + timestamp + suffix
+
+
 @yaql.context.EvalArg('self', dict)
 def _values(self):
     return self.values()
@@ -250,6 +305,7 @@ def register(context):
     context.register_function(_str, 'str')
     context.register_function(_int, 'int')
     context.register_function(_patch, 'patch')
+    context.register_function(_random_name, 'randomName')
     # Temporary workaround as YAQL does not provide "where" function for
     # dictionaries, and there is no easy way to implement it there.
     context.register_function(yaql_builtin.dict_attribution, 'get')

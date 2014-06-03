@@ -73,10 +73,11 @@ class TaskProcessingEndpoint(object):
             # TODO(slagun) code below needs complete rewrite and redesign
             LOG.exception("Error during task execution for tenant %s",
                           env.tenant_id)
-            msg_env = Environment(task['model']['Objects']['?']['id'])
-            reporter = status_reporter.StatusReporter()
-            reporter.initialize(msg_env)
-            reporter.report_error(msg_env, '{0}'.format(e))
+            if task['model']['Objects']:
+                msg_env = Environment(task['model']['Objects']['?']['id'])
+                reporter = status_reporter.StatusReporter()
+                reporter.initialize(msg_env)
+                reporter.report_error(msg_env, '{0}'.format(e))
             rpc.api().process_result(task['model'])
 
 

@@ -26,7 +26,7 @@ import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.openstack.common.log as logging
 
-log = logging.getLogger(__name__)
+LOG = logging.getLogger(__name__)
 
 
 @murano_class.classname('io.murano.system.HeatStack')
@@ -103,6 +103,10 @@ class HeatStack(murano_object.MuranoObject):
         self._parameters.clear()
         self._applied = False
 
+    def setParameters(self, parameters):
+        self._parameters = parameters
+        self._applied = False
+
     def updateTemplate(self, template):
         self.current()
         self._template = helpers.merge_dicts(self._template, template)
@@ -161,13 +165,13 @@ class HeatStack(murano_object.MuranoObject):
         if self._applied or self._template is None:
             return
 
-        log.info('Pushing: {0}'.format(self._template))
+        LOG.info('Pushing: {0}'.format(self._template))
 
         current_status = self._get_status()
+        resources = self._template.get('Resources') or \
+            self._template.get('resources')
         if current_status == 'NOT_FOUND':
-            # For now, allow older CFN style templates as well, but this
-            # should be removed to avoid mixing them
-            if 'resources' in self._template or 'Resources' in self._template:
+            if resources:
                 self._heat_client.stacks.create(
                     stack_name=self._name,
                     parameters=self._parameters,
@@ -177,9 +181,7 @@ class HeatStack(murano_object.MuranoObject):
                 self._wait_state(
                     lambda status: status == 'CREATE_COMPLETE')
         else:
-            # For now, allow older CFN style templates as well, but this
-            # should be removed to avoid mixing them
-            if 'resources' in self._template or 'Resources' in self._template:
+            if resources:
                 self._heat_client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,
