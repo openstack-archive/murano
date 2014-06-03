@@ -60,15 +60,9 @@ where they should be set. To do this `YAQL
 used. All lines are going to be checked for a yaql
 expressions. Currently, 2 yaql functions are provided for object model
 generation:
-* **generateHostname** is used for machine hostname generation; it
-   accepts 2 arguments: name pattern (string) and index (integer). If
-   '#' symbol is present in name pattern, it will be replaced with the
-   index provided. If pattern is not given, a random name will be
-   generated.
-* **repeat** is used to produce a list of data snippets, given the
-   template snippet (first argument) and number of times it should be
-   reproduced (second argument). Inside that template snippet current
-   step can be referenced as *$index*.
+
+* **generateHostname** is used for machine hostname generation; it accepts 2 arguments: name pattern (string) and index (integer). If '#' symbol is present in name pattern, it will be replaced with the index provided. If pattern is not given, a random name will be generated.
+* **repeat** is used to produce a list of data snippets, given the template snippet (first argument) and number of times it should be reproduced (second argument). Inside that template snippet current step can be referenced as *$index*.
 
 Note that while evaluating YAQL expressions referenced from
 **Application** section (as well as almost all attributes inside
@@ -81,6 +75,7 @@ as *$.appConfiguration.name*. This context will be called as
 *Example:*
 
 .. code-block:: yaml
+
    Templates:
      primaryController:
         ?:
@@ -115,7 +110,8 @@ as *$.appConfiguration.name*. This context will be called as
 Forms
 =====
 
-This section describes Django forms. Set name for your form and provide fields and validators.
+This section describes markup elements for defining forms (which are currently rendered and validated with Django). Each form has name, field definitions (mandatory) and validator definitions (optionally). Note that each form is splitted into 2 parts - input area (left side, where all the controls are located) and description area (right side, where descriptions of the controls are located).
+
 Each field should contain:
 
 * **name** -  system field name, could be any
@@ -123,60 +119,32 @@ Each field should contain:
 
 Currently supported options for **type** attribute are:
 
-    * string - Django CharField with one-line text input
-    * boolean - Django BooleanField
-    * text - Django CharField with multi-line text input
-    * integer - Django IntegerField
-    * password - Specific field with validation for strong password
-    * clusterip - Specific field, used for cluster IP
-    * domain - Specific field, used for Active Directory domain
-    * databaselist - Specific field, a list of databases
-      (comma-separated list of databases' names, where each name has the
-      following syntax first symbol should be latin letter or
-      underscore; subsequent symbols can be latin letter, numeric,
-      underscore, at the sign, number sign or dollar sign)
-    * table - Specific field, used for defining table in a form
-    * flavor - Specific field, used for defining flavor in a form
-    * keypair - Specific field, used for defining KeyPair in a form
-    * image- Specific field, used for defining image in a form
-    * azone - Specific field, used for defining availability zone in a
-      form
+* string - text field (no inherent validations) with one-line text input
+* boolean - boolean field, rendered as a checkbox
+* text - same as string, but with a multi-line input
+* integer - integer field with an appropriate validation, one-line text input
+* password - text field with validation for strong password, rendered as two masked text inputs (second one is for password confirmation)
+* clusterip - specific text field, used for entering cluster IP address (validations for valid IP address syntax and for that IP to belong to a fixed subnet)
+* floatingip - specific boolean field, used for specifying whether or not an instance should have floating IP; *DEPRECATED FIELD* - use boolean field instead
+* domain - specific field, used for selecting Active Directory domain from a list (or creating a new Active Directory application); *DEPRECATED FIELD* - use io.murano.windows.ActiveDirectory instead
+* databaselist - Specific field, a list of databases (comma-separated list of databases' names, where each name has the following syntax first symbol should be latin letter or underscore; subsequent symbols can be latin letter, numeric, underscore, at the sign, number sign or dollar sign), rendered as one-line text input
+* flavor - specific field, used for selection instance flavor from a list
+* keypair - specific field, used for selecting keypair from a list
+* image- specific field, used for selecting instance image from a list
+* azone - specific field, used for selecting instance availability zone from a list
+* any other value is considered to be a fully qualified name for some Application package and is rendered as a pair of controls: one for selecting already existing Applications of that type in an Environment, second - for creating a new Application of that type and selecting it
 
 Other arguments (and whether they are required or not) depends on
 field's type and other attributes values. Among the most common
 attributes are:
-* **label** - name, that will be displayed in the form; defaults to
-    **name** being capitalized.
-* **description** - description, that will be displayed in the form
-    description area. Use yaml line folding character >- to keep the
-    correct formatting during data transferring.
-* **descriptionTitle** - title of the description, defaults to
-    **label**.
-* **hidden** whether field should be visible or not in the form's left
-    side. Note that hidden field's description will still be visible
-    in the form's right side (if given). Hidden fields are used
-    storing some data to be used by other, visible fields.
-* **minLength**, **maxLength** (for string fields) and **minValue**,
-    **maxValue** (for integer fields) are transparently translated
-    into django validation properties.
-* **validators** is a list of validators dictionaries, each validator
-    should at least have *expr* key, under that key either some `YAQL
-    <https://github.com/ativelkov/yaql/blob/master/README.md>`
-    expression is stored, either one-element dictionary with
-    *regexpValidator* key (and some regexp string as value). Another
-    possible key of a validator dictionary is *message*, and although
-    it is not required, it is highly desirable to specify it -
-    otherwise, when validator fails (i.e. regexp doesn't match or YAQL
-    expression evaluates to false) no message will be shown. Note that
-    field-level validators use YAQL context different from all other
-    attributes and section: here *$* root object is set to the value
-    of field being validated (to make expressions shorter).
-* **widgetMedia** sets some custom *CSS* and *JavaScript* used for the
-    field's widget rendering. Mostly they are used to do some
-    client-side field enabling/disabling, hiding/unhiding etc. This is
-    a temporary field which will be dropped once Version 3 of Dynamic
-    UI is implemented (since it will transparently translate YAQL
-    expressions into the appropriate *JavaScript*).
+
+* **label** - name, that will be displayed in the form; defaults to **name** being capitalized.
+* **description** - description, that will be displayed in the description area. Use yaml line folding character >- to keep the correct formatting during data transferring.
+* **descriptionTitle** - title of the description, defaults to **label**; displayed in the description area
+* **hidden** whether field should be visible or not in the input area. Note that hidden field's description will still be visible in the descriptions area (if given). Hidden fields are used storing some data to be used by other, visible fields. 
+* **minLength**, **maxLength** (for string fields) and **minValue**, **maxValue** (for integer fields) are transparently translated into django validation properties.
+* **validators** is a list of dictionaries, each dictionary should at least have *expr* key, under that key either some `YAQL <https://github.com/ativelkov/yaql/blob/master/README.md>` expression is stored, either one-element dictionary with *regexpValidator* key (and some regexp string as value). Another possible key of a validator dictionary is *message*, and although it is not required, it is highly desirable to specify it - otherwise, when validator fails (i.e. regexp doesn't match or YAQL expression evaluates to false) no message will be shown. Note that field-level validators use YAQL context different from all other attributes and section: here *$* root object is set to the value of field being validated (to make expressions shorter).
+* **widgetMedia** sets some custom *CSS* and *JavaScript* used for the field's widget rendering. Mostly they are used to do some client-side field enabling/disabling, hiding/unhiding etc. This is a temporary field which will be dropped once Version 3 of Dynamic UI is implemented (since it will transparently translate YAQL expressions into the appropriate *JavaScript*).
 
 Besides field-level validators form-level validators also exist. They
 use **standard context** for YAQL evaluation and are required when
@@ -252,5 +220,3 @@ fields.
              required: false
 
 Full example with Active Directory application form definitions is available here :ref:`active-directory-yaml`
-
-
