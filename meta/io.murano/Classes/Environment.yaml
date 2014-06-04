@@ -34,6 +34,10 @@ Properties:
     Contract: $.class(sys:SecurityGroupManager)
     Usage: Runtime
 
+  reporter:
+    Contract: $.class(sys:StatusReporter)
+    Usage: Runtime
+
 Workflow:
   initialize:
     Body:
