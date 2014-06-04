@@ -16,7 +16,6 @@
 import re
 
 import mock
-import unittest2 as unittest
 import yaql
 
 import murano.dsl.exceptions as exceptions
@@ -26,11 +25,16 @@ import murano.dsl.murano_object as murano_object
 import murano.dsl.namespace_resolver as ns_resolver
 import murano.dsl.typespec as typespec
 import murano.dsl.yaql_expression as yaql_expression
+from murano.tests import base
 
 ROOT_CLASS = 'io.murano.Object'
 
 
-class TestNamespaceResolving(unittest.TestCase):
+class TestNamespaceResolving(base.MuranoTestCase):
+
+    def setUp(self):
+        super(TestNamespaceResolving, self).setUp()
+
     def test_fails_w_empty_name(self):
         resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
 
@@ -110,8 +114,11 @@ class Bunch(object):
             setattr(self, key, value)
 
 
-class TestClassesManipulation(unittest.TestCase):
+class TestClassesManipulation(base.MuranoTestCase):
     resolver = mock.Mock(resolve_name=lambda name: name)
+
+    def setUp(self):
+        super(TestClassesManipulation, self).setUp()
 
     def test_class_name(self):
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
@@ -152,8 +159,9 @@ class TestClassesManipulation(unittest.TestCase):
 
         self.assertRaises(TypeError, cls.add_property, **kwargs)
 
-    @unittest.skip
     def test_add_property_to_class(self):
+        self.skipTest("FIXME!")
+
         prop = typespec.PropertySpec({'Default': 1}, self.resolver)
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS, None)
         cls.add_property('firstPrime', prop)
@@ -164,8 +172,9 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertEqual(['firstPrime'], class_properties)
         self.assertEqual(prop, class_property)
 
-    @unittest.skip
     def test_class_property_search(self):
+        self.skipTest("FIXME!")
+
         void_prop = typespec.PropertySpec({'Default': 'Void'}, self.resolver)
         mother_prop = typespec.PropertySpec({'Default': 'Mother'},
                                             self.resolver)
@@ -224,8 +233,11 @@ class TestClassesManipulation(unittest.TestCase):
         self.assertFalse(obj.initialize.called)
 
 
-class TestObjectsManipulation(unittest.TestCase):
+class TestObjectsManipulation(base.MuranoTestCase):
+
     def setUp(self):
+        super(TestObjectsManipulation, self).setUp()
+
         self.resolver = mock.Mock(resolve_name=lambda name: name)
         self.cls = mock.Mock()
         self.cls.name = ROOT_CLASS
@@ -275,8 +287,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(parent, obj.parent)
 
-    @unittest.skip
     def test_fails_internal_property_access(self):
+        self.skipTest("FIXME!")
+
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
 
         cls.add_property('__hidden',
@@ -285,8 +298,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertRaises(AttributeError, lambda: obj.__hidden)
 
-    @unittest.skip
     def test_proper_property_access(self):
+        self.skipTest("FIXME!")
+
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
 
         cls.add_property('someProperty',
@@ -295,8 +309,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(0, obj.someProperty)
 
-    @unittest.skip
     def test_parent_class_property_access(self):
+        self.skipTest("FIXME!")
+
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         child_cls = murano_class.MuranoClass(None, self.resolver,
                                              'Child', [cls])
@@ -307,8 +322,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(0, obj.anotherProperty)
 
-    @unittest.skip
     def test_fails_on_parents_property_collision(self):
+        self.skipTest("FIXME!")
+
         root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         mother = murano_class.MuranoClass(None, self.resolver,
                                           'Mother', [root])
@@ -344,8 +360,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(prop_value, resolved_value)
 
-    @unittest.skip
     def test_fails_forbidden_set_property(self):
+        self.skipTest("FIXME!")
+
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.add_property('someProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
@@ -355,8 +372,9 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertRaises(exceptions.NoWriteAccess, obj.set_property,
                           'someProperty', 10, caller_class=cls)
 
-    @unittest.skip
     def test_set_property(self):
+        self.skipTest("FIXME!")
+
         cls = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls.add_property('someProperty',
                          typespec.PropertySpec({'Default': 0}, self.resolver))
@@ -369,8 +387,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(10, obj.someProperty)
 
-    @unittest.skip
     def test_set_parent_property(self):
+        self.skipTest("FIXME!")
+
         root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         cls = murano_class.MuranoClass(None, self.resolver,
                                        'SomeClass', [root])
@@ -385,8 +404,9 @@ class TestObjectsManipulation(unittest.TestCase):
 
         self.assertEqual(20, obj.rootProperty)
 
-    @unittest.skip
     def test_object_up_cast(self):
+        self.skipTest("FIXME!")
+
         root = murano_class.MuranoClass(None, self.resolver, ROOT_CLASS)
         root_alt = murano_class.MuranoClass(None, self.resolver, 'RootAlt', [])
         cls = murano_class.MuranoClass(
@@ -413,7 +433,11 @@ class TestObjectsManipulation(unittest.TestCase):
         self.assertRaises(TypeError, root_obj.cast, cls)
 
 
-class TestHelperFunctions(unittest.TestCase):
+class TestHelperFunctions(base.MuranoTestCase):
+
+    def setUp(self):
+        super(TestHelperFunctions, self).setUp()
+
     def test_generate_id(self):
         generated_id = helpers.generate_id()
 
@@ -452,7 +476,11 @@ class TestHelperFunctions(unittest.TestCase):
         self.assertTrue(testee([yaql_expr]))
 
 
-class TestYaqlExpression(unittest.TestCase):
+class TestYaqlExpression(base.MuranoTestCase):
+
+    def setUp(self):
+        super(TestYaqlExpression, self).setUp()
+
     def test_expression(self):
         yaql_expr = yaql_expression.YaqlExpression('string')
 

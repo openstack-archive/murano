@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
-
 from murano.common import utils
+from murano.tests import base
 
 
-class TraverseHelperTests(unittest.TestCase):
+class TraverseHelperTests(base.MuranoTestCase):
     def test_root_get_with_dict(self):
         source = {'attr': True}
         value = utils.TraverseHelper.get('/', source)

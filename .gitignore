@@ -12,6 +12,9 @@ dist/
 .tox
 AUTHORS
 ChangeLog
+.testrepository
+.coverage
+cover
 
 #Python
 *.pyc

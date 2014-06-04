@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
-
 from murano.common.helpers import token_sanitizer
+from murano.tests import base
 
 
-class TokenSanitizerTests(unittest.TestCase):
+class TokenSanitizerTests(base.MuranoTestCase):
     sanitizer = token_sanitizer.TokenSanitizer()
 
     def test_dict_with_one_value(self):
