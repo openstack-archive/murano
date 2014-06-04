@@ -75,7 +75,8 @@ class MuranoClassLoader(object):
             spec = typespec.PropertySpec(property_spec, ns_resolver)
             type_obj.add_property(property_name, spec)
 
-        for method_name, payload in data.get('Workflow', {}).iteritems():
+        methods = data.get('Methods') or data.get('Workflow') or {}
+        for method_name, payload in methods.iteritems():
             type_obj.add_method(method_name, payload)
 
         self._loaded_types[name] = type_obj

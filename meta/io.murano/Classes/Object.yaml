@@ -2,5 +2,5 @@ Namespaces:
     =: io.murano
 Name: Object
 
-Workflow:
+Methods:
   initialize:

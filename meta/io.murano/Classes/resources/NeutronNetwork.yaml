@@ -35,7 +35,7 @@ Properties:
     Contract: $.bool().notNull()
     Default: true
 
-Workflow:
+Methods:
   initialize:
     Body:
       - $.environment: $.find(std:Environment).require()

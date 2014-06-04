@@ -6,7 +6,7 @@ Name: WindowsInstance
 
 Extends: Instance
 
-Workflow:
+Methods:
   createDefaultInstanceSecurityGroupRules:
     Arguments:
       - groupName:

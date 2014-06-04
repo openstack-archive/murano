@@ -13,7 +13,7 @@ Properties:
     Usage: InOut
     Default: null
 
-Workflow:
+Methods:
   prepareUserData:
     Body:
       - Return: $.customUserData

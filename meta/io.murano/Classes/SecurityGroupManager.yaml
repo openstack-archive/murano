@@ -13,7 +13,7 @@ Properties:
     Usage: Runtime
     Default: format('MuranoSecurityGroup-{0}', $.environment.name)
 
-Workflow:
+Methods:
   addGroupIngress:
     Arguments:
       - rules:

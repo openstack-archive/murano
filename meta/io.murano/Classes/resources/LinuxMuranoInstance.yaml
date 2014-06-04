@@ -8,7 +8,7 @@ Name: LinuxMuranoInstance
 Extends:
   - LinuxInstance
 
-Workflow:
+Methods:
  prepareUserData:
     Body:
       - $environment: $.find(std:Environment).require()

@@ -45,7 +45,7 @@ Properties:
     Contract: $.string()
     Default: null
 
-Workflow:
+Methods:
   initialize:
     Body:
       - $.environment: $.find(std:Environment).require()

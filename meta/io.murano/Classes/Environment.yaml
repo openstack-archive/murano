@@ -38,7 +38,7 @@ Properties:
     Contract: $.class(sys:StatusReporter)
     Usage: Runtime
 
-Workflow:
+Methods:
   initialize:
     Body:
       - $this.agentListener: new(sys:AgentListener, name => $.name)
