@@ -46,6 +46,10 @@ def get_session(autocommit=True, expire_on_commit=False):
     return s
 
 
+def get_engine():
+    return _create_facade_lazily().get_engine()
+
+
 def db_sync():
     repo_path = os.path.abspath(os.path.dirname(migrate_repo.__file__))
     try:
