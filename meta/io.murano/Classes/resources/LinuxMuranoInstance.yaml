@@ -1,5 +1,6 @@
 Namespaces:
   =: io.murano.resources
+  sys: io.murano.system
   std: io.murano
 
 Name: LinuxMuranoInstance
@@ -10,8 +11,10 @@ Extends:
 Workflow:
  prepareUserData:
     Body:
-      - $configFile: $.resources.string('Agent-v2.template')
-      - $initScript: $.resources.string('linux-init.sh')
+      - $environment: $.find(std:Environment).require()
+      - $resources: new(sys:Resources)
+      - $configFile: $resources.string('Agent-v2.template')
+      - $initScript: $resources.string('linux-init.sh')
       - $configReplacements:
           "%RABBITMQ_HOST%": config(rabbitmq, host)
           "%RABBITMQ_PORT%": config(rabbitmq, port)
@@ -20,7 +23,7 @@ Workflow:
           "%RABBITMQ_VHOST%": config(rabbitmq, virtual_host)
           "%RABBITMQ_SSL%": str(config(rabbitmq, ssl)).toLower()
           "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
-          "%RESULT_QUEUE%": $.environment.agentListener.queueName()
+          "%RESULT_QUEUE%": $environment.agentListener.queueName()
       - $scriptReplacements:
           "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
           "%INTERNAL_HOSTNAME%": $.name
