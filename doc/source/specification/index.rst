@@ -55,6 +55,7 @@ General information
     (X-Auth-Token). Clients must authenticate with Keystone before
     interacting with the Murano service.
 
+
 .. include:: murano-api.rst
 .. include:: murano-repository.rst
 

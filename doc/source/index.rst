@@ -48,18 +48,48 @@ Murano consists of three source code repositories:
 This documentation offers information on how Murano works and how to
 contribute to the project.
 
-Table of contents
-=================
+
+**Installation**
+
+.. toctree::
+   :maxdepth: 1
+
+   install/index
+
+**Background Concepts for Murano**
+
+.. toctree::
+   :maxdepth: 1
+
+   articles/murano_pl_index
+   articles/dynamic_ui
+   articles/workflow
+
+
+**Tutorials**
+
+.. toctree::
+   :maxdepth: 1
+
+   articles/app_pkg
+   articles/heat_support
+   image_builders/index
+
+**Guidelines**
 
 .. toctree::
    :maxdepth: 2
 
    contributing
    guidelines
-   install/index
-   articles/index
+
+
+**API specification**
+
+.. toctree::
+   :maxdepth: 1
+
    specification/index
-   image_builders/index
 
 Indices and tables
 ==================

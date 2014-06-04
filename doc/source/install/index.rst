@@ -15,9 +15,9 @@
 
 .. _install:
 
-==================
- Installing Murano
-==================
+=========================
+Murano Installation Guide
+=========================
 
 .. toctree::
    :maxdepth: 2
