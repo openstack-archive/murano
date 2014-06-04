@@ -453,11 +453,12 @@ class TestHelperFunctions(base.MuranoTestCase):
         # tuple(evaluate(list)) transformation adds + 1
         complex_literal_depth = 3 + 1
 
-        evaluated_value = helpers.evaluate(yaql_value, None, 1)
-        non_evaluated_value = helpers.evaluate(yaql_value, None, 0)
-        evaluated_complex_value = helpers.evaluate(complex_value, None)
+        context = yaql.create_context(False)
+        evaluated_value = helpers.evaluate(yaql_value, context, 1)
+        non_evaluated_value = helpers.evaluate(yaql_value, context, 0)
+        evaluated_complex_value = helpers.evaluate(complex_value, context)
         non_evaluated_complex_value = helpers.evaluate(
-            complex_value, None, complex_literal_depth)
+            complex_value, context, complex_literal_depth)
 
         self.assertEqual('atom', evaluated_value)
         self.assertNotEqual('atom', non_evaluated_value)
@@ -484,7 +485,7 @@ class TestYaqlExpression(base.MuranoTestCase):
     def test_expression(self):
         yaql_expr = yaql_expression.YaqlExpression('string')
 
-        self.assertEqual('string', yaql_expr.expression())
+        self.assertEqual('string', yaql_expr.expression)
 
     def test_evaluate_calls(self):
         string = 'string'

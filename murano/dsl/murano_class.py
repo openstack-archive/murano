@@ -101,6 +101,15 @@ class MuranoClass(object):
         if initial and not yielded:
             yield initial
 
+    def find_method(self, name):
+        if name in self._methods:
+            return [(self, name)]
+        if not self._parents:
+            return []
+        return list(set(reduce(
+            lambda x, y: x + y,
+            [p.find_method(name) for p in self._parents])))
+
     def find_single_method(self, name):
         chains = sorted(self._find_method_chains(name), key=lambda t: len(t))
         result = []

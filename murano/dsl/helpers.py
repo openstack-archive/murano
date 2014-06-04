@@ -35,7 +35,7 @@ def serialize(value, memo=None):
             result[d_key] = serialize(d_value, memo)
         return result
     elif isinstance(value, murano.dsl.murano_object.MuranoObject):
-        if not value.object_id in memo:
+        if value.object_id not in memo:
             memo.add(value.object_id)
             return serialize(value.to_dictionary(), memo)
         else:
@@ -47,13 +47,19 @@ def serialize(value, memo=None):
 
 
 def evaluate(value, context, max_depth=sys.maxint):
-    if isinstance(value, (yaql_expression.YaqlExpression,
-                          yaql.expressions.Expression)):
+    if isinstance(value, yaql.expressions.Expression):
+        value = yaql_expression.YaqlExpression(value)
+
+    if isinstance(value, yaql_expression.YaqlExpression):
         func = lambda: evaluate(value.evaluate(context), context, 1)
         if max_depth <= 0:
             return func
         else:
-            return func()
+            try:
+                context.set_data(value, '?currentInstruction')
+                return func()
+            finally:
+                context.set_data(None, '?currentInstruction')
 
     elif isinstance(value, types.DictionaryType):
         result = {}
@@ -178,3 +184,11 @@ def get_caller_context(context):
 
 def get_attribute_store(context):
     return context.get_data('$?attributeStore')
+
+
+def get_current_instruction(context):
+    return context.get_data('$?currentInstruction')
+
+
+def get_current_method(context):
+    return context.get_data('$?currentMethod')

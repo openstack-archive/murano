@@ -17,15 +17,37 @@ import types
 
 import yaql
 import yaql.exceptions
+import yaql.expressions
 
 
 class YaqlExpression(object):
     def __init__(self, expression):
-        self._expression = str(expression)
-        self._parsed_expression = yaql.parse(self._expression)
+        if isinstance(expression, types.StringTypes):
+            self._expression = str(expression)
+            self._parsed_expression = yaql.parse(self._expression)
+            self._file_position = None
+        elif isinstance(expression, YaqlExpression):
+            self._expression = expression._expression
+            self._parsed_expression = expression._parsed_expression
+            self._file_position = expression._file_position
+        elif isinstance(expression, yaql.expressions.Expression):
+            self._expression = str(expression)
+            self._parsed_expression = expression
+            self._file_position = None
+        else:
+            raise TypeError('expression is not of supported types')
 
+    @property
     def expression(self):
         return self._expression
+
+    @property
+    def file_position(self):
+        return self._file_position
+
+    @file_position.setter
+    def file_position(self, value):
+        self._file_position = value
 
     def __repr__(self):
         return 'YAQL(%s)' % self._expression
@@ -49,3 +71,43 @@ class YaqlExpression(object):
 
     def evaluate(self, context=None):
         return self._parsed_expression.evaluate(context=context)
+
+
+class YaqlExpressionFilePosition(object):
+    def __init__(self, file_path, start_line, start_column, start_index,
+                 end_line, end_column, length):
+        self._file_path = file_path
+        self._start_line = start_line
+        self._start_column = start_column
+        self._start_index = start_index
+        self._end_line = end_line
+        self._end_column = end_column
+        self._length = length
+
+    @property
+    def file_path(self):
+        return self._file_path
+
+    @property
+    def start_line(self):
+        return self._start_line
+
+    @property
+    def start_column(self):
+        return self._start_column
+
+    @property
+    def start_index(self):
+        return self._start_index
+
+    @property
+    def end_line(self):
+        return self._end_line
+
+    @property
+    def end_column(self):
+        return self._end_column
+
+    @property
+    def length(self):
+        return self._length

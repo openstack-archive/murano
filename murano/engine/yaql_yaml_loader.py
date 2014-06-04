@@ -30,7 +30,17 @@ YaqlYamlLoader.yaml_implicit_resolvers = resolvers
 
 def yaql_constructor(loader, node):
     value = loader.construct_scalar(node)
-    return yaql_expression.YaqlExpression(value)
+    result = yaql_expression.YaqlExpression(value)
+    position = yaql_expression.YaqlExpressionFilePosition(
+        node.start_mark.name,
+        node.start_mark.line + 1,
+        node.start_mark.column + 1,
+        node.start_mark.index,
+        node.end_mark.line + 1,
+        node.end_mark.column + 1,
+        node.end_mark.index - node.start_mark.index)
+    result.file_position = position
+    return result
 
 yaml.add_constructor(u'!yaql', yaql_constructor, YaqlYamlLoader)
 yaml.add_implicit_resolver(u'!yaql', yaql_expression.YaqlExpression,
