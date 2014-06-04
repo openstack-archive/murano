@@ -18,9 +18,7 @@ import heatclient.client as hclient
 import heatclient.exc as heat_exc
 import keystoneclient.v2_0.client as ksclient
 
-
 import murano.common.config as config
-
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
@@ -80,7 +78,8 @@ class HeatStack(murano_object.MuranoObject):
                     stack_info.id))
             # template = {}
             self._template = template
-            self._parameters.update(stack_info.parameters)
+            self._parameters.update(
+                HeatStack._remove_system_params(stack_info.parameters))
             self._applied = True
             return self._template.copy()
         except heat_exc.HTTPNotFound:
@@ -111,6 +110,11 @@ class HeatStack(murano_object.MuranoObject):
         self.current()
         self._template = helpers.merge_dicts(self._template, template)
         self._applied = False
+
+    @staticmethod
+    def _remove_system_params(parameters):
+        return {k: v for k, v in parameters.iteritems() if
+                not k.startswith("OS::")}
 
     def _get_status(self):
         status = [None]
