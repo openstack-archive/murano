@@ -12,10 +12,11 @@ Workflow:
       - groupName:
           Contract: $.string().notNull()
     Body:
+      - $environment: $.find(std:Environment).require()
       - $rules:
         - ToPort: 22
           IpProtocol: tcp
           FromPort: 22
           External: true
-      - $.environment.securityGroupManager.addGroupIngress(
+      - $environment.securityGroupManager.addGroupIngress(
           rules => $rules, groupName => $groupName)
