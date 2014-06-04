@@ -123,18 +123,23 @@ class SessionServices(object):
         environment = unit.query(models.Environment).get(
             session.environment_id)
 
-        data = {
+        task = {
+            'action': {
+                'object_id': environment.id,
+                'method': 'deploy',
+                'args': {}
+            },
             'model': session.description,
             'token': token,
             'tenant_id': environment.tenant_id
         }
 
-        data['model']['Objects']['?']['id'] = environment.id
-        data['model']['Objects']['applications'] = \
-            data['model']['Objects'].get('services', [])
+        task['model']['Objects']['?']['id'] = environment.id
+        task['model']['Objects']['applications'] = \
+            task['model']['Objects'].get('services', [])
 
-        if 'services' in data['model']['Objects']:
-            del data['model']['Objects']['services']
+        if 'services' in task['model']['Objects']:
+            del task['model']['Objects']['services']
 
         session.state = SessionState.deploying
         deployment = models.Deployment()
@@ -150,4 +155,4 @@ class SessionServices(object):
             unit.add(session)
             unit.add(deployment)
 
-        rpc.engine().handle_task(data)
+        rpc.engine().handle_task(task)

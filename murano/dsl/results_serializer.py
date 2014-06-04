@@ -14,6 +14,8 @@
 
 import types
 
+import murano.dsl.helpers as helpers
+import murano.dsl.murano_method as murano_method
 import murano.dsl.murano_object as murano_object
 
 
@@ -56,6 +58,35 @@ def _cmp_objects(obj1, obj2):
     return obj1.object_id == obj2.object_id
 
 
+def _serialize_available_action(obj):
+    def _serialize(obj_type):
+        actions = {}
+        for name, method in obj_type.methods.iteritems():
+            if method.usage == murano_method.MethodUsages.Action:
+                actions[name] = {
+                    'id': '%s_%s' % (obj.object_id, name),
+                    'name': name,
+                    'enabled': True,
+                }
+        for parent in obj_type.parents:
+            parent_actions = _serialize(parent)
+            actions = helpers.merge_dicts(parent_actions, actions)
+        return actions
+    return _serialize(obj.type).values()
+
+
+def _merge_actions(list1, list2):
+    dict1 = dict([(action['id'], action) for action in list1])
+    dict2 = dict([(action['id'], action) for action in list2])
+
+    result = helpers.merge_dicts(dict1, dict2)
+    for action_id in dict1:
+        if action_id not in dict2:
+            del result[action_id]
+
+    return result.values()
+
+
 def _pass1_serialize(value, parent, serialized_objects,
                      designer_attributes_getter):
     if isinstance(value, (types.StringTypes, types.IntType, types.FloatType,
@@ -69,6 +100,10 @@ def _pass1_serialize(value, parent, serialized_objects,
             result = value.to_dictionary()
             if designer_attributes_getter is not None:
                 result['?'].update(designer_attributes_getter(value.object_id))
+                #deserialize and merge list of actions
+                actions = _serialize_available_action(value)
+                result['?']['_actions'] = _merge_actions(
+                    result['?'].get('_actions', []), actions)
             serialized_objects.add(value.object_id)
             return _pass1_serialize(
                 result, value, serialized_objects, designer_attributes_getter)

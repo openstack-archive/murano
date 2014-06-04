@@ -45,6 +45,7 @@ Workflow:
 
 
   deploy:
+    Usage: Action
     Body:
       - $.agentListener.start()
       - If: len($.applications) = 0
