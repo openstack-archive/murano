@@ -60,14 +60,16 @@ Workflow:
     Body:
       - $.ensureNetworkConfigured()
       - $portname: $instance.name + '-port-to-' + $.id()
+      - $netResName: $.name + '-net-' + $.id()
+      - $subnetResName: $.name + '-subnet-' + $.id()
       - $template:
           heat_template_version: '2013-05-23'
           resources:
             $portname:
               type: 'OS::Neutron::Port'
               properties:
-                network_id: { get_resource: $.net_res_name }
-                fixed_ips: [{ subnet_id: { get_resource: $.subnet_res_name } }]
+                network_id: { get_resource: $netResName }
+                fixed_ips: [{ subnet_id: { get_resource: $subnetResName } }]
                 security_groups:
                   - get_resource: $securityGroupName
             $instance.name:
@@ -110,8 +112,6 @@ Workflow:
             Then:
               - $.dnsNameserver: $.netExplorer.getDefaultDns()
 
-          - $.net_res_name: $.name + '-net-' + $.id()
-          - $.subnet_res_name: $.name + '-subnet-' + $.id()
           - $.createNetwork()
           - If: $.autoUplink and (not bool($.externalRouterId))
             Then:
@@ -130,10 +130,11 @@ Workflow:
 
   createNetwork:
     Body:
+      - $netResName: $.name + '-net-' + $.id()
       - $template:
           heat_template_version: '2013-05-23'
           resources:
-            $.net_res_name:
+            $netResName:
               type: 'OS::Neutron::Net'
               properties:
                 name: $.name
@@ -141,13 +142,15 @@ Workflow:
 
   createSubnet:
     Body:
+      - $subnetResName: $.name + '-subnet-' + $.id()
+      - $netResName: $.name + '-net-' + $.id()
       - $template:
           heat_template_version: '2013-05-23'
           resources:
-            $.subnet_res_name:
+            $subnetResName:
               type: 'OS::Neutron::Subnet'
               properties:
-                network_id: { get_resource: $.net_res_name }
+                network_id: { get_resource: $netResName }
                 ip_version: 4
                 dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
@@ -155,6 +158,7 @@ Workflow:
 
   createRouterInterface:
     Body:
+      - $subnetResName: $.name + '-subnet-' + $.id()
       - $template:
           heat_template_version: '2013-05-23'
           resources:
@@ -162,5 +166,5 @@ Workflow:
               type: 'OS::Neutron::RouterInterface'
               properties:
                 router_id: $.externalRouterId
-                subnet_id: { get_resource: $.subnet_res_name }
+                subnet_id: { get_resource: $subnetResName }
       - $.environment.stack.updateTemplate($template)
