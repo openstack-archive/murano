@@ -113,8 +113,8 @@ class HeatStack(murano_object.MuranoObject):
 
     @staticmethod
     def _remove_system_params(parameters):
-        return {k: v for k, v in parameters.iteritems() if
-                not k.startswith("OS::")}
+        return dict((k, v) for k, v in parameters.iteritems() if
+                    not k.startswith('OS::'))
 
     def _get_status(self):
         status = [None]
