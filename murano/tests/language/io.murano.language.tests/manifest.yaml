@@ -1,9 +1,0 @@
-Format: 1.0
-Type: Library
-FullName: io.murano.language.tests
-Name: Example Test Cases
-Description: Simple test case intended to be used as example
-Author: Example
-Tags: [test, example]
-Classes:
-  io.murano.language.tests.ExampleTestCase: ExampleTestCase.yaml

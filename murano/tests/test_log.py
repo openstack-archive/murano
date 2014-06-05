@@ -12,15 +12,23 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
+
 import logging
-import unittest
+import sys
 
 from murano.openstack.common import log
+from murano.tests import base
 
 
-class SysLogHandlersTestCase(unittest.TestCase):
+class SysLogHandlersTestCase(base.MuranoTestCase):
     """Test for standard and RFC compliant Syslog handlers."""
+
     def setUp(self):
+        super(SysLogHandlersTestCase, self).setUp()
+
+        if sys.platform != 'linux2':
+            self.skip("SKIP: This test work on Linux platform only.")
+
         self.facility = logging.handlers.SysLogHandler.LOG_USER
         self.rfclogger = log.RFCSysLogHandler(address='/dev/log',
                                               facility=self.facility)

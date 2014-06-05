@@ -12,12 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import unittest2 as unittest
-
 from murano.common import utils
+from murano.tests import base
 
 
-class IsDifferentTests(unittest.TestCase):
+class IsDifferentTests(base.MuranoTestCase):
     def test_equal_dicts(self):
         obj1 = {'first': 10, 'second': 12}
         obj2 = {'second': 12, 'first': 10}
