@@ -283,6 +283,7 @@ function purge_init()
         esac
         rm -f "/etc/init.d/$_initscript" || retval=$?
     done
+    rm -rf "/var/run/murano" || retval=$?
     return $retval
 }
 function run_pip_uninstall()
