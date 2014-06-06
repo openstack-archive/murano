@@ -62,7 +62,7 @@ Methods:
               - $.createRouterInterface()
 
           - $.environment.stack.push()
-          - $.setAttr(networkConfigured, true)
+          - $.setAttr(deployed, true)
 
   createNetwork:
     Body:

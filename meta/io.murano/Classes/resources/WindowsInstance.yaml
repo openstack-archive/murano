@@ -1,6 +1,7 @@
 Namespaces:
   =: io.murano.resources
   std: io.murano
+  sys: io.murano.system
 
 Name: WindowsInstance
 
