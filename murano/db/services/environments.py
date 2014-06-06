@@ -29,8 +29,8 @@ EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
 )
 
 DEFAULT_NETWORKS = {
-    'environment': 'io.murano.lib.networks.neutron.NewNetwork',
-    # 'flat': 'io.murano.lib.networks.ExistingNetworkConnector'
+    'environment': 'io.murano.resources.NeutronNetwork',
+    # 'flat': 'io.murano.resources.ExistingNetworkConnector'
 }
 
 

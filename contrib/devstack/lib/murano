@@ -167,7 +167,6 @@ function init_murano() {
 
     $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE db-sync
     $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/io.murano
-    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/io.murano.lib.networks.Neutron
 }
 
 
