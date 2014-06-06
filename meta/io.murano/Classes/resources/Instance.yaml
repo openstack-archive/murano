@@ -60,7 +60,7 @@ Workflow:
           )
       - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
       - $.detectPrimaryNetwork()
-
+      - $.ensureNetworksDeployed()
       - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
         Then:
           $.joinNet($.environment.defaultNetworks.environment, $securityGroupName)
@@ -108,6 +108,15 @@ Workflow:
                 Then:
                   - $.primaryNetwork: $.environment.defaultNetworks.flat
 
+  ensureNetworksDeployed:
+    Body:
+      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
+        Then:
+          - $.environment.defaultNetworks.environment.deploy()
+      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
+        Then:
+          - $.environment.defaultNetworks.flat.deploy()
+      - $.networks.customNetworks.pselect($.deploy())
 
   joinNet:
     Arguments:
