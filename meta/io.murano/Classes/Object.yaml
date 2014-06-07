@@ -4,3 +4,4 @@ Name: Object
 
 Workflow:
   initialize:
+  destroy:

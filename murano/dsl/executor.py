@@ -83,6 +83,12 @@ class MuranoDslExecutor(object):
             raise Exception('{0} is not an action'.format(method.name))
         # TODO (slagun): check method accessibility from murano_class
 
+        if not external_call and is_special_method:
+            LOG.deprecated('initialize/destroy methods are called '
+                           'automatically by engine. This call is no-op '
+                           'and will become exception in the future')
+            return None
+
         # restore this from upcast object (no change if there was no upcast)
         this = this.real_this
         arguments_scheme = method.arguments_scheme

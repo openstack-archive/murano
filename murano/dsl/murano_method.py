@@ -109,7 +109,8 @@ class MuranoMethod(object):
         return macros.MethodBlock(body)
 
     def __repr__(self):
-        return 'MuranoMethod({0})'.format(self.name)
+        return 'MuranoMethod({0}::{1})'.format(
+            self.murano_class.name, self.name)
 
     def invoke(self, executor, this, parameters):
         return self.murano_class.invoke(self.name, executor, this, parameters)

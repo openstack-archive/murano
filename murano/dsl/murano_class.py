@@ -130,14 +130,16 @@ class MuranoClass(object):
         return result[0]
 
     def find_all_methods(self, name):
-        #resolved_name = self._namespace_resolver.resolve_name(name, self.name)
-        if name in self._methods:
-            return [self.methods[name]]
-        if not self._parents:
-            return []
-        return list(reduce(
-            lambda x, y: x + [t for t in y if t not in x],
-            [p.find_all_methods(name) for p in self._parents]))
+        result = []
+        queue = collections.deque([self])
+        while queue:
+            c = queue.popleft()
+            if name in c.methods:
+                method = c.methods[name]
+                if method not in result:
+                    result.append(method)
+            queue.extend(c.parents)
+        return result
 
     def find_property(self, name):
         types = collections.deque([self])
