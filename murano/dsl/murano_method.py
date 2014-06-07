@@ -110,3 +110,6 @@ class MuranoMethod(object):
 
     def __repr__(self):
         return 'MuranoMethod({0})'.format(self.name)
+
+    def invoke(self, executor, this, parameters):
+        return self.murano_class.invoke(self.name, executor, this, parameters)

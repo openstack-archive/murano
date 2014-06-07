@@ -13,7 +13,6 @@
 #    under the License.
 
 import collections
-import functools
 import inspect
 import types
 import uuid
@@ -23,9 +22,9 @@ import eventlet.event
 import yaql.context
 
 import murano.dsl.attribute_store as attribute_store
-import murano.dsl.exceptions as exceptions
 import murano.dsl.expressions as expressions
 import murano.dsl.helpers as helpers
+import murano.dsl.murano_method as murano_method
 import murano.dsl.murano_object as murano_object
 import murano.dsl.object_store as object_store
 import murano.dsl.yaql_functions as yaql_functions
@@ -71,44 +70,39 @@ class MuranoDslExecutor(object):
             raise ValueError()
 
     def invoke_method(self, name, this, context, murano_class, *args):
+        external_call = False
         if context is None:
+            external_call = True
             context = self._root_context
-        implementations = this.type.find_method(name)
+        method = this.type.find_single_method(name)
+
+        is_special_method = name in ('initialize', 'destroy')
+
+        if external_call and not is_special_method and \
+                method.usage != murano_method.MethodUsages.Action:
+            raise Exception('{0} is not an action'.format(method.name))
+        # TODO (slagun): check method accessibility from murano_class
+
         # restore this from upcast object (no change if there was no upcast)
         this = this.real_this
-        delegates = []
-        for declaring_class, name in implementations:
-            method = declaring_class.get_method(name)
-            if not method:
-                continue
-            arguments_scheme = method.arguments_scheme
-            try:
-                params = self._evaluate_parameters(
-                    arguments_scheme, context, this, *args)
-                delegates.append(functools.partial(
-                    self._invoke_method_implementation,
-                    method, this, declaring_class, context, params))
-            except TypeError:
-                continue
-        if len(delegates) < 1:
-            raise exceptions.NoMethodFound(name)
-        elif len(delegates) > 1:
-            raise exceptions.AmbiguousMethodName(name)
-        else:
-            return delegates[0]()
+        arguments_scheme = method.arguments_scheme
+        params = self._evaluate_parameters(
+            arguments_scheme, context, this, *args)
+        return self._invoke_method_implementation(
+            method, this, context, params)
 
-    def _invoke_method_implementation(self, method, this, murano_class,
-                                      context, params):
+    def _invoke_method_implementation(self, method, this, context, params):
         body = method.body
         if not body:
             return None
 
+        murano_class = method.murano_class
         current_thread = eventlet.greenthread.getcurrent()
-        if not hasattr(current_thread, '_murano_dsl_thread_marker'):
-            thread_marker = current_thread._murano_dsl_thread_marker = \
+        if not hasattr(current_thread, '_muranopl_thread_marker'):
+            thread_marker = current_thread._muranopl_thread_marker = \
                 uuid.uuid4().hex
         else:
-            thread_marker = current_thread._murano_dsl_thread_marker
+            thread_marker = current_thread._muranopl_thread_marker
 
         method_id = id(body)
         this_id = this.object_id
@@ -145,7 +139,7 @@ class MuranoDslExecutor(object):
                                          thread_marker=None):
         if thread_marker:
             current_thread = eventlet.greenthread.getcurrent()
-            current_thread._murano_dsl_thread_marker = thread_marker
+            current_thread._muranopl_thread_marker = thread_marker
         if callable(body):
             if '_context' in inspect.getargspec(body).args:
                 params['_context'] = self._create_context(
@@ -253,10 +247,10 @@ class MuranoDslExecutor(object):
             try:
                 self._object_store = gc_object_store
                 for obj in objects_to_clean:
-                    methods = obj.type.find_method('destroy')
-                    for cls, method in methods:
+                    methods = obj.type.find_all_methods('destroy')
+                    for method in methods:
                         try:
-                            cls.invoke(method, self, obj, {})
+                            method.invoke(self, obj, {})
                         except Exception:
                             pass
             finally:

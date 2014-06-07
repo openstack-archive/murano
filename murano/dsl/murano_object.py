@@ -156,7 +156,7 @@ class MuranoObject(object):
             raise AttributeError(key)
 
     def cast(self, type):
-        if self.type == type:
+        if self.type is type:
             return self
         for parent in self.__parents.values():
             try:
