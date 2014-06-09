@@ -91,7 +91,7 @@ Workflow:
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ip', $this.name)).values().flatten().addr.list()
       - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
-      - $.environment.instanceNotifier.trackApplication($this)
+      - $.environment.instanceNotifier.trackCloudInstance($this)
 
   detectPrimaryNetwork:
     Body:
@@ -195,7 +195,7 @@ Workflow:
       - $template: patch($template, $patchBlock)
       - $.environment.stack.setTemplate($template)
       - $.environment.stack.push()
-      - $.environment.instanceNotifier.untrackApplication($this)
+      - $.environment.instanceNotifier.untrackCloudInstance($this)
 
   createDefaultInstanceSecurityGroupRules:
     Arguments:
