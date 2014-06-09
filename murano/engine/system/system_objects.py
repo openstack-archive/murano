@@ -41,9 +41,9 @@ def register(class_loader, package_loader):
 
     @murano_class.classname('io.murano.system.Resources')
     class ResourceManagerWrapper(resource_manager.ResourceManager):
-        def initialize(self, _context, _class=None):
+        def initialize(self, _context):
             super(ResourceManagerWrapper, self).initialize(
-                package_loader, _context, _class)
+                package_loader, _context)
 
     class_loader.import_class(agent.Agent)
     class_loader.import_class(agent_listener.AgentListener)
