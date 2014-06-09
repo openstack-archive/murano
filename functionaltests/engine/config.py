@@ -34,7 +34,13 @@ MuranoGroup = [
                help='keystone tenant'),
     cfg.StrOpt('murano_url',
                default='http://127.0.0.1:8082/v1/',
-               help="murano url")
+               help="murano url"),
+    cfg.StrOpt('linux_image',
+               default='default_linux',
+               help="image for linux services"),
+    cfg.StrOpt('windows_image',
+               default='default_windows',
+               help="image for windows services")
 ]
 
 

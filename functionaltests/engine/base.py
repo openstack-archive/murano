@@ -20,7 +20,6 @@ import testtools
 import time
 import uuid
 
-from glanceclient import Client as gclient
 from keystoneclient.v2_0 import client as ksclient
 
 import functionaltests.engine.config as cfg
@@ -42,24 +41,6 @@ class Client(object):
             'X-Auth-Token': self.auth.auth_token,
             'Content-type': 'application/json'
         }
-
-        glance_endpoint = \
-            self.auth.service_catalog.url_for(service_type='image',
-                                              endpoint_type='publicURL')
-        glance = gclient('1', endpoint=glance_endpoint,
-                         token=self.auth.auth_token)
-
-        for i in glance.images.list():
-            if 'murano_image_info' in i.properties.keys():
-                if 'linux' == json.loads(
-                        i.properties['murano_image_info'])['type']:
-                    self.linux = i.name
-                elif 'windows' in json.loads(
-                        i.properties['murano_image_info'])['type']:
-                    self.windows = i.name
-                elif 'demo' in json.loads(
-                        i.properties['murano_image_info'])['type']:
-                    self.demo = i.name
 
     def create_environment(self, name):
         post_body = {'name': name}
@@ -133,6 +114,9 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                             auth_url=CONF.murano.auth_url,
                             murano_url=CONF.murano.murano_url)
 
+        cls.linux = CONF.murano.linux_image
+        cls.windows = CONF.murano.windows_image
+
         cls.location = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
@@ -147,10 +131,13 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 endpoint=CONF.murano.murano_url,
                 url='catalog/packages')
 
+            headers = cls.client.headers.copy()
+            del headers['Content-type']
+
             return requests.post(request_url,
                                  files=files,
                                  data=post_body,
-                                 headers=cls.client.headers).json()['id']
+                                 headers=headers).json()['id']
 
         cls.postgre_id = upload_package(
             'PostgreSQL',
@@ -191,7 +178,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
-                "image": self.client.linux,
+                "image": self.linux,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -225,7 +212,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
-                "image": self.client.linux,
+                "image": self.linux,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -259,7 +246,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
-                "image": self.client.linux,
+                "image": self.linux,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -293,7 +280,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
-                "image": self.client.linux,
+                "image": self.linux,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
