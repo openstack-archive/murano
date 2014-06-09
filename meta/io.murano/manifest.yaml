@@ -26,4 +26,5 @@ Classes:
   io.murano.resources.LinuxMuranoInstance: resources/LinuxMuranoInstance.yaml
   io.murano.resources.LinuxUDInstance: resources/LinuxUDInstance.yaml
   io.murano.resources.WindowsInstance: resources/WindowsInstance.yaml
+  io.murano.resources.NeutronNetwork: resources/NeutronNetwork.yaml
 

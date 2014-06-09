@@ -29,10 +29,12 @@ Properties:
       useEnvironmentNetwork: $.bool().notNull()
       useFlatNetwork: $.bool().notNull()
       customNetworks: [$.class(Network).notNull()]
+      primaryNetwork: $.class(Network).notOwned()
     Default:
       useEnvironmentNetwork: true
       useFlatNetwork: false
       customNetworks: []
+      primaryNetwork: null
   assignFloatingIp:
     Contract: $.bool().notNull()
     Default: false
@@ -57,11 +59,12 @@ Workflow:
             $.environment.securityGroupManager.defaultGroupName
           )
       - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
+      - $.detectPrimaryNetwork()
 
-      - If: $.networks.useEnvironmentNetwork
+      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
         Then:
           $.joinNet($.environment.defaultNetworks.environment, $securityGroupName)
-      - If: $.networks.useFlatNetwork
+      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
         Then:
           $.joinNet($.environment.defaultNetworks.flat, $securityGroupName)
       - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
@@ -78,8 +81,6 @@ Workflow:
                 image: $.image
                 user_data: $userData
                 key_name: $.keyname
-
-
           outputs:
             format('{0}-assigned-ip', $.name):
               description: format('IP address assigned to {0} instance', $.name)
@@ -92,22 +93,89 @@ Workflow:
       - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
       - $.environment.instanceNotifier.trackApplication($this)
 
+  detectPrimaryNetwork:
+    Body:
+      - $.primaryNetwork: null
+      - If: $.networks.primaryNetwork != null
+        Then:
+          - $.primaryNetwork: $.networks.primaryNetwork
+        Else:
+          - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
+            Then:
+              - $.primaryNetwork: $.environment.defaultNetworks.environment
+            Else:
+              - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
+                Then:
+                  - $.primaryNetwork: $.environment.defaultNetworks.flat
+
+
   joinNet:
     Arguments:
       - net:
-          Contract: $.class(Network)
+          Contract: $.class(Network).notNull()
       - securityGroupName:
           Contract: $.string()
     Body:
-      - If: $net != null
+      - If: $net = $.primaryNetwork
         Then:
-          - If: $.assignFloatingIp and (not bool($.getAttr(fipAssigned)))
+          - $primary: true
+        Else:
+          - $primary: false
+
+      - If: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
+        Then:
+          - $assignFip: true
+
+        Else:
+          - $assignFip: false
+
+      - $portname: $.name + '-port-to-' + $net.id()
+      - $netRef: $net.getNetworkReference()
+      - $subnetRef: $net.getSubnetReference()
+      - $template:
+          heat_template_version: '2013-05-23'
+          resources:
+            $portname:
+              type: 'OS::Neutron::Port'
+              properties:
+                network_id: $netRef
+                fixed_ips:
+                  - subnet_id: $subnetRef
+                security_groups:
+                  - get_resource: $securityGroupName
+            $.name:
+              properties:
+                networks:
+                  - port:
+                      get_resource: $portname
+      - $.environment.stack.updateTemplate($template)
+
+      - If: $assignFip
+        Then:
+          - $extNetId: $net.getExternalNetId()
+          - If: $extNetId != null
             Then:
-              - $assignFip: true
+              - $fip_name: $.name + '-FloatingIP-' + $net.id()
+              - $template:
+                  resources:
+                    $fip_name:
+                      type: 'OS::Neutron::FloatingIP'
+                      properties:
+                        floating_network_id: $extNetId
+                    $.name + '-FloatingIpAssoc-' + $net.id():
+                      type: 'OS::Neutron::FloatingIPAssociation'
+                      properties:
+                        floatingip_id:
+                          get_resource: $fip_name
+                        port_id:
+                          get_resource: $portname
+                  outputs:
+                    $.name + '-FloatingIPaddress':
+                      value:
+                        get_attr: [$fip_name, floating_ip_address]
+                      description: Floating IP assigned
+              - $.environment.stack.updateTemplate($template)
               - $.setAttr(fipAssigned, true)
-            Else:
-              - $assignFip: false
-          - $net.addHostToNetwork($, $assignFip, $securityGroupName)
 
   destroy:
     Body:
