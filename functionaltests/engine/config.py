@@ -31,7 +31,10 @@ MuranoGroup = [
                help="password for keystone user"),
     cfg.StrOpt('tenant',
                default='admin',
-               help='keystone tenant')
+               help='keystone tenant'),
+    cfg.StrOpt('murano_url',
+               default='http://127.0.0.1:8082/v1/',
+               help="murano url")
 ]
 
 
@@ -40,7 +43,10 @@ def register_config(config, config_group, config_opts):
     config.register_group(config_group)
     config.register_opts(config_opts, config_group)
 
-path = os.path.join("%s/config.conf" % os.getcwd())
+__location = os.path.realpath(os.path.join(os.getcwd(),
+                                           os.path.dirname(__file__)))
+
+path = os.path.join(__location, "config.conf")
 
 if os.path.exists(path):
     cfg.CONF([], project='muranointegration', default_config_files=[path])
