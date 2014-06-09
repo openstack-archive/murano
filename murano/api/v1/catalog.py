@@ -91,12 +91,13 @@ def _validate_body(body):
             raise exc.HTTPBadRequest('Uploading file is too large.'
                                      ' The limit is {0} Mb'.format(mb_limit))
 
-    if len(body.keys()) != 2:
+    if len(body.keys()) > 2:
         msg = _("'multipart/form-data' request body should contain "
-                "2 parts: json string and zip archive. Current body consist "
-                "of {0} part(s)").format(len(body.keys()))
+                "1 or 2 parts: json string and zip archive. Current body "
+                "consists of {0} part(s)").format(len(body.keys()))
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
+
     file_obj = None
     package_meta = None
     for part in body.values():
@@ -108,10 +109,6 @@ def _validate_body(body):
             package_meta = part
     if file_obj is None:
         msg = _('There is no file package with application description')
-        LOG.error(msg)
-        raise exc.HTTPBadRequest(msg)
-    if package_meta is None:
-        msg = _('There is no json with meta information about package')
         LOG.error(msg)
         raise exc.HTTPBadRequest(msg)
     return file_obj, package_meta
@@ -128,6 +125,7 @@ class Controller(object):
             { "op": "add", "path": "/tags", "value": [ "foo", "bar" ] }
             { "op": "add", "path": "/categories", "value": [ "foo", "bar" ] }
             { "op": "remove", "path": "/tags" }
+            { "op": "remove", "path": "/categories" }
             { "op": "replace", "path": "/tags", "value": ["foo", "bar"] }
             { "op": "replace", "path": "/is_public", "value": true }
             { "op": "replace", "path": "/description",
@@ -185,11 +183,14 @@ class Controller(object):
         """
         _check_content_type(req, 'multipart/form-data')
         file_obj, package_meta = _validate_body(body)
-        try:
-            jsonschema.validate(package_meta, schemas.PKG_UPLOAD_SCHEMA)
-        except jsonschema.ValidationError as e:
-            LOG.exception(e)
-            raise exc.HTTPBadRequest(explanation=e.message)
+        if package_meta:
+            try:
+                jsonschema.validate(package_meta, schemas.PKG_UPLOAD_SCHEMA)
+            except jsonschema.ValidationError as e:
+                LOG.exception(e)
+                raise exc.HTTPBadRequest(explanation=e.message)
+        else:
+            package_meta = {}
 
         with tempfile.NamedTemporaryFile(delete=False) as tempf:
             LOG.debug("Storing package archive in a temporary file")

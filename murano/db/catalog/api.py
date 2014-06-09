@@ -197,10 +197,6 @@ def _do_remove(package, change):
                     "does not exist.").format(value, path)
             LOG.error(msg)
             raise exc.HTTPNotFound(msg)
-        if path == 'categories' and len(current_values) == 1:
-            msg = _("At least one category should be assigned to the package")
-            LOG.error(msg)
-            raise exc.HTTPBadRequest(msg)
         item_to_remove = find(current_values, lambda i: i.name == value)
         current_values.remove(item_to_remove)
     return package
