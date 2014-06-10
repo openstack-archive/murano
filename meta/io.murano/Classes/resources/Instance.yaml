@@ -82,7 +82,9 @@ Methods:
           $.joinNet($.environment.defaultNetworks.flat, $securityGroupName)
       - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
 
-      - $userData: $.prepareUserData()
+      - $preparedUserData: $.prepareUserData()
+      - $userData: $preparedUserData.data
+      - $userDataFormat: $preparedUserData.format
 
       - $template:
           resources:
@@ -92,6 +94,7 @@ Methods:
                 flavor: $.flavor
                 image: $.image
                 user_data: $userData
+                user_data_format: $userDataFormat
                 key_name: $.keyname
           outputs:
             format('{0}-assigned-ip', $.name):
@@ -231,3 +234,8 @@ Methods:
           Contract: $.string().notNull()
 
   prepareUserData:
+    Body:
+      Return:
+        data: null
+        # Valid values are HEAT_CFNTOOLS, RAW and SOFTWARE_CONFIG
+        format: HEAT_CFNTOOLS

@@ -29,5 +29,7 @@ Methods:
           "%INTERNAL_HOSTNAME%": $.name
           "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), config(rabbitmq, host))
           "%CA_ROOT_CERT_BASE64%": ""
-      - Return: $initScript.replace($scriptReplacements)
+      - Return:
+          data: $initScript.replace($scriptReplacements)
+          format: HEAT_CFNTOOLS
 

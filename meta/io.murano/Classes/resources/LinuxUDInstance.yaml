@@ -16,7 +16,9 @@ Properties:
 Methods:
   prepareUserData:
     Body:
-      - Return: $.customUserData
+      - Return:
+          data: $.customUserData
+          format: HEAT_CFNTOOLS
 
   setCustomUserData:
     Arguments:
