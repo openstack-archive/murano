@@ -17,6 +17,8 @@ Classes:
   io.murano.Object: Object.yaml
   io.murano.Environment: Environment.yaml
   io.murano.Application: Application.yaml
+  io.murano.Exception: Exception.yaml
+  io.murano.StackTrace: StackTrace.yaml
   io.murano.SharedIp: SharedIp.yaml
 
   io.murano.system.SecurityGroupManager: SecurityGroupManager.yaml

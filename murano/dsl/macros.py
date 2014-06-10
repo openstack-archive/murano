@@ -17,6 +17,7 @@ import types
 import eventlet.greenpool as greenpool
 import yaql.context
 
+import murano.dsl.dsl_exception as dsl_exception
 import murano.dsl.exceptions as exceptions
 import murano.dsl.expressions as expressions
 import murano.dsl.helpers as helpers
@@ -33,7 +34,20 @@ class CodeBlock(expressions.DslExpression):
     def execute(self, context, murano_class):
         try:
             for expr in self.code_block:
-                expr.execute(context, murano_class)
+                def action():
+                    try:
+                        expr.execute(context, murano_class)
+                    except dsl_exception.MuranoPlException:
+                        raise
+                    except Exception as ex:
+                        raise dsl_exception.MuranoPlException.\
+                            from_python_exception(ex, context)
+
+                if hasattr(expr, 'virtual_instruction'):
+                    instruction = expr.virtual_instruction
+                    helpers.execute_instruction(instruction, action, context)
+                else:
+                    action()
         except exceptions.BreakException as e:
             if self._breakable:
                 raise e
@@ -47,16 +61,14 @@ class MethodBlock(CodeBlock):
         self._name = name
 
     def execute(self, context, murano_class):
+        new_context = yaql.context.Context(context)
+        new_context.set_data(self._name, '?currentMethod')
         try:
-            context.set_data(self._name, '?currentMethod')
-            super(MethodBlock, self).execute(
-                context, murano_class)
+            super(MethodBlock, self).execute(new_context, murano_class)
         except exceptions.ReturnException as e:
             return e.value
         else:
             return None
-        finally:
-            context.set_data(None, '?currentMethod')
 
 
 class ReturnMacro(expressions.DslExpression):
@@ -220,13 +232,14 @@ class DoMacro(expressions.DslExpression):
         self._code.execute(child_context, murano_class)
 
 
-expressions.register_macro(DoMacro)
-expressions.register_macro(ReturnMacro)
-expressions.register_macro(BreakMacro)
-expressions.register_macro(ParallelMacro)
-expressions.register_macro(IfMacro)
-expressions.register_macro(WhileDoMacro)
-expressions.register_macro(ForMacro)
-expressions.register_macro(RepeatMacro)
-expressions.register_macro(MatchMacro)
-expressions.register_macro(SwitchMacro)
+def register():
+    expressions.register_macro(DoMacro)
+    expressions.register_macro(ReturnMacro)
+    expressions.register_macro(BreakMacro)
+    expressions.register_macro(ParallelMacro)
+    expressions.register_macro(IfMacro)
+    expressions.register_macro(WhileDoMacro)
+    expressions.register_macro(ForMacro)
+    expressions.register_macro(RepeatMacro)
+    expressions.register_macro(MatchMacro)
+    expressions.register_macro(SwitchMacro)

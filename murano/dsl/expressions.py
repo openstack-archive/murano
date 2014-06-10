@@ -14,11 +14,21 @@
 
 import types
 
+import murano.dsl.dsl_exception as dsl_exception
 import murano.dsl.helpers as helpers
 import murano.dsl.lhs_expression as lhs_expression
 import murano.dsl.yaql_expression as yaql_expression
 
 _macros = []
+
+
+class InstructionStub(object):
+    def __init__(self, title, position):
+        self._title = title
+        self.source_file_position = position
+
+    def __str__(self):
+        return self._title
 
 
 def register_macro(cls):
@@ -55,11 +65,16 @@ class Statement(DslExpression):
         return self._expression
 
     def execute(self, context, murano_class):
-        result = helpers.evaluate(self.expression, context)
-        if self.destination:
-            self.destination(result, context, murano_class)
-
-        return result
+        try:
+            result = helpers.evaluate(self.expression, context)
+            if self.destination:
+                self.destination(result, context, murano_class)
+            return result
+        except dsl_exception.MuranoPlException:
+            raise
+        except Exception as e:
+            raise dsl_exception.MuranoPlException.from_python_exception(
+                e, context)
 
 
 def parse_expression(expr):
@@ -79,7 +94,16 @@ def parse_expression(expr):
         if result is None:
             for cls in _macros:
                 try:
-                    return cls(**kwds)
+                    macro = cls(**kwds)
+                    position = None
+                    title = 'block construct'
+                    if hasattr(expr, 'source_file_position'):
+                        position = expr.source_file_position
+                    if '__str__' in cls.__dict__:
+                        title = str(macro)
+                    macro.virtual_instruction = InstructionStub(
+                        title, position)
+                    return macro
                 except TypeError:
                     continue
 

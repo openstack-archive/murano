@@ -53,7 +53,7 @@ def _id(value):
 @yaql.context.EvalArg('type', str)
 @yaql.context.ContextAware()
 def _cast(context, value, type):
-    if not '.' in type:
+    if '.' not in type:
         murano_class = helpers.get_type(context)
         type = murano_class.namespace_resolver.resolve_name(type)
     class_loader = helpers.get_class_loader(context)
@@ -84,6 +84,10 @@ def _new(context, name, *args):
         new_context.set_data(value, key)
     return class_loader.get_class(name).new(
         None, object_store, new_context, parameters=parameters)
+
+
+def new(name, context, **kwargs):
+    return _new(context, name, lambda: kwargs)
 
 
 @yaql.context.EvalArg('value', murano_object.MuranoObject)

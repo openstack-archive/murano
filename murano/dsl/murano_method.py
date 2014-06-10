@@ -17,12 +17,17 @@ import types
 
 import murano.dsl.macros as macros
 import murano.dsl.typespec as typespec
+import murano.dsl.virtual_exceptions as virtual_exceptions
 import murano.dsl.yaql_expression as yaql_expression
 
 try:
     from collections import OrderedDict  # noqa
 except ImportError:  # python2.6
     from ordereddict import OrderedDict  # noqa
+
+
+macros.register()
+virtual_exceptions.register()
 
 
 class MethodUsages(object):

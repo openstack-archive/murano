@@ -16,6 +16,7 @@
 import uuid
 
 import anyjson
+import eventlet.debug
 from oslo import messaging
 from oslo.messaging import target
 
@@ -24,6 +25,7 @@ from murano.common.helpers import token_sanitizer
 from murano.common import rpc
 from murano.dsl import executor
 from murano.dsl import results_serializer
+from murano.dsl import virtual_exceptions
 from murano.engine import environment
 from murano.engine import package_class_loader
 from murano.engine import package_loader
@@ -35,6 +37,8 @@ from murano.openstack.common import log as logging
 RPC_SERVICE = None
 
 LOG = logging.getLogger(__name__)
+
+eventlet.debug.hub_exceptions(False)
 
 
 class TaskProcessingEndpoint(object):
@@ -118,7 +122,10 @@ class TaskExecutor(object):
                 if self.action:
                     self._invoke(exc)
             except Exception as e:
-                LOG.warn(e, exc_info=1)
+                if isinstance(e, virtual_exceptions.MuranoPlException):
+                    LOG.error(e.format())
+                else:
+                    LOG.exception(e)
                 reporter = status_reporter.StatusReporter()
                 reporter.initialize(obj)
                 reporter.report_error(obj, str(e))

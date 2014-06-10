@@ -1,0 +1,12 @@
+Namespaces:
+  =: io.murano
+
+Name: StackTrace
+
+Properties:
+  frames:
+    Contract:
+      - instruction: $.string()
+        location: $
+        method: $
+        class: $

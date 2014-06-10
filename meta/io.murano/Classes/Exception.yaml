@@ -1,0 +1,29 @@
+Namespaces:
+  =: io.murano
+
+Name: Exception
+
+Properties:
+  name:
+    Contract: $.string()
+    Usage: Runtime
+
+  message:
+    Contract: $.string()
+    Usage: Runtime
+
+  stackTrace:
+    Contract: $
+    Usage: Runtime
+
+  extra:
+    Contract: {}
+    Usage: Runtime
+
+  nativeException:
+    Contract: $
+    Usage: Runtime
+
+  cause:
+    Contract: $.class(Exception)
+    Usage: Runtime

@@ -21,7 +21,9 @@ import eventlet
 import eventlet.event
 import yaql.context
 
+
 import murano.dsl.attribute_store as attribute_store
+import murano.dsl.dsl_exception as dsl_exception
 import murano.dsl.expressions as expressions
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_method as murano_method
@@ -150,12 +152,18 @@ class MuranoDslExecutor(object):
             if '_context' in inspect.getargspec(body).args:
                 params['_context'] = self._create_context(
                     this, murano_class, context, **params)
-            if inspect.ismethod(body) and not body.__self__:
-                return body(this, **params)
-            else:
-                return body(**params)
+            try:
+                if inspect.ismethod(body) and not body.__self__:
+                    return body(this, **params)
+                else:
+                    return body(**params)
+            except Exception as e:
+                raise dsl_exception.MuranoPlException.from_python_exception(
+                    e, context)
         elif isinstance(body, expressions.DslExpression):
-            return self.execute(body, murano_class, this, context, **params)
+            return self.execute(
+                body, murano_class, this, context, **params)
+
         else:
             raise ValueError()
 

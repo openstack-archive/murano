@@ -42,11 +42,11 @@ class YaqlExpression(object):
         return self._expression
 
     @property
-    def file_position(self):
+    def source_file_position(self):
         return self._file_position
 
-    @file_position.setter
-    def file_position(self, value):
+    @source_file_position.setter
+    def source_file_position(self, value):
         self._file_position = value
 
     def __repr__(self):
