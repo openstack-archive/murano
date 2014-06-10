@@ -36,7 +36,6 @@ Methods:
 
       - $stack: $.environment.stack
       - $template:
-          heat_template_version: '2013-05-23'
           resources:
             $groupName:
               type: 'OS::Neutron::SecurityGroup'

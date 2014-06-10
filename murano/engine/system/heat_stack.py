@@ -26,6 +26,12 @@ import murano.openstack.common.log as logging
 
 LOG = logging.getLogger(__name__)
 
+HEAT_TEMPLATE_VERSION = '2013-05-23'
+
+
+class HeatStackError(Exception):
+    pass
+
 
 @murano_class.classname('io.murano.system.HeatStack')
 class HeatStack(murano_object.MuranoObject):
@@ -107,6 +113,12 @@ class HeatStack(murano_object.MuranoObject):
         self._applied = False
 
     def updateTemplate(self, template):
+        template_version = template.get('heat_template_version',
+                                        HEAT_TEMPLATE_VERSION)
+        if template_version != HEAT_TEMPLATE_VERSION:
+            err_msg = ("Currently only heat_template_version %s "
+                       "is supported." % HEAT_TEMPLATE_VERSION)
+            raise HeatStackError(err_msg)
         self.current()
         self._template = helpers.merge_dicts(self._template, template)
         self._applied = False
@@ -168,6 +180,9 @@ class HeatStack(murano_object.MuranoObject):
     def push(self):
         if self._applied or self._template is None:
             return
+
+        if 'heat_template_version' not in self._template:
+            self._template['heat_template_version'] = HEAT_TEMPLATE_VERSION
 
         LOG.info('Pushing: {0}'.format(self._template))
 
