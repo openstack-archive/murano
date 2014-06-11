@@ -24,6 +24,10 @@ set -o xtrace
 MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/stackforge/murano.git}
 MURANO_BRANCH=${MURANO_BRANCH:-master}
 
+MURANO_PYTHONCLIENT_REPO=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/stackforge/python-muranoclient.git}
+MURANO_PYTHONCLIENT_BRANCH=${MURANO_PYTHONCLIENT_BRANCH:-$MURANO_BRANCH}
+MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
+
 # Set up default directories
 MURANO_DIR=$DEST/murano
 MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
@@ -172,12 +176,20 @@ function init_murano() {
 
 # install_murano() - Collect source and prepare
 function install_murano() {
+    install_murano_pythonclient
+
     git_clone $MURANO_REPO $MURANO_DIR $MURANO_BRANCH
 
     # TODO(ruhe): use setup_develop once Murano requirements match with global-requirement.txt
     # both functions (setup_develop and setup_package) are defined at:
     # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
     setup_package $MURANO_DIR -e
+}
+
+
+function install_murano_pythonclient() {
+    git_clone $MURANO_PYTHONCLIENT_REPO $MURANO_PYTHONCLIENT_DIR $MURANO_PYTHONCLIENT_BRANCH
+    setup_package $MURANO_PYTHONCLIENT_DIR -e
 }
 
 

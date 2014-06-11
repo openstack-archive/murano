@@ -31,10 +31,6 @@ MURANO_DASHBOARD_REPO=${MURANO_DASHBOARD_REPO:-${GIT_BASE}/stackforge/murano-das
 MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-$MURANO_BRANCH}
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
 
-MURANO_PYTHONCLIENT_REPO=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/stackforge/python-muranoclient.git}
-MURANO_PYTHONCLIENT_BRANCH=${MURANO_PYTHONCLIENT_BRANCH:-$MURANO_BRANCH}
-MURANO_PYTHONCLIENT_DIR=$DEST/murano-pythonclient
-
 # Set up default directories
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
 MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
@@ -137,19 +133,11 @@ function init_murano_dashboard() {
 function install_murano_dashboard() {
     echo_summary "Install Murano Dashboard"
 
-    install_murano_pythonclient
-
     git_clone $MURANO_DASHBOARD_REPO $MURANO_DASHBOARD_DIR $MURANO_DASHBOARD_BRANCH
     # TODO(dteselkin): use setup_develop once Murano requirements match with global-requirement.txt
     # both functions (setup_develop and setup_package) are defined at:
     # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
     setup_package $MURANO_DASHBOARD_DIR -e
-}
-
-
-function install_murano_pythonclient() {
-    git_clone $MURANO_PYTHONCLIENT_REPO $MURANO_PYTHONCLIENT_DIR $MURANO_PYTHONCLIENT_BRANCH
-    setup_develop $MURANO_PYTHONCLIENT_DIR
 }
 
 
