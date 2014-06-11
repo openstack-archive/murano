@@ -42,14 +42,21 @@ class CodeBlock(expressions.DslExpression):
 
 
 class MethodBlock(CodeBlock):
+    def __init__(self, body, name=None):
+        super(MethodBlock, self).__init__(body)
+        self._name = name
+
     def execute(self, context, murano_class):
         try:
+            context.set_data(self._name, '?currentMethod')
             super(MethodBlock, self).execute(
                 context, murano_class)
         except exceptions.ReturnException as e:
             return e.value
         else:
             return None
+        finally:
+            context.set_data(None, '?currentMethod')
 
 
 class ReturnMacro(expressions.DslExpression):

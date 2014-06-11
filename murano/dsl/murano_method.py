@@ -51,7 +51,7 @@ class MuranoMethod(object):
                                   MethodUsages.Runtime)
         else:
             payload = payload or {}
-            self._body = self._prepare_body(payload.get('Body') or [])
+            self._body = self._prepare_body(payload.get('Body') or [], name)
             self._usage = payload.get('Usage') or MethodUsages.Runtime
             arguments_scheme = payload.get('Arguments') or []
             if isinstance(arguments_scheme, types.DictionaryType):
@@ -105,8 +105,8 @@ class MuranoMethod(object):
             del result['_context']
         return result
 
-    def _prepare_body(self, body):
-        return macros.MethodBlock(body)
+    def _prepare_body(self, body, name):
+        return macros.MethodBlock(body, name)
 
     def __repr__(self):
         return 'MuranoMethod({0}::{1})'.format(
