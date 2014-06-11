@@ -1,0 +1,94 @@
+Namespaces:
+  =: io.murano
+
+Name: SharedIp
+
+Properties:
+  assignFloatingIp:
+    Contract: $.bool().notNull()
+    Default: false
+  virtualIp:
+    Contract: $.string()
+    Usage: Out
+  floatingIpAddress:
+    Contract: $.string()
+    Usage: Out
+
+Workflow:
+  initialize:
+    Body:
+      - $.environment: $.find(Environment).require()
+      - $.network: $.environment.defaultNetworks.environment
+      - $.instances: []
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+          - $reporter: $.environment.reporter
+          - $.network.deploy()
+          - $aapPortName: format('AllowedAddressPairsPort-{0}', $.id())
+          - $template:
+              heat_template_version: '2013-05-23'
+              resources:
+                $aapPortName:
+                  type: 'OS::Neutron::Port'
+                  properties:
+                    network_id:
+                      get_resource: $.network.name + '-net-' + $.network.id()
+                    fixed_ips:
+                      - subnet_id:
+                          get_resource: $.network.name + '-subnet-' + $.network.id()
+              outputs:
+                $aapPortName+'-virtualIp':
+                  value:
+                    get_attr: [$aapPortName, fixed_ips, 0, ip_address]
+                  description: format('SharedIP Address of SharedIp group {0}', $.id())
+          - $.environment.stack.updateTemplate($template)
+          - If: $.assignFloatingIp
+            Then:
+              - $extNetId: $.network.getExternalNetId()
+              - $fip_name: format('Shared-Floating-ip-{0}', $.id())
+              - $fip_assoc_name: format('Shared-Floating-ip-assoc-{0}', $.id())
+              - $template:
+                  resources:
+                    $fip_name:
+                      type: 'OS::Neutron::FloatingIP'
+                      properties:
+                        floating_network_id: $extNetId
+                    $fip_assoc_name:
+                      type: 'OS::Neutron::FloatingIPAssociation'
+                      properties:
+                        floatingip_id:
+                          get_resource: $fip_name
+                        port_id:
+                          get_resource: $aapPortName
+                  outputs:
+                    $fip_name + '-val':
+                      value:
+                        get_attr: [$fip_name, floating_ip_address]
+                      description: Shared Floating IP assigned
+              - $.environment.stack.updateTemplate($template)
+
+          - $reporter.report($this, 'Allocating shared ip address')
+          - $.environment.stack.push()
+          - $outputs: $.environment.stack.output()
+          - $.virtualIp: $outputs.get(format('AllowedAddressPairsPort-{0}-virtualIp', $.id()))
+          - $.floatingIpAddress: $outputs.get(format('Shared-Floating-ip-{0}-val', $.id()))
+          - $reporter.report($this, format('Shared IP allocated at {0}', $.virtualIp))
+          - If: $.assignFloatingIp
+            Then:
+              - $reporter.report($this, format('Floating shared IP is {0}', $.floatingIpAddress))
+          - $.setAttr(deployed, true)
+
+
+  getSharedIpRef:
+    Body:
+      - $aapPortName: format('AllowedAddressPairsPort-{0}', $.id())
+      - Return:
+          get_attr: [$aapPortName, fixed_ips, 0, ip_address]
+
+
+
+
+

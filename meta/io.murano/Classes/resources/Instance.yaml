@@ -44,6 +44,10 @@ Properties:
   securityGroupName:
     Contract: $.string()
     Default: null
+  sharedIps:
+    Contract:
+      - $.class(std:SharedIp)
+    Usage: InOut  # as it is set in setSharedIps
 
 Methods:
   initialize:
@@ -51,6 +55,14 @@ Methods:
       - $.environment: $.find(std:Environment).require()
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
+
+  setSharedIps:
+    Arguments:
+      ips:
+        Contract:
+          - $.class(std:SharedIp)
+    Body:
+      $.sharedIps: $ips
 
   deploy:
     Body:
@@ -60,6 +72,7 @@ Methods:
           )
       - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
       - $.detectPrimaryNetwork()
+      - $.ensureSharedIpsDeployed()
       - $.ensureNetworksDeployed()
       - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
         Then:
@@ -118,6 +131,10 @@ Methods:
           - $.environment.defaultNetworks.flat.deploy()
       - $.networks.customNetworks.pselect($.deploy())
 
+  ensureSharedIpsDeployed:
+    Body:
+      - $.sharedIps.pselect($.deploy())
+
   joinNet:
     Arguments:
       - net:
@@ -158,6 +175,19 @@ Methods:
                   - port:
                       get_resource: $portname
       - $.environment.stack.updateTemplate($template)
+
+      - If: $primary
+        Then:
+          - For: sip
+            In: $.sharedIps
+            Do:
+              - $template:
+                  resources:
+                    $portname:
+                      properties:
+                        allowed_address_pairs:
+                          - ip_address: $sip.getSharedIpRef()
+              - $.environment.stack.updateTemplate($template)
 
       - If: $assignFip
         Then:
