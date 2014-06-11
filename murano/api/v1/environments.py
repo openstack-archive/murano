@@ -16,6 +16,7 @@ from sqlalchemy import desc
 from webob import exc
 
 from murano.api.v1 import request_statistics
+from murano.common import policy
 from murano.common import utils
 from murano.db import models
 from murano.db.services import core_services
@@ -33,10 +34,10 @@ API_NAME = 'Environments'
 
 
 class Controller(object):
-
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         LOG.debug('Environments:List')
+        policy.check('list_environments', request.context, {})
 
         #Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
@@ -48,6 +49,7 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
         LOG.debug('Environments:Create <Body {0}>'.format(body))
+        policy.check('create_environment', request.context, {})
 
         try:
             environment = envs.EnvironmentServices.create(
@@ -62,6 +64,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, environment_id):
         LOG.debug('Environments:Show <Id: {0}>'.format(environment_id))
+        target = {"environment_id": environment_id}
+        policy.check('show_environment', request.context, target)
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
@@ -93,6 +97,8 @@ class Controller(object):
     def update(self, request, environment_id, body):
         LOG.debug('Environments:Update <Id: {0}, '
                   'Body: {1}>'.format(environment_id, body))
+        target = {"environment_id": environment_id}
+        policy.check('update_environment', request.context, target)
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
@@ -115,6 +121,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
         LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
+        target = {"environment_id": environment_id}
+        policy.check('delete_environment', request.context, target)
 
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)

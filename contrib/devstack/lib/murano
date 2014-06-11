@@ -32,6 +32,7 @@ MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
 MURANO_DIR=$DEST/murano
 MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
 MURANO_CONF_FILE=${MURANO_CONF_DIR}/murano.conf
+MURANO_POLICY_FILE=${MURANO_CONF_DIR}/policy.json
 MURANO_DEBUG=${MURANO_DEBUG:-True}
 
 MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
@@ -134,6 +135,7 @@ function configure_murano {
     # Copy over Murano configuration file and configure common parameters.
     cp $MURANO_DIR/etc/murano/murano.conf.sample $MURANO_CONF_FILE
     cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
+    cp $MURANO_DIR/etc/murano/policy.json $MURANO_POLICY_FILE
 
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG

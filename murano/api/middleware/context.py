@@ -41,13 +41,14 @@ class ContextMiddleware(wsgi.Middleware):
         :param req: wsgi request object that will be given the context object
         """
 
+        roles = [r.strip() for r in req.headers.get('X-Roles').split(',')]
         kwargs = {
             'user': req.headers.get('X-User-Id'),
             'tenant': req.headers.get('X-Tenant-Id'),
             'auth_token': req.headers.get('X-Auth-Token'),
             'session': req.headers.get('X-Configuration-Session'),
-            'is_admin': CONF.admin_role in [
-                role.strip() for role in req.headers.get('X-Roles').split(',')]
+            'is_admin': CONF.admin_role in roles,
+            'roles': roles
         }
         req.context = murano.context.RequestContext(**kwargs)
 

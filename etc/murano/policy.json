@@ -1,0 +1,6 @@
+{
+    "context_is_admin": "role:admin or is_admin:True",
+
+    "default": ""
+}
+

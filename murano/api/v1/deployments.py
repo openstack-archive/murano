@@ -15,6 +15,7 @@ from sqlalchemy import desc
 from webob import exc
 
 from murano.api.v1 import request_statistics
+from murano.common import policy
 from murano.common import utils
 from murano.db import models
 from murano.db import session as db_session
@@ -31,6 +32,9 @@ API_NAME = 'Deployments'
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request, environment_id):
+        target = {"environment_id": environment_id}
+        policy.check("list_deployments", request.context, target)
+
         unit = db_session.get_session()
         verify_and_get_env(unit, environment_id, request)
         query = unit.query(models.Deployment) \
@@ -43,6 +47,10 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Statuses')
     def statuses(self, request, environment_id, deployment_id):
+        target = {"environment_id": environment_id,
+                  "deployment_id": deployment_id}
+        policy.check("statuses_deployments", request.context, target)
+
         unit = db_session.get_session()
         query = unit.query(models.Status) \
             .filter_by(deployment_id=deployment_id) \

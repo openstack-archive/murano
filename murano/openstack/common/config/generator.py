@@ -64,6 +64,10 @@ BASEDIR = os.path.abspath(os.path.join(os.path.dirname(__file__),
 WORDWRAP_WIDTH = 60
 
 
+def raise_extension_exception(extmanager, ep, err):
+    raise
+
+
 def generate(argv):
     parser = argparse.ArgumentParser(
         description='generate sample configuration file',
@@ -107,6 +111,7 @@ def generate(argv):
             'oslo.config.opts',
             names=list(set(parsed_args.libraries)),
             invoke_on_load=False,
+            on_load_failure_callback=raise_extension_exception
         )
         for ext in loader:
             for group, opts in ext.plugin():
@@ -218,6 +223,8 @@ def _get_my_ip():
 
 def _sanitize_default(name, value):
     """Set up a reasonably sensible default for pybasedir, my_ip and host."""
+    hostname = socket.gethostname()
+    fqdn = socket.getfqdn()
     if value.startswith(sys.prefix):
         # NOTE(jd) Don't use os.path.join, because it is likely to think the
         # second part is an absolute pathname and therefore drop the first
@@ -229,8 +236,13 @@ def _sanitize_default(name, value):
         return value.replace(BASEDIR, '')
     elif value == _get_my_ip():
         return '10.0.0.1'
-    elif value in (socket.gethostname(), socket.getfqdn()) and 'host' in name:
-        return 'murano'
+    elif value in (hostname, fqdn):
+        if 'host' in name:
+            return 'murano'
+    elif value.endswith(hostname):
+        return value.replace(hostname, 'murano')
+    elif value.endswith(fqdn):
+        return value.replace(fqdn, 'murano')
     elif value.strip() != value:
         return '"%s"' % value
     return value

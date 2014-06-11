@@ -1,5 +1,15 @@
 #!/usr/bin/env bash
 
+# Generate sample configuration for your project.
+#
+# Aside from the command line flags, it also respects a config file which
+# should be named oslo.config.generator.rc and be placed in the same directory.
+#
+# You can then export the following variables:
+# MURANO_CONFIG_GENERATOR_EXTRA_MODULES: list of modules to interrogate for options.
+# MURANO_CONFIG_GENERATOR_EXTRA_LIBRARIES: list of libraries to discover.
+# MURANO_CONFIG_GENERATOR_EXCLUDED_FILES: list of files to remove from automatic listing.
+
 print_hint() {
     echo "Try \`${0##*/} --help' for more information." >&2
 }
@@ -65,7 +75,7 @@ then
     BASEDIR=$(cd "$BASEDIR" && pwd)
 fi
 
-PACKAGENAME=${PACKAGENAME:-${BASEDIR##*/}}
+PACKAGENAME=${PACKAGENAME:-$(python setup.py --name)}
 TARGETDIR=$BASEDIR/$PACKAGENAME
 if ! [ -d $TARGETDIR ]
 then
@@ -95,11 +105,15 @@ then
     source "$RC_FILE"
 fi
 
-for mod in ${MURANOAPI_CONFIG_GENERATOR_EXTRA_MODULES}; do
+for filename in ${MURANO_CONFIG_GENERATOR_EXCLUDED_FILES}; do
+    FILES="${FILES[@]/$filename/}"
+done
+
+for mod in ${MURANO_CONFIG_GENERATOR_EXTRA_MODULES}; do
     MODULES="$MODULES -m $mod"
 done
 
-for lib in ${MURANOAPI_CONFIG_GENERATOR_EXTRA_LIBRARIES}; do
+for lib in ${MURANO_CONFIG_GENERATOR_EXTRA_LIBRARIES}; do
     LIBRARIES="$LIBRARIES -l $lib"
 done
 

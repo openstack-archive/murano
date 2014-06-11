@@ -291,7 +291,7 @@ from sqlalchemy.pool import NullPool, StaticPool
 from sqlalchemy.sql.expression import literal_column
 
 from murano.openstack.common.db import exception
-from murano.openstack.common.gettextutils import _LE, _LW, _LI
+from murano.openstack.common.gettextutils import _LE, _LW
 from murano.openstack.common import timeutils
 
 
@@ -305,7 +305,6 @@ class SqliteForeignKeysListener(PoolListener):
     so the foreign key constraints will be enabled here for every
     database connection
     """
-
     def connect(self, dbapi_con, con_record):
         dbapi_con.execute('pragma foreign_keys=ON')
 
@@ -368,7 +367,7 @@ def _raise_if_duplicate_entry_error(integrity_error, engine_name):
             return [columns]
         return columns[len(uniqbase):].split("0")[1:]
 
-    if engine_name not in ["ibm_db_sa", "mysql", "sqlite", "postgresql"]:
+    if engine_name not in ("ibm_db_sa", "mysql", "sqlite", "postgresql"):
         return
 
     # FIXME(johannes): The usage of the .message attribute has been
@@ -417,7 +416,7 @@ def _raise_if_deadlock_error(operational_error, engine_name):
     re = _DEADLOCK_RE_DB.get(engine_name)
     if re is None:
         return
-        # FIXME(johannes): The usage of the .message attribute has been
+    # FIXME(johannes): The usage of the .message attribute has been
     # deprecated since Python 2.6. However, the exceptions raised by
     # SQLAlchemy can differ when using unicode() and accessing .message.
     # An audit across all three supported engines will be necessary to
@@ -460,7 +459,6 @@ def _wrap_db_error(f):
         except Exception as e:
             LOG.exception(_LE('DB exception wrapped.'))
             raise exception.DBError(e)
-
     return _wrap
 
 
@@ -475,7 +473,6 @@ def _add_regexp_listener(dbapi_con, con_record):
     def regexp(expr, item):
         reg = re.compile(expr)
         return reg.search(six.text_type(item)) is not None
-
     dbapi_con.create_function('regexp', 2, regexp)
 
 
@@ -492,7 +489,7 @@ def _thread_yield(dbapi_con, con_record):
 
 
 def _ping_listener(engine, dbapi_conn, connection_rec, connection_proxy):
-    """Ensures that MySQL and DB2 connections are alive.
+    """Ensures that MySQL, PostgreSQL or DB2 connections are alive.
 
     Borrowed from:
     http://groups.google.com/group/sqlalchemy/msg/a4ce563d802c929f
@@ -508,13 +505,20 @@ def _ping_listener(engine, dbapi_conn, connection_rec, connection_proxy):
         if engine.dialect.is_disconnect(ex, dbapi_conn, cursor):
             msg = _LW('Database server has gone away: %s') % ex
             LOG.warning(msg)
+
+            # if the database server has gone away, all connections in the pool
+            # have become invalid and we can safely close all of them here,
+            # rather than waste time on checking of every single connection
+            engine.dispose()
+
+            # this will be handled by SQLAlchemy and will force it to create
+            # a new connection and retry the original action
             raise sqla_exc.DisconnectionError(msg)
         else:
             raise
 
 
-def _set_session_sql_mode(dbapi_con, connection_rec,
-                          connection_proxy, sql_mode=None):
+def _set_session_sql_mode(dbapi_con, connection_rec, sql_mode=None):
     """Set the sql_mode session variable.
 
     MySQL supports several server modes. The default is None, but sessions
@@ -523,30 +527,54 @@ def _set_session_sql_mode(dbapi_con, connection_rec,
 
     Note: passing in '' (empty string) for sql_mode clears
     the SQL mode for the session, overriding a potentially set
-    server default. Passing in None (the default) makes this
-    a no-op, meaning if a server-side SQL mode is set, it still applies.
+    server default.
     """
-    cursor = dbapi_con.cursor()
-    if sql_mode is not None:
-        cursor.execute("SET SESSION sql_mode = %s", [sql_mode])
 
-    # Check against the real effective SQL mode. Even when unset by
+    cursor = dbapi_con.cursor()
+    cursor.execute("SET SESSION sql_mode = %s", [sql_mode])
+
+
+def _mysql_get_effective_sql_mode(engine):
+    """Returns the effective SQL mode for connections from the engine pool.
+
+    Returns ``None`` if the mode isn't available, otherwise returns the mode.
+
+    """
+    # Get the real effective SQL mode. Even when unset by
     # our own config, the server may still be operating in a specific
-    # SQL mode as set by the server configuration
-    cursor.execute("SHOW VARIABLES LIKE 'sql_mode'")
-    row = cursor.fetchone()
+    # SQL mode as set by the server configuration.
+    # Also note that the checkout listener will be called on execute to
+    # set the mode if it's registered.
+    row = engine.execute("SHOW VARIABLES LIKE 'sql_mode'").fetchone()
     if row is None:
+        return
+    return row[1]
+
+
+def _mysql_check_effective_sql_mode(engine):
+    """Logs a message based on the effective SQL mode for MySQL connections."""
+    realmode = _mysql_get_effective_sql_mode(engine)
+
+    if realmode is None:
         LOG.warning(_LW('Unable to detect effective SQL mode'))
         return
-    realmode = row[1]
-    LOG.info(_LI('MySQL server mode set to %s') % realmode)
+
+    LOG.debug('MySQL server mode set to %s', realmode)
     # 'TRADITIONAL' mode enables several other modes, so
     # we need a substring match here
     if not ('TRADITIONAL' in realmode.upper() or
             'STRICT_ALL_TABLES' in realmode.upper()):
         LOG.warning(_LW("MySQL SQL mode is '%s', "
-                        "consider enabling TRADITIONAL or STRICT_ALL_TABLES")
-                    % realmode)
+                        "consider enabling TRADITIONAL or STRICT_ALL_TABLES"),
+                    realmode)
+
+
+def _mysql_set_mode_callback(engine, sql_mode):
+    if sql_mode is not None:
+        mode_callback = functools.partial(_set_session_sql_mode,
+                                          sql_mode=sql_mode)
+        sqlalchemy.event.listen(engine, 'connect', mode_callback)
+    _mysql_check_effective_sql_mode(engine)
 
 
 def _is_db_connection_error(args):
@@ -617,14 +645,12 @@ def create_engine(sql_connection, sqlite_fk=False, mysql_sql_mode=None,
 
     sqlalchemy.event.listen(engine, 'checkin', _thread_yield)
 
-    if engine.name in ['mysql', 'ibm_db_sa']:
+    if engine.name in ('ibm_db_sa', 'mysql', 'postgresql'):
         ping_callback = functools.partial(_ping_listener, engine)
         sqlalchemy.event.listen(engine, 'checkout', ping_callback)
         if engine.name == 'mysql':
             if mysql_sql_mode:
-                mode_callback = functools.partial(_set_session_sql_mode,
-                                                  sql_mode=mysql_sql_mode)
-                sqlalchemy.event.listen(engine, 'checkout', mode_callback)
+                _mysql_set_mode_callback(engine, mysql_sql_mode)
     elif 'sqlite' in connection_dict.drivername:
         if not sqlite_synchronous:
             sqlalchemy.event.listen(engine, 'connect',
@@ -661,7 +687,6 @@ def create_engine(sql_connection, sqlite_fk=False, mysql_sql_mode=None,
 
 class Query(sqlalchemy.orm.query.Query):
     """Subclass of sqlalchemy.query with soft_delete() method."""
-
     def soft_delete(self, synchronize_session='evaluate'):
         return self.update({'deleted': literal_column('id'),
                             'updated_at': literal_column('updated_at'),
@@ -671,7 +696,6 @@ class Query(sqlalchemy.orm.query.Query):
 
 class Session(sqlalchemy.orm.session.Session):
     """Custom Session class to avoid SqlAlchemy Session monkey patching."""
-
     @_wrap_db_error
     def query(self, *args, **kwargs):
         return super(Session, self).query(*args, **kwargs)
@@ -716,10 +740,10 @@ def _patch_mysqldb_with_stacktrace_comments():
                 continue
             if filename.endswith('exception.py') and method == '_wrap':
                 continue
-                # db/api is just a wrapper around db/sqlalchemy/api
+            # db/api is just a wrapper around db/sqlalchemy/api
             if filename.endswith('db/api.py'):
                 continue
-                # only trace inside murano
+            # only trace inside murano
             index = filename.rfind('murano')
             if index == -1:
                 continue
@@ -738,18 +762,16 @@ def _patch_mysqldb_with_stacktrace_comments():
 
 
 class EngineFacade(object):
-    """A helper class for removing of global engine instances from
-    murano.db.
+    """A helper class for removing of global engine instances from murano.db.
 
-    As a library, murano.db can't decide where to store/when to create
-    engine and sessionmaker instances, so this must be left for a target
-    application.
+    As a library, murano.db can't decide where to store/when to create engine
+    and sessionmaker instances, so this must be left for a target application.
 
-    On the other hand, in order to simplify the adoption of murano.db
-    changes, we'll provide a helper class, which creates engine and
-    sessionmaker on its instantiation and provides get_engine()/get_session()
-    methods that are compatible with corresponding utility functions that
-    currently exist in target projects, e.g. in Nova.
+    On the other hand, in order to simplify the adoption of murano.db changes,
+    we'll provide a helper class, which creates engine and sessionmaker
+    on its instantiation and provides get_engine()/get_session() methods
+    that are compatible with corresponding utility functions that currently
+    exist in target projects, e.g. in Nova.
 
     engine/sessionmaker instances will still be global (and they are meant to
     be global), but they will be stored in the app context, rather that in the
@@ -759,11 +781,12 @@ class EngineFacade(object):
     integrate engine/sessionmaker instances into your apps any way you like
     (e.g. one might want to bind a session to a request context). Two important
     things to remember:
-        1. An Engine instance is effectively a pool of DB connections, so it's
-           meant to be shared (and it's thread-safe).
-        2. A Session instance is not meant to be shared and represents a DB
-           transactional context (i.e. it's not thread-safe). sessionmaker is
-           a factory of sessions.
+
+    1. An Engine instance is effectively a pool of DB connections, so it's
+       meant to be shared (and it's thread-safe).
+    2. A Session instance is not meant to be shared and represents a DB
+       transactional context (i.e. it's not thread-safe). sessionmaker is
+       a factory of sessions.
 
     """
 

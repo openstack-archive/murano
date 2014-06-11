@@ -23,6 +23,7 @@ from webob import exc
 
 import murano.api.v1
 from murano.api.v1 import schemas
+from murano.common import policy
 from murano.db.catalog import api as db_api
 from murano.openstack.common.db import exception as db_exc
 from murano.openstack.common import exception
@@ -132,6 +133,8 @@ class Controller(object):
                                 "value":"New description" }
             { "op": "replace", "path": "/name", "value": "New name" }
         """
+        policy.check("update_package", req.context, {'package_id': package_id})
+
         _check_content_type(req, 'application/murano-packages-json-patch')
         if not isinstance(body, list):
             msg = _('Request body must be a JSON array of operation objects.')
@@ -142,6 +145,8 @@ class Controller(object):
         return package.to_dict()
 
     def get(self, req, package_id):
+        policy.check("get_package", req.context, {'package_id': package_id})
+
         package = db_api.package_get(package_id, req.context)
         return package.to_dict()
 
@@ -163,6 +168,8 @@ class Controller(object):
 
             return value
 
+        policy.check("search_packages", req.context)
+
         filters = _get_filters(req.GET.items())
         limit = _validate_limit(filters.get('limit'))
         if limit is None:
@@ -181,6 +188,8 @@ class Controller(object):
         Upload new file archive for the new package
         together with package metadata
         """
+        policy.check("upload_package", req.context)
+
         _check_content_type(req, 'multipart/form-data')
         file_obj, package_meta = _validate_body(body)
         if package_meta:
@@ -224,21 +233,35 @@ class Controller(object):
         return package.to_dict()
 
     def get_ui(self, req, package_id):
+        target = {'package_id': package_id}
+        policy.check("get_package_ui", req.context, target)
+
         package = db_api.package_get(package_id, req.context)
         return package.ui_definition
 
     def get_logo(self, req, package_id):
+        target = {'package_id': package_id}
+        policy.check("get_package_logo", req.context, target)
+
         package = db_api.package_get(package_id, req.context)
         return package.logo
 
     def download(self, req, package_id):
+        target = {'package_id': package_id}
+        policy.check("download_package", req.context, target)
+
         package = db_api.package_get(package_id, req.context)
         return package.archive
 
     def delete(self, req, package_id):
+        target = {'package_id': package_id}
+        policy.check("delete_package", req.context, target)
+
         db_api.package_delete(package_id, req.context)
 
     def show_categories(self, req):
+        policy.check("show_categories", req.context)
+
         categories = db_api.categories_list()
         return {'categories': [category.name for category in categories]}
 
