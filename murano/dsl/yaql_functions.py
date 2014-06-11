@@ -54,7 +54,7 @@ def _id(value):
 @yaql.context.ContextAware()
 def _cast(context, value, type):
     if not '.' in type:
-        murano_class = context.get_data('$?type')
+        murano_class = helpers.get_type(context)
         type = murano_class.namespace_resolver.resolve_name(type)
     class_loader = helpers.get_class_loader(context)
     return value.cast(class_loader.get_class(type))
@@ -87,18 +87,22 @@ def _new(context, name, *args):
 
 
 @yaql.context.EvalArg('value', murano_object.MuranoObject)
-def _super(value):
-    return [value.cast(type) for type in value.type.parents]
+@yaql.context.ContextAware()
+def _super(context, value):
+    cast_type = helpers.get_type(context)
+    return [value.cast(type) for type in cast_type.parents]
 
 
 @yaql.context.EvalArg('value', murano_object.MuranoObject)
-def _super2(value, func):
-    return itertools.imap(func, _super(value))
+@yaql.context.ContextAware()
+def _super2(context, value, func):
+    return itertools.imap(func, _super(context, value))
 
 
 @yaql.context.EvalArg('value', murano_object.MuranoObject)
-def _psuper2(value, func):
-    helpers.parallel_select(_super(value), func)
+@yaql.context.ContextAware()
+def _psuper2(context, value, func):
+    helpers.parallel_select(_super(context, value), func)
 
 
 @yaql.context.EvalArg('value', object)
