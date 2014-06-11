@@ -15,6 +15,7 @@ from sqlalchemy import desc
 from webob import exc
 
 from murano.api.v1 import request_statistics
+from murano.common.helpers import token_sanitizer
 from murano.common import policy
 from murano.common import utils
 from murano.db import models
@@ -37,10 +38,13 @@ class Controller(object):
 
         unit = db_session.get_session()
         verify_and_get_env(unit, environment_id, request)
-        query = unit.query(models.Deployment) \
+        query = unit.query(models.Task) \
             .filter_by(environment_id=environment_id) \
-            .order_by(desc(models.Deployment.created))
+            .order_by(desc(models.Task.created))
         result = query.all()
+        # show only tasks with 'deploy' action
+        result = [task for task in result
+                  if (task.action or {}).get('method', 'deploy') == 'deploy']
         deployments = [set_dep_state(deployment, unit).to_dict() for deployment
                        in result]
         return {'deployments': deployments}
@@ -53,7 +57,7 @@ class Controller(object):
 
         unit = db_session.get_session()
         query = unit.query(models.Status) \
-            .filter_by(deployment_id=deployment_id) \
+            .filter_by(task_id=deployment_id) \
             .order_by(models.Status.created)
         deployment = verify_and_get_deployment(unit, environment_id,
                                                deployment_id)
@@ -88,12 +92,12 @@ def verify_and_get_env(db_session, environment_id, request):
 
 
 def _patch_description(description):
-    description['services'] = description.get('applications', [])
-    del description['applications']
+    description['services'] = description.pop('applications', [])
+    return token_sanitizer.TokenSanitizer().sanitize(description)
 
 
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
-    deployment = db_session.query(models.Deployment).get(deployment_id)
+    deployment = db_session.query(models.Task).get(deployment_id)
     if not deployment:
         LOG.info(_('Deployment with id {0} not found').format(deployment_id))
         raise exc.HTTPNotFound
@@ -103,7 +107,7 @@ def verify_and_get_deployment(db_session, environment_id, deployment_id):
                                                  environment_id))
         raise exc.HTTPBadRequest
 
-    _patch_description(deployment.description)
+    deployment.description = _patch_description(deployment.description)
     return deployment
 
 
@@ -114,11 +118,11 @@ def create_resource():
 def set_dep_state(deployment, unit):
     num_errors = unit.query(models.Status).filter_by(
         level='error',
-        deployment_id=deployment.id).count()
+        task_id=deployment.id).count()
 
     num_warnings = unit.query(models.Status).filter_by(
         level='warning',
-        deployment_id=deployment.id).count()
+        task_id=deployment.id).count()
 
     if deployment.finished:
         if num_errors:
@@ -135,5 +139,5 @@ def set_dep_state(deployment, unit):
         else:
             deployment.state = 'running'
 
-    _patch_description(deployment.description)
+    deployment.description = _patch_description(deployment.description)
     return deployment

@@ -186,18 +186,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         e = models.Environment(**expected)
         test_utils.save_models(e)
 
-        rpc_task = {
-            'id': '12345',
-            'action': None,
-            'tenant_id': self.tenant,
-            'model': {'Attributes': {}, 'Objects': None},
-            'token': None
-        }
-
         req = self._delete('/environments/12345')
         result = req.get_response(self.api)
-
-        self.mock_engine_rpc.handle_task.assert_called_once_with(rpc_task)
 
         # Should this be expected behavior?
         self.assertEqual('', result.body)

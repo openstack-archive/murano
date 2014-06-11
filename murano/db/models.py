@@ -68,8 +68,9 @@ class Environment(Base, TimestampMixin):
 
     sessions = sa_orm.relationship("Session", backref='environment',
                                    cascade='save-update, merge, delete')
-    deployments = sa_orm.relationship("Deployment", backref='environment',
-                                      cascade='save-update, merge, delete')
+
+    tasks = sa_orm.relationship('Task', backref='environment',
+                                cascade='save-update, merge, delete')
 
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
@@ -99,22 +100,22 @@ class Session(Base, TimestampMixin):
         return dictionary
 
 
-class Deployment(Base, TimestampMixin):
-    __tablename__ = 'deployment'
+class Task(Base, TimestampMixin):
+    __tablename__ = 'task'
 
-    id = sa.Column(sa.String(36),
-                   primary_key=True,
+    id = sa.Column(sa.String(36), primary_key=True,
                    default=uuidutils.generate_uuid)
     started = sa.Column(sa.DateTime, default=timeutils.utcnow, nullable=False)
     finished = sa.Column(sa.DateTime, default=None, nullable=True)
     description = sa.Column(st.JsonBlob(), nullable=False)
     environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'))
-    statuses = sa_orm.relationship("Status", backref='deployment',
+    action = sa.Column(st.JsonBlob())
+
+    statuses = sa_orm.relationship("Status", backref='task',
                                    cascade='save-update, merge, delete')
 
     def to_dict(self):
-        dictionary = super(Deployment, self).to_dict()
-        # del dictionary["description"]
+        dictionary = super(Task, self).to_dict()
         if 'statuses' in dictionary:
             del dictionary['statuses']
         if 'environment' in dictionary:
@@ -130,8 +131,8 @@ class Status(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     entity_id = sa.Column(sa.String(255), nullable=True)
     entity = sa.Column(sa.String(10), nullable=True)
-    deployment_id = sa.Column(sa.String(36), sa.ForeignKey('deployment.id'))
-    text = sa.Column(sa.Text(), nullable=False)
+    task_id = sa.Column(sa.String(32), sa.ForeignKey('task.id'))
+    text = sa.Column(sa.String(), nullable=False)
     level = sa.Column(sa.String(32), nullable=False)
     details = sa.Column(sa.Text(), nullable=True)
 
@@ -297,7 +298,7 @@ def register_models(engine):
     """
     Creates database tables for all models with the given engine
     """
-    models = (Environment, Status, Session, Deployment,
+    models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class, Instance)
     for model in models:
         model.metadata.create_all(engine)
@@ -307,7 +308,7 @@ def unregister_models(engine):
     """
     Drops database tables for all models with the given engine
     """
-    models = (Environment, Status, Session, Deployment,
+    models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class)
     for model in models:
         model.metadata.drop_all(engine)

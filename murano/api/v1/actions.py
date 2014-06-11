@@ -1,0 +1,73 @@
+#    Copyright (c) 2014 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+from webob import exc
+
+from murano.common import policy
+from murano.db import models
+from murano.db.services import environments as envs
+from murano.db.services import sessions
+from murano.db import session as db_session
+
+from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common import log as logging
+from murano.openstack.common import wsgi
+from murano.services import actions
+
+
+LOG = logging.getLogger(__name__)
+
+
+class Controller(object):
+    def execute(self, request, environment_id, action_id, body):
+        policy.check("execute_action", request.context, {})
+
+        LOG.debug('Action:Execute <ActionId: {0}>'.format(action_id))
+
+        unit = db_session.get_session()
+        environment = unit.query(models.Environment).get(environment_id)
+
+        if environment is None:
+            LOG.info(_('Environment <EnvId {0}> '
+                       'is not found').format(environment_id))
+            raise exc.HTTPNotFound
+
+        if environment.tenant_id != request.context.tenant:
+            LOG.info(_('User is not authorized to access '
+                       'this tenant resources.'))
+            raise exc.HTTPUnauthorized
+
+        # no new session can be opened if environment has deploying status
+        env_status = envs.EnvironmentServices.get_status(environment_id)
+        if env_status in (envs.EnvironmentStatus.DEPLOYING,
+                          envs.EnvironmentStatus.DELETING):
+            LOG.info(_('Could not open session for environment <EnvId: {0}>,'
+                       'environment has deploying '
+                       'status.').format(environment_id))
+            raise exc.HTTPForbidden()
+
+        user_id = request.context.user
+        session = sessions.SessionServices.create(environment_id, user_id)
+
+        if not sessions.SessionServices.validate(session):
+            LOG.error(_('Session <SessionId {0}> '
+                        'is invalid').format(session.id))
+            raise exc.HTTPForbidden()
+
+        actions.ActionServices.execute(action_id, session, unit,
+                                       request.context.auth_token, body or {})
+
+
+def create_resource():
+    return wsgi.Resource(Controller())

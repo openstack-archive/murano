@@ -75,9 +75,9 @@ class ResultEndpoint(object):
         deployment.finished = timeutils.utcnow()
 
         num_errors = unit.query(models.Status)\
-            .filter_by(level='error', deployment_id=deployment.id).count()
+            .filter_by(level='error', task_id=deployment.id).count()
         num_warnings = unit.query(models.Status)\
-            .filter_by(level='warning', deployment_id=deployment.id).count()
+            .filter_by(level='warning', task_id=deployment.id).count()
 
         final_status_text = action_name + ' finished'
         if num_errors:
@@ -87,7 +87,7 @@ class ResultEndpoint(object):
             final_status_text += " with warnings"
 
         status = models.Status()
-        status.deployment_id = deployment.id
+        status.task_id = deployment.id
         status.text = final_status_text
         status.level = 'info'
         deployment.statuses.append(status)
@@ -170,9 +170,9 @@ def report_notification(report):
 
 
 def get_last_deployment(unit, env_id):
-    query = unit.query(models.Deployment)\
-        .filter_by(environment_id=env_id)\
-        .order_by(desc(models.Deployment.started))
+    query = unit.query(models.Task) \
+        .filter_by(environment_id=env_id) \
+        .order_by(desc(models.Task.started))
     return query.first()
 
 

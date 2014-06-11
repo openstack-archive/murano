@@ -1,4 +1,4 @@
-#    Copyright (c) 2013 Mirantis, Inc.
+# Copyright (c) 2013 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -49,7 +49,7 @@ class EnvironmentServices(object):
         :return: Returns list of environments
         """
         unit = db_session.get_session()
-        environments = unit.query(models.Environment).\
+        environments = unit.query(models.Environment). \
             filter_by(**filters).all()
 
         for env in environments:
@@ -174,11 +174,11 @@ class EnvironmentServices(object):
                 if session.state != sessions.SessionState.DEPLOYED:
                     env_description = session.description
                 else:
-                    env = unit.query(models.Environment)\
+                    env = unit.query(models.Environment) \
                         .get(session.environment_id)
                     env_description = env.description
             else:
-                env = unit.query(models.Environment)\
+                env = unit.query(models.Environment) \
                     .get(session.environment_id)
                 env_description = env.description
         else:
@@ -229,3 +229,14 @@ class EnvironmentServices(object):
                 'flat': None
             }
         }
+
+    @staticmethod
+    def deploy(session, unit, token):
+        environment = unit.query(models.Environment).get(
+            session.environment_id)
+
+        if (session.description['Objects'] is None and
+                'ObjectsCopy' not in session.description):
+            EnvironmentServices.remove(session.environment_id)
+        else:
+            sessions.SessionServices.deploy(session, environment, unit, token)

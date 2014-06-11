@@ -24,7 +24,6 @@ from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
 from murano.openstack.common import wsgi
 
-
 LOG = logging.getLogger(__name__)
 API_NAME = 'Sessions'
 
@@ -145,7 +144,7 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
-        sessions.SessionServices.deploy(session,
+        envs.EnvironmentServices.deploy(session,
                                         unit,
                                         request.context.auth_token)
 

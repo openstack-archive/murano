@@ -11,12 +11,12 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import collections
 
-from murano.common.helpers import token_sanitizer
-from murano.common import rpc
 from murano.db import models
 from murano.db import session as db_session
+from murano.services import actions
 
 
 SessionState = collections.namedtuple('SessionState', [
@@ -116,7 +116,7 @@ class SessionServices(object):
         return True
 
     @staticmethod
-    def deploy(session, unit, token):
+    def deploy(session, environment, unit, token):
         """
         Prepares environment for deployment and send deployment command to
         orchestration engine
@@ -127,47 +127,10 @@ class SessionServices(object):
         """
 
         #Set X-Auth-Token for conductor
-        environment = unit.query(models.Environment).get(
-            session.environment_id)
 
         deleted = session.description['Objects'] is None
-        action = None
-        if not deleted:
-            action = {
-                'object_id': environment.id,
-                'method': 'deploy',
-                'args': {}
-            }
-
-        task = {
-            'action': action,
-            'model': session.description,
-            'token': token,
-            'tenant_id': environment.tenant_id,
-            'id': environment.id
-        }
-
-        if not deleted:
-            task['model']['Objects']['?']['id'] = environment.id
-            task['model']['Objects']['applications'] = \
-                task['model']['Objects'].get('services', [])
-
-            if 'services' in task['model']['Objects']:
-                del task['model']['Objects']['services']
-
-        session.state = SessionState.DELETING if deleted \
-            else SessionState.DEPLOYING
-        deployment = models.Deployment()
-        deployment.environment_id = session.environment_id
-        deployment.description = token_sanitizer.TokenSanitizer().sanitize(
-            session.description.get('Objects'))
-        status = models.Status()
-        status.text = ('Delete' if deleted else 'Deployment') + ' scheduled'
-        status.level = 'info'
-        deployment.statuses.append(status)
-
-        with unit.begin():
-            unit.add(session)
-            unit.add(deployment)
-
-        rpc.engine().handle_task(task)
+        action_name = None if deleted else 'deploy'
+        actions.ActionServices.submit_task(
+            action_name, environment.id,
+            {}, environment, session,
+            token, unit)

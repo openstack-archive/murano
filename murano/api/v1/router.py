@@ -13,6 +13,7 @@
 #    under the License.
 import routes
 
+from murano.api.v1 import actions
 from murano.api.v1 import catalog
 from murano.api.v1 import deployments
 from murano.api.v1 import environments
@@ -139,6 +140,12 @@ class API(wsgi.Router):
             controller=statistics_resource,
             action='get_aggregated',
             conditions={'method': ['GET']})
+
+        actions_resource = actions.create_resource()
+        mapper.connect('/environments/{environment_id}/actions/{action_id}',
+                       controller=actions_resource,
+                       action='execute',
+                       conditions={'method': ['POST']})
 
         catalog_resource = catalog.create_resource()
         mapper.connect('/catalog/packages/categories',

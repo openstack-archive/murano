@@ -118,3 +118,8 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
     def _check_002(self, engine, data):
         self.assertEqual('002', migration.version(engine))
         self.assertColumnExists(engine, 'package', 'supplier_logo')
+
+    def _check_003(self, engine, data):
+        self.assertEqual('003', migration.version(engine))
+        self.assertColumnExists(engine, 'task', 'action')
+        self.assertColumnExists(engine, 'status', 'task_id')
