@@ -23,7 +23,6 @@ from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.common import rpc
 from murano.dsl import executor
-from murano.dsl import murano_method
 from murano.dsl import results_serializer
 from murano.engine import environment
 from murano.engine import package_class_loader
@@ -119,6 +118,7 @@ class TaskExecutor(object):
                 if self.action:
                     self._invoke(exc)
             except Exception as e:
+                LOG.warn(e, exc_info=1)
                 reporter = status_reporter.StatusReporter()
                 reporter.initialize(obj)
                 reporter.report_error(obj, str(e))
@@ -130,18 +130,4 @@ class TaskExecutor(object):
         method_name, args = self.action['method'], self.action['args']
 
         if obj is not None:
-            if self._is_action(obj, method_name) is False:
-                raise Exception('%s is not an action' % (method_name,))
-
             obj.type.invoke(method_name, mpl_executor, obj, args)
-
-    @staticmethod
-    def _is_action(obj, method_name):
-        implementations = obj.type.find_method(method_name)
-        if len(implementations) < 1:
-            raise Exception('Action %s is not found' % (method_name,))
-        if len(implementations) > 1:
-            raise Exception('Action %s name is ambiguous' % (method_name,))
-        declaring_class, _ = implementations[0]
-        method = declaring_class.get_method(method_name)
-        return method.usage == murano_method.MethodUsages.Action

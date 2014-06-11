@@ -15,6 +15,7 @@
 import collections
 import inspect
 
+import murano.dsl.exceptions as exceptions
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_method as murano_method
 import murano.dsl.murano_object as murano_object
@@ -90,15 +91,53 @@ class MuranoClass(object):
     def get_property(self, name):
         return self._properties[name]
 
-    def find_method(self, name):
+    def _find_method_chains(self, name):
+        initial = [self.methods[name]] if name in self.methods else []
+        yielded = False
+        for parent in self.parents:
+            for seq in parent._find_method_chains(name):
+                yield initial + list(seq)
+                yielded = True
+        if initial and not yielded:
+            yield initial
+
+    def find_single_method(self, name):
+        chains = sorted(self._find_method_chains(name), key=lambda t: len(t))
+        result = []
+
+        for i in range(len(chains)):
+            if chains[i][0] in result:
+                continue
+            add = True
+            for j in range(i + 1, len(chains)):
+                common = 0
+                if not add:
+                    break
+                for p in range(len(chains[i])):
+                    if chains[i][-p - 1] is chains[j][-p - 1]:
+                        common += 1
+                    else:
+                        break
+                if common == len(chains[i]):
+                    add = False
+                    break
+            if add:
+                result.append(chains[i][0])
+        if len(result) < 1:
+            raise exceptions.NoMethodFound(name)
+        elif len(result) > 1:
+            raise exceptions.AmbiguousMethodName(name)
+        return result[0]
+
+    def find_all_methods(self, name):
         #resolved_name = self._namespace_resolver.resolve_name(name, self.name)
         if name in self._methods:
-            return [(self, name)]
+            return [self.methods[name]]
         if not self._parents:
             return []
-        return list(set(reduce(
-            lambda x, y: x + y,
-            [p.find_method(name) for p in self._parents])))
+        return list(reduce(
+            lambda x, y: x + [t for t in y if t not in x],
+            [p.find_all_methods(name) for p in self._parents]))
 
     def find_property(self, name):
         types = collections.deque([self])
@@ -110,8 +149,10 @@ class MuranoClass(object):
         return None
 
     def invoke(self, name, executor, this, parameters):
+        if not self.is_compatible(this):
+            raise Exception("'this' must be of compatible type")
         args = executor.to_yaql_args(parameters)
-        return executor.invoke_method(name, this, None, self, *args)
+        return executor.invoke_method(name, this.cast(self), None, self, *args)
 
     def is_compatible(self, obj):
         if isinstance(obj, murano_object.MuranoObject):
