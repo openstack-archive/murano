@@ -249,8 +249,6 @@ Allowed operations:
         { "op": "replace", "path": "/name", "value": "New name" }
     ]
 
-Note, that replacing categories with empty list is not allowed as well as the removing last category.
-
 **Request 200 (application/murano-packages-json-patch)**
 
 ::
@@ -291,10 +289,6 @@ Note, that replacing categories with empty list is not allowed as well as the re
 *  An attempt to update immutable fields
 *  An attempt to perform operation that is not allowed on the specified path
 *  An attempt to update non-public package by user whose tenant is not an owner of this package
-
-**Response 400**
-
-* An attempt to replace categories with empty list or remove last category
 
 **Response 404**
 

@@ -37,7 +37,7 @@ PKG_UPLOAD_SCHEMA = {
         },
         "categories": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "items": {"type": "string"},
             "uniqueItems": True
         },
@@ -46,7 +46,6 @@ PKG_UPLOAD_SCHEMA = {
         "is_public": {"type": "boolean"},
         "enabled": {"type": "boolean"}
     },
-    "required": ["categories"],
     "additionalProperties": False
 }
 
@@ -62,7 +61,6 @@ PKG_UPDATE_SCHEMA = {
         },
         "categories": {
             "type": "array",
-            "minItems": 1,
             "items": {"type": "string"},
             "uniqueItems": True
         },
