@@ -173,6 +173,10 @@ class API(wsgi.Router):
                        controller=catalog_resource,
                        action='get_logo',
                        conditions={'method': ['GET']})
+        mapper.connect('/catalog/packages/{package_id}/supplier_logo',
+                       controller=catalog_resource,
+                       action='get_supplier_logo',
+                       conditions={'method': ['GET']})
         mapper.connect('/catalog/packages/{package_id}/download',
                        controller=catalog_resource,
                        action='download',

@@ -246,6 +246,10 @@ class Controller(object):
         package = db_api.package_get(package_id, req.context)
         return package.logo
 
+    def get_supplier_logo(self, req, package_id):
+        package = db_api.package_get(package_id, req.context)
+        return package.supplier_logo
+
     def download(self, req, package_id):
         target = {'package_id': package_id}
         policy.check("download_package", req.context, target)
@@ -270,7 +274,7 @@ class PackageSerializer(wsgi.ResponseSerializer):
     def serialize(self, action_result, accept, action):
         if action == 'get_ui':
             accept = 'text/plain'
-        elif action in ('download', 'get_logo'):
+        elif action in ('download', 'get_logo', 'get_supplier_logo'):
             accept = 'application/octet-stream'
         return super(PackageSerializer, self).serialize(action_result,
                                                         accept,

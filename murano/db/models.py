@@ -270,6 +270,7 @@ class Package(BASE, ModificationsTrackedObject):
                                      unique=True)
     type = sa.Column(sa.String(20), nullable=False, default='class')
     author = sa.Column(sa.String(80), default='Openstack')
+    supplier = sa.Column(JsonBlob(), nullable=True, default={})
     name = sa.Column(sa.String(80), nullable=False)
     enabled = sa.Column(sa.Boolean, default=True)
     description = sa.Column(sa.String(512),
@@ -283,6 +284,7 @@ class Package(BASE, ModificationsTrackedObject):
     logo = sa.Column(sa.LargeBinary, nullable=True)
     owner_id = sa.Column(sa.String(36), nullable=False)
     ui_definition = sa.Column(sa.Text)
+    supplier_logo = sa.Column(sa.LargeBinary, nullable=True)
     categories = sa_orm.relationship("Category",
                                      secondary=package_to_category,
                                      cascade='save-update, merge',
@@ -295,7 +297,8 @@ class Package(BASE, ModificationsTrackedObject):
         not_serializable = ['_sa_instance_state',
                             'archive',
                             'logo',
-                            'ui_definition']
+                            'ui_definition',
+                            'supplier_logo']
         nested_objects = ['categories', 'tags', 'class_definitions']
         for key in not_serializable:
             if key in d.keys():

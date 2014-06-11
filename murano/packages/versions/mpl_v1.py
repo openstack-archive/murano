@@ -36,6 +36,7 @@ def load(package, yaml_content):
     package._display_name = yaml_content.get('Name', package._full_name)
     package._description = yaml_content.get('Description')
     package._author = yaml_content.get('Author')
+    package._supplier = yaml_content.get('Supplier') or {}
     package._classes = yaml_content.get('Classes')
     package._ui = yaml_content.get('UI', 'ui.yaml')
     package._logo = yaml_content.get('Logo')

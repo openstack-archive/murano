@@ -37,10 +37,12 @@ class ApplicationPackage(object):
         self._display_name = None
         self._description = None
         self._author = None
+        self._supplier = {}
         self._tags = None
         self._logo = None
         self._format = manifest.get('Format')
         self._logo_cache = None
+        self._supplier_logo_cache = None
         self._blob_cache = None
 
     @property
@@ -64,6 +66,10 @@ class ApplicationPackage(object):
         return self._author
 
     @property
+    def supplier(self):
+        return self._supplier
+
+    @property
     def tags(self):
         return tuple(self._tags)
 
@@ -72,6 +78,12 @@ class ApplicationPackage(object):
         if not self._logo_cache:
             self._load_logo(False)
         return self._logo_cache
+
+    @property
+    def supplier_logo(self):
+        if not self._supplier_logo_cache:
+            self._load_supplier_logo(False)
+        return self._supplier_logo_cache
 
     @property
     def blob(self):
@@ -104,6 +116,26 @@ class ApplicationPackage(object):
             trace = sys.exc_info()[2]
             raise e.PackageLoadError(
                 "Unable to load logo: " + str(ex)), None, trace
+
+    def _load_supplier_logo(self, validate=False):
+        if 'Logo' not in self._supplier:
+            self._supplier['Logo'] = None
+        logo_file = self._supplier['Logo'] or 'supplier_logo.png'
+        full_path = os.path.join(self._source_directory, logo_file)
+        if not os.path.isfile(full_path) and logo_file == 'supplier_logo.png':
+            del self._supplier['Logo']
+            return
+        try:
+            if validate:
+                if imghdr.what(full_path) != 'png':
+                    raise e.PackageLoadError(
+                        "Supplier Logo is not in PNG format")
+            with open(full_path) as stream:
+                self._supplier_logo_cache = stream.read()
+        except Exception as ex:
+            trace = sys.exc_info()[2]
+            raise e.PackageLoadError(
+                "Unable to load supplier logo: " + str(ex)), None, trace
 
 
 def _zipdir(path, zipf):

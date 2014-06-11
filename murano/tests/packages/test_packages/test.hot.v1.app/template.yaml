@@ -1,0 +1,8 @@
+heat_template_version: '2013-05-23'
+resources:
+  test-server:
+    type: OS::Nova::Server
+    properties:
+      flavor: test.flavor
+      image: Some image name
+      key_name: default

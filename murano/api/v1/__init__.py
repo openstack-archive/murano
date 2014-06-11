@@ -30,7 +30,9 @@ PKG_PARAMS_MAP = {'display_name': 'name',
                   'description': 'description',
                   'author': 'author',
                   'classes': 'class_definitions',
-                  'tags': 'tags'}
+                  'tags': 'tags',
+                  'supplier': 'supplier',
+                  'supplier_logo': 'supplier_logo'}
 
 
 def get_draft(environment_id=None, session_id=None):
