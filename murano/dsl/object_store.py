@@ -88,6 +88,7 @@ class ObjectStore(object):
         if not self.initializing:
             executor = helpers.get_executor(context)
             methods = obj.type.find_all_methods('initialize')
+            methods.reverse()
             for method in methods:
                 method.invoke(executor, obj, {})
         return obj

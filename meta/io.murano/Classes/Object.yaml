@@ -4,3 +4,4 @@ Name: Object
 
 Methods:
   initialize:
+  destroy:
