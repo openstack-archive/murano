@@ -85,7 +85,6 @@ Methods:
       - $userData: $.prepareUserData()
 
       - $template:
-          heat_template_version: '2013-05-23'
           resources:
             $.name:
               type: 'OS::Nova::Server'
@@ -159,7 +158,6 @@ Methods:
       - $netRef: $net.getNetworkReference()
       - $subnetRef: $net.getSubnetReference()
       - $template:
-          heat_template_version: '2013-05-23'
           resources:
             $portname:
               type: 'OS::Neutron::Port'
