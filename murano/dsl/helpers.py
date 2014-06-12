@@ -46,6 +46,14 @@ def serialize(value, memo=None):
         return value
 
 
+def execute_instruction(instruction, action, context):
+    old_instruction = context.get_data('$?currentInstruction')
+    context.set_data(instruction, '?currentInstruction')
+    result = action()
+    context.set_data(old_instruction, '?currentInstruction')
+    return result
+
+
 def evaluate(value, context, max_depth=sys.maxint):
     if isinstance(value, yaql.expressions.Expression):
         value = yaql_expression.YaqlExpression(value)
@@ -55,11 +63,7 @@ def evaluate(value, context, max_depth=sys.maxint):
         if max_depth <= 0:
             return func
         else:
-            try:
-                context.set_data(value, '?currentInstruction')
-                return func()
-            finally:
-                context.set_data(None, '?currentInstruction')
+            return execute_instruction(value, func, context)
 
     elif isinstance(value, types.DictionaryType):
         result = {}
@@ -192,3 +196,7 @@ def get_current_instruction(context):
 
 def get_current_method(context):
     return context.get_data('$?currentMethod')
+
+
+def get_current_exception(context):
+    return context.get_data('$?currentException')
