@@ -317,9 +317,11 @@ def package_search(filters, context, limit=None):
     sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
                  filters.get('order_by', []) or ['created']]
     marker = filters.get('marker')
+    sort_dir = filters.get('sort_dir')
     if marker is not None:  # set marker to real object instead of its id
         marker = _package_get(marker, session)
-    query = utils.paginate_query(query, pkg, limit, sort_keys, marker)
+    query = utils.paginate_query(
+        query, pkg, limit, sort_keys, marker, sort_dir)
 
     return query.all()
 
