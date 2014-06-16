@@ -23,9 +23,9 @@ from oslo.messaging import target
 from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.common import rpc
+from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import results_serializer
-from murano.dsl import virtual_exceptions
 from murano.engine import environment
 from murano.engine import package_class_loader
 from murano.engine import package_loader
@@ -122,7 +122,7 @@ class TaskExecutor(object):
                 if self.action:
                     self._invoke(exc)
             except Exception as e:
-                if isinstance(e, virtual_exceptions.MuranoPlException):
+                if isinstance(e, dsl_exception.MuranoPlException):
                     LOG.error(e.format())
                 else:
                     LOG.exception(e)
