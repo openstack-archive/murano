@@ -37,7 +37,9 @@ class CodeBlock(expressions.DslExpression):
                 def action():
                     try:
                         expr.execute(context, murano_class)
-                    except dsl_exception.MuranoPlException:
+                    except (dsl_exception.MuranoPlException,
+                            exceptions.BreakException,
+                            exceptions.ReturnException):
                         raise
                     except Exception as ex:
                         raise dsl_exception.MuranoPlException.\
