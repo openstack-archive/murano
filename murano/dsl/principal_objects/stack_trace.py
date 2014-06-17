@@ -45,25 +45,15 @@ class StackTrace(murano_object.MuranoObject):
         frames.reverse()
 
         if includeNativeFrames:
-            class InstructionStub(object):
-                def __init__(self, title, position):
-                    self._title = title
-                    self.source_file_position = position
-
-                def __str__(self):
-                    return self._title
-
             native_frames = []
             for frame in inspect.trace()[1:]:
-                info = inspect.getframeinfo(frame[0])
-                position = yaql_expression.YaqlExpressionFilePosition(
-                    os.path.abspath(info.filename), info.lineno,
+                location = yaql_expression.YaqlExpressionFilePosition(
+                    os.path.abspath(frame[1]), frame[2],
                     -1, -1, -1, -1, -1)
-                instruction = InstructionStub(
-                    info.code_context[0].strip(), position)
-                method = info.function
+                method = frame[3]
                 native_frames.append({
-                    'instruction': instruction,
+                    'instruction': frame[4][0].strip(),
+                    'location': location,
                     'method': method,
                     'class': None
                 })
@@ -77,6 +67,8 @@ class StackTrace(murano_object.MuranoObject):
             method = frame['method']
             murano_class = frame['class']
             location = frame['location']
+            if murano_class:
+                method += ' of class ' + murano_class.name
 
             if location:
                 args = (
@@ -86,14 +78,12 @@ class StackTrace(murano_object.MuranoObject):
                     if location.start_column >= 0 else '',
                     method,
                     instruction,
-                    prefix,
-                    '' if not murano_class else murano_class.name + '::'
+                    prefix
                 )
-                return '{5}File "{0}", line {1}{2} in method {6}{3}\n' \
+                return '{5}File "{0}", line {1}{2} in method {3}\n' \
                        '{5}    {4}'.format(*args)
             else:
-                return '{2}File <unknown> in method {3}{0}\n{2}    {1}'.format(
-                    method, instruction, prefix,
-                    '' if not murano_class else murano_class.name + '::')
+                return '{2}File <unknown> in method {0}\n{2}    {1}'.format(
+                    method, instruction, prefix)
 
         return '\n'.join([format_frame(t)for t in self.get_property('frames')])

@@ -49,3 +49,7 @@ Methods:
             - Return:
         Value: $enum
 
+  testStackTrace:
+    Body:
+      raisePythonException()
+

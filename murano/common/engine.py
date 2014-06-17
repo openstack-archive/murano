@@ -123,7 +123,7 @@ class TaskExecutor(object):
                     self._invoke(exc)
             except Exception as e:
                 if isinstance(e, dsl_exception.MuranoPlException):
-                    LOG.error(e.format())
+                    LOG.error('\n' + e.format(prefix='  '))
                 else:
                     LOG.exception(e)
                 reporter = status_reporter.StatusReporter()
