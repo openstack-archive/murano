@@ -1,0 +1,29 @@
+Name: SampleClass1
+
+Properties:
+  stringProperty:
+    Contract: $.string().notNull()
+  classProperty:
+    Contract: $.class(SampleClass2).notNull()
+
+Workflow:
+  testTrace:
+    Arguments:
+      - intArg:
+          Contract: $.int().notNull()
+    Body:
+      - trace($intArg)
+      - trace($.stringProperty)
+      - trace($.classProperty.class2Property)
+
+  testException:
+    Body:
+      - raiseException()
+
+  testReturn:
+    Arguments:
+      - intArg:
+          Contract: $.int().notNull()
+    Body:
+      Return: $intArg
+
