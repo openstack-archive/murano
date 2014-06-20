@@ -63,28 +63,24 @@ def _serialize_available_action(obj):
         actions = {}
         for name, method in obj_type.methods.iteritems():
             if method.usage == murano_method.MethodUsages.Action:
-                actions[name] = {
-                    'id': '%s_%s' % (obj.object_id, name),
+                action_id = '{0}_{1}'.format(obj.object_id, name)
+                actions[action_id] = {
                     'name': name,
-                    'enabled': True,
+                    'enabled': True
                 }
         for parent in obj_type.parents:
             parent_actions = _serialize(parent)
             actions = helpers.merge_dicts(parent_actions, actions)
         return actions
-    return _serialize(obj.type).values()
+    return _serialize(obj.type)
 
 
-def _merge_actions(list1, list2):
-    dict1 = dict([(action['id'], action) for action in list1])
-    dict2 = dict([(action['id'], action) for action in list2])
-
+def _merge_actions(dict1, dict2):
     result = helpers.merge_dicts(dict1, dict2)
     for action_id in dict1:
         if action_id not in dict2:
             del result[action_id]
-
-    return result.values()
+    return result
 
 
 def _pass1_serialize(value, parent, serialized_objects,
@@ -103,7 +99,7 @@ def _pass1_serialize(value, parent, serialized_objects,
                 #deserialize and merge list of actions
                 actions = _serialize_available_action(value)
                 result['?']['_actions'] = _merge_actions(
-                    result['?'].get('_actions', []), actions)
+                    result['?'].get('_actions', {}), actions)
             serialized_objects.add(value.object_id)
             return _pass1_serialize(
                 result, value, serialized_objects, designer_attributes_getter)
