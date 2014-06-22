@@ -1,0 +1,13 @@
+[run]
+branch = True
+source = murano
+omit =
+ */openstack/common/*
+ .tox/*
+ murano/tests/*
+
+[paths]
+source = murano
+
+[report]
+ignore-errors = True
