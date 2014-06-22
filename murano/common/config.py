@@ -30,68 +30,136 @@ import murano
 from murano.openstack.common.gettextutils import _  # noqa
 
 paste_deploy_opts = [
-    cfg.StrOpt('flavor'),
-    cfg.StrOpt('config_file'),
+    cfg.StrOpt('flavor', help='Paste flavor'),
+    cfg.StrOpt('config_file', help='Path to Paste config file'),
 ]
 
 bind_opts = [
-    cfg.StrOpt('bind-host', default='0.0.0.0'),
-    cfg.IntOpt('bind-port', default='8082'),
-]
-
-db_opts = [
-    cfg.BoolOpt('auto_create', default=False,
-                help=_('A boolean that determines if the database will be '
-                       'automatically created.')),
+    cfg.StrOpt('bind-host', default='0.0.0.0',
+               help='Address to bind the Murano API server to.'),
+    cfg.IntOpt('bind-port', default=8082,
+               help='Port the bind the Murano API server to.'),
 ]
 
 rabbit_opts = [
-    cfg.StrOpt('host', default='localhost'),
-    cfg.IntOpt('port', default=5672),
-    cfg.StrOpt('login', default='guest'),
-    cfg.StrOpt('password', default='guest'),
-    cfg.StrOpt('virtual_host', default='/'),
-    cfg.BoolOpt('ssl', default=False),
-    cfg.StrOpt('ca_certs', default='')
+    cfg.StrOpt('host', default='localhost',
+               help='The RabbitMQ broker address which used for communication '
+               'with Murano guest agents.'),
+
+    cfg.IntOpt('port', default=5672,
+               help='The RabbitMQ broker port.'),
+
+    cfg.StrOpt('login', default='guest',
+               help='The RabbitMQ login.'),
+
+    cfg.StrOpt('password', default='guest',
+               help='The RabbitMQ password.'),
+
+    cfg.StrOpt('virtual_host', default='/',
+               help='The RabbitMQ virtual host.'),
+
+    cfg.BoolOpt('ssl', default=False,
+                help='Boolean flag to enable SSL communication through the '
+                'RabbitMQ broker between murano-engine and guest agents.'),
+    cfg.StrOpt('ca_certs', default='',
+               help='SSL cert file (valid only if SSL enabled).')
 ]
 
 heat_opts = [
-    cfg.BoolOpt('insecure', default=False),
-    cfg.StrOpt('ca_file'),
-    cfg.StrOpt('cert_file'),
-    cfg.StrOpt('key_file'),
-    cfg.StrOpt('endpoint_type', default='publicURL')
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                '"insecure" SSL connections and transfers with Heat API.'),
+
+    cfg.StrOpt('ca_file',
+               help='(SSL) Tells Murano to use the specified certificate file '
+               'to verify the peer running Heat API.'),
+
+    cfg.StrOpt('cert_file',
+               help='(SSL) Tells Murano to use the specified client '
+               'certificate file when communicating with Heat.'),
+
+    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
+                                'communicate with Heat API.'),
+
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Heat endpoint type.')
 ]
 
 neutron_opts = [
-    cfg.BoolOpt('insecure', default=False),
-    cfg.StrOpt('ca_cert'),
-    cfg.StrOpt('endpoint_type', default='publicURL')
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                '"insecure" SSL connections and transfers with Neutron API.'),
+
+    cfg.StrOpt('ca_cert',
+               help='(SSL) Tells Murano to use the specified client '
+               'certificate file when communicating with Neutron.'),
+
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Neutron endpoint type.')
 ]
 
 keystone_opts = [
-    cfg.StrOpt('auth_url'),
-    cfg.BoolOpt('insecure', default=False),
-    cfg.StrOpt('ca_file'),
-    cfg.StrOpt('cert_file'),
-    cfg.StrOpt('key_file')
+    cfg.StrOpt('auth_url', help='URL to access OpenStack Identity service.'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                     '"insecure" SSL connections and transfers with '
+                     'Keystone API running Kyestone API.'),
+
+    cfg.StrOpt('ca_file',
+               help='(SSL) Tells Murano to use the specified certificate file '
+                    'to verify the peer when communicating with Keystone.'),
+
+    cfg.StrOpt('cert_file',
+               help='(SSL) Tells Murano to use the specified client '
+                    'certificate file when communicating with Keystone.'),
+
+    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
+                                'communicate with Keystone API')
 ]
 
 murano_opts = [
-    cfg.StrOpt('url', help=_('Optional murano url in format '
-                             'like http://0.0.0.0:8082')),
-    cfg.BoolOpt('insecure', default=False),
-    cfg.StrOpt('cacert'),
-    cfg.StrOpt('cert_file'),
-    cfg.StrOpt('key_file'),
-    cfg.StrOpt('endpoint_type', default='publicURL')
+    cfg.StrOpt('url', help='Optional murano url in format '
+                           'like http://0.0.0.0:8082 used by Murano engine'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                     '"insecure" SSL connections and transfers used by '
+                     'Murano engine.'),
+
+    cfg.StrOpt('cacert',
+               help='(SSL) Tells Murano to use the specified client '
+               'certificate file when communicating with Murano API '
+               'used by Murano engine.'),
+
+    cfg.StrOpt('cert_file',
+               help='(SSL) Tells Murano to use the specified client '
+                    'certificate file when communicating with Murano '
+                    'used by Murano engine.'),
+
+    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name '
+                                'to communicate with Murano API used by '
+                                'Murano engine.'),
+
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Murno endpoint type used by Murano engine.')
 ]
 
 networking_opts = [
-    cfg.IntOpt('max_environments', default=20),
-    cfg.IntOpt('max_hosts', default=250),
-    cfg.StrOpt('env_ip_template', default='10.0.0.0'),
-    cfg.StrOpt('default_dns', default='8.8.8.8')
+    cfg.IntOpt('max_environments', default=20,
+               help='Maximum number of environments that use a single router '
+               'per tenant'),
+
+    cfg.IntOpt('max_hosts', default=250,
+               help='Maximum number of VMs per environment'),
+
+    cfg.StrOpt('env_ip_template', default='10.0.0.0',
+               help='Template IP address for generating environment '
+               'subnet cidrs'),
+
+    cfg.StrOpt('default_dns', default='8.8.8.8',
+               help='Default DNS nameserver to be assigned to '
+               'created Networks')
 ]
 
 stats_opt = [
@@ -100,21 +168,29 @@ stats_opt = [
                       'Default value is 5 minutes.'))
 ]
 
-metadata_dir = cfg.StrOpt('metadata-dir', default='./meta')
+metadata_dir = cfg.StrOpt('metadata-dir', default='./meta',
+                          help='Metadata dir')
 
 temp_pkg_cache = os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
 
 packages_opts = [
-    cfg.StrOpt('packages_cache', default=temp_pkg_cache),
-    cfg.IntOpt('package_size_limit', default=5),
-    cfg.IntOpt('limit_param_default', default=20),
-    cfg.IntOpt('api_limit_max', default=100)
+    cfg.StrOpt('packages_cache', default=temp_pkg_cache,
+               help='Location (directory) for Murano package cache.'),
+
+    cfg.IntOpt('package_size_limit', default=5,
+               help='Maximum application package size, Mb'),
+
+    cfg.IntOpt('limit_param_default', default=20,
+               help='Default value for package pagination in API.'),
+
+    cfg.IntOpt('api_limit_max', default=100,
+               help='Maximum number of packages to be returned in a single '
+                    'pagination request')
 ]
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
-CONF.register_opts(db_opts, group='database')
 CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(heat_opts, group='heat')
 CONF.register_opts(neutron_opts, group='neutron')
