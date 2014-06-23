@@ -27,6 +27,7 @@ DAEMON_USER="murano"
 DAEMON_GROUP="murano"
 DAEMON_CFG_DIR="/etc/murano"
 DAEMON_LOG_DIR="/var/log/murano"
+MANAGE_DB_CMD="murano-db-manage"
 LOGFILE="/tmp/${DAEMON_NAME}_install.log"
 DAEMON_DB_CONSTR="sqlite:///$DAEMON_CFG_DIR/$DAEMON_NAME.sqlite"
 common_pkgs="wget git make gcc python-pip python-setuptools python-lxml python-crypto ntpdate"
@@ -367,7 +368,7 @@ function install_daemon()
     fi
     get_service_exec_path "murano-manage" || exit $?
     log "Running murano-manage under $DAEMON_USER..."
-    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db-sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+    su -c "$MANAGE_DB_CMD --config-file $daemon_conf upgrade" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
     core_meta_dir="$RUN_DIR/meta"
     if [ -d "$core_meta_dir" ]; then
         for package_dir in $(ls $core_meta_dir); do
@@ -378,7 +379,7 @@ function install_daemon()
     else
         log "Warning: $core_meta_dir not found!"
     fi
-    su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf db-sync" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+    su -c "$MANAGE_DB_CMD --config-file $daemon_conf upgrade" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
     log "Everything done, please, verify \"$daemon_conf\", services created as \"murano-api,murano-engine\"."
 }
 function uninstall_daemon()
