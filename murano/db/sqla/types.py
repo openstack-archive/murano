@@ -1,5 +1,3 @@
-#    Copyright (c) 2013 Mirantis, Inc.
-#
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
 #    a copy of the License at
@@ -12,9 +10,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo.config import cfg
+import sqlalchemy as sa
+from sqlalchemy.dialects import mysql
 
-from migrate.versioning.shell import main
+CONF = cfg.CONF
 
-# This should probably be a console script entry point.
-if __name__ == '__main__':
-    main(debug='False', repository='.')
+
+def _is_mysql_avail():
+    return CONF.database.connection.startswith('mysql')
+
+
+def LargeBinary():
+    if _is_mysql_avail():
+        return mysql.LONGBLOB
+    return sa.LargeBinary

@@ -1,0 +1,15 @@
+Please see https://alembic.readthedocs.org/en/latest/index.html for general documentation
+
+To create alembic migrations use:
+$ murano-db-manage revision --message --autogenerate
+
+Stamp db with most recent migration version, without actually running migrations
+$ murano-db-manage stamp --revision head
+
+Upgrade can be performed by:
+$ murano-db-manage upgrade
+$ murano-db-manage upgrade --revision head
+
+Downgrading db:
+$ murano-db-manage downgrade
+$ murano-db-manage downgrade --revision base

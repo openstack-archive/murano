@@ -14,13 +14,7 @@
 
 """Session management functions."""
 
-import os
-
-from migrate import exceptions as versioning_exceptions
-from migrate.versioning import api as versioning_api
-
 from murano.common import config
-from murano.db import migrate_repo
 from murano.openstack.common.db.sqlalchemy import session as db_session
 from murano.openstack.common import log as logging
 
@@ -48,12 +42,3 @@ def get_session(autocommit=True, expire_on_commit=False):
 
 def get_engine():
     return _create_facade_lazily().get_engine()
-
-
-def db_sync():
-    repo_path = os.path.abspath(os.path.dirname(migrate_repo.__file__))
-    try:
-        versioning_api.upgrade(CONF.database.connection, repo_path)
-    except versioning_exceptions.DatabaseNotControlledError:
-        versioning_api.version_control(CONF.database.connection, repo_path)
-        versioning_api.upgrade(CONF.database.connection, repo_path)

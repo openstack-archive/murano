@@ -108,11 +108,11 @@ class Environment(BASE, ModificationsTrackedObject):
     """Represents a Environment in the metadata-store"""
     __tablename__ = 'environment'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(255),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(255), nullable=False)
-    tenant_id = sa.Column(sa.String(32), nullable=False)
+    tenant_id = sa.Column(sa.String(36), nullable=False)
     version = sa.Column(sa.BigInteger, nullable=False, default=0)
     description = sa.Column(JsonBlob(), nullable=False, default={})
     networking = sa.Column(JsonBlob(), nullable=True, default={})
@@ -131,10 +131,10 @@ class Environment(BASE, ModificationsTrackedObject):
 class Session(BASE, ModificationsTrackedObject):
     __tablename__ = 'session'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    environment_id = sa.Column(sa.String(32), sa.ForeignKey('environment.id'))
+    environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'))
 
     user_id = sa.Column(sa.String(36), nullable=False)
     state = sa.Column(sa.String(36), nullable=False)
@@ -153,13 +153,13 @@ class Session(BASE, ModificationsTrackedObject):
 class Deployment(BASE, ModificationsTrackedObject):
     __tablename__ = 'deployment'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     started = sa.Column(sa.DateTime, default=timeutils.utcnow, nullable=False)
     finished = sa.Column(sa.DateTime, default=None, nullable=True)
     description = sa.Column(JsonBlob(), nullable=False)
-    environment_id = sa.Column(sa.String(32), sa.ForeignKey('environment.id'))
+    environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'))
 
     statuses = sa_orm.relationship("Status", backref='deployment',
                                    cascade='save-update, merge, delete')
@@ -177,12 +177,12 @@ class Deployment(BASE, ModificationsTrackedObject):
 class Status(BASE, ModificationsTrackedObject):
     __tablename__ = 'status'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    entity_id = sa.Column(sa.String(32), nullable=True)
+    entity_id = sa.Column(sa.String(255), nullable=True)
     entity = sa.Column(sa.String(10), nullable=True)
-    deployment_id = sa.Column(sa.String(32), sa.ForeignKey('deployment.id'))
+    deployment_id = sa.Column(sa.String(36), sa.ForeignKey('deployment.id'))
     text = sa.Column(sa.String(), nullable=False)
     level = sa.Column(sa.String(32), nullable=False)
     details = sa.Column(sa.Text(), nullable=True)
@@ -216,20 +216,20 @@ class ApiStats(BASE, ModificationsTrackedObject):
 package_to_category = sa.Table('package_to_category',
                                BASE.metadata,
                                sa.Column('package_id',
-                                         sa.String(32),
+                                         sa.String(36),
                                          sa.ForeignKey('package.id')),
                                sa.Column('category_id',
-                                         sa.String(32),
+                                         sa.String(36),
                                          sa.ForeignKey('category.id',
                                                        ondelete="RESTRICT")))
 
 package_to_tag = sa.Table('package_to_tag',
                           BASE.metadata,
                           sa.Column('package_id',
-                                    sa.String(32),
+                                    sa.String(36),
                                     sa.ForeignKey('package.id')),
                           sa.Column('tag_id',
-                                    sa.String(32),
+                                    sa.String(36),
                                     sa.ForeignKey('tag.id',
                                     ondelete="CASCADE")))
 
@@ -238,16 +238,16 @@ class Instance(BASE, ModelBase):
     __tablename__ = 'instance_stats'
 
     environment_id = sa.Column(
-        sa.String(100), primary_key=True, nullable=False)
+        sa.String(255), primary_key=True, nullable=False)
     instance_id = sa.Column(
-        sa.String(100), primary_key=True, nullable=False)
+        sa.String(255), primary_key=True, nullable=False)
     instance_type = sa.Column(sa.Integer, default=0, nullable=False)
     created = sa.Column(sa.Integer, nullable=False)
     destroyed = sa.Column(sa.Integer, nullable=True)
     type_name = sa.Column('type_name', sa.String(512), nullable=False)
     type_title = sa.Column('type_title', sa.String(512))
     unit_count = sa.Column('unit_count', sa.Integer())
-    tenant_id = sa.Column('tenant_id', sa.String(32), nullable=False)
+    tenant_id = sa.Column('tenant_id', sa.String(36), nullable=False)
 
     def to_dict(self):
         dictionary = super(Instance, self).to_dict()
@@ -311,7 +311,7 @@ class Category(BASE, ModificationsTrackedObject):
     """
     __tablename__ = 'category'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
@@ -323,7 +323,7 @@ class Tag(BASE, ModificationsTrackedObject):
     """
     __tablename__ = 'tag'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(80), nullable=False, unique=True)
@@ -335,11 +335,11 @@ class Class(BASE, ModificationsTrackedObject):
     """
     __tablename__ = 'class_definition'
 
-    id = sa.Column(sa.String(32),
+    id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    name = sa.Column(sa.String(80), nullable=False, index=True)
-    package_id = sa.Column(sa.String(32), sa.ForeignKey('package.id'))
+    name = sa.Column(sa.String(512), nullable=False, index=True)
+    package_id = sa.Column(sa.String(36), sa.ForeignKey('package.id'))
 
 
 def register_models(engine):
