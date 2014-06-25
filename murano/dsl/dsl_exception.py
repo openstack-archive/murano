@@ -54,8 +54,10 @@ class MuranoPlException(Exception):
         names = ['{0}.{1}'.format(exception_type.__module__,
                                   exception_type.__name__)]
 
-        return MuranoPlException(
+        result = MuranoPlException(
             names, exception.message, stacktrace)
+        result.original_exception = exception
+        return result
 
     def _format_name(self):
         if not self._names:
