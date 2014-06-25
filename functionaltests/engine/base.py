@@ -15,11 +15,13 @@
 import json
 import os
 import requests
+import socket
 import testresources
 import testtools
 import time
 import uuid
 
+from heatclient import client as heatclient
 from keystoneclient.v2_0 import client as ksclient
 
 import functionaltests.engine.config as cfg
@@ -83,15 +85,22 @@ class Client(object):
         return requests.post(endpoint, data=json.dumps(json_data),
                              headers=headers).json()
 
-    def status_check(self, environment_id):
+    def wait_for_environment_deploy(self, environment_id):
         environment = self.get_environment(environment_id)
+
         start_time = time.time()
+
         while environment['status'] != 'ready':
             if time.time() - start_time > 1200:
                 return
             time.sleep(5)
             environment = self.get_environment(environment_id)
-        return 'OK'
+
+        return environment
+
+    def get_ip_list(self, environment):
+        return [service['instance']['ipAddresses']
+                for service in environment['services']]
 
     def deployments_list(self, environment_id):
         endpoint = '{0}environments/{1}/deployments'.format(self.endpoint,
@@ -116,6 +125,12 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
 
         cls.linux = CONF.murano.linux_image
         cls.windows = CONF.murano.windows_image
+
+        heat_url = cls.client.auth.service_catalog.url_for(
+            service_type='orchestration', endpoint_type='publicURL')
+
+        cls.heat_client = heatclient.Client('1', endpoint=heat_url,
+                                            token=cls.client.auth.auth_token)
 
         cls.location = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
@@ -164,6 +179,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         super(MuranoBase, self).setUp()
 
         self.environments = []
+        self.stack_names = []
 
     def tearDown(self):
         super(MuranoBase, self).tearDown()
@@ -174,11 +190,40 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             except Exception:
                 pass
 
+        # add workaround for https://bugs.launchpad.net/murano/+bug/1330966
+        time.sleep(60)
+
+        stack_list = self.heat_client.stacks.list()
+        for stack_name in self.stack_names:
+            try:
+                for stack in stack_list:
+                    if stack.stack_name == stack_name:
+                        self.heat_client.stacks.delete(stack.id)
+            except Exception:
+                pass
+
+    def check_port_access(self, ip, port):
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+
+        result = sock.connect_ex((str(ip), port))
+        sock.close()
+
+        self.assertEqual(0, result)
+
+    def deployment_success_check(self, env_id, ip, port):
+        deployments = self.client.deployments_list(env_id)
+
+        for deployment in deployments:
+            self.assertEqual('success', deployment['state'])
+
+        self.check_port_access(ip, port)
+
     def test_deploy_telnet(self):
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
                 "image": self.linux,
+                "assignFloatingIp": True,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -192,27 +237,31 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             }
         }
 
-        environment = self.client.create_environment('Telnetenv')
+        environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
+
+        environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
+        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
         self.client.create_service(environment['id'], session['id'], post_body)
         self.client.deploy_session(environment['id'], session['id'])
 
-        status = self.client.status_check(environment['id'])
+        env = self.client.wait_for_environment_deploy(environment['id'])
 
-        self.assertEqual('OK', status)
+        self.assertIsNotNone(env)
 
-        deployments = self.client.deployments_list(environment['id'])
-        for deployment in deployments:
-            self.assertEqual('success', deployment['state'])
+        ip_list = self.client.get_ip_list(env)
+
+        self.deployment_success_check(environment['id'], ip_list[0][1], 23)
 
     def test_deploy_apache(self):
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
                 "image": self.linux,
+                "assignFloatingIp": True,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -226,27 +275,31 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             }
         }
 
-        environment = self.client.create_environment('Apacheenv')
+        environment_name = 'Apacheenv' + uuid.uuid4().hex[:5]
+
+        environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
+        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
         self.client.create_service(environment['id'], session['id'], post_body)
         self.client.deploy_session(environment['id'], session['id'])
 
-        status = self.client.status_check(environment['id'])
+        env = self.client.wait_for_environment_deploy(environment['id'])
 
-        self.assertEqual('OK', status)
+        self.assertIsNotNone(env)
 
-        deployments = self.client.deployments_list(environment['id'])
-        for deployment in deployments:
-            self.assertEqual('success', deployment['state'])
+        ip_list = self.client.get_ip_list(env)
+
+        self.deployment_success_check(environment['id'], ip_list[0][1], 80)
 
     def test_deploy_postgresql(self):
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
                 "image": self.linux,
+                "assignFloatingIp": True,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -260,27 +313,31 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             }
         }
 
-        environment = self.client.create_environment('Postgreenv')
+        environment_name = 'Postgreenv' + uuid.uuid4().hex[:5]
+
+        environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
+        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
         self.client.create_service(environment['id'], session['id'], post_body)
         self.client.deploy_session(environment['id'], session['id'])
 
-        status = self.client.status_check(environment['id'])
+        env = self.client.wait_for_environment_deploy(environment['id'])
 
-        self.assertEqual('OK', status)
+        self.assertIsNotNone(env)
 
-        deployments = self.client.deployments_list(environment['id'])
-        for deployment in deployments:
-            self.assertEqual('success', deployment['state'])
+        ip_list = self.client.get_ip_list(env)
+
+        self.deployment_success_check(environment['id'], ip_list[0][1], 5432)
 
     def test_deploy_tomcat(self):
         post_body = {
             "instance": {
                 "flavor": "m1.medium",
                 "image": self.linux,
+                "assignFloatingIp": True,
                 "?": {
                     "type": "io.murano.resources.LinuxMuranoInstance",
                     "id": str(uuid.uuid4())
@@ -294,18 +351,21 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             }
         }
 
-        environment = self.client.create_environment('Tomcatenv')
+        environment_name = 'Tomcatenv' + uuid.uuid4().hex[:5]
+
+        environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
+        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
         self.client.create_service(environment['id'], session['id'], post_body)
         self.client.deploy_session(environment['id'], session['id'])
 
-        status = self.client.status_check(environment['id'])
+        env = self.client.wait_for_environment_deploy(environment['id'])
 
-        self.assertEqual('OK', status)
+        self.assertIsNotNone(env)
 
-        deployments = self.client.deployments_list(environment['id'])
-        for deployment in deployments:
-            self.assertEqual('success', deployment['state'])
+        ip_list = self.client.get_ip_list(env)
+
+        self.deployment_success_check(environment['id'], ip_list[0][1], 8080)
