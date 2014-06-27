@@ -46,6 +46,8 @@ System prerequisites
 
 * libmysqlclient-dev
 
+* libpq-dev
+
 *CentOS*
 
 * gcc
