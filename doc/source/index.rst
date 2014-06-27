@@ -32,7 +32,7 @@ environments on the Application abstraction level and then manage their
 lifecycle.
 
 Murano consists of three source code repositories:
-    * `murano-api`_ - is the main repository. It contains code for Murano API
+    * `murano`_ - is the main repository. It contains code for Murano API
       server, Murano engine and MuranoPL
     * `murano-agent`_ - agent which runs on guest VMs and executes deployment
       plan
@@ -40,7 +40,7 @@ Murano consists of three source code repositories:
       Dashboard
 
 
-.. _murano-api: https://git.openstack.org/cgit/stackforge/murano-api/
+.. _murano: https://git.openstack.org/cgit/stackforge/murano/
 .. _murano-agent: https://git.openstack.org/cgit/stackforge/murano-agent/
 .. _murano-dashboard: https://git.openstack.org/cgit/stackforge/murano-dashboard/
 

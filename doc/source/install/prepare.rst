@@ -44,6 +44,8 @@ System prerequisites
 
 * libffi-dev
 
+* libmysqlclient-dev
+
 *CentOS*
 
 * gcc

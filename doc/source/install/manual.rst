@@ -58,7 +58,7 @@ Installing the API service and Engine
    ::
 
       $ cd /opt/stack
-      $ git clone https://git.openstack.org/stackforge/murano-api.git
+      $ git clone https://git.openstack.org/stackforge/murano.git
 
 2. Configure the database. Murano can run with MySQL and SQLite. MySQL is
    required for produciton installation, SQLite can be used for developemnt
@@ -78,10 +78,10 @@ Installing the API service and Engine
    ::
 
       $ mkdir -p /etc/murano
-      $ cp etc/murano/murano-api.conf.sample /etc/murano/murano-api.conf
-      $ cp etc/murano/murano-api-paste.ini /etc/murano/
+      $ cp etc/murano/murano.conf.sample /etc/murano/murano.conf
+      $ cp etc/murano/murano-paste.ini /etc/murano/
 
-4. Edit ``/etc/murano/murano-api.conf``
+4. Edit ``/etc/murano/murano.conf``
 
    TODO(ruhe): document configuration options
 
@@ -89,16 +89,16 @@ Installing the API service and Engine
 
    ::
 
-      $ tox -e venv -- murano-db-manage --config-file /etc/murano/murano-api.conf upgrade
+      $ tox -e venv -- murano-db-manage --config-file /etc/murano/murano.conf upgrade
 
 6. Launch Murano API service:
 
    ::
 
-      $ tox -e venv -- murano-api --config-file /etc/murano/murano-api.conf
+      $ tox -e venv -- murano-api --config-file /etc/murano/murano.conf
 
 7. Launch Murano Engine service:
 
    ::
 
-      $ tox -e venv -- murano-engine --config-file /etc/murano/murano-api.conf
+      $ tox -e venv -- murano-engine --config-file /etc/murano/murano.conf

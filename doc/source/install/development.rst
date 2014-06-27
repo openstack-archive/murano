@@ -26,4 +26,4 @@ Murano with `Devstack`_.
 
 
 .. _Devstack: http://www.devstack.org/
-.. _contrib/devstack: https://git.openstack.org/cgit/stackforge/murano-api/tree/contrib/devstack
+.. _contrib/devstack: https://git.openstack.org/cgit/stackforge/murano/tree/contrib/devstack
