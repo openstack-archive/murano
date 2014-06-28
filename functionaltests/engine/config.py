@@ -49,12 +49,13 @@ def register_config(config, config_group, config_opts):
     config.register_group(config_group)
     config.register_opts(config_opts, config_group)
 
-__location = os.path.realpath(os.path.join(os.getcwd(),
-                                           os.path.dirname(__file__)))
 
-path = os.path.join(__location, "config.conf")
+def load_config():
+    __location = os.path.realpath(os.path.join(os.getcwd(),
+                                  os.path.dirname(__file__)))
+    path = os.path.join(__location, "config.conf")
 
-if os.path.exists(path):
-    cfg.CONF([], project='muranointegration', default_config_files=[path])
+    if os.path.exists(path):
+        cfg.CONF([], project='muranointegration', default_config_files=[path])
 
-register_config(cfg.CONF, murano_group, MuranoGroup)
+    register_config(cfg.CONF, murano_group, MuranoGroup)

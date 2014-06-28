@@ -117,6 +117,8 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
     def setUpClass(cls):
         super(MuranoBase, cls).setUpClass()
 
+        cfg.load_config()
+
         cls.client = Client(user=CONF.murano.user,
                             password=CONF.murano.password,
                             tenant=CONF.murano.tenant,
