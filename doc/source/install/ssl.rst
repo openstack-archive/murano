@@ -23,7 +23,7 @@ HTTPS for Murano API
 ====================
 
 SSL for Murano API service can be configured in *ssl* section in
-``/etc/murano/murano-api.conf``. Just point to a valid SSL certificate.
+``/etc/murano/murano.conf``. Just point to a valid SSL certificate.
 See the example below:
 
 ::
@@ -57,7 +57,7 @@ separately.
 
 **Murano API <-> Rabbit MQ exchange <-> Murano Engine**
 
-Edit ssl parameters in default section of ``/etc/murano/murano-api.conf``. Set ``rabbit_use_ssl`` option to *true* and configure ssl kombu parameters.
+Edit ssl parameters in default section of ``/etc/murano/murano.conf``. Set ``rabbit_use_ssl`` option to *true* and configure ssl kombu parameters.
 Specify the path to the SSL keyfile and SSL CA certificate in a regular format: /path/to/file without quotes or leave it empty to
 allow self-signed certificates.
 
@@ -84,7 +84,7 @@ allow self-signed certificates.
 
 **Murano Agent -> Rabbit MQ exchange**
 
-In main murano-api configuration file there is a section ,named *rabbitmq*, that is responsible for set up communication between Murano Agent and Rabbit MQ.
+In main murano configuration file there is a section ,named *rabbitmq*, that is responsible for set up communication between Murano Agent and Rabbit MQ.
 Just set *ssl* parameter to True to enable ssl.
 
 ::
@@ -98,7 +98,7 @@ Just set *ssl* parameter to True to enable ssl.
     ssl = True
 
 If you want to configure Murano Agent in a different way change
-the default template. It can be found in Murano Core Library, located at */https://github.com/stackforge/murano-api/blob/master/meta/io.murano/Resources/Agent-v1.template.* Take
+the default template. It can be found in Murano Core Library, located at */https://github.com/stackforge/murano/blob/master/meta/io.murano/Resources/Agent-v1.template.* Take
 a look at appSettings section:
 
 ::

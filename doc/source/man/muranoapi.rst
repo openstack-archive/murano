@@ -45,10 +45,10 @@ OPTIONS
 FILES
 =====
 
-* /etc/murano-api/murano-api.conf
-* /etc/murano-api/murano-api-paste.conf
+* /etc/murano/murano.conf
+* /etc/murano/murano-paste.conf
 
 SEE ALSO
 ========
 
-* `Murano <http://murano-api.readthedocs.org/>`__
+* `Murano <http://murano.readthedocs.org/>`__

@@ -21,7 +21,7 @@ MuranoPL Core Library
 
 Some objects and actions could be used in several application deployments. All common parts are grouped into MuranoPL libraries.
 Murano core library is a set of classes needed in every deployment. Class names from core library could be used in the application definitions.
-This library is located under the `meta <https://github.com/stackforge/murano-api/tree/master/meta/io.murano>`_ directory.
+This library is located under the `meta <https://github.com/stackforge/murano/tree/master/meta/io.murano>`_ directory.
 The following classes are included into the Murano core library:
 
 **io.murano:**
