@@ -13,6 +13,7 @@
 #    under the License.
 
 
+import sys
 import types
 
 from murano.dsl import dsl_exception
@@ -29,15 +30,13 @@ class Runner(object):
             self._runner = runner
             if isinstance(obj, types.StringTypes):
                 self._object_id = obj
-            elif isinstance(obj, object_model.Object):
-                self._object_id = obj.data['?']['id']
+            elif isinstance(obj, (object_model.Object, object_model.Ref)):
+                self._object_id = obj.id
             elif isinstance(obj, murano_object.MuranoObject):
                 self._object_id = obj.object_id
-            elif isinstance(obj, object_model.Ref):
-                self._object_id = obj.id
             else:
                 raise ValueError(
-                    'obj should be object ID string, MuranoObject or one of '
+                    'obj must be object ID string, MuranoObject or one of '
                     'object_model helper classes (Object, Ref)')
             self._preserve_exception = False
 
@@ -58,32 +57,46 @@ class Runner(object):
 
         self.executor = executor.MuranoDslExecutor(
             class_loader, environment.Environment())
-        self.root = self.executor.load(model)
+        self._root = self.executor.load(model)
 
     def _execute(self, name, object_id, *args, **kwargs):
         obj = self.executor.object_store.get(object_id)
         try:
-            return obj.type.invoke(
-                name, self.executor, obj,
-                tuple(list(args) + kwargs.items()))
+            final_args = []
+            for arg in args:
+                if isinstance(arg, object_model.Object):
+                    arg = object_model.build_model(arg)
+                final_args.append(arg)
+            for name, arg in kwargs.iteritems():
+                if isinstance(arg, object_model.Object):
+                    arg = object_model.build_model(arg)
+                final_args.append({name: arg})
+            return obj.type.invoke(name, self.executor, obj, tuple(final_args))
         except dsl_exception.MuranoPlException as e:
             if not self.preserve_exception:
                 original_exception = getattr(e, 'original_exception', None)
-                if not isinstance(original_exception,
-                                  dsl_exception.MuranoPlException):
-                    raise original_exception
+                if original_exception and not isinstance(
+                        original_exception, dsl_exception.MuranoPlException):
+                    exc_traceback = getattr(
+                        e, 'original_traceback', None) or sys.exc_info()[2]
+                    raise type(original_exception), original_exception, \
+                        exc_traceback
             raise
 
     def __getattr__(self, item):
         if item.startswith('test'):
-            return getattr(Runner.DslObjectWrapper(self.root, self), item)
+            return getattr(Runner.DslObjectWrapper(self._root, self), item)
 
     def on(self, obj):
         return Runner.DslObjectWrapper(obj, self)
 
     @property
-    def model(self):
-        return results_serializer.serialize(self.root, self.executor)
+    def root(self):
+        return self._root
+
+    @property
+    def serialized_model(self):
+        return results_serializer.serialize(self._root, self.executor)
 
     @property
     def preserve_exception(self):

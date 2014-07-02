@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
+
 import murano.dsl.yaql_functions as yaql_functions
 
 
@@ -55,8 +57,10 @@ class MuranoPlException(Exception):
                                   exception_type.__name__)]
 
         result = MuranoPlException(
-            names, exception.message, stacktrace)
+            names, str(exception), stacktrace)
+        exc_type, exc_value, exc_traceback = sys.exc_info()
         result.original_exception = exception
+        result.original_traceback = exc_traceback
         return result
 
     def _format_name(self):

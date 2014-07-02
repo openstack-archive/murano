@@ -28,14 +28,17 @@ class DslTestCase(base.MuranoTestCase):
         super(DslTestCase, self).setUp()
         directory = os.path.join(os.path.dirname(
             inspect.getfile(self.__class__)), 'meta')
+        root_meta_directory = os.path.join(
+            os.path.dirname(__file__), '../../../../meta')
         sys_class_loader = test_class_loader.TestClassLoader(
-            os.path.join(directory, '../../../../meta/io.murano/Classes'),
+            os.path.join(root_meta_directory, 'io.murano/Classes'),
             'murano.io')
         self._class_loader = test_class_loader.TestClassLoader(
             directory, 'tests', sys_class_loader)
         self.register_function(
             lambda data: self._traces.append(data()), 'trace')
         self._traces = []
+        eventlet.debug.hub_exceptions(False)
 
     def new_runner(self, model):
         return runner.Runner(model, self.class_loader)
@@ -44,13 +47,13 @@ class DslTestCase(base.MuranoTestCase):
     def traces(self):
         return self._traces
 
+    @traces.deleter
+    def traces(self):
+        self._traces = []
+
     @property
     def class_loader(self):
         return self._class_loader
 
     def register_function(self, func, name):
         self.class_loader.register_function(func, name)
-
-    @classmethod
-    def setUpClass(cls):
-        eventlet.debug.hub_exceptions(False)
