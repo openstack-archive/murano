@@ -11,12 +11,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import datetime
+import uuid
+
 from oslo.config import cfg
+from sqlalchemy import exc
 
 from murano.db import models  # noqa
 from murano.openstack.common.db.sqlalchemy import utils as db_utils
 from murano.tests.db.migration import test_migrations_base as base
-
 
 CONF = cfg.CONF
 
@@ -69,6 +72,43 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
     def _check_001(self, engine, data):
         self.assertColumnExists(engine, 'category', 'id')
         self.assertColumnExists(engine, 'environment', 'tenant_id')
+
+        # make sure indexes are in place
         self.assertIndexExists(engine,
                                'class_definition',
                                'ix_class_definition_name')
+
+        self.assertIndexExists(engine,
+                               'package',
+                               'ix_package_fqn')
+        self.assertIndexExists(engine,
+                               'category',
+                               'ix_category_name')
+
+        self._test_package_fqn_is_uniq(engine)
+
+    def _test_package_fqn_is_uniq(self, engine):
+        package_table = db_utils.get_table(engine, 'package')
+
+        package = {
+            'id': str(uuid.uuid4()),
+            'archive': "archive blob here",
+            'fully_qualified_name': 'com.example.package',
+            'type': 'class',
+            'author': 'OpenStack',
+            'name': 'package',
+            'enabled': True,
+            'description': 'some text',
+            'is_public': False,
+            'tags': ['tag1', 'tag2'],
+            'logo': "logo blob here",
+            'ui_definition': '{}',
+            'owner_id': '123',
+            'created': datetime.datetime.now(),
+            'updated': datetime.datetime.now()
+        }
+        package_table.insert().execute(package)
+
+        package['id'] = str(uuid.uuid4())
+        self.assertRaises(exc.IntegrityError,
+                          package_table.insert().execute, package)

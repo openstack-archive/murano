@@ -90,11 +90,13 @@ def upgrade():
         sa.Column('created', sa.DateTime(), nullable=False),
         sa.Column('updated', sa.DateTime(), nullable=False),
         sa.Column('id', sa.String(length=36), nullable=False),
-        sa.Column('name', sa.String(length=80), nullable=False, index=True),
+        sa.Column('name', sa.String(length=80), nullable=False, unique=True),
         sa.PrimaryKeyConstraint('id'),
         mysql_engine=MYSQL_ENGINE,
         mysql_charset=MYSQL_CHARSET
     )
+
+    op.create_index('ix_category_name', 'category', ['name'])
 
     op.create_table(
         'apistats',
@@ -137,8 +139,10 @@ def upgrade():
         sa.Column('updated', sa.DateTime(), nullable=False),
         sa.Column('id', sa.String(length=36), nullable=False),
         sa.Column('archive', st.LargeBinary(), nullable=True),
-        sa.Column('fully_qualified_name', sa.String(length=512),
-                  nullable=False, index=True),
+        sa.Column('fully_qualified_name',
+                  sa.String(length=128),
+                  nullable=False,
+                  unique=True),
         sa.Column('type', sa.String(length=20), nullable=False),
         sa.Column('author', sa.String(length=80), nullable=True),
         sa.Column('name', sa.String(length=80), nullable=False),
@@ -152,6 +156,10 @@ def upgrade():
         mysql_engine=MYSQL_ENGINE,
         mysql_charset=MYSQL_CHARSET
     )
+
+    op.create_index('ix_package_fqn',
+                    'package',
+                    ['fully_qualified_name'])
 
     op.create_table(
         'session',
@@ -189,13 +197,20 @@ def upgrade():
         sa.Column('created', sa.DateTime(), nullable=False),
         sa.Column('updated', sa.DateTime(), nullable=False),
         sa.Column('id', sa.String(length=36), nullable=False),
-        sa.Column('name', sa.String(length=512), nullable=False, index=True),
+        sa.Column('name',
+                  sa.String(length=128),
+                  nullable=False,
+                  unique=True),
         sa.Column('package_id', sa.String(length=36), nullable=True),
         sa.ForeignKeyConstraint(['package_id'], ['package.id'], ),
         sa.PrimaryKeyConstraint('id'),
         mysql_engine=MYSQL_ENGINE,
         mysql_charset=MYSQL_CHARSET
     )
+
+    op.create_index('ix_class_definition_name',
+                    'class_definition',
+                    ['name'])
 
     op.create_table(
         'status',
@@ -241,6 +256,10 @@ def upgrade():
 
 
 def downgrade():
+    op.drop_index('ix_category_name', table_name='category')
+    op.drop_index('ix_package_fqn', table_name='package')
+    op.drop_index('ix_class_definition_name', table_name='class_definition')
+
     op.drop_table('status')
     op.drop_table('package_to_category')
     op.drop_table('class_definition')

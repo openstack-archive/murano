@@ -11,10 +11,35 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import fixtures
+from oslo.config import cfg
 import testtools
+
+from murano.db import api as db_api
+from murano.openstack.common import log
+
+CONF = cfg.CONF
+CONF.import_opt('connection',
+                'murano.openstack.common.db.options',
+                group='database')
+log.setup('murano')
 
 
 class MuranoTestCase(testtools.TestCase):
 
     def setUp(self):
         super(MuranoTestCase, self).setUp()
+        self.useFixture(fixtures.FakeLogger('murano'))
+
+    def override_config(self, name, override, group=None):
+        CONF.set_override(name, override, group)
+        self.addCleanup(CONF.clear_override, name, group)
+
+
+class MuranoWithDBTestCase(MuranoTestCase):
+
+    def setUp(self):
+        super(MuranoWithDBTestCase, self).setUp()
+        self.override_config('connection', "sqlite://", group='database')
+        db_api.setup_db()
+        self.addCleanup(db_api.drop_db)
