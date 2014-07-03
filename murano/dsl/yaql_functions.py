@@ -124,11 +124,11 @@ def _get_container(context, obj, class_name):
     class_loader = helpers.get_class_loader(context)
     class_name = namespace_resolver.resolve_name(class_name)
     murano_class = class_loader.get_class(class_name)
-    p = obj.parent
+    p = obj.owner
     while p is not None:
         if murano_class.is_compatible(p):
             return p
-        p = p.parent
+        p = p.owner
     return None
 
 

@@ -13,6 +13,7 @@
 #    under the License.
 
 from murano.dsl import dsl_exception
+from murano.dsl import exceptions
 from murano.tests.dsl.foundation import object_model as om
 from murano.tests.dsl.foundation import test_case
 
@@ -27,10 +28,11 @@ class TestExecution(test_case.DslTestCase):
     def test_load(self):
         self._load()
 
-    def test_not_load(self):
-        def try_load():
-            self.new_runner(om.Object('SampleClass1'))
-        self.assertRaises(TypeError, try_load)
+    def test_load_failure(self):
+        self.assertRaises(
+            exceptions.ContractViolationException,
+            self.new_runner,
+            om.Object('SampleClass1'))
 
     def test_trace(self):
         runner = self._load()

@@ -18,6 +18,7 @@ import uuid
 
 import yaql.context
 
+from murano.dsl import exceptions
 import murano.dsl.helpers
 import murano.dsl.murano_object
 import murano.dsl.yaql_expression as yaql_expression
@@ -35,7 +36,7 @@ class TypeScheme(object):
         self._spec = spec
 
     @staticmethod
-    def prepare_context(root_context, this, object_store,
+    def prepare_context(root_context, this, owner, object_store,
                         namespace_resolver, default):
         def _int(value):
             value = value()
@@ -46,7 +47,8 @@ class TypeScheme(object):
             try:
                 return int(value)
             except Exception:
-                raise TypeError()
+                raise exceptions.ContractViolationException(
+                    'Value {0} violates int() contract'.format(value))
 
         def _string(value):
             value = value()
@@ -57,7 +59,8 @@ class TypeScheme(object):
             try:
                 return unicode(value)
             except Exception:
-                raise TypeError()
+                raise exceptions.ContractViolationException(
+                    'Value {0} violates string() contract'.format(value))
 
         def _bool(value):
             value = value()
@@ -74,18 +77,20 @@ class TypeScheme(object):
                 return value
 
             if value is None:
-                raise TypeError()
+                raise exceptions.ContractViolationException(
+                    'null value violates notNull() contract')
             return value
 
         def _error():
-            raise TypeError()
+            raise exceptions.ContractViolationException('error() contract')
 
         def _check(value, predicate):
             value = value()
             if isinstance(value, TypeScheme.ObjRef) or predicate(value):
                 return value
             else:
-                raise TypeError(value)
+                raise exceptions.ContractViolationException(
+                    "Value {0} doesn't match predicate".format(value))
 
         @yaql.context.EvalArg('obj', arg_type=(
             murano.dsl.murano_object.MuranoObject,
@@ -98,10 +103,16 @@ class TypeScheme(object):
 
             if obj is None:
                 return None
-            elif obj.parent is this:
-                return obj
-            else:
-                raise TypeError()
+
+            p = obj.owner
+            while p is not None:
+                if p is this:
+                    return obj
+                p = p.owner
+
+            raise exceptions.ContractViolationException(
+                'Object {0} violates owned() contract'.format(
+                    obj.object_id))
 
         @yaql.context.EvalArg('obj', arg_type=(
             murano.dsl.murano_object.MuranoObject,
@@ -114,10 +125,15 @@ class TypeScheme(object):
 
             if obj is None:
                 return None
-            elif obj.parent is this:
-                raise TypeError()
-            else:
+
+            try:
+                _owned(obj)
+            except exceptions.ContractViolationException:
                 return obj
+            else:
+                raise exceptions.ContractViolationException(
+                    'Object {0} violates notOwned() contract'.format(
+                        obj.object_id))
 
         @yaql.context.EvalArg('name', arg_type=str)
         def _class(value, name):
@@ -132,35 +148,41 @@ class TypeScheme(object):
             else:
                 default_name = namespace_resolver.resolve_name(default_name)
             value = value()
-            if value is NoValue:
-                value = default
-                if isinstance(default, types.DictionaryType):
-                    value = {'?': {
-                        'id': uuid.uuid4().hex,
-                        'type': default_name
-                    }}
             class_loader = murano.dsl.helpers.get_class_loader(root_context)
             murano_class = class_loader.get_class(name)
             if not murano_class:
-                raise TypeError()
+                raise exceptions.NoClassFound(
+                    'Class {0} cannot be found'.format(name))
             if value is None:
                 return None
             if isinstance(value, murano.dsl.murano_object.MuranoObject):
                 obj = value
             elif isinstance(value, types.DictionaryType):
-                obj = object_store.load(value, this, root_context,
+                if '?' not in value:
+                    new_value = {'?': {
+                        'id': uuid.uuid4().hex,
+                        'type': default_name
+                    }}
+                    new_value.update(value)
+                    value = new_value
+
+                obj = object_store.load(value, owner, root_context,
                                         defaults=default)
             elif isinstance(value, types.StringTypes):
                 obj = object_store.get(value)
                 if obj is None:
                     if not object_store.initializing:
-                        raise TypeError('Object %s not found' % value)
+                        raise exceptions.NoObjectFoundError(value)
                     else:
                         return TypeScheme.ObjRef(value)
             else:
-                raise TypeError()
+                raise exceptions.ContractViolationException(
+                    'Value {0} cannot be represented as class {1}'.format(
+                        value, name))
             if not murano_class.is_compatible(obj):
-                raise TypeError()
+                raise exceptions.ContractViolationException(
+                    'Object of type {0} is not compatible with '
+                    'requested type {1}'.format(obj.type.name, name))
             return obj
 
         @yaql.context.EvalArg('prefix', str)
@@ -187,7 +209,8 @@ class TypeScheme(object):
         if data is None or data is NoValue:
             data = {}
         if not isinstance(data, types.DictionaryType):
-            raise TypeError()
+            raise exceptions.ContractViolationException(
+                'Supplied is not of a dictionary type')
         if not spec:
             return data
         result = {}
@@ -195,7 +218,9 @@ class TypeScheme(object):
         for key, value in spec.iteritems():
             if isinstance(key, yaql_expression.YaqlExpression):
                 if yaql_key is not None:
-                    raise SyntaxError()
+                    raise exceptions.DslContractSyntaxError(
+                        'Dictionary contract '
+                        'cannot have more than one expression keys')
                 else:
                     yaql_key = key
             else:
@@ -232,7 +257,9 @@ class TypeScheme(object):
             shift += 1
 
         if not min_length <= len(data) <= max_length:
-            raise TypeError()
+            raise exceptions.ContractViolationException(
+                'Array length {0} is not within [{1}..{2}] range'.format(
+                    len(data), min_length, max_length))
 
         for index, item in enumerate(data):
             spec_item = spec[-1 - shift] \
@@ -242,7 +269,8 @@ class TypeScheme(object):
 
     def _map_scalar(self, data, spec):
         if data != spec:
-            raise TypeError()
+            raise exceptions.ContractViolationException(
+                'Value {0} is not equal to {1}'.format(data, spec))
         else:
             return data
 
@@ -260,7 +288,7 @@ class TypeScheme(object):
                                types.NoneType)):
             return self._map_scalar(data, spec)
 
-    def __call__(self, data, context, this, object_store,
+    def __call__(self, data, context, this, owner, object_store,
                  namespace_resolver, default):
         # TODO(ativelkov, slagun): temporary fix, need a better way of handling
         # composite defaults
@@ -270,9 +298,5 @@ class TypeScheme(object):
             data = default
 
         context = self.prepare_context(
-            context, this, object_store, namespace_resolver,
-            default)
-        result = self._map(data, self._spec, context)
-        if result is NoValue:
-            raise TypeError('No type specified')
-        return result
+            context, this, owner, object_store, namespace_resolver, default)
+        return self._map(data, self._spec, context)

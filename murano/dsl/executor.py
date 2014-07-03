@@ -189,7 +189,7 @@ class MuranoDslExecutor(object):
                 value = value()
             arg_spec = arguments_scheme[name]
             parameter_values[name] = arg_spec.validate(
-                value, this, self._root_context, self._object_store)
+                value, this, None, self._root_context, self._object_store)
 
         for name, arg_spec in arguments_scheme.iteritems():
             if name not in parameter_values:
@@ -199,7 +199,7 @@ class MuranoDslExecutor(object):
                     this, this.type, context)
                 parameter_values[name] = arg_spec.validate(
                     helpers.evaluate(arg_spec.default, parameter_context),
-                    this, self._root_context, self._object_store)
+                    this, None, self._root_context, self._object_store)
 
         return parameter_values
 
