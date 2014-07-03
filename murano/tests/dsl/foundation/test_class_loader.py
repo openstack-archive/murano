@@ -26,12 +26,18 @@ from murano.engine import yaql_yaml_loader
 
 
 class TestClassLoader(class_loader.MuranoClassLoader):
+    _classes_cache = {}
+
     def __init__(self, directory, package_name, parent_loader=None):
-        self._classes = {}
         self._package = murano_package.MuranoPackage()
         self._package.name = package_name
         self._parent = parent_loader
-        self._build_index(directory)
+        if directory in TestClassLoader._classes_cache:
+            self._classes = TestClassLoader._classes_cache[directory]
+        else:
+            self._classes = {}
+            self._build_index(directory)
+            TestClassLoader._classes_cache[directory] = self._classes
         self._functions = {}
         super(TestClassLoader, self).__init__()
 

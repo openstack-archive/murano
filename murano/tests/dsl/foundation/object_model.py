@@ -25,10 +25,18 @@ class Object(object):
         }
         self.data.update(kwargs)
 
+    @property
+    def id(self):
+        return self.data['?']['id']
+
 
 class Ref(object):
     def __init__(self, obj):
-        self.id = obj.data['?']['id']
+        self._id = obj.id
+
+    @property
+    def id(self):
+        return self._id
 
 
 def build_model(root):

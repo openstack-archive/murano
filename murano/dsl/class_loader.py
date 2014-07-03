@@ -59,16 +59,17 @@ class MuranoClassLoader(object):
         namespaces = data.get('Namespaces', {})
         ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
 
-        class_parents = data.get('Extends')
-        if class_parents:
-            if not isinstance(class_parents, types.ListType):
-                class_parents = [class_parents]
-            for i, parent_name in enumerate(class_parents):
+        parent_class_names = data.get('Extends')
+        parent_classes = []
+        if parent_class_names:
+            if not isinstance(parent_class_names, types.ListType):
+                parent_class_names = [parent_class_names]
+            for parent_name in parent_class_names:
                 full_name = ns_resolver.resolve_name(parent_name)
-                class_parents[i] = self.get_class(full_name)
+                parent_classes.append(self.get_class(full_name))
 
         type_obj = murano_class.MuranoClass(self, ns_resolver, name,
-                                            package, class_parents)
+                                            package, parent_classes)
 
         properties = data.get('Properties', {})
         for property_name, property_spec in properties.iteritems():
