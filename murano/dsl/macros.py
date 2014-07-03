@@ -25,36 +25,28 @@ import murano.dsl.yaql_expression as yaql_expression
 
 
 class CodeBlock(expressions.DslExpression):
-    def __init__(self, body, breakable=False):
+    def __init__(self, body):
         if not isinstance(body, types.ListType):
             body = [body]
         self.code_block = map(expressions.parse_expression, body)
-        self._breakable = breakable
 
     def execute(self, context, murano_class):
-        try:
-            for expr in self.code_block:
-                def action():
-                    try:
-                        expr.execute(context, murano_class)
-                    except (dsl_exception.MuranoPlException,
-                            exceptions.BreakException,
-                            exceptions.ReturnException):
-                        raise
-                    except Exception as ex:
-                        raise dsl_exception.MuranoPlException.\
-                            from_python_exception(ex, context)
+        for expr in self.code_block:
+            def action():
+                try:
+                    expr.execute(context, murano_class)
+                except (dsl_exception.MuranoPlException,
+                        exceptions.InternalFlowException):
+                    raise
+                except Exception as ex:
+                    raise dsl_exception.MuranoPlException.\
+                        from_python_exception(ex, context)
 
-                if hasattr(expr, 'virtual_instruction'):
-                    instruction = expr.virtual_instruction
-                    helpers.execute_instruction(instruction, action, context)
-                else:
-                    action()
-        except exceptions.BreakException as e:
-            if self._breakable:
-                raise e
+            if hasattr(expr, 'virtual_instruction'):
+                instruction = expr.virtual_instruction
+                helpers.execute_instruction(instruction, action, context)
             else:
-                raise SyntaxError()
+                action()
 
 
 class MethodBlock(CodeBlock):
@@ -69,6 +61,9 @@ class MethodBlock(CodeBlock):
             super(MethodBlock, self).execute(new_context, murano_class)
         except exceptions.ReturnException as e:
             return e.value
+        except exceptions.BreakException as e:
+            raise exceptions.DslInvalidOperationError(
+                'Break cannot be used on method level')
         else:
             return None
 
@@ -85,7 +80,7 @@ class ReturnMacro(expressions.DslExpression):
 class BreakMacro(expressions.DslExpression):
     def __init__(self, Break):
         if Break:
-            raise SyntaxError()
+            raise exceptions.DslSyntaxError('Break cannot have value')
 
     def execute(self, context, murano_class):
         raise exceptions.BreakException()
@@ -95,14 +90,15 @@ class ParallelMacro(CodeBlock):
     def __init__(self, Parallel, Limit=None):
         super(ParallelMacro, self).__init__(Parallel)
         if Limit:
-            self._limit = yaql_expression.YaqlExpression(Limit)
+            self._limit = yaql_expression.YaqlExpression(str(Limit))
         else:
             self._limit = len(self.code_block)
 
     def execute(self, context, murano_class):
         if not self.code_block:
             return
-        gpool = greenpool.GreenPool(helpers.evaluate(self._limit, context))
+        limit = helpers.evaluate(self._limit, context)
+        gpool = greenpool.GreenPool(helpers.evaluate(limit, context))
         for expr in self.code_block:
             gpool.spawn_n(expr.execute, context, murano_class)
         gpool.waitall()
@@ -111,7 +107,8 @@ class ParallelMacro(CodeBlock):
 class IfMacro(expressions.DslExpression):
     def __init__(self, If, Then, Else=None):
         if not isinstance(If, yaql_expression.YaqlExpression):
-            raise TypeError()
+            raise exceptions.DslSyntaxError(
+                'Condition must be of expression type')
         self._code1 = CodeBlock(Then)
         self._code2 = None if Else is None else CodeBlock(Else)
         self._condition = If
@@ -119,7 +116,8 @@ class IfMacro(expressions.DslExpression):
     def execute(self, context, murano_class):
         res = self._condition.evaluate(context)
         if not isinstance(res, types.BooleanType):
-            raise TypeError()
+            raise exceptions.DslInvalidOperationError(
+                'Condition must be evaluated to boolean type')
         if res:
             self._code1.execute(context, murano_class)
         elif self._code2 is not None:
@@ -130,14 +128,15 @@ class WhileDoMacro(expressions.DslExpression):
     def __init__(self, While, Do):
         if not isinstance(While, yaql_expression.YaqlExpression):
             raise TypeError()
-        self._code = CodeBlock(Do, breakable=True)
+        self._code = CodeBlock(Do)
         self._condition = While
 
     def execute(self, context, murano_class):
         while True:
             res = self._condition.evaluate(context)
             if not isinstance(res, types.BooleanType):
-                raise TypeError()
+                raise exceptions.DslSyntaxError(
+                    'Condition must be of expression type')
             try:
                 if res:
                     self._code.execute(context, murano_class)
@@ -150,18 +149,18 @@ class WhileDoMacro(expressions.DslExpression):
 class ForMacro(expressions.DslExpression):
     def __init__(self, For, In, Do):
         if not isinstance(For, types.StringTypes):
-            raise TypeError()
-        self._code = CodeBlock(Do, breakable=True)
+            raise exceptions.DslSyntaxError(
+                'For value must be of string type')
+        self._code = CodeBlock(Do)
         self._var = For
         self._collection = In
 
     def execute(self, context, murano_class):
         collection = helpers.evaluate(self._collection, context)
-        child_context = yaql.context.Context(context)
         for t in collection:
-            child_context.set_data(t, self._var)
+            context.set_data(t, self._var)
             try:
-                self._code.execute(child_context, murano_class)
+                self._code.execute(context, murano_class)
             except exceptions.BreakException:
                 break
 
@@ -169,9 +168,10 @@ class ForMacro(expressions.DslExpression):
 class RepeatMacro(expressions.DslExpression):
     def __init__(self, Repeat, Do):
         if not isinstance(Repeat, (int, yaql_expression.YaqlExpression)):
-            raise SyntaxError()
+            raise exceptions.DslSyntaxError(
+                'Repeat value must be either int or expression')
         self._count = Repeat
-        self._code = CodeBlock(Do, breakable=True)
+        self._code = CodeBlock(Do)
 
     def execute(self, context, murano_class):
         count = helpers.evaluate(self._count, context)
@@ -185,7 +185,8 @@ class RepeatMacro(expressions.DslExpression):
 class MatchMacro(expressions.DslExpression):
     def __init__(self, Match, Value, Default=None):
         if not isinstance(Match, types.DictionaryType):
-            raise SyntaxError()
+            raise exceptions.DslSyntaxError(
+                'Match value must be of dictionary type')
         self._switch = Match
         self._value = Value
         self._default = None if Default is None else CodeBlock(Default)
@@ -203,23 +204,27 @@ class MatchMacro(expressions.DslExpression):
 class SwitchMacro(expressions.DslExpression):
     def __init__(self, Switch, Default=None):
         if not isinstance(Switch, types.DictionaryType):
-            raise SyntaxError()
+            raise exceptions.DslSyntaxError(
+                'Switch value must be of dictionary type')
         self._switch = Switch
+        for key, value in self._switch.iteritems():
+            if not isinstance(key, (yaql_expression.YaqlExpression,
+                                    types.BooleanType)):
+                raise exceptions.DslSyntaxError(
+                    'Switch cases must be must be either '
+                    'boolean or expression')
         self._default = None if Default is None else CodeBlock(Default)
 
     def execute(self, context, murano_class):
         matched = False
         for key, value in self._switch.iteritems():
-            if not isinstance(key, (yaql_expression.YaqlExpression,
-                                    types.BooleanType)):
-                raise SyntaxError()
             res = helpers.evaluate(key, context)
             if not isinstance(res, types.BooleanType):
-                raise TypeError()
+                raise exceptions.DslInvalidOperationError(
+                    'Switch case must be evaluated to boolean type')
             if res:
                 matched = True
-                child_context = yaql.context.Context(context)
-                CodeBlock(value).execute(child_context, murano_class)
+                CodeBlock(value).execute(context, murano_class)
 
         if self._default is not None and not matched:
             self._default.execute(context, murano_class)
@@ -230,8 +235,7 @@ class DoMacro(expressions.DslExpression):
         self._code = CodeBlock(Do)
 
     def execute(self, context, murano_class):
-        child_context = yaql.context.Context(context)
-        self._code.execute(child_context, murano_class)
+        self._code.execute(context, murano_class)
 
 
 def register():

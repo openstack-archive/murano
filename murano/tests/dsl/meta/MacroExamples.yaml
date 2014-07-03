@@ -1,0 +1,198 @@
+Name: MacroExamples
+
+Methods:
+  testIf:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - If: $arg > 5
+        Then:
+          Return: gt
+      - Return: def
+
+  testIfElse:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - If: $arg > 5
+        Then:
+          Return: gt
+        Else:
+          Return: lt
+      - Return: def
+
+  testWhile:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - While: $arg > 0
+        Do:
+          - trace($arg)
+          - $arg: $arg - 1
+      - Return: $arg
+
+  testFor:
+    Body:
+      - For: t
+        In: [x, y, z]
+        Do:
+          - trace($t)
+      - $col: [1, 2, 3]
+      - For: t
+        In: $col.select($ * $)
+        Do:
+          - trace($t + 1)
+
+  testRepeat:
+    Arguments:
+      count:
+        Contract: $.int()
+    Body:
+      - Repeat: $count
+        Do:
+          - trace(run)
+
+  testBreak:
+    Body:
+      - For: t
+        In: range(0, 7)
+        Do:
+          - If: $t = 3
+            Then:
+              - trace(breaking)
+              - Break:
+          - trace($t)
+      - trace(method_break)
+      - Break:
+
+  testMatch:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - Match:
+          2:
+            Return: x
+          1:
+            Return: y
+          3:
+            Return: z
+        Value: $arg
+
+  testMatchDefault:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - Match:
+          2:
+            Return: x
+          1:
+            - Return: y
+          3:
+            Return: z
+        Default:
+          - Return: def
+        Value: $arg
+
+  testSwitch:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - Switch:
+          $arg > 10:
+            trace(gt)
+          $arg < 10:
+            trace(lt)
+          $arg > 100:
+            trace(gt100)
+
+
+  testSwitchDefault:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      - Switch:
+          $arg > 10:
+            trace(gt)
+          $arg < 0:
+            - trace(lt)
+          $arg > 100:
+            trace(gt100)
+        Default:
+          - trace(def)
+
+  testCodeBlock:
+    Body:
+      - Do:
+        - trace(a)
+        - $res: 123
+        - trace($res)
+      - Return: $res
+
+  testParallel:
+    Body:
+      Parallel:
+        - Do:
+          - trace(enter)
+          - sleep(0)
+          - trace(exit)
+        - Do:
+          - trace(enter)
+          - sleep(0)
+          - trace(exit)
+
+  testParallelWithLimit:
+    Body:
+      Parallel:
+        - Do:
+          - trace(enter)
+          - sleep(0)
+          - trace(exit)
+        - Do:
+          - trace(enter)
+          - sleep(0)
+          - trace(exit)
+        - Do:
+          - trace(enter)
+          - sleep(0)
+          - trace(exit)
+      Limit: 2
+
+  testScopeWithinMacro:
+    Body:
+      - $x: 0
+      - $c: 1
+      - If: $x = 0
+        Then:
+          $x: $x + 1
+      - While: $x = 1
+        Do:
+          $x: $x + 20
+      - For: t
+        In: [1]
+        Do:
+          $x: $x + 300
+      - Repeat: 1
+        Do:
+          $x: $x + 4000
+      - Match:
+          1:
+            $x: $x + 50000
+        Value: $c
+      - Switch:
+          $c > 0:
+            $x: $x + 600000
+      - Do:
+          $x: $x + 7000000
+      - Parallel:
+        - Do:
+            $x: $x + 80000000/2
+        - Do:
+            $x: $x + 80000000/2
+      - Return: $x
