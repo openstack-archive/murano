@@ -46,9 +46,7 @@ class ObjectStore(object):
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
-    def load(self, value, parent, context, defaults=None):
-        #tmp_store = ObjectStore(self._class_loader, self)
-
+    def load(self, value, owner, context, defaults=None):
         if value is None:
             return None
         if '?' not in value or 'type' not in value['?']:
@@ -62,7 +60,7 @@ class ObjectStore(object):
         if object_id in self._store:
             obj = self._store[object_id]
         else:
-            obj = class_obj.new(parent, self, context=context,
+            obj = class_obj.new(owner, self, context=context,
                                 object_id=object_id, defaults=defaults)
             self._store[object_id] = obj
             self._designer_attributes_store[object_id] = \
@@ -72,17 +70,17 @@ class ObjectStore(object):
         if '_context' in argspec:
             value['_context'] = context
         if '_parent' in argspec:
-            value['_parent'] = parent
+            value['_owner'] = owner
 
         try:
-            if parent is None:
+            if owner is None:
                 self._initializing = True
             obj.initialize(**value)
-            if parent is None:
+            if owner is None:
                 self._initializing = False
                 obj.initialize(**value)
         finally:
-            if parent is None:
+            if owner is None:
                 self._initializing = False
 
         if not self.initializing:

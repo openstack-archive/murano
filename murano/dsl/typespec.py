@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from murano.dsl import exceptions
 import murano.dsl.type_scheme as type_scheme
 
 
@@ -33,13 +34,15 @@ class Spec(object):
         self._has_default = 'Default' in declaration
         self._usage = declaration.get('Usage') or 'In'
         if self._usage not in PropertyUsages.All:
-            raise SyntaxError('Unknown type {0}. Must be one of ({1})'.format(
-                self._usage, ', '.join(PropertyUsages.All)))
+            raise exceptions.DslSyntaxError(
+                'Unknown type {0}. Must be one of ({1})'.format(
+                    self._usage, ', '.join(PropertyUsages.All)))
 
-    def validate(self, value, this, context, object_store, default=None):
+    def validate(self, value, this, owner, context,
+                 object_store, default=None):
         if default is None:
             default = self.default
-        return self._contract(value, context, this, object_store,
+        return self._contract(value, context, this, owner, object_store,
                               self._namespace_resolver, default)
 
     @property

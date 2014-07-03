@@ -47,6 +47,12 @@ class NoPackageForClassFound(Exception):
                                                      'is not found' % name)
 
 
+class NoObjectFoundError(Exception):
+    def __init__(self, object_id):
+        super(NoObjectFoundError, self).__init__(
+            'Object %s is not found in object store' % object_id)
+
+
 class AmbiguousMethodName(Exception):
     def __init__(self, name):
         super(AmbiguousMethodName, self).__init__(
@@ -57,3 +63,19 @@ class NoWriteAccess(Exception):
     def __init__(self, name):
         super(NoWriteAccess, self).__init__(
             'Property %s is immutable to the caller' % name)
+
+
+class DslContractSyntaxError(Exception):
+    pass
+
+
+class ContractViolationException(Exception):
+    pass
+
+
+class ValueIsMissingError(Exception):
+    pass
+
+
+class DslSyntaxError(Exception):
+    pass

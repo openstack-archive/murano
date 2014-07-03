@@ -89,7 +89,7 @@ def _pass1_serialize(value, parent, serialized_objects,
                           types.BooleanType, types.NoneType)):
         return value
     elif isinstance(value, murano_object.MuranoObject):
-        if not _cmp_objects(value.parent, parent) \
+        if not _cmp_objects(value.owner, parent) \
                 or value.object_id in serialized_objects:
             return ObjRef(value)
         else:

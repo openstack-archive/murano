@@ -175,17 +175,17 @@ class MuranoClass(object):
                 return True
         return False
 
-    def new(self, parent, object_store, context, parameters=None,
+    def new(self, owner, object_store, context, parameters=None,
             object_id=None, **kwargs):
 
-        obj = self.object_class(self, parent, object_store, context,
+        obj = self.object_class(self, owner, object_store, context,
                                 object_id=object_id, **kwargs)
         if parameters is not None:
             argspec = inspect.getargspec(obj.initialize).args
             if '_context' in argspec:
                 parameters['_context'] = context
-            if '_parent' in argspec:
-                parameters['_parent'] = parent
+            if '_owner' in argspec:
+                parameters['_owner'] = owner
             obj.initialize(**parameters)
         return obj
 

@@ -1,0 +1,137 @@
+Name: ContractExamples
+
+Properties:
+  sampleClass:
+    Contract: $.class(SampleClass1)
+
+Methods:
+  testStringContract:
+    Arguments:
+      arg:
+        Contract: $.string()
+    Body:
+      Return: $arg
+
+  testIntContract:
+    Arguments:
+      arg:
+        Contract: $.int()
+    Body:
+      Return: $arg
+
+  testBoolContract:
+    Arguments:
+      arg:
+        Contract: $.bool()
+    Body:
+      Return: $arg
+
+  testClassContract:
+    Arguments:
+      arg:
+        Contract: $.class(SampleClass2)
+    Body:
+      Return: $arg
+
+  testClassFromIdContract:
+    Arguments:
+      arg:
+        Contract: $.class(SampleClass1)
+    Body:
+      Return: $arg
+
+  testCheckContract:
+    Arguments:
+      - arg1:
+          Contract: $.class(SampleClass2).check($.class2Property = qwerty)
+      - arg2:
+          Contract: $.int().check($ > 10)
+
+  testOwnedContract:
+    Arguments:
+      - arg1:
+          Contract: $.class(SampleClass1).owned()
+      - arg2:
+          Contract: $.class(SampleClass2).owned()
+
+  testNotOwnedContract:
+    Arguments:
+      - arg1:
+          Contract: $.class(SampleClass1).notOwned()
+      - arg2:
+          Contract: $.class(SampleClass2).notOwned()
+
+  testScalarContract:
+    Arguments:
+      - arg1:
+          Contract: 'fixed'
+      - arg2:
+          Contract: 456
+      - arg3:
+          Contract: true
+    Body:
+      Return: $arg1
+
+  testListContract:
+    Arguments:
+      - arg:
+          Contract: [$.int()]
+    Body:
+      Return: $arg
+
+  testListWithMinLengthContract:
+    Arguments:
+      - arg:
+          Contract: [$.int(), 3]
+    Body:
+      Return: $arg
+
+  testListWithMinMaxLengthContract:
+    Arguments:
+      - arg:
+          Contract: [$.int(), 2, 4]
+    Body:
+      Return: $arg
+
+  testDictContract:
+    Arguments:
+      - arg:
+          Contract:
+            A: $.string()
+            B: $.int()
+    Body:
+      Return: $arg
+
+  testDictExprContract:
+    Arguments:
+      - arg:
+          Contract:
+            $.int(): $.string()
+            B: $.int()
+    Body:
+      Return: $arg
+
+  testDictMultiExprContract:
+    Arguments:
+      - arg:
+          Contract:
+            $.int(): $.string()
+            $.string(): $.int()
+    Body:
+      Return: $arg
+
+  testNotNullContract:
+    Arguments:
+      - arg:
+          Contract: $.notNull()
+    Body:
+      Return: $arg
+
+  testDefault:
+    Arguments:
+      - arg:
+          Contract: $.string()
+          Default: DEFAULT
+    Body:
+      Return: $arg
+

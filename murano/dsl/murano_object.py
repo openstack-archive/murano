@@ -24,12 +24,12 @@ import murano.dsl.typespec as typespec
 
 
 class MuranoObject(object):
-    def __init__(self, murano_class, parent_obj, object_store, context,
+    def __init__(self, murano_class, owner, object_store, context,
                  object_id=None, known_classes=None, defaults=None, this=None):
 
         if known_classes is None:
             known_classes = {}
-        self.__parent_obj = parent_obj
+        self.__owner = owner
         self.__object_id = object_id or murano.dsl.helpers.generate_id()
         self.__type = murano_class
         self.__properties = {}
@@ -42,7 +42,7 @@ class MuranoObject(object):
         for parent_class in murano_class.parents:
             name = parent_class.name
             if name not in known_classes:
-                obj = parent_class.new(parent_obj, object_store, context,
+                obj = parent_class.new(owner, object_store, context,
                                        None, object_id=self.__object_id,
                                        known_classes=known_classes,
                                        defaults=defaults, this=self.real_this)
@@ -75,8 +75,8 @@ class MuranoObject(object):
         return self.__type
 
     @property
-    def parent(self):
-        return self.__parent_obj
+    def owner(self):
+        return self.__owner
 
     @property
     def real_this(self):
@@ -145,7 +145,8 @@ class MuranoObject(object):
             default = murano.dsl.helpers.evaluate(default, child_context, 1)
 
             self.__properties[key] = spec.validate(
-                value, self, self.__context, self.__object_store, default)
+                value, self, self, self.__context,
+                self.__object_store, default)
         else:
             for parent in self.__parents.values():
                 try:
