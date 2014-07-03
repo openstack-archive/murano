@@ -1,0 +1,24 @@
+Name: ParentClass2
+
+Extends: CommonParent
+
+Properties:
+  ambiguousProperty1:
+    Contract: $.int()
+
+  ambiguousProperty2:
+    Contract: $.int()
+    Usage: InOut
+
+Methods:
+  method2:
+    Body:
+      - trace('ParentClass2::method2')
+
+  getAmbiguousProperty2:
+    Body:
+      Return: $.ambiguousProperty2
+
+  virtualMethod:
+    Body:
+      - trace('ParentClass2::virtualMethod')

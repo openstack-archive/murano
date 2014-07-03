@@ -1,0 +1,18 @@
+Name: SingleInheritanceChild
+
+Extends: SingleInheritanceParent
+
+Methods:
+  testVirtualCalls:
+    Body:
+      $.method1()
+
+  method1:
+    Body:
+      - trace('SingleInheritanceChild::method1')
+      - $.super($.method1())
+
+  method2:
+    Body:
+      - trace('SingleInheritanceChild::method2')
+      - $.super($.method2())

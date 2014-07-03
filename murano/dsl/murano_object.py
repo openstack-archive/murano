@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
-
 import yaml
 import yaql.context
 
@@ -88,73 +86,60 @@ class MuranoObject(object):
                                  'restricted')
         return self.get_property(item)
 
-    def get_property(self, item, caller_class=None):
-        try:
-            return self.__get_property(item, caller_class)
-        except AttributeError:
-            if not caller_class:
-                raise AttributeError(item)
-            try:
-                obj = self.cast(caller_class)
-                return obj.__properties[item]
-            except KeyError:
-                raise AttributeError(item)
-            except TypeError:
-                raise AttributeError(item)
-
-    def __get_property(self, item, caller_class=None):
-        if item in self.__properties and item in self.type.properties:
-            return self.__properties[item]
-        i = 0
-        result = None
-        for parent in self.__parents.values():
-            try:
-                result = parent.__get_property(item, caller_class)
-                i += 1
-                if i > 1:
-                    raise LookupError()
-            except AttributeError:
-                continue
-        if not i:
-            raise AttributeError()
-        return result
-
-    def set_property(self, key, value, caller_class=None):
-        try:
-            self.__set_property(key, value, caller_class)
-        except AttributeError as e:
-            if not caller_class:
-                raise e
-            try:
-                obj = self.cast(caller_class)
-                obj.__properties[key] = value
-            except TypeError:
-                raise AttributeError(key)
-
-    def __set_property(self, key, value, caller_class=None):
-        if key in self.__type.properties:
-            spec = self.__type.get_property(key)
-            if caller_class is not None \
-                    and (spec.usage not in typespec.PropertyUsages.Writable
-                         or not caller_class.is_compatible(self)):
-                raise exceptions.NoWriteAccess(key)
-
-            default = self.__defaults.get(key, spec.default)
-            child_context = yaql.context.Context(parent_context=self.__context)
-            child_context.set_data(self)
-            default = murano.dsl.helpers.evaluate(default, child_context, 1)
-
-            self.__properties[key] = spec.validate(
-                value, self, self, self.__context,
-                self.__object_store, default)
+    def get_property(self, name, caller_class=None):
+        start_type, derived = self.__type, False
+        if caller_class is not None and caller_class.is_compatible(self):
+            start_type, derived = caller_class, True
+        if name in start_type.properties:
+            return self.cast(start_type).__properties[name]
         else:
-            for parent in self.__parents.values():
+            declared_properties = start_type.find_property(name)
+            if len(declared_properties) == 1:
+                return self.cast(declared_properties[0]).__properties[name]
+            elif len(declared_properties) > 1:
+                raise exceptions.AmbiguousPropertyNameError(name)
+            elif derived:
                 try:
-                    parent.__set_property(key, value, caller_class)
-                    return
-                except AttributeError:
-                    continue
-            raise AttributeError(key)
+                    return self.cast(caller_class).__properties[name]
+                except KeyError:
+                    raise exceptions.UninitializedPropertyAccessError(
+                        name, start_type)
+            else:
+                raise exceptions.PropertyReadError(name, start_type)
+
+    def set_property(self, name, value, caller_class=None):
+        start_type, derived = self.__type, False
+        if caller_class is not None and caller_class.is_compatible(self):
+            start_type, derived = caller_class, True
+        declared_properties = start_type.find_property(name)
+        if len(declared_properties) > 0:
+            declared_properties = self.type.find_property(name)
+            values_to_assign = []
+            for mc in declared_properties:
+                spec = mc.get_property(name)
+                if caller_class is not None:
+                    if spec.usage not in typespec.PropertyUsages.Writable \
+                            or not derived:
+                        raise exceptions.NoWriteAccessError(name)
+
+                default = self.__defaults.get(name, spec.default)
+                child_context = yaql.context.Context(
+                    parent_context=self.__context)
+                child_context.set_data(self)
+                default = murano.dsl.helpers.evaluate(
+                    default, child_context, 1)
+
+                obj = self.cast(mc)
+                values_to_assign.append((obj, spec.validate(
+                    value, self, self,
+                    self.__context, self.__object_store, default)))
+            for obj, value in values_to_assign:
+                obj.__properties[name] = value
+        elif derived:
+                obj = self.cast(caller_class)
+                obj.__properties[name] = value
+        else:
+            raise exceptions.PropertyWriteError(name, start_type)
 
     def cast(self, type):
         if self.type is type:
@@ -184,14 +169,3 @@ class MuranoObject(object):
                         result[property_name] = \
                             self.__properties[property_name]
         return result
-
-    def __merge_default(self, src, defaults):
-        if src is None:
-            return
-        if type(src) != type(defaults):
-            raise ValueError()
-        if isinstance(defaults, types.DictionaryType):
-            for key, value in defaults.iteritems():
-                src_value = src.get(key)
-                if src_value is None:
-                    continue

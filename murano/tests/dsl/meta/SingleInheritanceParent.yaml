@@ -1,0 +1,11 @@
+Name: SingleInheritanceParent
+
+Methods:
+  method1:
+    Body:
+      - trace('SingleInheritanceParent::method1')
+      - $.method2()
+
+  method2:
+    Body:
+      trace('SingleInheritanceParent::method2')

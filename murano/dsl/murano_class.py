@@ -151,13 +151,14 @@ class MuranoClass(object):
         return result
 
     def find_property(self, name):
+        result = []
         types = collections.deque([self])
         while len(types) > 0:
             mc = types.popleft()
-            if name in mc.properties:
-                return mc.get_property(name)
+            if name in mc.properties and mc not in result:
+                result.append(mc)
             types.extend(mc.parents)
-        return None
+        return result
 
     def invoke(self, name, executor, this, parameters):
         if not self.is_compatible(this):

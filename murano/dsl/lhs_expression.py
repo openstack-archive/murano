@@ -91,7 +91,6 @@ class LhsExpression(object):
 
             elif isinstance(src, murano_object.MuranoObject) and isinstance(
                     key, types.StringTypes):
-                self._current_spec = src.type.find_property(key)
                 src.set_property(key, value, murano_class)
             else:
                 raise TypeError()

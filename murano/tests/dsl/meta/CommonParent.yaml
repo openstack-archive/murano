@@ -1,0 +1,20 @@
+Name: CommonParent
+
+Properties:
+  rootProperty:
+    Contract: $.string()
+
+Methods:
+  testRootMethod:
+    Body:
+      - trace('CommonParent::testRootMethod')
+      - trace($.rootProperty)
+
+  setPrivatePropertyChain:
+    Body:
+      - $.privateName: 'CommonParent'
+      - trace($.privateName)
+
+  virtualMethod:
+    Body:
+      - trace('CommonParent::virtualMethod')
