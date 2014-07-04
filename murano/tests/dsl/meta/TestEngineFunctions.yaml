@@ -1,0 +1,215 @@
+Name: TestEngineFunctions
+
+Methods:
+  testJoin:
+    Body:
+      - $arr: [xx, 123]
+      - Return: (' '.join($arr))
+
+  testSplit:
+    Body:
+      - Return: ('x yy 123').split(' ')
+
+  testLen:
+    Body:
+      - $a: str
+      - $b: [1, 2, 3, 4]
+      - $c: {'a': 'xxx' }
+      - Return: len($a) + len($b) + len($c)
+
+  testCoalesce:
+    Arguments:
+      - arg1:
+          Contract: $.string()
+      - arg2:
+          Contract: $.string()
+      - arg3:
+          Contract: $.string()
+    Body:
+      Return: coalesce($arg1, $arg2, $arg3)
+
+  testBase64Encode:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: base64encode($arg)
+
+  testBase64Decode:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: base64decode($arg)
+
+  testFormat:
+    Arguments:
+      - format:
+          Contract: $.string()
+      - arg1:
+          Contract: $.string()
+      - arg2:
+          Contract: $.string()
+    Body:
+      Return: $format.format($arg1, $arg2)
+
+  testReplaceStr:
+    Arguments:
+      - what:
+          Contract: $.string()
+      - old:
+          Contract: $.string()
+      - new:
+          Contract: $.string()
+    Body:
+      Return: $what.replace($old, $new)
+
+  testReplaceDict:
+    Arguments:
+      - what:
+          Contract: $.string()
+      - with:
+          Contract:
+            $.string(): $.string()
+    Body:
+      Return: $what.replace($with)
+
+  testToLower:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: toLower($arg)
+
+  testToUpper:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: toUpper($arg)
+
+  testStartsWith:
+    Arguments:
+      - what:
+          Contract: $.string()
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: $what.startsWith($arg)
+
+  testEndsWith:
+    Arguments:
+      - what:
+          Contract: $.string()
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: $what.endsWith($arg)
+
+  testTrim:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: trim($arg)
+
+  testSubstr:
+    Arguments:
+      - str:
+          Contract: $.string()
+      - arg1:
+          Contract: $.int()
+      - arg2:
+          Contract: $.int()
+    Body:
+      Return: $str.substr(0, $arg1) +
+              $str.substr($arg1, $arg2) +
+              $str.substr($arg1 + $arg2)
+
+  testStr:
+    Arguments:
+      - arg:
+          Contract: $
+    Body:
+      Return: str($arg)
+
+  testInt:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      Return: int($arg)
+
+  testKeys:
+    Arguments:
+      - arg:
+          Contract: {}
+    Body:
+      Return: $arg.keys()
+
+  testValues:
+    Arguments:
+      - arg:
+          Contract: {}
+    Body:
+      Return: $arg.values()
+
+  testFlatten:
+    Arguments:
+      - arg:
+          Contract: []
+    Body:
+      Return: $arg.flatten()
+
+  testDictGet:
+    Arguments:
+      - dict:
+          Contract:
+            $.string(): $
+      - key:
+          Contract: $.string().notNull()
+    Body:
+      Return: $dict.get($key)
+
+  testRandomName:
+    Body:
+      Return: randomName()
+
+  testPSelect:
+    Arguments:
+      - arg:
+          Contract: [$.int().notNull()]
+    Body:
+      Return: $arg.pselect($ * $)
+
+  testBind:
+    Arguments:
+      - template:
+          Contract: {}
+      - args:
+          Contract: {}
+    Body:
+      Return: $template.bind($args)
+
+  testPatch:
+    Body:
+      - $patches:
+          - op: add
+            path: '/foo'
+            value: bar
+          - op: add
+            path: '/baz'
+            value: [1, 2, 3]
+          - op: remove
+            path: '/baz/1'
+          - op: test
+            path: '/baz'
+            value': [1, 3]
+          - op: replace
+            path: '/baz/0'
+            value: 42
+          - op: remove
+            path: '/baz/1'
+      - $doc: {}
+      - Return: $doc.patch($patches)
+

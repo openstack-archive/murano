@@ -138,8 +138,8 @@ def _lower(value):
 
 
 @yaql.context.EvalArg('separator', types.StringTypes)
-def _join(separator, *args):
-    return separator.join([t() for t in args])
+def _join(separator, collection):
+    return separator.join(str(t) for t in collection())
 
 
 @yaql.context.EvalArg('value', types.StringTypes)
@@ -174,22 +174,34 @@ def _mathces(value, pattern):
 @yaql.context.EvalArg('value', types.StringTypes)
 @yaql.context.EvalArg('index', int)
 @yaql.context.EvalArg('length', int)
-def _substr(value, index=0, length=-1):
+def _substr3(value, index, length):
     if length < 0:
         return value[index:]
     else:
         return value[index:index + length]
 
 
+@yaql.context.EvalArg('value', types.StringTypes)
+@yaql.context.EvalArg('index', int)
+def _substr2(value, index):
+    return _substr3(value, index, -1)
+
+
 def _str(value):
     value = value()
     if value is None:
-        return None
+        return ''
+    elif value is True:
+        return 'true'
+    elif value is False:
+        return 'false'
     return unicode(value)
 
 
 def _int(value):
     value = value()
+    if value is None:
+        return 0
     return int(value)
 
 
@@ -300,7 +312,8 @@ def register(context):
     context.register_function(_endswith, 'endsWith')
     context.register_function(_trim, 'trim')
     context.register_function(_mathces, 'matches')
-    context.register_function(_substr, 'substr')
+    context.register_function(_substr2, 'substr')
+    context.register_function(_substr3, 'substr')
     context.register_function(_str, 'str')
     context.register_function(_int, 'int')
     context.register_function(_patch, 'patch')
