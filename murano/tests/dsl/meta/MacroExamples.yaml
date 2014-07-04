@@ -68,6 +68,18 @@ Methods:
       - trace(method_break)
       - Break:
 
+  testContinue:
+    Body:
+      - For: t
+        In: range(0, 7)
+        Do:
+          - If: $t >= 3 and $t < 5
+            Then:
+              - Continue:
+          - trace($t)
+      - trace(method_continue)
+      - Continue:
+
   testMatch:
     Arguments:
       arg:

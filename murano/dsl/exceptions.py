@@ -30,6 +30,10 @@ class BreakException(InternalFlowException):
     pass
 
 
+class ContinueException(InternalFlowException):
+    pass
+
+
 class DslInvalidOperationError(Exception):
     pass
 
