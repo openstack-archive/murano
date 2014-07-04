@@ -27,6 +27,24 @@ Workflow:
     Body:
       Return: $intArg
 
+  testCallAnotherMethod:
+    Body:
+      - trace(method1)
+      - $.anotherMethod()
+
+  anotherMethod:
+    Body:
+      - trace(method2)
+
+  testAttributes:
+    Arguments:
+      - arg:
+          Contract: $.string()
+    Body:
+      - $.setAttr(att1, $arg)
+      - $x: $.getAttr(att1)
+      - $y: $.getAttr(att2, ' Doe')
+      - Return: $x + $y
   testAssignment:
     Body:
       - $x: {}
