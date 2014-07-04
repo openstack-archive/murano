@@ -27,3 +27,18 @@ Workflow:
     Body:
       Return: $intArg
 
+  testAssignment:
+    Body:
+      - $x: {}
+      - $x.A: [1, 2]
+      - $x.A[0]: 3
+      - Return: $x
+
+  testAssignByCopy:
+    Arguments:
+      - arg:
+          Contract: [$.int()]
+    Body:
+      - $x: $arg
+      - $x[0]: 321
+      - Return: $arg
