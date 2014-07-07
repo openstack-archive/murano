@@ -24,7 +24,6 @@ import types
 import jsonpatch
 import jsonpointer
 import yaql.context
-import yaql.functions.builtin as yaql_builtin
 
 import murano.common.config as cfg
 import murano.dsl.helpers as helpers
@@ -306,9 +305,6 @@ def register(context):
     context.register_function(_int, 'int')
     context.register_function(_patch, 'patch')
     context.register_function(_random_name, 'randomName')
-    # Temporary workaround as YAQL does not provide "where" function for
-    # dictionaries, and there is no easy way to implement it there.
-    context.register_function(yaql_builtin.dict_attribution, 'get')
     # Temporary workaround, these functions should be moved to YAQL
     context.register_function(_keys, 'keys')
     context.register_function(_values, 'values')
