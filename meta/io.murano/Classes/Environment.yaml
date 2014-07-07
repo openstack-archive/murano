@@ -41,7 +41,12 @@ Properties:
 Methods:
   initialize:
     Body:
-      - $this.agentListener: new(sys:AgentListener, name => $.name)
+      - $heatStackName: $.getAttr(heatStackName)
+      - If: $heatStackName = null
+      - Then:
+          - $heatStackName: randomName()
+          - $.setAttr(heatStackName, $heatStackName)
+      - $this.agentListener: new(sys:AgentListener, name => $heatStackName)
       - $this.stack: new(sys:HeatStack, name => $.name)
       - $this.instanceNotifier: new(sys:InstanceNotifier, environment => $this)
       - $this.reporter: new(sys:StatusReporter, environment => $this)
