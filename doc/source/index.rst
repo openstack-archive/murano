@@ -74,6 +74,7 @@ contribute to the project.
    articles/app_pkg
    articles/heat_support
    image_builders/index
+   articles/test_docs
 
 **Guidelines**
 
