@@ -373,7 +373,7 @@ function install_daemon()
     if [ -d "$core_meta_dir" ]; then
         for package_dir in $(ls $core_meta_dir); do
             if [ -d "${core_meta_dir}/${package_dir}" ]; then
-                su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf import-package ${core_meta_dir}/${package_dir}" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
+                su -c "$SERVICE_EXEC_PATH --config-file $daemon_conf import-package ${core_meta_dir}/${package_dir} --update" -s /bin/bash $DAEMON_USER >> $LOGFILE 2>&1
             fi
         done
     else
