@@ -43,7 +43,7 @@ Methods:
     Body:
       - $heatStackName: $.getAttr(heatStackName)
       - If: $heatStackName = null
-      - Then:
+        Then:
           - $heatStackName: randomName()
           - $.setAttr(heatStackName, $heatStackName)
       - $this.agentListener: new(sys:AgentListener, name => $heatStackName)
