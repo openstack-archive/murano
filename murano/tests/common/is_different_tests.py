@@ -105,3 +105,11 @@ class IsDifferentTests(base.MuranoTestCase):
 
         self.assertTrue(comparison)
         self.assertTrue(comparison1)
+
+    def test_strings_are_compared_regardless_of_type(self):
+        str1 = 'string'
+        str2 = u'string'
+
+        comparison = utils.is_different(str1, str2)
+
+        self.assertFalse(comparison)
