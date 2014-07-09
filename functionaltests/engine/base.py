@@ -205,20 +205,26 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 pass
 
     def check_port_access(self, ip, port):
-        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        start_time = time.time()
+        while time.time() - start_time < 300:
+            sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+            result = sock.connect_ex((str(ip), port))
+            sock.close()
 
-        result = sock.connect_ex((str(ip), port))
-        sock.close()
+            if result == 0:
+                break
+            time.sleep(5)
 
         self.assertEqual(0, result)
 
-    def deployment_success_check(self, env_id, ip, port):
-        deployments = self.client.deployments_list(env_id)
+    def deployment_success_check(self, environment, port):
+        deployments = self.client.deployments_list(environment['id'])
 
         for deployment in deployments:
             self.assertEqual('success', deployment['state'])
 
-        self.check_port_access(ip, port)
+        ip = self.client.get_ip_list(environment)
+        self.check_port_access(ip[0][1], port)
 
     def test_deploy_telnet(self):
         post_body = {
@@ -251,12 +257,9 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment['id'], session['id'])
 
         env = self.client.wait_for_environment_deploy(environment['id'])
-
         self.assertIsNotNone(env)
 
-        ip_list = self.client.get_ip_list(env)
-
-        self.deployment_success_check(environment['id'], ip_list[0][1], 23)
+        self.deployment_success_check(env, 23)
 
     def test_deploy_apache(self):
         post_body = {
@@ -289,12 +292,9 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment['id'], session['id'])
 
         env = self.client.wait_for_environment_deploy(environment['id'])
-
         self.assertIsNotNone(env)
 
-        ip_list = self.client.get_ip_list(env)
-
-        self.deployment_success_check(environment['id'], ip_list[0][1], 80)
+        self.deployment_success_check(env, 80)
 
     def test_deploy_postgresql(self):
         post_body = {
@@ -327,12 +327,9 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment['id'], session['id'])
 
         env = self.client.wait_for_environment_deploy(environment['id'])
-
         self.assertIsNotNone(env)
 
-        ip_list = self.client.get_ip_list(env)
-
-        self.deployment_success_check(environment['id'], ip_list[0][1], 5432)
+        self.deployment_success_check(env, 5432)
 
     def test_deploy_tomcat(self):
         post_body = {
@@ -365,9 +362,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment['id'], session['id'])
 
         env = self.client.wait_for_environment_deploy(environment['id'])
-
         self.assertIsNotNone(env)
 
-        ip_list = self.client.get_ip_list(env)
-
-        self.deployment_success_check(environment['id'], ip_list[0][1], 8080)
+        self.deployment_success_check(env, 8080)
