@@ -33,6 +33,7 @@ NAME=murano-api
 DAEMON=$(which murano-api)
 PIDFILE=/var/run/murano/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+DAEMONLOG=/var/log/murano/$NAME.log
 SYSTEM_USER=murano
 CONFIG_FILE=/etc/murano/murano.conf
 LOCKFILE=/var/lock/subsys/$NAME
@@ -51,7 +52,7 @@ start() {
         chown -R $SYSTEM_USER /var/run/murano
     fi
     echo -n "Starting $NAME: "
-    daemon --user $SYSTEM_USER "$DAEMON --config-file=$CONFIG_FILE &>/dev/null & echo \$! > $PIDFILE"
+    daemon --user $SYSTEM_USER "$DAEMON --config-file=$CONFIG_FILE --log-file=$DAEMONLOG &>/dev/null & echo \$! > $PIDFILE"
     RETVAL=$?
     echo
     [ $RETVAL -eq 0 ] && touch $LOCKFILE

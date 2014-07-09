@@ -240,11 +240,13 @@ function inject_init()
         get_service_exec_path $DAEMON || exit $?
         eval src_init_sctipt="$DAEMON-$_dist"
         _initscript="$DAEMON"
+        _logfile="$(echo $DAEMON_LOG_DIR/${DAEMON}.log)"
         cp -f "$RUN_DIR/etc/init.d/$src_init_sctipt" "/etc/init.d/$_initscript" || retval=$?
         chmod +x "/etc/init.d/$_initscript" || retval=$?
         iniset '' 'SYSTEM_USER' "$DAEMON_USER" "/etc/init.d/$_initscript"
         iniset '' 'DAEMON' "$(shslash $SERVICE_EXEC_PATH)" "/etc/init.d/$_initscript"
         iniset '' 'SCRIPTNAME' "$(shslash "/etc/init.d/$_initscript")" "/etc/init.d/$_initscript"
+        iniset '' 'DAEMONLOG' "$(shslash $_logfile)" "/etc/init.d/$_initscript"
         case $_dist in
             "debian")
                 update-rc.d $_initscript defaults || retval=$?
@@ -343,11 +345,12 @@ function install_daemon()
     daemon_conf="$(echo $DAEMON_CFG_DIR/${DAEMON_NAME}.conf | sed 's/-api//')"
     daemon_conf_paste="$(echo $DAEMON_CFG_DIR/${DAEMON_NAME}-paste.ini | sed 's/-api//')"
     daemon_log="$(echo $DAEMON_LOG_DIR/${DAEMON_NAME}.log | sed 's/-api//')"
-    mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}.conf $daemon_conf
-    mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}-paste.ini $daemon_conf_paste
+    #mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}.conf $daemon_conf
+    #mv -f $DAEMON_CFG_DIR/${DAEMON_NAME}-paste.ini $daemon_conf_paste
     #
     log "Setting log file and sqlite db placement..."
-    iniset 'DEFAULT' 'log_file' "$(shslash $daemon_log)" "$daemon_conf"
+    sed -i '/log_file=/s/^/#/' $daemon_conf
+    #iniset 'DEFAULT' 'log_file' "$(shslash $daemon_log)" "$daemon_conf"
     iniset 'DEFAULT' 'verbose' 'True' "$daemon_conf"
     iniset 'DEFAULT' 'debug' 'True' "$daemon_conf"
     iniset 'rabbitmq' 'virtual_host' '/' "$daemon_conf"
