@@ -85,6 +85,15 @@ class Client(object):
         return requests.post(endpoint, data=json.dumps(json_data),
                              headers=headers).json()
 
+    def delete_service(self, environment_id, session_id, service_id):
+        headers = self.headers.copy()
+        headers.update({'x-configuration-session': session_id})
+
+        endpoint = '{0}environments/{1}/services/{2}'.format(
+            self.endpoint, environment_id, service_id)
+
+        requests.delete(endpoint, headers=headers)
+
     def wait_for_environment_deploy(self, environment_id):
         environment = self.get_environment(environment_id)
 
@@ -365,3 +374,63 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.assertIsNotNone(env)
 
         self.deployment_success_check(env, 8080)
+
+    def _get_telnet_app(self):
+        return {
+            "instance": {
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": str(uuid.uuid4())
+                },
+                "flavor": "m1.medium",
+                "image": self.linux,
+                "name": "instance{0}".format(uuid.uuid4().hex[:5]),
+            },
+            "name": "app{0}".format(uuid.uuid4().hex[:5]),
+            "?": {
+                "type": "io.murano.apps.linux.Telnet",
+                "id": str(uuid.uuid4())
+            }
+        }
+
+    def _quick_deploy(self, name, *apps):
+        environment = self.client.create_environment(name)
+        session = self.client.create_session(environment['id'])
+        environment_id, session_id = environment['id'], session['id']
+
+        for app in apps:
+            self.client.create_service(environment_id, session_id, app)
+        self.client.deploy_session(environment_id, session_id)
+        return self.client.wait_for_environment_deploy(environment_id)
+
+    def _get_stack(self, name):
+        by_name = {'name': name}
+        stack_iter = self.heat_client.stacks.list(limit=1, filters=by_name)
+        return next(stack_iter, None)
+
+    def test_instance_refs_are_removed_after_application_is_removed(self):
+        name = 'e' + str(uuid.uuid4().hex)
+
+        # create environment with telnet application
+        application1 = self._get_telnet_app()
+        application2 = self._get_telnet_app()
+        application_id = application1['?']['id']
+        instance_name = application1['instance']['name']
+        apps = [application1, application2]
+        environment_id = self._quick_deploy(name, *apps)['id']
+        # add environment to the list for tear-down clean-up
+        self.environments.append(environment_id)
+
+        # delete telnet application
+        session_id = self.client.create_session(environment_id)['id']
+        self.client.delete_service(environment_id, session_id, application_id)
+        self.client.deploy_session(environment_id, session_id)
+        self.client.wait_for_environment_deploy(environment_id)
+
+        template = self.heat_client.stacks.template(name)
+        ip_addresses = '{0}-assigned-ip'.format(instance_name)
+        floating_ip = '{0}-FloatingIPaddress'.format(instance_name)
+
+        self.assertNotIn(ip_addresses, template['outputs'])
+        self.assertNotIn(floating_ip, template['outputs'])
+        self.assertNotIn(instance_name, template['resources'])
