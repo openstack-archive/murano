@@ -57,3 +57,8 @@ class DslTestCase(base.MuranoTestCase):
 
     def register_function(self, func, name):
         self.class_loader.register_function(func, name)
+
+    def find_attribute(self, model, obj_id, obj_type, name):
+        for entry in model['Attributes']:
+            if tuple(entry[:3]) == (obj_id, obj_type, name):
+                return entry[3]

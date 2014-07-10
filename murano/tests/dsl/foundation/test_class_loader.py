@@ -12,8 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import glob
+import fnmatch
 import os.path
 import yaml
 
@@ -60,7 +59,9 @@ class TestClassLoader(class_loader.MuranoClassLoader):
             raise exceptions.NoClassFound(name)
 
     def _build_index(self, directory):
-        yamls = glob.glob(os.path.join(directory, '*.yaml'))
+        yamls = [os.path.join(dirpath, f)
+                 for dirpath, dirnames, files in os.walk(directory)
+                 for f in fnmatch.filter(files, '*.yaml')]
         for class_def_file in yamls:
             self._load_class(class_def_file)
 

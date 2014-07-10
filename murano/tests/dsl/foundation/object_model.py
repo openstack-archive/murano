@@ -16,10 +16,10 @@ from murano.dsl import helpers
 
 
 class Object(object):
-    def __init__(self, name, **kwargs):
+    def __init__(self, __name, **kwargs):
         self.data = {
             '?': {
-                'type': name,
+                'type': __name,
                 'id': helpers.generate_id()
             }
         }
@@ -28,6 +28,29 @@ class Object(object):
     @property
     def id(self):
         return self.data['?']['id']
+
+    @property
+    def type_name(self):
+        return self.data['?']['type']
+
+
+class Attribute(object):
+    def __init__(self, obj, key, value):
+        self._value = value
+        self._key = key
+        self._obj = obj
+
+    @property
+    def obj(self):
+        return self._obj
+
+    @property
+    def key(self):
+        return self._key
+
+    @property
+    def value(self):
+        return self._value
 
 
 class Ref(object):
@@ -50,4 +73,6 @@ def build_model(root):
         return build_model(root.data)
     elif isinstance(root, Ref):
         return root.id
+    elif isinstance(root, Attribute):
+        return [root.obj.id, root.obj.type_name, root.key, root.value]
     return root
