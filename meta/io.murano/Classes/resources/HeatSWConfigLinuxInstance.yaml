@@ -1,0 +1,11 @@
+Namespaces:
+  =: io.murano.resources
+  sys: io.murano.system
+  std: io.murano
+
+Name: HeatSWConfigLinuxInstance
+
+Extends:
+  - LinuxInstance
+  - HeatSWConfigInstance
+

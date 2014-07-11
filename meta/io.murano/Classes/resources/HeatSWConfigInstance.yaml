@@ -1,0 +1,16 @@
+Namespaces:
+  =: io.murano.resources
+  sys: io.murano.system
+  std: io.murano
+
+Name: HeatSWConfigInstance
+
+Extends:
+  - Instance
+
+Methods:
+  prepareUserData:
+    Body:
+      - Return:
+          data:
+          format: SOFTWARE_CONFIG
