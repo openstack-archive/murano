@@ -31,6 +31,7 @@ NAME=murano-api
 DAEMON=$(which murano-api)
 PIDFILE=/var/run/murano/$NAME.pid
 SCRIPTNAME=/etc/init.d/$NAME
+DAEMONLOG=/var/log/murano/$NAME.log
 SYSTEM_USER=murano
 CONFIG_FILE=/etc/murano/murano.conf
 # Exit if the package is not installed
@@ -48,7 +49,7 @@ do_start()
         chown -R $SYSTEM_USER /var/run/murano
     fi
     start-stop-daemon --start --background --quiet --chuid $SYSTEM_USER:$SYSTEM_USER --make-pidfile --pidfile $PIDFILE --startas $DAEMON --test -- --config-file=$CONFIG_FILE > /dev/null || return 1
-    start-stop-daemon --start --background --quiet --chuid $SYSTEM_USER:$SYSTEM_USER --make-pidfile --pidfile $PIDFILE --startas $DAEMON -- --config-file=$CONFIG_FILE || return 2
+    start-stop-daemon --start --background --quiet --chuid $SYSTEM_USER:$SYSTEM_USER --make-pidfile --pidfile $PIDFILE --startas $DAEMON -- --config-file=$CONFIG_FILE --log-file=$DAEMONLOG || return 2
 }
 
 do_stop()
