@@ -1,0 +1,90 @@
+Name: DerivedFrom2Classes
+
+Extends: [ParentClass1, ParentClass2]
+
+Properties:
+  ambiguousProperty2:
+    Contract: $.int()
+    Usage: InOut
+
+  usageTestProperty1:
+    Contract: $.int()
+  usageTestProperty2:
+    Contract: $.int()
+    Usage: In
+  usageTestProperty3:
+    Contract: $.int()
+    Usage: InOut
+  usageTestProperty4:
+    Contract: $.int()
+    Usage: Out
+  usageTestProperty5:
+    Contract: $.int()
+    Usage: Runtime
+  usageTestProperty6:
+    Contract: $.int()
+    Usage: Const
+
+
+Methods:
+  setPrivateProperty:
+    Body:
+      - $.privateProperty: 99
+
+  testAccessAmbiguousPropertyWithoutResolver:
+    Body:
+      Return: $.ambiguousProperty1
+
+  testAccessAmbiguousPropertyWithResolver:
+    Body:
+      Return: $.ambiguousProperty2
+
+  testPropertyMerge:
+    Body:
+      - trace($.ambiguousProperty2)
+      - $.setAmbiguousProperty2()
+      - trace($.ambiguousProperty2)
+      - trace($.getAmbiguousProperty2())
+      - trace($.cast(ParentClass1).ambiguousProperty2)
+      - trace($.cast(ParentClass2).ambiguousProperty2)
+      - Return: $.ambiguousProperty2
+
+  testModifyUsageTestProperty1:
+    Body:
+      - $.usageTestProperty1: 11
+      - Return: $.usageTestProperty1
+
+  testModifyUsageTestProperty2:
+    Body:
+      - $.usageTestProperty2: 22
+      - Return: $.usageTestProperty2
+
+  testModifyUsageTestProperty3:
+    Body:
+      - $.usageTestProperty3: 33
+      - Return: $.usageTestProperty3
+
+  testModifyUsageTestProperty4:
+    Body:
+      - $.usageTestProperty4: 44
+      - Return: $.usageTestProperty4
+
+  testModifyUsageTestProperty5:
+    Body:
+      - $.usageTestProperty5: 55
+      - Return: $.usageTestProperty5
+
+  testModifyUsageTestProperty6:
+    Body:
+      - $.usageTestProperty6: 66
+      - Return: $.usageTestProperty6
+
+  testMixinOverride:
+    Body:
+        - $.virtualMethod()
+        - trace('-')
+        - $.cast(CommonParent).virtualMethod()
+        - trace('-')
+        - $.cast(ParentClass1).virtualMethod()
+        - trace('-')
+        - $.cast(ParentClass2).virtualMethod()

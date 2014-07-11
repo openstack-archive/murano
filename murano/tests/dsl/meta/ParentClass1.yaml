@@ -1,0 +1,27 @@
+Name: ParentClass1
+
+Extends: CommonParent
+
+Properties:
+  ambiguousProperty1:
+    Contract: $.int()
+
+  ambiguousProperty2:
+    Contract: $.string()
+    Usage: InOut
+
+Methods:
+  method1:
+    Body:
+      - trace('ParentClass1::method1')
+
+  setPrivatePropertyChain:
+    Body:
+      - $.privateName: 'ParentClass1'
+      - $.cast(CommonParent).setPrivatePropertyChain()
+      - trace($.privateName)
+
+
+  setAmbiguousProperty2:
+    Body:
+      $.ambiguousProperty2: '555'

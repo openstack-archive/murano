@@ -59,12 +59,6 @@ class AmbiguousMethodName(Exception):
             'Found more that one method %s' % name)
 
 
-class NoWriteAccess(Exception):
-    def __init__(self, name):
-        super(NoWriteAccess, self).__init__(
-            'Property %s is immutable to the caller' % name)
-
-
 class DslContractSyntaxError(Exception):
     pass
 
@@ -79,3 +73,46 @@ class ValueIsMissingError(Exception):
 
 class DslSyntaxError(Exception):
     pass
+
+
+class PropertyAccessError(Exception):
+    pass
+
+
+class AmbiguousPropertyNameError(PropertyAccessError):
+    def __init__(self, name):
+        super(AmbiguousPropertyNameError, self).__init__(
+            'Found more that one property %s' % name)
+
+
+class NoWriteAccess(PropertyAccessError):
+    def __init__(self, name):
+        super(NoWriteAccess, self).__init__(
+            'Property %s is immutable to the caller' % name)
+
+
+class NoWriteAccessError(PropertyAccessError):
+    def __init__(self, name):
+        super(NoWriteAccessError, self).__init__(
+            'Property %s is immutable to the caller' % name)
+
+
+class PropertyReadError(PropertyAccessError):
+    def __init__(self, name, murano_class):
+        super(PropertyAccessError, self).__init__(
+            'Property %s in class %s cannot be read' %
+            (name, murano_class.name))
+
+
+class PropertyWriteError(PropertyAccessError):
+    def __init__(self, name, murano_class):
+        super(PropertyAccessError, self).__init__(
+            'Property %s in class %s cannot be written' %
+            (name, murano_class.name))
+
+
+class UninitializedPropertyAccessError(PropertyAccessError):
+    def __init__(self, name, murano_class):
+        super(PropertyAccessError, self).__init__(
+            'Access to private uninitialized property '
+            '%s in class %s is forbidden' % (name, murano_class.name))

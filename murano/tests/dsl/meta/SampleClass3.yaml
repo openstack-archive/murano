@@ -1,0 +1,35 @@
+Name: SampleClass3
+
+Properties:
+  multiClassProperty:
+    Contract: $.class(ParentClass1).class(ParentClass2)
+
+Methods:
+  testMultiContract:
+    Body:
+      - $.multiClassProperty.method1()
+      - $.multiClassProperty.method2()
+
+  testPropertyAccessibleOnSeveralPaths:
+    Body:
+      Return: $.multiClassProperty.rootProperty
+
+  testPrivateProperty:
+    Body:
+      - $.privateName: 'SampleClass3'
+      - $.multiClassProperty.setPrivatePropertyChain()
+      - trace($.privateName)
+
+  testUninitializedPrivatePropertyAccess:
+    Body:
+      Return: $.privateName
+
+  testReadOfPrivatePropertyOfOtherClass:
+    Body:
+      - $.multiClassProperty.setPrivateProperty()
+      - trace('accessing property')
+      - Return: $.multiClassProperty.privateProperty
+
+  testWriteOfPrivatePropertyOfOtherClass:
+    Body:
+      $.multiClassProperty.privateProperty: 123
