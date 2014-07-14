@@ -183,7 +183,7 @@ class Status(BASE, ModificationsTrackedObject):
     entity_id = sa.Column(sa.String(255), nullable=True)
     entity = sa.Column(sa.String(10), nullable=True)
     deployment_id = sa.Column(sa.String(36), sa.ForeignKey('deployment.id'))
-    text = sa.Column(sa.String(), nullable=False)
+    text = sa.Column(sa.Text(), nullable=False)
     level = sa.Column(sa.String(32), nullable=False)
     details = sa.Column(sa.Text(), nullable=True)
 
