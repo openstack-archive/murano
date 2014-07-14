@@ -50,8 +50,7 @@ class Runner(object):
     def __init__(self, model, class_loader):
         if isinstance(model, types.StringTypes):
             model = object_model.Object(model)
-        if not isinstance(model, dict):
-            model = object_model.build_model(model)
+        model = object_model.build_model(model)
         if 'Objects' not in model:
             model = {'Objects': model}
 
