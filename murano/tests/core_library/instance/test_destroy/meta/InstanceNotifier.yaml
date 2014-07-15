@@ -1,0 +1,10 @@
+Namespaces:
+    =: io.murano.system
+
+Name: InstanceNotifier
+
+Methods:
+  untrackCloudInstance:
+    Arguments:
+      - instance:
+          Contract: $

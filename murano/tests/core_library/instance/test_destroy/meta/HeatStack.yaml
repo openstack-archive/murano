@@ -1,0 +1,18 @@
+Namespaces:
+    =: io.murano.system
+
+Name: HeatStack
+
+Methods:
+  push:
+
+  current:
+    Body:
+      - Return: $.getAttr(stack)
+
+  setTemplate:
+    Arguments:
+      - template:
+          Contract: {}
+    Body:
+      - $.setAttr(stack, $template)

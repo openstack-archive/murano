@@ -218,12 +218,26 @@ Methods:
               - $.setAttr(fipAssigned, true)
 
   destroy:
+    # Fixme(smelikyan): We need to remove all associated resources on destroy
     Body:
       - $template: $.environment.stack.current()
+      # Remove OS::Nova::Server resource
       - $patchBlock:
           op: remove
           path: format('/resources/{0}', $.name)
       - $template: patch($template, $patchBlock)
+      # Remove Ip Addresses Outputs assigned to this Instance
+      - $assignedIpBlock:
+          op: remove
+          path: format('/outputs/{0}-assigned-ip', $.name)
+      - $template: patch($template, $assignedIpBlock)
+      # Remove Floatting IP Addresses Outputs
+      - If: $.getAttr(fipAssigned, false)
+        Then:
+          - $assignedFloatingIpBlock:
+              op: remove
+              path: format('/outputs/{0}-FloatingIPaddress', $.name)
+          - $template: patch($template, $assignedFloatingIpBlock)
       - $.environment.stack.setTemplate($template)
       - $.environment.stack.push()
       - $.environment.instanceNotifier.untrackCloudInstance($this)

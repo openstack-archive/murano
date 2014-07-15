@@ -1,0 +1,22 @@
+Namespaces:
+    =: io.murano
+    res: io.murano.resources
+    sys: io.murano.system
+
+Name: Environment
+
+Properties:
+  stack:
+    Contract: $.class(sys:HeatStack)
+
+  instance:
+    Contract: $.class(res:Instance)
+
+  instanceNotifier:
+    Contract: $.class(sys:InstanceNotifier)
+    Usage: Runtime
+
+Methods:
+  initialize:
+    Body:
+      $.instanceNotifier: new(sys:InstanceNotifier)
