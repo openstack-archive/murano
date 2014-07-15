@@ -71,8 +71,8 @@ class MuranoPlException(Exception):
         else:
             return self._names
 
-    def format(self, prefix='  '):
-        text = '\n{3}{0}: {1}\n' \
+    def format(self, prefix=''):
+        text = '{3}{0}: {1}\n' \
                '{3}Traceback (most recent call last):\n' \
                '{2}'.format(self._format_name(), self.message,
                             self.stacktrace.toString(prefix + '  '), prefix)
