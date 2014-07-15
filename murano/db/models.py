@@ -101,7 +101,9 @@ class JsonBlob(sa.TypeDecorator):
         return anyjson.serialize(value)
 
     def process_result_value(self, value, dialect):
-        return anyjson.deserialize(value)
+        if value is not None:
+            return anyjson.deserialize(value)
+        return None
 
 
 class Environment(BASE, ModificationsTrackedObject):

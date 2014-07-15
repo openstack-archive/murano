@@ -24,7 +24,7 @@ import os
 
 
 @mock.patch.object(policy, 'check')
-class TestCatalogApi(test_base.ControllerTest, test_base.MuranoTestCase):
+class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
     def setUp(self):
         super(TestCatalogApi, self).setUp()
         self.controller = catalog.Controller()
