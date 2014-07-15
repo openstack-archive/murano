@@ -48,6 +48,12 @@ System prerequisites
 
 * libpq-dev
 
+* python-openssl
+
+* mysql-client
+
+* python-mysqldb
+
 *CentOS*
 
 * gcc
@@ -61,6 +67,14 @@ System prerequisites
 * libxslt-devel
 
 * libffi-devel
+
+* postgresql-devel
+
+* pyOpenSSL
+
+* mysql
+
+* MySQL-python
 
 
 Lab Requirements
