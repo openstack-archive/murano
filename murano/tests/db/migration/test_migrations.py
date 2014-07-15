@@ -17,6 +17,7 @@ import uuid
 from oslo.config import cfg
 from sqlalchemy import exc
 
+from murano.db.migration import migration
 from murano.db import models  # noqa
 from murano.openstack.common.db.sqlalchemy import utils as db_utils
 from murano.tests.db.migration import test_migrations_base as base
@@ -70,6 +71,7 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
         self.assertEqual(sorted(members), sorted(index_columns))
 
     def _check_001(self, engine, data):
+        self.assertEqual('001', migration.version())
         self.assertColumnExists(engine, 'category', 'id')
         self.assertColumnExists(engine, 'environment', 'tenant_id')
 
@@ -112,3 +114,7 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
         package['id'] = str(uuid.uuid4())
         self.assertRaises(exc.IntegrityError,
                           package_table.insert().execute, package)
+
+    def _check_002(self, engine, data):
+        self.assertEqual('002', migration.version())
+        self.assertColumnExists(engine, 'package', 'supplier_logo')

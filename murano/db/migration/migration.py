@@ -14,6 +14,9 @@ import os
 
 import alembic
 from alembic import config as alembic_config
+from alembic import migration as alembic_migration
+
+from murano.db import session as db_session
 
 
 def get_alembic_config():
@@ -25,9 +28,12 @@ def get_alembic_config():
     return config
 
 
-# TODO(ruhe): implement me
-#def version(config=None):
-#    """Current database version."""
+def version():
+    """Returns current database version."""
+    engine = db_session.get_engine()
+    with engine.connect() as conn:
+        context = alembic_migration.MigrationContext.configure(conn)
+        return context.get_current_revision()
 
 
 def upgrade(revision, config=None):
