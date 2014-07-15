@@ -201,18 +201,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             except Exception:
                 pass
 
-        # add workaround for https://bugs.launchpad.net/murano/+bug/1330966
-        time.sleep(60)
-
-        stack_list = self.heat_client.stacks.list()
-        for stack_name in self.stack_names:
-            try:
-                for stack in stack_list:
-                    if stack.stack_name == stack_name:
-                        self.heat_client.stacks.delete(stack.id)
-            except Exception:
-                pass
-
     def check_port_access(self, ip, port):
         start_time = time.time()
         while time.time() - start_time < 300:
@@ -258,7 +246,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
 
         environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
-        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
@@ -363,7 +350,6 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
 
         environment = self.client.create_environment(environment_name)
         self.environments.append(environment['id'])
-        self.stack_names.append(environment_name)
 
         session = self.client.create_session(environment['id'])
 
@@ -409,7 +395,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         return next(stack_iter, None)
 
     def test_instance_refs_are_removed_after_application_is_removed(self):
-        name = 'e' + str(uuid.uuid4().hex)
+        name = 'e' + uuid.uuid4().hex
 
         # create environment with telnet application
         application1 = self._get_telnet_app()
@@ -434,3 +420,23 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.assertNotIn(ip_addresses, template['outputs'])
         self.assertNotIn(floating_ip, template['outputs'])
         self.assertNotIn(instance_name, template['resources'])
+
+    def test_stack_deletion_after_env_is_deleted(self):
+        name = 'e' + uuid.uuid4().hex
+
+        application = self._get_telnet_app()
+        environment = self._quick_deploy(name, application)
+        self.assertIsNotNone(environment)
+
+        stack = self._get_stack(name)
+        self.assertIsNotNone(stack)
+
+        self.client.delete_environment(environment['id'])
+
+        start_time = time.time()
+        while stack is not None:
+            if time.time() - start_time > 300:
+                break
+            time.sleep(5)
+            stack = self._get_stack(name)
+        self.assertIsNone(stack, 'stack is not deleted')

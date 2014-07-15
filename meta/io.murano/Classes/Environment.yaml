@@ -63,3 +63,7 @@ Methods:
         Else:
           - $.applications.pselect($.deploy())
       - $.agentListener.stop()
+
+  destroy:
+    Body:
+      - $.stack.delete()
