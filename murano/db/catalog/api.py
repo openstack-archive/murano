@@ -15,6 +15,7 @@
 from oslo.config import cfg
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
+# TODO(ruhe) use exception declared in openstack/common/db
 from webob import exc
 
 from murano.db import models
