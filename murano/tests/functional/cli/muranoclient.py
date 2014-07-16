@@ -36,3 +36,11 @@ class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
             CONF.cli.cli_dir
         )
         return clients
+
+    def listing(self, command, params=""):
+        return self.parser.listing(self.murano(command, params=params))
+
+    def get_value(self, need_field, known_field, known_value, somelist):
+        for element in somelist:
+            if element[known_field] == known_value:
+                return element[need_field]
