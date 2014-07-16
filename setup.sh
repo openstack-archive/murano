@@ -32,8 +32,8 @@ LOGFILE="/tmp/${DAEMON_NAME}_install.log"
 DAEMON_DB_CONSTR="sqlite:///$DAEMON_CFG_DIR/$DAEMON_NAME.sqlite"
 common_pkgs="wget git make gcc python-pip python-setuptools python-lxml python-crypto ntpdate"
 # Distro-specific package namings
-debian_pkgs="python-dev python-mysqldb libxml2-dev libxslt1-dev libffi-dev python-openssl mysql-client "
-redhat_pkgs="python-devel MySQL-python libxml2-devel libxslt-devel libffi-devel pyOpenSSL mysql"
+debian_pkgs="python-dev python-mysqldb libxml2-dev libxslt1-dev libffi-dev python-openssl mysql-client libpq-dev"
+redhat_pkgs="python-devel MySQL-python libxml2-devel libxslt-devel libffi-devel pyOpenSSL mysql postgresql-devel"
 #
 get_os
 eval req_pkgs="\$$(lowercase $DISTRO_BASED_ON)_pkgs"
