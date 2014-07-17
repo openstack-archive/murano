@@ -13,7 +13,11 @@
 #    under the License.
 
 
-class ReturnException(Exception):
+class InternalFlowException(Exception):
+    pass
+
+
+class ReturnException(InternalFlowException):
     def __init__(self, value):
         self._value = value
 
@@ -22,7 +26,11 @@ class ReturnException(Exception):
         return self._value
 
 
-class BreakException(Exception):
+class BreakException(InternalFlowException):
+    pass
+
+
+class DslInvalidOperationError(Exception):
     pass
 
 
