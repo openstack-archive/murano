@@ -61,9 +61,12 @@ class MethodBlock(CodeBlock):
             super(MethodBlock, self).execute(new_context, murano_class)
         except exceptions.ReturnException as e:
             return e.value
-        except exceptions.BreakException as e:
+        except exceptions.BreakException:
             raise exceptions.DslInvalidOperationError(
                 'Break cannot be used on method level')
+        except exceptions.ContinueException:
+            raise exceptions.DslInvalidOperationError(
+                'Continue cannot be used on method level')
         else:
             return None
 
@@ -84,6 +87,15 @@ class BreakMacro(expressions.DslExpression):
 
     def execute(self, context, murano_class):
         raise exceptions.BreakException()
+
+
+class ContinueMacro(expressions.DslExpression):
+    def __init__(self, Continue):
+        if Continue:
+            raise exceptions.DslSyntaxError('Continue cannot have value')
+
+    def execute(self, context, murano_class):
+        raise exceptions.ContinueException()
 
 
 class ParallelMacro(CodeBlock):
@@ -144,6 +156,8 @@ class WhileDoMacro(expressions.DslExpression):
                     break
             except exceptions.BreakException:
                 break
+            except exceptions.ContinueException:
+                continue
 
 
 class ForMacro(expressions.DslExpression):
@@ -163,6 +177,8 @@ class ForMacro(expressions.DslExpression):
                 self._code.execute(context, murano_class)
             except exceptions.BreakException:
                 break
+            except exceptions.ContinueException:
+                continue
 
 
 class RepeatMacro(expressions.DslExpression):
@@ -180,6 +196,8 @@ class RepeatMacro(expressions.DslExpression):
                 self._code.execute(context, murano_class)
             except exceptions.BreakException:
                 break
+            except exceptions.ContinueException:
+                continue
 
 
 class MatchMacro(expressions.DslExpression):
@@ -242,6 +260,7 @@ def register():
     expressions.register_macro(DoMacro)
     expressions.register_macro(ReturnMacro)
     expressions.register_macro(BreakMacro)
+    expressions.register_macro(ContinueMacro)
     expressions.register_macro(ParallelMacro)
     expressions.register_macro(IfMacro)
     expressions.register_macro(WhileDoMacro)

@@ -49,6 +49,11 @@ class TestMacros(test_case.DslTestCase):
                           self._runner.testBreak)
         self.assertEqual([0, 1, 2, 'breaking', 'method_break'], self.traces)
 
+    def test_continue(self):
+        self.assertRaises(exceptions.DslInvalidOperationError,
+                          self._runner.testContinue)
+        self.assertEqual([0, 1, 2, 5, 6, 'method_continue'], self.traces)
+
     def test_match(self):
         self.assertEqual('y', self._runner.testMatch(1))
         self.assertEqual('x', self._runner.testMatch(2))
