@@ -21,12 +21,12 @@ from murano.api.v1 import environments
 from murano.common import policy
 from murano.db import models
 from murano.openstack.common import timeutils
-import murano.tests.api.base as test_base
+import murano.tests.api.base as tb
 import murano.tests.utils as test_utils
 
 
 @mock.patch.object(policy, 'check')
-class TestEnvironmentApi(test_base.ControllerTest, test_base.MuranoTestCase):
+class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     RPC_IMPORT = 'murano.db.services.environments.rpc'
 
     def setUp(self):

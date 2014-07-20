@@ -16,8 +16,6 @@
 import fixtures
 import logging
 import mock
-from oslo.config import cfg
-import testtools
 import urllib
 import webob
 
@@ -25,6 +23,7 @@ from murano.api.v1 import request_statistics
 from murano.common import rpc
 from murano.openstack.common import timeutils
 from murano.openstack.common import wsgi
+from murano.tests import base
 from murano.tests import utils
 
 TEST_DEFAULT_LOGLEVELS = {'migrate': logging.WARN, 'sqlalchemy': logging.WARN}
@@ -60,13 +59,13 @@ class FakeLogMixin:
                     name=base))
 
 
-class MuranoTestCase(testtools.TestCase, FakeLogMixin):
+class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
     # Set this if common.rpc is imported into other scopes so that
     # it can be mocked properly
     RPC_IMPORT = 'murano.common.rpc'
 
     def setUp(self):
-        super(MuranoTestCase, self).setUp()
+        super(MuranoApiTestCase, self).setUp()
 
         self.setup_logging()
 
@@ -79,12 +78,9 @@ class MuranoTestCase(testtools.TestCase, FakeLogMixin):
                    return_value=self.mock_api_rpc).start()
 
         self.addCleanup(mock.patch.stopall)
-        self.addCleanup(cfg.CONF.reset)
-        utils.setup_dummy_db()
-        self.addCleanup(utils.reset_dummy_db)
 
     def tearDown(self):
-        super(MuranoTestCase, self).tearDown()
+        super(MuranoApiTestCase, self).tearDown()
         timeutils.utcnow.override_time = None
 
     def _stub_uuid(self, values=[]):
