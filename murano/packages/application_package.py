@@ -99,6 +99,7 @@ class ApplicationPackage(object):
 
     def validate(self):
         self._load_logo(True)
+        self._load_supplier_logo(True)
 
     def _load_logo(self, validate=False):
         logo_file = self._logo or 'logo.png'
