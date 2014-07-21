@@ -35,11 +35,12 @@ class HeatStackError(Exception):
 
 @murano_class.classname('io.murano.system.HeatStack')
 class HeatStack(murano_object.MuranoObject):
-    def initialize(self, _context, name):
+    def initialize(self, _context, name, description=None):
         self._name = name
         self._template = None
         self._parameters = {}
         self._applied = True
+        self._description = description
         environment = helpers.get_environment(_context)
         keystone_settings = config.CONF.keystone
         heat_settings = config.CONF.heat
@@ -183,6 +184,9 @@ class HeatStack(murano_object.MuranoObject):
 
         if 'heat_template_version' not in self._template:
             self._template['heat_template_version'] = HEAT_TEMPLATE_VERSION
+
+        if 'description' not in self._template and self._description:
+            self._template['description'] = self._description
 
         LOG.info('Pushing: {0}'.format(self._template))
 
