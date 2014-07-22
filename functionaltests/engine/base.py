@@ -389,10 +389,11 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment_id, session_id)
         return self.client.wait_for_environment_deploy(environment_id)
 
-    def _get_stack(self, name):
-        by_name = {'name': name}
-        stack_iter = self.heat_client.stacks.list(limit=1, filters=by_name)
-        return next(stack_iter, None)
+    def _get_stack(self, environment_id):
+
+        for stack in self.heat_client.stacks.list():
+            if environment_id in stack.description:
+                return stack
 
     def test_instance_refs_are_removed_after_application_is_removed(self):
         name = 'e' + uuid.uuid4().hex
@@ -413,7 +414,8 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         self.client.deploy_session(environment_id, session_id)
         self.client.wait_for_environment_deploy(environment_id)
 
-        template = self.heat_client.stacks.template(name)
+        stack_name = self._get_stack(environment_id).stack_name
+        template = self.heat_client.stacks.template(stack_name)
         ip_addresses = '{0}-assigned-ip'.format(instance_name)
         floating_ip = '{0}-FloatingIPaddress'.format(instance_name)
 
@@ -428,7 +430,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         environment = self._quick_deploy(name, application)
         self.assertIsNotNone(environment)
 
-        stack = self._get_stack(name)
+        stack = self._get_stack(environment['id'])
         self.assertIsNotNone(stack)
 
         self.client.delete_environment(environment['id'])
@@ -438,5 +440,5 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             if time.time() - start_time > 300:
                 break
             time.sleep(5)
-            stack = self._get_stack(name)
+            stack = self._get_stack(environment['id'])
         self.assertIsNone(stack, 'stack is not deleted')
