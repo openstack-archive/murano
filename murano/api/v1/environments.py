@@ -37,7 +37,7 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         LOG.debug('Environments:List')
-        policy.check('list_environments', request.context, {})
+        policy.check('list_environments', request.context)
 
         #Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
@@ -49,7 +49,7 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
         LOG.debug('Environments:Create <Body {0}>'.format(body))
-        policy.check('create_environment', request.context, {})
+        policy.check('create_environment', request.context)
 
         try:
             environment = envs.EnvironmentServices.create(

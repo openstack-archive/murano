@@ -14,18 +14,14 @@
 # limitations under the License.
 
 import json
-import mock
-from webob import exc
 
 from murano.api.v1 import environments
-from murano.common import policy
 from murano.db import models
 from murano.openstack.common import timeutils
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 
 
-@mock.patch.object(policy, 'check')
 class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     RPC_IMPORT = 'murano.db.services.environments.rpc'
 
@@ -33,17 +29,25 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
 
-    def test_list_empty_environments(self, mock_policy_check):
+    def test_list_empty_environments(self):
         """Check that with no environments an empty list is returned"""
-        self._mock_policy_setup(mock_policy_check, 'list_environments')
+        self._set_policy_rules(
+            {'list_environments': '@'}
+        )
+        self.expect_policy_check('list_environments')
 
         req = self._get('/environments')
-        result = self.controller.index(req)
-        self.assertEqual({'environments': []}, result)
+        result = req.get_response(self.api)
+        self.assertEqual({'environments': []}, json.loads(result.body))
 
-    def test_create_environment(self, mock_policy_check):
+    def test_create_environment(self):
         """Create an environment, test environment.show()"""
-        self._mock_policy_setup(mock_policy_check, 'create_environment')
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
 
         fake_now = timeutils.utcnow()
         timeutils.utcnow.override_time = fake_now
@@ -56,49 +60,57 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'my_env',
                     'networking': {},
                     'version': 0,
-                    'created': fake_now,
-                    'updated': fake_now}
+                    # TODO(sjmc7) - bug 1347298
+                    'created': timeutils.isotime(fake_now)[:-1],
+                    'updated': timeutils.isotime(fake_now)[:-1]}
 
         body = {'name': 'my_env'}
         req = self._post('/environments', json.dumps(body))
-        result = self.controller.create(req, body)
-        self.assertEqual(expected, result)
+        result = req.get_response(self.api)
+        self.assertEqual(expected, json.loads(result.body))
 
         expected['status'] = 'ready'
 
         # Reset the policy expectation
-        self._mock_policy_setup(mock_policy_check, 'list_environments')
+        self.expect_policy_check('list_environments')
 
         req = self._get('/environments')
-        result = self.controller.index(req)
-
-        self.assertEqual({'environments': [expected]}, result)
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        self.assertEqual({'environments': [expected]}, json.loads(result.body))
 
         expected['services'] = []
 
         # Reset the policy expectation
-        self._mock_policy_setup(mock_policy_check, 'show_environment',
-                                target={'environment_id': uuids[-1]})
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': uuids[-1]})
 
         req = self._get('/environments/%s' % uuids[-1])
-        result = self.controller.show(req, uuids[-1])
+        result = req.get_response(self.api)
 
-        self.assertEqual(expected, result)
+        self.assertEqual(expected, json.loads(result.body))
         self.assertEqual(3, mock_uuid.call_count)
 
-    def test_missing_environment(self, mock_policy_check):
+    def test_missing_environment(self):
         """Check that a missing environment results in an HTTPNotFound"""
-        self._mock_policy_setup(mock_policy_check, 'show_environment',
-                                target={'environment_id': 'no-such-id'})
+        self._set_policy_rules(
+            {'show_environment': '@'}
+        )
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': 'no-such-id'})
 
         req = self._get('/environments/no-such-id')
-        self.assertRaises(exc.HTTPNotFound, self.controller.show,
-                          req, 'no-such-id')
+        result = req.get_response(self.api)
+        self.assertEqual(404, result.status_code)
 
-    def test_update_environment(self, mock_policy_check):
+    def test_update_environment(self):
         """Check that environment rename works"""
-        self._mock_policy_setup(mock_policy_check, 'update_environment',
-                                target={'environment_id': '12345'})
+        self._set_policy_rules(
+            {'show_environment': '@',
+             'update_environment': '@'}
+        )
+        self.expect_policy_check('update_environment',
+                                 {'environment_id': '12345'})
 
         fake_now = timeutils.utcnow()
         timeutils.utcnow.override_time = fake_now
@@ -133,20 +145,28 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         body = {
             'name': 'renamed env'
         }
-        req = self._post('/environments/12345', json.dumps(body))
-        result = self.controller.update(req, '12345', body)
+        req = self._put('/environments/12345', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
 
-        self._mock_policy_setup(mock_policy_check, 'show_environment',
-                                target={'environment_id': '12345'})
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '12345'})
         req = self._get('/environments/12345')
-        result = self.controller.show(req, '12345')
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
 
-        self.assertEqual(expected, result)
+        expected['created'] = timeutils.isotime(expected['created'])[:-1]
+        expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
 
-    def test_delete_environment(self, mock_policy_check):
+        self.assertEqual(expected, json.loads(result.body))
+
+    def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call"""
-        self._mock_policy_setup(mock_policy_check, 'delete_environment',
-                                target={'environment_id': '12345'})
+        self._set_policy_rules(
+            {'delete_environment': '@'}
+        )
+        self.expect_policy_check('delete_environment',
+                                 {'environment_id': '12345'})
 
         fake_now = timeutils.utcnow()
         expected = dict(
@@ -174,9 +194,10 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         }
 
         req = self._delete('/environments/12345')
-        result = self.controller.delete(req, '12345')
+        result = req.get_response(self.api)
 
         self.mock_engine_rpc.handle_task.assert_called_once_with(rpc_task)
 
         # Should this be expected behavior?
-        self.assertEqual(None, result)
+        self.assertEqual('', result.body)
+        self.assertEqual(200, result.status_code)

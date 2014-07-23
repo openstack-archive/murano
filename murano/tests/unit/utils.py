@@ -30,12 +30,13 @@ def reset_dummy_db():
 
 
 def dummy_context(user='test_username', tenant_id='test_tenant_id',
-                  password='password', roles=[], user_id=None):
+                  password='password', roles=[], user_id=None,
+                  is_admin=False):
     return context.RequestContext.from_dict({
         'tenant': tenant_id,
         'user': user,
         #'roles': roles,  # Commented until policy check changes land
-        'is_admin': False,
+        'is_admin': is_admin,
 
     })
 

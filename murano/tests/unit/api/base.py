@@ -16,10 +16,13 @@
 import fixtures
 import logging
 import mock
+import routes
 import urllib
 import webob
 
 from murano.api.v1 import request_statistics
+from murano.api.v1 import router
+from murano.common import policy
 from murano.common import rpc
 from murano.openstack.common import timeutils
 from murano.openstack.common import wsgi
@@ -105,13 +108,37 @@ class ControllerTest(object):
         self.api_version = '1.0'
         self.tenant = 'test_tenant'
         self.mock_policy_check = None
+        self.mapper = routes.Mapper()
+        self.api = router.API(self.mapper)
 
         request_statistics.init_stats()
+
+    def setUp(self):
+        super(ControllerTest, self).setUp()
+
+        self.is_admin = False
+
+        policy.init(use_conf=False)
+        real_policy_check = policy.check
+
+        self._policy_check_expectations = []
+        self._actual_policy_checks = []
+
+        def wrap_policy_check(rule, ctxt, target={}, **kwargs):
+            self._actual_policy_checks.append((rule, target))
+            return real_policy_check(rule, ctxt, target=target, **kwargs)
+
+        mock.patch('murano.common.policy.check',
+                   side_effect=wrap_policy_check).start()
+
+        # Deny everything
+        self._set_policy_rules({"default": "!"})
 
     def _environ(self, path):
         return {
             'SERVER_NAME': 'server.test',
-            'SERVER_PORT': 8082,
+            'SERVER_PORT': '8082',
+            'SERVER_PROTOCOL': 'http',
             'SCRIPT_NAME': '/v1',
             'PATH_INFO': path,
             'wsgi.url_scheme': 'http',
@@ -130,7 +157,9 @@ class ControllerTest(object):
             environ['QUERY_STRING'] = qs
 
         req = wsgi.Request(environ)
-        req.context = utils.dummy_context('api_test_user', self.tenant)
+        req.context = utils.dummy_context('api_test_user',
+                                          self.tenant,
+                                          is_admin=self.is_admin)
         self.context = req.context
         return req
 
@@ -141,46 +170,40 @@ class ControllerTest(object):
         return self._simple_request(path, method='DELETE')
 
     def _data_request(self, path, data, content_type='application/json',
-                      method='POST'):
+                      method='POST', params={}):
         environ = self._environ(path)
         environ['REQUEST_METHOD'] = method
 
         req = wsgi.Request(environ)
         req.context = utils.dummy_context('api_test_user', self.tenant)
         self.context = req.context
+        req.content_type = content_type
         req.body = data
+
+        if params:
+            qs = urllib.urlencode(params)
+            environ['QUERY_STRING'] = qs
+
         return req
 
-    def _post(self, path, data, content_type='application/json'):
-        return self._data_request(path, data, content_type)
+    def _post(self, path, data, content_type='application/json', params={}):
+        return self._data_request(path, data, content_type, params=params)
 
-    def _put(self, path, data, content_type='application/json'):
-        return self._data_request(path, data, content_type, method='PUT')
+    def _put(self, path, data, content_type='application/json', params={}):
+        return self._data_request(path, data, content_type, method='PUT',
+                                  params=params)
 
-    def _mock_policy_setup(self, mocker, action, allowed=True,
-                           target=None, expected_request_count=1):
-        if self.mock_policy_check is not None:
-            # Test existing policy check record
-            self._check_policy()
-            self.mock_policy_check.reset_mock()
+    def _set_policy_rules(self, rules):
+        policy.set_rules(rules)
 
-        self.mock_policy_check = mocker
-        self.policy_action = action
-        self.mock_policy_check.return_value = allowed
-        self.policy_target = target
-        self.expected_request_count = expected_request_count
+    def expect_policy_check(self, action, target={}):
+        self._policy_check_expectations.append((action, target))
 
-    def _check_policy(self):
-        """Assert policy checks called as expected"""
-        if self.mock_policy_check:
-            # Check that policy enforcement got called as expected
-            self.mock_policy_check.assert_called_with(
-                self.policy_action,
-                self.context,
-                self.policy_target or {})
-            self.assertEqual(self.expected_request_count,
-                             len(self.mock_policy_check.call_args_list))
+    def _assert_policy_checks(self):
+        self.assertEqual(self._policy_check_expectations,
+                         self._actual_policy_checks)
 
     def tearDown(self):
-        self._check_policy()
+        self._assert_policy_checks()
+        policy.reset()
         super(ControllerTest, self).tearDown()

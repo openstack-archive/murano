@@ -54,11 +54,11 @@ def set_rules(data, default_rule=None, overwrite=True):
     _ENFORCER.set_rules(rules, overwrite=overwrite)
 
 
-def init(default_rule=None):
+def init(default_rule=None, use_conf=True):
     global _ENFORCER
     if not _ENFORCER:
         LOG.debug("Enforcer is not present, recreating.")
-        _ENFORCER = policy.Enforcer()
+        _ENFORCER = policy.Enforcer(use_conf=use_conf)
     _ENFORCER.load_rules()
 
 
