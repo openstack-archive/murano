@@ -224,6 +224,11 @@ class Controller(object):
         for k, v in PKG_PARAMS_MAP.iteritems():
             if hasattr(pkg_to_upload, k):
                 package_meta[v] = getattr(pkg_to_upload, k)
+
+        if req.params.get('is_public', '').lower() == 'true':
+            policy.check('publicize_image', req.context)
+            package_meta['is_public'] = True
+
         try:
             package = db_api.package_upload(package_meta, req.context.tenant)
         except db_exc.DBDuplicateEntry:

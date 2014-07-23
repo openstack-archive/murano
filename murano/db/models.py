@@ -279,7 +279,7 @@ class Package(BASE, ModificationsTrackedObject):
     description = sa.Column(sa.String(512),
                             nullable=False,
                             default='The description is not provided')
-    is_public = sa.Column(sa.Boolean, default=True)
+    is_public = sa.Column(sa.Boolean, default=False)
     tags = sa_orm.relationship("Tag",
                                secondary=package_to_tag,
                                cascade='save-update, merge',
