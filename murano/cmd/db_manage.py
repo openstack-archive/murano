@@ -36,6 +36,9 @@ class DBCommand(object):
     def stamp(self, config):
         migration.stamp(CONF.command.revision, config=config)
 
+    def version(self, config):
+        print(migration.version())
+
 
 def add_command_parsers(subparsers):
     command_object = DBCommand()
@@ -56,6 +59,9 @@ def add_command_parsers(subparsers):
     parser.add_argument('-m', '--message')
     parser.add_argument('--autogenerate', action='store_true')
     parser.set_defaults(func=command_object.revision)
+
+    parser = subparsers.add_parser('version')
+    parser.set_defaults(func=command_object.version)
 
 
 command_opt = cfg.SubCommandOpt('command',
