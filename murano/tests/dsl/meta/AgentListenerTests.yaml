@@ -1,0 +1,16 @@
+Name: AgentListenerTests
+
+Namespaces:
+  sys: io.murano.system 
+
+Properties:
+  agentListener:
+    Contract: $.class(sys:AgentListener)
+    Usage: Runtime
+
+
+Methods:
+  testAgentListener:
+    Body:
+      - $.agentListener: new(sys:AgentListener, name => 'hello')
+      - Return: $.agentListener

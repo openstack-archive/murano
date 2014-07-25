@@ -1,0 +1,16 @@
+Name: AgentTests
+
+Namespaces:
+  sys: io.murano.system 
+
+Properties:
+  agent:
+    Contract: $.class(sys:Agent)
+    Usage: Runtime
+
+
+Methods:
+  testAgent:
+    Body:
+      - $.agent: new(sys:Agent, host => $)
+      - Return: $.agent

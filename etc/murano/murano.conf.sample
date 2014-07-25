@@ -270,6 +270,16 @@
 #db_max_retries=20
 
 
+[engine]
+
+#
+# Options defined in murano.common.config
+#
+
+# Disallow the use of murano-agent (boolean value)
+#disable_murano_agent=false
+
+
 [heat]
 
 #
