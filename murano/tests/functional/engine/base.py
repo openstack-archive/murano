@@ -14,12 +14,14 @@
 
 import json
 import os
-import requests
 import socket
+import time
+import urlparse
+import uuid
+
+import requests
 import testresources
 import testtools
-import time
-import uuid
 
 from heatclient import client as heatclient
 from keystoneclient.v2_0 import client as ksclient
@@ -31,66 +33,70 @@ CONF = cfg.cfg.CONF
 
 
 class Client(object):
-
     def __init__(self, user, password, tenant, auth_url, murano_url):
-
-        self.auth = ksclient.Client(username=user, password=password,
-                                    tenant_name=tenant, auth_url=auth_url)
-
-        self.endpoint = murano_url
-
+        self.auth = ksclient.Client(
+            username=user, password=password,
+            tenant_name=tenant, auth_url=auth_url
+        )
+        self.endpoint = urlparse.urljoin(murano_url, 'v1/')
         self.headers = {
             'X-Auth-Token': self.auth.auth_token,
             'Content-type': 'application/json'
         }
 
+    def get_url(self, url_part=None):
+        return urlparse.urljoin(self.endpoint, url_part)
+
     def create_environment(self, name):
-        post_body = {'name': name}
-        resp = requests.post(self.endpoint + 'environments',
-                             data=json.dumps(post_body),
-                             headers=self.headers)
+        endpoint = self.get_url('environments')
+        body = json.dumps({'name': name})
 
-        return resp.json()
+        return requests.post(endpoint, data=body, headers=self.headers).json()
 
-    def delete_environment(self, environment_id):
-        endpoint = '{0}environments/{1}'.format(self.endpoint, environment_id)
-        return requests.delete(endpoint, headers=self.headers)
+    def delete_environment(self, environment_id, timeout=180):
+        endpoint = self.get_url('environments/%s' % environment_id)
+
+        def _is_exist():
+            resp = requests.get(endpoint, headers=self.headers)
+            return resp.status_code == requests.codes.ok
+
+        env_deleted = not _is_exist()
+        requests.delete(endpoint, headers=self.headers)
+
+        start_time = time.time()
+        while env_deleted is not True:
+            if timeout and time.time() - start_time > timeout:
+                raise Exception('Environment was not deleted')
+            time.sleep(5)
+            env_deleted = not _is_exist()
 
     def get_environment(self, environment_id):
-        return requests.get('{0}environments/{1}'.format(self.endpoint,
-                                                         environment_id),
-                            headers=self.headers).json()
+        endpoint = self.get_url('environments/%s' % environment_id)
+        return requests.get(endpoint, headers=self.headers).json()
 
     def create_session(self, environment_id):
-        post_body = None
-        endpoint = '{0}environments/{1}/configure'.format(self.endpoint,
-                                                          environment_id)
-
-        return requests.post(endpoint, data=post_body,
-                             headers=self.headers).json()
+        endpoint = self.get_url('environments/%s/configure' % environment_id)
+        return requests.post(endpoint, headers=self.headers).json()
 
     def deploy_session(self, environment_id, session_id):
-        endpoint = '{0}environments/{1}/sessions/{2}/deploy'.format(
-            self.endpoint, environment_id, session_id)
-
-        return requests.post(endpoint, data=None, headers=self.headers)
+        endpoint = self.get_url('environments/{0}/sessions/{1}/deploy'.format(
+            environment_id, session_id))
+        return requests.post(endpoint, headers=self.headers)
 
     def create_service(self, environment_id, session_id, json_data):
+        endpoint = self.get_url('environments/%s/services' % environment_id)
+        body = json.dumps(json_data)
         headers = self.headers.copy()
-        headers.update({'x-configuration-session': session_id})
+        headers['x-configuration-session'] = session_id
 
-        endpoint = '{0}environments/{1}/services'.format(self.endpoint,
-                                                         environment_id)
-
-        return requests.post(endpoint, data=json.dumps(json_data),
-                             headers=headers).json()
+        return requests.post(endpoint, data=body, headers=headers).json()
 
     def delete_service(self, environment_id, session_id, service_id):
+        endpoint = self.get_url('environments/{0}/services/{1}'.format(
+            environment_id, service_id
+        ))
         headers = self.headers.copy()
-        headers.update({'x-configuration-session': session_id})
-
-        endpoint = '{0}environments/{1}/services/{2}'.format(
-            self.endpoint, environment_id, service_id)
+        headers['x-configuration-session'] = session_id
 
         requests.delete(endpoint, headers=headers)
 
@@ -98,7 +104,6 @@ class Client(object):
         environment = self.get_environment(environment_id)
 
         start_time = time.time()
-
         while environment['status'] != 'ready':
             if time.time() - start_time > 1200:
                 return
@@ -112,11 +117,19 @@ class Client(object):
                 for service in environment['services']]
 
     def deployments_list(self, environment_id):
-        endpoint = '{0}environments/{1}/deployments'.format(self.endpoint,
-                                                            environment_id)
+        endpoint = self.get_url('environments/%s/deployments' % environment_id)
+        response = requests.get(endpoint, headers=self.headers)
+        return response.json()['deployments']
 
-        return requests.get(endpoint,
-                            headers=self.headers).json()['deployments']
+    def upload_package(self, name, package, description):
+        endpoint = self.get_url('catalog/packages')
+        body = {'JsonString': json.dumps(description)}
+        files = {name: open(package, 'rb')}
+        headers = self.headers.copy()
+        del headers['Content-type']
+
+        resp = requests.post(endpoint, data=body, files=files, headers=headers)
+        return resp.json()['id']
 
 
 class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
@@ -143,49 +156,38 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         cls.heat_client = heatclient.Client('1', endpoint=heat_url,
                                             token=cls.client.auth.auth_token)
 
-        cls.location = os.path.realpath(
-            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+        cls.pkgs_path = os.path.abspath(os.path.join(
+            os.path.dirname(__file__),
+            os.path.pardir,
+            'murano-app-incubator'
+        ))
 
-        cls.packages_path = '/'.join(cls.location.split('/')[:-1:])
-
-        def upload_package(package_name, body, app):
-            #TODO(efedorova): Use muranoclient to upload packages
-            files = {'%s' % package_name: open(
-                os.path.join(cls.packages_path, app), 'rb')}
-
-            post_body = {'JsonString': json.dumps(body)}
-            request_url = '{endpoint}{url}'.format(
-                endpoint=CONF.murano.murano_url,
-                url='catalog/packages')
-
-            headers = cls.client.headers.copy()
-            del headers['Content-type']
-
-            return requests.post(request_url,
-                                 files=files,
-                                 data=post_body,
-                                 headers=headers).json()['id']
-
-        cls.postgre_id = upload_package(
+        cls.postgre_id = cls.client.upload_package(
             'PostgreSQL',
-            {"categories": ["Databases"], "tags": ["tag"]},
-            'murano-app-incubator/io.murano.apps.PostgreSql.zip')
-        cls.apache_id = upload_package(
+            os.path.join(cls.pkgs_path, 'io.murano.apps.PostgreSql.zip'),
+            {'categories': ['Databases'], 'tags': ['tag']}
+        )
+        cls.apache_id = cls.client.upload_package(
             'Apache',
-            {"categories": ["Application Servers"], "tags": ["tag"]},
-            'murano-app-incubator/io.murano.apps.apache.Apache.zip')
-        cls.tomcat_id = upload_package(
+            os.path.join(cls.pkgs_path, 'io.murano.apps.apache.Apache.zip'),
+            {'categories': ['Application Servers'], 'tags': ['tag']}
+        )
+        cls.tomcat_id = cls.client.upload_package(
             'Tomcat',
-            {"categories": ["Application Servers"], "tags": ["tag"]},
-            'murano-app-incubator/io.murano.apps.apache.Tomcat.zip')
-        cls.telnet_id = upload_package(
+            os.path.join(cls.pkgs_path, 'io.murano.apps.apache.Tomcat.zip'),
+            {'categories': ['Application Servers'], 'tags': ['tag']}
+        )
+        cls.telnet_id = cls.client.upload_package(
             'Telnet',
-            {"categories": ["Web"], "tags": ["tag"]},
-            'murano-app-incubator/io.murano.apps.linux.Telnet.zip')
-        cls.ad_id = upload_package(
+            os.path.join(cls.pkgs_path, 'io.murano.apps.linux.Telnet.zip'),
+            {'categories': ['Web'], 'tags': ['tag']}
+        )
+        cls.ad_id = cls.client.upload_package(
             'Active Directory',
-            {"categories": ["Microsoft Services"], "tags": ["tag"]},
-            'murano-app-incubator/io.murano.windows.ActiveDirectory.zip')
+            os.path.join(cls.pkgs_path,
+                         'io.murano.windows.ActiveDirectory.zip'),
+            {'categories': ['Microsoft Services'], 'tags': ['tag']}
+        )
 
     def setUp(self):
         super(MuranoBase, self).setUp()

@@ -23,7 +23,9 @@ from sqlalchemy import desc
 from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.db import models
+from murano.db.services import environments
 from murano.db.services import instances
+from murano.db.services import sessions
 from murano.db import session
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
@@ -38,38 +40,35 @@ LOG = logging.getLogger(__name__)
 
 class ResultEndpoint(object):
     @staticmethod
-    def process_result(context, result):
+    def process_result(context, result, environment_id):
         secure_result = token_sanitizer.TokenSanitizer().sanitize(result)
         LOG.debug('Got result from orchestration '
                   'engine:\n{0}'.format(secure_result))
 
-        if not result['Objects']:
-            LOG.debug('Ignoring result for deleted environment')
-            return
-
-        result_id = result['Objects']['?']['id']
-
         unit = session.get_session()
-        environment = unit.query(models.Environment).get(result_id)
+        environment = unit.query(models.Environment).get(environment_id)
 
         if not environment:
             LOG.warning(_('Environment result could not be handled, specified '
                           'environment was not found in database'))
             return
 
+        if result['Objects'] is None and result.get('ObjectsCopy', {}) is None:
+            environments.EnvironmentServices.remove(environment_id)
+            return
+
         environment.description = result
-        environment.description['Objects']['services'] = \
-            environment.description['Objects'].get('applications', [])
-        del environment.description['Objects']['applications']
-        environment.networking = result.get('networking', {})
+        if environment.description['Objects'] is not None:
+            environment.description['Objects']['services'] = \
+                environment.description['Objects'].pop('applications', [])
+            # environment.networking = result.get('networking', {})
+            action_name = 'Deployment'
+            deleted = False
+        else:
+            action_name = 'Deletion'
+            deleted = True
         environment.version += 1
         environment.save(unit)
-
-        #close session
-        conf_session = unit.query(models.Session).filter_by(
-            **{'environment_id': environment.id, 'state': 'deploying'}).first()
-        conf_session.state = 'deployed'
-        conf_session.save(unit)
 
         #close deployment
         deployment = get_last_deployment(unit, environment.id)
@@ -80,7 +79,7 @@ class ResultEndpoint(object):
         num_warnings = unit.query(models.Status)\
             .filter_by(level='warning', deployment_id=deployment.id).count()
 
-        final_status_text = "Deployment finished"
+        final_status_text = action_name + ' finished'
         if num_errors:
             final_status_text += " with errors"
 
@@ -93,6 +92,18 @@ class ResultEndpoint(object):
         status.level = 'info'
         deployment.statuses.append(status)
         deployment.save(unit)
+
+        #close session
+        conf_session = unit.query(models.Session).filter_by(
+            **{'environment_id': environment.id,
+               'state': 'deploying' if not deleted else 'deleting'}).first()
+        if num_errors > 0:
+            conf_session.state = \
+                sessions.SessionState.DELETE_FAILURE if deleted else \
+                sessions.SessionState.DEPLOY_FAILURE
+        else:
+            conf_session.state = sessions.SessionState.DEPLOYED
+        conf_session.save(unit)
 
 
 def notification_endpoint_wrapper(priority='info'):

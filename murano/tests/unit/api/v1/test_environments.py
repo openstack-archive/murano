@@ -23,8 +23,6 @@ import murano.tests.unit.utils as test_utils
 
 
 class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
-    RPC_IMPORT = 'murano.db.services.environments.rpc'
-
     def setUp(self):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
@@ -165,8 +163,9 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self._set_policy_rules(
             {'delete_environment': '@'}
         )
-        self.expect_policy_check('delete_environment',
-                                 {'environment_id': '12345'})
+        self.expect_policy_check(
+            'delete_environment', {'environment_id': '12345'}
+        )
 
         fake_now = timeutils.utcnow()
         expected = dict(
@@ -188,6 +187,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         test_utils.save_models(e)
 
         rpc_task = {
+            'id': '12345',
+            'action': None,
             'tenant_id': self.tenant,
             'model': {'Attributes': {}, 'Objects': None},
             'token': None

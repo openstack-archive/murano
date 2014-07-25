@@ -49,7 +49,8 @@ class Controller(object):
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
-        if env_status == envs.EnvironmentStatus.deploying:
+        if env_status in (envs.EnvironmentStatus.DEPLOYING,
+                          envs.EnvironmentStatus.DELETING):
             LOG.info(_('Could not open session for environment <EnvId: {0}>,'
                        'environment has deploying '
                        'status.').format(environment_id))
@@ -113,7 +114,7 @@ class Controller(object):
                         '<SessionId {1}>.').format(user_id, session_id))
             raise exc.HTTPUnauthorized()
 
-        if session.state == sessions.SessionState.deploying:
+        if session.state == sessions.SessionState.DEPLOYING:
             LOG.error(_('Session <SessionId: {0}> is in deploying state and '
                         'could not be deleted').format(session_id))
             raise exc.HTTPForbidden()
@@ -145,7 +146,7 @@ class Controller(object):
                         'is invalid').format(session_id))
             raise exc.HTTPForbidden()
 
-        if session.state != sessions.SessionState.open:
+        if session.state != sessions.SessionState.OPENED:
             LOG.error(_('Session <SessionId {0}> is already deployed or '
                         'deployment is in progress').format(session_id))
             raise exc.HTTPForbidden()

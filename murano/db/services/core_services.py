@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import types
+from webob import exc
 
 from murano.common import utils
 from murano.db.services import environments as envs
@@ -46,6 +47,9 @@ class CoreServices(object):
 
         env_description = get_description(environment_id, session_id)
 
+        if env_description is None:
+            return None
+
         if not 'services' in env_description:
             return []
 
@@ -65,6 +69,8 @@ class CoreServices(object):
             save_environment_description
 
         env_description = get_description(environment_id, session_id)
+        if env_description is None:
+            raise exc.HTTPMethodNotAllowed
         if not 'services' in env_description:
             env_description['services'] = []
 

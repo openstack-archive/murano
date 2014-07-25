@@ -15,6 +15,7 @@
 import json
 import os
 import requests
+import time
 import uuid
 
 from tempest import clients
@@ -45,8 +46,24 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
-    def delete_environment(self, environment_id):
-        return self.delete('v1/environments/{0}'.format(environment_id))
+    def delete_environment(self, environment_id, timeout=180):
+        def _is_exist():
+            try:
+                resp, _ = self.get('v1/environments/{0}'.format(
+                    environment_id))
+            except exceptions.NotFound:
+                return False
+            return resp.status == 200
+
+        env_deleted = not _is_exist()
+        self.delete('v1/environments/{0}'.format(environment_id))
+
+        start_time = time.time()
+        while env_deleted is not True:
+            if timeout and time.time() - start_time > timeout:
+                raise Exception('Environment was not deleted')
+            time.sleep(5)
+            env_deleted = not _is_exist()
 
     def update_environment(self, environment_id):
         post_body = '{"name": "%s"}' % ("changed-environment-name")

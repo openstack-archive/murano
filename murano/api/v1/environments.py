@@ -16,6 +16,7 @@ from sqlalchemy import desc
 from webob import exc
 
 from murano.api.v1 import request_statistics
+from murano.api.v1 import sessions
 from murano.common import policy
 from murano.common import utils
 from murano.db import models
@@ -123,22 +124,11 @@ class Controller(object):
         LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
         target = {"environment_id": environment_id}
         policy.check('delete_environment', request.context, target)
-
-        unit = db_session.get_session()
-        environment = unit.query(models.Environment).get(environment_id)
-
-        if environment is None:
-            LOG.info(_('Environment <EnvId {0}> '
-                       'is not found').format(environment_id))
-            raise exc.HTTPNotFound
-
-        if environment.tenant_id != request.context.tenant:
-            LOG.info(_('User is not authorized to access '
-                       'this tenant resources.'))
-            raise exc.HTTPUnauthorized
-
-        envs.EnvironmentServices.delete(environment_id,
-                                        request.context.auth_token)
+        sessions_controller = sessions.Controller()
+        session = sessions_controller.configure(request, environment_id)
+        session_id = session['id']
+        envs.EnvironmentServices.delete(environment_id, session_id)
+        sessions_controller.deploy(request, environment_id, session_id)
 
     @request_statistics.stats_count(API_NAME, 'LastStatus')
     def last(self, request, environment_id):
@@ -150,7 +140,7 @@ class Controller(object):
                                                        session_id)
         session = db_session.get_session()
         result = {}
-        for service in services:
+        for service in services or []:
             service_id = service['?']['id']
             entity_ids = utils.build_entity_map(service).keys()
             last_status = session.query(models.Status). \
