@@ -33,7 +33,7 @@ class MuranoClassLoader(object):
         self._packages_cache = {}
         principal_objects.register(self)
 
-    def _get_package(self, class_name):
+    def _get_package_for_class(self, class_name):
         package_name = self.find_package_name(class_name)
         if package_name is None:
             raise exceptions.NoPackageForClassFound(class_name)
@@ -48,7 +48,7 @@ class MuranoClassLoader(object):
 
         try:
             data = self.load_definition(name)
-            package = self._get_package(name)
+            package = self._get_package_for_class(name)
         except (exceptions.NoPackageForClassFound, exceptions.NoClassFound):
             if create_missing:
                 data = {'Name': name}
