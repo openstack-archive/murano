@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import datetime
 import os
 import types
@@ -136,6 +137,7 @@ class Agent(murano_object.MuranoObject):
         }
 
     def buildExecutionPlan(self, template, resources):
+        template = copy.deepcopy(template)
         if not isinstance(template, types.DictionaryType):
             raise ValueError('Incorrect execution plan ')
         format_version = template.get('FormatVersion')
