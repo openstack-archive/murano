@@ -66,6 +66,7 @@ Methods:
 
   deploy:
     Body:
+
       - $securityGroupName: coalesce(
             $.securityGroupName,
             $.environment.securityGroupManager.defaultGroupName
@@ -85,7 +86,8 @@ Methods:
       - $preparedUserData: $.prepareUserData()
       - $userData: $preparedUserData.data
       - $userDataFormat: $preparedUserData.format
-
+      # Create MQ queue to communicate with the VM
+      - $.agent.prepare()
       - $template:
           resources:
             $.name:
