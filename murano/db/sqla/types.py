@@ -17,11 +17,5 @@ from sqlalchemy.dialects import mysql
 CONF = cfg.CONF
 
 
-def _is_mysql_avail():
-    return CONF.database.connection.startswith('mysql')
-
-
 def LargeBinary():
-    if _is_mysql_avail():
-        return mysql.LONGBLOB
-    return sa.LargeBinary
+    return sa.LargeBinary().with_variant(mysql.LONGBLOB(), 'mysql')
