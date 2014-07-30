@@ -24,6 +24,7 @@ from sqlalchemy import orm as sa_orm
 
 from murano.common import uuidutils
 from murano.db import session as db_session
+from murano.db.sqla import types as st
 from murano.openstack.common import timeutils
 
 
@@ -265,7 +266,7 @@ class Package(BASE, ModificationsTrackedObject):
     id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    archive = sa.Column(sa.LargeBinary)
+    archive = sa.Column(st.LargeBinary())
     fully_qualified_name = sa.Column(sa.String(512),
                                      nullable=False,
                                      index=True,
@@ -283,7 +284,7 @@ class Package(BASE, ModificationsTrackedObject):
                                secondary=package_to_tag,
                                cascade='save-update, merge',
                                lazy='joined')
-    logo = sa.Column(sa.LargeBinary, nullable=True)
+    logo = sa.Column(st.LargeBinary(), nullable=True)
     owner_id = sa.Column(sa.String(36), nullable=False)
     ui_definition = sa.Column(sa.Text)
     supplier_logo = sa.Column(sa.LargeBinary, nullable=True)
