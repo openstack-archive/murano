@@ -267,7 +267,7 @@ class Package(BASE, ModificationsTrackedObject):
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     archive = sa.Column(st.LargeBinary())
-    fully_qualified_name = sa.Column(sa.String(512),
+    fully_qualified_name = sa.Column(sa.String(128),
                                      nullable=False,
                                      index=True,
                                      unique=True)
@@ -344,7 +344,7 @@ class Class(BASE, ModificationsTrackedObject):
     id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
-    name = sa.Column(sa.String(512), nullable=False, index=True)
+    name = sa.Column(sa.String(128), nullable=False, index=True)
     package_id = sa.Column(sa.String(36), sa.ForeignKey('package.id'))
 
 

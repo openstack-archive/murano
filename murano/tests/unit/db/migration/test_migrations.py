@@ -71,7 +71,7 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
         self.assertEqual(sorted(members), sorted(index_columns))
 
     def _check_001(self, engine, data):
-        self.assertEqual('001', migration.version())
+        self.assertEqual('001', migration.version(engine))
         self.assertColumnExists(engine, 'category', 'id')
         self.assertColumnExists(engine, 'environment', 'tenant_id')
 
@@ -116,5 +116,5 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
                           package_table.insert().execute, package)
 
     def _check_002(self, engine, data):
-        self.assertEqual('002', migration.version())
+        self.assertEqual('002', migration.version(engine))
         self.assertColumnExists(engine, 'package', 'supplier_logo')
