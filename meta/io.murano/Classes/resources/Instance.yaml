@@ -56,6 +56,11 @@ Methods:
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
 
+  # Called after the Instance template pieces are in place. It
+  # is at this stage alterations to the template should be made
+  prepareStackTemplate:
+    Body:
+
   setSharedIps:
     Arguments:
       ips:
@@ -101,7 +106,12 @@ Methods:
               description: format('IP address assigned to {0} instance', $.name)
               value:
                 get_attr: [$.name, addresses]
+
       - $.environment.stack.updateTemplate($template)
+
+      # Any additional template preparation
+      - $.prepareStackTemplate()
+
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ip', $this.name)).values().flatten().addr.list()

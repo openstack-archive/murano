@@ -8,7 +8,100 @@ Name: HeatSWConfigInstance
 Extends:
   - Instance
 
+Properties:
+  softwareConfigs:
+    Contract: []
+    Usage: Runtime
+    Default: []
+
+
 Methods:
+  # configName will be prepended with the instance name
+  # configSection should be a map representing the 'config'
+  #      fragment in a StructuredConfig
+  # inputValues should be a map with any required inputs
+  #
+  # A StructuredConfig and StructuredDeployment will be added
+  # to the Instance
+  addStructuredConfig:
+    Arguments:
+      - configName:
+          Contract: $.string().notNull()
+      - configSection:
+          Contract: {}
+      - inputValues:
+          Contract: {}
+    Body:
+      - $group: Heat::Ungrouped
+      - $.addSoftwareConfig($configName, $configSection, $inputValues, configGroup=>$group, isStructured=>True)
+
+  # Adds a SoftwareConfig and SoftwareDeployment.
+  # configName will be prepended with the instance name
+  # configSection should be a map (the 'config' element of a Heat
+  #               Softwareconfig)
+  # inputValues should be a map with any inputs required by the Config
+  addSoftwareConfig:
+    Arguments:
+      - configName:
+          Contract: $.string().notNull()
+      - configSection:
+          Contract: {}
+      - inputValues:
+          Contract: {}
+      - configGroup:
+          Contract: $.string()
+          Default: Heat::Ungrouped
+      - isStructured:
+          Contract: $.bool()
+          Default: False
+    Body:
+      - $full_config_name: $.name + '-' + $configName
+      - $deployment_name: $full_config_name + '-deployment'
+      - $deployment_stderr: $deployment_name + '-stderr'
+      - $deployment_stdout: $deployment_name + '-stdout'
+      - $injectConfig:
+          $configSection
+      - $configType: OS::Heat::SoftwareConfig
+      - $deploymentType: OS::Heat::SoftwareDeployment
+      - If: $isStructured
+        Then:
+         - $configType: OS::Heat::StructuredConfig
+         - $deploymentType: OS::Heat::StructuredDeployment
+         - $injectConfig['completion-signal']: {get_input: deploy_signal_id}
+
+      - $fragment:
+          outputs:
+            $deployment_stdout:
+              value: {get_attr: [$deployment_name, deploy_stdout]}
+            $deployment_stderr:
+              value: {get_attr: [$deployment_name, deploy_stderr]}
+
+          resources:
+            $full_config_name:
+              type: $configType
+              properties:
+                group: $configGroup
+                config:
+                  $injectConfig
+            $deployment_name:
+              type: $deploymentType
+              properties:
+                config: { get_resource: $full_config_name }
+                server: { get_resource: $.name }
+                input_values:
+                  $inputValues
+      - $.softwareConfigs: $.softwareConfigs + list($fragment)
+
+  # Adds to the stack any heat SW config elements
+  prepareStackTemplate:
+    Body:
+      - $environment: $.find(std:Environment)
+      - $.super($.prepareStackTemplate())
+      - For: fragment
+        In: $.softwareConfigs
+        Do:
+        - $environment.stack.updateTemplate($fragment)
+
   prepareUserData:
     Body:
       - Return:
