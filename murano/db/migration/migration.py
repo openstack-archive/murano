@@ -28,9 +28,9 @@ def get_alembic_config():
     return config
 
 
-def version():
+def version(engine=None):
     """Returns current database version."""
-    engine = db_session.get_engine()
+    engine = engine or db_session.get_engine()
     with engine.connect() as conn:
         context = alembic_migration.MigrationContext.configure(conn)
         return context.get_current_revision()

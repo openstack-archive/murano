@@ -13,6 +13,7 @@
 #    under the License.
 
 """Session management functions."""
+import threading
 
 from murano.common import config
 from murano.openstack.common.db.sqlalchemy import session as db_session
@@ -20,17 +21,21 @@ from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
+
 _FACADE = None
+_LOCK = threading.Lock()
 
 
 def _create_facade_lazily():
-    global _FACADE
+    global _LOCK, _FACADE
 
     if _FACADE is None:
-        _FACADE = db_session.EngineFacade(
-            CONF.database.connection, sqlite_fk=True,
-            **dict(CONF.database.iteritems())
-        )
+        with _LOCK:
+            if _FACADE is None:
+                _FACADE = db_session.EngineFacade(
+                    CONF.database.connection, sqlite_fk=True,
+                    **dict(CONF.database.iteritems())
+                )
     return _FACADE
 
 
