@@ -41,6 +41,8 @@ MURANO_SERVICE_PROTOCOL=${MURANO_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
 MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
 
+MURANO_KEYSTONE_SIGNING_DIR=${MURANO_KEYSTONE_SIGNING_DIR:-/tmp/keystone-signing-muranoapi}
+
 # MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
 # This is not required if all OpenStack services are deployed by devstack scripts
 #   on a single node. In this case '/' virtual host (which is the default) is enough.
@@ -137,6 +139,8 @@ function configure_murano {
     cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
     cp $MURANO_DIR/etc/murano/policy.json $MURANO_POLICY_FILE
 
+    cleanup_murano
+
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG
 
@@ -212,6 +216,11 @@ function stop_murano() {
     screen -S $SCREEN_NAME -p murano-engine -X kill
 }
 
+function cleanup_murano() {
+
+    # Cleanup keystone signing dir
+    sudo rm -rf $MURANO_KEYSTONE_SIGNING_DIR
+}
 
 # Restore xtrace
 $XTRACE
