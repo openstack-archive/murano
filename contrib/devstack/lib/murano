@@ -163,6 +163,9 @@ function configure_murano {
 
     # Configure keystone auth url
     iniset $MURANO_CONF_FILE keystone auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
+
+    # Configure Murano API URL
+    iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
 }
 
 
