@@ -1,406 +1,467 @@
 ..
-      Copyright 2014 Mirantis, Inc.
+    Copyright 2014 Mirantis, Inc.
 
-      Licensed under the Apache License, Version 2.0 (the "License"); you may
-      not use this file except in compliance with the License. You may obtain
-      a copy of the License at
+    Licensed under the Apache License, Version 2.0 (the "License"); you may
+    not use this file except in compliance with the License. You may obtain
+    a copy of the License at
 
-          http://www.apache.org/licenses/LICENSE-2.0
+        http://www.apache.org/licenses/LICENSE-2.0
 
-      Unless required by applicable law or agreed to in writing, software
-      distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-      WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-      License for the specific language governing permissions and limitations
-      under the License.
+    Unless required by applicable law or agreed to in writing, software
+    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+    License for the specific language governing permissions and limitations
+    under the License.
+
+
 
 =============
 Windows Image
 =============
 
-Murano requires a Windows Image in QCOW2 format to be builded and
-uploaded into Glance.
+Murano requires a Windows Image in QCOW2 format to be built and uploaded into Glance.
 
-The easiest way to build Windows image for Murano is to build it on the
-host where your OpenStack is installed.
+The easiest way to build Windows image for Murano is to build it on the host where your OpenStack is installed.
 
-Install Required Packages
-=========================
 
-    **Note**
 
-    Please check that hardware virtualization supported and enabled in
-    BIOS.
+Prepare Image Builder Host
+==========================
 
-The following packages should be installed on any host which will be
-used to build Windows Image:
 
-* ipxe-qemu
-* kvm-ipxe
-* qemu-kvm
-* munin-libvirt-plugins
-* python-libvirt
-* virt-goodies
-* virt-manager
-* virt-top
-* virt-what
-* virtinst
-* python
+Install KVM
+-----------
 
-On Ubuntu you could install them using the command below:
+.. note::
 
-::
+  This guide was tested on Ubuntu Server 12.04 x64.
+..
 
-    ># apt-get install ipxe-qemu kvm-ipxe qemu-kvm virt-goodies \
-               virtinst virt-manager libvirt0 libvirt-bin \
-               munin-libvirt-plugins python python-libvirt \
-               python-libxml2 python-minimal python-pycurl \
-               python-pyorbit python-requests python-six \
-               samba samba-common openssh-server virt-top virt-what
+KVM is a default hypervisor in OpenStack, so our build scripts are targeted to this hypervisor only. It may change in future, though.
+
+Install KVM and some additional packages that are required by our scripts
+
+.. code-block:: console
+
+  # apt-get install qemu-kvm virtinst virt-manager
+..
+
+Check that your hardware supports hardware virtualization.
+
+.. code-block:: console
+
+  $ kvm-ok
+  INFO: /dev/kvm exists
+  KVM acceleration can be used
+..
+
+If your output differs, check that harware virtualization is enabled in your BIOS settings. You also could try import KVM kernel module
+
+.. code-block:: console
+
+  $ sudo modprobe kvm-intel
+..
+
+or
+
+.. code-block:: cosole
+
+  $ sudo modprobe kvm-amd
+..
+
+It might be helpful to add an appropriate module name into **/etc/modules** file to auto-load it during system boot. Sometimes it is required on Ubuntu systems.
+
 
 
 Configure Shared Resource
 =========================
 
-**Configure samba based share.**
+Murano Image Builder uses a shared folder located on the host system as an installation source for components.
+Makefile from image builder will copy required files to their locations, but you have to manually configure samba share.
+To do this, use the steps below.
 
-::
+* Install samba
 
-    ># mkdir -p /opt/samba/share
-    ># chown -R nobody:nogroup /opt/samba/share
+  .. code-block:: console
 
-**Configure samba server (/etc/samba/smb.conf).**
+    # apt-get install samba
+  ..
 
-::
+* Create folder that will be shared
+
+  .. code-block:: console
+
+    # mkdir -p /opt/samba/share
+    # chown -R nobody:nogroup /opt/samba/share
+  ..
+
+* Configure samba server (/etc/samba/smb.conf)
+
+  .. code-block:: text
+    :linenos:
 
     ...
     [global]
        ...
-       security = user
+      security = share
+      ...
+    [image-builder-share]
+        comment = Image Builder Share
+        browsable = yes
+        path = /opt/image-builder/share
+        guest ok = yes
+        guest user = nobody
+        read only = no
+        create mask = 0755
     ...
-    [share]
-       comment = Deployment Share
-       path = /opt/samba/share
-       browsable = yes
-       read only = no
-       create mask = 0755
-       guest ok = yes
-       guest account = nobody
-    ...
+  ..
 
-**Restart services.**
+* Restart samba services
 
-::
+  .. code-block:: console
 
-    ># service smbd restart
-    ># service nmbd restart
+      # service smbd restart
+      # service nmbd restart
+  ..
 
-Prerequisites
-===============
 
-Download the files below and copy them into their places in your
-**${SHARE\_PATH}** folder (we usually use **/opt/samba/share** as
-**${SHARE\_PATH}**):
 
-* *Windows 2012 Server ISO evaluation version*
+Download Prerequisites
+======================
 
-  * ${SHARE\_PATH}/libvirt/images/ws-2012-eval.iso
-  * `http://technet.microsoft.com/en-us/evalcenter/hh670538.aspx`_
 
-* *VirtIO drivers for Windows*
+.. _windows_installation_iso:
 
-  * ${SHARE\_PATH}/libvirt/images/virtio-win-0.1-74.iso
-  * `http://alt.fedoraproject.org/pub/alt/virtio-win/stable/virtio-win-0.1-74.iso`_
+Windows Server Installation ISO
+-------------------------------
 
-* *CloudBase-Init for Windows*
+.. list-table::
+    :header-rows: 1
+    :widths: 30, 15, 55
 
-  * ${SHARE\_PATH}/share/files/CloudbaseInitSetup\_Beta.msi
-  * `https://www.cloudbase.it/downloads/CloudbaseInitSetup_Beta.msi`_
+    * - Windows Version
+      - Version String
+      - Save to
 
-* *Far Manager*
+    * - Windows Server 2008 R2 [#win2k8r2_link]_
+      - 6.1.7601
+      - /opt/image-builder/share/libvirt/images/ws-2008-eval.iso
 
-  * ${SHARE\_PATH}/share/files/Far30b3367.x64.20130717.msi
-  * `http://www.farmanager.com/files/Far30b3525.x64.20130717.msi`_
+    * - Windows Server 2012 [#win2k12_link]_
+      - 6.3.9200
+      - /opt/image-builder/share/libvirt/images/ws-2012-eval.iso
+..
 
-* Git client
+.. warning::
 
-  * ${SHARE\_PATH}/share/files/Git-1.8.1.2-preview20130601.exe
-  * `https://msysgit.googlecode.com/files/Git-1.8.3-preview20130601.exe`_
+  Windows Server 2008 R2 must include Service Pack 1 updates. This is required to install PowerShell V3 which is required by Murano Agent.
+..
 
-* *Sysinternals Suite*
+|
+.. [#win2k8r2_link] http://www.microsoft.com/en-us/download/details.aspx?id=11093
+.. [#win2k12_link] http://technet.microsoft.com/en-US/evalcenter/hh670538.aspx?ocid=&wt.mc_id=TEC_108_1_33
 
-  * ${SHARE\_PATH}/share/files/SysinternalsSuite.zip
-  * `http://download.sysinternals.com/files/SysinternalsSuite.zip`_
 
-* *unzip.exe tool*
+.. _required_prerequisites:
 
-  * ${SHARE\_PATH}/share/files/unzip.exe
-  * `https://www.dropbox.com/sh/zthldcxnp6r4flm/AACwiyfcrlGDt3ygCFHrbwMra/unzip.exe`_
+Required Components
+-------------------
 
-* *PowerShell v3*
+.. list-table::
+  :header-rows: 1
+  :widths: 30, 70
 
-  * ${SHARE\_PATH}/share/files/Windows6.1-KB2506143-x64.msu
-  * `http://www.microsoft.com/en-us/download/details.aspx?id=34595`_
-* *.NET 4.0*
+  * - Component
+    - Save to
 
-  * ${SHARE\_PATH}/share/files/dotNetFx40\_Full\_x86\_x64.exe
-  * `http://www.microsoft.com/en-us/download/details.aspx?id=17718`_
+  * - VirtIO drivers for Windows [#virtio_iso_link]_
+    - /opt/image-builder/share/libvirt/images/virtio-win-0.1-74.iso
 
+  * - CloudBase-Init for Windows [#cloudbase_init_link]_
+    - /opt/image-builder/share/files/CloudbaseInitSetup_Beta.msi
 
-* *.NET 4.5*
+  * - .NET 4.0 [#dot_net_40_link]_
+    - /opt/image-builder/share/files/dotNetFx40_Full_x86_x64.exe
 
-  * ${SHARE\_PATH}/share/files/dotNetFx45\_Full\_setup.exe
-  * `http://www.microsoft.com/en-us/download/details.aspx?id=30653`_
+  * - PowerShell v3 [#powershell_v3_link]_
+    - /opt/image-builder/share/files/Windows6.1-KB2506143-x64.msu
 
+  * - Murano Agent [#murano_agent_link]_
+    - /opt/image-builder/share/files/MuranoAgent.zip
 
-* *Murano Agent*
+  * - Git client [#msysgit_link]_
+    - /opt/image-builder/share/files/Git-1.8.1.2-preview20130601.exe
+..
 
-  * ${SHARE\_PATH}/share/files/MuranoAgent.zip
-  * `https://www.dropbox.com/sh/zthldcxnp6r4flm/AADh6LkVkcw2j8nKZevqedHja/MuranoAgent.zip`_
+.. warning::
 
+  PowerShell V3 is a **mandatory** prerequisite. It is required by Murano Agent. To check your PowerShell version use PowerShell command *Get-Host*.
+..
 
-.. _`http://technet.microsoft.com/en-us/evalcenter/hh670538.aspx`: http://technet.microsoft.com/en-us/evalcenter/hh670538.aspx
-.. _`http://alt.fedoraproject.org/pub/alt/virtio-win/stable/virtio-win-0.1-74.iso`: http://alt.fedoraproject.org/pub/alt/virtio-win/stable/virtio-win-0.1-74.iso
-.. _`https://www.cloudbase.it/downloads/CloudbaseInitSetup_Beta.msi`: https://www.cloudbase.it/downloads/CloudbaseInitSetup_Beta.msi
-.. _`http://www.farmanager.com/files/Far30b3525.x64.20130717.msi`: http://www.farmanager.com/files/Far30b3525.x64.20130717.msi
-.. _`https://msysgit.googlecode.com/files/Git-1.8.3-preview20130601.exe`: https://msysgit.googlecode.com/files/Git-1.8.3-preview20130601.exe
-.. _`http://download.sysinternals.com/files/SysinternalsSuite.zip`: http://download.sysinternals.com/files/SysinternalsSuite.zip
-.. _`https://www.dropbox.com/sh/zthldcxnp6r4flm/AACwiyfcrlGDt3ygCFHrbwMra/unzip.exe`: https://www.dropbox.com/sh/zthldcxnp6r4flm/AACwiyfcrlGDt3ygCFHrbwMra/unzip.exe
-.. _`http://www.microsoft.com/en-us/download/details.aspx?id=34595`: http://www.microsoft.com/en-us/download/details.aspx?id=34595
-.. _`http://www.microsoft.com/en-us/download/details.aspx?id=17718`: http://www.microsoft.com/en-us/download/details.aspx?id=17718
-.. _`http://www.microsoft.com/en-us/download/details.aspx?id=30653`: http://www.microsoft.com/en-us/download/details.aspx?id=30653
-.. _`https://www.dropbox.com/sh/zthldcxnp6r4flm/AADh6LkVkcw2j8nKZevqedHja/MuranoAgent.zip`: https://www.dropbox.com/sh/zthldcxnp6r4flm/AADh6LkVkcw2j8nKZevqedHja/MuranoAgent.zip
+.. warning::
 
+  When downloading VirtIO drivers choose only stable versions.
+  Unstable versions might lead to errors during guest unattended installation.
+  You can check the latest version avaible here: http://alt.fedoraproject.org/pub/alt/virtio-win/stable
+..
 
-Additional Software
-===================
+|
+.. [#ws2012iso_link] http://technet.microsoft.com/en-us/evalcenter/hh670538.aspx
+.. [#virtio_iso_link] http://alt.fedoraproject.org/pub/alt/virtio-win/stable/virtio-win-0.1-74.iso
+.. [#cloudbase_init_link] https://www.cloudbase.it/downloads/CloudbaseInitSetup_Beta.msi
+.. [#dot_net_40_link] http://www.microsoft.com/en-us/download/details.aspx?id=17718
+.. [#powershell_v3_link] http://www.microsoft.com/en-us/download/details.aspx?id=34595
+.. [#murano_agent_link] https://www.dropbox.com/sh/zthldcxnp6r4flm/AADh6LkVkcw2j8nKZevqedHja/MuranoAgent.zip
+.. [#msysgit_link] https://msysgit.googlecode.com/files/Git-1.8.3-preview20130601.exe
 
-This section describes additional software which is required to build an
-Windows Image.
 
-**Windows ADK**
+.. _optional_prerequisites:
 
-*Windows Assessment and Deployment Kit (ADK) for Windows® 8* is required
-to build your own answer files for auto unattended Windows installation.
+Optional Components
+-------------------
 
-You can dowload it from `http://www.microsoft.com/en-us/download/details.aspx?id=30652`_.
+These components are not mandatory for Murano Agent to function properly.
+However, they may help you work with the image after deployment.
 
-**PuTTY**
+.. list-table::
+  :header-rows: 1
+  :widths: 30, 70
 
-PuTTY is a useful tool to manage your Linux boxes via SSH.
+  * - Component
+    - Save to
 
-You can download it from
-`http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html`_.
+  * - Far Manager [#far_manager_link]_
+    - /opt/image-builder/share/files/Far30b3367.x64.20130717.msi
 
-**Windows Server ISO image**
+  * - Sysinternals Suite [#sysinternals_link]_
+    - /opt/image-builder/share/files/SysinternalsSuite.zip
 
-We use the following Windows installation images:
+  * - unzip.exe [#unzip_link]_
+    - /opt/image-builder/share/files/unzip.exe
 
-* Windows Server 2008 R2
+  * - .NET 4.5 [#dot_net_45_link]_
+    - /opt/image-builder/share/files/dotNetFx45_Full_setup.exe
+..
 
-  * Image Name:
-               7601.17514.101119-1850\_x64fre\_server\_eval\_en-us-GRMSXEVAL\_EN\_DVD.iso
-  * URL:
-        `http://www.microsoft.com/en-us/download/details.aspx?id=11093`_
+|
+.. [#far_manager_link] http://www.farmanager.com/files/Far30b3525.x64.20130717.msi
+.. [#sysinternals_link] http://download.sysinternals.com/files/SysinternalsSuite.zip
+.. [#unzip_link] https://www.dropbox.com/sh/zthldcxnp6r4flm/AACwiyfcrlGDt3ygCFHrbwMra/unzip.exe
+.. [#dot_net_45_link] http://www.microsoft.com/en-us/download/details.aspx?id=30653
 
-* Windows Server 2012
 
- * Image Name:
-              9200.16384.WIN8\_RTM.120725-1247\_X64FRE\_SERVER\_EVAL\_EN-US-HRM\_SSS\_X64FREE\_EN-US\_DV5.iso
- * URL:
-        `http://technet.microsoft.com/en-US/evalcenter/hh670538.aspx?ocid=&wt.mc\_id=TEC\_108\_1\_33`_
 
 
-**VirtIO Red Hat drivers ISO image**
 
-    **Warning**
+Additional Tools
+================
 
-    Please, choose stable version instead of latest, We’ve got errors
-    with unstable drivers during guest unattended install.
+Tools from this section are not necessary to build an image.
+However, they may be helpful if you want to create an image with different configuration.
 
-Download drivers from
-`http://alt.fedoraproject.org/pub/alt/virtio-win/stable/`_
 
-**Floppy Image With Unattended File**
+Windows Assessment and Deployment Kit (ADK)
+-------------------------------------------
 
-Run following commands as root:
+*Windows ADK* is required if you want to build your own answer files for auto unattended Windows installation.
 
-1. Create emtpy floppy image in your home folder
+Download it from http://www.microsoft.com/en-us/download/details.aspx?id=30652
 
-   ::
 
-       ># dd bs=512 count=2880 \
-          if=/dev/zero of=~/floppy.img \
-          mkfs.msdos ~/floppy.img
+Floppy Image With Unattended File
+---------------------------------
 
-2. Mount the image to **/media/floppy**
+Floppy image with answer file for unattended installation is needed to automate Windows installation process.
 
-   ::
+* Create emtpy floppy image in your home folder
 
-       ># mkdir /media/floppy mount -o loop \
-          ~/floppy.img /media/floppy
+  .. code-block:: console
 
-3. Download **autounattend.xml** file from
-   `https://raw.githubusercontent.com/stackforge/murano-deployment/master/image-builder/share/files/ws-2012-std/autounattend.xml.template`_
+    $ mkdir ~/flp/files
+    $ mkdir ~/flp/mnt
+  ..
 
-   ::
+  .. code-block:: console
 
-    ># cd ~
-    ># wget https://raw.githubusercontent.com/stackforge/murano-deployment/master/image-builder/share/files/ws-2012-std/autounattend.xml.template
+    $ dd bs=512 count=2880 if=/dev/zero of=~/flp/floppy.img
+    $ mkfs.msdos ~/flp/floppy.img
+  ..
 
+* Mount the image
 
-4. Copy our **autounattend.xml** to **/media/floppy**
+  .. code-block:: console
 
-   ::
+      $ mkdir ~/flp/mnt
+      $ sudo mount -o loop ~/floppy.img ~/flp/mnt
+  ..
 
-    ># cp ~/autounattend.xml /media/floppy
+* Download **autounattend.xml.template** file from https://github.com/stackforge/murano-deployment/tree/master/contrib/windows/image-builder/share/files
 
-5. Unmount the image
+  This folder contains unatteded files for several Windows versions, choose one that matches your Windows version.
 
-   ::
+* Copy that file to mounted floppy image
 
-    ># umount /media/floppy
+  .. code-block:: console
 
-.. _`http://www.microsoft.com/en-us/download/details.aspx?id=30652`: http://www.microsoft.com/en-us/download/details.aspx?id=30652
-.. _`http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html`: http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html
-.. _`http://www.microsoft.com/en-us/download/details.aspx?id=11093`: http://www.microsoft.com/en-us/download/details.aspx?id=11093
-.. _`http://technet.microsoft.com/en-US/evalcenter/hh670538.aspx?ocid=&wt.mc\_id=TEC\_108\_1\_33`: http://technet.microsoft.com/en-US/evalcenter/hh670538.aspx?ocid=&wt.mc\_id=TEC\_108\_1\_33
-.. _`http://alt.fedoraproject.org/pub/alt/virtio-win/stable/`: http://alt.fedoraproject.org/pub/alt/virtio-win/stable/
-.. _`https://raw.githubusercontent.com/stackforge/murano-deployment/master/image-builder/share/files/ws-2012-std/autounattend.xml.template`: https://raw.githubusercontent.com/stackforge/murano-deployment/master/image-builder/share/files/ws-2012-std/autounattend.xml.template
+      $ cp ~/autounattend.xml.template ~/flp/mnt/autounattend.xml
+  ..
 
-Build Windows Image (Automatic Way)
-===================================
+* Replace string **%_IMAGE_BUILDER_IP_%** in that file with **192.168.122.1**
 
-1. Clone **murano-deployment** repository
+* Unmount the image
 
-   ::
+  .. code-block:: console
 
-       ># git clone git://github.com/stackforge/murano-deployment.git
+      $ sudo umount ~/flp/mnt
+  ..
 
-2. Change directory to **murano-deployment/image-builder** folder.
 
-3. Create folder structure for image builder
 
-   ::
+Build Windows Image with Murano
+===============================
 
-       ># make build-root
 
-4. Create shared resource
+.. _build_image_using_image_builder_scripts:
 
-   **Add to /etc/samba/smb.conf.**
+Build Windows Image Using Image Builder Script
+----------------------------------------------
 
-   ::
+* Clone **murano-deployment** repository
 
-       [image-builder-share]
-          comment = Image Builder Share
-          browsable = yes
-          path = /opt/image-builder/share
-          guest ok = yes
-          guest user = nobody
-          read only = no
-          create mask = 0755
+  .. code-block:: console
 
-   **Restart samba services.**
+    $ git clone git://github.com/stackforge/murano-deployment.git
+  ..
 
-   ::
+* Change directory to image-builder folder
 
-       ># restart smbd && restart nmbd
+  .. code-block:: console
 
-5. Test that all required files are in place
+    $ cd murano-deployment/contrib/windows/image-builder
+  ..
 
-   ::
+* Create folder structure for image builder
 
-       ># make test-build-files
+  .. code-block:: console
 
-6. Get list of available images
+    $ sudo make build-root
+  ..
 
-   ::
+* Download build prerequisites, and copy them to correct folders
 
-       ># make
+  * :ref:`windows_installation_iso`
+  * :ref:`required_prerequisites`
+  * :ref:`optional_prerequisites` (Optional)
 
-7. Run image build process
+* Test that all required files are in place
 
-   ::
+  .. code-block:: console
 
-       ># make ws-2012-std
+    $ sudo make test-build-files
+  ..
 
-8. Wait until process finishes
+* Get list of available images
 
-9. The image file **ws-2012-std.qcow2** should be stored under
-**/opt/image-builder/share/images** folder.
+  .. code-block:: console
 
-Build Windows Image (Manual Way)
-================================
+    $ make
+  ..
 
-    **Warning**
+* Run image build process (e.g. to build Windows Server 2012)
 
-    Please note that the preferred way to build images is to use
-    **Automated Build** described in the previous chapter.
+  .. code-block:: console
 
-**Get Post-Install Scripts**
+    $ sudo make ws-2012-std
+  ..
 
-There are a few scripts which perform all the required post-installation
-tasks.
+* Wait until process finishes
 
-Package installation tasks are performed by script named **wpi.ps1**.
+* The image file **ws-2012-std.qcow2** should be stored inside **/opt/image-builder/share/images** folder.
 
-Download it from `https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/wpi.ps1`_
 
-    **Note**
 
-    There are a few scripts named **wpi.ps1**, each supports only one
-    version of Windows image. The script above is intended to be used to
-    create Windows Server 2012 Standard. To build other version of
-    Windows please use appropriate script from **scripts** folder.
+Build Windows Image Manualy
+---------------------------
 
-Clean-up actions to finish image preparation are performed by
-**Start-Sysprep.ps1** script.
+.. note::
 
-Download it from `https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/Start-Sysprep.ps1`_
+  Please note that the preferred way to build images is to use Image Builder scripts, see :ref:`build_image_using_image_builder_scripts`
+..
 
-These scripts should be copied to the shared resource folder, subfolder
-**Scripts**.
 
-**Create a VM**
+Get Post-Install Scripts
+------------------------
 
-This section describes steps required to build an image of Windows
-Virtual Machine which could be used with Murano. There are two possible
-ways to create it - from CLI or using GUI tools. We describe both in
-this section.
+There are a few scripts which perform all the required post-installation tasks.
 
-    **Note**
+They all are located in https://github.com/stackforge/murano-deployment/tree/master/contrib/windows/image-builder/share/scripts
 
-    Run all commands as root.
 
-**Way 1: Using CLI Tools**
+.. note::
 
-This section describes the required step to launch a VM using CLI tools
-only.
+  There are subfolders for each supported Windows Version.
+  Choose one that matches Windows Version you are building.
+..
+
+This folder contains several scripts
+
+.. list-table::
+  :header-rows: 1
+  :widths: 20, 80
+
+  * - Script Name
+    - Description
+
+  * - wpi.ps1
+    - Handles component installation and system configuration tasks
+
+  * - Start-Sysprep.ps1
+    - Prepares system to be syspreped (cleans log files, stops some services and so on), and starts sysprep
+
+  * - Start-AtFirstBoot.ps1
+    - Performes basic after-installation tasks
+..
+
+
+Download these scripts and save them into /opt/image-builder/share/scripts
+
+
+Create a VM
+-----------
+
+Now you need a virtual machine instance. There are two possible ways to create it - using CLI or GUI tools. We describe both in this section.
+
+
+Using CLI Tools
+^^^^^^^^^^^^^^^
 
 1. Preallocate disk image
 
-   ::
+  .. code-block:: console
 
-       ># qemu-img create -f raw /var/lib/libvirt/images/ws-2012.img 40G
+    $ qemu-img create -f raw /var/lib/libvirt/images/ws-2012.img 40G
+  ..
 
 2. Start the VM
 
-   ::
+  .. code-block:: console
 
-       ># virt-install --connect qemu:///system --hvm --name WinServ \
-          --ram 2048 --vcpus 2 --cdrom /opt/samba/share/9200.16384.WIN8_RTM\
-       .120725-1247_X64FRE_SERVER_EVAL_EN-US-HRM_SSS_X64FREE_EN-US_DV5.ISO \
-         --disk path=/opt/samba/share/virtio-win-0.1-52.iso,device=cdrom \
-         --disk path=/opt/samba/share/floppy.img,device=floppy \
-         --disk path=/var/lib/libvirt/images/ws-2012.qcow2\
-       ,format=qcow2,bus=virtio,cache=none \
-         --network network=default,model=virtio \
-         --memballoon model=virtio --vnc --os-type=windows \
-         --os-variant=win2k8 --noautoconsole \
-         --accelerate --noapic --keymap=en-us --video=cirrus --force
+    # virt-install --connect qemu:///system --hvm --name WinServ \
+    > --ram 2048 --vcpus 2 --cdrom /opt/samba/share/9200.16384.WIN8_RTM\
+    >.120725-1247_X64FRE_SERVER_EVAL_EN-US-HRM_SSS_X64FREE_EN-US_DV5.ISO \
+    > --disk path=/opt/samba/share/virtio-win-0.1-52.iso,device=cdrom \
+    > --disk path=/opt/samba/share/floppy.img,device=floppy \
+    > --disk path=/var/lib/libvirt/images/ws-2012.qcow2\
+    >,format=qcow2,bus=virtio,cache=none \
+    > --network network=default,model=virtio \
+    > --memballoon model=virtio --vnc --os-type=windows \
+    > --os-variant=win2k8 --noautoconsole \
+    > --accelerate --noapic --keymap=en-us --video=cirrus --force
+  ..
 
-**Way 2: Using virt-manager UI**
 
-A VM also could be lauched via GUI tools like virt-manager.
+Using virt-manager UI
+^^^^^^^^^^^^^^^^^^^^^
 
 1. Launch *virt-manager* from shell as root
 
@@ -424,15 +485,85 @@ A VM also could be lauched via GUI tools like virt-manager.
 
 11. Start installation process and open guest vm screen through **Console** button
 
-**Convert the image from RAW to QCOW2 format.**
 
-The image must be converted from RAW format to QCOW2 before being
-imported into Glance.
+Install OS
+----------
 
-::
+Launch your virtual machine, connect to its virtual console and complete OS installation. At the end of this step you should have Windows Server system that you are able to log into.
 
-    ># qemu-img convert -O qcow2 /var/lib/libvirt/images/ws-2012.raw \
-       /var/lib/libvirt/images/ws-2012-ref.qcow2
+Install Prerequisites and Murano
+--------------------------------
 
-.. _`https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/wpi.ps1`: https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/wpi.ps1
-.. _`https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/Start-Sysprep.ps1`: https://raw.github.com/stackforge/murano-deployment/master/image-builder/share/scripts/ws-2012-std/Start-Sysprep.ps1
+* Create folders where Murano components will be installed
+
+  .. list-table::
+    :header-rows: 1
+    :widths: 20, 80
+
+    * - Path
+      - Description
+
+    * - C:\\Murano
+      - Root directory for Murano
+
+    * - C:\\Murano\\Agent
+      - Murano Agent installation directory
+
+    * - C:\\Murano\\Modules
+      - PowerShell modules required by Murano
+
+    * - C:\\Murano\\Scripts
+      - PowerShell scrtips and other files required by Murano
+  ..
+
+* Open **Explorer** and navigate to **\\192.168.122.1\share** **192.168.122.1** is an IP address of KVM hypervisor assigned by default.
+
+* Copy Murano Agent files into C:\Murano\Agent
+
+* Copy CoreFunctions directory (entire directory!) into C:\Murano\Modules
+
+* Install .NET 4.0
+
+* Register Murano Agent
+
+  .. code-block:: cmd
+
+    > cd C:\Murano\Agent
+    > .\WindowsMuranoAgent.exe /install
+  ..
+
+* Change PowerShell execution policy to less restricted
+
+  .. code-block:: powershell
+
+    Set-ExecutionPolicy RemoteSigned
+  ..
+
+* Register CoreFunctions modules
+
+  .. code-block:: powershell
+
+    Import-Module C:\Murano\Modules\CoreFunctions\CoreFunctions.psm1 -ArgumentList register
+  ..
+
+* Install CloudInit
+
+* Run Sysprep
+
+  .. code-block:: powershell
+
+    C:\Murano\Scripts\Start-Sysprep.ps1 -BatchExecution
+  ..
+
+* Wait until sysprep phase finishes and system powers off.
+
+Convert the image from RAW to QCOW2 format
+------------------------------------------
+
+The image must be converted from RAW format to QCOW2 before being imported into Glance.
+
+.. code-block:: console
+
+    # qemu-img convert -O qcow2 /var/lib/libvirt/images/ws-2012.raw \
+    > /var/lib/libvirt/images/ws-2012-ref.qcow2
+..
