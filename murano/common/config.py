@@ -168,6 +168,12 @@ stats_opt = [
                       'Default value is 5 minutes.'))
 ]
 
+engine_opts = [
+    cfg.BoolOpt('disable_murano_agent', default=False,
+                help=_('Disallow the use of murano-agent'))
+]
+
+# TODO(sjmc7): move into engine opts?
 metadata_dir = cfg.StrOpt('metadata-dir', default='./meta',
                           help='Metadata dir')
 
@@ -196,6 +202,7 @@ CONF.register_opts(heat_opts, group='heat')
 CONF.register_opts(neutron_opts, group='neutron')
 CONF.register_opts(keystone_opts, group='keystone')
 CONF.register_opts(murano_opts, group='murano')
+CONF.register_opts(engine_opts, group='engine')
 CONF.register_opt(cfg.StrOpt('file_server'))
 CONF.register_cli_opt(cfg.StrOpt('murano_metadata_url'))
 CONF.register_cli_opt(metadata_dir)

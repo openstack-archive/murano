@@ -20,12 +20,17 @@ import types
 import uuid
 
 import eventlet.event
+import logging
 
+import murano.common.config as config
 import murano.common.messaging as messaging
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.dsl.yaql_expression as yaql_expression
 import murano.engine.system.common as common
+
+
+LOG = logging.getLogger(__name__)
 
 
 class AgentException(Exception):
@@ -35,19 +40,36 @@ class AgentException(Exception):
 @murano_class.classname('io.murano.system.Agent')
 class Agent(murano_object.MuranoObject):
     def initialize(self, _context, host):
-        environment = yaql_expression.YaqlExpression(
+        self._enabled = False
+        if config.CONF.engine.disable_murano_agent:
+            LOG.debug("murano-agent is disabled by the server")
+            return
+
+        self._environment = self._get_environment(_context)
+        self._enabled = True
+        self._queue = str('e%s-h%s' % (
+            self._environment.object_id, host.object_id)).lower()
+
+    def _get_environment(self, _context):
+        return yaql_expression.YaqlExpression(
             "$host.find('io.murano.Environment').require()"
         ).evaluate(_context)
 
-        self._queue = str('e%s-h%s' % (
-            environment.object_id, host.object_id)).lower()
-        self._environment = environment
+    @property
+    def enabled(self):
+        return self._enabled
 
     def queueName(self):
         return self._queue
 
-    def _send(self, template, wait_results):
+    def _check_enabled(self):
+        if config.CONF.engine.disable_murano_agent:
+            raise AgentException(
+                "Use of murano-agent is disallowed "
+                "by the server configuration")
 
+    def _send(self, template, wait_results):
+        """Send a message over the MQ interface"""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()
@@ -77,17 +99,21 @@ class Agent(murano_object.MuranoObject):
             return None
 
     def call(self, template, resources):
+        self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
         return self._send(plan, True)
 
     def send(self, template, resources):
+        self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
         return self._send(plan, False)
 
     def callRaw(self, plan):
+        self._check_enabled()
         return self._send(plan, True)
 
     def sendRaw(self, plan):
+        self._check_enabled()
         return self._send(plan, False)
 
     def _process_v1_result(self, result):

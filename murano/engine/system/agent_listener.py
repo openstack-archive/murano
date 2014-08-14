@@ -15,6 +15,7 @@
 
 import eventlet
 
+import murano.common.config as config
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.engine.system.common as common
@@ -24,26 +25,49 @@ from murano.openstack.common import log as logging
 LOG = logging.getLogger(__name__)
 
 
+class AgentListenerException(Exception):
+    pass
+
+
 @murano_class.classname('io.murano.system.AgentListener')
 class AgentListener(murano_object.MuranoObject):
     def initialize(self, _context, name):
+        self._enabled = False
+        if config.CONF.engine.disable_murano_agent:
+            return
+        self._enabled = True
         self._results_queue = str('-execution-results-%s' % name.lower())
         self._subscriptions = {}
         self._receive_thread = None
+
+    @property
+    def enabled(self):
+        return self._enabled
 
     def queueName(self):
         return self._results_queue
 
     def start(self):
+        if config.CONF.engine.disable_murano_agent:
+            # Noop
+            LOG.debug("murano-agent is disabled by the server")
+            return
+
         if self._receive_thread is None:
             self._receive_thread = eventlet.spawn(self._receive)
 
     def stop(self):
+        # _receive_thread will be None if agent is disabled
         if self._receive_thread is not None:
             self._receive_thread.kill()
             self._receive_thread = None
 
     def subscribe(self, message_id, event):
+        if config.CONF.engine.disable_murano_agent:
+            raise AgentListenerException(
+                "Use of murano-agent is disallowed "
+                "by the server configuration")
+
         self._subscriptions[message_id] = event
 
     def _receive(self):
