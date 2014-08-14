@@ -28,12 +28,21 @@ LOG = logging.getLogger(__name__)
 class PackageClassLoader(class_loader.MuranoClassLoader):
     def __init__(self, package_loader):
         self.package_loader = package_loader
-        self._packages_cache = {}
+        self._class_packages = {}
         super(PackageClassLoader, self).__init__()
+
+    def _get_package_for(self, class_name):
+        package = self._class_packages.get(class_name, None)
+        if package is None:
+            package = self.package_loader.get_package_by_class(class_name)
+            if package is not None:
+                for cn in package.classes:
+                    self._class_packages[cn] = package
+        return package
 
     def load_definition(self, name):
         try:
-            package = self.package_loader.get_package_by_class(name)
+            package = self._get_package_for(name)
             return package.get_class(name)
         except Exception:
             raise exceptions.NoClassFound(name)
@@ -44,7 +53,7 @@ class PackageClassLoader(class_loader.MuranoClassLoader):
         return package
 
     def find_package_name(self, class_name):
-        app_pkg = self.package_loader.get_package_by_class(class_name)
+        app_pkg = self._get_package_for(class_name)
         return None if app_pkg is None else app_pkg.full_name
 
     def create_root_context(self):
