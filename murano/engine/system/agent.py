@@ -59,6 +59,10 @@ class Agent(murano_object.MuranoObject):
     def enabled(self):
         return self._enabled
 
+    def prepare(self):
+        with common.create_rmq_client() as client:
+            client.declare(self._queue, enable_ha=True, ttl=86400000)
+
     def queueName(self):
         return self._queue
 
@@ -82,7 +86,6 @@ class Agent(murano_object.MuranoObject):
         msg.id = msg_id
 
         with common.create_rmq_client() as client:
-            client.declare(self._queue, enable_ha=True, ttl=86400000)
             client.send(message=msg, key=self._queue)
 
         if wait_results:
