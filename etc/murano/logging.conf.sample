@@ -1,0 +1,74 @@
+[loggers]
+keys: root,murano
+
+[handlers]
+keys: watchedfile, stderr, stdout, null
+
+[formatters]
+keys: context, default
+
+[logger_root]
+level = WARNING
+handlers = null
+
+[logger_murano]
+level = INFO
+handlers = watchedfile
+qualname = murano
+
+[logger_amqp]
+level = WARNING
+handlers = stderr
+qualname = amqp
+
+[logger_amqplib]
+level = WARNING
+handlers = stderr
+qualname = amqplib
+
+[logger_sqlalchemy]
+level = WARNING
+handlers = stderr
+qualname = sqlalchemy
+# "level = INFO" logs SQL queries.
+# "level = DEBUG" logs SQL queries and results.
+# "level = WARNING" logs neither.  (Recommended for production systems.)
+
+[logger_eventletwsgi]
+level = WARNING
+handlers = stderr
+qualname = eventlet.wsgi.server
+
+[logger_messaging]
+level = WARNING
+handlers = stderr
+qualname = oslo.messaginga
+
+[handler_null]
+class = murano.openstack.common.log.NullHandler
+formatter = default
+args = ()
+
+[handler_stderr]
+class = StreamHandler
+args = (sys.stderr,)
+formatter = context
+
+[handler_stdout]
+class = StreamHandler
+args = (sys.stdout,)
+formatter = context
+
+[handler_watchedfile]
+class: handlers.WatchedFileHandler
+args: ('murano.log',)
+formatter: context
+
+[formatter_context]
+class: murano.openstack.common.log.ContextFormatter
+args: (datefmt=datefmt)
+format: %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user)s %(tenant)s] %(instance)s%(message)s
+datefmt: %Y-%m-%d %H:%M:%S
+
+[formatter_default]
+format = %(message)s
