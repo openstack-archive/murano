@@ -31,23 +31,29 @@ Methods:
           Contract: {}
       - inputValues:
           Contract: {}
+          Default: {}
     Body:
       - $group: Heat::Ungrouped
-      - $.addSoftwareConfig($configName, $configSection, $inputValues, configGroup=>$group, isStructured=>True)
+      - $.addSoftwareConfig($configName, $configSection,
+                            inputValues=>$inputValues,
+                            configGroup=>$group, isStructured=>True)
 
   # Adds a SoftwareConfig and SoftwareDeployment.
   # configName will be prepended with the instance name
-  # configSection should be a map (the 'config' element of a Heat
-  #               Softwareconfig)
+  # configSection should be of a suitable form (structured config takes maps,
+  # ordinary software config can take a string or a map),
+  # configGroup can be Heat::Ungrouped, script, puppet etc
   # inputValues should be a map with any inputs required by the Config
   addSoftwareConfig:
     Arguments:
       - configName:
           Contract: $.string().notNull()
       - configSection:
-          Contract: {}
+          # Should be string unless for a structured config
+          Contract: $.notNull()
       - inputValues:
           Contract: {}
+          Default: {}
       - configGroup:
           Contract: $.string()
           Default: Heat::Ungrouped
@@ -59,8 +65,7 @@ Methods:
       - $deployment_name: $full_config_name + '-deployment'
       - $deployment_stderr: $deployment_name + '-stderr'
       - $deployment_stdout: $deployment_name + '-stdout'
-      - $injectConfig:
-          $configSection
+      - $injectConfig: $configSection
       - $configType: OS::Heat::SoftwareConfig
       - $deploymentType: OS::Heat::SoftwareDeployment
       - If: $isStructured
@@ -68,14 +73,7 @@ Methods:
          - $configType: OS::Heat::StructuredConfig
          - $deploymentType: OS::Heat::StructuredDeployment
          - $injectConfig['completion-signal']: {get_input: deploy_signal_id}
-
       - $fragment:
-          outputs:
-            $deployment_stdout:
-              value: {get_attr: [$deployment_name, deploy_stdout]}
-            $deployment_stderr:
-              value: {get_attr: [$deployment_name, deploy_stderr]}
-
           resources:
             $full_config_name:
               type: $configType
@@ -90,6 +88,12 @@ Methods:
                 server: { get_resource: $.name }
                 input_values:
                   $inputValues
+          outputs:
+            $deployment_stdout:
+              value: {get_attr: [$deployment_name, deploy_stdout]}
+            $deployment_stderr:
+              value: {get_attr: [$deployment_name, deploy_stderr]}
+
       - $.softwareConfigs: $.softwareConfigs + list($fragment)
 
   # Adds to the stack any heat SW config elements
