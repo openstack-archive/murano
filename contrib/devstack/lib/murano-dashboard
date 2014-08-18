@@ -73,7 +73,7 @@ function configure_murano_dashboard() {
     configure_settings_py
     configure_local_settings_py
 
-    restart_service $APACHE_NAME
+    restart_apache_server
 }
 
 
@@ -125,7 +125,7 @@ function init_murano_dashboard() {
     python "$horizon_manage_py" collectstatic --noinput
     python "$horizon_manage_py" syncdb --noinput
 
-    restart_service $APACHE_NAME
+    restart_apache_server
 }
 
 
