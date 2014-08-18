@@ -26,7 +26,7 @@ murano_config = config.murano_config
 # add your model's MetaData object here
 # for 'autogenerate' support
 # from myapp import mymodel
-target_metadata = models.BASE.metadata
+target_metadata = models.Base.metadata
 
 
 def run_migrations_online():

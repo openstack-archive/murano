@@ -15,11 +15,11 @@ import datetime
 import uuid
 
 from oslo.config import cfg
+from oslo.db.sqlalchemy import utils as db_utils
 from sqlalchemy import exc
 
 from murano.db.migration import migration
 from murano.db import models  # noqa
-from murano.openstack.common.db.sqlalchemy import utils as db_utils
 from murano.tests.unit.db.migration import test_migrations_base as base
 
 CONF = cfg.CONF

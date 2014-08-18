@@ -19,9 +19,6 @@ from murano.db import api as db_api
 from murano.openstack.common import log
 
 CONF = cfg.CONF
-CONF.import_opt('connection',
-                'murano.openstack.common.db.options',
-                group='database')
 log.setup('murano')
 
 

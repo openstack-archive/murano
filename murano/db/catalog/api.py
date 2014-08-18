@@ -13,6 +13,7 @@
 #    under the License.
 
 from oslo.config import cfg
+from oslo.db.sqlalchemy import utils
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
 # TODO(ruhe) use exception declared in openstack/common/db
@@ -20,7 +21,6 @@ from webob import exc
 
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common.db.sqlalchemy import utils
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
 

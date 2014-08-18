@@ -10,12 +10,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo.config import cfg
+import anyjson
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
-
-CONF = cfg.CONF
 
 
 def LargeBinary():
     return sa.LargeBinary().with_variant(mysql.LONGBLOB(), 'mysql')
+
+
+class JsonBlob(sa.TypeDecorator):
+    impl = sa.Text
+
+    def process_bind_param(self, value, dialect):
+        return anyjson.serialize(value)
+
+    def process_result_value(self, value, dialect):
+        if value is not None:
+            return anyjson.deserialize(value)
+        return None

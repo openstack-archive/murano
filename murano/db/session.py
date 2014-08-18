@@ -15,12 +15,16 @@
 """Session management functions."""
 import threading
 
+from oslo.db import options
+from oslo.db.sqlalchemy import session as db_session
+
 from murano.common import config
-from murano.openstack.common.db.sqlalchemy import session as db_session
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = config.CONF
+
+options.set_defaults(CONF)
 
 _FACADE = None
 _LOCK = threading.Lock()
@@ -32,18 +36,16 @@ def _create_facade_lazily():
     if _FACADE is None:
         with _LOCK:
             if _FACADE is None:
-                _FACADE = db_session.EngineFacade(
-                    CONF.database.connection, sqlite_fk=True,
-                    **dict(CONF.database.iteritems())
-                )
+                _FACADE = db_session.EngineFacade.from_config(CONF,
+                                                              sqlite_fk=True)
     return _FACADE
 
 
-def get_session(autocommit=True, expire_on_commit=False):
-    s = _create_facade_lazily().get_session(autocommit=autocommit,
-                                            expire_on_commit=expire_on_commit)
-    return s
-
-
 def get_engine():
-    return _create_facade_lazily().get_engine()
+    facade = _create_facade_lazily()
+    return facade.get_engine()
+
+
+def get_session(**kwargs):
+    facade = _create_facade_lazily()
+    return facade.get_session(**kwargs)

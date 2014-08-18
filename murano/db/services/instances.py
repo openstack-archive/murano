@@ -12,13 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo.db import exception
 import sqlalchemy
-
 from sqlalchemy.sql import func
 
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common.db import exception
 from murano.openstack.common import timeutils
 
 

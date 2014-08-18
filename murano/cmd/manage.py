@@ -22,11 +22,11 @@ import sys
 import traceback
 
 from oslo.config import cfg
+from oslo.db import exception as db_exception
 
 import murano
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
-from murano.openstack.common.db import exception as db_exception
 from murano.openstack.common import log as logging
 from murano.packages import load_utils
 
