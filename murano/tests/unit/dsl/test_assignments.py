@@ -29,8 +29,13 @@ class TestAssignments(test_case.DslTestCase):
 
     def test_assignment(self):
         self.assertEqual(
-            {'A': [3, 2]},
-            self._runner.testAssignment())
+            {
+                'Arr': [5, 2, [10, 123]],
+                'Dict': {
+                    'Key1': 'V1',
+                    'Key2': {'KEY2': 'V3', 'a_b': 'V2'}
+                }
+            }, self._runner.testAssignment())
 
     def test_assign_by_copy(self):
         self.assertEqual(
