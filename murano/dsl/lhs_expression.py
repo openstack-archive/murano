@@ -45,7 +45,14 @@ class LhsExpression(object):
         self._current_obj_name = None
 
     def _create_context(self, root_context, murano_class):
+        def _evaluate(thing):
+            if isinstance(thing, yaql.expressions.Expression.Callable):
+                thing.yaql_context = root_context
+                thing = thing()
+            return thing
+
         def _get_value(src, key):
+            key = _evaluate(key)
             if isinstance(src, types.DictionaryType):
                 return src.get(key)
             elif isinstance(src, types.ListType) and isinstance(
@@ -60,6 +67,7 @@ class LhsExpression(object):
                 raise TypeError()
 
         def _set_value(src, key, value):
+            key = _evaluate(key)
             if isinstance(src, types.DictionaryType):
                 old_value = src.get(key, type_scheme.NoValue)
                 src[key] = value
@@ -115,9 +123,11 @@ class LhsExpression(object):
 
         @yaql.context.EvalArg("this", LhsExpression.Property)
         def indexation(this, index):
+            index = _evaluate(index)
+
             return LhsExpression.Property(
-                lambda: _get_value(this.get(), index()),
-                lambda value: _set_value(this.get(), index(), value))
+                lambda: _get_value(this.get(), index),
+                lambda value: _set_value(this.get(), index, value))
 
         context = yaql.context.Context()
         context.register_function(get_context_data, '#get_context_data')

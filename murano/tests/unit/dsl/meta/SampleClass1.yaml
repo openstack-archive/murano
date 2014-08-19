@@ -45,12 +45,23 @@ Workflow:
       - $x: $.getAttr(att1)
       - $y: $.getAttr(att2, ' Doe')
       - Return: $x + $y
+
   testAssignment:
     Body:
-      - $x: {}
-      - $x.A: [1, 2]
-      - $x.A[0]: 3
-      - Return: $x
+      - $result: {}
+      - $result.Arr: [1, 2, [10, 11]]
+      - $index: 1
+      - $result.Arr[0]: 3
+      - $result.Arr[$index - 1]: 5
+      - $result.Arr[$index + 1][1]: 123
+      - $result.Dict: {}
+      - $result.Dict.Key1: V1
+      - $keyName: Key2
+      - $result.Dict[$keyName]: {}
+      - $result.Dict[$keyName]['a_b']: V2
+      - $result.Dict[$keyName][toUpper($keyName)]: V3
+      - Return: $result
+
 
   testAssignByCopy:
     Arguments:
