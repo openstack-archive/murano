@@ -20,9 +20,15 @@ from murano.db import session as db_session
 
 
 SessionState = collections.namedtuple('SessionState', [
-    'open', 'deploying', 'deployed'
+    'OPENED', 'DEPLOYING', 'DEPLOYED', 'DEPLOY_FAILURE', 'DELETING',
+    'DELETE_FAILURE'
 ])(
-    open='open', deploying='deploying', deployed='deployed'
+    OPENED='opened',
+    DEPLOYING='deploying',
+    DEPLOYED='deployed',
+    DEPLOY_FAILURE='deploy failure',
+    DELETING='deleting',
+    DELETE_FAILURE='delete failure'
 )
 
 
@@ -41,17 +47,18 @@ class SessionServices(object):
         unit = db_session.get_session()
         # Here we duplicate logic for reducing calls to database
         # Checks for validation is same as in validate.
-        environment = unit.query(models.Environment).get(environment_id)
-
-        return unit.query(models.Session).filter(
+        query = unit.query(models.Session).filter(
             #Get all session for this environment
             models.Session.environment_id == environment_id,
-            #in this state, if state is not specified return in all states
-            models.Session.state.in_(SessionState
-                                     if state is None else [state]),
             #Only sessions with same version as current env version are valid
-            models.Session.version == environment.version
-        ).all()
+        )
+
+        if state:
+            #in this state, if state is not specified return in all states
+            query = query.filter(models.Session.state == state),
+
+        return query.order_by(models.Session.version.desc(),
+                              models.Session.updated.desc()).all()
 
     @staticmethod
     def create(environment_id, user_id):
@@ -68,7 +75,7 @@ class SessionServices(object):
         session = models.Session()
         session.environment_id = environment.id
         session.user_id = user_id
-        session.state = SessionState.open
+        session.state = SessionState.OPENED
         # used for checking if other sessions was deployed before this one
         session.version = environment.version
         # all changes to environment is stored here, and translated to
@@ -101,9 +108,9 @@ class SessionServices(object):
 
         #if other session is deploying now current session is invalid
         other_is_deploying = unit.query(models.Session).filter_by(
-            environment_id=session.environment_id, state=SessionState.deploying
+            environment_id=session.environment_id, state=SessionState.DEPLOYING
         ).count() > 0
-        if session.state == SessionState.open and other_is_deploying:
+        if session.state == SessionState.OPENED and other_is_deploying:
             return False
 
         return True
@@ -123,32 +130,40 @@ class SessionServices(object):
         environment = unit.query(models.Environment).get(
             session.environment_id)
 
-        task = {
-            'action': {
+        deleted = session.description['Objects'] is None
+        action = None
+        if not deleted:
+            action = {
                 'object_id': environment.id,
                 'method': 'deploy',
                 'args': {}
-            },
+            }
+
+        task = {
+            'action': action,
             'model': session.description,
             'token': token,
-            'tenant_id': environment.tenant_id
+            'tenant_id': environment.tenant_id,
+            'id': environment.id
         }
 
-        task['model']['Objects']['?']['id'] = environment.id
-        task['model']['Objects']['applications'] = \
-            task['model']['Objects'].get('services', [])
+        if not deleted:
+            task['model']['Objects']['?']['id'] = environment.id
+            task['model']['Objects']['applications'] = \
+                task['model']['Objects'].get('services', [])
 
-        if 'services' in task['model']['Objects']:
-            del task['model']['Objects']['services']
+            if 'services' in task['model']['Objects']:
+                del task['model']['Objects']['services']
 
-        session.state = SessionState.deploying
+        session.state = SessionState.DELETING if deleted \
+            else SessionState.DEPLOYING
         deployment = models.Deployment()
         deployment.environment_id = session.environment_id
         deployment.description = token_sanitizer.TokenSanitizer().sanitize(
-            dict(session.description.get('Objects')))
+            session.description.get('Objects'))
         status = models.Status()
-        status.text = "Deployment scheduled"
-        status.level = "info"
+        status.text = ('Delete' if deleted else 'Deployment') + ' scheduled'
+        status.level = 'info'
         deployment.statuses.append(status)
 
         with unit.begin():

@@ -67,7 +67,7 @@ def verify_session(func):
                        'is invalid').format(session_id))
             raise exc.HTTPForbidden()
 
-        if session.state == sessions.SessionState.deploying:
+        if session.state == sessions.SessionState.DEPLOYING:
             LOG.info(_('Session <SessionId {0}> is already in '
                        'deployment state').format(session_id))
             raise exc.HTTPForbidden()

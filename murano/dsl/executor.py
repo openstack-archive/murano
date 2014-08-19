@@ -263,10 +263,7 @@ class MuranoDslExecutor(object):
                 for obj in objects_to_clean:
                     methods = obj.type.find_all_methods('destroy')
                     for method in methods:
-                        try:
-                            method.invoke(self, obj, {})
-                        except Exception:
-                            pass
+                        method.invoke(self, obj, {})
             finally:
                 self._object_store = backup
 

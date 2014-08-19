@@ -48,21 +48,19 @@ class TaskProcessingEndpoint(object):
         LOG.info(_('Starting processing task: {task_desc}').format(
             task_desc=anyjson.dumps(s_task)))
 
+        result = task['model']
         try:
             task_executor = TaskExecutor(task)
             result = task_executor.execute()
-            rpc.api().process_result(result)
         except Exception as e:
-            # TODO(gokrokve) report error here
-            # TODO(slagun) code below needs complete rewrite and redesign
-            LOG.exception("Error during task execution for tenant %s",
+            LOG.exception('Error during task execution for tenant %s',
                           task['tenant_id'])
-            if task['model']['Objects']:
-                msg_env = Environment(task['model']['Objects']['?']['id'])
-                reporter = status_reporter.StatusReporter()
-                reporter.initialize(msg_env)
-                reporter.report_error(msg_env, str(e))
-            rpc.api().process_result(task['model'])
+            msg_env = Environment(task['id'])
+            reporter = status_reporter.StatusReporter()
+            reporter.initialize(msg_env)
+            reporter.report_error(msg_env, str(e))
+        finally:
+            rpc.api().process_result(result, task['id'])
 
 
 def _prepare_rpc_service(server_id):

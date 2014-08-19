@@ -17,8 +17,8 @@ import mock
 
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
-from murano.tests.dsl.foundation import object_model as om
-from murano.tests.dsl.foundation import test_case
+from murano.tests.unit.dsl.foundation import object_model as om
+from murano.tests.unit.dsl.foundation import test_case
 
 
 class TestAgentListener(test_case.DslTestCase):

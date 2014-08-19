@@ -1,0 +1,21 @@
+[murano]
+# keystone url
+#auth_url = http://127.0.0.1:5000/v2.0/
+
+# keystone user
+#user = admin
+
+# password for keystone user
+#password = pass
+
+# keystone tenant
+#tenant = admin
+
+# murano url
+#murano_url = http://localhost:8082
+
+# image for linux services
+#linux_image = default_linux
+
+# image for windows services
+#windows_image = default_windows

@@ -26,8 +26,9 @@ class ApiClient(object):
         client_target = target.Target('murano', 'results')
         self._client = rpc.RPCClient(transport, client_target, timeout=15)
 
-    def process_result(self, result):
-        return self._client.call({}, 'process_result', result=result)
+    def process_result(self, result, environment_id):
+        return self._client.call({}, 'process_result', result=result,
+                                 environment_id=environment_id)
 
 
 class EngineClient(object):

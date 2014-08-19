@@ -14,7 +14,6 @@
 
 import collections
 
-from murano.common import rpc
 from murano.common import uuidutils
 
 from murano.db import models
@@ -23,9 +22,16 @@ from murano.db import session as db_session
 
 
 EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
-    'ready', 'pending', 'deploying'
+    'READY', 'PENDING', 'DEPLOYING', 'DEPLOY_FAILURE', 'DELETING',
+    'DELETE_FAILURE'
 ])(
-    ready='ready', pending='pending', deploying='deploying'
+    READY='ready',
+    PENDING='pending',
+    DEPLOYING='deploying',
+    DEPLOY_FAILURE='deploy failure',
+    DELETING='deleting',
+    DELETE_FAILURE='delete failure'
+
 )
 
 DEFAULT_NETWORKS = {
@@ -54,31 +60,37 @@ class EnvironmentServices(object):
     @staticmethod
     def get_status(environment_id):
         """
-        Environment can have one of three distinguished statuses:
+        Environment can have one of the following statuses:
 
-         - Deploying: there is at least one session with status `deploying`;
-         - Pending: there is at least one session with status `open`;
-         - Ready: there is no sessions in status `deploying` or `open`.
+         - deploying: there is ongoing deployment for environment
+         - deleting: environment is currently being deleted
+         - deploy failure: last deployment session has failed
+         - delete failure: last delete session has failed
+         - pending: there is at least one session with status `open` and no
+            errors in previous sessions
+         - ready: there are no sessions for environment
 
         :param environment_id: Id of environment for which we checking status.
         :return: Environment status
         """
         #Deploying: there is at least one valid session with status `deploying`
-        deploying = sessions.SessionServices.get_sessions(
-            environment_id,
-            sessions.SessionState.deploying)
-        if len(deploying) > 0:
-            return 'deploying'
+        session_list = sessions.SessionServices.get_sessions(environment_id)
+        has_opened = False
+        for session in session_list:
+            if session.state == sessions.SessionState.DEPLOYING:
+                return EnvironmentStatus.DEPLOYING
+            elif session.state == sessions.SessionState.DELETING:
+                return EnvironmentStatus.DELETING
+            elif session.state == sessions.SessionState.DEPLOY_FAILURE:
+                return EnvironmentStatus.DEPLOY_FAILURE
+            elif session.state == sessions.SessionState.DELETE_FAILURE:
+                return EnvironmentStatus.DELETE_FAILURE
+            elif session.state == sessions.SessionState.OPENED:
+                has_opened = True
+        if has_opened:
+            return EnvironmentStatus.PENDING
 
-        #Pending: there is at least one valid session with status `open`;
-        open = sessions.SessionServices.get_sessions(
-            environment_id,
-            sessions.SessionState.open)
-        if len(open) > 0:
-            return 'pending'
-
-        #Ready: there are no sessions in status `deploying` or `open`
-        return 'ready'
+        return EnvironmentStatus.READY
 
     @staticmethod
     def create(environment_params, tenant_id):
@@ -118,30 +130,27 @@ class EnvironmentServices(object):
         return environment
 
     @staticmethod
-    def delete(environment_id, token):
+    def delete(environment_id, session_id):
         """
         Deletes environment and notify orchestration engine about deletion
 
         :param environment_id: Environment that is going to be deleted
         :param token: OpenStack auth token
         """
+
+        env_description = EnvironmentServices.get_environment_description(
+            environment_id, session_id, False)
+        env_description['Objects'] = None
+        EnvironmentServices.save_environment_description(
+            session_id, env_description, False)
+
+    @staticmethod
+    def remove(environment_id):
         unit = db_session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
-
-        #preparing data for removal from conductor
-        env = environment.description
-        env['Objects'] = None
-
-        data = {
-            'model': env,
-            'token': token,
-            'tenant_id': environment.tenant_id
-        }
-
-        rpc.engine().handle_task(data)
-
-        with unit.begin():
-            unit.delete(environment)
+        if environment:
+            with unit.begin():
+                unit.delete(environment)
 
     @staticmethod
     def get_environment_description(environment_id, session_id=None,
@@ -162,7 +171,7 @@ class EnvironmentServices(object):
         if session_id:
             session = unit.query(models.Session).get(session_id)
             if sessions.SessionServices.validate(session):
-                if session.state != sessions.SessionState.deployed:
+                if session.state != sessions.SessionState.DEPLOYED:
                     env_description = session.description
                 else:
                     env = unit.query(models.Environment)\
