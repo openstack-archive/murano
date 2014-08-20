@@ -205,6 +205,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 pass
 
     def check_port_access(self, ip, port):
+        result = 1
         start_time = time.time()
         while time.time() - start_time < 300:
             sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -215,24 +216,18 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 break
             time.sleep(5)
 
-        self.assertEqual(0, result,
-                         '{0} port is closed on instance'.format(port))
+        self.assertEqual(0, result, '%s port is closed on instance' % port)
 
     def deployment_success_check(self, environment, port):
         deployments = self.client.deployments_list(environment['id'])
 
         for deployment in deployments:
-            self.assertEqual('success', deployment['state'],
-                             'Deployment status is {0}'.format(
-                                 deployment['state']))
+            msg = 'Deployment status is %s' % deployment['state']
+            self.assertEqual('success', deployment['state'], msg)
 
-        ip = self.client.get_ip_list(environment)
-        if ip:
-            self.assertEqual(2, len(ip[0]),
-                             'Instance does not have floatingIP')
-            self.check_port_access(ip[0][1], port)
-        else:
-            self.fail('Instance does not have IPs')
+        instance = environment['services'][0]['instance']
+        self.assertTrue(instance['floatingIpAddress'])
+        self.check_port_access(instance['floatingIpAddress'], port)
 
     def test_deploy_telnet(self):
         post_body = {
