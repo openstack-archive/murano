@@ -23,23 +23,14 @@ from murano.dsl import yaql_expression
 
 @murano_class.classname('io.murano.StackTrace')
 class StackTrace(murano_object.MuranoObject):
+
     def initialize(self, _context, includeNativeFrames=True):
         frames = []
         context = _context
         while True:
             if not context:
                 break
-            instruction = helpers.get_current_instruction(context)
-            frames.append({
-                'instruction': None if instruction is None
-                else str(instruction),
-
-                'location': None if instruction is None
-                else instruction.source_file_position,
-
-                'method': helpers.get_current_method(context),
-                'class': helpers.get_type(context)
-            })
+            frames.append(compose_stack_frame(context))
             context = helpers.get_caller_context(context)
         frames.pop()
         frames.reverse()
@@ -62,28 +53,44 @@ class StackTrace(murano_object.MuranoObject):
         self.set_property('frames', frames)
 
     def toString(self, prefix=''):
-        def format_frame(frame):
-            instruction = frame['instruction']
-            method = frame['method']
-            murano_class = frame['class']
-            location = frame['location']
-            if murano_class:
-                method += ' of class ' + murano_class.name
+        return '\n'.join([format_frame(t, prefix)for t in self.get_property(
+            'frames')])
 
-            if location:
-                args = (
-                    os.path.abspath(location.file_path),
-                    location.start_line,
-                    ':' + str(location.start_column)
-                    if location.start_column >= 0 else '',
-                    method,
-                    instruction,
-                    prefix
-                )
-                return '{5}File "{0}", line {1}{2} in method {3}\n' \
-                       '{5}    {4}'.format(*args)
-            else:
-                return '{2}File <unknown> in method {0}\n{2}    {1}'.format(
-                    method, instruction, prefix)
 
-        return '\n'.join([format_frame(t)for t in self.get_property('frames')])
+def compose_stack_frame(context):
+    instruction = helpers.get_current_instruction(context)
+    return {
+        'instruction': None if instruction is None
+        else str(instruction),
+
+        'location': None if instruction is None
+        else instruction.source_file_position,
+
+        'method': helpers.get_current_method(context),
+        'class': helpers.get_type(context)
+    }
+
+
+def format_frame(frame, prefix=''):
+    instruction = frame['instruction']
+    method = frame['method']
+    murano_class = frame['class']
+    location = frame['location']
+    if murano_class:
+        method += ' of class ' + murano_class.name
+
+    if location:
+        args = (
+            os.path.abspath(location.file_path),
+            location.start_line,
+            ':' + str(location.start_column)
+            if location.start_column >= 0 else '',
+            method,
+            instruction,
+            prefix
+        )
+        return '{5}File "{0}", line {1}{2} in method {3}\n' \
+               '{5}    {4}'.format(*args)
+    else:
+        return '{2}File <unknown> in method {0}\n{2}    {1}'.format(
+            method, instruction, prefix)

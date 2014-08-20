@@ -29,6 +29,7 @@ import murano.dsl.helpers as helpers
 import murano.dsl.murano_method as murano_method
 import murano.dsl.murano_object as murano_object
 import murano.dsl.object_store as object_store
+import murano.dsl.principal_objects.stack_trace as trace
 import murano.dsl.yaql_functions as yaql_functions
 
 from murano.openstack.common import log as logging
@@ -128,10 +129,21 @@ class MuranoDslExecutor(object):
         event = eventlet.event.Event()
         self._locks[(method_id, this_id)] = (event, thread_marker)
         # noinspection PyProtectedMember
-        method_info = "{0}.{1} ({2})".format(murano_class.name, method._name,
+        method_info = '{0}.{1} ({2})'.format(murano_class.name, method._name,
                                              hash((method_id, this_id)))
-        LOG.debug(
-            "{0}: Begin execution: {1}".format(thread_marker, method_info))
+        # Prepare caller information
+        caller_ctx = helpers.get_caller_context(context)
+        if caller_ctx:
+            caller_info = trace.compose_stack_frame(caller_ctx)
+            LOG.debug(
+                '{0}: Begin execution: {1} called from {2}'.format(
+                    thread_marker, method_info, trace.format_frame(
+                        caller_info)))
+        else:
+            LOG.debug(
+                '{0}: Begin execution: {1}'.format(
+                    thread_marker, method_info))
+
         gt = eventlet.spawn(self._invoke_method_implementation_gt, body,
                             this, params, murano_class, context,
                             thread_marker)
