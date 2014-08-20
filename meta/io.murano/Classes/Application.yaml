@@ -19,3 +19,4 @@ Methods:
       Body:
         - $this.find(Environment).instanceNotifier.untrackApplication($this)
 
+  deploy:
