@@ -4,7 +4,8 @@ Namespaces:
 Name: Network
 
 Methods:
-  getNetworkReference:
-  getSubnetReference:
+  getNetworkName:
+  getSubnetName:
+  getRouterInterfaceName:
   getExternalNetId:
   deploy:

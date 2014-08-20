@@ -66,10 +66,9 @@ Methods:
 
   createNetwork:
     Body:
-      - $netResName: $.name + '-net-' + $.id()
       - $template:
           resources:
-            $netResName:
+            $.getNetworkName():
               type: 'OS::Neutron::Net'
               properties:
                 name: $.name
@@ -77,14 +76,12 @@ Methods:
 
   createSubnet:
     Body:
-      - $subnetResName: $.name + '-subnet-' + $.id()
-      - $netResName: $.name + '-net-' + $.id()
       - $template:
           resources:
-            $subnetResName:
+            $.getSubnetName():
               type: 'OS::Neutron::Subnet'
               properties:
-                network_id: { get_resource: $netResName }
+                network_id: { get_resource: $.getNetworkName() }
                 ip_version: 4
                 dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
@@ -92,23 +89,26 @@ Methods:
 
   createRouterInterface:
     Body:
-      - $subnetResName: $.name + '-subnet-' + $.id()
       - $template:
           resources:
-            $.name + '-ri-' + $.id():
+            $.getRouterInterfaceName():
               type: 'OS::Neutron::RouterInterface'
               properties:
                 router_id: $.externalRouterId
-                subnet_id: { get_resource: $subnetResName }
+                subnet_id: { get_resource: $.getSubnetName() }
       - $.environment.stack.updateTemplate($template)
 
-  getNetworkReference:
+  getRouterInterfaceName:
     Body:
-      Return: { get_resource:  $.name + '-net-' + $.id()}
+      Return: $.name + '-ri-' + $.id()
 
-  getSubnetReference:
+  getNetworkName:
     Body:
-      Return: { get_resource:  $.name + '-subnet-' + $.id()}
+      Return: $.name + '-net-' + $.id()
+
+  getSubnetName:
+    Body:
+      Return: $.name + '-subnet-' + $.id()
 
   getExternalNetId:
     Body:

@@ -170,8 +170,8 @@ Methods:
           - $assignFip: false
 
       - $portname: $.name + '-port-to-' + $net.id()
-      - $netRef: $net.getNetworkReference()
-      - $subnetRef: $net.getSubnetReference()
+      - $netRef: { get_resource: $net.getNetworkName() }
+      - $subnetRef: { get_resource: $net.getSubnetName() }
       - $template:
           resources:
             $portname:
@@ -226,6 +226,11 @@ Methods:
                       value:
                         get_attr: [$fip_name, floating_ip_address]
                       description: Floating IP assigned
+              - If: $net.externalRouterId != null
+                Then:
+                  # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
+                  - $routerInterfaceName: $net.getRouterInterfaceName()
+                  - $template['resources'][$fip_name]['depends_on']: [$routerInterfaceName]
               - $.environment.stack.updateTemplate($template)
               - $.setAttr(fipAssigned, true)
 
