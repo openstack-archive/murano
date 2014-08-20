@@ -31,5 +31,6 @@ if is_service_enabled murano; then
 
     if [[ "$1" == "unstack" ]]; then
         stop_murano
+        cleanup_murano
     fi
 fi
