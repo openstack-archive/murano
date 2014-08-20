@@ -32,7 +32,7 @@ class Controller(object):
         target = {"environment_id": environment_id}
         policy.check("get_aggregated_statistics", request.context, target)
 
-        # TODO (stanlagun): Check that caller is authorized to access
+        # TODO(stanlagun): Check that caller is authorized to access
         #  tenant's statistics
 
         return instances.InstanceStatsServices.get_aggregated_stats(
@@ -44,7 +44,7 @@ class Controller(object):
         target = {"environment_id": environment_id, "instance_id": instance_id}
         policy.check("get_instance_statistics", request.context, target)
 
-        # TODO (stanlagun): Check that caller is authorized to access
+        # TODO(stanlagun): Check that caller is authorized to access
         #  tenant's statistics
 
         return instances.InstanceStatsServices.get_raw_environment_stats(
@@ -56,7 +56,7 @@ class Controller(object):
         target = {"environment_id": environment_id}
         policy.check("get_statistics", request.context, target)
 
-        # TODO (stanlagun): Check that caller is authorized to access
+        # TODO(stanlagun): Check that caller is authorized to access
         #  tenant's statistics
 
         return instances.InstanceStatsServices.get_raw_environment_stats(

@@ -35,14 +35,14 @@ LOG = logging.getLogger(__name__)
 
 
 def _package_get(package_id_or_name, session):
-    # TODO (sjmc7): update openstack/common and pull in
+    # TODO(sjmc7): update openstack/common and pull in
     # uuidutils, check that package_id_or_name resembles a
     # UUID before trying to treat it as one
     package = session.query(models.Package).get(package_id_or_name)
     if not package:
         # Try using the FQN name instead. Since FQNs right now are unique,
         # don't need to do any logic to figure out if we have the right one.
-        # # TODO (sjmc7): Revisit for precedence rules.
+        # # TODO(sjmc7): Revisit for precedence rules.
         #  Heat does this in nicer way, giving each stack an unambiguous ID of
         # stack_name/id and redirecting to it in the API. We need to do some
         # reworking for precedence rules later, so maybe take a look at this
