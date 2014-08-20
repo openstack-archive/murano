@@ -2,4 +2,4 @@
 Namespaces:
   =: io.murano.system
 
-Name: InstanceReportNotifier
+Name: InstanceNotifier
