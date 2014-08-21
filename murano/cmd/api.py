@@ -61,7 +61,7 @@ def main():
         launcher.launch_service(stats.StatsCollectingService())
 
         launcher.wait()
-    except RuntimeError, e:
+    except RuntimeError as e:
         sys.stderr.write("ERROR: %s\n" % e)
         sys.exit(1)
 

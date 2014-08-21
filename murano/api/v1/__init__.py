@@ -37,7 +37,7 @@ PKG_PARAMS_MAP = {'display_name': 'name',
 
 def get_draft(environment_id=None, session_id=None):
     unit = db_session.get_session()
-    #TODO: When session is deployed should be returned env.description
+    # TODO(all): When session is deployed should be returned env.description
     if session_id:
         session = unit.query(models.Session).get(session_id)
         return session.description

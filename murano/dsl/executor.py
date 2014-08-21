@@ -84,7 +84,7 @@ class MuranoDslExecutor(object):
         if external_call and not is_special_method and \
                 method.usage != murano_method.MethodUsages.Action:
             raise Exception('{0} is not an action'.format(method.name))
-        # TODO (slagun): check method accessibility from murano_class
+        # TODO(slagun): check method accessibility from murano_class
 
         if not external_call and is_special_method:
             LOG.deprecated('initialize/destroy methods are called '

@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-#TODO:write detailed schema
+# TODO(all): write detailed schema.
 ENV_SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",
 

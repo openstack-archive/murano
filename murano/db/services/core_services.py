@@ -37,7 +37,7 @@ class CoreServices(object):
         :return: Service status
         """
         # Now we assume that service has same status as environment.
-        # TODO: implement as designed and described above
+        # TODO(ruhe): implement as designed and described above
 
         return envs.EnvironmentServices.get_status(environment_id)
 

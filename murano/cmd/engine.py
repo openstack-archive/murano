@@ -48,7 +48,7 @@ def main():
         launcher.launch_service(engine.get_rpc_service())
 
         launcher.wait()
-    except RuntimeError, e:
+    except RuntimeError as e:
         sys.stderr.write("ERROR: %s\n" % e)
         sys.exit(1)
 
