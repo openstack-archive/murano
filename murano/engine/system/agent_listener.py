@@ -57,7 +57,11 @@ class AgentListener(murano_object.MuranoObject):
             self._receive_thread = eventlet.spawn(self._receive)
 
     def stop(self):
-        # _receive_thread will be None if agent is disabled
+        if config.CONF.engine.disable_murano_agent:
+            # Noop
+            LOG.debug("murano-agent is disabled by the server")
+            return
+
         if self._receive_thread is not None:
             self._receive_thread.kill()
             self._receive_thread = None

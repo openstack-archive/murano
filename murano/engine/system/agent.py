@@ -60,6 +60,11 @@ class Agent(murano_object.MuranoObject):
         return self._enabled
 
     def prepare(self):
+        # (sjmc7) - turn this into a no-op if agents are disabled
+        if config.CONF.engine.disable_murano_agent:
+            LOG.debug("murano-agent is disabled by the server")
+            return
+
         with common.create_rmq_client() as client:
             client.declare(self._queue, enable_ha=True, ttl=86400000)
 
