@@ -24,11 +24,6 @@ if hasattr(yamllib, 'CSafeLoader'):
 else:
     yaml_loader = yamllib.SafeLoader
 
-if hasattr(yamllib, 'CSafeDumper'):
-    yaml_dumper = yamllib.CSafeDumper
-else:
-    yaml_dumper = yamllib.SafeDumper
-
 
 def _construct_yaml_str(self, node):
     # Override the default string handling function
@@ -58,4 +53,4 @@ class ResourceManager(murano_object.MuranoObject):
         return jsonlib.loads(self.string(name))
 
     def yaml(self, name):
-        return yamllib.safe_load(self.string(name))
+        return yamllib.load(self.string(name), Loader=yaml_loader)
