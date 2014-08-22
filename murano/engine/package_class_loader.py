@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import sys
+
 from oslo.config import cfg
 
 from murano.dsl import class_loader
@@ -20,6 +22,7 @@ from murano.dsl import exceptions
 from murano.dsl import murano_package
 from murano.engine.system import yaql_functions
 from murano.openstack.common import log as logging
+from murano.packages import exceptions as pkg_exceptions
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -43,9 +46,16 @@ class PackageClassLoader(class_loader.MuranoClassLoader):
     def load_definition(self, name):
         try:
             package = self._get_package_for(name)
+            if package is None:
+                raise exceptions.NoPackageForClassFound(name)
             return package.get_class(name)
-        except Exception:
-            raise exceptions.NoClassFound(name)
+        # (sjmc7) This is used as a control condition for system classes;
+        # do not delete (although I think it needs a better solution)
+        except exceptions.NoPackageForClassFound:
+            raise
+        except Exception as e:
+            msg = "Error loading {0}: {1}".format(name, str(e))
+            raise pkg_exceptions.PackageLoadError(msg), None, sys.exc_info()[2]
 
     def load_package(self, name):
         package = murano_package.MuranoPackage()

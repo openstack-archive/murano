@@ -16,6 +16,7 @@
 import abc
 import os
 import shutil
+import sys
 import tempfile
 import uuid
 
@@ -51,21 +52,21 @@ class ApiPackageLoader(PackageLoader):
 
     def get_package_by_class(self, name):
         filter_opts = {'class_name': name, 'limit': 1}
-
         try:
             package_definition = self._get_definition(filter_opts)
-            return self._get_package_by_definition(package_definition)
-        except(LookupError, pkg_exc.PackageLoadError):
-            raise exceptions.NoPackageForClassFound(name)
+        except LookupError:
+            exc_info = sys.exc_info()
+            raise exceptions.NoPackageForClassFound(name), None, exc_info[2]
+        return self._get_package_by_definition(package_definition)
 
     def get_package(self, name):
         filter_opts = {'fqn': name, 'limit': 1}
-
         try:
             package_definition = self._get_definition(filter_opts)
-            return self._get_package_by_definition(package_definition)
-        except(LookupError, pkg_exc.PackageLoadError):
-            raise exceptions.NoPackageFound(name)
+        except LookupError:
+            exc_info = sys.exc_info()
+            raise exceptions.NoPackageFound(name), None, exc_info[2]
+        return self._get_package_by_definition(package_definition)
 
     @staticmethod
     def _get_cache_directory():
@@ -74,8 +75,7 @@ class ApiPackageLoader(PackageLoader):
         directory = os.path.abspath(directory)
         os.makedirs(directory)
 
-        LOG.debug('Cache for package loader is located at: '
-                  '{0}'.format(directory))
+        LOG.debug('Cache for package loader is located at: %s' % directory)
         return directory
 
     @staticmethod
@@ -143,10 +143,12 @@ class ApiPackageLoader(PackageLoader):
                 shutil.rmtree(package_directory, ignore_errors=True)
         try:
             package_data = self._client.packages.download(package_id)
-        except muranoclient_exc.HTTPException:
-            LOG.exception('Unable to download '
-                          'package with id {0}'.format(package_id))
-            raise pkg_exc.PackageLoadError()
+        except muranoclient_exc.HTTPException as e:
+            msg = 'Error loading package id {0}: {1}'.format(
+                package_id, str(e)
+            )
+            exc_info = sys.exc_info()
+            raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
         package_file = None
         try:
             with tempfile.NamedTemporaryFile(delete=False) as package_file:
@@ -159,8 +161,9 @@ class ApiPackageLoader(PackageLoader):
                 loader=yaql_yaml_loader.YaqlYamlLoader
             )
         except IOError:
-            LOG.exception('Unable to write package file')
-            raise pkg_exc.PackageLoadError()
+            msg = 'Unable to extract package data for %s' % package_id
+            exc_info = sys.exc_info()
+            raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
         finally:
             try:
                 if package_file:
