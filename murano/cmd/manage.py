@@ -87,9 +87,7 @@ def _do_import_package(_dir, categories, update=False):
 
 # TODO(ruhe): proper error handling
 def do_import_package():
-    """
-    Import Murano package from local directory.
-    """
+    """Import Murano package from local directory."""
     _do_import_package(
         CONF.command.directory,
         CONF.command.categories,

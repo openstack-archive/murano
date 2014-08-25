@@ -32,7 +32,7 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.controller = actions.Controller()
 
     def test_execute_action(self, mock_policy_check):
-        """Test that action execution results in the correct rpc call"""
+        """Test that action execution results in the correct rpc call."""
         self._set_policy_rules(
             {'execute_action': '@'}
         )

@@ -17,13 +17,12 @@ import types
 
 
 class TokenSanitizer():
-    """
-    Helper class for cleaning some object from different passwords/tokens.
+    """Helper class for cleaning some object from different passwords/tokens.
     Simply searches attribute with `look a like` name as one of
     the token and replace it value with message.
     """
     def __init__(self, tokens=('token', 'pass'), message='*** SANITIZED ***'):
-        """
+        """Init method of TokenSanitizer.
         :param tokens:  iterable with tokens
         :param message: string by which each token going to be replaced
         """
@@ -32,16 +31,12 @@ class TokenSanitizer():
 
     @property
     def tokens(self):
-        """
-        Iterable with tokens that should be sanitized
-        """
+        """Iterable with tokens that should be sanitized."""
         return self._tokens
 
     @property
     def message(self):
-        """
-        String by which each token going to be replaced
-        """
+        """String by which each token going to be replaced."""
         return self._message
 
     def _contains_token(self, value):
@@ -51,8 +46,7 @@ class TokenSanitizer():
         return False
 
     def sanitize(self, obj):
-        """
-        Replaces each token found in object by message
+        """Replaces each token found in object by message.
         :param obj: types.DictType, types.ListType, types.Tuple, object
         :return: Sanitized object
         """

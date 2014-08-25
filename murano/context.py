@@ -14,8 +14,7 @@
 
 
 class RequestContext(object):
-    """
-    Stores information about the security context under which the user
+    """Stores information about the security context under which the user
     accesses the system, as well as additional request information.
 
     TODO: (sjmc7) - extend openstack.common.context

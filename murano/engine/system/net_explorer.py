@@ -79,8 +79,7 @@ class NetworkExplorer(murano_object.MuranoObject):
 
     # noinspection PyPep8Naming
     def getAvailableCidr(self, routerId, netId):
-        """
-        Uses hash of network IDs to minimize the collisions:
+        """Uses hash of network IDs to minimize the collisions:
         different nets will attempt to pick different cidrs out of available
         range.
         If the cidr is taken will pick another one

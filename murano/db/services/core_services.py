@@ -22,8 +22,7 @@ from murano.openstack.common import timeutils
 class CoreServices(object):
     @staticmethod
     def get_service_status(environment_id, service_id):
-        """
-        Service can have one of three distinguished statuses:
+        """Service can have one of three distinguished statuses:
 
          - Deploying: if environment has status deploying and there is at least
             one orchestration engine report for this service;
