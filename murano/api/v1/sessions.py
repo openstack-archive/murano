@@ -30,6 +30,18 @@ API_NAME = 'Sessions'
 
 
 class Controller(object):
+    def _check_session(self, environment_id, session, session_id):
+        if session is None:
+            msg = _('Session <SessionId {0}> is not found').format(session_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
+        if session.environment_id != environment_id:
+            msg = _('Session <SessionId {0}> is not tied with Environment '
+                    '<EnvId {1}>').format(session_id, environment_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
     @request_statistics.stats_count(API_NAME, 'Create')
     def configure(self, request, environment_id):
         LOG.debug('Session:Configure <EnvId: {0}>'.format(environment_id))
@@ -38,23 +50,25 @@ class Controller(object):
         environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
-            LOG.info(_('Environment <EnvId {0}> '
-                       'is not found').format(environment_id))
-            raise exc.HTTPNotFound
+            msg = _('Environment <EnvId {0}>'
+                    ' is not found').format(environment_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
 
         if environment.tenant_id != request.context.tenant:
-            LOG.info(_('User is not authorized to access '
-                       'this tenant resources.'))
-            raise exc.HTTPUnauthorized
+            msg = _('User is not authorized to access '
+                    'this tenant resources.')
+            LOG.error(msg)
+            raise exc.HTTPUnauthorized(explanation=msg)
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
         if env_status in (envs.EnvironmentStatus.DEPLOYING,
                           envs.EnvironmentStatus.DELETING):
-            LOG.info(_('Could not open session for environment <EnvId: {0}>,'
-                       'environment has deploying '
-                       'status.').format(environment_id))
-            raise exc.HTTPForbidden()
+            msg = _('Could not open session for environment <EnvId: {0}>,'
+                    'environment has deploying status.').format(environment_id)
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
         user_id = request.context.user
         session = sessions.SessionServices.create(environment_id, user_id)
@@ -68,26 +82,19 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        if session is None:
-            LOG.error(_('Session <SessionId {0}> '
-                        'is not found').format(session_id))
-            raise exc.HTTPNotFound()
-
-        if session.environment_id != environment_id:
-            LOG.error(_('Session <SessionId {0}> is not tied with Environment '
-                        '<EnvId {1}>').format(session_id, environment_id))
-            raise exc.HTTPNotFound()
+        self._check_session(environment_id, session, session_id)
 
         user_id = request.context.user
+        msg = _('User <UserId {0}> is not authorized to access session'
+                '<SessionId {1}>.').format(user_id, session_id)
         if session.user_id != user_id:
-            LOG.error(_('User <UserId {0}> is not authorized to access session'
-                        '<SessionId {1}>.').format(user_id, session_id))
-            raise exc.HTTPUnauthorized()
+            LOG.error(msg)
+            raise exc.HTTPUnauthorized(explanation=msg)
 
         if not sessions.SessionServices.validate(session):
-            LOG.error(_('Session <SessionId {0}> '
-                        'is invalid').format(session_id))
-            raise exc.HTTPForbidden()
+            msg = _('Session <SessionId {0}> is invalid').format(session_id)
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
         return session.to_dict()
 
@@ -98,26 +105,20 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        if session is None:
-            LOG.error(_('Session <SessionId {0}> '
-                        'is not found').format(session_id))
-            raise exc.HTTPNotFound()
-
-        if session.environment_id != environment_id:
-            LOG.error(_('Session <SessionId {0}> is not tied with Environment '
-                        '<EnvId {1}>').format(session_id, environment_id))
-            raise exc.HTTPNotFound()
+        self._check_session(environment_id, session, session_id)
 
         user_id = request.context.user
         if session.user_id != user_id:
-            LOG.error(_('User <UserId {0}> is not authorized to access session'
-                        '<SessionId {1}>.').format(user_id, session_id))
-            raise exc.HTTPUnauthorized()
+            msg = _('User <UserId {0}> is not authorized to access session'
+                    '<SessionId {1}>.').format(user_id, session_id)
+            LOG.error(msg)
+            raise exc.HTTPUnauthorized(explanation=msg)
 
         if session.state == sessions.SessionState.DEPLOYING:
-            LOG.error(_('Session <SessionId: {0}> is in deploying state and '
-                        'could not be deleted').format(session_id))
-            raise exc.HTTPForbidden()
+            msg = _('Session <SessionId: {0}> is in deploying state and '
+                    'could not be deleted').format(session_id)
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
         with unit.begin():
             unit.delete(session)
@@ -131,25 +132,18 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        if session is None:
-            LOG.error(_('Session <SessionId {0}> '
-                        'is not found').format(session_id))
-            raise exc.HTTPNotFound()
-
-        if session.environment_id != environment_id:
-            LOG.error(_('Session <SessionId {0}> is not tied with Environment '
-                        '<EnvId {1}>').format(session_id, environment_id))
-            raise exc.HTTPNotFound()
+        self._check_session(environment_id, session, session_id)
 
         if not sessions.SessionServices.validate(session):
-            LOG.error(_('Session <SessionId {0}> '
-                        'is invalid').format(session_id))
-            raise exc.HTTPForbidden()
+            msg = _('Session <SessionId {0}> is invalid').format(session_id)
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
         if session.state != sessions.SessionState.OPENED:
-            LOG.error(_('Session <SessionId {0}> is already deployed or '
-                        'deployment is in progress').format(session_id))
-            raise exc.HTTPForbidden()
+            msg = _('Session <SessionId {0}> is already deployed or '
+                    'deployment is in progress').format(session_id)
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
         sessions.SessionServices.deploy(session,
                                         unit,
