@@ -13,10 +13,10 @@
 
 import uuid
 
+from oslo.db import exception as db_exception
 from webob import exc
 
 from murano.db.catalog import api
-from murano.openstack.common.db import exception as db_exception
 from murano.tests.unit import base
 from murano.tests.unit import utils
 

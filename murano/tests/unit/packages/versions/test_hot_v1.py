@@ -10,22 +10,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-
 import imghdr
 import murano.packages.load_utils as load_utils
 import murano.tests.unit.base as test_base
-import murano.tests.unit.utils as test_utils
 import os
-from oslo.config import cfg
 
 
 class TestHotV1(test_base.MuranoTestCase):
-    def setUp(self):
-        super(TestHotV1, self).setUp()
-        test_utils.setup_dummy_db()
-        self.addCleanup(test_utils.reset_dummy_db)
-        self.addCleanup(cfg.CONF.reset)
-        self.addCleanup(test_utils.reset_dummy_db)
 
     def test_supplier_info_load(self):
         package_dir = os.path.abspath(

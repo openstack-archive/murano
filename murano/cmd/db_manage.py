@@ -11,13 +11,13 @@
 # under the License.
 
 from oslo.config import cfg
+from oslo.db import options
 
 from murano.db.migration import migration
-# this forces import and registration of db related configs
-from murano.db import models  # noqa
 from murano.openstack.common import log
 
 CONF = cfg.CONF
+options.set_defaults(CONF)
 
 
 class DBCommand(object):

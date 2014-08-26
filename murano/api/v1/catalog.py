@@ -19,13 +19,13 @@ import os
 import tempfile
 
 from oslo.config import cfg
+from oslo.db import exception as db_exc
 from webob import exc
 
 import murano.api.v1
 from murano.api.v1 import schemas
 from murano.common import policy
 from murano.db.catalog import api as db_api
-from murano.openstack.common.db import exception as db_exc
 from murano.openstack.common import exception
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging

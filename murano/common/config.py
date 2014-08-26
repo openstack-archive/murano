@@ -210,10 +210,6 @@ CONF.register_opts(packages_opts, group='packages_opts')
 CONF.register_opts(stats_opt, group='stats')
 CONF.register_opts(networking_opts, group='networking')
 
-CONF.import_opt('connection',
-                'murano.openstack.common.db.options',
-                group='database')
-
 
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,

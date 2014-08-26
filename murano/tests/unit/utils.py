@@ -14,19 +14,7 @@
 # limitations under the License.
 
 from murano import context
-from murano.db import models
 from murano.db import session
-from murano.openstack.common.db import options
-
-
-def setup_dummy_db():
-    options.cfg.set_defaults(options.database_opts, sqlite_synchronous=False)
-    options.set_defaults(sql_connection="sqlite://", sqlite_db='murano.db')
-    models.register_models(session.get_engine())
-
-
-def reset_dummy_db():
-    models.unregister_models(session.get_engine())
 
 
 def dummy_context(user='test_username', tenant_id='test_tenant_id',
