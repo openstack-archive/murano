@@ -217,11 +217,15 @@ class HeatStack(murano_object.MuranoObject):
         self._applied = True
 
     def delete(self):
-        if not self.current():
-            return
-        self._heat_client.stacks.delete(
-            stack_id=self._name)
-        self._wait_state(
-            lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
+        try:
+            if not self.current():
+                return
+            self._heat_client.stacks.delete(
+                stack_id=self._name)
+            self._wait_state(
+                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
+        except heat_exc.NotFound:
+            LOG.warn("Stack {0} already deleted?".format(self._name))
+
         self._template = {}
         self._applied = True
