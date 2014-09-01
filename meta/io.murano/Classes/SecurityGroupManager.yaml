@@ -10,7 +10,6 @@ Properties:
 
   defaultGroupName:
     Contract: $.string()
-    Usage: Runtime
     Default: format('MuranoSecurityGroup-{0}', $.environment.name)
 
 Methods:

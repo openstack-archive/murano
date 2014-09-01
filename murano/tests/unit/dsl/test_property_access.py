@@ -113,3 +113,8 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.NoWriteAccessError,
             self._runner.on(self._multi_derived).
             testModifyUsageTestProperty6)
+
+    def test_runtime_properties_skipped_on_initialize(self):
+        model = om.Object('PropertyInit', runtimeProperty='value')
+        runner = self.new_runner(model)
+        self.assertRaises(KeyError, runner.testPropertyAccess)

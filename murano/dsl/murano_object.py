@@ -54,6 +54,8 @@ class MuranoObject(object):
         for i in xrange(2):
             for property_name in self.__type.properties:
                 spec = self.__type.get_property(property_name)
+                if spec.usage == typespec.PropertyUsages.Runtime:
+                    continue
                 needs_evaluation = murano.dsl.helpers.needs_evaluation
                 if i == 0 and needs_evaluation(spec.default) or i == 1\
                         and property_name in used_names:

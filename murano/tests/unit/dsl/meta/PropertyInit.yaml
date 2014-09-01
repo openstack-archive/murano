@@ -1,0 +1,11 @@
+Name: PropertyInit
+
+Properties:
+  runtimeProperty:
+    Usage: Runtime
+    Contract: $.string()
+
+Methods:
+  testPropertyAccess:
+    Body:
+      - Return: $this.runtimeProperty
