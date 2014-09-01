@@ -15,6 +15,7 @@
 from webob import exc
 
 from murano.common import policy
+from murano.common import wsgi
 from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
@@ -22,7 +23,6 @@ from murano.db import session as db_session
 
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
-from murano.openstack.common import wsgi
 from murano.services import actions
 
 

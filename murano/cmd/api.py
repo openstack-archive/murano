@@ -14,11 +14,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import eventlet
 import os
 import sys
-
-import eventlet
-
 
 if os.name == 'nt':
     # eventlet monkey patching causes subprocess.Popen to fail on Windows
@@ -38,9 +36,9 @@ from murano.common import config
 from murano.common import policy
 from murano.common import server
 from murano.common import statservice as stats
+from murano.common import wsgi
 from murano.openstack.common import log
 from murano.openstack.common import service
-from murano.openstack.common import wsgi
 
 
 def main():

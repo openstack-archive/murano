@@ -20,6 +20,7 @@ from murano.api.v1 import request_statistics
 from murano.api.v1 import sessions
 from murano.common import policy
 from murano.common import utils
+from murano.common import wsgi
 from murano.db import models
 from murano.db.services import core_services
 from murano.db.services import environments as envs
@@ -27,7 +28,6 @@ from murano.db import session as db_session
 
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
-from murano.openstack.common import wsgi
 
 LOG = logging.getLogger(__name__)
 

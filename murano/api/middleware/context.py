@@ -14,10 +14,10 @@
 
 from oslo.config import cfg
 
+from murano.common import wsgi
 import murano.context
 from murano.openstack.common.gettextutils import _  # noqa
 import murano.openstack.common.log as logging
-from murano.openstack.common import wsgi
 
 context_opts = [
     cfg.StrOpt('admin_role', default='admin',

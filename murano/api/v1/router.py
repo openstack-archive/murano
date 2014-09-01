@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import routes
 
 from murano.api.v1 import actions
@@ -21,7 +22,7 @@ from murano.api.v1 import instance_statistics
 from murano.api.v1 import request_statistics
 from murano.api.v1 import services
 from murano.api.v1 import sessions
-from murano.openstack.common import wsgi
+from murano.common import wsgi
 
 
 class API(wsgi.Router):

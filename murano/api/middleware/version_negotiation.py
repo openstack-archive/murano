@@ -21,9 +21,9 @@ return
 from oslo.config import cfg
 
 from murano.api import versions
+from murano.common import wsgi
 from murano.openstack.common.gettextutils import _  # noqa
 import murano.openstack.common.log as logging
-from murano.openstack.common import wsgi
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)

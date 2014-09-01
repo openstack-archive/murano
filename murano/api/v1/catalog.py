@@ -25,13 +25,14 @@ from webob import exc
 import murano.api.v1
 from murano.api.v1 import schemas
 from murano.common import policy
+from murano.common import wsgi
 from murano.db.catalog import api as db_api
 from murano.openstack.common import exception
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
-from murano.openstack.common import wsgi
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
+
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

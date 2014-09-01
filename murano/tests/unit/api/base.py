@@ -24,8 +24,8 @@ from murano.api.v1 import request_statistics
 from murano.api.v1 import router
 from murano.common import policy
 from murano.common import rpc
+from murano.common import wsgi
 from murano.openstack.common import timeutils
-from murano.openstack.common import wsgi
 from murano.tests.unit import base
 from murano.tests.unit import utils
 

@@ -218,6 +218,19 @@
 
 
 #
+# Options defined in murano.common.wsgi
+#
+
+# Number of backlog requests to configure the socket with
+# (integer value)
+#backlog=4096
+
+# Sets the value of TCP_KEEPIDLE in seconds for each server
+# socket. Not supported on OS X. (integer value)
+#tcp_keepidle=600
+
+
+#
 # Options defined in murano.openstack.common.eventlet_backdoor
 #
 
@@ -347,19 +360,6 @@
 # Default rule. Enforced when a requested rule is not found.
 # (string value)
 #policy_default_rule=default
-
-
-#
-# Options defined in murano.openstack.common.wsgi
-#
-
-# Number of backlog requests to configure the socket with
-# (integer value)
-#backlog=4096
-
-# Sets the value of TCP_KEEPIDLE in seconds for each server
-# socket. Not supported on OS X. (integer value)
-#tcp_keepidle=600
 
 
 [database]

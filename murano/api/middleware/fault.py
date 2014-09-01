@@ -20,7 +20,7 @@ import traceback
 from oslo.config import cfg
 import webob
 
-from murano.openstack.common import wsgi
+from murano.common import wsgi
 from murano.packages import exceptions as pkg_exc
 
 cfg.CONF.import_opt('debug', 'murano.openstack.common.log')

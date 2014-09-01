@@ -11,6 +11,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import functools as func
 
 from webob import exc
@@ -18,10 +19,9 @@ from webob import exc
 
 from murano.api.v1 import request_statistics
 from murano.common.helpers import token_sanitizer
+from murano.common import wsgi
 from murano.db.services import core_services
-from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
-from murano.openstack.common import wsgi
 from murano import utils
 
 

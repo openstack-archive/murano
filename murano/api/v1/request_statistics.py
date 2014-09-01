@@ -15,9 +15,9 @@
 import time
 
 from murano.api import v1
+from murano.common import wsgi
 from murano.db.services import stats
 from murano.openstack.common import log as logging
-from murano.openstack.common import wsgi
 
 LOG = logging.getLogger(__name__)
 

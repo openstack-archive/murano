@@ -1,5 +1,3 @@
-# vim: tabstop=4 shiftwidth=4 softtabstop=4
-
 # Copyright 2011 OpenStack Foundation.
 # All Rights Reserved.
 #
@@ -22,8 +20,8 @@ eventlet.patcher.monkey_patch(all=False, socket=True)
 
 import datetime
 import errno
-import re
 import jsonschema
+import re
 import socket
 import sys
 import time
@@ -39,7 +37,7 @@ from xml.parsers import expat
 
 from murano.api.v1 import schemas
 from murano.openstack.common import exception
-from murano.openstack.common.gettextutils import _
+from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import jsonutils
 from murano.openstack.common import log as logging
 from murano.openstack.common import service
@@ -69,8 +67,7 @@ def run_server(application, port):
 
 
 class Service(service.Service):
-    """
-    Provides a Service API for wsgi servers.
+    """Provides a Service API for wsgi servers.
 
     This gives us the ability to launch wsgi servers with the
     Launcher classes in service.py.
@@ -105,7 +102,7 @@ class Service(service.Service):
                 if sslutils.is_enabled():
                     sock = sslutils.wrap(sock)
 
-            except socket.error, err:
+            except socket.error as err:
                 if err.args[0] != errno.EADDRINUSE:
                     raise
                 eventlet.sleep(0.1)
@@ -165,8 +162,7 @@ class Service(service.Service):
 
 
 class Middleware(object):
-    """
-    Base WSGI middleware wrapper. These classes require an application to be
+    """Base WSGI middleware wrapper. These classes require an application to be
     initialized that will be called next.  By default the middleware will
     simply call its wrapped app, or you can override __call__ to customize its
     behavior.
@@ -176,8 +172,7 @@ class Middleware(object):
         self.application = application
 
     def process_request(self, req):
-        """
-        Called on each request.
+        """Called on each request.
 
         If this returns None, the next application down the stack will be
         executed. If it returns a response then that response will be returned
@@ -199,8 +194,7 @@ class Middleware(object):
 
 
 class Debug(Middleware):
-    """
-    Helper class that can be inserted into any WSGI application chain
+    """Helper class that can be inserted into any WSGI application chain
     to get information about the request and response.
     """
 
@@ -208,13 +202,13 @@ class Debug(Middleware):
     def __call__(self, req):
         print ("*" * 40) + " REQUEST ENVIRON"
         for key, value in req.environ.items():
-            print key, "=", value
+            print(key, "=", value)
         print
         resp = req.get_response(self.application)
 
         print ("*" * 40) + " RESPONSE HEADERS"
         for (key, value) in resp.headers.iteritems():
-            print key, "=", value
+            print(key, "=", value)
         print
 
         resp.app_iter = self.print_generator(resp.app_iter)
@@ -223,8 +217,7 @@ class Debug(Middleware):
 
     @staticmethod
     def print_generator(app_iter):
-        """
-        Iterator that prints the contents of a wrapper string iterator
+        """Iterator that prints the contents of a wrapper string iterator
         when iterated.
         """
         print ("*" * 40) + " BODY"
@@ -236,13 +229,10 @@ class Debug(Middleware):
 
 
 class Router(object):
-    """
-    WSGI middleware that maps incoming requests to WSGI apps.
-    """
+    """WSGI middleware that maps incoming requests to WSGI apps."""
 
     def __init__(self, mapper):
-        """
-        Create a router for the given routes.Mapper.
+        """Create a router for the given routes.Mapper.
 
         Each route in `mapper` must specify a 'controller', which is a
         WSGI app to call.  You'll probably want to specify an 'action' as
@@ -270,19 +260,17 @@ class Router(object):
 
     @webob.dec.wsgify
     def __call__(self, req):
-        """
-        Route the incoming request to a controller based on self.map.
-        If no match, return a 404.
+        """Route the incoming request to a controller based on self.map.
+           If no match, return a 404.
         """
         return self._router
 
     @staticmethod
     @webob.dec.wsgify
     def _dispatch(req):
-        """
-        Called by self._router after matching the incoming request to a route
-        and putting the information into req.environ.  Either returns 404
-        or the routed WSGI app's response.
+        """Called by self._router after matching the incoming request to
+           a route and putting the information into req.environ.
+           Either returns 404 or the routed WSGI app's response.
         """
         match = req.environ['wsgiorg.routing_args'][1]
         if not match:
@@ -339,8 +327,7 @@ class Request(webob.Request):
 
 
 class Resource(object):
-    """
-    WSGI app that handles (de)serialization and controller dispatch.
+    """WSGI app that handles (de)serialization and controller dispatch.
 
     Reads routing information supplied by RoutesMiddleware and calls
     the requested action method upon its deserializer, controller,
@@ -357,7 +344,7 @@ class Resource(object):
     """
 
     def __init__(self, controller, deserializer=None, serializer=None):
-        """
+        """Resource init.
         :param controller: object that implement methods created by routes lib
         :param deserializer: object that supports webob request deserialization
                              through controller-like actions
@@ -440,7 +427,7 @@ class ActionDispatcher(object):
 
 
 class DictSerializer(ActionDispatcher):
-    """Default request body serialization"""
+    """Default request body serialization."""
 
     def serialize(self, data, action='default'):
         return self.dispatch(data, action=action)
@@ -450,7 +437,7 @@ class DictSerializer(ActionDispatcher):
 
 
 class JSONDictSerializer(DictSerializer):
-    """Default JSON request body serialization"""
+    """Default JSON request body serialization."""
 
     def default(self, data, result=None):
         def sanitizer(obj):
@@ -465,7 +452,7 @@ class JSONDictSerializer(DictSerializer):
 
 class XMLDictSerializer(DictSerializer):
     def __init__(self, metadata=None, xmlns=None):
-        """
+        """Default XML request body serialization.
         :param metadata: information needed to deserialize xml into
                          a dictionary.
         :param xmlns: XML namespace to include with serialized xml
@@ -563,14 +550,13 @@ class XMLDictSerializer(DictSerializer):
 
 
 class BlankSerializer(DictSerializer):
-    """Return raw data.
-    """
+    """Return raw data."""
     def default(self, data):
         return data
 
 
 class ResponseHeadersSerializer(ActionDispatcher):
-    """Default response headers serialization"""
+    """Default response headers serialization."""
 
     def serialize(self, response, data, action):
         self.dispatch(response, data, action=action)
@@ -580,7 +566,7 @@ class ResponseHeadersSerializer(ActionDispatcher):
 
 
 class ResponseSerializer(object):
-    """Encode the necessary pieces into a response object"""
+    """Encode the necessary pieces into a response object."""
 
     def __init__(self, body_serializers=None, headers_serializer=None):
         self.body_serializers = {
@@ -623,7 +609,7 @@ class ResponseSerializer(object):
 
 
 class RequestHeadersDeserializer(ActionDispatcher):
-    """Default request headers deserializer"""
+    """Default request headers deserializer."""
 
     def deserialize(self, request, action):
         return self.dispatch(request, action=action)
@@ -727,7 +713,7 @@ class RequestDeserializer(object):
 
 
 class TextDeserializer(ActionDispatcher):
-    """Default request body deserialization"""
+    """Default request body deserialization."""
 
     def deserialize(self, request, action='default'):
         return self.dispatch(request, action=action)
@@ -812,10 +798,10 @@ class JSONPatchDeserializer(TextDeserializer):
 
         if change_op not in allowed_methods:
             msg = _("Method '{method}' is not allowed for a path with name "
-                    "'{name}'. Allowed operations are: '{ops}'").format(
-                    method=change_op,
-                    name=change_path,
-                    ops=', '.join(allowed_methods))
+                    "'{name}'. Allowed operations are: "
+                    "'{ops}'").format(method=change_op,
+                                      name=change_path,
+                                      ops=', '.join(allowed_methods))
 
             raise webob.exc.HTTPForbidden(explanation=unicode(msg))
 
@@ -885,7 +871,7 @@ class JSONPatchDeserializer(TextDeserializer):
 
 class XMLDeserializer(TextDeserializer):
     def __init__(self, metadata=None):
-        """
+        """XMLDeserializer.
         :param metadata: information needed to deserialize xml into
                          a dictionary.
         """
@@ -926,20 +912,20 @@ class XMLDeserializer(TextDeserializer):
             return result
 
     def find_first_child_named(self, parent, name):
-        """Search a nodes children for the first child with a given name"""
+        """Search a nodes children for the first child with a given name."""
         for node in parent.childNodes:
             if node.nodeName == name:
                 return node
         return None
 
     def find_children_named(self, parent, name):
-        """Return all of a nodes children who have the given name"""
+        """Return all of a nodes children who have the given name."""
         for node in parent.childNodes:
             if node.nodeName == name:
                 yield node
 
     def extract_text(self, node):
-        """Get the text field contained by the given node"""
+        """Get the text field contained by the given node."""
         if len(node.childNodes) == 1:
             child = node.childNodes[0]
             if child.nodeType == child.TEXT_NODE:
@@ -962,7 +948,6 @@ class FormDataDeserializer(TextDeserializer):
 
     def default(self, request):
         form_data_parts = request.POST
-        result = []
         for key, value in form_data_parts.iteritems():
             if isinstance(value, basestring):
                 form_data_parts[key] = self._from_json(value)
