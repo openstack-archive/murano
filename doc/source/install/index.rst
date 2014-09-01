@@ -19,6 +19,9 @@
 Murano Installation Guide
 =========================
 
+Content
+=======
+
 .. toctree::
    :maxdepth: 2
 
@@ -26,3 +29,7 @@ Murano Installation Guide
    development
    manual
    ssl
+
+.. include:: prepare.rst
+.. include:: development.rst
+.. include:: manual.rst

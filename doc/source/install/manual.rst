@@ -144,8 +144,8 @@ Install the API service and Engine
     .. code-block:: ini
 
         [DEFAULT]
-        debug = True
-        verbose = True
+        debug = true
+        verbose = true
         rabbit_host = %RABBITMQ_SERVER_IP%
         rabbit_userid = %RABBITMQ_USER%
         rabbit_password = %RABBITMQ_PASSWORD%
@@ -173,6 +173,8 @@ Install the API service and Engine
 
         [rabbitmq]
         host = %RABBITMQ_SERVER_IP%
+        login = %RABBITMQ_USER%
+        password = %RABBITMQ_PASSWORD%
         virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
     ..
 
@@ -248,7 +250,17 @@ Dashboard.
         $ tox
     ..
 
-3.  Copy configuration file for dashboard.
+3. Install the latest horizon version and all murano-dashboard requirements into the virtual environment:
+
+   ::
+
+      $ tox -e venv pip install horizon
+
+It may happen, that the last release of horizon will be not capable with
+latest murano-dashboard code. In that case, horizon need to be installed
+from master branch of this repository: ``https://github.com/openstack/horizon``
+
+4.  Copy configuration file for dashboard.
 
     .. code-block:: console
 
@@ -256,7 +268,7 @@ Dashboard.
         $ cp local_settings.py.sample local_settings.py
     ..
 
-4.  Edit configuration file.
+5.  Edit configuration file.
 
     .. code-block:: console
 
@@ -264,24 +276,34 @@ Dashboard.
         $ vim ./local_settings.py
     ..
 
-    .. code-block:: python
+    ::
 
         ...
         ALLOWED_HOSTS = '*'
-        ...
-        OPENSTACK_HOST = '%OPENSTACK_HOST_IP%'
-        ...
-    ..
 
-5.  Run Murano dashboard.
+        # Provide OpenStack Lab credentials
+        OPENSTACK_HOST = '%OPENSTACK_HOST_IP%'
+
+        ...
+        # Set secret key to prevent it's generation
+        SECRET_KEY = 'random_string'
+
+        ...
+        DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
+        ...
+
+
+6.   Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
 
     .. code-block:: console
 
         $ cd ~/murano/murano-dashboard
-        $ tox -e venv -- python manage.py runserver
+        $ tox -e venv -- python manage.py runserver <IP:PORT>
     ..
 
-6.  Open dashboard using url http://localhost:8000
+Development server will be restarted automatically on every code change.
+
+7.  Open dashboard using url at http://localhost:8000 or at specified IP and port
 
 Import Murano Applications
 --------------------------

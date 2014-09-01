@@ -28,3 +28,7 @@ Content
    murano_pl
    system_classes
    core_classes
+
+.. include:: murano_pl.rst
+.. include:: system_classes.rst
+.. include:: core_classes.rst
