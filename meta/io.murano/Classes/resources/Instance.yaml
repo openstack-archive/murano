@@ -235,28 +235,15 @@ Methods:
               - $.setAttr(fipAssigned, true)
 
   destroy:
-    # Fixme(smelikyan): We need to remove all associated resources on destroy
+    # FIXME(smelikyan): All allocated resources should be cleaned-up on destroy
+    # Now no clean-up happens here cause we don't track all native resources
+    # that are allocated at the moment in descendants of Instance or other
+    # classes that may allocate resource dependent on OS::Nova:Server used
+    # as underlying implementation for Instance. This can cause
+    # resource leak when environment is updated. Resources are cleaned-up only
+    # when whole Environment is deleted (alongside with Heat stack deletion).
+    # https://bugs.launchpad.net/murano/+bug/1359998
     Body:
-      - $template: $.environment.stack.current()
-      # Remove OS::Nova::Server resource
-      - $patchBlock:
-          op: remove
-          path: format('/resources/{0}', $.name)
-      - $template: patch($template, $patchBlock)
-      # Remove Ip Addresses Outputs assigned to this Instance
-      - $assignedIpBlock:
-          op: remove
-          path: format('/outputs/{0}-assigned-ip', $.name)
-      - $template: patch($template, $assignedIpBlock)
-      # Remove Floatting IP Addresses Outputs
-      - If: $.getAttr(fipAssigned, false)
-        Then:
-          - $assignedFloatingIpBlock:
-              op: remove
-              path: format('/outputs/{0}-FloatingIPaddress', $.name)
-          - $template: patch($template, $assignedFloatingIpBlock)
-      - $.environment.stack.setTemplate($template)
-      - $.environment.stack.push()
       - $.environment.instanceNotifier.untrackCloudInstance($this)
 
   createDefaultInstanceSecurityGroupRules:
