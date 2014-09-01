@@ -92,25 +92,27 @@ After application package is ready, it can be uploaded to the catalog in two way
 
 
 * Using murano CLI
-    During uploading, it's required to provide category, that application belongs to. To browse all available categories preform:
 
-   ::
+  During uploading, it's required to provide category, that application belongs to.
+  To browse all available categories preform:
+
+  ::
 
    murano category-list
 
-Specify any suitable category and path to the application archive.
+  Specify any suitable category and path to the application archive.
 
-   ::
+  ::
 
    murano package-import --category=Web wordpress.zip
 
 
 * Using Murano Dashboard
 
-Package uploading is available for admin users at Murano -> Manage -> Packages page.
+  Package uploading is available for admin users at Murano -> Manage -> Packages page.
 
-.. image:: upload.png
+  .. image:: upload.png
 
-After that, application is available in the Catalog and could be selected for a deployment.
+  After that, application is available in the Catalog and could be selected for a deployment.
 
-.. image:: app_uploaded.png
+  .. image:: app_uploaded.png
