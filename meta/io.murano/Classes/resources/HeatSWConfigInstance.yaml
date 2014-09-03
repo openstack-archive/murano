@@ -8,14 +8,11 @@ Name: HeatSWConfigInstance
 Extends:
   - Instance
 
-Properties:
-  softwareConfigs:
-    Contract: []
-    Usage: Runtime
-    Default: []
-
-
 Methods:
+  initialize:
+    Body:
+      - $.softwareConfigs: []
+
   # configName will be prepended with the instance name
   # configSection should be a map representing the 'config'
   #      fragment in a StructuredConfig
