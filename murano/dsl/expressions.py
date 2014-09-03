@@ -108,5 +108,6 @@ def parse_expression(expr):
                     continue
 
     if result is None:
-        raise SyntaxError()
+        raise SyntaxError(
+            'Syntax is incorrect in expression: {0}'.format(expr))
     return result
