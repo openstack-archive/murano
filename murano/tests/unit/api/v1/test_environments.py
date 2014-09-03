@@ -28,7 +28,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.controller = environments.Controller()
 
     def test_list_empty_environments(self):
-        """Check that with no environments an empty list is returned"""
+        """Check that with no environments an empty list is returned."""
         self._set_policy_rules(
             {'list_environments': '@'}
         )
@@ -39,7 +39,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual({'environments': []}, json.loads(result.body))
 
     def test_create_environment(self):
-        """Create an environment, test environment.show()"""
+        """Create an environment, test environment.show()."""
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
@@ -90,7 +90,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(3, mock_uuid.call_count)
 
     def test_missing_environment(self):
-        """Check that a missing environment results in an HTTPNotFound"""
+        """Check that a missing environment results in an HTTPNotFound."""
         self._set_policy_rules(
             {'show_environment': '@'}
         )
@@ -102,7 +102,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(404, result.status_code)
 
     def test_update_environment(self):
-        """Check that environment rename works"""
+        """Check that environment rename works."""
         self._set_policy_rules(
             {'show_environment': '@',
              'update_environment': '@'}
@@ -159,7 +159,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(expected, json.loads(result.body))
 
     def test_delete_environment(self):
-        """Test that environment deletion results in the correct rpc call"""
+        """Test that environment deletion results in the correct rpc call."""
         self._set_policy_rules(
             {'delete_environment': '@'}
         )

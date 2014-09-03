@@ -79,8 +79,7 @@ class ActionServices(object):
 
     @staticmethod
     def find_action(model, action_id):
-        """
-        Traverses object model looking for an object definition
+        """Traverses object model looking for an object definition
         containing specified action
 
         :param model: object model

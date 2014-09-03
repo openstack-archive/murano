@@ -78,7 +78,7 @@ class Agent(murano_object.MuranoObject):
                 "by the server configuration")
 
     def _send(self, template, wait_results):
-        """Send a message over the MQ interface"""
+        """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()

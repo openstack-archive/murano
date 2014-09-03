@@ -32,7 +32,7 @@ class TestHeatStack(base.MuranoTestCase):
 
     @mock.patch('heatclient.client.Client')
     def test_push_adds_version(self, mock_heat_client):
-        """Assert that if heat_template_version is omitted, it's added"""
+        """Assert that if heat_template_version is omitted, it's added."""
         # Note that the 'with x as y, a as b:' syntax was introduced in
         # python 2.7, and contextlib.nested was deprecated in py2.7
         with mock.patch(MOD_NAME + '.HeatStack._get_status') as status_get:
@@ -66,7 +66,7 @@ class TestHeatStack(base.MuranoTestCase):
 
     @mock.patch('heatclient.client.Client')
     def test_description_is_optional(self, mock_heat_client):
-        """Assert that if heat_template_version is omitted, it's added"""
+        """Assert that if heat_template_version is omitted, it's added."""
         # Note that the 'with x as y, a as b:' syntax was introduced in
         # python 2.7, and contextlib.nested was deprecated in py2.7
         with mock.patch(MOD_NAME + '.HeatStack._get_status') as status_get:
@@ -98,7 +98,7 @@ class TestHeatStack(base.MuranoTestCase):
                 self.assertTrue(hs._applied)
 
     def test_update_wrong_template_version(self):
-        """Template version other than expected should cause error"""
+        """Template version other than expected should cause error."""
 
         hs = heat_stack.HeatStack(self.mock_murano_obj,
                                   None, None, None)

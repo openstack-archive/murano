@@ -75,12 +75,11 @@ def _get_filters(query_params):
 
 
 def _validate_body(body):
-    """
-    Check multipart/form-data has two parts: text (which is json string and
-    should parsed into dictionary in serializer) and file, which stores as
-    cgi.FieldStorage instance. Also validate file size doesn't exceed
-    the limit: seek to the end of the file, get the position of EOF and
-    reset the file position to the beginning
+    """Check multipart/form-data has two parts: text (which is json string and
+       should parsed into dictionary in serializer) and file, which stores as
+       cgi.FieldStorage instance. Also validate file size doesn't exceed
+       the limit: seek to the end of the file, get the position of EOF and
+       reset the file position to the beginning
     """
     def check_file_size(f):
         mb_limit = CONF.packages_opts.package_size_limit
@@ -116,13 +115,10 @@ def _validate_body(body):
 
 
 class Controller(object):
-    """
-        WSGI controller for application catalog resource in Murano v1 API
-    """
+    """WSGI controller for application catalog resource in Murano v1 API."""
 
     def update(self, req, body, package_id):
-        """
-        List of allowed changes:
+        """List of allowed changes:
             { "op": "add", "path": "/tags", "value": [ "foo", "bar" ] }
             { "op": "add", "path": "/categories", "value": [ "foo", "bar" ] }
             { "op": "remove", "path": "/tags" }
@@ -184,9 +180,8 @@ class Controller(object):
         return result
 
     def upload(self, req, body=None):
-        """
-        Upload new file archive for the new package
-        together with package metadata
+        """Upload new file archive for the new package
+           together with package metadata.
         """
         policy.check("upload_package", req.context)
 

@@ -41,7 +41,7 @@ class VersionNegotiationFilter(wsgi.Middleware):
         super(VersionNegotiationFilter, self).__init__(app)
 
     def process_request(self, req):
-        """Try to find a version first in the accept header, then the URL"""
+        """Try to find a version first in the accept header, then the URL."""
         msg = _("Determining version of request: %(method)s %(path)s"
                 " Accept: %(accept)s")
         args = {'method': req.method, 'path': req.path, 'accept': req.accept}
@@ -64,13 +64,12 @@ class VersionNegotiationFilter(wsgi.Middleware):
         return None
 
     def _match_version_string(self, subject):
-        """
-        Given a string, tries to match a major and/or
-        minor version number.
+        """Given a string, tries to match a major and/or
+           minor version number.
 
-        :param subject: The string to check
-        :returns version found in the subject
-        :raises ValueError if no acceptable version could be found
+           :param subject: The string to check
+           :returns version found in the subject
+           :raises ValueError if no acceptable version could be found
         """
         if subject in ('v1',):
             major_version = 1
@@ -79,9 +78,8 @@ class VersionNegotiationFilter(wsgi.Middleware):
         return major_version
 
     def _pop_path_info(self, req):
-        """
-        'Pops' off the next segment of PATH_INFO, returns the popped
-        segment. Do NOT push it onto SCRIPT_NAME.
+        """'Pops' off the next segment of PATH_INFO, returns the popped
+           segment. Do NOT push it onto SCRIPT_NAME.
         """
         path = req.path_info
         if not path:

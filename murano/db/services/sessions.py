@@ -35,8 +35,7 @@ SessionState = collections.namedtuple('SessionState', [
 class SessionServices(object):
     @staticmethod
     def get_sessions(environment_id, state=None):
-        """
-        Get list of sessions for specified environment
+        """Get list of sessions for specified environment.
 
         :param environment_id: Environment Id
         :param state: glazierapi.db.services.environments.EnvironmentStatus
@@ -62,8 +61,7 @@ class SessionServices(object):
 
     @staticmethod
     def create(environment_id, user_id):
-        """
-        Creates session object for specific environment for specified user.
+        """Creates session object for specific environment for specified user.
 
         :param environment_id: Environment Id
         :param user_id: User Id
@@ -89,8 +87,7 @@ class SessionServices(object):
 
     @staticmethod
     def validate(session):
-        """
-        Session is valid only if no other session for same
+        """Session is valid only if no other session for same.
         environment was already deployed on in deploying state,
 
         :param session: Session for validation
@@ -117,8 +114,7 @@ class SessionServices(object):
 
     @staticmethod
     def deploy(session, environment, unit, token):
-        """
-        Prepares environment for deployment and send deployment command to
+        """Prepares environment for deployment and send deployment command to
         orchestration engine
 
         :param session: session that is going to be deployed

@@ -77,10 +77,9 @@ def _authorize_package(package, context, allow_public=False):
 
 
 def package_get(package_id_or_name, context):
-    """
-    Return package details
-    :param package_id: ID or name of a package, string
-    :returns: detailed information about package, dict
+    """Return package details
+       :param package_id: ID or name of a package, string
+       :returns: detailed information about package, dict
     """
     session = db_session.get_session()
     package = _package_get(package_id_or_name, session)
@@ -89,10 +88,11 @@ def package_get(package_id_or_name, context):
 
 
 def _get_categories(category_names, session=None):
-    """
-    Return existing category objects or raise an exception
-    :param category_names: name of categories to associate with package, list
-    :returns: list of Category objects to associate with package, list
+    """Return existing category objects or raise an exception.
+
+       :param category_names: name of categories
+                              to associate with package, list
+       :returns: list of Category objects to associate with package, list
     """
     if session is None:
         session = db_session.get_session()
@@ -111,10 +111,9 @@ def _get_categories(category_names, session=None):
 
 
 def _get_tags(tag_names, session=None):
-    """
-    Return existing tags object or create new ones
-    :param tag_names: name of tags to associate with package, list
-    :returns: list of Tag objects to associate with package, list
+    """Return existing tags object or create new ones
+       :param tag_names: name of tags to associate with package, list
+       :returns: list of Tag objects to associate with package, list
     """
     if session is None:
         session = db_session.get_session()
@@ -204,10 +203,9 @@ def _do_remove(package, change):
 
 
 def package_update(pkg_id_or_name, changes, context):
-    """
-    Update package information
-    :param changes: parameters to update
-    :returns: detailed information about new package, dict
+    """Update package information
+       :param changes: parameters to update
+       :returns: detailed information about new package, dict
     """
 
     operation_methods = {'add': _do_add,
@@ -225,8 +223,7 @@ def package_update(pkg_id_or_name, changes, context):
 
 
 def package_search(filters, context, limit=None):
-    """
-    Search packages with different filters
+    """Search packages with different filters
       * Admin is allowed to browse all the packages
       * Regular user is allowed to browse all packages belongs to user tenant
         and all other packages marked is_public.
@@ -328,10 +325,9 @@ def package_search(filters, context, limit=None):
 
 
 def package_upload(values, tenant_id):
-    """
-    Upload a package with new application
-    :param values: parameters describing the new package
-    :returns: detailed information about new package, dict
+    """Upload a package with new application
+       :param values: parameters describing the new package
+       :returns: detailed information about new package, dict
     """
     session = db_session.get_session()
     package = models.Package()
@@ -353,7 +349,7 @@ def package_upload(values, tenant_id):
 
 
 def package_delete(package_id_or_name, context):
-    """Delete a package by name or by ID"""
+    """Delete a package by name or by ID."""
     session = db_session.get_session()
 
     with session.begin():

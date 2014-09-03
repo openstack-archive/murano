@@ -20,7 +20,7 @@ from murano.tests.unit import base
 
 class TestModels(base.MuranoWithDBTestCase):
     def test_missing_blob(self):
-        """Fake a package with NULL supplier JSON blob to test bug 1342306"""
+        """Fake a package with NULL supplier JSON blob to test bug 1342306."""
         con = session.get_session().connection()
         con.execute("INSERT INTO package(id, fully_qualified_name, "
                     "owner_id, name, description, created, updated, type, "

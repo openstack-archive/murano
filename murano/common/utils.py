@@ -32,8 +32,7 @@ class TraverseHelper(object):
 
     @staticmethod
     def get(path, source):
-        """
-        Provides the ability to traverse a data source made up of any
+        """Provides the ability to traverse a data source made up of any
         combination of lists and dicts. Has simple rules for selecting item of
         the list:
 
@@ -81,8 +80,7 @@ class TraverseHelper(object):
 
     @staticmethod
     def update(path, value, source):
-        """
-        Updates value selected with specified path.
+        """Updates value selected with specified path.
 
         Warning: Root object could not be updated
 
@@ -97,8 +95,7 @@ class TraverseHelper(object):
 
     @staticmethod
     def insert(path, value, source):
-        """
-        Inserts new item to selected list.
+        """Inserts new item to selected list.
 
         :param path: string with path to desired value
         :param value: value
@@ -109,8 +106,7 @@ class TraverseHelper(object):
 
     @staticmethod
     def extend(path, value, source):
-        """
-        Extend list by appending elements from the iterable.
+        """Extend list by appending elements from the iterable.
 
         :param path: string with path to desired value
         :param value: value
@@ -121,8 +117,7 @@ class TraverseHelper(object):
 
     @staticmethod
     def remove(path, source):
-        """
-        Removes selected item from source.
+        """Removes selected item from source.
 
         :param path: string with path to desired value
         :param source: python object (list or dict)
@@ -145,8 +140,7 @@ class TraverseHelper(object):
 
 
 def is_different(obj1, obj2):
-    """
-    Stripped-down version of deep.diff comparator
+    """Stripped-down version of deep.diff comparator
 
     Compares arbitrary nested objects, handles circular links, but doesn't
     point to the first difference as deep.diff does.

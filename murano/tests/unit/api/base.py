@@ -97,9 +97,7 @@ class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
 
 
 class ControllerTest(object):
-    """
-    Common utilities for testing API Controllers.
-    """
+    """Common utilities for testing API Controllers."""
 
     def __init__(self, *args, **kwargs):
         super(ControllerTest, self).__init__(*args, **kwargs)

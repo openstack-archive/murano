@@ -220,9 +220,7 @@ def parse_args(args=None, usage=None, default_config_files=None):
 
 
 def setup_logging():
-    """
-    Sets up the logging options for a log with supplied name
-    """
+    """Sets up the logging options for a log with supplied name."""
 
     if CONF.log_config:
         # Use a logging configuration file for all settings...
@@ -265,9 +263,8 @@ def setup_logging():
 
 
 def _get_deployment_flavor():
-    """
-    Retrieve the paste_deploy.flavor config item, formatted appropriately
-    for appending to the application name.
+    """Retrieve the paste_deploy.flavor config item, formatted appropriately
+       for appending to the application name.
     """
     flavor = CONF.paste_deploy.flavor
     return '' if not flavor else ('-' + flavor)
@@ -286,9 +283,8 @@ def _get_paste_config_path():
 
 
 def _get_deployment_config_file():
-    """
-    Retrieve the deployment_config_file config item, formatted as an
-    absolute pathname.
+    """Retrieve the deployment_config_file config item, formatted as an
+       absolute pathname.
     """
     path = CONF.paste_deploy.config_file
     if not path:
@@ -300,8 +296,7 @@ def _get_deployment_config_file():
 
 
 def load_paste_app(app_name=None):
-    """
-    Builds and returns a WSGI app from a paste config file.
+    """Builds and returns a WSGI app from a paste config file.
 
     We assume the last config file specified in the supplied ConfigOpts
     object is the paste config file.

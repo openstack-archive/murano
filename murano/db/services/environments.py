@@ -43,10 +43,9 @@ DEFAULT_NETWORKS = {
 class EnvironmentServices(object):
     @staticmethod
     def get_environments_by(filters):
-        """
-        Returns list of environments
-        :param filters: property filters
-        :return: Returns list of environments
+        """Returns list of environments
+           :param filters: property filters
+           :return: Returns list of environments
         """
         unit = db_session.get_session()
         environments = unit.query(models.Environment). \
@@ -59,8 +58,7 @@ class EnvironmentServices(object):
 
     @staticmethod
     def get_status(environment_id):
-        """
-        Environment can have one of the following statuses:
+        """Environment can have one of the following statuses:
 
          - deploying: there is ongoing deployment for environment
          - deleting: environment is currently being deleted
@@ -95,11 +93,11 @@ class EnvironmentServices(object):
     @staticmethod
     def create(environment_params, tenant_id):
         #tagging environment by tenant_id for later checks
-        """
-        Creates environment with specified params, in particular - name
-        :param environment_params: Dict, e.g. {'name': 'env-name'}
-        :param tenant_id: Tenant Id
-        :return: Created Environment
+        """Creates environment with specified params, in particular - name
+
+           :param environment_params: Dict, e.g. {'name': 'env-name'}
+           :param tenant_id: Tenant Id
+           :return: Created Environment
         """
 
         objects = {'?': {
@@ -131,11 +129,10 @@ class EnvironmentServices(object):
 
     @staticmethod
     def delete(environment_id, session_id):
-        """
-        Deletes environment and notify orchestration engine about deletion
+        """Deletes environment and notify orchestration engine about deletion
 
-        :param environment_id: Environment that is going to be deleted
-        :param token: OpenStack auth token
+           :param environment_id: Environment that is going to be deleted
+           :param token: OpenStack auth token
         """
 
         env_description = EnvironmentServices.get_environment_description(
@@ -155,16 +152,17 @@ class EnvironmentServices(object):
     @staticmethod
     def get_environment_description(environment_id, session_id=None,
                                     inner=True):
-        """
-        Returns environment description for specified environment. If session
-        is specified and not in deploying state function returns modified
-        environment description, otherwise returns actual environment desc.
+        """Returns environment description for specified environment.
 
-        :param environment_id: Environment Id
-        :param session_id: Session Id
-        :param inner: return contents of environment rather than whole
-         Object Model structure
-        :return: Environment Description Object
+           If session is specified and not in deploying state function
+           returns modified environment description,
+           otherwise returns actual environment desc.
+
+           :param environment_id: Environment Id
+           :param session_id: Session Id
+           :param inner: return contents of environment rather than whole
+            Object Model structure
+           :return: Environment Description Object
         """
         unit = db_session.get_session()
 
@@ -192,13 +190,12 @@ class EnvironmentServices(object):
 
     @staticmethod
     def save_environment_description(session_id, environment, inner=True):
-        """
-        Saves environment description to specified session
+        """Saves environment description to specified session.
 
-        :param session_id: Session Id
-        :param environment: Environment Description
-        :param inner: save modifications to only content of environment
-         rather than whole Object Model structure
+           :param session_id: Session Id
+           :param environment: Environment Description
+           :param inner: save modifications to only content of environment
+            rather than whole Object Model structure
         """
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)

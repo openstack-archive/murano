@@ -54,7 +54,7 @@ Base = declarative.declarative_base(cls=_MuranoBase)
 
 
 class Environment(Base, TimestampMixin):
-    """Represents a Environment in the metadata-store"""
+    """Represents a Environment in the metadata-store."""
     __tablename__ = 'environment'
 
     id = sa.Column(sa.String(255),
@@ -204,9 +204,7 @@ class Instance(Base):
 
 
 class Package(Base, TimestampMixin):
-    """
-    Represents a meta information about application package.
-    """
+    """Represents a meta information about application package."""
     __tablename__ = 'package'
 
     id = sa.Column(sa.String(36),
@@ -258,9 +256,7 @@ class Package(Base, TimestampMixin):
 
 
 class Category(Base, TimestampMixin):
-    """
-    Represents an application categories in the datastore.
-    """
+    """Represents an application categories in the datastore."""
     __tablename__ = 'category'
 
     id = sa.Column(sa.String(36),
@@ -270,9 +266,7 @@ class Category(Base, TimestampMixin):
 
 
 class Tag(Base, TimestampMixin):
-    """
-    Represents tags in the datastore.
-    """
+    """Represents tags in the datastore."""
     __tablename__ = 'tag'
 
     id = sa.Column(sa.String(36),
@@ -282,9 +276,7 @@ class Tag(Base, TimestampMixin):
 
 
 class Class(Base, TimestampMixin):
-    """
-    Represents a class definition in the datastore.
-    """
+    """Represents a class definition in the datastore."""
     __tablename__ = 'class_definition'
 
     id = sa.Column(sa.String(36),
@@ -295,9 +287,7 @@ class Class(Base, TimestampMixin):
 
 
 def register_models(engine):
-    """
-    Creates database tables for all models with the given engine
-    """
+    """Creates database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class, Instance)
     for model in models:
@@ -305,9 +295,7 @@ def register_models(engine):
 
 
 def unregister_models(engine):
-    """
-    Drops database tables for all models with the given engine
-    """
+    """Drops database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
               ApiStats, Package, Category, Class)
     for model in models:
