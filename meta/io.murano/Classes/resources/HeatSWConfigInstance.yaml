@@ -95,13 +95,16 @@ Methods:
 
   # Adds to the stack any heat SW config elements
   prepareStackTemplate:
+    Arguments:
+      instanceTemplate:
+        Contract: {}
     Body:
       - $environment: $.find(std:Environment)
-      - $.super($.prepareStackTemplate())
       - For: fragment
         In: $.softwareConfigs
         Do:
-        - $environment.stack.updateTemplate($fragment)
+          - $instanceTemplate: $instanceTemplate.mergeWith($fragment)
+      - Return: $instanceTemplate
 
   prepareUserData:
     Body:

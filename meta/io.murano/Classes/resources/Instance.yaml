@@ -55,11 +55,16 @@ Methods:
       - $.environment: $.find(std:Environment).require()
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
+      - $.instanceTemplate: {}
 
   # Called after the Instance template pieces are in place. It
   # is at this stage alterations to the template should be made
   prepareStackTemplate:
+    Arguments:
+      instanceTemplate:
+        Contract: {}
     Body:
+      - Return: $instanceTemplate
 
   setSharedIps:
     Arguments:
@@ -109,11 +114,11 @@ Methods:
               value:
                 get_attr: [$.name, addresses]
 
-      - $.environment.stack.updateTemplate($template)
+      - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
       # Any additional template preparation
-      - $.prepareStackTemplate()
-
+      - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
+      - $.environment.stack.updateTemplate($.instanceTemplate)
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ip', $this.name)).values().flatten().addr.list()
@@ -187,7 +192,7 @@ Methods:
                 networks:
                   - port:
                       get_resource: $portname
-      - $.environment.stack.updateTemplate($template)
+      - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
       - If: $primary
         Then:
@@ -200,7 +205,7 @@ Methods:
                       properties:
                         allowed_address_pairs:
                           - ip_address: $sip.getSharedIpRef()
-              - $.environment.stack.updateTemplate($template)
+              - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
       - If: $assignFip
         Then:
@@ -231,7 +236,7 @@ Methods:
                   # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
                   - $routerInterfaceName: $net.getRouterInterfaceName()
                   - $template['resources'][$fip_name]['depends_on']: [$routerInterfaceName]
-              - $.environment.stack.updateTemplate($template)
+              - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
               - $.setAttr(fipAssigned, true)
 
   destroy:
