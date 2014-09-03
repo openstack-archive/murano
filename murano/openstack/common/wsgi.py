@@ -452,13 +452,14 @@ class DictSerializer(ActionDispatcher):
 class JSONDictSerializer(DictSerializer):
     """Default JSON request body serialization"""
 
-    def default(self, data):
+    def default(self, data, result=None):
         def sanitizer(obj):
             if isinstance(obj, datetime.datetime):
                 _dtime = obj - datetime.timedelta(microseconds=obj.microsecond)
                 return _dtime.isoformat()
             return unicode(obj)
-
+        if result:
+            data.body = jsonutils.dumps(result)
         return jsonutils.dumps(data, default=sanitizer)
 
 
@@ -473,7 +474,7 @@ class XMLDictSerializer(DictSerializer):
         self.metadata = metadata or {}
         self.xmlns = xmlns
 
-    def default(self, data):
+    def default(self, data, result=None):
         # We expect data to contain a single key which is the XML root.
         root_key = data.keys()[0]
         doc = minidom.Document()

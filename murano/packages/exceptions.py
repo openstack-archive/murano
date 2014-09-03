@@ -16,7 +16,12 @@
 import murano.openstack.common.exception as e
 
 
-class PackageClassLoadError(e.Error):
+class PackageException(e.Error):
+    def __str__(self):
+        return unicode(self.message).encode('UTF-8')
+
+
+class PackageClassLoadError(PackageException):
     def __init__(self, class_name, message=None):
         msg = 'Unable to load class "{0}" from package'.format(class_name)
         if message:
@@ -24,7 +29,7 @@ class PackageClassLoadError(e.Error):
         super(PackageClassLoadError, self).__init__(msg)
 
 
-class PackageUILoadError(e.Error):
+class PackageUILoadError(PackageException):
     def __init__(self, message=None):
         msg = 'Unable to load ui definition from package'
         if message:
@@ -32,7 +37,7 @@ class PackageUILoadError(e.Error):
         super(PackageUILoadError, self).__init__(msg)
 
 
-class PackageLoadError(e.Error):
+class PackageLoadError(PackageException):
     pass
 
 
