@@ -165,7 +165,7 @@ def report_notification(report):
     with unit.begin():
         running_deployment = get_last_deployment(unit,
                                                  status.environment_id)
-        status.deployment_id = running_deployment.id
+        status.task_id = running_deployment.id
         unit.add(status)
 
 
