@@ -109,10 +109,10 @@ Methods:
                 user_data_format: $userDataFormat
                 key_name: $.keyname
           outputs:
-            format('{0}-assigned-ip', $.name):
-              description: format('IP address assigned to {0} instance', $.name)
+            format('{0}-assigned-ips', $.name):
+              description: format('Network IPs assigned to {0} instance', $.name)
               value:
-                get_attr: [$.name, addresses]
+                get_attr: [ $.name, networks ]
 
       - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
@@ -121,7 +121,8 @@ Methods:
       - $.environment.stack.updateTemplate($.instanceTemplate)
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
-      - $.ipAddresses: $outputs.get(format('{0}-assigned-ip', $this.name)).values().flatten().addr.list()
+      # Changing this to use the .networks attribute instead of 'addresses'
+      - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten()
       - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
       - $.environment.instanceNotifier.trackCloudInstance($this)
 
