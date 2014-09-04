@@ -98,8 +98,6 @@ neutron_opts = [
 ]
 
 keystone_opts = [
-    cfg.StrOpt('auth_url', help='URL to access OpenStack Identity service.'),
-
     cfg.BoolOpt('insecure', default=False,
                 help='This option explicitly allows Murano to perform '
                      '"insecure" SSL connections and transfers with '
@@ -180,7 +178,10 @@ stats_opts = [
 
 engine_opts = [
     cfg.BoolOpt('disable_murano_agent', default=False,
-                help=_('Disallow the use of murano-agent'))
+                help=_('Disallow the use of murano-agent')),
+    cfg.BoolOpt('use_trusts', default=False,
+                help=_("Create resources using trust token rather "
+                       "than user's token"))
 ]
 
 # TODO(sjmc7): move into engine opts?

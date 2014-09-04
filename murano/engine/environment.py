@@ -18,3 +18,6 @@ class Environment(object):
     def __init__(self):
         self.token = None
         self.tenant_id = None
+        self.trust_id = None
+        self.system_attributes = {}
+        self.clients = None

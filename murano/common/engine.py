@@ -26,6 +26,8 @@ from murano.common import rpc
 from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import results_serializer
+from murano.engine import auth_utils
+from murano.engine import client_manager
 from murano.engine import environment
 from murano.engine import package_class_loader
 from murano.engine import package_loader
@@ -103,32 +105,50 @@ class TaskExecutor(object):
         self._environment = environment.Environment()
         self._environment.token = task['token']
         self._environment.tenant_id = task['tenant_id']
+        self._environment.system_attributes = self._model.get('SystemData', {})
+        self._environment.clients = client_manager.ClientManager()
 
     def execute(self):
-        token, tenant_id = self.environment.token, self.environment.tenant_id
-        with package_loader.ApiPackageLoader(token, tenant_id) as pkg_loader:
-            class_loader = package_class_loader.PackageClassLoader(pkg_loader)
-            system_objects.register(class_loader, pkg_loader)
+        self._create_trust()
 
-            exc = executor.MuranoDslExecutor(class_loader, self.environment)
-            obj = exc.load(self.model)
+        try:
+            # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
+            # return self._execute(pkg_loader)
 
-            try:
-                # Skip execution of action in case of no action is provided.
-                # Model will be just loaded, cleaned-up and unloaded.
-                # Most of the time this is used for deletion of environments.
-                if self.action:
-                    self._invoke(exc)
-            except Exception as e:
-                if isinstance(e, dsl_exception.MuranoPlException):
-                    LOG.error('\n' + e.format(prefix='  '))
-                else:
-                    LOG.exception(e)
-                reporter = status_reporter.StatusReporter()
-                reporter.initialize(obj)
-                reporter.report_error(obj, str(e))
+            murano_client_factory = lambda: \
+                self._environment.clients.get_murano_client(self._environment)
+            with package_loader.ApiPackageLoader(
+                    murano_client_factory) as pkg_loader:
+                return self._execute(pkg_loader)
+        finally:
+            if self._model['Objects'] is None:
+                self._delete_trust()
 
-            return results_serializer.serialize(obj, exc)
+    def _execute(self, pkg_loader):
+        class_loader = package_class_loader.PackageClassLoader(pkg_loader)
+        system_objects.register(class_loader, pkg_loader)
+
+        exc = executor.MuranoDslExecutor(class_loader, self.environment)
+        obj = exc.load(self.model)
+
+        try:
+            # Skip execution of action in case of no action is provided.
+            # Model will be just loaded, cleaned-up and unloaded.
+            # Most of the time this is used for deletion of environments.
+            if self.action:
+                self._invoke(exc)
+        except Exception as e:
+            if isinstance(e, dsl_exception.MuranoPlException):
+                LOG.error('\n' + e.format(prefix='  '))
+            else:
+                LOG.exception(e)
+            reporter = status_reporter.StatusReporter()
+            reporter.initialize(obj)
+            reporter.report_error(obj, str(e))
+
+        result = results_serializer.serialize(obj, exc)
+        result['SystemData'] = self._environment.system_attributes
+        return result
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
@@ -136,3 +156,19 @@ class TaskExecutor(object):
 
         if obj is not None:
             obj.type.invoke(method_name, mpl_executor, obj, args)
+
+    def _create_trust(self):
+        if not config.CONF.engine.use_trusts:
+            return
+        trust_id = self._environment.system_attributes.get('TrustId')
+        if not trust_id:
+            trust_id = auth_utils.create_trust(self._environment)
+            self._environment.system_attributes['TrustId'] = trust_id
+        self._environment.trust_id = trust_id
+
+    def _delete_trust(self):
+        trust_id = self._environment.trust_id
+        if trust_id:
+            auth_utils.delete_trust(self._environment)
+            self._environment.system_attributes['TrustId'] = None
+            self._environment.trust_id = None
