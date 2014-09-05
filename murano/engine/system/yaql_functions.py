@@ -290,6 +290,12 @@ def _flatten(self):
             yield i
 
 
+@yaql.context.EvalArg('self', dict)
+@yaql.context.EvalArg('other', dict)
+def _merge_with(self, other):
+    return helpers.merge_dicts(self, other)
+
+
 def register(context):
     context.register_function(
         lambda json, mappings: _transform_json(json(), mappings()), 'bind')
@@ -322,3 +328,4 @@ def register(context):
     context.register_function(_keys, 'keys')
     context.register_function(_values, 'values')
     context.register_function(_flatten, 'flatten')
+    context.register_function(_merge_with, 'mergeWith')
