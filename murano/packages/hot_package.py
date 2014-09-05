@@ -205,23 +205,41 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             template_parameters[key] = YAQL("$." + key)
 
         deploy = [
+            {YAQL('$environment'): YAQL(
+                "$.find('io.murano.Environment').require()"
+            )},
+            {YAQL('$reporter'): YAQL(
+                "new('io.murano.system.StatusReporter', "
+                "environment => $environment)")},
             {
-                'If': YAQL('$.generatedHeatStackName = null'),
+                'If': YAQL('$.getAttr(generatedHeatStackName) = null'),
                 'Then': [
-                    {YAQL('$.generatedHeatStackName'): YAQL('randomName()')}
+                    YAQL('$.setAttr(generatedHeatStackName, randomName())')
                 ]
             },
-
             {YAQL('$stack'): YAQL(
                 "new('io.murano.system.HeatStack', "
-                "name => $.generatedHeatStackName)")},
+                "name => $.getAttr(generatedHeatStackName))")},
+
+
+            YAQL("$reporter.report($this, "
+                 "'Application deployment has started')"),
+
             {YAQL('$resources'): YAQL("new('io.murano.system.Resources')")},
             {YAQL('$template'): YAQL("$resources.yaml(type($this))")},
             {YAQL('$parameters'): template_parameters},
             YAQL('$stack.setTemplate($template)'),
             YAQL('$stack.setParameters($parameters)'),
+
+            YAQL("$reporter.report($this, "
+                 "'Stack creation has started')"),
             YAQL('$stack.push()'),
-            {YAQL('$outputs'): YAQL('$stack.output()')}
+            {YAQL('$outputs'): YAQL('$stack.output()')},
+            YAQL("$reporter.report($this, "
+                 "'Stack was successfully created')"),
+
+            YAQL("$reporter.report($this, "
+                 "'Application deployment has finished')"),
         ]
         for key, value in (hot.get('outputs') or {}).items():
             deploy.append({YAQL('$.' + key): YAQL(
@@ -230,7 +248,7 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         destroy = [
             {YAQL('$stack'): YAQL(
                 "new('io.murano.system.HeatStack', "
-                "name => $.generatedHeatStackName)")},
+                "name => $.getAttr(generatedHeatStackName))")},
             YAQL('$stack.delete()')
         ]
 
