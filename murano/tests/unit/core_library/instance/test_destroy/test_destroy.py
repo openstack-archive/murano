@@ -40,6 +40,9 @@ TEMPLATE = {
 
 class TestDestroy(test_case.DslTestCase):
     def test_destroy_removes_ip_address_from_outputs(self):
+        # FIXME(sergmelikyan): Revise this as part of proper fix for #1359998
+        self.skipTest('skipped until proper fix for #1359998 is proposed')
+
         heat_stack_obj = om.Object('io.murano.system.HeatStack')
         instance_obj = om.Object(
             'io.murano.resources.Instance',
