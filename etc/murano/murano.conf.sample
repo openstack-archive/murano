@@ -760,6 +760,10 @@
 # (string value)
 #default_dns=8.8.8.8
 
+# Name of the router that going to be used in order to join
+# all networks created by Murano (string value)
+#router_name=murano-default-router
+
 
 [neutron]
 
