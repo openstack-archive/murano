@@ -7,13 +7,11 @@ Name: LinuxUDInstance
 Extends:
   - LinuxInstance
 
-Properties:
-  customUserData:
-    Contract: $.string()
-    Usage: InOut
-    Default: null
-
 Methods:
+  initialize:
+    Body:
+      - $.customUserData: null
+
   prepareUserData:
     Body:
       - Return:
@@ -23,6 +21,6 @@ Methods:
   setCustomUserData:
     Arguments:
       - data:
-          Contract: $.string().notNull()
+          Contract: $.notNull()
     Body:
       - $.customUserData: $data
