@@ -16,58 +16,63 @@
 ==================================
 Murano Automated Tests Description
 ==================================
-This page describes automated tests for OpenStack Murano project: how you can download and run tests, how understand the root of problems with FAILed tests and detailed description about each test, which executes upon every commit.
+This page describes automated tests for a Murano project:
 
-Murano Continious Integration Service
+* where tests are located
+* how they are run
+* how execute tests on a local machine
+* how to find the the root of problems with FAILed tests
+
+Murano Continuous Integration Service
 =====================================
-Murano project has the CI server, which tests all commits for Murano components and verifies that new code does not break nothing.
+Murano project has separate CI server, which runs tests for all commits and verifies that new code does not break anything.
 
 Murano CI uses OpenStack QA cloud for testing infrastructure.
 
-Murano CI url: https://murano-ci.mirantis.com/jenkins/
+Murano CI url: https://murano-ci.mirantis.com/jenkins/ Anyone can login to that server, using launchpad credentials.
 
-There are two jobs for the **murano** repository and two jobs for the **murano-dashboard** repository : one of them runs on Ubuntu, another one on CentOS.
+There you can find each job for each repository: one for the **murano** and another one for **murano-dashboard**.
 
-Here you can see several Jenkins jobs with different targets:
-
-* Jobs "murano-dashboard-integration-tests-\*" allow to verify each commit to murano-dashboard repository on different distributive
-* Jobs "murano-engine-app-deployment-tests-\*" allow to verify each commit to murano repository on different distributive
+* "gate-murano-dashboard-selenium\*" verifies each commit to murano-dashboard repository
+* "gate-murano-integration\*" verifies each commit to murano repository
 
 Other jobs allow to build and test Murano documentation and perform another usefull work to support Murano CI infrastructure.
-
+All jobs are run on fresh installation of operation system and all components are installed on each run.
 
 Murano Automated Tests: UI Tests
 ================================
 
-Murano project has a Web User Interface and we have the test suite for Murano Web UI. All UI tests are located at the https://github.com/stackforge/murano-dashboard/functionaltests
+Murano project has a Web User Interface and all possible user scenarios should be tested.
+All UI tests are located at the https://git.openstack.org/cgit/stackforge/murano-dashboard/tree/muranodashboard/tests/functional
 
-All automated tests for Murano Web UI are written on Python using advanced Selenium library.This library allows to find Web elements using captions for fields and other information to find elements without/with xpath. For more information please visit http://selenium-python.readthedocs.org/
+Automated tests for Murano Web UI are written in Python using special Selenium library. This library is used to automate web browser interaction from Python.
+For more information please visit https://selenium-python.readthedocs.org/
 
-How To Run
-----------
 
 Prerequisites:
 ++++++++++++++
 
-* Install Python module called nose using **easy_install nose** or **pip install nose**
+* Install Python module, called nose performing one of the following commands **easy_install nose** or **pip install nose**
   This will install the nose libraries, as well as the nosetests script, which you can use to automatically discover and run tests.
-* Install external Python libraries which are required for Murano Web UI tests: **testtools** and **selenium**
+* Install external Python libraries, which are required for Murano Web UI tests: **testtools** and **selenium**
 
-Download tests and run:
+Download and run tests:
 +++++++++++++++++++++++
 
 First of all make sure that all additional components are installed.
 
 * Clone murano-dashboard git repository:
 
-    *git clone https://github.com/stackforge/murano-dashboard*
+  * git clone git://git.openstack.org/stackforge/murano-dashboard*
 * Change default settings:
-    * Open functionaltests/config/config_file.conf
-    * Set appropriate urls and credentials.
+
+  * Copy muranodashboard/tests/functional/config/config.conf.example to config.conf
+  * Set appropriate urls and credentials for your OpenStack lab. Only admin users are appropriate.
 
 ::
 
-    [common]
+    [murano]
+
     horizon_url = http://localhost/horizon
     murano_url = http://localhost:8082
     user = ***
@@ -75,42 +80,41 @@ First of all make sure that all additional components are installed.
     tenant = ***
     keystone_url = http://localhost:5000/v2.0/
 
-* Go to the "functionaltests" directory where tests are stored
-* Some applications need to be uploaded to the Application Catalog since some tests use them. To upload a set of standard packages from special Murano repository need to create and execute following script which clone repository with packages, archive and store them in 'functionaltests' folder:
+
+
+All tests are kept in *sanity_check.py* and divided into 5 test suites:
+
+  * TestSuiteSmoke - verification of Murano panels; check, that could be open without errors.
+  * TestSuiteEnvironment - verification of all operations with environment are finished successfully.
+  * TestSuiteImage - verification of operations with images.
+  * TestSuiteFields - verification of custom fields validators.
+  * TestSuitePackages - verification of operations with Murano packages.
+  * TestSuiteApplications - verification of Application Catalog page and of application creation process.
+
+To specify which tests/suite to run, pass test/suite names on the command line:
+
+  * to run all tests: ``nosetests sanity_check.p``
+  * to run a single suite: ``nosetests sanity_check.py:<test suite name>``
+  * to run a single test: ``nosetests sanity_check.py:<test suite name>.<test name>``
+
+
+In case of SUCCESS execution, you should see something like this:
 
 ::
 
-    git_url="https://github.com/murano-project/murano-app-incubator"
-    clone_dir="murano-app-incubator"
-    git clone $git_url $clone_dir
-    cd $clone_dir
-    for package_dir in io.murano.*
-    do
-        if [ -d "$package_dir" ]; then
-            if [ -f "${package_dir}/manifest.yaml" ]; then
-                sudo bash make-package.sh $package_dir
-            fi
-        fi
-    done
+    .........................
 
-* All preparation is done.
-* All tests are grouped for a few suites. To specify which tests/suite to run, pass test/suite names on the command line:
+    Ran 34 tests in 1.440s
 
-    * to run all tests: *nosetests sanity_check.py*
-    * to run single suite: *nosetests sanity_check.py:<test suite name>*
-    * to run single test: *nosetests sanity_check.py:<test suite name>.<test name>*
+    OK
 
-In case of SUCCESS you should see something like this:
+In case of FAILURE, folder with screenshots of the last operation of tests that finished with errors would be created.
+It's located in *muranodashboard/tests/functional* folder.
 
-.........................
+There are also a number of command line options that can be used to control the test execution and generated outputs. For more details about *nosetests*, try:
+::
 
-Ran 34 tests in 1.440s
-
-OK
-
-There are also a number of command line options that can be used to control the test execution and generated outputs. For help with nosetests’ many command-line options, try:
-
-*nosetests -h*
+ $ nosetests -h
 
 
 Murano Automated Tests: Tempest Tests
@@ -118,41 +122,31 @@ Murano Automated Tests: Tempest Tests
 
 All Murano services have tempest-based automated tests, which allow to verify API interfaces and deployment scenarious.
 
-Tempest tests for Murano are located at the: https://github.com/stackforge/murano/tree/master/functionaltests
+Tempest tests for Murano are located at the: https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional
 
 The following Python files are contain basic tests suites for different Murano components.
-Tests on API which running on devstack gate can be founded here https://github.com/stackforge/murano/tree/master/functionaltests/api
 
-* test_murano_envs.py contains test suite with actions on murano's environments(create, delete, get and etc.)
-* test_murano_sessions.py contains test suite with actions on murano's sessions(create, delete, get and etc.)
-* test_murano_services.py contains test suite with actions on murano's services(create, delete, get and etc.)
-* test_murano_repository.py contains test suite with actions on murano's package repository
+API Tests
++++++++++
 
-Tests on engine which running on murano-ci : https://github.com/stackforge/murano/tree/master/functionaltests/engine
+Murano API tests are run on devstack gate and located at https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional/api
 
-* base.py contains base test class and tests with actions on deploy murano's services
+* *test_murano_envs.py* contains test suite with actions on murano's environments(create, delete, get and etc.)
+* *test_murano_sessions.py* contains test suite with actions on murano's sessions(create, delete, get and etc.)
+* *test_murano_services.py* contains test suite with actions on murano's services(create, delete, get and etc.)
+* *test_murano_repository.py* contains test suite with actions on murano's package repository
 
-If you want to know, what steps this test performs, you can see test's scenario in code. For example:
+Engine Tests
++++++++++++++++++++
 
-::
+Murano Engine Tests are run on murano-ci : https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional/engine
 
-    @attr(type='smoke')
-    def test_get_environment(self):
-        """
-        Get environment by id
-        Test create environment, afterthat test try to get
-        environment's info, using environment's id,
-        and finally delete this environment
-        Target component: Murano
-        Scenario:
-            1. Send request to create environment.
-            2. Send request to get environment
-            3. Send request to delete environment
-        """
-        resp, env = self.create_environment('test')
-        self.environments.append(env)
-        resp, infa = self.get_environment_by_id(env['id'])
-        self.assertEqual(200, resp.status)
-        self.assertEqual('test', infa['name'])
-        self.delete_environment(env['id'])
-        self.environments.pop(self.environments.index(env))
+* *base.py* contains base test class and tests with actions on deploy Murano services such as 'Telnet' and 'Apache'.
+
+Command Line Tests
++++++++++++++++++++++++++
+
+Murano CLI tests case are currently in the middle of creation. The current scope is read only operations on a cloud that are hard to test via unit tests.
+
+
+All tests have description and execution steps in there docstrings.
