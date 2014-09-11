@@ -83,6 +83,7 @@ contribute to the project.
 
    contributing
    guidelines
+   articles/debug_tips
 
 
 **API specification**
