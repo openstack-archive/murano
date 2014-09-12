@@ -197,3 +197,22 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
         self.assertEqual(
             {'foo': 'bar', 'baz': [42]},
             self._runner.testPatch())
+
+    def test_skip(self):
+        self.assertEqual(
+            [3, 4, 5, 6],
+            self._runner.testSkip([1, 2, 3, 4, 5, 6], 2)
+        )
+
+    def test_take(self):
+        self.assertEqual(
+            [1, 2, 3],
+            self._runner.testTake([1, 2, 3, 4, 5, 6], 3)
+        )
+
+    def test_skip_take(self):
+        self.assertEqual(
+            [3, 4, 5],
+            self._runner.testSkipTake([1, 2, 3, 4, 5, 6, 7, 8],
+                                      2, 3)
+        )

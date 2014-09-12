@@ -213,3 +213,32 @@ Methods:
       - $doc: {}
       - Return: $doc.patch($patches)
 
+  testTake:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+      - count:
+          Contract: $.int()
+    Body:
+      - Return: $list.take($count)
+
+  testSkip:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+      - count:
+          Contract: $.int()
+    Body:
+      - Return: $list.skip($count)
+
+  testSkipTake:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+      - start:
+          Contract: $.int()
+      - count:
+          Contract: $.int()
+    Body:
+      - $l: $list.skip($start)
+      - Return: $l.take($count)
