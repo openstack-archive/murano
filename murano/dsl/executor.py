@@ -14,6 +14,7 @@
 
 import collections
 import inspect
+import sys
 import types
 import uuid
 
@@ -171,7 +172,7 @@ class MuranoDslExecutor(object):
                     return body(**params)
             except Exception as e:
                 raise dsl_exception.MuranoPlException.from_python_exception(
-                    e, context)
+                    e, context), None, sys.exc_info()[2]
         elif isinstance(body, expressions.DslExpression):
             return self.execute(
                 body, murano_class, this, context, **params)
