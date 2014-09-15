@@ -300,13 +300,13 @@ def _merge_with(self, other):
     return helpers.merge_dicts(self, other)
 
 
-@yaql.context.EvalArg('collection', types.ListType)
+@yaql.context.EvalArg('collection', collections.Iterable)
 @yaql.context.EvalArg('count', int)
 def _skip(collection, count):
     return itertools.islice(collection, count, None)
 
 
-@yaql.context.EvalArg('collection', types.ListType)
+@yaql.context.EvalArg('collection', collections.Iterable)
 @yaql.context.EvalArg('count', int)
 def _take(collection, count):
     return itertools.islice(collection, count)

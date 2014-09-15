@@ -242,3 +242,14 @@ Methods:
     Body:
       - $l: $list.skip($start)
       - Return: $l.take($count)
+
+  testSkipTakeChained:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+      - start:
+          Contract: $.int()
+      - count:
+          Contract: $.int()
+    Body:
+      - Return: $list.skip($start).take($count)

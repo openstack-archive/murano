@@ -216,3 +216,11 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
             self._runner.testSkipTake([1, 2, 3, 4, 5, 6, 7, 8],
                                       2, 3)
         )
+
+    def test_skip_take_chained(self):
+        self.assertEqual(
+            [3, 4, 5],
+            self._runner.testSkipTakeChained(
+                [1, 2, 3, 4, 5, 6, 7, 8],
+                2, 3)
+        )
