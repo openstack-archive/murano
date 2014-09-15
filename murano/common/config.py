@@ -160,9 +160,17 @@ networking_opts = [
                help='Default DNS nameserver to be assigned to '
                'created Networks'),
 
+    cfg.StrOpt('external_network', default='ext-net',
+               help='ID or name of the external network for routers '
+                    'to connect to'),
+
     cfg.StrOpt('router_name', default='murano-default-router',
                help='Name of the router that going to be used in order to '
-                    'join all networks created by Murano')
+                    'join all networks created by Murano'),
+
+    cfg.BoolOpt('create_router', default=True,
+                help='This option will create a router when one with '
+                     '"router_name" does not exist'),
 ]
 stats_opt = [
     cfg.IntOpt('period', default=5,
