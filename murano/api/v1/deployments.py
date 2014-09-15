@@ -42,9 +42,6 @@ class Controller(object):
             .filter_by(environment_id=environment_id) \
             .order_by(desc(models.Task.created))
         result = query.all()
-        # show only tasks with 'deploy' action
-        result = [task for task in result
-                  if (task.action or {}).get('method', 'deploy') == 'deploy']
         deployments = [set_dep_state(deployment, unit).to_dict() for deployment
                        in result]
         return {'deployments': deployments}
