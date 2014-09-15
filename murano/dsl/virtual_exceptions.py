@@ -52,7 +52,7 @@ class ThrowMacro(expressions.DslExpression):
     def __str__(self):
         if self._message:
             return 'Throw {0}: {1}'.format(self._names, self._message)
-        return 'Throw ' + self._names
+        return 'Throw ' + str(self._names)
 
 
 class CatchBlock(expressions.DslExpression):
