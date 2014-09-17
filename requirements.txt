@@ -19,6 +19,7 @@ six>=1.7.0
 netaddr>=0.7.6
 PyYAML>=3.1.0
 jsonpatch>=1.1
+keystonemiddleware>=1.0.0
 
 # For paste.util.template used in keystone.common.template
 Paste
