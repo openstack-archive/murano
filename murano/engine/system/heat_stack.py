@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
+
 import eventlet
 import heatclient.client as hclient
 import heatclient.exc as heat_exc
 import keystoneclient.v2_0.client as ksclient
 
 import murano.common.config as config
+import murano.common.utils as utils
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
@@ -188,17 +191,17 @@ class HeatStack(murano_object.MuranoObject):
         if 'description' not in self._template and self._description:
             self._template['description'] = self._description
 
-        LOG.info('Pushing: {0}'.format(self._template))
+        template = copy.deepcopy(self._template)
+        LOG.info('Pushing: {0}'.format(template))
 
         current_status = self._get_status()
-        resources = self._template.get('Resources') or \
-            self._template.get('resources')
+        resources = template.get('Resources') or template.get('resources')
         if current_status == 'NOT_FOUND':
             if resources:
                 self._heat_client.stacks.create(
                     stack_name=self._name,
                     parameters=self._parameters,
-                    template=self._template,
+                    template=template,
                     disable_rollback=False)
 
                 self._wait_state(
@@ -208,13 +211,13 @@ class HeatStack(murano_object.MuranoObject):
                 self._heat_client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,
-                    template=self._template)
+                    template=template)
                 self._wait_state(
                     lambda status: status == 'UPDATE_COMPLETE')
             else:
                 self.delete()
 
-        self._applied = True
+        self._applied = not utils.is_different(self._template, template)
 
     def delete(self):
         try:
