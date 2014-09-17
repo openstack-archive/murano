@@ -17,6 +17,7 @@ Methods:
   # configSection should be a map representing the 'config'
   #      fragment in a StructuredConfig
   # inputValues should be a map with any required inputs
+  # signalTransport: null (==CFN_SIGNAL), HEAT_SIGNAL, NO_TRANSPORT
   #
   # A StructuredConfig and StructuredDeployment will be added
   # to the Instance
@@ -29,11 +30,15 @@ Methods:
       - inputValues:
           Contract: {}
           Default: {}
+      - signalTransport:
+          Contract: $.string()
+          Default: null
     Body:
       - $group: Heat::Ungrouped
       - $.addSoftwareConfig($configName, $configSection,
                             inputValues=>$inputValues,
-                            configGroup=>$group, isStructured=>True)
+                            configGroup=>$group, isStructured=>True,
+                            signalTransport=>$signalTransport)
 
   # Adds a SoftwareConfig and SoftwareDeployment.
   # configName will be prepended with the instance name
@@ -41,6 +46,7 @@ Methods:
   # ordinary software config can take a string or a map),
   # configGroup can be Heat::Ungrouped, script, puppet etc
   # inputValues should be a map with any inputs required by the Config
+  # signalTransport: null (==CFN_SIGNAL), HEAT_SIGNAL, NO_TRANSPORT
   addSoftwareConfig:
     Arguments:
       - configName:
@@ -57,6 +63,10 @@ Methods:
       - isStructured:
           Contract: $.bool()
           Default: False
+      - signalTransport:
+          Contract: $.string()
+          Default: null
+
     Body:
       - $full_config_name: $.name + '-' + $configName
       - $deployment_name: $full_config_name + '-deployment'
@@ -83,6 +93,7 @@ Methods:
               properties:
                 config: { get_resource: $full_config_name }
                 server: { get_resource: $.name }
+                signal_transport: $signalTransport
                 input_values:
                   $inputValues
           outputs:
