@@ -70,9 +70,12 @@ class ApiPackageLoader(PackageLoader):
 
     @staticmethod
     def _get_cache_directory():
-        directory = os.path.join(config.CONF.packages_opts.packages_cache,
-                                 str(uuid.uuid4()))
-        directory = os.path.abspath(directory)
+        base_directory = (
+            config.CONF.packages_opts.packages_cache or
+            os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
+        )
+        directory = os.path.abspath(os.path.join(base_directory,
+                                                 str(uuid.uuid4())))
         os.makedirs(directory)
 
         LOG.debug('Cache for package loader is located at: %s' % directory)
