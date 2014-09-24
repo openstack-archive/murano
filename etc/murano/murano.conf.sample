@@ -788,7 +788,7 @@
 
 # Location (directory) for Murano package cache. (string
 # value)
-#packages_cache=/tmp/murano-packages-cache
+#packages_cache=<None>
 
 # Maximum application package size, Mb (integer value)
 #package_size_limit=5

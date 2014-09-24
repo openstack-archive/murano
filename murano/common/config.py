@@ -21,7 +21,6 @@ import logging.config
 import logging.handlers
 import os
 import sys
-import tempfile
 
 from oslo.config import cfg
 from paste import deploy
@@ -177,10 +176,8 @@ engine_opts = [
 metadata_dir = cfg.StrOpt('metadata-dir', default='./meta',
                           help='Metadata dir')
 
-temp_pkg_cache = os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
-
 packages_opts = [
-    cfg.StrOpt('packages_cache', default=temp_pkg_cache,
+    cfg.StrOpt('packages_cache', default=None,
                help='Location (directory) for Murano package cache.'),
 
     cfg.IntOpt('package_size_limit', default=5,
