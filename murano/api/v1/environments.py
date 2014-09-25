@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import re
+
 from oslo.db import exception as db_exc
 from sqlalchemy import desc
 from webob import exc
@@ -33,6 +35,8 @@ LOG = logging.getLogger(__name__)
 
 API_NAME = 'Environments'
 
+VALID_NAME_REGEX = re.compile('^[a-zA-Z]+[\w-]*$')
+
 
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
@@ -51,15 +55,22 @@ class Controller(object):
     def create(self, request, body):
         LOG.debug('Environments:Create <Body {0}>'.format(body))
         policy.check('create_environment', request.context)
-
-        try:
-            environment = envs.EnvironmentServices.create(
-                body.copy(),
-                request.context.tenant)
-        except db_exc.DBDuplicateEntry:
-            msg = _('Environment with specified name already exists')
+        LOG.debug('ENV NAME: {0}>'.format(body['name']))
+        if VALID_NAME_REGEX.match(str(body['name'])):
+            try:
+                environment = envs.EnvironmentServices.create(
+                    body.copy(),
+                    request.context.tenant)
+            except db_exc.DBDuplicateEntry:
+                msg = _('Environment with specified name already exists')
+                LOG.exception(msg)
+                raise exc.HTTPConflict(msg)
+        else:
+            msg = _('Environment name must contain only alphanumeric '
+                    'or "_-." characters, must start with alpha')
             LOG.exception(msg)
-            raise exc.HTTPConflict(msg)
+            raise exc.HTTPClientError(msg)
+
         return environment.to_dict()
 
     @request_statistics.stats_count(API_NAME, 'Show')
@@ -114,8 +125,15 @@ class Controller(object):
                        'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
-        environment.update(body)
-        environment.save(session)
+        LOG.debug('ENV NAME: {0}>'.format(body['name']))
+        if VALID_NAME_REGEX.match(str(body['name'])):
+            environment.update(body)
+            environment.save(session)
+        else:
+            msg = _('Environment name must contain only alphanumeric '
+                    'or "_-." characters, must start with alpha')
+            LOG.exception(msg)
+            raise exc.HTTPClientError(msg)
 
         return environment.to_dict()
 

@@ -89,6 +89,20 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(expected, json.loads(result.body))
         self.assertEqual(3, mock_uuid.call_count)
 
+    def test_illegal_environment_name_create(self):
+        """Check that an illegal env name results in an HTTPClientError."""
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        body = {'name': 'my+#env'}
+        req = self._post('/environments', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+
     def test_missing_environment(self):
         """Check that a missing environment results in an HTTPNotFound."""
         self._set_policy_rules(
@@ -125,7 +139,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                 'Objects': {
                     '?': {'id': '12345'}
                 },
-                'Attributes': {}
+                'Attributes': []
             }
         )
         e = models.Environment(**expected)
@@ -137,11 +151,11 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         del expected['description']
         expected['services'] = []
         expected['status'] = 'ready'
-        expected['name'] = 'renamed env'
+        expected['name'] = 'renamed_env'
         expected['updated'] = fake_now
 
         body = {
-            'name': 'renamed env'
+            'name': 'renamed_env'
         }
         req = self._put('/environments/12345', json.dumps(body))
         result = req.get_response(self.api)
