@@ -24,6 +24,11 @@ import murano.common.config as config
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
+from murano.openstack.common import log as logging
+import muranoclient.openstack.common.uuidutils as uuidutils
+
+
+LOG = logging.getLogger(__name__)
 
 
 @murano_class.classname('io.murano.system.NetworkExplorer')
@@ -69,7 +74,37 @@ class NetworkExplorer(murano_object.MuranoObject):
             list_routers(tenant_id=self._tenant_id, name=router_name).\
             get('routers')
         if len(routers) == 0:
-            raise KeyError('Router %s was not found' % router_name)
+            LOG.debug('Router {0} not found'.format(router_name))
+            if self._settings.create_router:
+                LOG.debug('Attempting to create Router {0}'.
+                          format(router_name))
+                external_network = self._settings.external_network
+                kwargs = {'id': external_network} \
+                    if uuidutils.is_uuid_like(external_network) \
+                    else {'name': external_network}
+                networks = self._neutron.list_networks(**kwargs). \
+                    get('networks')
+                ext_nets = filter(lambda n: n['router:external'], networks)
+                if len(ext_nets) == 0:
+                    raise KeyError('Router %s could not be created, '
+                                   'no external network found' % router_name)
+                nid = ext_nets[0]['id']
+
+                body_data = {
+                    'router': {
+                        'name': router_name,
+                        'external_gateway_info': {
+                            'network_id': nid
+                        },
+                        'admin_state_up': True,
+                    }
+                }
+                router = self._neutron.create_router(body=body_data).\
+                    get('router')
+                LOG.debug('Created router: {0}'.format(router))
+                return router['id']
+            else:
+                raise KeyError('Router %s was not found' % router_name)
         else:
             if routers[0]['external_gateway_info'] is None:
                 raise Exception('Please set external gateway '

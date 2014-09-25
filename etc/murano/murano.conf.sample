@@ -760,9 +760,17 @@
 # (string value)
 #default_dns=8.8.8.8
 
+# ID or name of the external network for routers to connect to
+# (string value)
+#external_network=ext-net
+
 # Name of the router that going to be used in order to join
 # all networks created by Murano (string value)
 #router_name=murano-default-router
+
+# This option will create a router when one with "router_name"
+# does not exist (boolean value)
+#create_router=true
 
 
 [neutron]
