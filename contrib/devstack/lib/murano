@@ -43,6 +43,9 @@ MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
 
 MURANO_KEYSTONE_SIGNING_DIR=${MURANO_KEYSTONE_SIGNING_DIR:-/tmp/keystone-signing-muranoapi}
 
+MURANO_DEFAULT_ROUTER=${MURANO_DEFAULT_ROUTER:-''}
+MURANO_EXTERNAL_NETWORK=${MURANO_EXTERNAL_NETWORK:-''}
+
 # MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
 # This is not required if all OpenStack services are deployed by devstack scripts
 #   on a single node. In this case '/' virtual host (which is the default) is enough.
@@ -126,6 +129,30 @@ function configure_murano_rpc_backend() {
     fi
 }
 
+function configure_murano_networking {
+    # Use keyword 'public' if Murano external network was not set.
+    # If it was set but the network is not exist then
+    # first available external network will be selected.
+    local ext_net=${MURANO_EXTERNAL_NETWORK:-'public'}
+    local ext_net_id=$(neutron net-external-list \
+            | grep " $ext_net " | get_field 2)
+
+    # Try to select first available external network
+    if [[ -n "$ext_net_id" ]]; then
+        ext_net_id=$(neutron net-external-list -f csv -c id \
+            | tail -n +2 | tail -n 1)
+    fi
+
+    # Configure networking options for Murano
+    if [[ -n "$MURANO_EXTERNAL_NETWORK" ]] && [[ -n "$ext_net_id" ]]; then
+        iniset $MURANO_CONF_FILE networking external_network $ext_net_id
+        iniset $MURANO_CONF_FILE networking create_router 'true'
+    fi
+
+    if [[ -n "$MURANO_DEFAULT_ROUTER" ]]; then
+        iniset $MURANO_CONF_FILE networking router_name $MURANO_DEFAULT_ROUTER
+    fi
+}
 
 # Entry points
 # ------------
@@ -175,6 +202,8 @@ function configure_murano {
 
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
+
+    configure_murano_networking
 }
 
 
