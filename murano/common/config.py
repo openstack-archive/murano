@@ -158,9 +158,12 @@ networking_opts = [
 
     cfg.StrOpt('default_dns', default='8.8.8.8',
                help='Default DNS nameserver to be assigned to '
-               'created Networks')
-]
+               'created Networks'),
 
+    cfg.StrOpt('router_name', default='murano-default-router',
+               help='Name of the router that going to be used in order to '
+                    'join all networks created by Murano')
+]
 stats_opt = [
     cfg.IntOpt('period', default=5,
                help=_('Statistics collection interval in minutes.'
