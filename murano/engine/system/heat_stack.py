@@ -168,8 +168,10 @@ class HeatStack(murano_object.MuranoObject):
                     eventlet.sleep(2)
                     continue
                 if not status_func(status):
+                    reason = ': {0}'.format(
+                        stack_info.stack_status_reason) if stack_info else ''
                     raise EnvironmentError(
-                        "Unexpected stack state {0}".format(status))
+                        "Unexpected stack state {0}{1}".format(status, reason))
 
                 try:
                     return dict([(t['output_key'], t['output_value'])
@@ -202,7 +204,7 @@ class HeatStack(murano_object.MuranoObject):
                     stack_name=self._name,
                     parameters=self._parameters,
                     template=template,
-                    disable_rollback=False)
+                    disable_rollback=True)
 
                 self._wait_state(
                     lambda status: status == 'CREATE_COMPLETE')

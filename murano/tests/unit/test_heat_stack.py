@@ -58,7 +58,7 @@ class TestHeatStack(base.MuranoTestCase):
                 }
                 mock_heat_client.stacks.create.assert_called_with(
                     stack_name='test-stack',
-                    disable_rollback=False,
+                    disable_rollback=True,
                     parameters={},
                     template=expected_template
                 )
@@ -91,7 +91,7 @@ class TestHeatStack(base.MuranoTestCase):
                 }
                 mock_heat_client.stacks.create.assert_called_with(
                     stack_name='test-stack',
-                    disable_rollback=False,
+                    disable_rollback=True,
                     parameters={},
                     template=expected_template
                 )
