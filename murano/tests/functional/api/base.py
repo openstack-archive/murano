@@ -19,6 +19,7 @@ import time
 import uuid
 
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -273,5 +274,6 @@ class NegativeTestCase(TestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        mgr = clients.Manager()
+        creds = isolated_creds.IsolatedCreds(cls.__name__).get_alt_creds()
+        mgr = clients.Manager(credentials=creds)
         cls.alt_client = MuranoClient(mgr.auth_provider)
