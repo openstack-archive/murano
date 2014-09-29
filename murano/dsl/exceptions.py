@@ -126,5 +126,5 @@ class PropertyWriteError(PropertyAccessError):
 class UninitializedPropertyAccessError(PropertyAccessError):
     def __init__(self, name, murano_class):
         super(PropertyAccessError, self).__init__(
-            'Access to private uninitialized property '
+            'Access to uninitialized property '
             '%s in class %s is forbidden' % (name, murano_class.name))

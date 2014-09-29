@@ -41,7 +41,7 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.UninitializedPropertyAccessError,
             self._runner.testUninitializedPrivatePropertyAccess)
         self.assertEqual(
-            'Access to private uninitialized property privateName '
+            'Access to uninitialized property privateName '
             'in class SampleClass3 is forbidden', str(e))
 
     def test_read_of_private_property_of_other_class(self):
@@ -113,8 +113,3 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.NoWriteAccessError,
             self._runner.on(self._multi_derived).
             testModifyUsageTestProperty6)
-
-    def test_runtime_properties_skipped_on_initialize(self):
-        model = om.Object('PropertyInit', runtimeProperty='value')
-        runner = self.new_runner(model)
-        self.assertRaises(KeyError, runner.testPropertyAccess)

@@ -54,17 +54,27 @@ class MuranoObject(object):
         for i in xrange(2):
             for property_name in self.__type.properties:
                 spec = self.__type.get_property(property_name)
-                if spec.usage == typespec.PropertyUsages.Runtime:
-                    continue
                 needs_evaluation = murano.dsl.helpers.needs_evaluation
                 if i == 0 and needs_evaluation(spec.default) or i == 1\
                         and property_name in used_names:
                     continue
                 used_names.add(property_name)
-                property_value = kwargs.get(property_name, type_scheme.NoValue)
-                self.set_property(property_name, property_value)
+                if spec.usage == typespec.PropertyUsages.Runtime:
+                    if not spec.has_default:
+                        continue
+                    property_value = type_scheme.NoValue
+                else:
+                    property_value = kwargs.get(property_name,
+                                                type_scheme.NoValue)
+                try:
+                    self.set_property(property_name, property_value)
+                except exceptions.ContractViolationException:
+                    if spec.usage != typespec.PropertyUsages.Runtime:
+                        raise
+
         for parent in self.__parents.values():
             parent.initialize(**kwargs)
+        self.__initialized = True
 
     @property
     def object_id(self):
@@ -93,7 +103,7 @@ class MuranoObject(object):
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
         if name in start_type.properties:
-            return self.cast(start_type).__properties[name]
+            return self.cast(start_type)._get_property_value(name)
         else:
             declared_properties = start_type.find_property(name)
             if len(declared_properties) == 1:
@@ -101,13 +111,16 @@ class MuranoObject(object):
             elif len(declared_properties) > 1:
                 raise exceptions.AmbiguousPropertyNameError(name)
             elif derived:
-                try:
-                    return self.cast(caller_class).__properties[name]
-                except KeyError:
-                    raise exceptions.UninitializedPropertyAccessError(
-                        name, start_type)
+                return self.cast(caller_class)._get_property_value(name)
             else:
                 raise exceptions.PropertyReadError(name, start_type)
+
+    def _get_property_value(self, name):
+        try:
+            return self.__properties[name]
+        except KeyError:
+            raise exceptions.UninitializedPropertyAccessError(
+                name, self.__type)
 
     def set_property(self, name, value, caller_class=None):
         start_type, derived = self.__type, False
