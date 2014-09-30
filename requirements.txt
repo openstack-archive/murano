@@ -13,7 +13,7 @@ WebOb>=1.2.3
 wsgiref>=0.1.2
 argparse
 ordereddict
-kombu>=2.4.8
+kombu>=2.5.0
 lockfile>=0.8
 pycrypto>=2.6
 psutil>=1.1.1,<2.0.0
