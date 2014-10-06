@@ -123,6 +123,8 @@ class TryBlockMacro(expressions.DslExpression):
                         raise
                 finally:
                     context.set_data(None, '?currentException')
+            else:
+                raise
         else:
             if self._else_block:
                 self._else_block.execute(context, murano_class)
