@@ -16,6 +16,7 @@ import mock
 
 from murano.dsl import murano_method
 from murano.dsl import results_serializer
+from murano.services import actions
 from murano.tests.unit import base
 
 
@@ -94,3 +95,41 @@ class TestActionsSerializer(base.MuranoTestCase):
         expected_result = {'name': 'method3', 'enabled': True}
         self.assertIn('id1_method3', obj_actions)
         self.assertEqual(expected_result, obj_actions['id1_method3'])
+
+
+class TestActionFinder(base.MuranoTestCase):
+    def setUp(self):
+        super(TestActionFinder, self).setUp()
+
+    def test_simple_root_level_search(self):
+        model = {
+            '?': {
+                'id': 'id1',
+                '_actions': {
+                    'ad_deploy': {
+                        'enabled': True,
+                        'name': 'deploy'
+                    }
+                }
+            }
+        }
+        action = actions.ActionServices.find_action(model, 'ad_deploy')
+        self.assertEqual('deploy', action[1]['name'])
+
+    def test_recursive_action_search(self):
+        model = {
+            '?': {
+                'id': 'id1',
+                '_actions': {'ad_deploy': {'enabled': True, 'name': 'deploy'}}
+            },
+            'property': {
+                '?': {
+                    'id': 'id2',
+                    '_actions': {
+                        'ad_scale': {'enabled': True, 'name': 'scale'}
+                    }
+                },
+            }
+        }
+        action = actions.ActionServices.find_action(model, 'ad_scale')
+        self.assertEqual('scale', action[1]['name'])
