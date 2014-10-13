@@ -207,13 +207,13 @@ Request
 
 Return information about environment itself and about applications, including to this environment.
 
-+----------+----------------------------------+----------------------------------+
-| Method   | URI                              | Description                      |
-+==========+==================================+==================================+
-| GET      | /environments/{id}               | Response detailed information    |
-|          |                                  | about Environment including      |
-|          |                                  | child entities                   |
-+----------+----------------------------------+----------------------------------+
++----------+----------------------------------+-----------------------------------+----------------------------------+
+| Method   | URI                              | Header                            | Description                      |
++==========+==================================+===================================+==================================+
+| GET      | /environments/{id}               | X-Configuration-Session (optional)| Response detailed information    |
+|          |                                  |                                   | about Environment including      |    
+|          |                                  |                                   | child entities                   |   
++----------+----------------------------------+-----------------------------------+----------------------------------+
 
 Response
 """"""""
@@ -592,7 +592,7 @@ Request
 +----------------+-----------------------------------------------------------+------------------------------------+
 | Method         | URI                                                       | Header                             |
 +================+===========================================================+====================================+
-| POST           | /environments/<env_id>/services                           | X-Configuration-Session (optional) |
+| POST           | /environments/<env_id>/services                           | X-Configuration-Session            |
 +----------------+-----------------------------------------------------------+------------------------------------+
 
 ::
