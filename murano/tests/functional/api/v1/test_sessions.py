@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest import exceptions
 from tempest.test import attr
 
@@ -102,4 +104,42 @@ class TestSessions(base.TestCase):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_session,
                           env['id'],
+                          sess['id'])
+
+
+class TestSessionsTenantIsolation(base.NegativeTestCase):
+
+    @attr(type='negative')
+    def test_create_session_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.create_session, env['id'])
+
+    @attr(type='negative')
+    def test_delete_session_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.delete_session, env['id'],
+                          sess['id'])
+
+    @attr(type='negative')
+    def test_get_session_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_session, env['id'],
+                          sess['id'])
+
+    @testtools.skip("https://bugs.launchpad.net/murano/+bug/1382026")
+    @attr(type='negative')
+    def test_deploy_session_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.deploy_session, env['id'],
                           sess['id'])

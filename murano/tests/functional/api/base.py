@@ -101,6 +101,14 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
+    def deploy_session(self, environment_id, session_id):
+        post_body = None
+        url = 'v1/environments/{0}/sessions/{1}/deploy'
+        resp, body = self.post(url.format(environment_id, session_id),
+                               post_body)
+
+        return resp, json.loads(body)
+
     def create_service(self, environment_id, session_id, post_body):
         post_body = json.dumps(post_body)
 
@@ -243,7 +251,9 @@ class TestCase(tempest.test.BaseTestCase):
 
         return environment
 
-    def create_demo_service(self, environment_id, session_id):
+    def create_demo_service(self, environment_id, session_id, client=None):
+        if not client:
+            client = self.client
         post_body = {
             "?": {
                 "id": uuid.uuid4().hex,
@@ -262,9 +272,9 @@ class TestCase(tempest.test.BaseTestCase):
             "configuration": "standalone"
         }
 
-        return self.client.create_service(environment_id,
-                                          session_id,
-                                          post_body)
+        return client.create_service(environment_id,
+                                     session_id,
+                                     post_body)
 
 
 class NegativeTestCase(TestCase):
