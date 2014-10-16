@@ -363,4 +363,5 @@ Murano App Incubator.
         $ tox -e venv -- murano-manage \
         > --config-file ./etc/murano/murano.conf \
         > import-package ../murano-app-incubator/%APPLICATION_DIRECTORY_NAME%
-    ..
+
+.. include:: configure_network.rst
