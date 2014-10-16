@@ -229,9 +229,9 @@ Install the API service and Engine
 Install Murano Dashboard
 ------------------------
 
-Murano API & Engine services provide the core of Murano. However, your need a
-control plane to use it. This section decribes how to install and run Murano
-Dashboard.
+ Murano API & Engine services provide the core of Murano. However, your need a
+ control plane to use it. This section decribes how to install and run Murano
+ Dashboard.
 
 1.  Clone the repository with Murano Dashboard.
 
@@ -256,9 +256,9 @@ Dashboard.
 
       $ tox -e venv pip install horizon
 
-It may happen, that the last release of horizon will be not capable with
-latest murano-dashboard code. In that case, horizon need to be installed
-from master branch of this repository: ``https://github.com/openstack/horizon``
+ It may happen, that the last release of horizon will be not capable with
+ latest murano-dashboard code. In that case, horizon need to be installed
+ from master branch of this repository: ``https://github.com/openstack/horizon``
 
 4.  Copy configuration file for dashboard.
 
@@ -293,17 +293,51 @@ from master branch of this repository: ``https://github.com/openstack/horizon``
         ...
 
 
-6.   Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
+.. _update_settings:
+6. Update settings file
 
-    .. code-block:: console
 
-        $ cd ~/murano/murano-dashboard
-        $ tox -e venv -- python manage.py runserver <IP:PORT>
-    ..
+.. _`here`: https://github.com/stackforge/murano-dashboard/blob/master/update_setting.sh
 
-Development server will be restarted automatically on every code change.
 
-7.  Open dashboard using url at http://localhost:8000 or at specified IP and port
+ Running Murano dashboard on developer environment implies the use of murano settings file instead of horizon.
+ However, for the correct setup requires settings file to be synchronized with corresponding horizon release.
+ But murano-dashboard also have parameters, that should be added to that config. So for your convenience,
+ Murano has special script that allows to quickly synchronize Django settings file for a developer installation.
+ *update_setting.sh* file can be found `here`_.
+
+ To display all possible options run:
+
+ .. code-block:: console
+
+     ./update_setting.sh --help
+
+ ..
+
+ .. note::
+
+     Ether output or input parameter should be specified.
+
+ ..
+
+* ``--input={PATH/TO/HORIZON/SETTINGS/FILE}`` - settings file to which murano settings would be applied. If omitted, settings from horizon master branch are downloaded.
+* ``--output={PATH/TO/FILE}`` - file to store script execution result. Will be overwrite if already exist. If omitted, coincides to the *input* parameter.
+* ``--tag`` - horizon release tag name, applied, if no input parameter is provided.
+* ``--remove`` - if set, Murano parameters would be removed from the settings file.
+* ``--cache-dir={PATH/TO/DIRECTORY}`` - directory to store intermediate script data. Default is */tmp/muranodashboard-cache*.
+* ``--log-file={PATH/TO/FILE}`` - file to store the script execution log to a separate file.
+
+7. Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
+
+ .. code-block:: console
+
+     $ cd ~/murano/murano-dashboard
+     $ tox -e venv -- python manage.py runserver <IP:PORT>
+ ..
+
+ Development server will be restarted automatically on every code change.
+
+8.  Open dashboard using url http://localhost:8000
 
 Import Murano Applications
 --------------------------
