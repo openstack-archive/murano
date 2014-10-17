@@ -21,7 +21,7 @@ from webob import exc
 
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 
 CONF = cfg.CONF

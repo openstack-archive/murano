@@ -25,7 +25,7 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano import version
 
 paste_deploy_opts = [

@@ -22,7 +22,7 @@ from oslo.config import cfg
 
 from murano.api import versions
 from murano.common import wsgi
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 import murano.openstack.common.log as logging
 
 CONF = cfg.CONF

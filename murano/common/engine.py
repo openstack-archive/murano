@@ -31,7 +31,7 @@ from murano.engine import package_class_loader
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 
 RPC_SERVICE = None

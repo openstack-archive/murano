@@ -28,7 +28,7 @@ from murano.common import policy
 from murano.common import wsgi
 from murano.db.catalog import api as db_api
 from murano.openstack.common import exception
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
