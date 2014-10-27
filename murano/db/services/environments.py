@@ -12,27 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
-
 from murano.common import uuidutils
-
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
+from murano.services import states
 
-
-EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
-    'READY', 'PENDING', 'DEPLOYING', 'DEPLOY_FAILURE', 'DELETING',
-    'DELETE_FAILURE'
-])(
-    READY='ready',
-    PENDING='pending',
-    DEPLOYING='deploying',
-    DEPLOY_FAILURE='deploy failure',
-    DELETING='deleting',
-    DELETE_FAILURE='delete failure'
-
-)
 
 DEFAULT_NETWORKS = {
     'environment': 'io.murano.resources.NeutronNetwork',
@@ -75,20 +60,20 @@ class EnvironmentServices(object):
         session_list = sessions.SessionServices.get_sessions(environment_id)
         has_opened = False
         for session in session_list:
-            if session.state == sessions.SessionState.DEPLOYING:
-                return EnvironmentStatus.DEPLOYING
-            elif session.state == sessions.SessionState.DELETING:
-                return EnvironmentStatus.DELETING
-            elif session.state == sessions.SessionState.DEPLOY_FAILURE:
-                return EnvironmentStatus.DEPLOY_FAILURE
-            elif session.state == sessions.SessionState.DELETE_FAILURE:
-                return EnvironmentStatus.DELETE_FAILURE
-            elif session.state == sessions.SessionState.OPENED:
+            if session.state == states.SessionState.DEPLOYING:
+                return states.EnvironmentStatus.DEPLOYING
+            elif session.state == states.SessionState.DELETING:
+                return states.EnvironmentStatus.DELETING
+            elif session.state == states.SessionState.DEPLOY_FAILURE:
+                return states.EnvironmentStatus.DEPLOY_FAILURE
+            elif session.state == states.SessionState.DELETE_FAILURE:
+                return states.EnvironmentStatus.DELETE_FAILURE
+            elif session.state == states.SessionState.OPENED:
                 has_opened = True
         if has_opened:
-            return EnvironmentStatus.PENDING
+            return states.EnvironmentStatus.PENDING
 
-        return EnvironmentStatus.READY
+        return states.EnvironmentStatus.READY
 
     @staticmethod
     def create(environment_params, tenant_id):
@@ -169,7 +154,7 @@ class EnvironmentServices(object):
         if session_id:
             session = unit.query(models.Session).get(session_id)
             if sessions.SessionServices.validate(session):
-                if session.state != sessions.SessionState.DEPLOYED:
+                if session.state != states.SessionState.DEPLOYED:
                     env_description = session.description
                 else:
                     env = unit.query(models.Environment) \
