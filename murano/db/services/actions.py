@@ -12,7 +12,7 @@
 
 from murano.common.helpers import token_sanitizer
 from murano.db import models
-from murano.services import state
+from murano.services import states
 
 
 def get_environment(session, unit):
@@ -22,10 +22,11 @@ def get_environment(session, unit):
 
 
 def update_task(action, session, task, unit):
-    session.state = state.SessionState.deploying
+    objects = session.description.get('Objects', None)
+    session.state = states.SessionState.DELETING if objects is None \
+        else states.SessionState.DEPLOYING
     task_info = models.Task()
     task_info.environment_id = session.environment_id
-    objects = session.description.get('Objects', None)
     if objects:
         task_info.description = token_sanitizer.TokenSanitizer().sanitize(
             dict(session.description.get('Objects')))

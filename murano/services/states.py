@@ -14,7 +14,26 @@
 import collections
 
 SessionState = collections.namedtuple('SessionState', [
-    'open', 'deploying', 'deployed'
+    'OPENED', 'DEPLOYING', 'DEPLOYED', 'DEPLOY_FAILURE', 'DELETING',
+    'DELETE_FAILURE'
 ])(
-    open='open', deploying='deploying', deployed='deployed'
+    OPENED='opened',
+    DEPLOYING='deploying',
+    DEPLOYED='deployed',
+    DEPLOY_FAILURE='deploy failure',
+    DELETING='deleting',
+    DELETE_FAILURE='delete failure'
+)
+
+EnvironmentStatus = collections.namedtuple('EnvironmentStatus', [
+    'READY', 'PENDING', 'DEPLOYING', 'DEPLOY_FAILURE', 'DELETING',
+    'DELETE_FAILURE'
+])(
+    READY='ready',
+    PENDING='pending',
+    DEPLOYING='deploying',
+    DEPLOY_FAILURE='deploy failure',
+    DELETING='deleting',
+    DELETE_FAILURE='delete failure'
+
 )
