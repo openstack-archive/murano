@@ -12,12 +12,27 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest import cli
+from tempest_lib.cli import base  # noqa
+
+from tempest import config
+from tempest import test
+
+CONF = config.CONF
 
 
-class ClientTestBase(cli.ClientTestBase):
+class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
 
     def murano(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes murano command for the given action."""
-        return self.cmd_with_auth(
+        return self.clients.cmd_with_auth(
             'murano', action, flags, params, admin, fail_ok)
+
+    def _get_clients(self):
+        clients = base.CLIClient(
+            CONF.identity.admin_username,
+            CONF.identity.admin_password,
+            CONF.identity.admin_tenant_name,
+            CONF.identity.uri,
+            CONF.cli.cli_dir
+        )
+        return clients
