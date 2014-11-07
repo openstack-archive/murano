@@ -25,8 +25,8 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-import murano
 from murano.openstack.common.gettextutils import _  # noqa
+from murano import version
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor', help='Paste flavor'),
@@ -222,7 +222,7 @@ CONF.register_opts(networking_opts, group='networking')
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,
          project='murano',
-         version=murano.__version__,
+         version=version.version_string,
          usage=usage,
          default_config_files=default_config_files)
 

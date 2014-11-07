@@ -24,12 +24,11 @@ import traceback
 from oslo.config import cfg
 from oslo.db import exception as db_exception
 
-import murano
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
 from murano.openstack.common import log as logging
 from murano.packages import load_utils
-
+from murano import version
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -151,7 +150,7 @@ def main():
     try:
         default_config_files = cfg.find_config_files('murano', 'murano')
         CONF(sys.argv[1:], project='murano', prog='murano-manage',
-             version=murano.__version__,
+             version=version.version_string,
              default_config_files=default_config_files)
         logging.setup("murano")
     except RuntimeError as e:
