@@ -145,14 +145,23 @@ class MuranoDslExecutor(object):
                 '{0}: Begin execution: {1}'.format(
                     thread_marker, method_info))
 
-        gt = eventlet.spawn(self._invoke_method_implementation_gt, body,
-                            this, params, murano_class, context,
-                            thread_marker)
-        result = gt.wait()
-        del self._locks[(method_id, this_id)]
-        LOG.debug(
-            "{0}: End execution: {1}".format(thread_marker, method_info))
-        event.send()
+        try:
+            gt = eventlet.spawn(self._invoke_method_implementation_gt, body,
+                                this, params, murano_class, context,
+                                thread_marker)
+            result = gt.wait()
+        except Exception as e:
+            LOG.debug(
+                "{0}: End execution: {1} with exception {2}".format(
+                    thread_marker, method_info, e))
+            raise
+        else:
+            LOG.debug(
+                "{0}: End execution: {1}".format(thread_marker, method_info))
+        finally:
+            del self._locks[(method_id, this_id)]
+            event.send()
+
         return result
 
     def _invoke_method_implementation_gt(self, body, this,
