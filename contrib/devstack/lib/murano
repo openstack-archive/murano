@@ -134,8 +134,12 @@ function configure_murano_rpc_backend() {
 function configure_murano {
     mkdir_chown_stack "$MURANO_CONF_DIR"
 
-    # Copy over Murano configuration file and configure common parameters.
-    cp $MURANO_DIR/etc/murano/murano.conf.sample $MURANO_CONF_FILE
+    # Generate Murano configuration file and configure common parameters.
+    oslo-config-generator --namespace keystonemiddleware.auth_token \
+                          --namespace murano \
+                          --namespace oslo.db \
+                          --namespace oslo.messaging \
+                          > $MURANO_CONF_FILE
     cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
     cp $MURANO_DIR/etc/murano/policy.json $MURANO_POLICY_FILE
 

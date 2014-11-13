@@ -1,2 +1,0 @@
-export MURANO_CONFIG_GENERATOR_EXTRA_MODULES="keystonemiddleware.auth_token"
-export MURANO_CONFIG_GENERATOR_EXTRA_LIBRARIES="oslo.db oslo.messaging"

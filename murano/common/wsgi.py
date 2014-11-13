@@ -15,6 +15,7 @@
 
 """Utility methods for working with WSGI servers."""
 
+import copy
 import eventlet
 eventlet.patcher.monkey_patch(all=False, socket=True)
 
@@ -58,6 +59,10 @@ CONF = cfg.CONF
 CONF.register_opts(socket_opts)
 
 LOG = logging.getLogger(__name__)
+
+
+def list_opts():
+    return [('socket', copy.deepcopy(socket_opts))]
 
 
 def run_server(application, port):
