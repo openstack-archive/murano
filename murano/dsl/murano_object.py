@@ -36,6 +36,10 @@ class MuranoObject(object):
         self.__context = context
         self.__defaults = defaults or {}
         self.__this = this
+        self.__config = object_store.class_loader.get_class_config(
+            murano_class.name)
+        if not isinstance(self.__config, dict):
+            self.__config = {}
         known_classes[murano_class.name] = self
         for parent_class in murano_class.parents:
             name = parent_class.name
@@ -51,9 +55,20 @@ class MuranoObject(object):
 
     def initialize(self, **kwargs):
         used_names = set()
+        for property_name in self.__type.properties:
+            spec = self.__type.get_property(property_name)
+            if spec.usage == typespec.PropertyUsages.Config:
+                if property_name in self.__config:
+                    property_value = self.__config[property_name]
+                else:
+                    property_value = type_scheme.NoValue
+                self.set_property(property_name, property_value)
+
         for i in xrange(2):
             for property_name in self.__type.properties:
                 spec = self.__type.get_property(property_name)
+                if spec.usage == typespec.PropertyUsages.Config:
+                    continue
                 needs_evaluation = murano.dsl.helpers.needs_evaluation
                 if i == 0 and needs_evaluation(spec.default) or i == 1\
                         and property_name in used_names:
@@ -137,7 +152,8 @@ class MuranoObject(object):
                             or not derived:
                         raise exceptions.NoWriteAccessError(name)
 
-                default = self.__defaults.get(name, spec.default)
+                default = self.__config.get(name, spec.default)
+                default = self.__defaults.get(name, default)
                 child_context = yaql.context.Context(
                     parent_context=self.__context)
                 child_context.set_data(self)

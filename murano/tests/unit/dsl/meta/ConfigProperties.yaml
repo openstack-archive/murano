@@ -1,0 +1,17 @@
+Name: ConfigProperties
+
+Properties:
+  cfgProperty:
+    Usage: Config
+    Contract: $.int().notNull()
+    Default: 123
+
+  normalProperty:
+    Contract: $.string().notNull()
+    Default: DEFAULT
+
+Methods:
+  testPropertyValues:
+    Body:
+      - trace($.cfgProperty)
+      - trace($.normalProperty)

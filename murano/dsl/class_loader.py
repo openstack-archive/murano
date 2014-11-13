@@ -73,7 +73,7 @@ class MuranoClassLoader(object):
 
         properties = data.get('Properties', {})
         for property_name, property_spec in properties.iteritems():
-            spec = typespec.PropertySpec(property_spec, ns_resolver)
+            spec = typespec.PropertySpec(property_spec, type_obj)
             type_obj.add_property(property_name, spec)
 
         methods = data.get('Methods') or data.get('Workflow') or {}
@@ -94,6 +94,9 @@ class MuranoClassLoader(object):
 
     def create_root_context(self):
         return yaql.create_context(True)
+
+    def get_class_config(self, name):
+        return {}
 
     def create_local_context(self, parent_context, murano_class):
         return yaql.context.Context(parent_context=parent_context)

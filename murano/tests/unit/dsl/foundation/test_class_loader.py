@@ -22,10 +22,12 @@ from murano.dsl import murano_package
 from murano.dsl import namespace_resolver
 from murano.engine.system import yaql_functions
 from murano.engine import yaql_yaml_loader
+from murano.tests.unit.dsl.foundation import object_model
 
 
 class TestClassLoader(class_loader.MuranoClassLoader):
     _classes_cache = {}
+    _configs = {}
 
     def __init__(self, directory, package_name, parent_loader=None):
         self._package = murano_package.MuranoPackage()
@@ -90,3 +92,16 @@ class TestClassLoader(class_loader.MuranoClassLoader):
 
     def register_function(self, func, name):
         self._functions[name] = func
+
+    def get_class_config(self, name):
+        return TestClassLoader._configs.get(name, {})
+
+    def set_config_value(self, class_name, property_name, value):
+        if isinstance(class_name, object_model.Object):
+            class_name = class_name.type_name
+        TestClassLoader._configs.setdefault(class_name, {})[
+            property_name] = value
+
+    @staticmethod
+    def clear_configs():
+        TestClassLoader._configs = {}

@@ -22,17 +22,18 @@ class PropertyUsages(object):
     InOut = 'InOut'
     Runtime = 'Runtime'
     Const = 'Const'
-    All = set([In, Out, InOut, Runtime, Const])
+    Config = 'Config'
+    All = set([In, Out, InOut, Runtime, Const, Config])
     Writable = set([Out, InOut, Runtime])
 
 
 class Spec(object):
-    def __init__(self, declaration, namespace_resolver):
-        self._namespace_resolver = namespace_resolver
+    def __init__(self, declaration, owner_class):
+        self._namespace_resolver = owner_class.namespace_resolver
         self._contract = type_scheme.TypeScheme(declaration['Contract'])
+        self._usage = declaration.get('Usage') or 'In'
         self._default = declaration.get('Default')
         self._has_default = 'Default' in declaration
-        self._usage = declaration.get('Usage') or 'In'
         if self._usage not in PropertyUsages.All:
             raise exceptions.DslSyntaxError(
                 'Unknown type {0}. Must be one of ({1})'.format(

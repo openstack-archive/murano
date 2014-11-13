@@ -13,9 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import json
+import os.path
 import sys
 
 from oslo.config import cfg
+import yaml
 
 from murano.dsl import class_loader
 from murano.dsl import exceptions
@@ -70,3 +73,14 @@ class PackageClassLoader(class_loader.MuranoClassLoader):
         context = super(PackageClassLoader, self).create_root_context()
         yaql_functions.register(context)
         return context
+
+    def get_class_config(self, name):
+        json_config = os.path.join(CONF.engine.class_configs, name + '.json')
+        if os.path.exists(json_config):
+            with open(json_config) as f:
+                return json.load(f)
+        yaml_config = os.path.join(CONF.engine.class_configs, name + '.yaml')
+        if os.path.exists(yaml_config):
+            with open(yaml_config) as f:
+                return yaml.safe_load(f)
+        return {}

@@ -1,0 +1,57 @@
+# Copyright (c) 2014 Mirantis, Inc.
+#
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+from murano.tests.unit.dsl.foundation import object_model as om
+from murano.tests.unit.dsl.foundation import test_case
+
+
+class TestConfigProperties(test_case.DslTestCase):
+    def test_config_property(self):
+        obj = om.Object('ConfigProperties')
+        self.class_loader.set_config_value(obj, 'cfgProperty', '987')
+        runner = self.new_runner(obj)
+        runner.testPropertyValues()
+        self.assertEqual(
+            [987, 'DEFAULT'],
+            self.traces
+        )
+
+    def test_config_property_exclusion_from_obect_model(self):
+        obj = om.Object('ConfigProperties', cfgProperty=555)
+        runner = self.new_runner(obj)
+        runner.testPropertyValues()
+        self.assertEqual(
+            [123, 'DEFAULT'],
+            self.traces
+        )
+
+    def test_config_affects_default(self):
+        obj = om.Object('ConfigProperties')
+        self.class_loader.set_config_value(obj, 'normalProperty', 'custom')
+        runner = self.new_runner(obj)
+        runner.testPropertyValues()
+        self.assertEqual(
+            [123, 'custom'],
+            self.traces
+        )
+
+    def test_config_not_affects_in_properties(self):
+        obj = om.Object('ConfigProperties', normalProperty='qq')
+        self.class_loader.set_config_value(obj, 'normalProperty', 'custom')
+        runner = self.new_runner(obj)
+        runner.testPropertyValues()
+        self.assertEqual(
+            [123, 'qq'],
+            self.traces
+        )
