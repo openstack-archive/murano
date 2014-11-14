@@ -20,10 +20,10 @@ from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
 from murano.services import actions
+from murano.services import states
 
 
 LOG = logging.getLogger(__name__)
@@ -50,8 +50,8 @@ class Controller(object):
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
-        if env_status in (envs.EnvironmentStatus.DEPLOYING,
-                          envs.EnvironmentStatus.DELETING):
+        if env_status in (states.EnvironmentStatus.DEPLOYING,
+                          states.EnvironmentStatus.DELETING):
             LOG.info(_('Could not open session for environment <EnvId: {0}>,'
                        'environment has deploying '
                        'status.').format(environment_id))

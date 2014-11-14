@@ -12,24 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
-
 from murano.db import models
 from murano.db import session as db_session
 from murano.services import actions
-
-
-SessionState = collections.namedtuple('SessionState', [
-    'OPENED', 'DEPLOYING', 'DEPLOYED', 'DEPLOY_FAILURE', 'DELETING',
-    'DELETE_FAILURE'
-])(
-    OPENED='opened',
-    DEPLOYING='deploying',
-    DEPLOYED='deployed',
-    DEPLOY_FAILURE='deploy failure',
-    DELETING='deleting',
-    DELETE_FAILURE='delete failure'
-)
+from murano.services import states
 
 
 class SessionServices(object):
@@ -38,7 +24,7 @@ class SessionServices(object):
         """Get list of sessions for specified environment.
 
         :param environment_id: Environment Id
-        :param state: glazierapi.db.services.environments.EnvironmentStatus
+        :param state: murano.services.states.EnvironmentStatus
         :return: Sessions for specified Environment, if SessionState is
         not defined all sessions for specified environment is returned.
         """
@@ -73,7 +59,7 @@ class SessionServices(object):
         session = models.Session()
         session.environment_id = environment.id
         session.user_id = user_id
-        session.state = SessionState.OPENED
+        session.state = states.SessionState.OPENED
         # used for checking if other sessions was deployed before this one
         session.version = environment.version
         # all changes to environment is stored here, and translated to
@@ -105,9 +91,10 @@ class SessionServices(object):
 
         #if other session is deploying now current session is invalid
         other_is_deploying = unit.query(models.Session).filter_by(
-            environment_id=session.environment_id, state=SessionState.DEPLOYING
+            environment_id=session.environment_id,
+            state=states.SessionState.DEPLOYING
         ).count() > 0
-        if session.state == SessionState.OPENED and other_is_deploying:
+        if session.state == states.SessionState.OPENED and other_is_deploying:
             return False
 
         return True

@@ -13,7 +13,7 @@
 from murano.common import rpc
 from murano.db import models
 from murano.db.services import actions as actions_db
-from murano.services import state as states
+from murano.services import states
 
 
 class ActionServices(object):

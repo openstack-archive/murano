@@ -20,9 +20,9 @@ from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging
+from murano.services import states
 
 LOG = logging.getLogger(__name__)
 API_NAME = 'Sessions'
@@ -62,8 +62,8 @@ class Controller(object):
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
-        if env_status in (envs.EnvironmentStatus.DEPLOYING,
-                          envs.EnvironmentStatus.DELETING):
+        if env_status in (states.EnvironmentStatus.DEPLOYING,
+                          states.EnvironmentStatus.DELETING):
             msg = _('Could not open session for environment <EnvId: {0}>,'
                     'environment has deploying status.').format(environment_id)
             LOG.error(msg)
@@ -113,7 +113,7 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPUnauthorized(explanation=msg)
 
-        if session.state == sessions.SessionState.DEPLOYING:
+        if session.state == states.SessionState.DEPLOYING:
             msg = _('Session <SessionId: {0}> is in deploying state and '
                     'could not be deleted').format(session_id)
             LOG.error(msg)
@@ -138,7 +138,7 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
-        if session.state != sessions.SessionState.OPENED:
+        if session.state != states.SessionState.OPENED:
             msg = _('Session <SessionId {0}> is already deployed or '
                     'deployment is in progress').format(session_id)
             LOG.error(msg)
