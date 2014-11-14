@@ -16,10 +16,12 @@
 ====================================
 Composing application package manual
 ====================================
+
 Murano is Application catalog that supports types of applications. This document intends to make composing application packages easily.
 
 Step 1.  Prepare Execution Plans
 ================================
+
 An *Execution Plan* is a set of metadata that describes the installation process of an application in a virtual machine.
 It's a minimal unit of execution that can be triggered in Murano Workflows and should be understandable by Murano agent. From *Execution plans* any script can be triggered.
 It could be any type of scripts which will execute commands and install application components as the result. Each script may consist of one or more files.
@@ -72,6 +74,7 @@ Example *DeployTelnet.template*
 
 Step 2.  Prepare MuranoPL class definitions
 ===========================================
+
 MuranoPL classes control application deployment workflow execution. Full information about MuranoPL classes see here: :ref:`MuranoPL Spec`
 
 .. _Telnet Class:
@@ -119,17 +122,20 @@ Note, that
 
 Step 3.  Prepare dynamic UI form definition
 ===========================================
+
 Create a form definition in a yaml format. Before configuring a form, compose a list of parameters that will be required to set by a user.
 Some form fields that are responsible for choosing a flavor, image and availability zone are better to use in every application creation wizard.
-Syntax of  Dynamic UI can be found see here: :ref:`Dynamic UI Spec`
-Full example with Telnet application form definition :ref:`telnet-yaml`.
+Syntax of  Dynamic UI can be found see at the corresponding section: :ref:`Dynamic UI Definition specification <DynamicUISpec>`.
+Full example with Telnet application form definition :ref:`Telnet Definition <TelnetUI>`.
 
 Step 4.  Prepare application logo
 =================================
+
 Find or create a simple image (in a .png format) associated with your application. Is should be small and have a square shape. You can specify any name of your image. In our example, let's name it *telnet.png*.
 
 Step 5.  Prepare manifest file
 ==============================
+
 General application metadata should be described in the application manifest file. It should be in a yaml format and should have the following sections
 
 * **Format** - version of a manifest syntax format
@@ -161,6 +167,7 @@ Example *manifest.yaml*
 
 Step 6.  Compose a zip archive
 ==============================
+
 An application archive should have the following structure
 
 * *Classes* folder

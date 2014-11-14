@@ -34,7 +34,9 @@ The following classes are included into the Murano core library:
 **io.murano.resources:**
 
 - :ref:`Instance`
+
     :ref:`Resources <Instance_resources>`:
+
     - Agent-v1.template
     - Agent-v2.template
     - linux-init.sh
@@ -49,6 +51,7 @@ The following classes are included into the Murano core library:
 
 Class: Object
 =============
+
 Parent class for all MuranoPL classes, which implements initialize method, and setAttr and getAttr methods, which are defined in the pythonic part of the Object class.
 All MuranoPL classes are implicitly inherited from this class.
 
@@ -56,6 +59,7 @@ All MuranoPL classes are implicitly inherited from this class.
 
 Class: Application
 ==================
+
 Defines application itself. All custom applications should be derived from this class.
 Has two properties:
 
@@ -87,6 +91,7 @@ Has two properties:
 
 Class: SecurityGroupManager
 ===========================
+
 Manages  security groups during application deployment.
 
 .. code-block:: yaml

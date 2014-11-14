@@ -16,23 +16,21 @@
 
 .. _installing_manually:
 
-================================
- Installing and Running Manually
-================================
-
+===============================
+Installing and Running Manually
+===============================
 
 Prepare Environment
--------------------
-
+===================
 
 Install Prerequisites
-^^^^^^^^^^^^^^^^^^^^^
+---------------------
 
 First you need to install a number of packages with your OS package manager.
 The list of packages depends on the OS you use.
 
 Ubuntu
-""""""
+^^^^^^
 
 .. code-block:: console
 
@@ -43,7 +41,7 @@ Ubuntu
 ..
 
 Fedora
-""""""
+^^^^^^
 
 .. note::
 
@@ -58,7 +56,7 @@ Fedora
 
 
 CentOS
-""""""
+^^^^^^
 
 .. code-block:: console
 
@@ -68,7 +66,7 @@ CentOS
 
 
 Install tox
-^^^^^^^^^^^
+-----------
 
 .. code-block:: console
 
@@ -77,7 +75,7 @@ Install tox
 
 
 Install And Configure Database
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+------------------------------
 
 Murano can use various database types on backend. For development purposes
 SQLite is enough in most cases. For production installations you should use
@@ -107,7 +105,7 @@ To use MySQL database you should install it and create an empty database first:
 
 
 Install the API service and Engine
-----------------------------------
+==================================
 
 1.  Create a folder which will hold all Murano components.
 
@@ -227,7 +225,7 @@ Install the API service and Engine
 
 
 Install Murano Dashboard
-------------------------
+========================
 
  Murano API & Engine services provide the core of Murano. However, your need a
  control plane to use it. This section decribes how to install and run Murano
@@ -294,11 +292,11 @@ Install Murano Dashboard
 
 
 .. _update_settings:
+
 6. Update settings file
 
 
 .. _`here`: https://github.com/stackforge/murano-dashboard/blob/master/update_setting.sh
-
 
  Running Murano dashboard on developer environment implies the use of murano settings file instead of horizon.
  However, for the correct setup requires settings file to be synchronized with corresponding horizon release.
@@ -340,7 +338,7 @@ Install Murano Dashboard
 8.  Open dashboard using url http://localhost:8000
 
 Import Murano Applications
---------------------------
+==========================
 
 Murano provides excellent catalog services, but it also requires applications
 which to provide. This section describes how to import Murano Applications from

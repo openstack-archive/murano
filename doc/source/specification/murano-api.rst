@@ -14,7 +14,7 @@
       under the License.
 
 Glossary
---------
+========
 
 * **Environment**
 
@@ -78,8 +78,9 @@ Environment API
 List Environments
 -----------------
 
-Request
-"""""""
+*Request*
+
+
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
 +==========+==================================+==================================+
@@ -87,8 +88,8 @@ Request
 |          |                                  | Environments                     |
 +----------+----------------------------------+----------------------------------+
 
-Response
-""""""""
+*Response*
+
 
 This call returns list of environments. Only the basic properties are
 returned.
@@ -129,8 +130,7 @@ Create Environment
 | name                 | string     | Environment name; only alphanumeric characters and '-' |
 +----------------------+------------+--------------------------------------------------------+
 
-Request
-"""""""
+*Request*
 
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
@@ -144,8 +144,7 @@ Request
 * **Example**
    {"name": "env_name"}
 
-Response
-""""""""
+*Response*
 
 ::
 
@@ -168,8 +167,7 @@ Update Environment
 | name                 | string     | Environment name; only alphanumeric characters and '-' |
 +----------------------+------------+--------------------------------------------------------+
 
-Request
-"""""""
+*Request*
 
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
@@ -183,8 +181,7 @@ Request
 * **Example**
   {"name": "env_name_changed"}
 
-Response
-""""""""
+*Response*
 
 **Content-Type**
   application/json
@@ -202,8 +199,8 @@ Response
 
 Get Environment Details
 -----------------------
-Request
-"""""""
+
+*Request*
 
 Return information about environment itself and about applications, including to this environment.
 
@@ -215,8 +212,7 @@ Return information about environment itself and about applications, including to
 |          |                                  |                                   | child entities                   |   
 +----------+----------------------------------+-----------------------------------+----------------------------------+
 
-Response
-""""""""
+*Response*
 
 **Content-Type**
   application/json
@@ -261,8 +257,9 @@ Response
 
 Delete Environment
 ------------------
-Request
-"""""""
+
+*Request*
+
 
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
@@ -304,8 +301,8 @@ Configure Environment / Open session
 
 During this call new working session is created, and session ID should be sent in a request header with name ``X-Configuration-Session``.
 
-Request
-"""""""
+*Request*
+
 
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
@@ -314,8 +311,8 @@ Request
 |          |                                  | session                          |
 +----------+----------------------------------+----------------------------------+
 
-Response
-""""""""
+*Response*
+
 **Content-Type**
   application/json
 
@@ -345,8 +342,7 @@ Deploy Session
 
 With this request all local changes made within environment start to deploy on Openstack.
 
-Request
-"""""""
+*Request*
 
 +----------+---------------------------------+--------------------------------+
 | Method   | URI                             | Description                    |
@@ -355,8 +351,8 @@ Request
 |          | <session_id>/deploy             |  with specified session_id     |
 +----------+---------------------------------+--------------------------------+
 
-Response
-""""""""
+*Response*
+
 
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
@@ -370,8 +366,8 @@ Response
 
 Get Session Details
 -------------------
-Request
-"""""""
+
+*Request*
 
 +----------+---------------------------------+---------------------------+
 | Method   | URI                             | Description               |
@@ -380,8 +376,8 @@ Request
 |          | <session_id>                    | with specified session_id |
 +----------+---------------------------------+---------------------------+
 
-Response
-""""""""
+*Response*
+
 
 ::
 
@@ -407,8 +403,8 @@ Response
 
 Delete Session
 --------------
-Request
-"""""""
+
+*Request*
 
 +----------+---------------------------------+----------------------------------+
 | Method   | URI                             | Description                      |
@@ -417,8 +413,7 @@ Request
 |          | <session_id>                    | session_id                       |
 +----------+---------------------------------+----------------------------------+
 
-Response
-""""""""
+*Response*
 
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
@@ -438,10 +433,10 @@ It also allows to browse deployment history.
 
 List Deployments
 ----------------
+
 Returns information about all deployments of the specified environment.
 
-Request
-"""""""
+*Request*
 
 +----------+------------------------------------+--------------------------------------+
 | Method   | URI                                | Description                          |
@@ -449,8 +444,8 @@ Request
 | GET      | /environments/<env_id>/deployments | Get list of environment deployments  |
 +----------+------------------------------------+--------------------------------------+
 
-Response
-""""""""
+*Response*
+
 **Content-Type**
   application/json
 
@@ -535,8 +530,8 @@ selection of specific attribute on application, simply appending part with
 attribute name will work. For example to request application name, user
 should use next endpoint: */environments/<env_id>/services/<application_id>/name*
 
-Request
-"""""""
+*Request*
+
 +----------------+-----------------------------------------------------------+------------------------------------+
 | Method         | URI                                                       | Header                             |
 +================+===========================================================+====================================+
@@ -548,8 +543,7 @@ Request
 * `env_id` - environment ID, required
 * `app_id` - application ID, optional
 
-Response
-""""""""
+*Response*
 
 **Content-Type**
   application/json
@@ -583,8 +577,7 @@ POST applications
 New application can be added to the Murano environment using session.
 Result JSON is calculated in Murano dashboard, which based on `UI definition <Dynamic UI Spec>`_
 
-Request
-"""""""
+*Request*
 
 **Content-Type**
   application/json
@@ -618,8 +611,7 @@ Request
     }
 
 
-Response
-"""""""""
+*Response*
 
 Created application returned
 
@@ -651,10 +643,10 @@ Created application returned
 
 Delete application from environment
 -----------------------------------
+
 Delete one or all applications from the environment
 
-Request
-"""""""
+*Request*
 
 +----------------+-----------------------------------------------------------+-----------------------------------+
 | Method         | URI                                                       | Header                            |
@@ -675,8 +667,8 @@ Statistic API intends to provide billing feature
 Instance Environment Statistics
 -------------------------------
 
-Request
-"""""""
+*Request*
+
 Get information about all deployed instances in the specified environment
 
 +----------------+--------------------------------------------------------------+
@@ -690,8 +682,8 @@ Get information about all deployed instances in the specified environment
 * `env_id` - environment ID, required
 * `instance_id` - ID of the instance for which need to provide statistic information, optional
 
-Response
-""""""""
+*Response*
+
 
 +----------------------+------------+-----------------------------------------------------------------+
 | Attribute            | Type       | Description                                                     |
@@ -725,8 +717,7 @@ Response
         }
     ]
 
-Request
-"""""""
+*Request*
 
 +----------------+--------------------------------------------------------------+
 | Method         | URI                                                          |
@@ -734,8 +725,8 @@ Request
 | GET            | /environments/<env_id>/instance-statistics/aggregated        |
 +----------------+--------------------------------------------------------------+
 
-Response
-""""""""
+*Response*
+
 +----------------------+------------+-----------------------------------------------------------------+
 | Attribute            | Type       | Description                                                     |
 +======================+============+=================================================================+
@@ -762,8 +753,7 @@ Response
 General Request Statistics
 --------------------------
 
-Request
-"""""""
+*Request*
 
 +----------------+---------------+
 | Method         | URI           |
@@ -771,8 +761,7 @@ Request
 | GET            | /stats        |
 +----------------+---------------+
 
-Response
-""""""""
+*Response*
 
 +----------------------+------------+-----------------------------------------------------------------+
 | Attribute            | Type       | Description                                                     |

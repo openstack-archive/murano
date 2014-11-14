@@ -27,6 +27,7 @@ The API sends a message that instructs murano-engine, the workflow component of
 Murano, to deploy an environment. The message consists of a JSON document
 containing the class types required to create the environment, as well as any
 parameters the user selected prior to deployment. Examples are:
+
 * An :ref:`Environment` object (io.murano.Environment) with a *name*
 * An object (or objects) referring to networks that need to be created
   or that already exist

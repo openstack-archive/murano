@@ -13,11 +13,11 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-.. _active-directory-yaml:
+.. _adUI:
 
-=============
-*ad.yaml*
-=============
+=============================================
+UI Definition Of Active Directory Application
+=============================================
 
 .. code-block:: yaml
 

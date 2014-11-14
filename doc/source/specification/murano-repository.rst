@@ -20,7 +20,8 @@ Manage application definitions in the Application Catalog.
 You can browse, edit and upload new application packages (.zip.package archive with all data that required for a service deployment).
 
 Packages
---------
+========
+
 Methods for application package management
 
 **Package Properties**
@@ -39,7 +40,7 @@ Methods for application package management
 - ``owner_id``: id of a tenant which user  not an owned the package
 
 List packages
-"""""""""""""
+-------------
 
 `/v1/catalog/packages?{marker}{limit}{order_by}{type}{category}{fqn}{owned}{class_name} [GET]`
 
@@ -114,7 +115,7 @@ For an admin role all packages are available.
 
 
 Upload a new package[POST]
-""""""""""""""""""""""""""
+--------------------------
 
 `/v1/catalog/packages`
 
@@ -178,7 +179,8 @@ See the example of multipart/form-data request, It should contain two parts - te
     }
 
 Get package details
-"""""""""""""""""""
+-------------------
+
 `/v1/catalog/packages/{id} [GET]`
 
 Display details for a package.
@@ -222,7 +224,8 @@ Display details for a package.
 *  In case specified package id doesn't exist.
 
 Update a Package
-""""""""""""""""
+================
+
 `/v1/catalog/packages/{id} [PATCH]`
 
 Allows to edit mutable fields (categories, tags, name, description, is_public, enabled).
@@ -294,8 +297,10 @@ Allowed operations:
 
 * An attempt to update package that doesn't exist
 
+
 Delete application definition from the catalog
-""""""""""""""""""""""""""""""""""""""""""""""
+----------------------------------------------
+
 `/v1/catalog/packages/{id} [DELETE]`
 
 **Parameters**
@@ -306,11 +311,10 @@ Delete application definition from the catalog
 
 * An attempt to delete package that doesn't exist
 
-Download application data
--------------------------
 
 Get application package
-"""""""""""""""""""""""
+-----------------------
+
 `/v1/catalog/packages/{id}/download [GET]`
 
 Get application definition package
@@ -327,8 +331,10 @@ The sequence of bytes representing package content
 
 Specified package id doesn't exist
 
+
 Get UI definition
-"""""""""""""""""
+-----------------
+
 `/v1/catalog/packages/{id}/ui [GET]`
 
 Retrieve UI definition for a application which described in a package with provided id
@@ -353,8 +359,10 @@ Specified package is not public and not owned by user tenant, performing the req
 
 * Specified package id doesn't exist
 
+
 Get logo
-""""""""
+--------
+
 Retrieve application logo which described in a package with provided id
 
 `/v1/catalog/packages/{id}/logo [GET]`
@@ -376,10 +384,11 @@ Specified package is not public and not owned by user tenant, performing the req
 Specified package is not public and not owned by user tenant, performing the request
 
 Categories
-----------
+==========
 
 List categories
-"""""""""""""""
+---------------
+
 `/v1/catalog/packages/categories [GET]`
 
 Retrieve list of all available application categories

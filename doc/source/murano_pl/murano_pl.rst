@@ -318,12 +318,12 @@ The following block constructs are available:
 | |     ``- code``                |                                                                                        |
 | |     ``- block``               | if not case matched and Default key is present (it is optional)                        |
 | |  ``case2:``                   |    than Default code block get executed.                                               |
-| |    ``- code``                 | case values are constant values (not expressions)                                      |
-| |    ``- block``                |                                                                                        |
+| |     ``- code``                | case values are constant values (not expressions)                                      |
+| |     ``- block``               |                                                                                        |
 | | ``Value: $valueExpression()`` |                                                                                        |
 | | ``Default:``                  |                                                                                        |
-| |    ``- code``                 |                                                                                        |
-| |    ``- block``                |                                                                                        |
+| |     ``- code``                |                                                                                        |
+| |     ``- block``               |                                                                                        |
 +---------------------------------+----------------------------------------------------------------------------------------+
 | | ``Switch:``                   | all code blocks that have their predicate evaluated to true are executed but the order |
 | |   ``$predicate1() :``         |    of predicate evaluation is not fixed                                                |

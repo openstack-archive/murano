@@ -59,9 +59,8 @@ Manual network configuration
    The same action can be done via CLI by running `neutron net-external-list`. To create new external network examine `OpenStack documentation <http://docs.openstack.org/trunk/install-guide/install/apt/content/neutron_initial-external-network.html>`_.
 
   .. image:: 1.png
-    :align: left
-
-    :scale: 70 %
+     :align: left
+     :scale: 70 %
 
 * Step 2. Create local network
 

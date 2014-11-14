@@ -19,7 +19,7 @@ on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
-sys.path.insert(0, os.path.abspath('../../murano'))
+sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('./'))
 
@@ -64,7 +64,12 @@ highlight_language = 'python'
 
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
-exclude_patterns = []
+exclude_patterns = ['specification/murano-repository.rst',
+                    'specification/murano-api.rst',
+                    'murano_pl/builtin_functions.rst',
+                    'install/configure_network.rst',
+                    'articles/ad-ui.rst',
+                    'articles/telnet.rst']
 
 # If true, sectionauthor and moduleauthor directives will be shown in the
 # output. They are ignored by default.
@@ -74,9 +79,8 @@ show_authors = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-if on_rtd:
-    html_theme_path = ['.']
-    html_theme = '_theme_rtd'
+html_theme_path = ['.']
+html_theme = '_theme'
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.

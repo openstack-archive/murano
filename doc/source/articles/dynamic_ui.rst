@@ -13,7 +13,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-.. _Dynamic UI Spec:
+.. _DynamicUISpec:
 
 ===================================
 Dynamic UI Definition specification
@@ -219,4 +219,4 @@ fields.
              description: Select availability zone where service would be installed.
              required: false
 
-Full example with Active Directory application form definitions is available here :ref:`active-directory-yaml`
+Full example with Active Directory application form definitions is available here :ref:`UI Definition Of AD App <adUI>`
