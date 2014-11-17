@@ -116,7 +116,7 @@ class EnvironmentMuranoClientTest(muranoclient.ClientTestBase):
 
         ID = self.get_value('ID', 'Name', env_name, environment)
 
-        new_name = uuid.uuid4().hex
+        new_name = "renamed" + uuid.uuid4().hex
         rename_env = self.listing('environment-rename',
                                   params='{id} {name}'.format(id=ID,
                                                               name=new_name))
