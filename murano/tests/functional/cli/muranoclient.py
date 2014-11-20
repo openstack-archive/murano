@@ -15,12 +15,11 @@
 from tempest_lib.cli import base  # noqa
 
 from tempest import config
-from tempest import test
 
 CONF = config.CONF
 
 
-class ClientTestBase(base.ClientTestBase, test.BaseTestCase):
+class ClientTestBase(base.ClientTestBase):
 
     def murano(self, action, flags='', params='', admin=True, fail_ok=False):
         """Executes murano command for the given action."""
