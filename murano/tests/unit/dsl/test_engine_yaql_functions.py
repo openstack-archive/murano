@@ -224,3 +224,15 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
                 [1, 2, 3, 4, 5, 6, 7, 8],
                 2, 3)
         )
+
+    def test_aggregate(self):
+        self.assertEqual(
+            10,
+            self._runner.testAggregate([1, 2, 3, 4])
+        )
+
+    def test_aggregate_with_initializer(self):
+        self.assertEqual(
+            21,
+            self._runner.testAggregateWithInitializer([1, 2, 3, 4], 11)
+        )

@@ -312,6 +312,16 @@ def _take(collection, count):
     return itertools.islice(collection, count)
 
 
+@yaql.context.EvalArg('collection', collections.Iterable)
+def _aggregate(collection, selector):
+    return reduce(selector, collection)
+
+
+@yaql.context.EvalArg('collection', collections.Iterable)
+def _aggregate_with_seed(collection, selector, seed):
+    return reduce(selector, collection, seed())
+
+
 def register(context):
     context.register_function(
         lambda json, mappings: _transform_json(json(), mappings()), 'bind')
@@ -347,3 +357,5 @@ def register(context):
     context.register_function(_merge_with, 'mergeWith')
     context.register_function(_skip, 'skip')
     context.register_function(_take, 'take')
+    context.register_function(_aggregate, 'aggregate')
+    context.register_function(_aggregate_with_seed, 'aggregate')

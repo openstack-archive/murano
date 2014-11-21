@@ -253,3 +253,20 @@ Methods:
           Contract: $.int()
     Body:
       - Return: $list.skip($start).take($count)
+
+
+  testAggregate:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+    Body:
+      - Return: $list.aggregate($1 + $2)
+
+  testAggregateWithInitializer:
+    Arguments:
+      - list:
+          Contract: [$.int()]
+      - initializer:
+          Contract: $.int()
+    Body:
+      - Return: $list.aggregate($1 + $2, $initializer)
