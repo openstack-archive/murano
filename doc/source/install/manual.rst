@@ -122,7 +122,15 @@ Install the API service and Engine
         $ git clone https://github.com/stackforge/murano
     ..
 
-3.  Copy the sample configuration from the source tree to their final location.
+3.  Generate the sample configuration file with *tox*.
+
+    .. code-block:: console
+
+        $ cd ~/murano/murano
+        $ tox -egenconfig
+    ..
+
+4.  Copy the sample configuration from the source tree to their final location.
 
     .. code-block:: console
 
@@ -130,7 +138,7 @@ Install the API service and Engine
         $ cp murano.conf.sample murano.conf
     ..
 
-4.  Edit ``murano.conf`` with your favorite editor. Below is an example
+5.  Edit ``murano.conf`` with your favorite editor. Below is an example
     which contains basic settings your are likely need to configure.
 
     .. note::
@@ -176,7 +184,7 @@ Install the API service and Engine
         virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
     ..
 
-5.  Create a virtual environment and install Murano prerequisites. We will use
+6.  Create a virtual environment and install Murano prerequisites. We will use
     *tox* for that. Virtual environment will be created under *.tox* directory.
 
     .. code-block:: console
@@ -185,7 +193,7 @@ Install the API service and Engine
         $ tox
     ..
 
-6.  Create database tables for Murano.
+7.  Create database tables for Murano.
 
     .. code-block:: console
 
@@ -194,7 +202,7 @@ Install the API service and Engine
         > --config-file ./etc/murano/murano.conf upgrade
     ..
 
-7.  Open a new console and launch Murano API. A separate terminal is
+8.  Open a new console and launch Murano API. A separate terminal is
     required because the console will be locked by a running process.
 
     .. code-block:: console
@@ -204,7 +212,7 @@ Install the API service and Engine
         > --config-file ./etc/murano/murano.conf
     ..
 
-8.  Import Core Murano Library.
+9.  Import Core Murano Library.
 
     .. code-block:: console
 
@@ -214,7 +222,7 @@ Install the API service and Engine
         > import-package ./meta/io.murano
     ..
 
-8.  Open a new console and launch Murano Engine. A separate terminal is
+10. Open a new console and launch Murano Engine. A separate terminal is
     required because the console will be locked by a running process.
 
     .. code-block:: console
