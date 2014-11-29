@@ -313,8 +313,9 @@ def package_search(filters, context, limit=None):
         query = query.filter(or_(*conditions))
 
     sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
-                 filters.get('order_by', []) or ['created']]
+                 filters.get('order_by', []) or ['name']]
     marker = filters.get('marker')
+    # TODO(btully): sort_dir is always None - not getting passed as a filter?
     sort_dir = filters.get('sort_dir')
     if marker is not None:  # set marker to real object instead of its id
         marker = _package_get(marker, session)
