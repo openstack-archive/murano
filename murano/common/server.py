@@ -17,6 +17,7 @@ import uuid
 from oslo import messaging
 from oslo.messaging.notify import dispatcher as oslo_dispatcher
 from oslo.messaging import target
+from oslo.utils import timeutils
 
 from sqlalchemy import desc
 
@@ -28,7 +29,6 @@ from murano.db.services import instances
 from murano.db import session
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
-from murano.openstack.common import timeutils
 from murano.services import states
 
 
