@@ -15,8 +15,7 @@
 
 from keystoneclient.v3 import client as ks_client
 from oslo.config import cfg
-
-from murano.openstack.common import importutils
+from oslo.utils import importutils
 
 
 def get_client(environment):
