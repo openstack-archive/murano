@@ -16,7 +16,7 @@ from oslo.config import cfg
 
 from murano.common import wsgi
 import murano.context
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 import murano.openstack.common.log as logging
 
 context_opts = [

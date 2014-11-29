@@ -19,7 +19,7 @@ from webob import exc
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.services import states
 

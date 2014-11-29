@@ -22,7 +22,7 @@ from murano.common import wsgi
 from murano.db import models
 from murano.db import session as db_session
 
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)

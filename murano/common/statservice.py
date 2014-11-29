@@ -23,7 +23,7 @@ from murano.api.v1 import request_statistics
 from murano.common import config
 
 from murano.db.services import stats as db_stats
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.openstack.common import service
 
