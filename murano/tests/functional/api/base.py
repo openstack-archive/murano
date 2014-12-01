@@ -19,6 +19,7 @@ import time
 import uuid
 
 from tempest import clients
+from tempest.common import isolated_creds
 from tempest.common import rest_client
 from tempest import config
 from tempest import exceptions
@@ -97,6 +98,14 @@ class MuranoClient(rest_client.RestClient):
         resp, body = self.get(
             'v1/environments/{0}/sessions/{1}'.format(environment_id,
                                                       session_id))
+
+        return resp, json.loads(body)
+
+    def deploy_session(self, environment_id, session_id):
+        post_body = None
+        url = 'v1/environments/{0}/sessions/{1}/deploy'
+        resp, body = self.post(url.format(environment_id, session_id),
+                               post_body)
 
         return resp, json.loads(body)
 
@@ -242,7 +251,9 @@ class TestCase(tempest.test.BaseTestCase):
 
         return environment
 
-    def create_demo_service(self, environment_id, session_id):
+    def create_demo_service(self, environment_id, session_id, client=None):
+        if not client:
+            client = self.client
         post_body = {
             "?": {
                 "id": uuid.uuid4().hex,
@@ -261,9 +272,9 @@ class TestCase(tempest.test.BaseTestCase):
             "configuration": "standalone"
         }
 
-        return self.client.create_service(environment_id,
-                                          session_id,
-                                          post_body)
+        return client.create_service(environment_id,
+                                     session_id,
+                                     post_body)
 
 
 class NegativeTestCase(TestCase):
@@ -273,5 +284,6 @@ class NegativeTestCase(TestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        mgr = clients.Manager()
+        creds = isolated_creds.IsolatedCreds(cls.__name__).get_alt_creds()
+        mgr = clients.Manager(credentials=creds)
         cls.alt_client = MuranoClient(mgr.auth_provider)

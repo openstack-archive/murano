@@ -13,7 +13,6 @@
 #    under the License.
 
 import os
-import testtools
 import uuid
 import zipfile
 
@@ -56,8 +55,6 @@ class TestCaseRepository(base.TestCase):
             try:
                 self.client.delete_package(package['id'])
             except Exception:
-            #except exceptions.NotFound: Need to uncomment after fix the
-            #following bug https://bugs.launchpad.net/murano/+bug/1309413
                 pass
 
     @classmethod
@@ -141,7 +138,6 @@ class TestRepositoryNegativeNotFound(base.NegativeTestCase):
                           self.client.get_package,
                           self.id)
 
-    @testtools.skip("https://bugs.launchpad.net/murano/+bug/1309413")
     @attr(type='negative')
     def test_delete_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
@@ -172,9 +168,6 @@ class TestRepositoryNegativeForbidden(base.NegativeTestCase,
     @classmethod
     def setUpClass(cls):
         super(TestRepositoryNegativeForbidden, cls).setUpClass()
-
-        raise cls.skipException(
-            "https://bugs.launchpad.net/murano/+bug/1312190")
 
         cls.categorie = cls.client.list_categories()[1]['categories'][0]
 

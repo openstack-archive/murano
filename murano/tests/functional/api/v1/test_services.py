@@ -206,3 +206,44 @@ class TestServices(base.TestCase):
                           env['id'],
                           "",
                           service['?']['id'])
+
+
+class TestServicesTenantIsolation(base.NegativeTestCase):
+
+    @attr(type='negative')
+    def test_get_list_services_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_services_list, env['id'],
+                          sess['id'])
+
+    @attr(type='negative')
+    def test_create_service_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.create_demo_service, env['id'],
+                          sess['id'], client=self.alt_client)
+
+    @attr(type='negative')
+    def test_delete_service_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+        service = self.create_demo_service(env['id'], sess['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.delete_service, env['id'],
+                          sess['id'], service['?']['id'])
+
+    @attr(type='negative')
+    def test_get_service_in_env_from_another_tenant(self):
+        env = self.create_environment('test')
+        sess = self.client.create_session(env['id'])[1]
+        service = self.create_demo_service(env['id'], sess['id'])[1]
+
+        self.assertRaises(exceptions.Unauthorized,
+                          self.alt_client.get_service, env['id'],
+                          sess['id'], service['?']['id'])
