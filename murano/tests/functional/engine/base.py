@@ -76,12 +76,18 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
         upload_package(
             'PostgreSQL',
             {"categories": ["Databases"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.apps.PostgreSql.zip')
+            os.path.join(cls.pkgs_path, 'io.murano.databases.PostgreSql.zip')
+        )
+        upload_package(
+            'SqlDatabase',
+            {"categories": ["Databases"], "tags": ["tag"]},
+            os.path.join(cls.pkgs_path, 'io.murano.databases.SqlDatabase.zip')
         )
         upload_package(
             'Apache',
             {"categories": ["Application Servers"], "tags": ["tag"]},
-            os.path.join(cls.pkgs_path, 'io.murano.apps.apache.Apache.zip')
+            os.path.join(cls.pkgs_path,
+                         'io.murano.apps.apache.ApacheHttpServer.zip')
         )
         upload_package(
             'Tomcat',
@@ -198,7 +204,7 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
             },
             "name": "teMurano",
             "?": {
-                "type": "io.murano.apps.apache.Apache",
+                "type": "io.murano.apps.apache.ApacheHttpServer",
                 "id": str(uuid.uuid4())
             }
         }
@@ -222,8 +228,11 @@ class MuranoBase(testtools.TestCase, testtools.testcase.WithAttributes,
                 "name": "testMurano"
             },
             "name": "teMurano",
+            "database": "test_db",
+            "username": "test_usr",
+            "password": "test_pass",
             "?": {
-                "type": "io.murano.apps.PostgreSql",
+                "type": "io.murano.databases.PostgreSql",
                 "id": str(uuid.uuid4())
             }
         }
