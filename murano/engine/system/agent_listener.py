@@ -17,6 +17,7 @@ import eventlet
 import greenlet
 
 import murano.common.config as config
+import murano.common.exceptions as exceptions
 from murano.dsl import helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
@@ -41,6 +42,16 @@ class AgentListener(murano_object.MuranoObject):
         self._results_queue = str('-execution-results-%s' % name.lower())
         self._subscriptions = {}
         self._receive_thread = None
+
+    def _check_enabled(self):
+        if config.CONF.engine.disable_murano_agent:
+            LOG.debug(
+                'Use of murano-agent is disallowed '
+                'by the server configuration')
+
+            raise exceptions.PolicyViolationException(
+                'Use of murano-agent is disallowed '
+                'by the server configuration')
 
     @property
     def enabled(self):
@@ -76,13 +87,13 @@ class AgentListener(murano_object.MuranoObject):
                 self._receive_thread = None
 
     def subscribe(self, message_id, event, _context):
-        if config.CONF.engine.disable_murano_agent:
-            raise AgentListenerException(
-                "Use of murano-agent is disallowed "
-                "by the server configuration")
-
+        self._check_enabled()
         self._subscriptions[message_id] = event
         self.start(_context)
+
+    def unsubscribe(self, message_id):
+        self._check_enabled()
+        self._subscriptions.pop(message_id)
 
     def _receive(self):
         with common.create_rmq_client() as client:

@@ -23,12 +23,12 @@ import eventlet.event
 import logging
 
 import murano.common.config as config
+import murano.common.exceptions as exceptions
 import murano.common.messaging as messaging
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.dsl.yaql_expression as yaql_expression
 import murano.engine.system.common as common
-
 
 LOG = logging.getLogger(__name__)
 
@@ -42,7 +42,8 @@ class Agent(murano_object.MuranoObject):
     def initialize(self, _context, host):
         self._enabled = False
         if config.CONF.engine.disable_murano_agent:
-            LOG.debug("murano-agent is disabled by the server")
+            LOG.debug('Use of murano-agent is disallowed '
+                      'by the server configuration')
             return
 
         self._environment = self._get_environment(_context)
@@ -62,7 +63,8 @@ class Agent(murano_object.MuranoObject):
     def prepare(self):
         # (sjmc7) - turn this into a no-op if agents are disabled
         if config.CONF.engine.disable_murano_agent:
-            LOG.debug("murano-agent is disabled by the server")
+            LOG.debug('Use of murano-agent is disallowed '
+                      'by the server configuration')
             return
 
         with common.create_rmq_client() as client:
@@ -73,11 +75,11 @@ class Agent(murano_object.MuranoObject):
 
     def _check_enabled(self):
         if config.CONF.engine.disable_murano_agent:
-            raise AgentException(
-                "Use of murano-agent is disallowed "
-                "by the server configuration")
+            raise exceptions.PolicyViolationException(
+                'Use of murano-agent is disallowed '
+                'by the server configuration')
 
-    def _send(self, template, wait_results, _context):
+    def _send(self, template, wait_results, _context, timeout):
         """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
@@ -93,22 +95,32 @@ class Agent(murano_object.MuranoObject):
             client.send(message=msg, key=self._queue)
 
         if wait_results:
-            result = event.wait()
+            try:
+                with eventlet.Timeout(timeout):
+                    result = event.wait()
+
+            except eventlet.Timeout:
+                listener.unsubscribe(msg_id)
+                raise exceptions.TimeoutException(
+                    'The Agent does not respond'
+                    'within {0} seconds'.format(timeout))
 
             if not result:
                 return None
 
             if result.get('FormatVersion', '1.0.0').startswith('1.'):
                 return self._process_v1_result(result)
+
             else:
                 return self._process_v2_result(result)
+
         else:
             return None
 
-    def call(self, template, resources, _context):
+    def call(self, template, resources, _context, timeout=600):
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, True, _context)
+        return self._send(plan, True, _context, timeout)
 
     def send(self, template, resources, _context):
         self._check_enabled()
@@ -122,6 +134,19 @@ class Agent(murano_object.MuranoObject):
     def sendRaw(self, plan, _context):
         self._check_enabled()
         return self._send(plan, False, _context)
+
+    def isReady(self, timeout=100):
+        try:
+            self.waitReady(timeout)
+        except exceptions.TimeoutException:
+            return False
+        else:
+            return True
+
+    def waitReady(self, timeout=100):
+        self._check_enabled()
+        template = {'Body': 'return', 'FormatVersion': '2.0.0', 'Scripts': {}}
+        self.call(template, False, timeout)
 
     def _process_v1_result(self, result):
         if result['IsException']:

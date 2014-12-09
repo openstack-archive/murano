@@ -17,6 +17,7 @@ import mock
 
 import yaql.context
 
+from murano.common import exceptions as exc
 from murano.engine import environment
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
@@ -47,7 +48,7 @@ class TestAgentListener(test_case.DslTestCase):
         self.override_config('disable_murano_agent', True, 'engine')
         al = self.runner.testAgentListener()
         self.assertFalse(al.enabled)
-        self.assertRaises(agent_listener.AgentListenerException,
+        self.assertRaises(exc.PolicyViolationException,
                           al.subscribe, 'msgid', 'event', None)
 
 
@@ -81,7 +82,7 @@ class TestAgent(test_case.DslTestCase):
         self.override_config('disable_murano_agent', True, 'engine')
         a = self.runner.testAgent()
         self.assertFalse(a.enabled)
-        self.assertRaises(agent.AgentException, a.call, {}, None, None)
-        self.assertRaises(agent.AgentException, a.send, {}, None, None)
-        self.assertRaises(agent.AgentException, a.callRaw, {}, None)
-        self.assertRaises(agent.AgentException, a.sendRaw, {}, None)
+        self.assertRaises(exc.PolicyViolationException, a.call, {}, None, None)
+        self.assertRaises(exc.PolicyViolationException, a.send, {}, None, None)
+        self.assertRaises(exc.PolicyViolationException, a.callRaw, {}, None)
+        self.assertRaises(exc.PolicyViolationException, a.sendRaw, {}, None)
