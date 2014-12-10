@@ -20,9 +20,7 @@ import sys
 import tempfile
 import uuid
 
-from keystoneclient.v2_0 import client as keystoneclient
 from muranoclient.common import exceptions as muranoclient_exc
-from muranoclient.v1 import client as muranoclient
 import six
 
 from murano.common import config
@@ -46,9 +44,9 @@ class PackageLoader(six.with_metaclass(abc.ABCMeta)):
 
 
 class ApiPackageLoader(PackageLoader):
-    def __init__(self, token_id, tenant_id):
+    def __init__(self, murano_client_factory):
         self._cache_directory = self._get_cache_directory()
-        self._client = self._get_murano_client(token_id, tenant_id)
+        self._murano_client_factory = murano_client_factory
 
     def get_package_by_class(self, name):
         filter_opts = {'class_name': name, 'limit': 1}
@@ -81,44 +79,10 @@ class ApiPackageLoader(PackageLoader):
         LOG.debug('Cache for package loader is located at: %s' % directory)
         return directory
 
-    @staticmethod
-    def _get_murano_client(token_id, tenant_id):
-        murano_settings = config.CONF.murano
-
-        endpoint_url = murano_settings.url
-        if endpoint_url is None:
-            keystone_settings = config.CONF.keystone
-            keystone_client = keystoneclient.Client(
-                endpoint=keystone_settings.auth_url,
-                cacert=keystone_settings.ca_file or None,
-                cert=keystone_settings.cert_file or None,
-                key=keystone_settings.key_file or None,
-                insecure=keystone_settings.insecure
-            )
-
-            if not keystone_client.authenticate(
-                    auth_url=keystone_settings.auth_url,
-                    tenant_id=tenant_id,
-                    token=token_id):
-                raise muranoclient_exc.HTTPUnauthorized()
-
-            endpoint_url = keystone_client.service_catalog.url_for(
-                service_type='application_catalog',
-                endpoint_type=murano_settings.endpoint_type
-            )
-
-        return muranoclient.Client(
-            endpoint=endpoint_url,
-            key_file=murano_settings.key_file or None,
-            cacert=murano_settings.cacert or None,
-            cert_file=murano_settings.cert_file or None,
-            insecure=murano_settings.insecure,
-            token=token_id
-        )
-
     def _get_definition(self, filter_opts):
         try:
-            packages = self._client.packages.filter(**filter_opts)
+            packages = self._murano_client_factory().packages.filter(
+                **filter_opts)
             try:
                 return packages.next()
             except StopIteration:
@@ -145,7 +109,8 @@ class ApiPackageLoader(PackageLoader):
                 LOG.exception('Unable to load package from cache. Clean-up...')
                 shutil.rmtree(package_directory, ignore_errors=True)
         try:
-            package_data = self._client.packages.download(package_id)
+            package_data = self._murano_client_factory().packages.download(
+                package_id)
         except muranoclient_exc.HTTPException as e:
             msg = 'Error loading package id {0}: {1}'.format(
                 package_id, str(e)

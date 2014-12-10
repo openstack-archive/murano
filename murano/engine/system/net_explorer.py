@@ -14,11 +14,8 @@
 # limitations under the License.
 import math
 
-import keystoneclient.apiclient.exceptions as ks_exc
-import keystoneclient.v2_0.client as ksclient
 import netaddr
 from netaddr.strategy import ipv4
-import neutronclient.v2_0.client as nclient
 
 import murano.common.config as config
 import murano.dsl.helpers as helpers
@@ -36,43 +33,18 @@ class NetworkExplorer(murano_object.MuranoObject):
     # noinspection PyAttributeOutsideInit
     def initialize(self, _context):
         environment = helpers.get_environment(_context)
+        self._clients = environment.clients
         self._tenant_id = environment.tenant_id
-        keystone_settings = config.CONF.keystone
-        neutron_settings = config.CONF.neutron
         self._settings = config.CONF.networking
-
-        keystone_client = ksclient.Client(
-            endpoint=keystone_settings.auth_url,
-            cacert=keystone_settings.ca_file or None,
-            cert=keystone_settings.cert_file or None,
-            key=keystone_settings.key_file or None,
-            insecure=keystone_settings.insecure)
-
-        if not keystone_client.authenticate(
-                auth_url=keystone_settings.auth_url,
-                tenant_id=environment.tenant_id,
-                token=environment.token):
-            raise ks_exc.AuthorizationFailure()
-
-        neutron_url = keystone_client.service_catalog.url_for(
-            service_type='network',
-            endpoint_type=neutron_settings.endpoint_type)
-
-        self._neutron = \
-            nclient.Client(endpoint_url=neutron_url,
-                           token=environment.token,
-                           ca_cert=neutron_settings.ca_cert or None,
-                           insecure=neutron_settings.insecure)
-
         self._available_cidrs = self._generate_possible_cidrs()
 
     # noinspection PyPep8Naming
-    def getDefaultRouter(self):
+    def getDefaultRouter(self, _context):
+        client = self._clients.get_neutron_client(_context)
         router_name = self._settings.router_name
 
-        routers = self._neutron.\
-            list_routers(tenant_id=self._tenant_id, name=router_name).\
-            get('routers')
+        routers = client.list_routers(
+            tenant_id=self._tenant_id, name=router_name).get('routers')
         if len(routers) == 0:
             LOG.debug('Router {0} not found'.format(router_name))
             if self._settings.create_router:
@@ -82,8 +54,7 @@ class NetworkExplorer(murano_object.MuranoObject):
                 kwargs = {'id': external_network} \
                     if uuidutils.is_uuid_like(external_network) \
                     else {'name': external_network}
-                networks = self._neutron.list_networks(**kwargs). \
-                    get('networks')
+                networks = client.list_networks(**kwargs).get('networks')
                 ext_nets = filter(lambda n: n['router:external'], networks)
                 if len(ext_nets) == 0:
                     raise KeyError('Router %s could not be created, '
@@ -99,8 +70,7 @@ class NetworkExplorer(murano_object.MuranoObject):
                         'admin_state_up': True,
                     }
                 }
-                router = self._neutron.create_router(body=body_data).\
-                    get('router')
+                router = client.create_router(body=body_data).get('router')
                 LOG.debug('Created router: {0}'.format(router))
                 return router['id']
             else:
@@ -113,13 +83,13 @@ class NetworkExplorer(murano_object.MuranoObject):
         return router_id
 
     # noinspection PyPep8Naming
-    def getAvailableCidr(self, routerId, netId):
+    def getAvailableCidr(self, _context, routerId, netId):
         """Uses hash of network IDs to minimize the collisions:
         different nets will attempt to pick different cidrs out of available
         range.
         If the cidr is taken will pick another one
         """
-        taken_cidrs = self._get_cidrs_taken_by_router(routerId)
+        taken_cidrs = self._get_cidrs_taken_by_router(_context, routerId)
         id_hash = hash(netId)
         num_fails = 0
         while num_fails < len(self._available_cidrs):
@@ -137,20 +107,22 @@ class NetworkExplorer(murano_object.MuranoObject):
         return self._settings.default_dns
 
     # noinspection PyPep8Naming
-    def getExternalNetworkIdForRouter(self, routerId):
-        router = self._neutron.show_router(routerId).get('router')
+    def getExternalNetworkIdForRouter(self, _context, routerId):
+        client = self._clients.get_neutron_client(_context)
+        router = client.show_router(routerId).get('router')
         if not router or 'external_gateway_info' not in router:
             return None
         return router['external_gateway_info'].get('network_id')
 
     # noinspection PyPep8Naming
-    def getExternalNetworkIdForNetwork(self, networkId):
-        network = self._neutron.show_network(networkId).get('network')
+    def getExternalNetworkIdForNetwork(self, _context, networkId):
+        client = self._clients.get_neutron_client(_context)
+        network = client.show_network(networkId).get('network')
         if network.get('router:external', False):
             return networkId
 
         # Get router interfaces of the network
-        router_ports = self._neutron.list_ports(
+        router_ports = client.list_ports(
             **{'device_owner': 'network:router_interface',
                'network_id': networkId}).get('ports')
 
@@ -158,21 +130,23 @@ class NetworkExplorer(murano_object.MuranoObject):
         # check if the router has external_gateway set
         for router_port in router_ports:
             ext_net_id = self.getExternalNetworkIdForRouter(
+                _context,
                 router_port.get('device_id'))
             if ext_net_id:
                 return ext_net_id
         return None
 
-    def _get_cidrs_taken_by_router(self, router_id):
+    def _get_cidrs_taken_by_router(self, _context, router_id):
         if not router_id:
             return []
-        ports = self._neutron.list_ports(device_id=router_id)['ports']
+        client = self._clients.get_neutron_client(_context)
+        ports = client.list_ports(device_id=router_id)['ports']
         subnet_ids = []
         for port in ports:
             for fixed_ip in port['fixed_ips']:
                 subnet_ids.append(fixed_ip['subnet_id'])
 
-        all_subnets = self._neutron.list_subnets()['subnets']
+        all_subnets = client.list_subnets()['subnets']
         filtered_cidrs = [netaddr.IPNetwork(subnet['cidr']) for subnet in
                           all_subnets if subnet['id'] in subnet_ids]
 

@@ -59,15 +59,15 @@ Methods:
   deploy:
     Usage: Action
     Body:
-      Try:
-        - $.agentListener.start()
-        - If: len($.applications) = 0
-          Then:
-            - $.stack.delete()
-          Else:
-            - $.applications.pselect($.deploy())
-      Finally:
-        - $.agentListener.stop()
+      - $minimalStack:
+          resources: {}
+      - $.stack.updateTemplate($minimalStack)
+      - $.stack.push()
+      - Try:
+          - $.agentListener.start()
+          - $.applications.pselect($.deploy())
+        Finally:
+          - $.agentListener.stop()
 
   destroy:
     Body:
