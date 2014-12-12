@@ -15,10 +15,10 @@
 import httplib
 
 from oslo.config import cfg
+from oslo.serialization import jsonutils
 import webob.dec
 
 from murano.common import wsgi
-from murano.openstack.common import jsonutils
 
 
 CONF = cfg.CONF
