@@ -19,8 +19,6 @@ import itertools
 
 import murano.common.config
 import murano.common.wsgi
-import murano.openstack.common.eventlet_backdoor
-import murano.openstack.common.lockutils
 import murano.openstack.common.log
 import murano.openstack.common.policy
 import murano.openstack.common.sslutils
@@ -49,8 +47,6 @@ _opt_lists = [
         murano.common.config.file_server,
         murano.common.config.murano_metadata_url,
         murano.common.wsgi.socket_opts,
-        murano.openstack.common.eventlet_backdoor.eventlet_backdoor_opts,
-        murano.openstack.common.lockutils.util_opts,
         murano.openstack.common.log.common_cli_opts,
         murano.openstack.common.log.generic_log_opts,
         murano.openstack.common.log.log_opts,
