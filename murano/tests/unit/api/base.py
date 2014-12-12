@@ -16,6 +16,7 @@
 import fixtures
 import logging
 import mock
+from oslo.utils import timeutils
 import routes
 import urllib
 import webob
@@ -25,7 +26,6 @@ from murano.api.v1 import router
 from murano.common import policy
 from murano.common import rpc
 from murano.common import wsgi
-from murano.openstack.common import timeutils
 from murano.tests.unit import base
 from murano.tests.unit import utils
 

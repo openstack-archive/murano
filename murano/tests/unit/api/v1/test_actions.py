@@ -15,11 +15,11 @@
 
 
 import mock
+from oslo.utils import timeutils
 
 from murano.api.v1 import actions
 from murano.common import policy
 from murano.db import models
-from murano.openstack.common import timeutils
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 

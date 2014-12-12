@@ -16,13 +16,13 @@ import math
 
 import netaddr
 from netaddr.strategy import ipv4
+import oslo.utils
 
 import murano.common.config as config
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 from murano.openstack.common import log as logging
-import muranoclient.openstack.common.uuidutils as uuidutils
 
 
 LOG = logging.getLogger(__name__)
@@ -52,7 +52,7 @@ class NetworkExplorer(murano_object.MuranoObject):
                           format(router_name))
                 external_network = self._settings.external_network
                 kwargs = {'id': external_network} \
-                    if uuidutils.is_uuid_like(external_network) \
+                    if oslo.utils.uuidutils.is_uuid_like(external_network) \
                     else {'name': external_network}
                 networks = client.list_networks(**kwargs).get('networks')
                 ext_nets = filter(lambda n: n['router:external'], networks)

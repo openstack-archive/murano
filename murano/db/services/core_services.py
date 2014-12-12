@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 import types
+
+from oslo.utils import timeutils
 from webob import exc
 
 from murano.common import utils
 from murano.db.services import environments as envs
-from murano.openstack.common import timeutils
 
 
 class CoreServices(object):

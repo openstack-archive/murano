@@ -24,13 +24,13 @@ revision = '001'
 down_revision = None
 
 from alembic import op
+from oslo.utils import timeutils
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import table as sa_table
 import uuid
 
 from murano.common import consts
 from murano.db.sqla import types as st
-from murano.openstack.common import timeutils
 
 
 MYSQL_ENGINE = 'InnoDB'

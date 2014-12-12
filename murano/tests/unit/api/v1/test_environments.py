@@ -14,10 +14,10 @@
 # limitations under the License.
 
 import json
+from oslo.utils import timeutils
 
 from murano.api.v1 import environments
 from murano.db import models
-from murano.openstack.common import timeutils
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 

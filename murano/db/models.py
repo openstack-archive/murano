@@ -16,13 +16,13 @@
 SQLAlchemy models for murano data
 """
 from oslo.db.sqlalchemy import models
+from oslo.utils import timeutils
 import sqlalchemy as sa
 from sqlalchemy.ext import declarative
 from sqlalchemy import orm as sa_orm
 
 from murano.common import uuidutils
 from murano.db.sqla import types as st
-from murano.openstack.common import timeutils
 
 
 class TimestampMixin(object):
