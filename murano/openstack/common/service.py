@@ -38,14 +38,12 @@ from eventlet import event
 from oslo.config import cfg
 
 from murano.openstack.common import eventlet_backdoor
-from murano.openstack.common.gettextutils import _LE, _LI, _LW
-from murano.openstack.common import importutils
+from murano.openstack.common._i18n import _LE, _LI, _LW
 from murano.openstack.common import log as logging
 from murano.openstack.common import systemd
 from murano.openstack.common import threadgroup
 
 
-rpc = importutils.try_import('murano.openstack.common.rpc')
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
@@ -180,12 +178,6 @@ class ServiceLauncher(Launcher):
             status = exc.code
         finally:
             self.stop()
-            if rpc:
-                try:
-                    rpc.cleanup()
-                except Exception:
-                    # We're shutting down, so it doesn't matter at this point.
-                    LOG.exception(_LE('Exception during rpc cleanup.'))
 
         return status, signo
 
@@ -391,9 +383,12 @@ class ProcessLauncher(object):
             while True:
                 self.handle_signal()
                 self._respawn_children()
-                if self.sigcaught:
-                    signame = _signo_to_signame(self.sigcaught)
-                    LOG.info(_LI('Caught %s, stopping children'), signame)
+                # No signal means that stop was called.  Don't clean up here.
+                if not self.sigcaught:
+                    return
+
+                signame = _signo_to_signame(self.sigcaught)
+                LOG.info(_LI('Caught %s, stopping children'), signame)
                 if not _is_sighup_and_daemon(self.sigcaught):
                     break
 
@@ -404,6 +399,11 @@ class ProcessLauncher(object):
         except eventlet.greenlet.GreenletExit:
             LOG.info(_LI("Wait called after thread killed.  Cleaning up."))
 
+        self.stop()
+
+    def stop(self):
+        """Terminate child processes and wait on each."""
+        self.running = False
         for pid in self.children:
             try:
                 os.kill(pid, signal.SIGTERM)
