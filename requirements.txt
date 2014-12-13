@@ -10,10 +10,8 @@ PasteDeploy>=1.5.0
 Routes>=1.12.3,!=2.0
 WebOb>=1.2.3
 wsgiref>=0.1.2
-argparse
 kombu>=2.5.0
 lockfile>=0.8
-pycrypto>=2.6
 psutil>=1.1.1,<2.0.0
 iso8601>=0.1.9
 six>=1.7.0
@@ -25,7 +23,6 @@ keystonemiddleware>=1.0.0
 # For paste.util.template used in keystone.common.template
 Paste
 
-passlib
 jsonschema>=2.0.0,<3.0.0
 python-keystoneclient>=0.11.1
 python-heatclient>=0.2.9
