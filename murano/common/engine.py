@@ -15,10 +15,10 @@
 
 import uuid
 
-import anyjson
 import eventlet.debug
 from oslo import messaging
 from oslo.messaging import target
+from oslo.serialization import jsonutils
 
 from murano.common import config
 from murano.common.helpers import token_sanitizer
@@ -48,7 +48,7 @@ class TaskProcessingEndpoint(object):
     def handle_task(context, task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
         LOG.info(_('Starting processing task: {task_desc}').format(
-            task_desc=anyjson.dumps(s_task)))
+            task_desc=jsonutils.dumps(s_task)))
 
         result = task['model']
         try:

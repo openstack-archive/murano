@@ -10,7 +10,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import anyjson
+from oslo.serialization import jsonutils
 import sqlalchemy as sa
 from sqlalchemy.dialects import mysql
 
@@ -23,9 +23,9 @@ class JsonBlob(sa.TypeDecorator):
     impl = sa.Text
 
     def process_bind_param(self, value, dialect):
-        return anyjson.serialize(value)
+        return jsonutils.dumps(value)
 
     def process_result_value(self, value, dialect):
         if value is not None:
-            return anyjson.deserialize(value)
+            return jsonutils.loads(value)
         return None

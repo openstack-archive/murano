@@ -13,12 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import anyjson
 import logging
 import ssl as ssl_module
 
 from eventlet import patcher
 kombu = patcher.import_patched('kombu')
+from oslo.serialization import jsonutils
 from subscription import Subscription
 
 
@@ -95,7 +95,7 @@ class MqClient(object):
         producer.publish(
             exchange=str(exchange),
             routing_key=str(key),
-            body=anyjson.dumps(message.body),
+            body=jsonutils.dumps(message.body),
             message_id=str(message.id)
         )
 

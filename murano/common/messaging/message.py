@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import anyjson
 import logging
+from oslo.serialization import jsonutils
 
 log = logging.getLogger("murano-common.messaging")
 
@@ -28,7 +28,7 @@ class Message(object):
             message_handle.properties.get('message_id')
         try:
             self.body = None if message_handle is None else \
-                anyjson.loads(message_handle.body)
+                jsonutils.loads(message_handle.body)
         except ValueError as e:
             self.body = None
             log.exception(e)
