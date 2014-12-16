@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import inspect
 import types
 
@@ -19,11 +20,6 @@ import murano.dsl.macros as macros
 import murano.dsl.typespec as typespec
 import murano.dsl.virtual_exceptions as virtual_exceptions
 import murano.dsl.yaql_expression as yaql_expression
-
-try:
-    from collections import OrderedDict  # noqa
-except ImportError:  # python2.6
-    from ordereddict import OrderedDict  # noqa
 
 
 macros.register()
@@ -62,7 +58,7 @@ class MuranoMethod(object):
             if isinstance(arguments_scheme, types.DictionaryType):
                 arguments_scheme = [{key: value} for key, value in
                                     arguments_scheme.iteritems()]
-            self._arguments_scheme = OrderedDict()
+            self._arguments_scheme = collections.OrderedDict()
             for record in arguments_scheme:
                 if not isinstance(record, types.DictionaryType) \
                         or len(record) > 1:
@@ -102,7 +98,7 @@ class MuranoMethod(object):
         defaults = func_info.defaults or tuple()
         for i in xrange(len(defaults)):
             data[i + len(data) - len(defaults)][1]['Default'] = defaults[i]
-        result = OrderedDict([
+        result = collections.OrderedDict([
             (name, typespec.ArgumentSpec(
                 declaration, self._namespace_resolver))
             for name, declaration in data])
