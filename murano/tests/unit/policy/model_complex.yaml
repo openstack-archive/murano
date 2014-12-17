@@ -1,0 +1,53 @@
+'?': {id: 75a7423a67384ca3a6ee9f7350f3552b, type: io.murano.Environment}
+applications:
+- '?': {id: 7cb96c80-1cd7-40bc-88fe-47b905069890, type: io.murano.apps.apache.TomcatCluster}
+  balancer_ip: null
+  clustered: null
+  instances:
+  - '?': {id: be3c5155-6670-4cf6-9a28-a4574ff70b71, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    floatingIpAddress: null
+    image: murano-ubuntu
+    ipAddresses: []
+    keyname: ''
+    name: gcthmi4jn23l68
+    networks:
+      customNetworks: []
+      primaryNetwork: null
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+    securityGroupName: null
+    sharedIps: []
+  - '?': {id: ade378ce-00d4-4a33-99eb-7b4b6ea3ab97, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    floatingIpAddress: null
+    image: murano-ubuntu
+    ipAddresses: [10.0.1.13, 16.60.90.90]
+    keyname: ''
+    name: bmtjbi4jn23l89
+    networks:
+      customNetworks: [10.0.1.0, 10.0.2.0]
+      primaryNetwork: null
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+      customProp1:
+        prop: val
+    securityGroupName: null
+    sharedIps: []
+  name: Tomcat
+  port: 8080
+  public_ip: null
+defaultNetworks:
+  environment:
+    '?': {id: 7bac482a4c194b6e8dea81e6ce606db6, type: io.murano.resources.NeutronNetwork}
+    autoUplink: true
+    autogenerateSubnet: true
+    dnsNameserver: null
+    externalRouterId: null
+    name: quick-env-12-network
+    subnetCidr: null
+    useDefaultDns: true
+  flat: null
+name: quick-env-12

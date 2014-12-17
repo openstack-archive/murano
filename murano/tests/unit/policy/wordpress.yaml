@@ -1,0 +1,175 @@
+defaultNetworks:
+  environment:
+    '?': {id: c46770dec1db483ca2322914b842e50f, type: io.murano.resources.NeutronNetwork}
+    autoUplink: true
+    autogenerateSubnet: true
+    dnsNameserver: null
+    externalRouterId: null
+    name: wordpress-env-network
+    subnetCidr: null
+    useDefaultDns: true
+  flat: null
+name: wordpress-env
+'?': {type: io.murano.Environment, id: 83bff5acf8354816b08cf9b4917c898d}
+applications:
+- '?': {id: e7a13d3c-b3c9-42fa-975d-a47b142fd233, type: io.murano.databases.MySql}
+  database: wordpress
+  instance:
+    '?': {id: 825dc61d-217a-4fd8-80fc-43807f8d6fa2, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.small
+    floatingIpAddress: null
+    image: murano-ubuntu
+    ipAddresses: []
+    keyname: ''
+    name: qgijhi4uwe5wd8
+    networks:
+      customNetworks: []
+      primaryNetwork: null
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+    securityGroupName: null
+    sharedIps: []
+  name: MySqlDB
+  password: Adminadmin#1
+  username: admin
+- '?': {id: d224db7d-081d-47a4-9333-9d2677b90b1f, type: io.murano.apps.apache.ApacheHttpServer}
+  enablePHP: true
+  instance:
+    '?': {id: 3ddd4945-e4b8-4dac-9f85-537fc0957151, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.small
+    floatingIpAddress: null
+    image: murano-ubuntu
+    ipAddresses: []
+    keyname: ''
+    name: yeqsbi4uwejfg7
+    networks:
+      customNetworks: []
+      primaryNetwork: null
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+    securityGroupName: null
+    sharedIps: []
+  name: ApacheHttpServer
+- '?': {id: 33e91790-5c44-40ce-9292-9dd4856325a0, type: io.murano.apps.ZabbixServer}
+  database: zabbix
+  instance:
+    '?': {id: 0b568a74-66c9-4e73-84d8-7dd1b96066ec, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.small
+    floatingIpAddress: null
+    image: murano-ubuntu
+    ipAddresses: []
+    keyname: ''
+    name: gzxgdi4uwfjt57
+    networks:
+      customNetworks: []
+      primaryNetwork: null
+      useEnvironmentNetwork: true
+      useFlatNetwork: false
+    securityGroupName: null
+    sharedIps: []
+  name: ZabbixServer
+  password: Adminadmin#1
+  username: zabbix
+- '?': {id: 19a87de5-41ce-4e63-bf43-0e25dd409a1e, type: io.murano.apps.ZabbixAgent}
+  hostname: zabbix
+  name: ZabbixAgent
+  probe: ICMP
+  server:
+    '?': {id: 33e91790-5c44-40ce-9292-9dd4856325a0, type: io.murano.apps.ZabbixServer}
+    database: zabbix
+    instance:
+      '?': {id: 0b568a74-66c9-4e73-84d8-7dd1b96066ec, type: io.murano.resources.LinuxMuranoInstance}
+      assignFloatingIp: false
+      flavor: m1.small
+      floatingIpAddress: null
+      image: murano-ubuntu
+      ipAddresses: []
+      keyname: ''
+      name: gzxgdi4uwfjt57
+      networks:
+        customNetworks: []
+        primaryNetwork: null
+        useEnvironmentNetwork: true
+        useFlatNetwork: false
+      securityGroupName: null
+      sharedIps: []
+    name: ZabbixServer
+    password: Adminadmin#1
+    username: zabbix
+- '?': {id: fec71a35-8abc-4a8f-a5e4-91e77854d761, type: io.murano.apps.WordPress}
+  database:
+    '?': {id: e7a13d3c-b3c9-42fa-975d-a47b142fd233, type: io.murano.databases.MySql}
+    database: wordpress
+    instance:
+      '?': {id: 825dc61d-217a-4fd8-80fc-43807f8d6fa2, type: io.murano.resources.LinuxMuranoInstance}
+      assignFloatingIp: false
+      flavor: m1.small
+      floatingIpAddress: null
+      image: murano-ubuntu
+      ipAddresses: []
+      keyname: ''
+      name: qgijhi4uwe5wd8
+      networks:
+        customNetworks: []
+        primaryNetwork: null
+        useEnvironmentNetwork: true
+        useFlatNetwork: false
+      securityGroupName: null
+      sharedIps: []
+    name: MySqlDB
+    password: Adminadmin#1
+    username: admin
+  dbName: wordpress
+  dbPassword: Adminadmin#1
+  dbUser: admin
+  monitoring:
+    '?': {id: 19a87de5-41ce-4e63-bf43-0e25dd409a1e, type: io.murano.apps.ZabbixAgent}
+    hostname: zabbix
+    name: ZabbixAgent
+    probe: ICMP
+    server:
+      '?': {id: 33e91790-5c44-40ce-9292-9dd4856325a0, type: io.murano.apps.ZabbixServer}
+      database: zabbix
+      instance:
+        '?': {id: 0b568a74-66c9-4e73-84d8-7dd1b96066ec, type: io.murano.resources.LinuxMuranoInstance}
+        assignFloatingIp: false
+        flavor: m1.small
+        floatingIpAddress: null
+        image: murano-ubuntu
+        ipAddresses: []
+        keyname: ''
+        name: gzxgdi4uwfjt57
+        networks:
+          customNetworks: []
+          primaryNetwork: null
+          useEnvironmentNetwork: true
+          useFlatNetwork: false
+        securityGroupName: null
+        sharedIps: []
+      name: ZabbixServer
+      password: Adminadmin#1
+      username: zabbix
+  name: WordPress
+  server:
+    '?': {id: d224db7d-081d-47a4-9333-9d2677b90b1f, type: io.murano.apps.apache.ApacheHttpServer}
+    enablePHP: true
+    instance:
+      '?': {id: 3ddd4945-e4b8-4dac-9f85-537fc0957151, type: io.murano.resources.LinuxMuranoInstance}
+      assignFloatingIp: false
+      flavor: m1.small
+      floatingIpAddress: null
+      image: murano-ubuntu
+      ipAddresses: []
+      keyname: ''
+      name: yeqsbi4uwejfg7
+      networks:
+        customNetworks: []
+        primaryNetwork: null
+        useEnvironmentNetwork: true
+        useFlatNetwork: false
+      securityGroupName: null
+      sharedIps: []
+    name: ApacheHttpServer
