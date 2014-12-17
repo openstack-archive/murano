@@ -12,22 +12,28 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
 from eventlet import semaphore
 import heatclient.client as hclient
 
-try:
-    import mistralclient.api.client as mistralclient
-except ImportError as mistral_import_error:
-    mistralclient = None
-
+import keystoneclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
+from oslo.config import cfg
 
 from murano.common import config
 from murano.dsl import helpers
 from murano.engine import auth_utils
 from murano.engine import environment
+
+try:
+    # integration with congress is optional
+    import congressclient.v1.client as congress_client
+except ImportError as congress_client_import_error:
+    congress_client = None
+try:
+    import mistralclient.api.client as mistralclient
+except ImportError as mistral_import_error:
+    mistralclient = None
 
 
 class ClientManager(object):
@@ -76,6 +82,31 @@ class ClientManager(object):
             if use_trusts else auth_utils.get_client(env)
 
         return self._get_client(context, 'keystone', use_trusts, factory)
+
+    def get_congress_client(self, context, use_trusts=True):
+        """Client for congress services
+
+        :return: initialized congress client
+        :raise ImportError: in case that python-congressclient
+        is not present on python path
+        """
+
+        if not congress_client:
+            # congress client was not imported
+            raise congress_client_import_error
+        if not config.CONF.engine.use_trusts:
+            use_trusts = False
+
+        def factory(keystone_client, auth_token):
+            auth = keystoneclient.auth.identity.v2.Token(
+                auth_url=cfg.CONF.keystone_authtoken.auth_uri,
+                tenant_name=keystone_client.tenant_name,
+                token=auth_token)
+            session = keystoneclient.session.Session(auth=auth)
+            return congress_client.Client(session=session,
+                                          service_type='policy')
+
+        return self._get_client(context, 'congress', use_trusts, factory)
 
     def get_heat_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
