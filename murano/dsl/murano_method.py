@@ -40,10 +40,9 @@ def methodusage(usage):
 
 
 class MuranoMethod(object):
-    def __init__(self, namespace_resolver,
-                 murano_class, name, payload):
+    def __init__(self, murano_class, name, payload):
         self._name = name
-        self._namespace_resolver = namespace_resolver
+        self._murano_class = murano_class
 
         if callable(payload):
             self._body = payload
@@ -65,9 +64,7 @@ class MuranoMethod(object):
                     raise ValueError()
                 name = record.keys()[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
-                    record[name], self._namespace_resolver)
-
-        self._murano_class = murano_class
+                    record[name], murano_class)
 
     @property
     def name(self):
@@ -99,8 +96,7 @@ class MuranoMethod(object):
         for i in xrange(len(defaults)):
             data[i + len(data) - len(defaults)][1]['Default'] = defaults[i]
         result = collections.OrderedDict([
-            (name, typespec.ArgumentSpec(
-                declaration, self._namespace_resolver))
+            (name, typespec.ArgumentSpec(declaration, self.murano_class))
             for name, declaration in data])
         if '_context' in result:
             del result['_context']

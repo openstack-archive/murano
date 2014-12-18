@@ -24,6 +24,9 @@ Properties:
   usageTestProperty6:
     Contract: $.int()
     Usage: Const
+  usageTestProperty7:
+    Contract: $.int()
+    Usage: Config
 
 
 Methods:
@@ -78,6 +81,12 @@ Methods:
     Body:
       - $.usageTestProperty6: 66
       - Return: $.usageTestProperty6
+
+  testModifyUsageTestProperty7:
+    Body:
+      - $.usageTestProperty7: 77
+      - Return: $.usageTestProperty7
+
 
   testMixinOverride:
     Body:

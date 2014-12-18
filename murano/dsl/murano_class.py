@@ -38,6 +38,7 @@ class MuranoClass(object):
         self._namespace_resolver = namespace_resolver
         self._name = namespace_resolver.resolve_name(name)
         self._properties = {}
+        self._config = {}
         if self._name == 'io.murano.Object':
             self._parents = []
         else:
@@ -74,8 +75,7 @@ class MuranoClass(object):
         return self._methods.get(name)
 
     def add_method(self, name, payload):
-        method = murano_method.MuranoMethod(self._namespace_resolver,
-                                            self, name, payload)
+        method = murano_method.MuranoMethod(self, name, payload)
         self._methods[name] = method
         return method
 
