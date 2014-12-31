@@ -235,6 +235,10 @@ See the full specification `here <http://tools.ietf.org/html/rfc6902>`_.
 
 ``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
+**Content type**
+
+application/murano-packages-json-patch
+
 Allowed operations:
 
 ::
@@ -305,7 +309,7 @@ Delete application definition from the catalog
 
 **Parameters**
 
-``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package to delete
+* ``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package to delete
 
 **Response 404**
 
@@ -321,7 +325,7 @@ Get application definition package
 
 **Parameters**
 
-* id (required)  Hexadecimal `id` (or fully qualified name) of the package
+* ``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octetstream)**
 
@@ -341,7 +345,7 @@ Retrieve UI definition for a application which described in a package with provi
 
 **Parameters**
 
-* id (required)  Hexadecimal `id` (or fully qualified name) of the package
+* ``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octet-stream)**
 
@@ -369,7 +373,7 @@ Retrieve application logo which described in a package with provided id
 
 **Parameters**
 
-id (required)  Hexadecimal `id` (or fully qualified name) of the package
+``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
 **Response 200 (application/octet-stream)**
 
@@ -377,26 +381,208 @@ The sequence of bytes representing application logo
 
 **Response 403**
 
-Specified package is not public and not owned by user tenant, performing the request
+Specified package is not public and not owned by user tenant,
+performing the request
 
 **Response 404**
 
-Specified package is not public and not owned by user tenant, performing the request
+Specified package is not public and not owned by user tenant,
+performing the request
 
 Categories
 ==========
 
+Provides category management. Categories are used in the Application Catalog
+to group application for easy browsing and search.
+
 List categories
 ---------------
 
-`/v1/catalog/packages/categories [GET]`
+* `/v1/catalog/packages/categories [GET]`
 
-Retrieve list of all available application categories
+ !DEPRECATED (Plan to remove in L release) Retrieve list of all available application categories
 
-**Response 200 (application/json)**
+ **Response 200 (application/json)**
 
-::
+ A list, containing category names
+
+ *Content-Type*
+  application/json
+
+ ::
 
         {
             "categories": ["Web service", "Directory", "Database", "Storage"]
         }
+
+
+* `/v1/catalog/categories [GET]`
+
+ +----------+----------------------------------+----------------------------------+
+ | Method   | URI                              | Description                      |
+ +==========+==================================+==================================+
+ | GET      | /catalog/categories              | Get list of existing categories  |
+ +----------+----------------------------------+----------------------------------+
+
+
+ Retrieve list of all available application categories
+
+ **Response 200 (application/json)**
+
+ A list, containing detailed information about each category
+
+ *Content-Type*
+  application/json
+
+ ::
+
+        {"categories": [
+            {
+                "id": "0420045dce7445fabae7e5e61fff9e2f",
+                "updated": "2014-12-26T13:57:04",
+                "name": "Web",
+                "created": "2014-12-26T13:57:04"
+            },
+            {
+                "id": "3dd486b1e26f40ac8f35416b63f52042",
+                "updated": "2014-12-26T13:57:04",
+            "name": "Databases",
+            "created": "2014-12-26T13:57:04"
+            }]
+        }
+
+
+
+Get category details
+--------------------
+
+`/catalog/categories/<category_id> [GET]`
+
+ Return detailed information for a provided category
+
+*Request*
+
++----------+-----------------------------------+----------------------------------+
+| Method   | URI                               | Description                      |
++==========+===================================+==================================+
+| GET      | /catalog/categories/<category_id> | Get category detail              |
++----------+-----------------------------------+----------------------------------+
+
+*Parameters*
+
+* ``category_id`` - required, category ID, required
+
+*Response*
+
+ *Content-Type*
+   application/json
+
+::
+
+    {
+        "id": "b308f7fa8a2f4a5eb419970c827f4466",
+        "updated": "2015-01-28T17:00:19",
+        "packages": [
+            {
+                "fully_qualified_name": "io.murano.apps.ZabbixServer",
+                "id": "4dfb566e69e6445fbd4aea5099fe95e9",
+                "name": "Zabbix Server"
+            }
+        ],
+        "name": "Web",
+        "created": "2015-01-28T17:00:19"
+    }
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Category deleted successfully                         |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified category doesn`t exist               |
++----------------+-----------------------------------------------------------+
+
+Add new category
+----------------
+
+`/catalog/categories [POST]`
+
+ Add new category to the Application Catalog
+
+*Parameters*
+
++----------------------+------------+--------------------------------------------------------+
+| Attribute            | Type       | Description                                            |
++======================+============+========================================================+
+| name                 | string     | Environment name; only alphanumeric characters and '-' |
++----------------------+------------+--------------------------------------------------------+
+
+*Request*
+
++----------+----------------------------------+----------------------------------+
+| Method   | URI                              | Description                      |
++==========+==================================+==================================+
+| POST     | /catalog/categories              | Create new category              |
++----------+----------------------------------+----------------------------------+
+
+ *Content-Type*
+  application/json
+
+ *Example*
+  {"name": "category_name"}
+
+*Response*
+
+::
+
+    {
+        "id": "ce373a477f211e187a55404a662f968",
+        "name": "category_name",
+        "created": "2013-11-30T03:23:42Z",
+        "updated": "2013-11-30T03:23:44Z",
+    }
+
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Category created successfully                         |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 409            | Conflict. Category with specified name already exist      |
++----------------+-----------------------------------------------------------+
+
+
+Delete category
+---------------
+
+`/catalog/categories [DELETE]`
+
+*Request*
+
++----------+-----------------------------------+-----------------------------------+
+| Method   | URI                               | Description                       |
++==========+===================================+===================================+
+| DELETE   | /catalog/categories/<category_id> | Delete category with specified id |
++----------+-----------------------------------+-----------------------------------+
+
+*Parameters:*
+
+* ``category_id`` - required, category ID, required
+
+*Response*
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Category deleted successfully                         |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified category doesn`t exist               |
++----------------+-----------------------------------------------------------+
+| 403            | Forbidden. Category with specified name is assigned to    |
+|                | the package, presented in the catalog                     |
++----------------+-----------------------------------------------------------+

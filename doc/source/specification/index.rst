@@ -25,7 +25,8 @@ General information
     Murano Service API is a programmatic interface used for interaction with
     Murano. Other interaction mechanisms like Murano Dashboard or Murano CLI
     should use API as underlying protocol for interaction.
-    * **Allowed HTTPs requests**
+
+* **Allowed HTTPs requests**
 
   * *POST*   :   To create a resource
   * *GET*    :   Get a resource or list of resources

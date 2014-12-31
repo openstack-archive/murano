@@ -235,7 +235,22 @@ class API(wsgi.Router):
                        controller=catalog_resource,
                        action='download',
                        conditions={'method': ['GET']})
-
+        mapper.connect('/catalog/categories',
+                       controller=catalog_resource,
+                       action='list_categories',
+                       conditions={'method': ['GET']})
+        mapper.connect('/catalog/categories/{category_id}',
+                       controller=catalog_resource,
+                       action='get_category',
+                       conditions={'method': ['GET']})
+        mapper.connect('/catalog/categories',
+                       controller=catalog_resource,
+                       action='add_category',
+                       conditions={'method': ['POST']})
+        mapper.connect('/catalog/categories/{category_id}',
+                       controller=catalog_resource,
+                       action='delete_category',
+                       conditions={'method': ['DELETE']})
         req_stats_resource = request_statistics.create_resource()
         mapper.connect('/stats',
                        controller=req_stats_resource,

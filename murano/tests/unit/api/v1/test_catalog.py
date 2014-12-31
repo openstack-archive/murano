@@ -16,15 +16,19 @@
 import cgi
 import cStringIO
 import imghdr
+import json
 import os
 
 import mock
+from oslo.utils import timeutils
 
 from murano.api.v1 import catalog
 from murano.common import policy
 from murano.db.catalog import api as db_catalog_api
+from murano.db import models
 from murano.packages import load_utils
 import murano.tests.unit.api.base as test_base
+import murano.tests.unit.utils as test_utils
 
 
 class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
@@ -132,3 +136,64 @@ Content-Type: application/json
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
                 params={"is_public": "true"})
             res = req.get_response(self.api)
+            self.assertEqual(403, res.status_code)
+
+    def test_add_category(self):
+        """Check that category added successfully
+        """
+
+        self._set_policy_rules({'add_category': '@'})
+        self.expect_policy_check('add_category')
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        expected = {'name': 'new_category',
+                    'created': timeutils.isotime(fake_now)[:-1],
+                    'updated': timeutils.isotime(fake_now)[:-1]}
+
+        body = {'name': 'new_category'}
+        req = self._post('/catalog/categories', json.dumps(body))
+        result = req.get_response(self.api)
+        processed_result = json.loads(result.body)
+        self.assertIn('id', processed_result.keys())
+        expected['id'] = processed_result['id']
+        self.assertDictEqual(expected, processed_result)
+
+    def test_delete_category(self):
+        """Check that category deleted successfully
+        """
+
+        self._set_policy_rules({'delete_category': '@'})
+        self.expect_policy_check('delete_category',
+                                 {'category_id': '12345'})
+
+        fake_now = timeutils.utcnow()
+        expected = {'name': 'new_category',
+                    'created': fake_now,
+                    'updated': fake_now,
+                    'id': '12345'}
+
+        e = models.Category(**expected)
+        test_utils.save_models(e)
+
+        req = self._delete('/catalog/categories/12345')
+        processed_result = req.get_response(self.api)
+        self.assertEqual('', processed_result.body)
+        self.assertEqual(200, processed_result.status_code)
+
+    def test_add_category_failed_for_non_admin(self):
+        """Check that non admin user couldn't add new category
+        """
+
+        self._set_policy_rules({'add_category': 'role:context_admin'})
+        self.is_admin = False
+        self.expect_policy_check('add_category')
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        body = {'name': 'new_category'}
+        req = self._post('/catalog/categories', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(403, result.status_code)

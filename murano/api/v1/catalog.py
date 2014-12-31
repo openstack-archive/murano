@@ -268,11 +268,44 @@ class Controller(object):
 
         db_api.package_delete(package_id, req.context)
 
+    def get_category(self, req, category_id):
+        policy.check("get_category", req.context)
+        category = db_api.category_get(category_id, packages=True)
+        return category.to_dict()
+
     def show_categories(self, req):
         policy.check("show_categories", req.context)
-
         categories = db_api.categories_list()
         return {'categories': [category.name for category in categories]}
+
+    def list_categories(self, req):
+        policy.check("list_categories", req.context)
+        categories = db_api.categories_list()
+        return {'categories': [category.to_dict() for category in categories]}
+
+    def add_category(self, req, body=None):
+        policy.check("add_category", req.context)
+
+        if not body.get('name'):
+            raise exc.HTTPBadRequest(
+                explanation='Please, specify a name of the category to create')
+        try:
+            category = db_api.category_add(body['name'])
+        except db_exc.DBDuplicateEntry:
+            msg = _('Category with specified name is already exist')
+            LOG.error(msg)
+            raise exc.HTTPConflict(explanation=msg)
+        return category.to_dict()
+
+    def delete_category(self, req, category_id):
+        target = {'category_id': category_id}
+        policy.check("delete_category", req.context, target)
+        category = db_api.category_get(category_id, packages=True)
+        if category.packages:
+            msg = _("It's impossible to delete categories assigned"
+                    " to the package, uploaded to the catalog")
+            raise exc.HTTPForbidden(explanation=msg)
+        db_api.category_delete(category_id)
 
 
 class PackageSerializer(wsgi.ResponseSerializer):

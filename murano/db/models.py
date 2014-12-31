@@ -285,6 +285,10 @@ class Category(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
 
+    def to_dict(self):
+        dictionary = super(Category, self).to_dict()
+        return dictionary
+
 
 class Tag(Base, TimestampMixin):
     """Represents tags in the datastore."""
