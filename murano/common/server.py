@@ -106,6 +106,18 @@ class ResultEndpoint(object):
             conf_session.state = states.SessionState.DEPLOYED
         conf_session.save(unit)
 
+        #output application tracking information
+        message = '<EnvId: {0} TenantId: {1} Status: {2} Apps: {3}>'.format(
+            environment.id,
+            environment.tenant_id,
+            'Failed' if num_errors + num_warnings > 0 else 'Successful',
+            ', '.join(map(
+                lambda a: a['?']['type'],
+                result['Objects']['services']
+            ))
+        )
+        LOG.info(message)
+
 
 def notification_endpoint_wrapper(priority='info'):
     def wrapper(func):
