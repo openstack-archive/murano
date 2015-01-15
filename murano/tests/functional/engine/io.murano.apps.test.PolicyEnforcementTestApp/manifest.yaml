@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.apps.test.PolicyEnforcementTestApp
+Name: PolicyEnforcementTestApp
+Description: |
+ This is a simple test app with a single VM for policy enforcement testing purposes.
+Author: 'Hewlett-Packard'
+Tags: [test]
+Classes:
+ io.murano.apps.test.PolicyEnforcementTestApp: PolicyEnforcementTestApp.yaml
