@@ -15,6 +15,12 @@
 
 from eventlet import semaphore
 import heatclient.client as hclient
+
+try:
+    import mistralclient.api.client as mistralclient
+except ImportError as mistral_import_error:
+    mistralclient = None
+
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
 
@@ -140,3 +146,30 @@ class ClientManager(object):
                 token=auth_token)
 
         return self._get_client(context, 'murano', use_trusts, factory)
+
+    def get_mistral_client(self, context, use_trusts=True):
+        if not mistralclient:
+            raise mistral_import_error
+
+        if not config.CONF.engine.use_trusts:
+            use_trusts = False
+
+        def factory(keystone_client, auth_token):
+            mistral_settings = config.CONF.mistral
+
+            endpoint_type = mistral_settings.endpoint_type
+            service_type = mistral_settings.service_type
+
+            mistral_url = keystone_client.service_catalog.url_for(
+                service_type=service_type,
+                endpoint_type=endpoint_type)
+
+            return mistralclient.client(mistral_url=mistral_url,
+                                        auth_url=keystone_client.auth_url,
+                                        project_id=keystone_client.tenant_id,
+                                        endpoint_type=endpoint_type,
+                                        service_type=service_type,
+                                        auth_token=auth_token,
+                                        user_id=keystone_client.user_id)
+
+        return self._get_client(context, 'mistral', use_trusts, factory)

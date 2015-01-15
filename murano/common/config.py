@@ -84,6 +84,13 @@ heat_opts = [
                help='Heat endpoint type.')
 ]
 
+mistral_opts = [
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Mistral endpoint type.'),
+    cfg.StrOpt('service_type', default='workflowv2',
+               help='Mistral service type.')
+]
+
 neutron_opts = [
     cfg.BoolOpt('insecure', default=False,
                 help='This option explicitly allows Murano to perform '
@@ -220,6 +227,7 @@ CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
 CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(heat_opts, group='heat')
+CONF.register_opts(mistral_opts, group='mistral')
 CONF.register_opts(neutron_opts, group='neutron')
 CONF.register_opts(keystone_opts, group='keystone')
 CONF.register_opts(murano_opts, group='murano')
