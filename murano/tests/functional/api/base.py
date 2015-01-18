@@ -30,10 +30,11 @@ CONF = config.CONF
 
 class MuranoClient(rest_client.RestClient):
     def __init__(self, auth_provider):
-        super(MuranoClient, self).__init__(auth_provider)
-
-        self.service = 'application_catalog'
-        self.endpoint_url = 'publicURL'
+        super(MuranoClient, self).__init__(
+            auth_provider,
+            'application_catalog',
+            CONF.identity.region
+        )
 
     def get_environments_list(self):
         resp, body = self.get('v1/environments')
