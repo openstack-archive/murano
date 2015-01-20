@@ -14,8 +14,8 @@
 
 import testtools
 
-from tempest import exceptions
 from tempest.test import attr
+from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
 

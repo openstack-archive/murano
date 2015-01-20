@@ -14,16 +14,18 @@
 
 import json
 import os
-import requests
 import time
 import uuid
 
+import requests
+
 from tempest import clients
 from tempest.common import isolated_creds
-from tempest.common import rest_client
 from tempest import config
-from tempest import exceptions
-import tempest.test
+from tempest import test
+from tempest_lib.common import rest_client
+from tempest_lib import exceptions
+
 
 CONF = config.CONF
 
@@ -222,7 +224,7 @@ class MuranoClient(rest_client.RestClient):
         return resp, json.loads(body)
 
 
-class TestCase(tempest.test.BaseTestCase):
+class TestCase(test.BaseTestCase):
     @classmethod
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
