@@ -20,6 +20,7 @@ from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.engine.system import heat_stack
 from murano.engine.system import instance_reporter
+from murano.engine.system import mistralclient
 from murano.engine.system import net_explorer
 from murano.engine.system import resource_manager
 from murano.engine.system import status_reporter
@@ -48,6 +49,7 @@ def register(class_loader, package_loader):
     class_loader.import_class(agent.Agent)
     class_loader.import_class(agent_listener.AgentListener)
     class_loader.import_class(heat_stack.HeatStack)
+    class_loader.import_class(mistralclient.MistralClient)
     class_loader.import_class(ResourceManagerWrapper)
     class_loader.import_class(instance_reporter.InstanceReportNotifier)
     class_loader.import_class(status_reporter.StatusReporter)

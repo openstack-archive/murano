@@ -1,0 +1,5 @@
+# Blank class for in-python system libraries, for caching purposes
+Namespaces:
+  =: io.murano.system
+
+Name: MistralClient
