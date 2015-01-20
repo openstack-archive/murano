@@ -219,12 +219,7 @@ Methods:
                     $fip_name:
                       type: 'OS::Neutron::FloatingIP'
                       properties:
-                        floating_network_id: $extNetId
-                    $.name + '-FloatingIpAssoc-' + $net.id():
-                      type: 'OS::Neutron::FloatingIPAssociation'
-                      properties:
-                        floatingip_id:
-                          get_resource: $fip_name
+                        floating_network: $extNetId
                         port_id:
                           get_resource: $portname
                   outputs:
