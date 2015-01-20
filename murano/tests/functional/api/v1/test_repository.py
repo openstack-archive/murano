@@ -17,8 +17,7 @@ import uuid
 import zipfile
 
 from tempest.test import attr
-
-from tempest import exceptions
+from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
 
