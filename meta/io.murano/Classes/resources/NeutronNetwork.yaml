@@ -81,7 +81,7 @@ Methods:
             $.getSubnetName():
               type: 'OS::Neutron::Subnet'
               properties:
-                network_id: { get_resource: $.getNetworkName() }
+                network: { get_resource: $.getNetworkName() }
                 ip_version: 4
                 dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
@@ -94,8 +94,8 @@ Methods:
             $.getRouterInterfaceName():
               type: 'OS::Neutron::RouterInterface'
               properties:
-                router_id: $.externalRouterId
-                subnet_id: { get_resource: $.getSubnetName() }
+                router: $.externalRouterId
+                subnet: { get_resource: $.getSubnetName() }
       - $.environment.stack.updateTemplate($template)
 
   getRouterInterfaceName:

@@ -183,9 +183,9 @@ Methods:
             $portname:
               type: 'OS::Neutron::Port'
               properties:
-                network_id: $netRef
+                network: $netRef
                 fixed_ips:
-                  - subnet_id: $subnetRef
+                  - subnet: $subnetRef
                 security_groups:
                   - get_resource: $securityGroupName
             $.name:
