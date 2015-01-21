@@ -11,31 +11,33 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+"""
+Tests for database migrations.
+For the opportunistic testing you need to set up a db named 'openstack_citest'
+with user 'openstack_citest' and password 'openstack_citest' on localhost.
+The test will then use that db and u/p combo to run the tests.
+For postgres on Ubuntu this can be done with the following commands:
+sudo -u postgres psql
+postgres=# create user openstack_citest with createdb login password
+      'openstack_citest';
+postgres=# create database openstack_citest with owner openstack_citest;
+"""
+
 import datetime
 import uuid
 
-from oslo.config import cfg
+from oslo.db import exception as db_exc
+from oslo.db.sqlalchemy import test_base
 from oslo.db.sqlalchemy import utils as db_utils
-from sqlalchemy import exc
 
 from murano.db.migration import migration
-from murano.db import models  # noqa
 from murano.tests.unit.db.migration import test_migrations_base as base
 
-CONF = cfg.CONF
 
+class MuranoMigrationsCheckers(object):
 
-class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
-
-    USER = "openstack_citest"
-    PASSWD = "openstack_citest"
-    DATABASE = "openstack_citest"
-
-    def __init__(self, *args, **kwargs):
-        super(TestMigrations, self).__init__(*args, **kwargs)
-
-    def setUp(self):
-        super(TestMigrations, self).setUp()
+    snake_walk = True
+    downgrade = True
 
     def assertColumnExists(self, engine, table, column):
         t = db_utils.get_table(engine, table)
@@ -69,6 +71,9 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
                 break
 
         self.assertEqual(sorted(members), sorted(index_columns))
+
+    def test_walk_versions(self):
+        self.walk_versions(self.engine, self.snake_walk, self.downgrade)
 
     def _check_001(self, engine, data):
         self.assertEqual('001', migration.version(engine))
@@ -112,7 +117,7 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
         package_table.insert().execute(package)
 
         package['id'] = str(uuid.uuid4())
-        self.assertRaises(exc.IntegrityError,
+        self.assertRaises(db_exc.DBDuplicateEntry,
                           package_table.insert().execute, package)
 
     def _check_002(self, engine, data):
@@ -123,3 +128,15 @@ class TestMigrations(base.BaseWalkMigrationTestCase, base.CommonTestsMixIn):
         self.assertEqual('003', migration.version(engine))
         self.assertColumnExists(engine, 'task', 'action')
         self.assertColumnExists(engine, 'status', 'task_id')
+
+
+class TestMigrationsMySQL(MuranoMigrationsCheckers,
+                          base.BaseWalkMigrationTestCase,
+                          test_base.MySQLOpportunisticTestCase):
+    pass
+
+
+class TestMigrationsPostgresql(MuranoMigrationsCheckers,
+                               base.BaseWalkMigrationTestCase,
+                               test_base.PostgreSQLOpportunisticTestCase):
+    pass
