@@ -9,6 +9,7 @@ fixtures>=0.3.14
 mock>=1.0
 posix_ipc
 sqlalchemy-migrate>=0.9.1,!=0.9.2
+tempest-lib
 testrepository>=0.0.18
 testresources>=0.2.4
 testscenarios>=0.4
