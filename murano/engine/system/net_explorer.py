@@ -19,13 +19,13 @@ import keystoneclient.v2_0.client as ksclient
 import netaddr
 from netaddr.strategy import ipv4
 import neutronclient.v2_0.client as nclient
+from oslo.utils import uuidutils
 
 import murano.common.config as config
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 from murano.openstack.common import log as logging
-import muranoclient.openstack.common.uuidutils as uuidutils
 
 
 LOG = logging.getLogger(__name__)
