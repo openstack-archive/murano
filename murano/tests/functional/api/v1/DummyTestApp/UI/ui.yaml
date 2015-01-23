@@ -11,6 +11,7 @@ Templates:
       name: generateHostname($.serviceConfiguration.unitNamingPattern, 1)
       flavor: $.instanceConfiguration.flavor
       image: $.instanceConfiguration.osImage
+      availabilityZone: $.instanceConfiguration.availabilityZone
 
   secondaryController:
     ?:
