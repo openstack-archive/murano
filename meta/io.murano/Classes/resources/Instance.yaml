@@ -188,6 +188,7 @@ Methods:
                   - subnet_id: $subnetRef
                 security_groups:
                   - get_resource: $securityGroupName
+                replacement_policy: AUTO
             $.name:
               properties:
                 networks:
