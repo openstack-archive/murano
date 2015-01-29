@@ -94,7 +94,7 @@ Methods:
             $.getRouterInterfaceName():
               type: 'OS::Neutron::RouterInterface'
               properties:
-                router: $.externalRouterId
+                router_id: $.externalRouterId
                 subnet: { get_resource: $.getSubnetName() }
       - $.environment.stack.updateTemplate($template)
 
