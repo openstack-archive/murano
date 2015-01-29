@@ -44,8 +44,8 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
 
     try:
         if not zipfile.is_zipfile(archive_path):
-            raise e.PackageFormatError("Uploading file should be a "
-                                       "zip' archive")
+            raise e.PackageFormatError("Uploaded file {0} is not a "
+                                       "zip archive".format(archive_path))
         package = zipfile.ZipFile(archive_path)
         package.extractall(path=target_dir)
         return load_from_dir(target_dir, preload=True, loader=loader)
