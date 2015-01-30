@@ -218,10 +218,6 @@ file_server = [
     cfg.StrOpt('file_server', default='')
 ]
 
-murano_metadata_url = [
-    cfg.StrOpt('murano_metadata_url', default='')
-]
-
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
@@ -233,7 +229,6 @@ CONF.register_opts(keystone_opts, group='keystone')
 CONF.register_opts(murano_opts, group='murano')
 CONF.register_opts(engine_opts, group='engine')
 CONF.register_opts(file_server)
-CONF.register_cli_opts(murano_metadata_url)
 CONF.register_cli_opts(metadata_dir)
 CONF.register_opts(packages_opts, group='packages_opts')
 CONF.register_opts(stats_opts, group='stats')
