@@ -100,6 +100,9 @@ class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
 class ControllerTest(object):
     """Common utilities for testing API Controllers."""
 
+    DEFAULT_USER = 'test_user'
+    DEFAULT_TENANT = 'test_tenant'
+
     def __init__(self, *args, **kwargs):
         super(ControllerTest, self).__init__(*args, **kwargs)
 
@@ -143,7 +146,8 @@ class ControllerTest(object):
             'wsgi.url_scheme': 'http',
         }
 
-    def _simple_request(self, path, params=None, method='GET'):
+    def _simple_request(self, path, params=None, method='GET',
+                        user=DEFAULT_USER, tenant=DEFAULT_TENANT):
         """Returns a request with a fake but valid-looking context
         and sets the request environment variables. If `params` is given,
         it should be a dictionary or sequence of tuples.
@@ -156,25 +160,28 @@ class ControllerTest(object):
             environ['QUERY_STRING'] = qs
 
         req = wsgi.Request(environ)
-        req.context = utils.dummy_context('api_test_user',
-                                          self.tenant,
+        req.context = utils.dummy_context(user, tenant,
                                           is_admin=self.is_admin)
         self.context = req.context
         return req
 
-    def _get(self, path, params=None):
-        return self._simple_request(path, params=params)
+    def _get(self, path, params=None, user=DEFAULT_USER,
+             tenant=DEFAULT_TENANT):
+        return self._simple_request(path, params=params, user=user,
+                                    tenant=tenant)
 
-    def _delete(self, path):
-        return self._simple_request(path, method='DELETE')
+    def _delete(self, path, user=DEFAULT_USER, tenant=DEFAULT_TENANT):
+        return self._simple_request(path, method='DELETE', user=user,
+                                    tenant=tenant)
 
     def _data_request(self, path, data, content_type='application/json',
-                      method='POST', params={}):
+                      method='POST', params={},
+                      user=DEFAULT_USER, tenant=DEFAULT_TENANT):
         environ = self._environ(path)
         environ['REQUEST_METHOD'] = method
 
         req = wsgi.Request(environ)
-        req.context = utils.dummy_context('api_test_user', self.tenant)
+        req.context = utils.dummy_context(user, tenant)
         self.context = req.context
         req.content_type = content_type
         req.body = data
@@ -185,12 +192,15 @@ class ControllerTest(object):
 
         return req
 
-    def _post(self, path, data, content_type='application/json', params={}):
-        return self._data_request(path, data, content_type, params=params)
+    def _post(self, path, data, content_type='application/json', params={},
+              user=DEFAULT_USER, tenant=DEFAULT_TENANT):
+        return self._data_request(path, data, content_type, params=params,
+                                  user=user, tenant=tenant)
 
-    def _put(self, path, data, content_type='application/json', params={}):
+    def _put(self, path, data, content_type='application/json', params={},
+             user=DEFAULT_USER, tenant=DEFAULT_TENANT):
         return self._data_request(path, data, content_type, method='PUT',
-                                  params=params)
+                                  params=params, user=user, tenant=tenant)
 
     def _set_policy_rules(self, rules):
         policy.set_rules(rules)
