@@ -17,7 +17,9 @@ Properties:
   keyname:
     Contract: $.string()
     Default: null
-
+  availabilityZone:
+    Contract: $.string().notNull()
+    Default: nova
   agent:
     Contract: $.class(sys:Agent)
     Usage: Runtime
@@ -105,6 +107,7 @@ Methods:
               properties:
                 flavor: $.flavor
                 image: $.image
+                availability_zone: $.availabilityZone
                 user_data: $userData
                 user_data_format: $userDataFormat
                 key_name: $.keyname
