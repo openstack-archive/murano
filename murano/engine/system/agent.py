@@ -18,6 +18,7 @@ import datetime
 import logging
 import os
 import types
+import urlparse
 import uuid
 
 import eventlet.event
@@ -228,31 +229,79 @@ class Agent(murano_object.MuranoObject):
         files = {}
         for file_id, file_descr in template['Files'].items():
             files[file_descr['Name']] = file_id
+
         for name, script in template.get('Scripts', {}).items():
             if 'EntryPoint' not in script:
                 raise ValueError('No entry point in script ' + name)
-            script['EntryPoint'] = self._place_file(
-                scripts_folder, script['EntryPoint'],
-                template, files, resources)
-            if 'Files' in script:
-                for i in range(0, len(script['Files'])):
-                    script['Files'][i] = self._place_file(
-                        scripts_folder, script['Files'][i],
-                        template, files, resources)
 
+            if 'Application' in script['Type']:
+                script['EntryPoint'] = self._place_file(
+                    scripts_folder, script['EntryPoint'],
+                    template, files, resources)
+            scripts_files = script['Files']
+            script['Files'] = []
+            for file in scripts_files:
+                file_id = self._place_file(scripts_folder, file,
+                                           template, files, resources)
+                if self._is_url(file):
+                    script['Files'].append(file)
+                else:
+                    script['Files'].append(file_id)
         return template
 
-    def _place_file(self, folder, name, template, files, resources):
+    def _is_url(self, file):
+        file = self._get_url(file)
+        parts = urlparse.urlsplit(file)
+        if not parts.scheme or not parts.netloc:
+            return False
+        else:
+            return True
+
+    def _get_url(self, file):
+        if isinstance(file, dict):
+            return file.values()[0]
+        else:
+            return file
+
+    def _get_name(self, file):
+        if isinstance(file, dict):
+            name = file.keys()[0]
+        else:
+            name = file
+
+        if self._is_url(name):
+            name = name[name.rindex('/') + 1:len(name)]
+        return name
+
+    def _get_file(self, file):
+        if isinstance(file, dict):
+            return file.values()[0]
+        else:
+            return file
+
+    def _place_file(self, folder, file, template, files, resources):
+        name = self._get_name(file)
+        file = self._get_file(file)
+        file_id = uuid.uuid4().hex
+
+        if self._is_url(file):
+            template['Files'][file_id] = {
+                'Name': str(name),
+                'URL': file,
+                'Type': 'Downloadable'}
+            return file_id
+
         use_base64 = False
-        if name.startswith('<') and name.endswith('>'):
+        if file.startswith('<') and file.endswith('>'):
             use_base64 = True
-            name = name[1:len(name) - 1]
-        if name in files:
+            if '<' in name:
+                name = file[1:len(file) - 1]
+
+        if file in files:
             return files[name]
 
-        file_id = uuid.uuid4().hex
         body_type = 'Base64' if use_base64 else 'Text'
-        body = resources.string(os.path.join(folder, name))
+        body = resources.string(os.path.join(folder, file))
         if use_base64:
             body = body.encode('base64')
 
