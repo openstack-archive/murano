@@ -64,6 +64,7 @@ contribute to the project.
    murano_pl/murano_pl_index
    articles/dynamic_ui
    articles/workflow
+   articles/policy_enf_index
 
 
 **Tutorials**
