@@ -35,6 +35,7 @@ from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
+from murano.policy import model_policy_enforcer as enforcer
 
 RPC_SERVICE = None
 
@@ -108,13 +109,13 @@ class TaskExecutor(object):
         self._environment.system_attributes = self._model.get('SystemData', {})
         self._environment.clients = client_manager.ClientManager()
 
+        self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
+            self._environment)
+
     def execute(self):
         self._create_trust()
 
         try:
-            # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
-            # return self._execute(pkg_loader)
-
             murano_client_factory = lambda: \
                 self._environment.clients.get_murano_client(self._environment)
             with package_loader.ApiPackageLoader(
@@ -130,6 +131,8 @@ class TaskExecutor(object):
 
         exc = executor.MuranoDslExecutor(class_loader, self.environment)
         obj = exc.load(self.model)
+
+        self._validate_model(obj, self.action, class_loader)
 
         try:
             # Skip execution of action in case of no action is provided.
@@ -149,6 +152,13 @@ class TaskExecutor(object):
         result = results_serializer.serialize(obj, exc)
         result['SystemData'] = self._environment.system_attributes
         return result
+
+    def _validate_model(self, obj, action, class_loader):
+        if config.CONF.engine.enable_model_policy_enforcer:
+            if obj is not None:
+                if action is not None and action['method'] == 'deploy':
+                    self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                         class_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])

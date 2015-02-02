@@ -1,0 +1,21 @@
+'?': {id: c86104748a0c4907b4c5981e6d3bce9f, type: io.murano.Environment}
+applications:
+- '?':
+    _26411a1861294160833743e45d0eaad9: {name: Git}
+    id: 0c810278-7282-4e4a-9d69-7b4c36b6ce6f
+    type: io.murano.apps.linux.Git
+  instance:
+    '?': {id: b840b71e-1805-46c5-9e6f-5a3d2c8d773e, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.small
+    image: murano-ubuntu
+    keyname: ''
+    name: whjiyi3uzhxes6
+  name: git1
+  repo: default.git
+defaultNetworks:
+  environment:
+    '?': {id: 9d89844f20a642e0a1148e1fb8fd9e2e, type: io.murano.resources.NeutronNetwork}
+    name: quick-env-1-network
+  flat: null
+name: quick-env-1

@@ -1,0 +1,46 @@
+'?': {id: 3409bdd0590e4c60b70fda5e6777ff96, type: io.murano.Environment}
+applications:
+- '?':
+    _26411a1861294160833743e45d0eaad9: {name: MySQL}
+    id: 0aafd67e-72e9-4ae0-bb62-fe724f77df2a
+    type: io.murano.databases.MySql
+  database: wordpress
+  instance:
+    '?': {id: ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    image: murano-ubuntu
+    keyname: ''
+    name: cgnvki4ji4tzo2
+  name: MySqlDB
+  password: admin
+  username: admin
+- '?':
+    _26411a1861294160833743e45d0eaad9: {name: Apache HTTP Server}
+    id: 8ce94f23-f16a-40a1-9d9d-a877266c315d
+    type: io.murano.apps.apache.ApacheHttpServer
+  enablePHP: true
+  instance:
+    '?': {id: fc6b8c41-166f-4fc9-a640-d82009e0a03d, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    image: murano-ubuntu
+    keyname: ''
+    name: ntxoai4ji58e53
+  name: ApacheHttpServer
+- '?':
+    _26411a1861294160833743e45d0eaad9: {name: WordPress}
+    id: 50fa68ff-cd9a-4845-b573-2c80879d158d
+    type: io.murano.apps.WordPress
+  database: 0aafd67e-72e9-4ae0-bb62-fe724f77df2a
+  dbName: wordpress
+  dbPassword: admin
+  dbUser: admin
+  monitoring: null
+  server: 8ce94f23-f16a-40a1-9d9d-a877266c315d
+defaultNetworks:
+  environment:
+    '?': {id: 119de5707de34fca92fd2d6cd48bc26c, type: io.murano.resources.NeutronNetwork}
+    name: wordpress-env-network
+  flat: null
+name: wordpress-env

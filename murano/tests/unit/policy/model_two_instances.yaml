@@ -1,0 +1,26 @@
+'?': {id: 00cc8fdf4cc54addb29133234d485edd, type: io.murano.Environment}
+applications:
+- '?':
+    _26411a1861294160833743e45d0eaad9: {name: Apache Tomcat Cluster}
+    id: 222256b6-07ef-4a69-a836-a6fe0df219e6
+    type: io.murano.apps.apache.TomcatCluster
+  instances:
+  - '?': {id: afa3266c-e2a7-4822-a176-11a48cdd7949, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    image: murano-ubuntu
+    keyname: ''
+    name: qvamli4jgrkjn3
+  - '?': {id: 824b1718-09d8-4dd3-be32-9886f0d146d7, type: io.murano.resources.LinuxMuranoInstance}
+    assignFloatingIp: false
+    flavor: m1.medium
+    image: murano-ubuntu
+    keyname: ''
+    name: krqlei4jgrkjo4
+  name: Tomcat-cluster
+defaultNetworks:
+  environment:
+    '?': {id: 854caae929e94290a2671281aef7ca9f, type: io.murano.resources.NeutronNetwork}
+    name: quick-env-3-network
+  flat: null
+name: quick-env-3

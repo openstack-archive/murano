@@ -1,0 +1,2 @@
+murano:properties+("824b1718-09d8-4dd3-be32-9886f0d146d7", "flavor", "m1.medium")
+murano:properties+("afa3266c-e2a7-4822-a176-11a48cdd7949", "flavor", "m1.medium")
