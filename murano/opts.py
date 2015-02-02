@@ -45,7 +45,6 @@ _opt_lists = [
         murano.common.config.metadata_dir,
         murano.common.config.bind_opts,
         murano.common.config.file_server,
-        murano.common.config.murano_metadata_url,
         murano.common.wsgi.socket_opts,
         murano.openstack.common.log.common_cli_opts,
         murano.openstack.common.log.generic_log_opts,
