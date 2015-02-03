@@ -322,6 +322,27 @@ def _aggregate_with_seed(collection, selector, seed):
     return reduce(selector, collection, seed())
 
 
+@yaql.context.EvalArg('collection', collections.Iterable)
+def _first(collection):
+    return iter(collection).next()
+
+
+@yaql.context.EvalArg('collection', collections.Iterable)
+def _first_or_default(collection):
+    try:
+        return iter(collection).next()
+    except StopIteration:
+        return None
+
+
+@yaql.context.EvalArg('collection', collections.Iterable)
+def _first_or_default2(collection, default):
+    try:
+        return iter(collection).next()
+    except StopIteration:
+        return default
+
+
 def register(context):
     context.register_function(
         lambda json, mappings: _transform_json(json(), mappings()), 'bind')
@@ -359,3 +380,6 @@ def register(context):
     context.register_function(_take, 'take')
     context.register_function(_aggregate, 'aggregate')
     context.register_function(_aggregate_with_seed, 'aggregate')
+    context.register_function(_first, 'first')
+    context.register_function(_first_or_default, 'firstOrDefault')
+    context.register_function(_first_or_default2, 'firstOrDefault')
