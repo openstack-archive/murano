@@ -23,7 +23,7 @@ import murano.policy.congress_rules as congress
 
 class MockClassLoader(object):
     def __init__(self, rules):
-        """Create rules like this: ['child->parent', 'child->parent2']"""
+        """Create rules like this: ['child->parent', 'child->parent2']."""
 
         self._rules_dict = {}
         for rule in rules:
@@ -34,7 +34,7 @@ class MockClassLoader(object):
                 self._rules_dict[split[0]] = [split[1]]
 
     def get_class(self, name):
-        if not name in self._rules_dict:
+        if name not in self._rules_dict:
             return None
         parents = []
         for parent_name in self._rules_dict[name]:
@@ -214,7 +214,7 @@ class TestCongressRules(unittest.TestCase):
         with open(expected_rules_file) as f:
             for line in f:
                 line = line.rstrip('\n')
-                if not line in rules_str:
+                if line not in rules_str:
                     s += 'Expected rule not found:\n\t' + line + '\n'
 
         if len(s) > 0:

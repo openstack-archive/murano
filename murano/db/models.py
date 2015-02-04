@@ -180,7 +180,7 @@ package_to_tag = sa.Table('package_to_tag',
                           sa.Column('tag_id',
                                     sa.String(36),
                                     sa.ForeignKey('tag.id',
-                                    ondelete="CASCADE")))
+                                                  ondelete="CASCADE")))
 
 
 class Instance(Base):
