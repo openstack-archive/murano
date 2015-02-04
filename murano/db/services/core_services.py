@@ -11,13 +11,19 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import types
 
 from oslo.utils import timeutils
 from webob import exc
 
+from murano.common.i18n import _
 from murano.common import utils
+from murano.db.services import environment_templates as env_temp
 from murano.db.services import environments as envs
+from murano.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
 
 
 class CoreServices(object):
@@ -63,6 +69,96 @@ class CoreServices(object):
         return result
 
     @staticmethod
+    def get_template_data(env_template_id, path):
+        """It obtains the data for the template. It includes
+        all the services. In case the path includes information
+        such as the env_template_id, the information provided will
+        be related to the entity specified in the path
+
+        :param env_template_id: The env_template_id to obtain the data
+        :param path: Id of service for which we checking status.
+        :return: The template description
+        """
+        temp_description = env_temp.EnvTemplateServices.\
+            get_description(env_template_id)
+
+        if temp_description is None:
+            return None
+
+        if 'services' not in temp_description:
+            return []
+
+        result = utils.TraverseHelper.get(path, temp_description)
+        if result is None:
+            msg = _('Environment Template <EnvId {0}> is not found').format(
+                env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+        return result
+
+    @staticmethod
+    def post_env_template_data(env_template_id, data, path):
+        """It stores the template data inside the template
+        description.
+        :param env_template_id: The env_template_id to obtain the data
+        :param data: the template description
+        :param path: Id of service for which we checking status.
+        :return: The template description
+        """
+        get_description = env_temp.EnvTemplateServices.get_description
+        save_description = env_temp.EnvTemplateServices.save_description
+
+        temp_description = get_description(env_template_id)
+        if temp_description is None:
+            msg = _('Environment Template <EnvId {0}> is not found').format(
+                env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
+        if 'services' not in temp_description:
+            temp_description['services'] = []
+
+        if path == '/services':
+            if isinstance(data, types.ListType):
+                utils.TraverseHelper.extend(path, data, temp_description)
+            else:
+                utils.TraverseHelper.insert(path, data, temp_description)
+        save_description(temp_description)
+        return data
+
+    @staticmethod
+    def post_application_data(env_template_id, data, path):
+        """It stores the application data inside the template
+        description.
+        :param env_template_id: The env_template_id to obtain the data
+        :param data: the template description
+        :param path: Id of service for which we checking status.
+        :return: The template description
+        """
+        get_description = env_temp.EnvTemplateServices.get_description
+        save_description = env_temp.EnvTemplateServices.save_description
+
+        temp_description = get_description(env_template_id)
+        if temp_description is None:
+            msg = _('Environment Template <EnvId {0}> is not found').format(
+                env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
+        if 'services' not in temp_description:
+            temp_description['services'] = []
+
+        if path == '/services':
+            if isinstance(data, types.ListType):
+                utils.TraverseHelper.extend(path, data, temp_description)
+            else:
+                utils.TraverseHelper.insert(path, data, temp_description)
+
+        save_description(temp_description, env_template_id)
+
+        return data
+
+    @staticmethod
     def post_data(environment_id, session_id, data, path):
         get_description = envs.EnvironmentServices.get_environment_description
         save_description = envs.EnvironmentServices.\
@@ -70,7 +166,11 @@ class CoreServices(object):
 
         env_description = get_description(environment_id, session_id)
         if env_description is None:
-            raise exc.HTTPMethodNotAllowed
+            msg = _('Environment <EnvId {0}> is not found').format(
+                environment_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
         if 'services' not in env_description:
             env_description['services'] = []
 
@@ -109,3 +209,22 @@ class CoreServices(object):
 
         utils.TraverseHelper.remove(path, env_description)
         save_description(session_id, env_description)
+
+    @staticmethod
+    def delete_env_template_data(env_template_id, path):
+        """It deletes a template.
+        :param env_template_id: The env_template_id to be deleted.
+        :param path: The path to check.
+        """
+        get_description = env_temp.EnvTemplateServices.get_description
+        save_description = env_temp.EnvTemplateServices.save_description
+
+        tmp_description = get_description(env_template_id)
+        if tmp_description is None:
+            msg = _('Environment Template <EnvId {0}> is not found').format(
+                env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
+        utils.TraverseHelper.remove(path, tmp_description)
+        save_description(tmp_description, env_template_id)
