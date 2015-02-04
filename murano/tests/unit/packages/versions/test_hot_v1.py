@@ -10,10 +10,13 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+
 import imghdr
+import os
+
 import murano.packages.load_utils as load_utils
 import murano.tests.unit.base as test_base
-import os
 
 
 class TestHotV1(test_base.MuranoTestCase):

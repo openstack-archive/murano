@@ -24,10 +24,10 @@ revision = '004'
 down_revision = '003'
 
 from alembic import op
-from murano.db.sqla import types as st
 import sqlalchemy as sa
 
 import murano.db.migration.helpers as helpers
+from murano.db.sqla import types as st
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

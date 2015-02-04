@@ -16,8 +16,9 @@ import os
 import shutil
 import sys
 import tempfile
-import yaml
 import zipfile
+
+import yaml
 
 from murano.engine import yaql_yaml_loader
 import murano.packages.application_package

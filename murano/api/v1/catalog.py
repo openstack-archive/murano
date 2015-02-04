@@ -14,10 +14,10 @@
 #    under the License.
 
 import cgi
-import jsonschema
 import os
 import tempfile
 
+import jsonschema
 from oslo.config import cfg
 from oslo.db import exception as db_exc
 from webob import exc

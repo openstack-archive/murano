@@ -23,11 +23,12 @@ Create Date: 2014-05-29 16:32:33.698760
 revision = '001'
 down_revision = None
 
+import uuid
+
 from alembic import op
 from oslo.utils import timeutils
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import table as sa_table
-import uuid
 
 from murano.common import consts
 from murano.db.sqla import types as st

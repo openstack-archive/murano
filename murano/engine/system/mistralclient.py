@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import eventlet
+
 import json
+
+import eventlet
 
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class

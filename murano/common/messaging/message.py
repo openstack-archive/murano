@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+
 from oslo.serialization import jsonutils
 
 log = logging.getLogger("murano-common.messaging")
