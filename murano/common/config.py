@@ -176,6 +176,10 @@ networking_opts = [
     cfg.BoolOpt('create_router', default=True,
                 help='This option will create a router when one with '
                      '"router_name" does not exist'),
+
+    cfg.StrOpt('network_config_file', default='netconfig.yaml',
+               help='If provided networking configuration will be taken '
+                    'from this file')
 ]
 stats_opts = [
     cfg.IntOpt('period', default=5,

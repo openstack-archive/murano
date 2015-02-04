@@ -15,9 +15,11 @@
 
 import json
 
+from oslo.config import cfg
 from oslo.utils import timeutils
 
 from murano.api.v1 import environments
+from murano.common import config
 from murano.db import models
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
@@ -41,6 +43,12 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_create_environment(self):
         """Create an environment, test environment.show()."""
+        opts = [
+            cfg.StrOpt('config_dir'),
+            cfg.StrOpt('config_file', default='murano.conf'),
+            cfg.StrOpt('project', default='murano'),
+        ]
+        config.CONF.register_opts(opts)
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
