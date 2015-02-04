@@ -14,7 +14,6 @@
 
 from eventlet import semaphore
 import heatclient.client as hclient
-
 import keystoneclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient

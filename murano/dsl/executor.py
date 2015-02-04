@@ -22,7 +22,6 @@ import eventlet
 import eventlet.event
 import yaql.context
 
-
 import murano.dsl.attribute_store as attribute_store
 import murano.dsl.dsl_exception as dsl_exception
 import murano.dsl.expressions as expressions
@@ -32,7 +31,6 @@ import murano.dsl.murano_object as murano_object
 import murano.dsl.object_store as object_store
 import murano.dsl.principal_objects.stack_trace as trace
 import murano.dsl.yaql_functions as yaql_functions
-
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)

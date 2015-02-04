@@ -16,7 +16,6 @@
 from testtools import matchers
 
 from murano.dsl import exceptions
-
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
 

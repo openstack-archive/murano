@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.test import attr
 from tempest_lib import exceptions
+import testtools
 
 from murano.tests.functional.api import base
 

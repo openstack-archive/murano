@@ -15,10 +15,10 @@
 
 import re
 
-from murano.policy import congress_rules
-
 from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
+from murano.policy import congress_rules
+
 
 LOG = logging.getLogger(__name__)
 
