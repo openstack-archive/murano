@@ -98,7 +98,7 @@ def upgrade():
                               'class_definition', 'package',
                               ['package_id'], ['id'])
 
-    ### end Alembic commands ###
+    # end Alembic commands #
 
 
 def downgrade():
@@ -166,4 +166,4 @@ def downgrade():
                               'class_definition', 'package',
                               ['package_id'], ['id'])
 
-    ### end Alembic commands ###
+    # end Alembic commands #

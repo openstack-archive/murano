@@ -103,7 +103,7 @@ class ControllerTest(object):
     def __init__(self, *args, **kwargs):
         super(ControllerTest, self).__init__(*args, **kwargs)
 
-        #cfg.CONF.set_default('host', 'server.test')
+        # cfg.CONF.set_default('host', 'server.test')
         self.api_version = '1.0'
         self.tenant = 'test_tenant'
         self.mock_policy_check = None

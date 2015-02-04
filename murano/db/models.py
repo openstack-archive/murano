@@ -94,7 +94,7 @@ class Session(Base, TimestampMixin):
     def to_dict(self):
         dictionary = super(Session, self).to_dict()
         del dictionary['description']
-        #object relations may be not loaded yet
+        # object relations may be not loaded yet
         if 'environment' in dictionary:
             del dictionary['environment']
         return dictionary
@@ -138,7 +138,7 @@ class Status(Base, TimestampMixin):
 
     def to_dict(self):
         dictionary = super(Status, self).to_dict()
-        #object relations may be not loaded yet
+        # object relations may be not loaded yet
         if 'deployment' in dictionary:
             del dictionary['deployment']
         return dictionary

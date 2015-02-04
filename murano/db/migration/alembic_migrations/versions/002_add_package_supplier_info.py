@@ -40,10 +40,10 @@ def upgrade():
         'package',
         sa.Column('supplier', sa.types.Text())
     )
-    ### end Alembic commands ###
+    # end Alembic commands #
 
 
 def downgrade():
     op.drop_column('package', 'supplier')
     op.drop_column('package', 'supplier_logo')
-    ### end Alembic commands ###
+    # end Alembic commands #

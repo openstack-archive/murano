@@ -96,7 +96,7 @@ def _pass1_serialize(value, parent, serialized_objects,
             result = value.to_dictionary()
             if designer_attributes_getter is not None:
                 result['?'].update(designer_attributes_getter(value.object_id))
-                #deserialize and merge list of actions
+                # deserialize and merge list of actions
                 actions = _serialize_available_action(value)
                 result['?']['_actions'] = _merge_actions(
                     result['?'].get('_actions', {}), actions)
