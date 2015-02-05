@@ -201,38 +201,38 @@ class TestRepositoryNegativeForbidden(base.NegativeTestCase,
             }
         ]
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.update_package,
                           self.package['id'],
                           post_body)
 
     @attr(type='negative')
     def test_get_package_from_another_tenant(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_package,
                           self.package['id'])
 
     @attr(type='negative')
     def test_delete_package_from_another_tenant(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_package,
                           self.package['id'])
 
     @attr(type='negative')
     def test_download_package_from_another_tenant(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.download_package,
                           self.package['id'])
 
     @attr(type='negative')
     def test_get_ui_definition_from_another_tenant(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_ui_definition,
                           self.package['id'])
 
     @attr(type='negative')
     def test_get_logo_from_another_tenant(self):
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_logo,
                           self.package['id'])
 
