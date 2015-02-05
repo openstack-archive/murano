@@ -114,7 +114,7 @@ class TestServices(base.TestCase):
 
         self.client.create_session(env['id'])
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.create_demo_service,
                           env['id'],
                           "")
@@ -141,7 +141,7 @@ class TestServices(base.TestCase):
 
         service = self.create_demo_service(env['id'], sess['id'])[1]
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.client.delete_service,
                           env['id'],
                           "",
