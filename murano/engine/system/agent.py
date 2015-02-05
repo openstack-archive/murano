@@ -15,12 +15,12 @@
 
 import copy
 import datetime
+import logging
 import os
 import types
 import uuid
 
 import eventlet.event
-import logging
 
 import murano.common.config as config
 import murano.common.messaging as messaging

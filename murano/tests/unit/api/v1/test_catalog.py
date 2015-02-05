@@ -16,8 +16,9 @@
 import cgi
 import cStringIO
 import imghdr
-import mock
 import os
+
+import mock
 
 from murano.api.v1 import catalog
 from murano.common import policy

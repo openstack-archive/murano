@@ -14,10 +14,11 @@
 
 # Based on designate/policy.py
 
-import murano.openstack.common.log as logging
-from murano.openstack.common import policy
 from oslo.config import cfg
 from webob import exc as exceptions
+
+import murano.openstack.common.log as logging
+from murano.openstack.common import policy
 
 LOG = logging.getLogger(__name__)
 

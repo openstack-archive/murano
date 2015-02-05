@@ -13,12 +13,13 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import fixtures
 import logging
+import urllib
+
+import fixtures
 import mock
 from oslo.utils import timeutils
 import routes
-import urllib
 import webob
 
 from murano.api.v1 import request_statistics

@@ -15,26 +15,25 @@
 
 """Utility methods for working with WSGI servers."""
 
-import eventlet
-eventlet.patcher.monkey_patch(all=False, socket=True)
-
 import datetime
 import errno
-import jsonschema
 import re
 import socket
 import sys
 import time
+from xml.dom import minidom
+from xml.parsers import expat
 
+import eventlet
+eventlet.patcher.monkey_patch(all=False, socket=True)
 import eventlet.wsgi
+import jsonschema
 from oslo.config import cfg
 from oslo.serialization import jsonutils
 import routes
 import routes.middleware
 import webob.dec
 import webob.exc
-from xml.dom import minidom
-from xml.parsers import expat
 
 from murano.api.v1 import schemas
 from murano.common import xmlutils
