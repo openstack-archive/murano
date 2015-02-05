@@ -17,13 +17,12 @@ import socket
 import time
 import uuid
 
-import testresources
-import testtools
-
 from heatclient import client as heatclient
 from keystoneclient.v2_0 import client as ksclient
 from muranoclient import client as mclient
 import muranoclient.common.exceptions as exceptions
+import testresources
+import testtools
 
 import murano.tests.functional.engine.config as cfg
 

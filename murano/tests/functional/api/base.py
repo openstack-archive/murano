@@ -18,7 +18,6 @@ import time
 import uuid
 
 import requests
-
 from tempest import clients
 from tempest.common import isolated_creds
 from tempest import config
