@@ -52,14 +52,14 @@ class FakeLogMixin:
             fixtures.FakeLogger(level=logging.DEBUG))
         base_list = set([nlog.split('.')[0]
                          for nlog in logging.Logger.manager.loggerDict])
-        for base in base_list:
-            if base in TEST_DEFAULT_LOGLEVELS:
+        for base_name in base_list:
+            if base_name in TEST_DEFAULT_LOGLEVELS:
                 self.useFixture(fixtures.FakeLogger(
-                    level=TEST_DEFAULT_LOGLEVELS[base],
-                    name=base))
-            elif base != 'murano':
+                    level=TEST_DEFAULT_LOGLEVELS[base_name],
+                    name=base_name))
+            elif base_name != 'murano':
                 self.useFixture(fixtures.FakeLogger(
-                    name=base))
+                    name=base_name))
 
 
 class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):

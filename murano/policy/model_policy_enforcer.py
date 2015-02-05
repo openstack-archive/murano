@@ -77,7 +77,7 @@ class ModelPolicyEnforcer(object):
             False,
             {'query': 'predeploy_errors(eid, oid, msg)',
              'action_policy': 'action',
-            'sequence': rules_str})
+             'sequence': rules_str})
 
         if validation_result["result"]:
 

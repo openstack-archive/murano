@@ -50,7 +50,7 @@ class CoreServices(object):
         if env_description is None:
             return None
 
-        if not 'services' in env_description:
+        if 'services' not in env_description:
             return []
 
         result = utils.TraverseHelper.get(path, env_description)
@@ -71,7 +71,7 @@ class CoreServices(object):
         env_description = get_description(environment_id, session_id)
         if env_description is None:
             raise exc.HTTPMethodNotAllowed
-        if not 'services' in env_description:
+        if 'services' not in env_description:
             env_description['services'] = []
 
         if path == '/services':
