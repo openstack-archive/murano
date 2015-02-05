@@ -93,4 +93,4 @@ class StatsCollectingService(service.Service):
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
             LOG.error(_("Failed to get statistics object "
-                        "form a database. %s" % e))
+                        "form a database. {0}").format(e))

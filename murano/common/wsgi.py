@@ -939,7 +939,7 @@ class FormDataDeserializer(TextDeserializer):
     def _from_json(self, datastring):
         value = datastring
         try:
-            LOG.debug(_("Trying deserialize '{0}' to json".format(datastring)))
+            LOG.debug(_("Trying deserialize '{0}' to json").format(datastring))
             value = jsonutils.loads(datastring)
         except ValueError:
             LOG.debug(_("Unable deserialize to json, using raw text"))
