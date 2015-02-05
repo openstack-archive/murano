@@ -1,0 +1,31 @@
+Namespaces:
+  =: io.murano.apps.test
+  std: io.murano
+  sys: io.murano.system
+
+
+Name: MistralShowcaseApp
+
+Extends: std:Application
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  mistralClient:
+    Contract: $.class(sys:MistralClient)
+    Usage: Runtime
+
+
+Methods:
+  initialize:
+    Body:
+      - $this.mistralClient: new(sys:MistralClient)
+
+  deploy:
+    Body:
+      - $resources: new('io.murano.system.Resources')
+      - $workflow: $resources.string('TestEcho_MistralWorkflow.yaml')
+      - $.mistralClient.upload(definition => $workflow)
+      - $output: $.mistralClient.run(name => 'test_echo', inputs => dict(input_1 => input_1_value))
+      - $this.find(std:Environment).reporter.report($this, $output.get('out_3'))
