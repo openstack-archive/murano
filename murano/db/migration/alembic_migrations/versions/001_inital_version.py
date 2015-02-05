@@ -253,7 +253,7 @@ def upgrade():
     )
 
     _create_default_categories(op)
-    ### end Alembic commands ###
+    # end Alembic commands #
 
 
 def downgrade():
@@ -273,4 +273,4 @@ def downgrade():
     op.drop_table('category')
     op.drop_table('tag')
     op.drop_table('environment')
-    ### end Alembic commands ###
+    # end Alembic commands #

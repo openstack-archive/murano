@@ -44,7 +44,7 @@ class Controller(object):
         LOG.debug('Environments:List')
         policy.check('list_environments', request.context)
 
-        #Only environments from same tenant as user should be returned
+        # Only environments from same tenant as user should be returned
         filters = {'tenant_id': request.context.tenant}
         environments = envs.EnvironmentServices.get_environments_by(filters)
         environments = [env.to_dict() for env in environments]
@@ -99,7 +99,7 @@ class Controller(object):
         if hasattr(request, 'context') and request.context.session:
             session_id = request.context.session
 
-        #add services to env
+        # add services to env
         get_data = core_services.CoreServices.get_data
         env['services'] = get_data(environment_id, '/services', session_id)
 

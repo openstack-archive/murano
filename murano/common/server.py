@@ -70,7 +70,7 @@ class ResultEndpoint(object):
         environment.version += 1
         environment.save(unit)
 
-        #close deployment
+        # close deployment
         deployment = get_last_deployment(unit, environment.id)
         deployment.finished = timeutils.utcnow()
 
@@ -93,7 +93,7 @@ class ResultEndpoint(object):
         deployment.statuses.append(status)
         deployment.save(unit)
 
-        #close session
+        # close session
         conf_session = unit.query(models.Session).filter_by(
             **{'environment_id': environment.id,
                'state': states.SessionState.DEPLOYING if not deleted
@@ -106,7 +106,7 @@ class ResultEndpoint(object):
             conf_session.state = states.SessionState.DEPLOYED
         conf_session.save(unit)
 
-        #output application tracking information
+        # output application tracking information
         message = '<EnvId: {0} TenantId: {1} Status: {2} Apps: {3}>'.format(
             environment.id,
             environment.tenant_id,
@@ -174,7 +174,7 @@ def report_notification(report):
     status.update(report)
 
     unit = session.get_session()
-    #connect with deployment
+    # connect with deployment
     with unit.begin():
         running_deployment = get_last_deployment(unit,
                                                  status.environment_id)
