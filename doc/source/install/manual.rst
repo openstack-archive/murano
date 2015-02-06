@@ -107,14 +107,14 @@ To use MySQL database you should install it and create an empty database first:
 Install the API service and Engine
 ==================================
 
-1.  Create a folder which will hold all Murano components.
+#.  Create a folder which will hold all Murano components.
 
     .. code-block:: console
 
         $ mkdir ~/murano
     ..
 
-2.  Clone the Murano git repository to the management server.
+#.  Clone the Murano git repository to the management server.
 
     .. code-block:: console
 
@@ -122,23 +122,25 @@ Install the API service and Engine
         $ git clone https://github.com/stackforge/murano
     ..
 
-3.  Generate the sample configuration file with *tox*.
+#.  Set up Murano config file
+
+    Murano has common config file for API and Engine servicies.
+
+    First, generate sample configuration file, using tox
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ tox -egenconfig
+        $ tox -e genconfig
     ..
 
-4.  Copy the sample configuration from the source tree to their final location.
+    And make a copy of it for further modifications
 
     .. code-block:: console
-
         $ cd ~/murano/murano/etc/murano
         $ cp murano.conf.sample murano.conf
     ..
 
-5.  Edit ``murano.conf`` with your favorite editor. Below is an example
+#.  Edit ``murano.conf`` with your favorite editor. Below is an example
     which contains basic settings your are likely need to configure.
 
     .. note::
@@ -158,12 +160,18 @@ Install the API service and Engine
         rabbit_virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
         notification_driver = messagingv2
 
+        ...
+
         [database]
         backend = sqlalchemy
         connection = sqlite:///murano.sqlite
 
+        ...
+
         [keystone]
         auth_url = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'
+
+        ...
 
         [keystone_authtoken]
         auth_uri = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'
@@ -173,6 +181,8 @@ Install the API service and Engine
         admin_tenant_name = %OPENSTACK_ADMIN_TENANT%
         admin_user = %OPENSTACK_ADMIN_USER%
         admin_password = %OPENSTACK_ADMIN_PASSWORD%
+
+        ...
 
         [murano]
         url = http://%YOUR_HOST_IP%:8082
@@ -184,7 +194,7 @@ Install the API service and Engine
         virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
     ..
 
-6.  Create a virtual environment and install Murano prerequisites. We will use
+#.  Create a virtual environment and install Murano prerequisites. We will use
     *tox* for that. Virtual environment will be created under *.tox* directory.
 
     .. code-block:: console
@@ -193,7 +203,7 @@ Install the API service and Engine
         $ tox
     ..
 
-7.  Create database tables for Murano.
+#.  Create database tables for Murano.
 
     .. code-block:: console
 
@@ -202,7 +212,7 @@ Install the API service and Engine
         > --config-file ./etc/murano/murano.conf upgrade
     ..
 
-8.  Open a new console and launch Murano API. A separate terminal is
+#.  Open a new console and launch Murano API. A separate terminal is
     required because the console will be locked by a running process.
 
     .. code-block:: console
@@ -212,7 +222,7 @@ Install the API service and Engine
         > --config-file ./etc/murano/murano.conf
     ..
 
-9.  Import Core Murano Library.
+#.  Import Core Murano Library.
 
     .. code-block:: console
 
@@ -222,7 +232,7 @@ Install the API service and Engine
         > import-package ./meta/io.murano
     ..
 
-10. Open a new console and launch Murano Engine. A separate terminal is
+#. Open a new console and launch Murano Engine. A separate terminal is
     required because the console will be locked by a running process.
 
     .. code-block:: console
@@ -239,7 +249,7 @@ Install Murano Dashboard
  control plane to use it. This section decribes how to install and run Murano
  Dashboard.
 
-1.  Clone the repository with Murano Dashboard.
+#.  Clone the repository with Murano Dashboard.
 
     .. code-block:: console
 
@@ -247,42 +257,43 @@ Install Murano Dashboard
         $ git clone https://github.com/stackforge/murano-dashboard
     ..
 
-2.  Create a virtual environment and install dashboard prerequisites. Again,
-    we use *tox* for that.
+#.  Create a virtual environment and install dashboard prerequisites. Use *tox* for that.
+    According to tox.ini config, this command also installs horizon (openstack dashboard).
+    It's not listed in murano-dashboard dependencies,
+    since in production murano supposed to be a horizon plugin and is used above existing horizon.
 
     .. code-block:: console
 
         $ cd ~/murano/murano-dashboard
-        $ tox
+        $ tox -e venv
     ..
 
-3. Install the latest horizon version and all murano-dashboard requirements into the virtual environment:
+    .. note::
 
-   ::
+        By default horizon is installed from master, according to tox config file.
+        Note, that previous murano versions may be incompatible with horizon master.
+        So, to switch horizon version, please remove existing installation
+        (tox -e venv pip uninstall horizon) and install the desired version
+        with a tarball from http://tarballs.openstack.org/horizon
 
-      $ tox -e venv pip install horizon
+    ..
 
- It may happen, that the last release of horizon will be not capable with
- latest murano-dashboard code. In that case, horizon need to be installed
- from master branch of this repository: ``https://github.com/openstack/horizon``
-
-4.  Copy configuration file for dashboard.
+#.  Copy configuration local settings configuration file.
 
     .. code-block:: console
 
         $ cd ~/murano/murano-dashboard/muranodashboard/local
-        $ cp local_settings.py.sample local_settings.py
+        $ cp local_settings.py.example local_settings.py
     ..
 
-5.  Edit configuration file.
+#.  And edit it according to your Openstack installation.
 
     .. code-block:: console
 
-        $ cd ~/murano/murano-dashboard/muranodashboard/local
         $ vim ./local_settings.py
     ..
 
-    ::
+    .. code-block:: python
 
         ...
         ALLOWED_HOSTS = '*'
@@ -291,59 +302,78 @@ Install Murano Dashboard
         OPENSTACK_HOST = '%OPENSTACK_HOST_IP%'
 
         ...
+
         # Set secret key to prevent it's generation
         SECRET_KEY = 'random_string'
 
         ...
+
         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
+    ..
+
+    Also, it's better to change default session backend from  browser cookies to database to avoid
+    issues with forms during creating applications:
+
+    .. code-block:: python
+
         ...
+        DATABASES = {
+            'default': {
+            'ENGINE': 'django.db.backends.sqlite3',
+            'NAME': '/tmp/murano-dashboard.sqlite',
+            }
+        }
+
+        SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+    ..
+
+    If you do not plan to get murano service from keystone application catalog,
+    provide where murano-api service is running:
+
+    .. code-block:: python
+
+        ...
+        MURANO_API_URL = 'http://localhost:8082'
+    ..
+
+#.  Perform database synchronization.
+
+    Optional step. needed in case you set up database as a session backend.
+
+    .. code-block:: console
+
+        $ tox -e venv -- ~/murano/murano-dashboard/manage.py syncdb
+    ..
+
+#.  Prepare murano
+
+    Murano UI is a plugin for Openstack Dashboard (Horizon). Horizon allows dashboards,
+    panels and panel groups to be added without modifying the default settings.
+    To get more information, go the the official `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#pluggable-settings-label>`_
 
 
-.. _update_settings:
+    There is special script that sets up murano-dashboard with horizon in one action.
+    It is called *prepare_murano.sh* and located under repository root. This script
+    copies actual openstack_dashboard settings file from horizon and puts murano plugin file to the right place.
+    Openstack_dashboard location parameter should be provided:
 
-6. Update settings file
+    .. code-block:: console
 
+        $ cd ~/murano/murano-dashboard
+        $ ./prepare_murano.sh --openstack-dashboard .tox/venv/lib/python2.7/site-packages/openstack_dashboard
 
-.. _`here`: https://github.com/stackforge/murano-dashboard/blob/master/update_setting.sh
+    ..
 
- Running Murano dashboard on developer environment implies the use of murano settings file instead of horizon.
- However, for the correct setup requires settings file to be synchronized with corresponding horizon release.
- But murano-dashboard also have parameters, that should be added to that config. So for your convenience,
- Murano has special script that allows to quickly synchronize Django settings file for a developer installation.
- *update_setting.sh* file can be found `here`_.
+#.  Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
 
- To display all possible options run:
+    .. code-block:: console
 
- .. code-block:: console
+        $ tox -e venv -- python manage.py runserver <IP:PORT>
+    ..
 
-     ./update_setting.sh --help
+    Development server will be restarted automatically on every code change.
 
- ..
-
- .. note::
-
-     Ether output or input parameter should be specified.
-
- ..
-
-* ``--input={PATH/TO/HORIZON/SETTINGS/FILE}`` - settings file to which murano settings would be applied. If omitted, settings from horizon master branch are downloaded.
-* ``--output={PATH/TO/FILE}`` - file to store script execution result. Will be overwrite if already exist. If omitted, coincides to the *input* parameter.
-* ``--tag`` - horizon release tag name, applied, if no input parameter is provided.
-* ``--remove`` - if set, Murano parameters would be removed from the settings file.
-* ``--cache-dir={PATH/TO/DIRECTORY}`` - directory to store intermediate script data. Default is */tmp/muranodashboard-cache*.
-* ``--log-file={PATH/TO/FILE}`` - file to store the script execution log to a separate file.
-
-7. Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
-
- .. code-block:: console
-
-     $ cd ~/murano/murano-dashboard
-     $ tox -e venv -- python manage.py runserver <IP:PORT>
- ..
-
- Development server will be restarted automatically on every code change.
-
-8.  Open dashboard using url http://localhost:8000
+#.  Open dashboard using url http://localhost:8000
 
 Import Murano Applications
 ==========================
@@ -357,10 +387,10 @@ Murano App Incubator.
     .. code-block:: console
 
         $ cd ~/murano
-        $ git clone https://github.com/murano-project/murano-app-incubator
+        $ git clone https://github.com/stackforge/murano-apps
     ..
 
-2.  Import every package you need from Murano App Incubator using the command
+2.  Import every package you need from this repository, using the command
     below.
 
     .. code-block:: console
