@@ -85,6 +85,7 @@ contribute to the project.
    contributing
    guidelines
    articles/debug_tips
+   articles/app_migrating
 
 
 **API specification**
