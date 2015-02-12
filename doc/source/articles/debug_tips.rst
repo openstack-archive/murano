@@ -38,12 +38,11 @@ Possible problem list
 * `murano-db-manage` failed to execute
 
   * Check `connection` parameter in provided config file. It should be a `connection string <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html>`_.
+
 * Murano Dashboard is not working
 
-  * Check that settings.py has custom Murano data. To add that data execute *update_settings.sh* script
-     or use `horizon plugin <http://docs.openstack.org/developer/horizon/topics/settings.html#pluggable-settings>`_
-     Note, that even if settings.py contains Murano data, the file could be outdated. *update_settings.sh* script could synchronize settings with horizon master.
-  * Check, that dashboard is not inserted twice in the settings file and as a plugin.
+  * Make sure, that *prepare_murano.sh* script was executed and *murano* file located in *enabled* folder under openstack_dashboard repository.
+  * Check, that murano data is not inserted twice in the settings file and as a plugin.
 
 
 Problems during deployment
