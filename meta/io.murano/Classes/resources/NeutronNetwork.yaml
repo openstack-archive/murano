@@ -27,13 +27,11 @@ Properties:
     Contract: $.string()
     Usage: InOut
 
-  dnsNameserver:
-    Contract: $.string()
+  dnsNameservers:
+    # This property is optional,
+    # since neutron default dns will be used in case of empty
+    Contract: [$.string()]
     Usage: InOut
-
-  useDefaultDns:
-    Contract: $.bool().notNull()
-    Default: true
 
 Methods:
   initialize:
@@ -46,10 +44,9 @@ Methods:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
-          - If: $.useDefaultDns and (not bool($.dnsNameserver))
+          - If: $.dnsNameservers = null
             Then:
-              - $.dnsNameserver: $._netExplorer.getDefaultDns()
-
+              - $.dnsNameservers: $._netExplorer.getDefaultDns()
           - $template: $._createNetwork()
           - If: $.autoUplink and (not bool($.externalRouterId))
             Then:
@@ -87,7 +84,7 @@ Methods:
               properties:
                 network: { get_resource: $._getNetworkName() }
                 ip_version: 4
-                dns_nameservers: [ $.dnsNameserver ]
+                dns_nameservers: $.dnsNameservers
                 cidr: $.subnetCidr
 
 

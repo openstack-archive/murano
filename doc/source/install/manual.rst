@@ -192,6 +192,10 @@ Install the API service and Engine
         login = %RABBITMQ_USER%
         password = %RABBITMQ_PASSWORD%
         virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
+
+        [networking]
+        default_dns = 8.8.8.8 # In case openstack neutron has no default
+                              # DNS configured
     ..
 
 #.  Create a virtual environment and install Murano prerequisites. We will use

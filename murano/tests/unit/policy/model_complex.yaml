@@ -44,10 +44,9 @@ defaultNetworks:
     '?': {id: 7bac482a4c194b6e8dea81e6ce606db6, type: io.murano.resources.NeutronNetwork}
     autoUplink: true
     autogenerateSubnet: true
-    dnsNameserver: null
+    dnsNameservers: null
     externalRouterId: null
     name: quick-env-12-network
     subnetCidr: null
-    useDefaultDns: true
   flat: null
 name: quick-env-12
