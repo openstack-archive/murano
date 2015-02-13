@@ -28,5 +28,8 @@ TEMPEST_DIR=${TEMPEST_DIR:-/opt/stack/new/tempest}
 # Add tempest source tree to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$TEMPEST_DIR
 
+#installing requirements for tempest
+pip install -r $TEMPEST_DIR/requirements.txt
+
 nosetests -sv ../murano/tests/functional/api/v1 ../murano/tests/functional/cli/simple_read_only
 
