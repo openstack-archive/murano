@@ -133,6 +133,7 @@ class Task(Base, TimestampMixin):
 
     statuses = sa_orm.relationship("Status", backref='task',
                                    cascade='save-update, merge, delete')
+    result = sa.Column(st.JsonBlob(), nullable=True, default={})
 
     def to_dict(self):
         dictionary = super(Task, self).to_dict()

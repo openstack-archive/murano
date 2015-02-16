@@ -62,8 +62,9 @@ class ActionServices(object):
         task = ActionServices.create_action_task(
             action_name, target_obj, args,
             environment, session, token)
-        actions_db.update_task(action_name, session, task, unit)
+        task_id = actions_db.update_task(action_name, session, task, unit)
         rpc.engine().handle_task(task)
+        return task_id
 
     @staticmethod
     def execute(action_id, session, unit, token, args={}):
@@ -74,8 +75,9 @@ class ActionServices(object):
         if not action[1].get('enabled', True):
             raise ValueError('Cannot execute disabled action')
 
-        ActionServices.submit_task(action[1]['name'], action[0],
-                                   args, environment, session, token, unit)
+        return ActionServices.submit_task(
+            action[1]['name'], action[0], args, environment,
+            session, token, unit)
 
     @staticmethod
     def find_action(model, action_id):
@@ -104,3 +106,9 @@ class ActionServices(object):
                     return result
         else:
             return None
+
+    @staticmethod
+    def get_result(environment_id, task_id, unit):
+        task = unit.query(models.Task).filter_by(
+            id=task_id, environment_id=environment_id).first()
+        return task.result

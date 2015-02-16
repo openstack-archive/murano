@@ -94,5 +94,4 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         self.mock_engine_rpc.handle_task.assert_called_once_with(rpc_task)
 
-        # Should this be expected behavior?
-        self.assertEqual(None, result)
+        self.assertIn('task_id', result)

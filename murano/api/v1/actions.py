@@ -30,12 +30,7 @@ LOG = logging.getLogger(__name__)
 
 
 class Controller(object):
-    def execute(self, request, environment_id, action_id, body):
-        policy.check("execute_action", request.context, {})
-
-        LOG.debug('Action:Execute <ActionId: {0}>'.format(action_id))
-
-        unit = db_session.get_session()
+    def _validate_environment(self, unit, request, environment_id):
         environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
@@ -47,6 +42,14 @@ class Controller(object):
             LOG.info(_LI('User is not authorized to access '
                          'this tenant resources.'))
             raise exc.HTTPUnauthorized
+
+    def execute(self, request, environment_id, action_id, body):
+        policy.check("execute_action", request.context, {})
+
+        LOG.debug('Action:Execute <ActionId: {0}>'.format(action_id))
+
+        unit = db_session.get_session()
+        self._validate_environment(unit, request, environment_id)
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
@@ -65,8 +68,18 @@ class Controller(object):
                           'is invalid').format(session.id))
             raise exc.HTTPForbidden()
 
-        actions.ActionServices.execute(action_id, session, unit,
-                                       request.context.auth_token, body or {})
+        task_id = actions.ActionServices.execute(
+            action_id, session, unit, request.context.auth_token, body or {})
+        return {'task_id': task_id}
+
+    def get_result(self, request, environment_id, task_id):
+        policy.check("execute_action", request.context, {})
+
+        LOG.debug('Action:GetResult <TaskId: {0}>'.format(task_id))
+
+        unit = db_session.get_session()
+        self._validate_environment(unit, request, environment_id)
+        return actions.ActionServices.get_result(environment_id, task_id, unit)
 
 
 def create_resource():

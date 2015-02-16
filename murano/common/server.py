@@ -44,6 +44,9 @@ class ResultEndpoint(object):
         LOG.debug('Got result from orchestration '
                   'engine:\n{0}'.format(secure_result))
 
+        model = result['model']
+        action_result = result.get('action', {})
+
         unit = session.get_session()
         environment = unit.query(models.Environment).get(environment_id)
 
@@ -52,11 +55,11 @@ class ResultEndpoint(object):
                             'specified environment not found in database'))
             return
 
-        if result['Objects'] is None and result.get('ObjectsCopy', {}) is None:
+        if model['Objects'] is None and model.get('ObjectsCopy', {}) is None:
             environments.EnvironmentServices.remove(environment_id)
             return
 
-        environment.description = result
+        environment.description = model
         if environment.description['Objects'] is not None:
             environment.description['Objects']['services'] = \
                 environment.description['Objects'].pop('applications', [])
@@ -72,6 +75,7 @@ class ResultEndpoint(object):
         # close deployment
         deployment = get_last_deployment(unit, environment.id)
         deployment.finished = timeutils.utcnow()
+        deployment.result = action_result
 
         num_errors = unit.query(models.Status)\
             .filter_by(level='error', task_id=deployment.id).count()
@@ -112,7 +116,7 @@ class ResultEndpoint(object):
             _('Failed') if num_errors + num_warnings > 0 else _('Successful'),
             ', '.join(map(
                 lambda a: a['?']['type'],
-                result['Objects']['services']
+                model['Objects']['services']
             ))
         )
         LOG.info(message)

@@ -19,7 +19,7 @@ import types
 from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import murano_object
-from murano.dsl import results_serializer
+from murano.dsl import serializer
 from murano.engine import environment
 from murano.tests.unit.dsl.foundation import object_model
 
@@ -95,7 +95,7 @@ class Runner(object):
 
     @property
     def serialized_model(self):
-        return results_serializer.serialize(self._root, self.executor)
+        return serializer.serialize_model(self._root, self.executor)
 
     @property
     def preserve_exception(self):

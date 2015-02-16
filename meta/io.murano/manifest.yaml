@@ -20,6 +20,7 @@ Classes:
   io.murano.Exception: Exception.yaml
   io.murano.StackTrace: StackTrace.yaml
   io.murano.SharedIp: SharedIp.yaml
+  io.murano.File: File.yaml
 
   io.murano.system.SecurityGroupManager: SecurityGroupManager.yaml
 

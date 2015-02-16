@@ -38,3 +38,4 @@ def update_task(action, session, task, unit):
     with unit.begin():
         unit.add(session)
         unit.add(task_info)
+    return task_info.id

@@ -147,6 +147,10 @@ class API(wsgi.Router):
                        controller=actions_resource,
                        action='execute',
                        conditions={'method': ['POST']})
+        mapper.connect('/environments/{environment_id}/actions/{task_id}',
+                       controller=actions_resource,
+                       action='get_result',
+                       conditions={'method': ['GET']})
 
         catalog_resource = catalog.create_resource()
         mapper.connect('/catalog/packages/categories',

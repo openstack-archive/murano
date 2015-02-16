@@ -135,6 +135,10 @@ class MuranoMigrationsCheckers(object):
         self.assertColumnExists(engine, 'environment-template', 'tenant_id')
         self.assertColumnExists(engine, 'environment-template', 'name')
 
+    def _check_006(self, engine, data):
+        self.assertEqual('006', migration.version(engine))
+        self.assertColumnExists(engine, 'task', 'result')
+
 
 class TestMigrationsMySQL(MuranoMigrationsCheckers,
                           base.BaseWalkMigrationTestCase,

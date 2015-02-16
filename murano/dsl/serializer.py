@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import types
 
 import murano.dsl.helpers as helpers
@@ -24,7 +25,20 @@ class ObjRef(object):
         self.ref_obj = obj
 
 
-def _serialize_tree(root_object, designer_attributes):
+def serialize_object(obj):
+    if isinstance(obj, (collections.Sequence, collections.Set)):
+        return [serialize_object(t) for t in obj]
+    elif isinstance(obj, collections.Mapping):
+        result = {}
+        for key, value in obj.iteritems():
+            result[key] = serialize_object(value)
+        return result
+    elif isinstance(obj, murano_object.MuranoObject):
+        return _serialize_object(obj, None)[0]
+    return obj
+
+
+def _serialize_object(root_object, designer_attributes=None):
     serialized_objects = set()
     tree = _pass1_serialize(
         root_object, None, serialized_objects, designer_attributes)
@@ -32,15 +46,15 @@ def _serialize_tree(root_object, designer_attributes):
     return tree, serialized_objects
 
 
-def serialize(root_object, executor):
+def serialize_model(root_object, executor):
     if root_object is None:
         tree = None
         tree_copy = None
         attributes = []
     else:
-        tree, serialized_objects = _serialize_tree(
+        tree, serialized_objects = _serialize_object(
             root_object, executor.object_store.designer_attributes)
-        tree_copy, _ = _serialize_tree(root_object, None)
+        tree_copy, _ = _serialize_object(root_object, None)
         attributes = executor.attribute_store.serialize(serialized_objects)
 
     return {

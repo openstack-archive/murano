@@ -15,7 +15,7 @@
 import mock
 
 from murano.dsl import murano_method
-from murano.dsl import results_serializer
+from murano.dsl import serializer
 from murano.services import actions
 from murano.tests.unit import base
 
@@ -35,7 +35,7 @@ class TestActionsSerializer(base.MuranoTestCase):
             'action3': {'name': 'name3', 'enabled': True},
         }
 
-        result = results_serializer._merge_actions(old, new)
+        result = serializer._merge_actions(old, new)
 
         self.assertEqual(2, len(result))
         self.assertNotIn('action1', result)
@@ -50,7 +50,7 @@ class TestActionsSerializer(base.MuranoTestCase):
             'action2': {'name': 'name3', 'enabled': True},
         }
 
-        result = results_serializer._merge_actions(old, new)
+        result = serializer._merge_actions(old, new)
 
         self.assertFalse(result['action1']['enabled'])
 
@@ -76,7 +76,7 @@ class TestActionsSerializer(base.MuranoTestCase):
     def test_object_actions_serialization(self):
         obj = self._get_mocked_obj()
 
-        obj_actions = results_serializer._serialize_available_action(obj)
+        obj_actions = serializer._serialize_available_action(obj)
 
         expected_result = {'name': 'method1', 'enabled': True}
         self.assertIn('id1_method1', obj_actions)
@@ -84,13 +84,13 @@ class TestActionsSerializer(base.MuranoTestCase):
 
     def test_that_only_actions_are_serialized(self):
         obj = self._get_mocked_obj()
-        obj_actions = results_serializer._serialize_available_action(obj)
+        obj_actions = serializer._serialize_available_action(obj)
         self.assertNotIn('id1_method2', obj_actions)
 
     def test_parent_actions_are_serialized(self):
         obj = self._get_mocked_obj()
 
-        obj_actions = results_serializer._serialize_available_action(obj)
+        obj_actions = serializer._serialize_available_action(obj)
 
         expected_result = {'name': 'method3', 'enabled': True}
         self.assertIn('id1_method3', obj_actions)

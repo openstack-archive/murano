@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import traceback
+
 import uuid
 
 import eventlet.debug
@@ -25,7 +27,7 @@ from murano.common.helpers import token_sanitizer
 from murano.common import rpc
 from murano.dsl import dsl_exception
 from murano.dsl import executor
-from murano.dsl import results_serializer
+from murano.dsl import serializer
 from murano.engine import auth_utils
 from murano.engine import client_manager
 from murano.engine import environment
@@ -51,13 +53,14 @@ class TaskProcessingEndpoint(object):
         LOG.info(_LI('Starting processing task: {task_desc}').format(
             task_desc=jsonutils.dumps(s_task)))
 
-        result = task['model']
+        result = {'model': task['model']}
         try:
             task_executor = TaskExecutor(task)
             result = task_executor.execute()
         except Exception as e:
             LOG.exception(_LE('Error during task execution for tenant %s'),
                           task['tenant_id'])
+            result['action'] = TaskExecutor.exception_result(e)
             msg_env = Environment(task['id'])
             reporter = status_reporter.StatusReporter()
             reporter.initialize(msg_env)
@@ -116,6 +119,13 @@ class TaskExecutor(object):
         self._create_trust()
 
         try:
+            # !!! please do not delete 2 commented lines of code below.
+            # Uncomment to make engine load packages from
+            # local folder rather than from API !!!
+
+            # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
+            # return self._execute(pkg_loader)
+
             murano_client_factory = lambda: \
                 self._environment.clients.get_murano_client(self._environment)
             with package_loader.ApiPackageLoader(
@@ -133,17 +143,21 @@ class TaskExecutor(object):
         obj = exc.load(self.model)
 
         self._validate_model(obj, self.action, class_loader)
-
+        action_result = None
+        exception = None
+        exception_traceback = None
         try:
             # Skip execution of action in case no action is provided.
             # Model will be just loaded, cleaned-up and unloaded.
             # Most of the time this is used for deletion of environments.
             if self.action:
-                self._invoke(exc)
+                action_result = self._invoke(exc)
         except Exception as e:
+            exception = e
             if isinstance(e, dsl_exception.MuranoPlException):
                 LOG.error('\n' + e.format(prefix='  '))
             else:
+                exception_traceback = traceback.format_exc()
                 LOG.exception(
                     _LE("Exception %(exc)s occured"
                         " during invocation of %(method)s"),
@@ -152,9 +166,37 @@ class TaskExecutor(object):
             reporter.initialize(obj)
             reporter.report_error(obj, str(e))
 
-        result = results_serializer.serialize(obj, exc)
-        result['SystemData'] = self._environment.system_attributes
+        model = serializer.serialize_model(obj, exc)
+        model['SystemData'] = self._environment.system_attributes
+        result = {
+            'model': model,
+            'action': {
+                'result': None,
+                'isException': False
+            }
+        }
+        if exception is not None:
+            result['action'] = TaskExecutor.exception_result(
+                exception, exception_traceback)
+        else:
+            result['action']['result'] = serializer.serialize_object(
+                action_result)
+
         return result
+
+    @staticmethod
+    def exception_result(exception, exception_traceback):
+        record = {
+            'isException': True,
+            'result': {
+                'message': str(exception),
+            }
+        }
+        if isinstance(exception, dsl_exception.MuranoPlException):
+            record['result']['details'] = exception.format()
+        else:
+            record['result']['details'] = exception_traceback
+        return record
 
     def _validate_model(self, obj, action, class_loader):
         if config.CONF.engine.enable_model_policy_enforcer:
@@ -168,7 +210,7 @@ class TaskExecutor(object):
         method_name, args = self.action['method'], self.action['args']
 
         if obj is not None:
-            obj.type.invoke(method_name, mpl_executor, obj, args)
+            return obj.type.invoke(method_name, mpl_executor, obj, args)
 
     def _create_trust(self):
         if not config.CONF.engine.use_trusts:

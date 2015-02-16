@@ -1,0 +1,16 @@
+Namespaces:
+  =: io.murano
+
+Name: File
+
+Properties:
+  base64Content:
+    Contract: $.string().notNull()
+    Default: ''
+
+  mimeType:
+    Contract: $.string().notNull()
+    Default: 'application/octet-stream'
+
+  filename:
+    Contract: $.string()
