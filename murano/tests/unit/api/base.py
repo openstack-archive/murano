@@ -42,7 +42,7 @@ def test_with_middleware(self, middleware, func, req, *args, **kwargs):
     return resp
 
 
-class FakeLogMixin:
+class FakeLogMixin(object):
     """Allow logs to be tested (rather than just disabling
     logging. This is taken from heat
     """
@@ -88,7 +88,7 @@ class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
         timeutils.utcnow.override_time = None
 
     def _stub_uuid(self, values=[]):
-        class FakeUUID:
+        class FakeUUID(object):
             def __init__(self, v):
                 self.hex = v
 

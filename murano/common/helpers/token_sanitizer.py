@@ -16,7 +16,7 @@
 import types
 
 
-class TokenSanitizer():
+class TokenSanitizer(object):
     """Helper class for cleaning some object from different passwords/tokens.
     Simply searches attribute with `look a like` name as one of
     the token and replace it value with message.
