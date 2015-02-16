@@ -132,7 +132,7 @@ class Status(Base, TimestampMixin):
     entity_id = sa.Column(sa.String(255), nullable=True)
     entity = sa.Column(sa.String(10), nullable=True)
     task_id = sa.Column(sa.String(32), sa.ForeignKey('task.id'))
-    text = sa.Column(sa.String(), nullable=False)
+    text = sa.Column(sa.Text(), nullable=False)
     level = sa.Column(sa.String(32), nullable=False)
     details = sa.Column(sa.Text(), nullable=True)
 
@@ -220,7 +220,7 @@ class Package(Base, TimestampMixin):
     supplier = sa.Column(st.JsonBlob(), nullable=True, default={})
     name = sa.Column(sa.String(80), nullable=False)
     enabled = sa.Column(sa.Boolean, default=True)
-    description = sa.Column(sa.String(512),
+    description = sa.Column(sa.Text(),
                             nullable=False,
                             default='The description is not provided')
     is_public = sa.Column(sa.Boolean, default=False)
