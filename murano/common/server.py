@@ -26,7 +26,7 @@ from murano.db import models
 from murano.db.services import environments
 from murano.db.services import instances
 from murano.db import session
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _, _LI, _LW
 from murano.openstack.common import log as logging
 from murano.services import states
 
@@ -48,8 +48,8 @@ class ResultEndpoint(object):
         environment = unit.query(models.Environment).get(environment_id)
 
         if not environment:
-            LOG.warning(_('Environment result could not be handled, specified '
-                          'environment was not found in database'))
+            LOG.warning(_LW('Environment result could not be handled, '
+                            'specified environment not found in database'))
             return
 
         if result['Objects'] is None and result.get('ObjectsCopy', {}) is None:
@@ -106,10 +106,10 @@ class ResultEndpoint(object):
         conf_session.save(unit)
 
         # output application tracking information
-        message = '<EnvId: {0} TenantId: {1} Status: {2} Apps: {3}>'.format(
+        message = _LI('EnvId: {0} TenantId: {1} Status: {2} Apps: {3}').format(
             environment.id,
             environment.tenant_id,
-            'Failed' if num_errors + num_warnings > 0 else 'Successful',
+            _('Failed') if num_errors + num_warnings > 0 else _('Successful'),
             ', '.join(map(
                 lambda a: a['?']['type'],
                 result['Objects']['services']

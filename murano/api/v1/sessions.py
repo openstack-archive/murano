@@ -15,12 +15,12 @@
 from webob import exc
 
 from murano.api.v1 import request_statistics
+from murano.common.i18n import _
 from murano.common import wsgi
 from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.services import states
 

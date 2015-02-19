@@ -15,7 +15,7 @@
 
 import re
 
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _, _LI
 from murano.openstack.common import log as logging
 from murano.policy import congress_rules
 
@@ -60,7 +60,7 @@ class ModelPolicyEnforcer(object):
         if not client:
             raise ValueError(_('Congress client is not configured!'))
 
-        LOG.info('Validating model')
+        LOG.info(_LI('Validating model'))
         LOG.debug(model)
 
         rules = congress_rules.CongressRulesManager().convert(
@@ -87,11 +87,12 @@ class ModelPolicyEnforcer(object):
 
             if messages:
                 result_str = "\n  ".join(map(str, messages))
-                raise ValidationError(
-                    _("Murano object model validation failed:") +
+                msg = _("Murano object model validation failed: {0}").format(
                     "\n  " + result_str)
+                LOG.error(msg)
+                raise ValidationError(msg)
         else:
-            LOG.info('Model valid')
+            LOG.info(_LI('Model valid'))
 
     def _parse_messages(self, env_id, results):
         """Transforms list of strings in format

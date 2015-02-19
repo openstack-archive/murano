@@ -21,7 +21,7 @@ Exceptions common to OpenStack projects
 
 import logging
 
-from murano.openstack.common.gettextutils import _  # noqa
+from murano.openstack.common._i18n import _
 
 _FATAL_EXCEPTION_FORMAT_ERRORS = False
 

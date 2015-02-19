@@ -36,9 +36,9 @@ import webob.dec
 import webob.exc
 
 from murano.api.v1 import schemas
+from murano.common.i18n import _
 from murano.common import xmlutils
 from murano.openstack.common import exception
-from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.openstack.common import service
 from murano.openstack.common import sslutils
@@ -660,24 +660,24 @@ class RequestDeserializer(object):
 
     def deserialize_body(self, request, action):
         if not len(request.body) > 0:
-            LOG.debug(_("Empty body provided in request"))
+            LOG.debug("Empty body provided in request")
             return {}
 
         try:
             content_type = request.get_content_type()
         except exception.InvalidContentType as e:
-            msg = _("Unrecognized Content-Type provided in request: {0}")
+            msg = "Unrecognized Content-Type provided in request: {0}"
             LOG.debug(unicode(msg).format(str(e)))
             raise
 
         if content_type is None:
-            LOG.debug(_("No Content-Type provided in request"))
+            LOG.debug("No Content-Type provided in request")
             return {}
 
         try:
             deserializer = self.get_body_deserializer(content_type)
         except exception.InvalidContentType:
-            LOG.debug(_("Unable to deserialize body as provided Content-Type"))
+            LOG.debug("Unable to deserialize body as provided Content-Type")
             raise
 
         return deserializer.deserialize(request, action)
@@ -939,10 +939,10 @@ class FormDataDeserializer(TextDeserializer):
     def _from_json(self, datastring):
         value = datastring
         try:
-            LOG.debug(_("Trying deserialize '{0}' to json").format(datastring))
+            LOG.debug("Trying deserialize '{0}' to json".format(datastring))
             value = jsonutils.loads(datastring)
         except ValueError:
-            LOG.debug(_("Unable deserialize to json, using raw text"))
+            LOG.debug("Unable deserialize to json, using raw text")
         return value
 
     def default(self, request):

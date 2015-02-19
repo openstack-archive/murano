@@ -33,7 +33,7 @@ from murano.engine import package_class_loader
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _LI, _LE
 from murano.openstack.common import log as logging
 from murano.policy import model_policy_enforcer as enforcer
 
@@ -48,7 +48,7 @@ class TaskProcessingEndpoint(object):
     @staticmethod
     def handle_task(context, task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        LOG.info(_('Starting processing task: {task_desc}').format(
+        LOG.info(_LI('Starting processing task: {task_desc}').format(
             task_desc=jsonutils.dumps(s_task)))
 
         result = task['model']
@@ -56,7 +56,7 @@ class TaskProcessingEndpoint(object):
             task_executor = TaskExecutor(task)
             result = task_executor.execute()
         except Exception as e:
-            LOG.exception('Error during task execution for tenant %s',
+            LOG.exception(_LE('Error during task execution for tenant %s'),
                           task['tenant_id'])
             msg_env = Environment(task['id'])
             reporter = status_reporter.StatusReporter()
@@ -135,7 +135,7 @@ class TaskExecutor(object):
         self._validate_model(obj, self.action, class_loader)
 
         try:
-            # Skip execution of action in case of no action is provided.
+            # Skip execution of action in case no action is provided.
             # Model will be just loaded, cleaned-up and unloaded.
             # Most of the time this is used for deletion of environments.
             if self.action:
@@ -144,7 +144,10 @@ class TaskExecutor(object):
             if isinstance(e, dsl_exception.MuranoPlException):
                 LOG.error('\n' + e.format(prefix='  '))
             else:
-                LOG.exception(e)
+                LOG.exception(
+                    _LE("Exception %(exc)s occured"
+                        " during invocation of %(method)"),
+                    {'exc': e, 'method': self.action['method']})
             reporter = status_reporter.StatusReporter()
             reporter.initialize(obj)
             reporter.report_error(obj, str(e))
