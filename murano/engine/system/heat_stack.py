@@ -22,6 +22,7 @@ import murano.common.utils as utils
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
+from murano.common.i18n import _LI, _LW
 import murano.openstack.common.log as logging
 
 LOG = logging.getLogger(__name__)
@@ -162,7 +163,7 @@ class HeatStack(murano_object.MuranoObject):
             self._template['description'] = self._description
 
         template = copy.deepcopy(self._template)
-        LOG.info('Pushing: {0}'.format(template))
+        LOG.info(_LI('Pushing: {0}').format(template))
 
         current_status = self._get_status(_context)
         resources = template.get('Resources') or template.get('resources')
@@ -204,7 +205,7 @@ class HeatStack(murano_object.MuranoObject):
                 _context,
                 lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
         except heat_exc.NotFound:
-            LOG.warn('Stack {0} already deleted?'.format(self._name))
+            LOG.warn(_LW('Stack {0} already deleted?').format(self._name))
 
         self._template = {}
         self._applied = True

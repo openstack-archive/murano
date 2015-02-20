@@ -22,7 +22,6 @@ from oslo.config import cfg
 
 from murano.api import versions
 from murano.common import wsgi
-from murano.openstack.common.gettextutils import _
 import murano.openstack.common.log as logging
 
 CONF = cfg.CONF
@@ -42,8 +41,8 @@ class VersionNegotiationFilter(wsgi.Middleware):
 
     def process_request(self, req):
         """Try to find a version first in the accept header, then the URL."""
-        msg = _("Determining version of request: %(method)s %(path)s"
-                " Accept: %(accept)s")
+        msg = ("Determining version of request:"
+               " %(method)s %(path)s Accept: %(accept)s")
         args = {'method': req.method, 'path': req.path, 'accept': req.accept}
         LOG.debug(msg % args)
 

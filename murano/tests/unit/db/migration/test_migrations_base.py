@@ -31,6 +31,7 @@ from alembic import migration
 from alembic import script as alembic_script
 from oslo.config import cfg
 
+from murano.common.i18n import _LE
 import murano.db.migration
 from murano.openstack.common import log as logging
 
@@ -178,6 +179,7 @@ class BaseWalkMigrationTestCase(object):
                 if check:
                     check(engine, data)
         except Exception:
-            LOG.error("Failed to migrate to version %s on engine %s" %
-                      (version, engine))
+            LOG.error(_LE(
+                "Failed to migrate to version %(ver)s on engine %(eng)s") %
+                {'ver': version, 'eng': engine})
             raise

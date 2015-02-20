@@ -17,6 +17,7 @@
 from oslo.config import cfg
 from webob import exc as exceptions
 
+from murano.common.i18n import _
 import murano.openstack.common.log as logging
 from murano.openstack.common import policy
 
@@ -77,8 +78,10 @@ def check(rule, ctxt, target={}, do_raise=True, exc=exceptions.HTTPForbidden):
         extra = {'policy': {'rule': rule, 'target': target}}
 
         if result:
-            LOG.audit("Policy check succeeded for rule '%s' on target %s",
-                      rule, repr(target), extra=extra)
+            LOG.audit(_("Policy check succeeded for rule "
+                        "'%(rule)s' on target %(target)s"),
+                      {'rule': rule, 'target': repr(target)}, extra=extra)
         else:
-            LOG.audit("Policy check failed for rule '%s' on target: %s",
-                      rule, repr(target), extra=extra)
+            LOG.audit(_("Policy check failed for rule "
+                        "'%(rule)s' on target: %(target)s"),
+                      {'rule': rule, 'target': repr(target)}, extra=extra)

@@ -21,7 +21,7 @@ from webob import exc
 
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _, _LW
 from murano.openstack.common import log as logging
 
 CONF = cfg.CONF
@@ -54,7 +54,7 @@ def _package_get(package_id_or_name, session):
         msg = _("Package id or name '{0}' not found").\
             format(package_id_or_name)
         LOG.error(msg)
-        raise exc.HTTPNotFound(msg)
+        raise exc.HTTPNotFound(explanation=msg)
 
     return package
 
@@ -68,12 +68,12 @@ def _authorize_package(package, context, allow_public=False):
             msg = _("Package '{0}' is not owned by "
                     "tenant '{1}'").format(package.id, context.tenant)
             LOG.error(msg)
-            raise exc.HTTPForbidden(msg)
+            raise exc.HTTPForbidden(explanation=msg)
         if not package.is_public:
             msg = _("Package '{0}' is not public and not owned by "
                     "tenant '{1}' ").format(package.id, context.tenant)
             LOG.error(msg)
-            raise exc.HTTPForbidden(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
 
 def package_get(package_id_or_name, context):
@@ -104,7 +104,7 @@ def _get_categories(category_names, session=None):
             msg = _("Category '{name}' doesn't exist").format(name=ctg_name)
             LOG.error(msg)
             # it's not allowed to specify non-existent categories
-            raise exc.HTTPBadRequest(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
 
         categories.append(ctg_obj)
     return categories
@@ -174,8 +174,8 @@ def _do_add(package, change):
         try:
             getattr(package, path).append(item)
         except AssertionError:
-            msg = _('One of the specified {0} is already '
-                    'associated with a package. Doing nothing.')
+            msg = _LW('One of the specified {0} is already '
+                      'associated with a package. Doing nothing.')
             LOG.warning(msg.format(path))
     return package
 
@@ -196,7 +196,7 @@ def _do_remove(package, change):
             msg = _("Value '{0}' of property '{1}' "
                     "does not exist.").format(value, path)
             LOG.error(msg)
-            raise exc.HTTPNotFound(msg)
+            raise exc.HTTPNotFound(explanation=msg)
         item_to_remove = find(current_values, lambda i: i.name == value)
         current_values.remove(item_to_remove)
     return package

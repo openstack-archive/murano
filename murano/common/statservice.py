@@ -23,8 +23,8 @@ import psutil
 from murano.api import v1
 from murano.api.v1 import request_statistics
 from murano.common import config
+from murano.common.i18n import _LE
 from murano.db.services import stats as db_stats
-from murano.openstack.common.gettextutils import _
 from murano.openstack.common import log as logging
 from murano.openstack.common import service
 
@@ -92,5 +92,5 @@ class StatsCollectingService(service.Service):
             stats.cpu_percent = psutil.cpu_percent()
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
-            LOG.error(_("Failed to get statistics object "
-                        "form a database. {0}").format(e))
+            LOG.exception(_LE("Failed to get statistics object "
+                          "form a database. %s"), e)

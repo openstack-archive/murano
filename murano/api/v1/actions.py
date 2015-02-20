@@ -20,7 +20,7 @@ from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _LI, _LE
 from murano.openstack.common import log as logging
 from murano.services import actions
 from murano.services import states
@@ -39,30 +39,30 @@ class Controller(object):
         environment = unit.query(models.Environment).get(environment_id)
 
         if environment is None:
-            LOG.info(_('Environment <EnvId {0}> '
-                       'is not found').format(environment_id))
+            LOG.info(_LI('Environment <EnvId {0}> '
+                         'is not found').format(environment_id))
             raise exc.HTTPNotFound
 
         if environment.tenant_id != request.context.tenant:
-            LOG.info(_('User is not authorized to access '
-                       'this tenant resources.'))
+            LOG.info(_LI('User is not authorized to access '
+                         'this tenant resources.'))
             raise exc.HTTPUnauthorized
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
         if env_status in (states.EnvironmentStatus.DEPLOYING,
                           states.EnvironmentStatus.DELETING):
-            LOG.info(_('Could not open session for environment <EnvId: {0}>,'
-                       'environment has deploying '
-                       'status.').format(environment_id))
+            LOG.info(_LI('Could not open session for environment <EnvId: {0}>,'
+                         'environment has deploying '
+                         'status.').format(environment_id))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
         session = sessions.SessionServices.create(environment_id, user_id)
 
         if not sessions.SessionServices.validate(session):
-            LOG.error(_('Session <SessionId {0}> '
-                        'is invalid').format(session.id))
+            LOG.error(_LE('Session <SessionId {0}> '
+                          'is invalid').format(session.id))
             raise exc.HTTPForbidden()
 
         actions.ActionServices.execute(action_id, session, unit,

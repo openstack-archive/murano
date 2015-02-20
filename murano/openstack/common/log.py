@@ -46,7 +46,7 @@ from six import moves
 
 _PY26 = sys.version_info[0:2] == (2, 6)
 
-from murano.openstack.common._i18n import _
+from murano.openstack.common._i18n import _, _LI
 from murano.openstack.common import local
 
 
@@ -521,8 +521,9 @@ def _setup_logging_from_conf(project, version):
         if CONF.log_format:
             handler.setFormatter(logging.Formatter(fmt=CONF.log_format,
                                                    datefmt=datefmt))
-            log_root.info('Deprecated: log_format is now deprecated and will '
-                          'be removed in the next release')
+            log_root.info(_LI(
+                'Deprecated: log_format is now deprecated and will '
+                'be removed in the next release'))
         else:
             handler.setFormatter(ContextFormatter(project=project,
                                                   version=version,

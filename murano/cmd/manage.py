@@ -26,6 +26,7 @@ from oslo.db import exception as db_exception
 
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
+from murano.common.i18n import _LI, _LE
 from murano.openstack.common import log as logging
 from murano.packages import load_utils
 from murano import version
@@ -40,20 +41,21 @@ class AdminContext(object):
 
 
 def _do_import_package(_dir, categories, update=False):
-    LOG.info("Going to import Murano package from {0}".format(_dir))
+    LOG.info(_LI("Going to import Murano package from {0}").format(_dir))
     pkg = load_utils.load_from_dir(_dir)
 
-    LOG.info("Checking for existing")
+    LOG.info(_LI("Checking for existing"))
     existing = db_catalog_api.package_search(
         {'fqn': pkg.full_name},
         AdminContext())
     if existing:
         existing_pkg = existing[0]
         if update:
-            LOG.info("Deleting existing package {0}".format(existing_pkg.id))
+            LOG.info(_LI(
+                "Deleting existing package {0}").format(existing_pkg.id))
             db_catalog_api.package_delete(existing_pkg.id, AdminContext())
         else:
-            LOG.error("Package '{0}' exists ({1}). Use --update.".format(
+            LOG.error(_LE("Package '{0}' exists ({1}). Use --update.").format(
                 pkg.full_name,
                 existing_pkg.id))
             return
@@ -81,7 +83,7 @@ def _do_import_package(_dir, categories, update=False):
     # it is a required field in the DB, that's why we pass an empty string
     result = db_catalog_api.package_upload(package, '')
 
-    LOG.info("Finished import of package {0}".format(result.id))
+    LOG.info(_LI("Finished import of package {0}").format(result.id))
 
 
 # TODO(ruhe): proper error handling
@@ -154,14 +156,14 @@ def main():
              default_config_files=default_config_files)
         logging.setup("murano")
     except RuntimeError as e:
-        LOG.error("failed to initialize murano-manage: %s" % e)
+        LOG.error(_LE("failed to initialize murano-manage: %s") % e)
         sys.exit("ERROR: %s" % e)
 
     try:
         CONF.command.func()
     except Exception as e:
         tb = traceback.format_exc()
-        err_msg = "murano-manage command failed: {0}\n{1}".format(e, tb)
+        err_msg = _LE("murano-manage command failed: {0}\n{1}").format(e, tb)
         LOG.error(err_msg)
         sys.exit(err_msg)
 

@@ -24,6 +24,7 @@ from muranoclient.common import exceptions as muranoclient_exc
 import six
 
 from murano.common import config
+from murano.common.i18n import _LE
 from murano.dsl import exceptions
 from murano.engine import yaql_yaml_loader
 from murano.openstack.common import log as logging
@@ -106,7 +107,8 @@ class ApiPackageLoader(PackageLoader):
                     package_directory, preload=True,
                     loader=yaql_yaml_loader.YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
-                LOG.exception('Unable to load package from cache. Clean-up...')
+                LOG.exception(_LE(
+                    'Unable to load package from cache. Clean-up...'))
                 shutil.rmtree(package_directory, ignore_errors=True)
         try:
             package_data = self._murano_client_factory().packages.download(
@@ -176,8 +178,8 @@ class DirectoryPackageLoader(PackageLoader):
                     folder, preload=True,
                     loader=yaql_yaml_loader.YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
-                LOG.exception('Unable to load package from path: '
-                              '{0}'.format(entry))
+                LOG.exception(_LE('Unable to load package from path: '
+                                  '{0}').format(entry))
                 continue
 
             for c in package.classes:

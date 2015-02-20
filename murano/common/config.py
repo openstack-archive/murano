@@ -25,7 +25,7 @@ import sys
 from oslo.config import cfg
 from paste import deploy
 
-from murano.openstack.common.gettextutils import _
+from murano.common.i18n import _
 from murano import version
 
 paste_deploy_opts = [
@@ -343,8 +343,8 @@ def load_paste_app(app_name=None):
 
     try:
         logger = logging.getLogger(__name__)
-        logger.debug(_("Loading %(app_name)s from %(conf_file)s"),
-                     {'conf_file': conf_file, 'app_name': app_name})
+        logger.debug("Loading %(app_name)s from %(conf_file)s".format(
+            conf_file=conf_file, app_name=app_name))
 
         app = deploy.loadapp("config:%s" % conf_file, name=app_name)
 
