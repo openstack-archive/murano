@@ -1,0 +1,43 @@
+#!/bin/bash
+
+set -eu
+
+install-packages curl wget
+
+SVC_ROOT=/opt/bin
+
+ETCD_LATEST_VERSION=$(curl https://github.com/coreos/etcd/releases/latest | awk -F'"' '{ print $2 }' | awk -F'/' '{ print $8 }')
+ETCD_LATEST_URL="https://github.com/coreos/etcd/releases/download/${ETCD_LATEST_VERSION}/etcd-${ETCD_LATEST_VERSION}-linux-amd64.tar.gz"
+KUBE_LATEST_VERSION=$(curl https://github.com/GoogleCloudPlatform/kubernetes/releases/latest | awk -F'"' '{ print $2 }' | awk -F'/' '{ print $8 }')
+KUBE_LATEST_URL="https://github.com/GoogleCloudPlatform/kubernetes/releases/download/${KUBE_LATEST_VERSION}/kubernetes.tar.gz"
+
+mkdir -p ${SVC_ROOT}
+pushd ${SVC_ROOT}
+
+wget -O ${SVC_ROOT}/etcd-latest.tar.gz $ETCD_LATEST_URL
+tar xzvf ${SVC_ROOT}/etcd-latest.tar.gz
+rm -f ${SVC_ROOT}/etcd-latest.tar.gz
+
+mv ${SVC_ROOT}/etcd-${ETCD_LATEST_VERSION}-linux-amd64/etcd ${SVC_ROOT}/
+mv ${SVC_ROOT}/etcd-${ETCD_LATEST_VERSION}-linux-amd64/etcdctl ${SVC_ROOT}/
+
+rm -rf ${SVC_ROOT}/etcd-${ETCD_LATEST_VERSION}-linux-amd64
+
+wget -O ${SVC_ROOT}/kubernetes-latest.tar.gz $KUBE_LATEST_URL
+tar xzvf ${SVC_ROOT}/kubernetes-latest.tar.gz
+rm -f ${SVC_ROOT}/kubernetes-latest.tar.gz
+
+tar xzvf ${SVC_ROOT}/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
+mv ${SVC_ROOT}/kubernetes ${SVC_ROOT}/kubernetes-latest
+
+for EXECUTABLE in kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubecfg kubectl kubelet kubernetes;
+    do cp ${SVC_ROOT}/kubernetes/server/bin/${EXECUTABLE} ${SVC_ROOT}/${EXECUTABLE}
+done
+
+pushd ${SVC_ROOT}/kubernetes-latest/cluster/ubuntu
+${SVC_ROOT}/kubernetes-latest/cluster/ubuntu/util.sh
+popd
+
+rm -rf ${SVC_ROOT}/kubernetes-latest
+
+popd
