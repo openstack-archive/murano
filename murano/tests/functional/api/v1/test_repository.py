@@ -182,6 +182,7 @@ class TestRepositoryNegativeForbidden(base.NegativeTestCase,
         super(TestRepositoryNegativeForbidden, cls).tearDownClass()
 
         cls.client.delete_package(cls.package['id'])
+        cls.purge_creds()
 
     @attr(type='negative')
     def test_update_package_from_another_tenant(self):
