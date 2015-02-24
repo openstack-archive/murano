@@ -286,6 +286,11 @@ class NegativeTestCase(TestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        creds = isolated_creds.IsolatedCreds(cls.__name__).get_alt_creds()
+        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        creds = cls.isolated_creds.get_alt_creds()
         mgr = clients.Manager(credentials=creds)
         cls.alt_client = MuranoClient(mgr.auth_provider)
+
+    @classmethod
+    def purge_creds(cls):
+        cls.isolated_creds.clear_isolated_creds()
