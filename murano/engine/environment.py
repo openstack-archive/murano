@@ -13,8 +13,37 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import murano.openstack.common.log as logging
+
+
+LOG = logging.getLogger(__name__)
+
 
 class Environment(object):
     def __init__(self):
         self.token = None
         self.tenant_id = None
+        self._set_up_list = []
+        self._tear_down_list = []
+
+    def on_session_start(self, delegate):
+        self._set_up_list.append(delegate)
+
+    def on_session_finish(self, delegate):
+        self._tear_down_list.append(delegate)
+
+    def start(self):
+        for delegate in self._set_up_list:
+            try:
+                delegate()
+            except Exception as e:
+                LOG.exception(e)
+        self._set_up_list = []
+
+    def finish(self):
+        for delegate in self._tear_down_list:
+            try:
+                delegate()
+            except Exception as e:
+                LOG.exception(e)
+        self._tear_down_list = []

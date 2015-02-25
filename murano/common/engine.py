@@ -114,6 +114,7 @@ class TaskExecutor(object):
             obj = exc.load(self.model)
 
             try:
+                self.environment.start()
                 # Skip execution of action in case of no action is provided.
                 # Model will be just loaded, cleaned-up and unloaded.
                 # Most of the time this is used for deletion of environments.
@@ -127,6 +128,8 @@ class TaskExecutor(object):
                 reporter = status_reporter.StatusReporter()
                 reporter.initialize(obj)
                 reporter.report_error(obj, str(e))
+            finally:
+                self.environment.finish()
 
             return results_serializer.serialize(obj, exc)
 

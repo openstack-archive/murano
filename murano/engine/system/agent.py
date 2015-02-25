@@ -77,14 +77,13 @@ class Agent(murano_object.MuranoObject):
                 "Use of murano-agent is disallowed "
                 "by the server configuration")
 
-    def _send(self, template, wait_results):
+    def _send(self, template, wait_results, _context):
         """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()
             listener = self._environment.agentListener
-            listener.subscribe(msg_id, event)
-            listener.start()
+            listener.subscribe(msg_id, event, _context)
 
         msg = messaging.Message()
         msg.body = template
@@ -106,23 +105,23 @@ class Agent(murano_object.MuranoObject):
         else:
             return None
 
-    def call(self, template, resources):
+    def call(self, template, resources, _context):
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, True)
+        return self._send(plan, True, _context)
 
-    def send(self, template, resources):
+    def send(self, template, resources, _context):
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, False)
+        return self._send(plan, False, _context)
 
-    def callRaw(self, plan):
+    def callRaw(self, plan, _context):
         self._check_enabled()
-        return self._send(plan, True)
+        return self._send(plan, True, _context)
 
-    def sendRaw(self, plan):
+    def sendRaw(self, plan, _context):
         self._check_enabled()
-        return self._send(plan, False)
+        return self._send(plan, False, _context)
 
     def _process_v1_result(self, result):
         if result['IsException']:
