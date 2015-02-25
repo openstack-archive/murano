@@ -146,7 +146,7 @@ class TaskExecutor(object):
             else:
                 LOG.exception(
                     _LE("Exception %(exc)s occured"
-                        " during invocation of %(method)"),
+                        " during invocation of %(method)s"),
                     {'exc': e, 'method': self.action['method']})
             reporter = status_reporter.StatusReporter()
             reporter.initialize(obj)
