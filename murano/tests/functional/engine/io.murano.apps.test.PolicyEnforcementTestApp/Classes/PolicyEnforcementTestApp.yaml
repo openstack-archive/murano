@@ -3,7 +3,6 @@ Namespaces:
   std: io.murano
   res: io.murano.resources
   sys: io.murano.system
-  apps: io.murano.apps
 
 
 Name: PolicyEnforcementTestApp
@@ -25,25 +24,25 @@ Properties:
     Contract: $.string()
     Usage: Out
 
-Workflow:
+Methods:
   initialize:
     Body:
-      - $.environment: $.find(std:Environment).require()
+      - $._environment: $.find(std:Environment).require()
 
   deploy:
     Body:
-      - If: !yaql "not bool($.getAttr(deployed))"
+      - If: not $.getAttr(deployed, false)
         Then:
-          - $this.find(std:Environment).reporter.report($this, 'Creating VM ')
+          - $._environment.reporter.report($this, 'Creating VM')
           - $securityGroupIngress:
               - ToPort: 22
                 FromPort: 22
                 IpProtocol: tcp
-                External: True
-          - $.environment.securityGroupManager.addGroupIngress($securityGroupIngress)
+                External: true
+          - $._environment.securityGroupManager.addGroupIngress($securityGroupIngress)
           - $.instance.deploy()
           - $resources: new(sys:Resources)
-          - $this.find(std:Environment).reporter.report($this, 'Test VM is installed')
+          - $._environment.reporter.report($this, 'Test VM is installed')
           - $.host: $.instance.ipAddresses[0]
           - $.user: 'root'
-          - $.setAttr(deployed, True)
+          - $.setAttr(deployed, true)
