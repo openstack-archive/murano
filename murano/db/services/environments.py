@@ -70,6 +70,8 @@ class EnvironmentServices(object):
                 return states.EnvironmentStatus.DELETE_FAILURE
             elif session.state == states.SessionState.OPENED:
                 has_opened = True
+            elif session.state == states.SessionState.DEPLOYED:
+                break
         if has_opened:
             return states.EnvironmentStatus.PENDING
 
