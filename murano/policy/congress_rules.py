@@ -41,7 +41,7 @@ class CongressRulesManager(object):
             r = PropertyRule(self._env_id, 'tenant_id', tenant_id)
             self._rules.append(r)
 
-        state_rule = StateRule(self._env_id, 'PENDING')
+        state_rule = StateRule(self._env_id, 'pending')
         self._rules.append(state_rule)
 
         self._walk(model, self._process_item)

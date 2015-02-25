@@ -225,5 +225,5 @@ class TestCongressRules(unittest.TestCase):
         rules_str = self._create_rules_str('model.yaml')
 
         self.assertTrue(
-            'murano:states+("c86104748a0c4907b4c5981e6d3bce9f", "PENDING")'
+            'murano:states+("c86104748a0c4907b4c5981e6d3bce9f", "pending")'
             in rules_str)
