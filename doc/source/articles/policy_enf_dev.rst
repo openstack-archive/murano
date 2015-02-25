@@ -158,4 +158,4 @@ Transformed to these rules:
 
 Currently only one record for environment is created:
 
-- ``murano:states+("uugi324", "PENDING")``
+- ``murano:states+("uugi324", "pending")``
