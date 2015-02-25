@@ -262,20 +262,19 @@ Install Murano Dashboard
     It's not listed in murano-dashboard dependencies,
     since in production murano supposed to be a horizon plugin and is used above existing horizon.
 
+    .. note::
+
+     | By default horizon is installed from the master branch, according to tox config file.
+     | Note, that previous murano versions may be incompatible with horizon master.
+     | So, to install desired horizon version, edit *tox.ini* file and provide
+       in *deps* parameter of [testenv] section link to the desired package
+       from http://tarballs.openstack.org/horizon
+
+    ..
     .. code-block:: console
 
         $ cd ~/murano/murano-dashboard
-        $ tox -e venv
-    ..
-
-    .. note::
-
-        By default horizon is installed from master, according to tox config file.
-        Note, that previous murano versions may be incompatible with horizon master.
-        So, to switch horizon version, please remove existing installation
-        (tox -e venv pip uninstall horizon) and install the desired version
-        with a tarball from http://tarballs.openstack.org/horizon
-
+        $ tox -e venv -- pip freeze
     ..
 
 #.  Copy configuration local settings configuration file.
@@ -336,15 +335,6 @@ Install Murano Dashboard
         MURANO_API_URL = 'http://localhost:8082'
     ..
 
-#.  Perform database synchronization.
-
-    Optional step. needed in case you set up database as a session backend.
-
-    .. code-block:: console
-
-        $ tox -e venv -- ~/murano/murano-dashboard/manage.py syncdb
-    ..
-
 #.  Prepare murano
 
     Murano UI is a plugin for Openstack Dashboard (Horizon). Horizon allows dashboards,
@@ -362,6 +352,15 @@ Install Murano Dashboard
         $ cd ~/murano/murano-dashboard
         $ ./prepare_murano.sh --openstack-dashboard .tox/venv/lib/python2.7/site-packages/openstack_dashboard
 
+    ..
+
+#.  Perform database synchronization.
+
+    Optional step. Needed in case you set up database as a session backend.
+
+    .. code-block:: console
+
+        $ tox -e venv -- python manage.py syncdb
     ..
 
 #.  Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
