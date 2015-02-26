@@ -15,7 +15,10 @@
 
 import mock
 
+import yaql.context
+
 from murano.common import exceptions as exc
+from murano.engine import environment
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.tests.unit.dsl.foundation import object_model as om
@@ -31,12 +34,14 @@ class TestAgentListener(test_case.DslTestCase):
         model = om.Object(
             'AgentListenerTests')
         self.runner = self.new_runner(model)
+        self.context = yaql.context.Context()
+        self.context.set_data(environment.Environment(), '?environment')
 
     def test_listener_enabled(self):
         self.override_config('disable_murano_agent', False, 'engine')
         al = self.runner.testAgentListener()
         self.assertTrue(al.enabled)
-        al.subscribe('msgid', 'event')
+        al.subscribe('msgid', 'event', self.context)
         self.assertEqual({'msgid': 'event'}, al._subscriptions)
 
     def test_listener_disabled(self):
@@ -44,7 +49,7 @@ class TestAgentListener(test_case.DslTestCase):
         al = self.runner.testAgentListener()
         self.assertFalse(al.enabled)
         self.assertRaises(exc.PolicyViolationException,
-                          al.subscribe, 'msgid', 'event')
+                          al.subscribe, 'msgid', 'event', None)
 
 
 class TestAgent(test_case.DslTestCase):
@@ -70,14 +75,14 @@ class TestAgent(test_case.DslTestCase):
 
             with mock.patch(agent_cls + '._send') as s:
                 s.return_value = mock.MagicMock()
-                a.sendRaw({})
-                s.assert_called_with({}, False)
+                a.sendRaw({}, None)
+                s.assert_called_with({}, False, 0, None)
 
     def test_agent_disabled(self):
         self.override_config('disable_murano_agent', True, 'engine')
         a = self.runner.testAgent()
         self.assertFalse(a.enabled)
-        self.assertRaises(exc.PolicyViolationException, a.call, {}, None)
-        self.assertRaises(exc.PolicyViolationException, a.send, {}, None)
-        self.assertRaises(exc.PolicyViolationException, a.callRaw, {})
-        self.assertRaises(exc.PolicyViolationException, a.sendRaw, {})
+        self.assertRaises(exc.PolicyViolationException, a.call, {}, None, None)
+        self.assertRaises(exc.PolicyViolationException, a.send, {}, None, None)
+        self.assertRaises(exc.PolicyViolationException, a.callRaw, {}, None)
+        self.assertRaises(exc.PolicyViolationException, a.sendRaw, {}, None)

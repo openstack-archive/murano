@@ -135,6 +135,8 @@ class TaskExecutor(object):
         self._validate_model(obj, self.action, class_loader)
 
         try:
+            LOG.info(_LI('Invoking pre-execution hooks'))
+            self.environment.start()
             # Skip execution of action in case no action is provided.
             # Model will be just loaded, cleaned-up and unloaded.
             # Most of the time this is used for deletion of environments.
@@ -151,6 +153,9 @@ class TaskExecutor(object):
             reporter = status_reporter.StatusReporter()
             reporter.initialize(obj)
             reporter.report_error(obj, str(e))
+        finally:
+            LOG.info(_LI('Invoking post-execution hooks'))
+            self.environment.finish()
 
         result = results_serializer.serialize(obj, exc)
         result['SystemData'] = self._environment.system_attributes
