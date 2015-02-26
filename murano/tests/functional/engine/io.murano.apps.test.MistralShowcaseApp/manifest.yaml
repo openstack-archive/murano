@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.apps.test.MistralShowcaseApp
+Name: MistralShowcaseApp
+Description: |
+ MistralShowcaseApp.
+Author: 'Mirantis, Inc'
+Tags: [Servlets, Server, Pages, Java]
+Classes:
+ io.murano.apps.test.MistralShowcaseApp: MistralShowcaseApp.yaml

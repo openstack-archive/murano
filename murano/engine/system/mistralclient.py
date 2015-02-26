@@ -35,6 +35,10 @@ class MistralClient(murano_object.MuranoObject):
     def initialize(self, _context):
         self._clients = helpers.get_environment(_context).clients
 
+    def upload(self, _context, definition):
+        mistral_client = self._clients.get_mistral_client(_context)
+        mistral_client.workflows.update(definition)
+
     def run(self, _context, name, timeout=600, inputs=None, params=None):
         mistral_client = self._clients.get_mistral_client(_context)
         execution = mistral_client.executions.create(workflow_name=name,
