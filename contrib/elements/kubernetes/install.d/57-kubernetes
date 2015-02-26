@@ -38,6 +38,8 @@ pushd ${SVC_ROOT}/kubernetes-latest/cluster/ubuntu
 ${SVC_ROOT}/kubernetes-latest/cluster/ubuntu/util.sh
 popd
 
+sed -i 's/PATH="/PATH="\/opt\/bin:/g' /etc/environment
+
 rm -rf ${SVC_ROOT}/kubernetes-latest
 
 popd
