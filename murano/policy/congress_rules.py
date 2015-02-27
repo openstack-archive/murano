@@ -35,6 +35,8 @@ class CongressRulesManager(object):
             return self._rules
 
         self._env_id = model['?']['id']
+        # Environment owner is tenant.
+        self._owner_id = tenant_id
 
         # Arbitrary property for tenant_id.
         if tenant_id is not None:
@@ -72,7 +74,10 @@ class CongressRulesManager(object):
 
     def _process_item(self, obj):
         if isinstance(obj, dict) and '?' in obj:
-            obj2 = self._create_object_rule(obj, self._env_id)
+            obj2 = self._create_object_rule(obj)
+            # Owner of components in environment is environment itself.
+            self._owner_id = self._env_id
+
             self._rules.append(obj2)
             self._rules.extend(self._create_propety_rules(obj2.obj_id, obj))
 
@@ -89,9 +94,8 @@ class CongressRulesManager(object):
         else:
             return obj
 
-    @staticmethod
-    def _create_object_rule(app, env_id):
-        return ObjectRule(app['?']['id'], env_id, app['?']['type'])
+    def _create_object_rule(self, app):
+        return ObjectRule(app['?']['id'], self._owner_id, app['?']['type'])
 
     def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []
@@ -160,14 +164,14 @@ class CongressRulesManager(object):
 
 
 class ObjectRule(object):
-    def __init__(self, obj_id, env_id, type_name):
+    def __init__(self, obj_id, owner_id, type_name):
         self.obj_id = obj_id
-        self.env_id = env_id
+        self.owner_id = owner_id
         self.type_name = type_name
 
     def __str__(self):
         return 'murano:objects+("{0}", "{1}", "{2}")'.format(self.obj_id,
-                                                             self.env_id,
+                                                             self.owner_id,
                                                              self.type_name)
 
 

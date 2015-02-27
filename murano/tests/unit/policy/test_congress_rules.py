@@ -19,7 +19,10 @@ import os.path
 import unittest2 as unittest
 import yaml
 
+from murano.common import uuidutils
 import murano.policy.congress_rules as congress
+
+TENANT_ID = 'de305d5475b4431badb2eb6b9e546013'
 
 
 class MockClassLoader(object):
@@ -61,7 +64,8 @@ class TestCongressRules(unittest.TestCase):
         model = self._load_file(model_file)
 
         congress_rules = congress.CongressRulesManager()
-        rules = congress_rules.convert(model, class_loader)
+        rules = congress_rules.convert(model, class_loader,
+                                       tenant_id=TENANT_ID)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
 
@@ -160,11 +164,13 @@ class TestCongressRules(unittest.TestCase):
         model = Struct(d)
 
         congress_rules = congress.CongressRulesManager()
-        rules = congress_rules.convert(model)
+        tenant_id = uuidutils.generate_uuid()
+        rules = congress_rules.convert(model, tenant_id=tenant_id)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
 
-        self.assertTrue('murano:objects+("1", "1", "t1")' in rules_str)
+        self.assertTrue('murano:objects+("1", "{0}", "t1")'.format(tenant_id)
+                        in rules_str)
         self.assertTrue('murano:objects+("2", "1", "t2")' in rules_str)
         self.assertTrue('murano:objects+("3", "1", "t3")' in rules_str)
 
