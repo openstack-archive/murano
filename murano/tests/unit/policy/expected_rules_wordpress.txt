@@ -1,4 +1,4 @@
-murano:objects+("83bff5acf8354816b08cf9b4917c898d", "83bff5acf8354816b08cf9b4917c898d", "io.murano.Environment")
+murano:objects+("83bff5acf8354816b08cf9b4917c898d", "de305d5475b4431badb2eb6b9e546013", "io.murano.Environment")
 murano:properties+("83bff5acf8354816b08cf9b4917c898d", "defaultNetworks.flat", "")
 murano:properties+("83bff5acf8354816b08cf9b4917c898d", "name", "wordpress-env")
 murano:parent_types+("83bff5acf8354816b08cf9b4917c898d", "io.murano.Object")
