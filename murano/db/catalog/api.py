@@ -60,8 +60,6 @@ def _package_get(package_id_or_name, session):
 
 
 def _authorize_package(package, context, allow_public=False):
-    if context.is_admin:
-        return
 
     if package.owner_id != context.tenant:
         if not allow_public:

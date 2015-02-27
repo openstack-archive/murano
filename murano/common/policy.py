@@ -85,3 +85,13 @@ def check(rule, ctxt, target={}, do_raise=True, exc=exceptions.HTTPForbidden):
             LOG.audit(_("Policy check failed for rule "
                         "'%(rule)s' on target: %(target)s"),
                       {'rule': rule, 'target': repr(target)}, extra=extra)
+
+
+def check_is_admin(context):
+    """Check if the given context is associated with an admin role.
+
+       :param context: Murano request context
+       :returns: A non-False value if context role is admin.
+    """
+    return check('context_is_admin', context,
+                 context.to_dict(), do_raise=False)

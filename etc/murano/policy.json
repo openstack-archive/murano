@@ -1,6 +1,10 @@
 {
-    "context_is_admin": "role:admin or is_admin:True",
+    "context_is_admin": "role:admin",
+    "admin_api": "is_admin:True",
+    "default": "",
 
-    "default": ""
+    "update_package": "rule:admin_api",
+    "upload_package": "rule:admin_api",
+    "delete_package": "rule:admin_api"
 }
 
