@@ -110,22 +110,20 @@ class CongressRulesManager(object):
             if key == '?':
                 continue
 
-            if value is None:
-                value = ""
-
-            value = self._to_dict(value)
-            if isinstance(value, dict):
-                rules.extend(self._create_propety_rules(
-                    obj_id, value, prefix + key + "."))
-            elif isinstance(value, list):
-                for v in value:
-                    v = self._to_dict(v)
-                    if not isinstance(v, dict):
-                        rule = PropertyRule(obj_id, prefix + key, v)
-                        rules.append(rule)
-            else:
-                rule = PropertyRule(obj_id, prefix + key, value)
-                rules.append(rule)
+            if value is not None:
+                value = self._to_dict(value)
+                if isinstance(value, dict):
+                    rules.extend(self._create_propety_rules(
+                        obj_id, value, prefix + key + "."))
+                elif isinstance(value, list):
+                    for v in value:
+                        v = self._to_dict(v)
+                        if not isinstance(v, dict):
+                            rule = PropertyRule(obj_id, prefix + key, v)
+                            rules.append(rule)
+                else:
+                    rule = PropertyRule(obj_id, prefix + key, value)
+                    rules.append(rule)
 
         return rules
 
