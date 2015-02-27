@@ -78,6 +78,26 @@ class Environment(Base, TimestampMixin):
         return dictionary
 
 
+class EnvironmentTemplate(Base, TimestampMixin):
+    """Represents a Environment emplate in the metadata-store."""
+    __tablename__ = 'environment-template'
+
+    id = sa.Column(sa.String(36),
+                   primary_key=True,
+                   default=uuidutils.generate_uuid)
+    name = sa.Column(sa.String(255), nullable=False)
+    tenant_id = sa.Column(sa.String(36), nullable=False)
+    version = sa.Column(sa.BigInteger, nullable=False, default=0)
+    description = sa.Column(st.JsonBlob(), nullable=False, default={})
+    networking = sa.Column(st.JsonBlob(), nullable=True, default={})
+
+    def to_dict(self):
+        dictionary = super(EnvironmentTemplate, self).to_dict()
+        if 'description' in dictionary:
+            del dictionary['description']
+        return dictionary
+
+
 class Session(Base, TimestampMixin):
     __tablename__ = 'session'
 
