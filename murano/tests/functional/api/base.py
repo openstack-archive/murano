@@ -19,6 +19,7 @@ import uuid
 
 import requests
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common import isolated_creds
 from tempest import config
 from tempest import test
@@ -231,7 +232,9 @@ class TestCase(test.BaseTestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        mgr = clients.Manager()
+        cls.creds = cred_provider.get_configured_credentials(
+            credential_type='identity_admin')
+        mgr = clients.Manager(cls.creds)
         cls.client = MuranoClient(mgr.auth_provider)
 
     def setUp(self):

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from murano.common import policy
+
 
 class RequestContext(object):
     """Stores information about the security context under which the user
@@ -29,6 +31,9 @@ class RequestContext(object):
         self.session = session
         self.is_admin = is_admin
         self.roles = roles or []
+
+        if self.is_admin is None:
+            self.is_admin = policy.check_is_admin(self)
 
     def to_dict(self):
         return {
