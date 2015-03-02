@@ -234,7 +234,7 @@ class Controller(object):
         except db_exc.DBDuplicateEntry:
             msg = _('Package with specified full name is already registered')
             LOG.exception(msg)
-            raise exc.HTTPServerError(msg)
+            raise exc.HTTPConflict(msg)
         return package.to_dict()
 
     def get_ui(self, req, package_id):
