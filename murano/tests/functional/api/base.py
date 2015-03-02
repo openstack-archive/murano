@@ -141,9 +141,10 @@ class MuranoClient(rest_client.RestClient):
 
     def get_services_list(self, environment_id, session_id):
         headers = self.get_headers()
-        headers.update(
-            {'X-Configuration-Session': session_id}
-        )
+        if session_id:
+            headers.update(
+                {'X-Configuration-Session': session_id}
+            )
 
         resp, body = self.get(
             'v1/environments/{0}/services'.format(environment_id),
