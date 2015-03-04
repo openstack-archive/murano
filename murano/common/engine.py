@@ -185,7 +185,7 @@ class TaskExecutor(object):
         return result
 
     @staticmethod
-    def exception_result(exception, exception_traceback):
+    def exception_result(exception, exception_traceback=None):
         record = {
             'isException': True,
             'result': {
