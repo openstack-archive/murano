@@ -14,6 +14,12 @@
 # murano url
 #murano_url = http://localhost:8082
 
+# Flavor for simple checks
+#standard_flavor = m1.medium
+
+# Flavor for advanced checks
+#advanced_flavor = m1.large
+
 # image for linux services
 #linux_image = default_linux
 

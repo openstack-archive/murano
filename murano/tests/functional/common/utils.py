@@ -13,6 +13,7 @@
 # under the License.
 
 import contextlib
+import logging
 import os
 import time
 import zipfile
@@ -28,6 +29,8 @@ import murano.tests.functional.engine.config as cfg
 
 CONF = cfg.cfg.CONF
 
+LOG = logging.getLogger(__name__)
+
 
 @contextlib.contextmanager
 def ignored(*exceptions):
@@ -38,19 +41,30 @@ def ignored(*exceptions):
 
 
 def memoize(f):
+    """Decorator, which saves result of a decorated function
+    to cache.
+    TTL for cache is 1800 sec
+
+    :param f: decorated function
+    :return: saved result of a decorated function
+    """
     cache = {}
 
     def decorated_function(*args):
         if args in cache:
-            return cache[args]
+            if time.time() - cache[args][1] < 1800:
+                return cache[args][0]
+            else:
+                cache[args] = (f(*args), time.time())
+                return cache[args][0]
         else:
-            cache[args] = f(*args)
-            return cache[args]
+            cache[args] = (f(*args), time.time())
+            return cache[args][0]
+
     return decorated_function
 
 
 class ZipUtilsMixin(object):
-
     @staticmethod
     def zip_dir(parent_dir, dir):
         abs_path = os.path.join(parent_dir, dir)
@@ -65,7 +79,6 @@ class ZipUtilsMixin(object):
 
 
 class DeployTestMixin(ZipUtilsMixin):
-
     cfg.load_config()
 
     @staticmethod
@@ -92,6 +105,7 @@ class DeployTestMixin(ZipUtilsMixin):
                 service_type='application_catalog', endpoint_type='publicURL')
         except ks_exceptions.EndpointNotFound:
             url = CONF.murano.murano_url
+            LOG.warning("Murano endpoint not found in Keystone. Using CONF.")
         return url if 'v1' not in url else "/".join(
             url.split('/')[:url.split('/').index('v1')])
 
@@ -126,9 +140,10 @@ class DeployTestMixin(ZipUtilsMixin):
                 cls.murano_client().environments.get(environment_id)
             except exceptions.HTTPNotFound:
                 return
-        raise RuntimeError(
-            'Environment {0} was not deleted in {1} seconds'.format(
-                environment_id, timeout))
+        err_msg = ('Environment {0} was not deleted in {1} seconds'.
+                   format(environment_id, timeout))
+        LOG.error(err_msg)
+        raise RuntimeError(err_msg)
 
     @classmethod
     def deploy_apps(cls, name, *apps):
@@ -146,12 +161,15 @@ class DeployTestMixin(ZipUtilsMixin):
         return environment
 
     @staticmethod
-    def wait_for_final_status(environment):
+    def wait_for_final_status(environment, timeout=300):
         start_time = time.time()
         status = environment.manager.get(environment.id).status
         while states.SessionState.DEPLOYING == status:
-            if time.time() - start_time > 300:
-                raise RuntimeError('Deployment not finished in 300 seconds')
+            if time.time() - start_time > timeout:
+                err_msg = ('Deployment not finished in {0} seconds'
+                           .format(timeout))
+                LOG.error(err_msg)
+                raise RuntimeError(err_msg)
             time.sleep(5)
             status = environment.manager.get(environment.id).status
         dep = environment.manager.api.deployments.list(environment.id)
