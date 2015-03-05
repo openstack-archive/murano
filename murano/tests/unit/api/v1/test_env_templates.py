@@ -27,7 +27,8 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def setUp(self):
         super(TestEnvTemplateApi, self).setUp()
         self.controller = templates.Controller()
-        self.uuids = ['env_template_id']
+        self.uuids = ['env_template_id', 'other', 'network_id',
+                      'environment_id', 'session_id']
         self.mock_uuid = self._stub_uuid(self.uuids)
 
     def test_list_empty_env_templates(self):
@@ -237,7 +238,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     "image": "cloud-fedora-v3",
                     "flavor": "m1.medium",
                     "?": {
-                        "type": "io.murano.resources.LinuxMuranoInstance",
+                        "type": "io.murano.resources.Linux",
                         "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
                     }
                 },
@@ -261,7 +262,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                         "image": "cloud-fedora-v3",
                         "flavor": "m1.medium",
                         "?": {
-                            "type": "io.murano.resources.LinuxMuranoInstance",
+                            "type": "io.murano.resources.Linux",
                             "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
                         }
                     },
@@ -314,7 +315,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     "image": "cloud-fedora-v3",
                     "flavor": "m1.medium",
                     "?": {
-                        "type": "io.murano.resources.LinuxMuranoInstance",
+                        "type": "io.murano.resources.Linux",
                         "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
                     }
                 },
@@ -418,3 +419,122 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                         '/services/' + service_id)
         result = req.get_response(self.api)
         self.assertEqual(404, result.status_code)
+
+    def test_create_environment(self):
+        """Test that environment is created, session configured."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'create_environment': '@'}
+        )
+
+        self._create_env_template_no_service()
+        body_env = {'name': 'my_template'}
+
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': self.uuids[0]})
+        req = self._post('/templates/%s/create-environment' %
+                         self.uuids[0], json.dumps(body_env))
+        session_result = req.get_response(self.api)
+        self.assertEqual(200, session_result.status_code)
+        self.assertIsNotNone(session_result)
+        body_returned = json.loads(session_result.body)
+        self.assertEqual(self.uuids[4], body_returned['session_id'])
+        self.assertEqual(self.uuids[3], body_returned['environment_id'])
+
+    def test_create_env_with_template_no_services(self):
+        """Test that environment is created and session with template
+        without services.
+        """
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'create_environment': '@'}
+        )
+        self._create_env_template_no_service()
+
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': self.uuids[0]})
+        body = {'name': 'my_template'}
+
+        req = self._post('/templates/%s/create-environment' %
+                         self.uuids[0], json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertIsNotNone(result)
+        self.assertEqual(200, result.status_code)
+        body_returned = json.loads(result.body)
+        self.assertEqual(self.uuids[4], body_returned['session_id'])
+        self.assertEqual(self.uuids[3], body_returned['environment_id'])
+
+    def test_mallformed_env_body(self):
+        """Check that an illegal temp name results in an HTTPClientError."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'create_environment': '@'}
+        )
+        self. _create_env_template_no_service()
+
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': self.uuids[0]})
+        body = {'invalid': 'test'}
+        req = self._post('/templates/%s/create-environment' %
+                         self.uuids[0], json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+
+    def test_create_env_notexisting_templatebody(self):
+        """Check that an illegal temp name results in an HTTPClientError."""
+        self._set_policy_rules(
+            {'create_environment': '@'}
+        )
+        env_template_id = 'noexisting'
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': env_template_id})
+
+        body = {'name': 'test'}
+        req = self._post('/templates/%s/create-environment'
+                         % env_template_id, json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(404, result.status_code)
+
+    def _create_env_template_no_service(self):
+        self.expect_policy_check('create_env_template')
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        req = self._post('/templates', json.dumps({'name': 'name'}))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+
+    def _create_env_template_services(self):
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        self.expect_policy_check('create_env_template')
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+        body = {
+            "name": "env_template_name",
+            "services": [
+                {
+                    "instance": {
+                        "assignFloatingIp": "true",
+                        "keyname": "mykeyname",
+                        "image": "cloud-fedora-v3",
+                        "flavor": "m1.medium",
+                        "?": {
+                            "type": "io.murano.resources.Linux",
+                            "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+                        }
+                    },
+                    "name": "orion",
+                    "port": "8080",
+                    "?": {
+                        "type": "io.murano.apps.apache.Tomcat",
+                        "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+                    }
+                }
+            ]
+        }
+
+        req = self._post('/templates', json.dumps(body))
+        req.get_response(self.api)

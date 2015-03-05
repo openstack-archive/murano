@@ -15,13 +15,16 @@
 from oslo.db import exception as db_exc
 from webob import exc
 
-from murano.api.v1 import environments as envs
+from murano.api.v1 import environments as envs_api
 from murano.api.v1 import request_statistics
 from murano.common.i18n import _
 from murano.common import policy
+from murano.common import utils
 from murano.common import wsgi
 from murano.db.services import core_services
 from murano.db.services import environment_templates as env_temps
+from murano.db.services import environments as envs
+from murano.db.services import sessions
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -59,7 +62,7 @@ class Controller(object):
         policy.check('create_env_template', request.context)
         try:
             LOG.debug('ENV TEMP NAME: {0}>'.format(body['name']))
-            if not envs.VALID_NAME_REGEX.match(str(body['name'])):
+            if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
                 msg = _('Environment Template must contain only alphanumeric '
                         'or "_-." characters, must start with alpha')
                 LOG.exception(msg)
@@ -114,7 +117,7 @@ class Controller(object):
         self._validate_request(request, env_template_id)
         try:
             LOG.debug('ENV TEMP NAME: {0}>'.format(body['name']))
-            if not envs.VALID_NAME_REGEX.match(str(body['name'])):
+            if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
                 msg = _('Env Template must contain only alphanumeric '
                         'or "_-." characters, must start with alpha')
                 LOG.exception(msg)
@@ -140,6 +143,68 @@ class Controller(object):
         env_temps.EnvTemplateServices.delete(env_template_id)
         env_temps.EnvTemplateServices.remove(env_template_id)
         return
+
+    def has_services(self, template):
+        """"It checks if the template has services
+        :param template: the template to check.
+        :return: True or False
+        """
+        if not template.description:
+            return False
+
+        if (template.description.get('services')):
+            return True
+        return False
+
+    @request_statistics.stats_count(API_NAME, 'Create_environment')
+    def create_environment(self, request, env_template_id, body):
+        """Creates environment and session from template.
+        :param request: operation request
+        :param env_template_id: environment template ID
+        :param body: the environment name
+        :return: session_id and environment_id
+        """
+        LOG.debug('Templates:Create environment <Id: {0}>'.
+                  format(env_template_id))
+        target = {"env_template_id": env_template_id}
+        policy.check('create_environment', request.context, target)
+
+        self._validate_request(request, env_template_id)
+        template = env_temps.EnvTemplateServices.\
+            get_env_template(env_template_id)
+
+        if ('name' not in body or
+                not envs_api.VALID_NAME_REGEX.match(str(body['name']))):
+            msg = _('Environment must contain only alphanumeric '
+                    'or "_-." characters, must start with alpha')
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
+        LOG.debug('ENVIRONMENT NAME: {0}>'.format(body['name']))
+
+        try:
+            environment = envs.EnvironmentServices.create(
+                body.copy(), request.context.tenant)
+        except db_exc.DBDuplicateEntry:
+            msg = _('Environment with specified name already exists')
+            LOG.exception(msg)
+            raise exc.HTTPConflict(explanation=msg)
+
+        user_id = request.context.user
+        session = sessions.SessionServices.create(environment.id, user_id)
+
+        if self.has_services(template):
+            services_node = utils.TraverseHelper.get("services",
+                                                     template.description)
+            utils.TraverseHelper.update("/Objects/services",
+                                        services_node,
+                                        environment.description)
+
+        envs.EnvironmentServices.save_environment_description(
+            session.id,
+            environment.description,
+            inner=False
+        )
+        return {"session_id": session.id, "environment_id": environment.id}
 
     def _validate_request(self, request, env_template_id):
         env_template_exists = env_temps.EnvTemplateServices.env_template_exist
