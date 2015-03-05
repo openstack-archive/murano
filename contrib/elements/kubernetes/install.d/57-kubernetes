@@ -30,7 +30,7 @@ rm -f ${SVC_ROOT}/kubernetes-latest.tar.gz
 tar xzvf ${SVC_ROOT}/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
 mv ${SVC_ROOT}/kubernetes ${SVC_ROOT}/kubernetes-latest
 
-for EXECUTABLE in kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubecfg kubectl kubelet kubernetes;
+for EXECUTABLE in kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubectl kubelet kubernetes;
     do cp ${SVC_ROOT}/kubernetes-latest/server/bin/${EXECUTABLE} ${SVC_ROOT}/${EXECUTABLE}
 done
 
