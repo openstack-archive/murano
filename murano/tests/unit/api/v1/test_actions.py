@@ -95,3 +95,60 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.mock_engine_rpc.handle_task.assert_called_once_with(rpc_task)
 
         self.assertIn('task_id', result)
+
+    def test_get_result(self, _):
+        """Result of task with given id and environment id is returned."""
+        now = timeutils.utcnow()
+        expected_environment_id = 'test_environment'
+        expected_task_id = 'test_task'
+        expected_result = {'test_result': 'test_result'}
+
+        environment = models.Environment(
+            id=expected_environment_id,
+            name='test_environment', created=now, updated=now,
+            tenant_id=self.tenant
+        )
+
+        task = models.Task(
+            id=expected_task_id,
+            started=now,
+            finished=now,
+            result=expected_result,
+            environment_id=expected_environment_id
+        )
+
+        test_utils.save_models(environment, task)
+
+        request = self._get(
+            '/environments/{environment_id}/actions/{task_id}'
+            .format(environment_id=expected_environment_id,
+                    task_id=expected_task_id),
+        )
+
+        response = request.get_response(self.api)
+
+        self.assertEqual(response.status_code, 200)
+        self.assertEqual(response.json, expected_result)
+
+    def test_get_result_not_found(self, _):
+        """If task does not exists, it should be handled correctly
+        and API should return 404.
+        """
+        expected_environment_id = 'test_environment'
+
+        environment = models.Environment(
+            id=expected_environment_id,
+            name='test_environment',
+            tenant_id=self.tenant
+        )
+        test_utils.save_models(environment)
+
+        request = self._get(
+            '/environments/{environment_id}/actions/{task_id}'
+            .format(environment_id=expected_environment_id,
+                    task_id='not_existent_task_id'),
+        )
+
+        response = request.get_response(self.api)
+
+        self.assertEqual(response.status_code, 404)

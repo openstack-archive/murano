@@ -111,4 +111,8 @@ class ActionServices(object):
     def get_result(environment_id, task_id, unit):
         task = unit.query(models.Task).filter_by(
             id=task_id, environment_id=environment_id).first()
-        return task.result
+
+        if task is not None:
+            return task.result
+
+        return None

@@ -20,7 +20,7 @@ from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.common.i18n import _LI, _LE
+from murano.common.i18n import _LI, _LE, _
 from murano.openstack.common import log as logging
 from murano.services import actions
 from murano.services import states
@@ -79,7 +79,17 @@ class Controller(object):
 
         unit = db_session.get_session()
         self._validate_environment(unit, request, environment_id)
-        return actions.ActionServices.get_result(environment_id, task_id, unit)
+        result = actions.ActionServices.get_result(environment_id, task_id,
+                                                   unit)
+
+        if result is not None:
+            return result
+        msg = (_('Result for task with environment_id: {} and '
+                 'task_id: {} was not found.')
+               .format(environment_id, task_id))
+
+        LOG.error(msg)
+        raise exc.HTTPNotFound(msg)
 
 
 def create_resource():
