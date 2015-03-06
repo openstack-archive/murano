@@ -200,6 +200,27 @@ def _do_remove(package, change):
     return package
 
 
+def _get_packages_for_category(session, category_id):
+    """Return detailed list of packages, belonging to the provided category
+    :param session:
+    :param category_id:
+    :return: list of dictionaries, containing id, name and package frn
+    """
+    pkg = models.Package
+    packages = (session.query(pkg.id, pkg.name, pkg.fully_qualified_name)
+                .filter(pkg.categories
+                        .any(models.Category.id == category_id))
+                .all())
+
+    result_packages = []
+    for package in packages:
+        id, name, fqn = package
+        result_packages.append({'id': id,
+                                'name': name,
+                                'fully_qualified_name': fqn})
+    return result_packages
+
+
 def package_update(pkg_id_or_name, changes, context):
     """Update package information
        :param changes: parameters to update
@@ -357,6 +378,24 @@ def package_delete(package_id_or_name, context):
         session.delete(package)
 
 
+def category_get(category_id, session=None, packages=False):
+    """Return category details
+       :param category_id: ID of a category, string
+       :returns: detailed information about category, dict
+    """
+    if not session:
+        session = db_session.get_session()
+
+    category = session.query(models.Category).get(category_id)
+    if not category:
+        msg = _("Category id or '{0}' not found").format(category_id)
+        LOG.error(msg)
+        raise exc.HTTPNotFound(msg)
+    if packages:
+        category.packages = _get_packages_for_category(session, category_id)
+    return category
+
+
 def categories_list():
     session = db_session.get_session()
     return session.query(models.Category).all()
@@ -380,3 +419,16 @@ def category_add(category_name):
         category.save(session)
 
     return category
+
+
+def category_delete(category_id):
+    """Delete a category by ID."""
+    session = db_session.get_session()
+
+    with session.begin():
+        category = session.query(models.Category).get(category_id)
+        if not category:
+            msg = _("Category id '{0}' not found").format(category_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(msg)
+        session.delete(category)

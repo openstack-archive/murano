@@ -5,6 +5,8 @@
 
     "update_package": "rule:admin_api",
     "upload_package": "rule:admin_api",
-    "delete_package": "rule:admin_api"
+    "delete_package": "rule:admin_api",
+    "delete_category": "rule:admin_api",
+    "add_category": "rule:admin_api"
 }
 
