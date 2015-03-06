@@ -1,4 +1,4 @@
-# Copyright (c) 2014 Mirantis, Inc.
+# Copyright (c) 2015 Mirantis, Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License"); you may
 # not use this file except in compliance with the License. You may obtain
@@ -35,6 +35,12 @@ MuranoGroup = [
     cfg.StrOpt('murano_url',
                default='http://127.0.0.1:8082/v1/',
                help="murano url"),
+    cfg.StrOpt('standard_flavor',
+               default='m1.medium',
+               help="flavor for sanity tests"),
+    cfg.StrOpt('advanced_flavor',
+               default='m1.large',
+               help="flavor for advanced tests"),
     cfg.StrOpt('linux_image',
                default='default_linux',
                help="image for linux services"),
