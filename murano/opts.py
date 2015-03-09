@@ -37,7 +37,7 @@ _opt_lists = [
     ('neutron', murano.common.config.neutron_opts),
     ('keystone', murano.common.config.keystone_opts),
     ('murano', murano.common.config.murano_opts),
-    ('netwoking', murano.common.config.networking_opts),
+    ('networking', murano.common.config.networking_opts),
     ('stats', murano.common.config.stats_opts),
     ('packages_opts', murano.common.config.packages_opts),
     ('ssl', murano.openstack.common.sslutils.ssl_opts),
