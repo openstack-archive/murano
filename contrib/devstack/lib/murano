@@ -145,9 +145,11 @@ function configure_murano_networking {
     fi
 
     # Configure networking options for Murano
-    if [[ -n "$MURANO_EXTERNAL_NETWORK" ]] && [[ -n "$ext_net_id" ]]; then
+    if [[ -n "$ext_net" ]] && [[ -n "$ext_net_id" ]]; then
         iniset $MURANO_CONF_FILE networking external_network $ext_net_id
         iniset $MURANO_CONF_FILE networking create_router 'true'
+    else
+        iniset $MURANO_CONF_FILE networking create_router 'false'
     fi
 
     if [[ -n "$MURANO_DEFAULT_ROUTER" ]]; then
@@ -203,13 +205,13 @@ function configure_murano {
 
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
-
-    configure_murano_networking
 }
 
 
 # init_murano() - Initialize databases, etc.
 function init_murano() {
+    configure_murano_networking
+
     # (re)create Murano database
     recreate_database murano utf8
 
