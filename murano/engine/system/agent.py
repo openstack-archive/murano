@@ -79,14 +79,13 @@ class Agent(murano_object.MuranoObject):
                 'Use of murano-agent is disallowed '
                 'by the server configuration')
 
-    def _send(self, template, wait_results, timeout):
+    def _send(self, template, wait_results, timeout, _context):
         """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()
             listener = self._environment.agentListener
-            listener.subscribe(msg_id, event)
-            listener.start()
+            listener.subscribe(msg_id, event, _context)
 
         msg = messaging.Message()
         msg.body = template
@@ -118,36 +117,36 @@ class Agent(murano_object.MuranoObject):
         else:
             return None
 
-    def call(self, template, resources, timeout=600):
+    def call(self, template, resources, _context, timeout=600):
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, True, timeout)
+        return self._send(plan, True, timeout, _context)
 
-    def send(self, template, resources):
+    def send(self, template, resources, _context):
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, False)
+        return self._send(plan, False, 0, _context)
 
-    def callRaw(self, plan):
+    def callRaw(self, plan, _context, timeout=600):
         self._check_enabled()
-        return self._send(plan, True)
+        return self._send(plan, True, timeout, _context)
 
-    def sendRaw(self, plan):
+    def sendRaw(self, plan, _context):
         self._check_enabled()
-        return self._send(plan, False)
+        return self._send(plan, False, 0, _context)
 
-    def isReady(self, timeout=100):
+    def isReady(self, _context, timeout=100):
         try:
-            self.waitReady(timeout)
+            self.waitReady(_context, timeout)
         except exceptions.TimeoutException:
             return False
         else:
             return True
 
-    def waitReady(self, timeout=100):
+    def waitReady(self, _context, timeout=100):
         self._check_enabled()
         template = {'Body': 'return', 'FormatVersion': '2.0.0', 'Scripts': {}}
-        self.call(template, False, timeout)
+        self.call(template, False, _context, timeout)
 
     def _process_v1_result(self, result):
         if result['IsException']:

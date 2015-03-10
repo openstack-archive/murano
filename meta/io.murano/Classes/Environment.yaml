@@ -63,11 +63,7 @@ Methods:
           resources: {}
       - $.stack.updateTemplate($minimalStack)
       - $.stack.push()
-      - Try:
-          - $.agentListener.start()
-          - $.applications.pselect($.deploy())
-        Finally:
-          - $.agentListener.stop()
+      - $.applications.pselect($.deploy())
 
   destroy:
     Body:
