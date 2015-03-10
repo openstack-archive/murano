@@ -51,7 +51,7 @@ class MistralTest(testtools.TestCase, tempest_utils.TempestDeployTestMixin):
 
         try:
             # Upload the Murano test package.
-            cls.upload_mistral_test_app()
+            cls.upload_mistral_showcase_app()
 
         except Exception as e:
             cls.tearDownClass()
@@ -63,7 +63,7 @@ class MistralTest(testtools.TestCase, tempest_utils.TempestDeployTestMixin):
             cls.purge_uploaded_packages()
 
     @classmethod
-    def upload_mistral_test_app(cls):
+    def upload_mistral_showcase_app(cls):
         app_dir = 'io.murano.apps.test.MistralShowcaseApp'
         zip_file_path = cls.zip_dir(os.path.dirname(__file__), app_dir)
         cls.init_list("_package_files")

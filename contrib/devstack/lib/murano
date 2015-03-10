@@ -180,8 +180,7 @@ function configure_murano {
 
     # Murano Policy Enforcement Configuration
     if [[ -n "$MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT" ]]; then
-        iniset $MURANO_CONF_FILE engine enable_model_policy_enforcer \
-               $MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT
+        iniset $MURANO_CONF_FILE engine enable_model_policy_enforcer $MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT
     fi
 
     # Murano Api Configuration
