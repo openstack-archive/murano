@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import mock
-
 import yaql.context
 
 from murano.common import exceptions as exc

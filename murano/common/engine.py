@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import traceback
-
 import uuid
 
 import eventlet.debug
