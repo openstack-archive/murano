@@ -59,4 +59,5 @@ General information
 
 .. include:: murano-api.rst
 .. include:: murano-repository.rst
+.. include:: murano-env-temp.rst
 

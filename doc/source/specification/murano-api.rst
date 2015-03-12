@@ -41,6 +41,13 @@ Glossary
 
     A .zip archive, containing instructions for an application deployment.
 
+* **Environment-Template**
+    The Environment template is the specification of a set of applications managed by a single tenant, which are
+    related each other. The environment template is stored in a environment template catalogue, and it can be
+    managed by the user (creation, deletion, updating...). Finally, it can be deployed on Openstack by translating
+    into an environment.
+
+
 Environment API
 ===============
 
@@ -641,17 +648,6 @@ Created application returned
         }
     }
 
-
-+----------------+-----------------------------------------------------------+
-| Code           | Description                                               |
-+================+===========================================================+
-| 200            | Deployments information received successfully             |
-+----------------+-----------------------------------------------------------+
-| 400            | Application package was considered invalid                |
-+----------------+-----------------------------------------------------------+
-| 409            | Package with specified FQPN already exists                |
-+----------------+-----------------------------------------------------------+
-
 Delete application from environment
 -----------------------------------
 
@@ -817,3 +813,4 @@ General Request Statistics
             "average_response_time": 0.55942
         }
     ]
+
