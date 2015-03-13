@@ -1,0 +1,21 @@
+FormatVersion: 2.0.0
+Version: 1.0.0
+Name: Deploy Chef
+
+Parameters:
+  appName: $appName
+
+Body: |
+  return deploy(args.appName).stdout
+
+Scripts:
+  deploy:
+    Type: Chef
+    Version: 1.0.0
+    EntryPoint: cookbook/recipe
+    Files:
+      - https://github.com/tomcat.git
+      - java: https://github.com/java.git
+    Options:
+      captureStdout: true
+      captureStderr: true
