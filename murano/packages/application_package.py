@@ -71,7 +71,7 @@ class ApplicationPackage(object):
 
     @property
     def tags(self):
-        return tuple(self._tags)
+        return list(self._tags)
 
     @property
     def logo(self):
