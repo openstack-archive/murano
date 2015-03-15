@@ -52,14 +52,14 @@ def verify_env_template(func):
         unit = db_session.get_session()
         template = unit.query(models.EnvironmentTemplate).get(env_template_id)
         if template is None:
-            LOG.info(_("Environment Template with id '{0}'"
-                       " not found").format(env_template_id))
+            LOG.info(_LI("Environment Template with id '{0}' not found").
+                     format(env_template_id))
             raise exc.HTTPNotFound()
 
         if hasattr(request, 'context'):
             if template.tenant_id != request.context.tenant:
-                LOG.info(_('User is not authorized to access'
-                           ' this tenant resources'))
+                LOG.info(_LI('User is not authorized to access '
+                             'this tenant resources'))
                 raise exc.HTTPUnauthorized()
 
         return func(self, request, env_template_id, *args, **kwargs)
