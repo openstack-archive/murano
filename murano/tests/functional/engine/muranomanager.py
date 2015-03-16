@@ -18,11 +18,11 @@ import random
 import socket
 import time
 import uuid
-import yaml
 
 import requests
 import testresources
 import testtools
+import yaml
 
 import murano.tests.functional.common.utils as utils
 import murano.tests.functional.engine.config as cfg
