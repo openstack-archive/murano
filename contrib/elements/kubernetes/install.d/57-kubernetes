@@ -1,8 +1,5 @@
 #!/bin/bash
-
-set -eu
-
-install-packages curl wget
+install-packages curl wget linux-libc-dev git gcc libc6-dev bridge-utils haproxy
 
 SVC_ROOT=/opt/bin
 
@@ -14,6 +11,7 @@ KUBE_LATEST_URL="https://github.com/GoogleCloudPlatform/kubernetes/releases/down
 mkdir -p ${SVC_ROOT}
 pushd ${SVC_ROOT}
 
+# Install latest etcd
 wget -O ${SVC_ROOT}/etcd-latest.tar.gz $ETCD_LATEST_URL
 tar xzvf ${SVC_ROOT}/etcd-latest.tar.gz
 rm -f ${SVC_ROOT}/etcd-latest.tar.gz
@@ -23,6 +21,7 @@ mv ${SVC_ROOT}/etcd-${ETCD_LATEST_VERSION}-linux-amd64/etcdctl ${SVC_ROOT}/
 
 rm -rf ${SVC_ROOT}/etcd-${ETCD_LATEST_VERSION}-linux-amd64
 
+# Install latest kubernetes
 wget -O ${SVC_ROOT}/kubernetes-latest.tar.gz $KUBE_LATEST_URL
 tar xzvf ${SVC_ROOT}/kubernetes-latest.tar.gz
 rm -f ${SVC_ROOT}/kubernetes-latest.tar.gz
@@ -30,16 +29,63 @@ rm -f ${SVC_ROOT}/kubernetes-latest.tar.gz
 tar xzvf ${SVC_ROOT}/kubernetes/server/kubernetes-server-linux-amd64.tar.gz
 mv ${SVC_ROOT}/kubernetes ${SVC_ROOT}/kubernetes-latest
 
-for EXECUTABLE in kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubectl kubelet kubernetes;
-    do cp ${SVC_ROOT}/kubernetes-latest/server/bin/${EXECUTABLE} ${SVC_ROOT}/${EXECUTABLE}
-done
-
-pushd ${SVC_ROOT}/kubernetes-latest/cluster/ubuntu
-${SVC_ROOT}/kubernetes-latest/cluster/ubuntu/util.sh
-popd
-
-sed -i 's/PATH="/PATH="\/opt\/bin:/g' /etc/environment
+cp ${SVC_ROOT}/kubernetes-latest/server/bin/* ${SVC_ROOT}/
 
 rm -rf ${SVC_ROOT}/kubernetes-latest
+
+# Install Go
+wget -O go.tar.gz https://storage.googleapis.com/golang/go1.4.2.linux-amd64.tar.gz
+tar xzvf go.tar.gz
+mv ${SVC_ROOT}/go /usr/local/go
+export PATH=$PATH:/usr/local/go/bin
+
+# Build flannel
+git clone https://github.com/coreos/flannel flannel
+pushd ${SVC_ROOT}/flannel
+${SVC_ROOT}/flannel/build
+popd
+
+cp ${SVC_ROOT}/flannel/bin/flanneld ${SVC_ROOT}/flanneld
+
+rm -rf ${SVC_ROOT}/flannel
+
+# Obtain init scripts
+git clone https://github.com/GoogleCloudPlatform/kubernetes.git kubernetes-git
+
+pushd ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster
+
+for file in etcd flanneld kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubelet; 
+    do echo -e "start on runlevel [235]\r\nstop on runlevel [016]" >> ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster/init_conf/$file.conf;
+done
+
+cp -R default_scripts/* /etc/default/
+cp -R init_conf/* /etc/init/
+cp -R initd_scripts/* /etc/init.d/
+popd
+
+cp -R ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster/* ${SVC_ROOT}/
+
+sed -i 's/"$etcdVersion" != "2.0.0"/"${etcdVersion%.*}" != "2.0"/g' ${SVC_ROOT}/configure.sh
+
+rm -rf ${SVC_ROOT}/kubernetes-git
+
+# Update system PATH
+sed -i 's/PATH="/PATH="\/opt\/bin:\/opt\/go\/bin:/g' /etc/environment
+
+update-rc.d etcd start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d flanneld start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d kube-apiserver start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d kube-controller-manager start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d kube-proxy start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d kube-scheduler start 70 3 4 5 . stop 20 0 1 6 .
+update-rc.d kubelet start 70 3 4 5 . stop 20 0 1 6 .
+
+update-rc.d etcd disable
+update-rc.d flanneld disable
+update-rc.d kube-apiserver disable
+update-rc.d kube-controller-manager disable
+update-rc.d kube-proxy disable
+update-rc.d kube-scheduler disable
+update-rc.d kubelet disable
 
 popd
