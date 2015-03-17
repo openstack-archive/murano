@@ -1,0 +1,40 @@
+Namespaces:
+  =: io.murano.apps.example.plugin
+  std: io.murano
+  res: io.murano.resources
+  sys: io.murano.system
+
+
+Name: DemoApp
+
+Extends: std:Application
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  instance:
+    Contract: $.class(res:Instance).notNull()
+
+Workflow:
+  initialize:
+    Body:
+      - $.environment: $.find(std:Environment).require()
+
+  deploy:
+    Body:
+      - If: !yaql "not bool($.getAttr(deployed))"
+        Then:
+          - $this.find(std:Environment).reporter.report($this, 'Creating VM ')
+          - $securityGroupIngress:
+              - ToPort: 22
+                FromPort: 22
+                IpProtocol: tcp
+                External: True
+          - $.environment.securityGroupManager.addGroupIngress($securityGroupIngress)
+          - $.instance.deploy()
+          - $resources: new(sys:Resources)
+          - $this.find(std:Environment).reporter.report($this, 'Test VM is installed')
+          - $.host: $.instance.ipAddresses[0]
+          - $.user: 'root'
+          - $.setAttr(deployed, True)

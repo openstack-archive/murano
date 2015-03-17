@@ -1,0 +1,81 @@
+Version: 2
+
+Application:
+  ?:
+    type: io.murano.apps.example.plugin.DemoApp
+  name: $.appConfiguration.name
+  instance:
+    ?:
+      type: io.murano.apps.example.plugin.DemoInstance
+    name: generateHostname($.instanceConfiguration.unitNamingPattern, 1)
+    flavor: $.instanceConfiguration.flavor
+    image: $.instanceConfiguration.osImage
+    requiredType: $.appConfiguration.requiredType
+    assignFloatingIp: $.appConfiguration.assignFloatingIP
+    keyname: $.instanceConfiguration.keyPair
+
+Forms:
+  - appConfiguration:
+      fields:
+        - name: name
+          type: string
+          label: Application Name
+          initial: Demo
+          description: >-
+            Enter a desired name for the application. Just A-Z, a-z, 0-9, dash and
+            underline are allowed
+        - name: requiredType
+          type: string
+          label: Required MuranoImage Type
+          initial: linux
+          description: >-
+            Enter a value to be matched against 'type' field of MuranoImage metadata
+        - name: assignFloatingIP
+          type: boolean
+          label: Assign Floating IP
+          description: >-
+             Select to true to assign floating IP automatically
+          initial: false
+          required: false
+          widgetMedia:
+            css: {all: ['muranodashboard/css/checkbox.css']}
+  - instanceConfiguration:
+      fields:
+        - name: title
+          type: string
+          required: false
+          hidden: true
+          description: Specify some instance parameters on which the application would be created
+        - name: flavor
+          type: flavor
+          label: Instance flavor
+          description: >-
+            Select registered in Openstack flavor. Consider that application performance
+            depends on this parameter.
+          required: false
+        - name: osImage
+          type: image
+          imageType: linux
+          label: Instance image
+          description: >-
+            Select a valid image for the application. Image should already be prepared and
+            registered in glance.
+        - name: keyPair
+          type: keypair
+          label: Key Pair
+          description: >-
+            Select a Key Pair to control access to instances. You can login to
+            instances using this KeyPair after the deployment of application.
+          required: false
+        - name: availabilityZone
+          type: azone
+          label: Availability zone
+          description: Select availability zone where the application would be installed.
+          required: false
+        - name: unitNamingPattern
+          label: Hostname
+          type: string
+          required: false
+          widgetMedia:
+            js: ['muranodashboard/js/support_placeholder.js']
+            css: {all: ['muranodashboard/css/support_placeholder.css']}

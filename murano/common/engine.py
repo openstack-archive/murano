@@ -23,6 +23,7 @@ from oslo.serialization import jsonutils
 
 from murano.common import config
 from murano.common.helpers import token_sanitizer
+from murano.common import plugin_loader
 from murano.common import rpc
 from murano.dsl import dsl_exception
 from murano.dsl import executor
@@ -38,7 +39,9 @@ from murano.common.i18n import _LI, _LE
 from murano.openstack.common import log as logging
 from murano.policy import model_policy_enforcer as enforcer
 
+
 RPC_SERVICE = None
+PLUGIN_LOADER = None
 
 LOG = logging.getLogger(__name__)
 
@@ -82,6 +85,14 @@ def get_rpc_service():
     if RPC_SERVICE is None:
         RPC_SERVICE = _prepare_rpc_service(str(uuid.uuid4()))
     return RPC_SERVICE
+
+
+def get_plugin_loader():
+    global PLUGIN_LOADER
+
+    if PLUGIN_LOADER is None:
+        PLUGIN_LOADER = plugin_loader.PluginLoader()
+    return PLUGIN_LOADER
 
 
 class Environment(object):
@@ -137,6 +148,7 @@ class TaskExecutor(object):
     def _execute(self, pkg_loader):
         class_loader = package_class_loader.PackageClassLoader(pkg_loader)
         system_objects.register(class_loader, pkg_loader)
+        get_plugin_loader().register_in_loader(class_loader)
 
         exc = executor.MuranoDslExecutor(class_loader, self.environment)
         obj = exc.load(self.model)

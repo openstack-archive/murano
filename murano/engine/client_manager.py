@@ -47,7 +47,7 @@ class ClientManager(object):
             return context
         return helpers.get_environment(context)
 
-    def _get_client(self, context, name, use_trusts, client_factory):
+    def get_client(self, context, name, use_trusts, client_factory):
         if not config.CONF.engine.use_trusts:
             use_trusts = False
 
@@ -80,7 +80,7 @@ class ClientManager(object):
         factory = lambda _1, _2: auth_utils.get_client_for_trusts(env) \
             if use_trusts else auth_utils.get_client(env)
 
-        return self._get_client(context, 'keystone', use_trusts, factory)
+        return self.get_client(context, 'keystone', use_trusts, factory)
 
     def get_congress_client(self, context, use_trusts=True):
         """Client for congress services
@@ -105,7 +105,7 @@ class ClientManager(object):
             return congress_client.Client(session=session,
                                           service_type='policy')
 
-        return self._get_client(context, 'congress', use_trusts, factory)
+        return self.get_client(context, 'congress', use_trusts, factory)
 
     def get_heat_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
@@ -133,7 +133,7 @@ class ClientManager(object):
                 })
             return hclient.Client('1', heat_url, **kwargs)
 
-        return self._get_client(context, 'heat', use_trusts, factory)
+        return self.get_client(context, 'heat', use_trusts, factory)
 
     def get_neutron_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
@@ -152,7 +152,7 @@ class ClientManager(object):
                 ca_cert=neutron_settings.ca_cert or None,
                 insecure=neutron_settings.insecure)
 
-        return self._get_client(context, 'neutron', use_trusts, factory)
+        return self.get_client(context, 'neutron', use_trusts, factory)
 
     def get_murano_client(self, context, use_trusts=True):
         if not config.CONF.engine.use_trusts:
@@ -175,7 +175,7 @@ class ClientManager(object):
                 auth_url=keystone_client.auth_url,
                 token=auth_token)
 
-        return self._get_client(context, 'murano', use_trusts, factory)
+        return self.get_client(context, 'murano', use_trusts, factory)
 
     def get_mistral_client(self, context, use_trusts=True):
         if not mistralclient:
@@ -202,4 +202,4 @@ class ClientManager(object):
                                         auth_token=auth_token,
                                         user_id=keystone_client.user_id)
 
-        return self._get_client(context, 'mistral', use_trusts, factory)
+        return self.get_client(context, 'mistral', use_trusts, factory)

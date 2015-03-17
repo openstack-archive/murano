@@ -146,7 +146,12 @@ murano_opts = [
                                 'Murano engine.'),
 
     cfg.StrOpt('endpoint_type', default='publicURL',
-               help='Murno endpoint type used by Murano engine.')
+               help='Murano endpoint type used by Murano engine.'),
+
+    cfg.ListOpt('enabled_plugins', default=None,
+                help="List of enabled Extension Plugins. "
+                     "Remove or leave commented to enable all installed "
+                     "plugins.")
 ]
 
 networking_opts = [

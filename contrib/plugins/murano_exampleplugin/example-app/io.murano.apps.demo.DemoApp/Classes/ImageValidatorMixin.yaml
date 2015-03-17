@@ -1,0 +1,36 @@
+Namespaces:
+  =: io.murano.apps.example.plugin
+  res: io.murano.resources
+
+Name: ImageValidatorMixin
+
+Extends:
+  - res:Instance
+
+Properties:
+  requiredType:
+    Contract: $.string().notNull()
+
+Workflow:
+  validateImage:
+    Body:
+      - Try:
+        - $glance: new('io.murano.extensions.mirantis.example.Glance')
+        Catch:
+          With: 'murano.dsl.exceptions.NoPackageForClassFound'
+          Do:
+            Throw: PluginNotFoundException
+            Message: 'Plugin for interaction with Glance is not installed'
+      - $glanceImage: $glance.getById($.image)
+      - If: $glanceImage = null
+        Then:
+          Throw: ImageNotFoundException
+          Message: 'Image with specified Id was not found'
+      - If: $glanceImage.meta = null
+        Then:
+          Throw: InvalidImageException
+          Message: 'Image does not contain Murano metadata tag'
+      - If: $glanceImage.meta.type != $.requiredType
+        Then:
+          Throw: InvalidImageException
+          Message: 'Image has unappropriate Murano type'

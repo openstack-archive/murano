@@ -1,0 +1,15 @@
+Namespaces:
+  =: io.murano.apps.example.plugin
+  res: io.murano.resources
+
+Name: DemoInstance
+
+Extends:
+  - res:LinuxMuranoInstance
+  - ImageValidatorMixin
+
+Workflow:
+  deploy:
+    Body:
+      - $.validateImage()
+      - $.super($.deploy())

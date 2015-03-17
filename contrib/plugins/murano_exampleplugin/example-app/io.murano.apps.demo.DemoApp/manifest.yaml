@@ -1,0 +1,12 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.apps.example.plugin.DemoApp
+Name: Plugin Demo App
+Description: |
+ Demo App to validate Glance Images
+Author: 'Mirantis, Inc'
+Tags: [Demo, Images]
+Classes:
+ io.murano.apps.example.plugin.ImageValidatorMixin: ImageValidatorMixin.yaml
+ io.murano.apps.example.plugin.DemoInstance: DemoInstance.yaml
+ io.murano.apps.example.plugin.DemoApp: DemoApp.yaml
