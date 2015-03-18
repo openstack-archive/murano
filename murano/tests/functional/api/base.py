@@ -44,9 +44,8 @@ class MuranoClient(rest_client.RestClient):
         return resp, json.loads(body)
 
     def create_environment(self, name):
-        post_body = '{"name": "%s"}' % name
-
-        resp, body = self.post('v1/environments', post_body)
+        body = {'name': name}
+        resp, body = self.post('v1/environments', json.dumps(body))
 
         return resp, json.loads(body)
 
@@ -110,7 +109,7 @@ class MuranoClient(rest_client.RestClient):
         resp, body = self.post(url.format(environment_id, session_id),
                                post_body)
 
-        return resp, json.loads(body)
+        return resp
 
     def create_service(self, environment_id, session_id, post_body):
         post_body = json.dumps(post_body)
@@ -224,6 +223,94 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
+    def get_env_templates_list(self):
+        """Check the environment templates deployed by the user."""
+        resp, body = self.get('v1/templates')
+
+        return resp, json.loads(body)
+
+    def create_env_template(self, env_template_name):
+        """Check the creation of an environment template."""
+        body = {'name': env_template_name}
+        resp, body = self.post('v1/templates', json.dumps(body))
+
+        return resp, json.loads(body)
+
+    def create_env_template_with_apps(self, env_template_name):
+        """Check the creation of an environment template."""
+        body = {'name': env_template_name}
+        body['services'] = [self._get_demo_app()]
+        resp, body = self.post('v1/templates', json.dumps(body))
+        return resp, json.loads(body)
+
+    def create_app_in_env_template(self, env_template_name):
+        """Check the creation of an environment template."""
+        resp, body = self.post('v1/templates/{0}/services'.
+                               format(env_template_name),
+                               json.dumps(self._get_demo_app()))
+        return resp, json.loads(body)
+
+    def get_apps_in_env_template(self, env_template_name):
+        """Check getting information about applications
+        in an environment template.
+        """
+        resp, body = self.get('v1/templates/{0}/services'.
+                              format(env_template_name))
+        return resp, json.loads(body)
+
+    def get_app_in_env_template(self, env_template_name, app_name):
+        """Check getting information about an application
+        in an environment template.
+        """
+        resp, body = self.get('v1/templates/{0}/services/{1}'.
+                              format(env_template_name, app_name))
+        return resp, json.loads(body)
+
+    def delete_app_in_env_template(self, env_template_name):
+        """Delete an application in an environment template."""
+        resp, body = self.delete('v1/templates/{0}/services/{1}'.
+                                 format(env_template_name, 'ID'))
+        return resp
+
+    def delete_env_template(self, env_template_id):
+        """Check the deletion of an environment template."""
+        resp, body = self.delete('v1/templates/{0}'.format(env_template_id))
+        return resp
+
+    def get_env_template(self, env_template_id):
+        """Check getting information of an environment template."""
+        resp, body = self.get('v1/templates/{0}'.format(env_template_id))
+
+        return resp, json.loads(body)
+
+    def create_env_from_template(self, env_template_id, env_name):
+        """Check creating an environment from a template."""
+        body = {'name': env_name}
+        resp, body = self.post('v1/templates/{0}/create-environment'.
+                               format(env_template_id),
+                               json.dumps(body))
+        return resp, json.loads(body)
+
+    def _get_demo_app(self):
+        return {
+            "instance": {
+                "assignFloatingIp": "true",
+                "keyname": "mykeyname",
+                "image": "cloud-fedora-v3",
+                "flavor": "m1.medium",
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+                }
+            },
+            "name": "orion",
+            "port": "8080",
+            "?": {
+                "type": "io.murano.apps.apache.Tomcat",
+                "id": "ID"
+            }
+        }
+
 
 class TestCase(test.BaseTestCase):
     @classmethod
@@ -241,6 +328,7 @@ class TestCase(test.BaseTestCase):
         super(TestCase, self).setUp()
 
         self.environments = []
+        self.env_templates = []
 
     def tearDown(self):
         super(TestCase, self).tearDown()
@@ -251,11 +339,23 @@ class TestCase(test.BaseTestCase):
             except exceptions.NotFound:
                 pass
 
+        for env_template in self.env_templates:
+            try:
+                self.client.delete_env_template(env_template['id'])
+            except exceptions.NotFound:
+                pass
+
     def create_environment(self, name):
         environment = self.client.create_environment(name)[1]
         self.environments.append(environment)
 
         return environment
+
+    def create_env_template(self, name):
+        env_template = self.client.create_env_template(name)[1]
+        self.env_templates.append(env_template)
+
+        return env_template
 
     def create_demo_service(self, environment_id, session_id, client=None):
         if not client:
