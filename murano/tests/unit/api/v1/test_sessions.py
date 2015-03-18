@@ -15,8 +15,11 @@
 
 import json
 
+from oslo.config import cfg
+
 from murano.api.v1 import environments
 from murano.api.v1 import sessions
+from murano.common import config
 import murano.tests.unit.api.base as tb
 
 
@@ -35,6 +38,12 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         """
         CREDENTIALS_1 = {'tenant': 'test_tenant_1', 'user': 'test_user_1'}
         CREDENTIALS_2 = {'tenant': 'test_tenant_2', 'user': 'test_user_2'}
+        opts = [
+            cfg.StrOpt('config_dir'),
+            cfg.StrOpt('config_file', default='murano.conf'),
+            cfg.StrOpt('project', default='murano'),
+        ]
+        config.CONF.register_opts(opts)
 
         self._set_policy_rules(
             {'create_environment': '@'}

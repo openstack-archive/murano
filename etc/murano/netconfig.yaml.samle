@@ -1,0 +1,8 @@
+environment:
+  ?:
+    type: io.murano.resources.ExistingNeutronNetwork
+  internalNetworkName: internal
+  # internalSubnetworkName: subnet1
+  # externalNetworkName: ext_net
+
+flat: null
