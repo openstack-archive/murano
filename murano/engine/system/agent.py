@@ -270,6 +270,8 @@ class Agent(murano_object.MuranoObject):
 
         if self._is_url(name):
             name = name[name.rindex('/') + 1:len(name)]
+        elif name.startswith('<') and name.endswith('>'):
+            name = name[1: -1]
         return name
 
     def _get_file(self, file):
@@ -280,34 +282,38 @@ class Agent(murano_object.MuranoObject):
 
     def _place_file(self, folder, file, template, files, resources):
         name = self._get_name(file)
-        file = self._get_file(file)
+        location = self._get_file(file)
         file_id = uuid.uuid4().hex
 
-        if self._is_url(file):
+        if self._is_url(location):
+            key = '='.join((name, location))
+            if key in files:
+                return files[key]
+
             template['Files'][file_id] = {
-                'Name': str(name),
-                'URL': file,
-                'Type': 'Downloadable'}
-            return file_id
+                'Name': name,
+                'URL': location,
+                'Type': 'Downloadable'
+            }
+            files[key] = file_id
+        else:
+            if name in files:
+                return files[name]
 
-        use_base64 = False
-        if file.startswith('<') and file.endswith('>'):
-            use_base64 = True
-            if '<' in name:
-                name = file[1:len(file) - 1]
+            use_base64 = False
+            if location.startswith('<') and location.endswith('>'):
+                use_base64 = True
+                location = location[1: -1]
 
-        if file in files:
-            return files[name]
+            body_type = 'Base64' if use_base64 else 'Text'
+            body = resources.string(os.path.join(folder, location))
+            if use_base64:
+                body = body.encode('base64')
 
-        body_type = 'Base64' if use_base64 else 'Text'
-        body = resources.string(os.path.join(folder, file))
-        if use_base64:
-            body = body.encode('base64')
-
-        template['Files'][file_id] = {
-            'Name': name,
-            'BodyType': body_type,
-            'Body': body
-        }
-        files[name] = file_id
+            template['Files'][file_id] = {
+                'Name': name,
+                'BodyType': body_type,
+                'Body': body
+            }
+            files[name] = file_id
         return file_id

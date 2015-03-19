@@ -56,8 +56,13 @@ class TestExecutionPlan(base.MuranoTestCase):
             self._read('application.template'),
             Loader=self.yaml_loader)
         template = self.agent.buildExecutionPlan(template, self.resources)
-
         self.assertEqual(template, self._get_application())
+        self.assertEqual(
+            [
+                mock.call(os.path.join('scripts', 'deployTomcat.sh')),
+                mock.call(os.path.join('scripts', 'installer.sh')),
+                mock.call(os.path.join('scripts', 'common.sh'))
+            ], self.resources.string.call_args_list)
 
     def test_execution_plan_v2_chef_type(self):
         template = yamllib.load(
@@ -66,7 +71,7 @@ class TestExecutionPlan(base.MuranoTestCase):
         template = self.agent.buildExecutionPlan(template, self.resources)
         self.assertEqual(template, self._get_chef())
 
-    def test_execution_plan_v3_telnet_application(self):
+    def test_execution_plan_v2_telnet_application(self):
         template = yamllib.load(
             self._read('DeployTelnet.template'),
             Loader=self.yaml_loader)
