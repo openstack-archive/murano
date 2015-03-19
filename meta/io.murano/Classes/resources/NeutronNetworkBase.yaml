@@ -1,0 +1,82 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+
+Name: NeutronNetworkBase
+
+Extends: Network
+
+Methods:
+  joinInstanceToNetwork:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)
+      - netRef:
+            Contract: $
+      - subnetRef:
+            Contract: $
+      - floatingIpResourceName:
+          Contract: $.string()
+      - floatingIpNeRef:
+          Contract: $
+    Body:
+      - $portName: format('port-{0}-{1}', $.id(), $instance.name)
+      - $patchTemplate:
+          resources:
+            $portName:
+              type: 'OS::Neutron::Port'
+              properties:
+                network: $netRef
+                fixed_ips:
+                  - subnet: $subnetRef
+                replacement_policy: AUTO
+
+      - If: bool($securityGroupName)
+        Then:
+          - $template:
+              resources:
+                $portName:
+                  properties:
+                    security_groups:
+                      - get_resource: $securityGroupName
+          - $patchTemplate: $patchTemplate.mergeWith($template)
+
+      - For: sip
+        In: $sharedIps
+        Do:
+          - $template:
+              resources:
+                $portName:
+                  properties:
+                    allowed_address_pairs:
+                      - ip_address: $sip.getSharedIpRef()
+          - $patchTemplate: $patchTemplate.mergeWith($template)
+
+      - $instanceFipOutput: null
+      - If: $floatingIpResourceName != null and $floatingIpNeRef != null
+        Then:
+          - $instanceFipOutput: $instance.name + '-floatingIPaddress'
+          - $template:
+              resources:
+                $floatingIpResourceName:
+                  type: 'OS::Neutron::FloatingIP'
+                  properties:
+                    floating_network: $floatingIpNeRef
+                    port_id:
+                      get_resource: $portName
+              outputs:
+                $instanceFipOutput:
+                  value:
+                    get_attr: [$floatingIpResourceName, floating_ip_address]
+                  description: format('Floating IP of {0}', $instance.name)
+          - $patchTemplate: $patchTemplate.mergeWith($template)
+      - Return:
+          template: $patchTemplate
+          portRef:
+            get_resource: $portName
+          instanceFipOutput: $instanceFipOutput

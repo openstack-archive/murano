@@ -32,7 +32,9 @@ Classes:
   io.murano.resources.HeatSWConfigLinuxInstance: resources/HeatSWConfigLinuxInstance.yaml
   io.murano.resources.LinuxUDInstance: resources/LinuxUDInstance.yaml
   io.murano.resources.WindowsInstance: resources/WindowsInstance.yaml
+  io.murano.resources.NeutronNetworkBase: resources/NeutronNetworkBase.yaml
   io.murano.resources.NeutronNetwork: resources/NeutronNetwork.yaml
+  io.murano.resources.ExistingNeutronNetwork: resources/ExistingNeutronNetwork.yaml
 
   io.murano.system.Agent: system/Agent.yaml
   io.murano.system.AgentListener: system/AgentListener.yaml

@@ -5,7 +5,7 @@ Namespaces:
 
 Name: NeutronNetwork
 
-Extends: Network
+Extends: NeutronNetworkBase
 
 Properties:
   name:
@@ -38,8 +38,8 @@ Properties:
 Methods:
   initialize:
     Body:
-      - $.environment: $.find(std:Environment).require()
-      - $.netExplorer: new(sys:NetworkExplorer)
+      - $._environment: $.find(std:Environment).require()
+      - $._netExplorer: new(sys:NetworkExplorer)
 
   deploy:
     Body:
@@ -47,69 +47,111 @@ Methods:
         Then:
           - If: $.useDefaultDns and (not bool($.dnsNameserver))
             Then:
-              - $.dnsNameserver: $.netExplorer.getDefaultDns()
+              - $.dnsNameserver: $._netExplorer.getDefaultDns()
 
-          - $.createNetwork()
+          - $template: $._createNetwork()
           - If: $.autoUplink and (not bool($.externalRouterId))
             Then:
-              - $.externalRouterId: $.netExplorer.getDefaultRouter()
+              - $.externalRouterId: $._netExplorer.getDefaultRouter()
           - If: $.autogenerateSubnet and (not bool($.subnetCidr))
             Then:
-              - $.subnetCidr: $.netExplorer.getAvailableCidr($.externalRouterId, $.id())
-          - $.createSubnet()
-          - If: $.externalRouterId!=null
-            Then:
-              - $.createRouterInterface()
+              - $.subnetCidr: $._netExplorer.getAvailableCidr($.externalRouterId, $.id())
 
-          - $.environment.stack.push()
+          - $template: $template.mergeWith($._createSubnet())
+          - If: $.externalRouterId != null
+            Then:
+              - $template: $template.mergeWith($._createRouterInterface())
+
+          - $._environment.stack.updateTemplate($template)
+          - $._environment.stack.push()
           - $.setAttr(deployed, true)
 
-  createNetwork:
+  _createNetwork:
     Body:
-      - $template:
+      - Return:
           resources:
-            $.getNetworkName():
+            $._getNetworkName():
               type: 'OS::Neutron::Net'
               properties:
-                name: $.name
-      - $.environment.stack.updateTemplate($template)
+                name: format('{0}-{1}', $.name, $.id())
 
-  createSubnet:
+  _createSubnet:
     Body:
-      - $template:
+      - Return:
           resources:
-            $.getSubnetName():
+            $._getSubnetName():
               type: 'OS::Neutron::Subnet'
               properties:
-                network: { get_resource: $.getNetworkName() }
+                network: { get_resource: $._getNetworkName() }
                 ip_version: 4
                 dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
-      - $.environment.stack.updateTemplate($template)
 
-  createRouterInterface:
+  _createRouterInterface:
     Body:
-      - $template:
+      - Return:
           resources:
-            $.getRouterInterfaceName():
+            $._getRouterInterfaceName():
               type: 'OS::Neutron::RouterInterface'
               properties:
                 router_id: $.externalRouterId
-                subnet: { get_resource: $.getSubnetName() }
-      - $.environment.stack.updateTemplate($template)
+                subnet: { get_resource: $._getSubnetName() }
 
-  getRouterInterfaceName:
+  joinInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)
     Body:
-      Return: $.name + '-ri-' + $.id()
+      - $netRef: { get_resource: $._getNetworkName() }
+      - $subnetRef: { get_resource: $._getSubnetName() }
+      - $extNetId: null
+      - $fipName: null
+      - If: $assignFloatingIp
+        Then:
+          - $extNetId: $._getExternalNetId()
+          - $fipName: format('fip-{0}-{1}'. $.id(), $instance.name)
 
-  getNetworkName:
-    Body:
-      Return: $.name + '-net-' + $.id()
+      - $result: $.joinInstanceToNetwork(
+            instance => $instance,
+            securityGroupName => $securityGroupName,
+            sharedIps => $sharedIps,
+            netRef => $netRef,
+            subnetRef => $subnetRef,
+            floatingIpResourceName => $fipName,
+            floatingIpNeRef => $extNetId
+          )
 
-  getSubnetName:
-    Body:
-      Return: $.name + '-subnet-' + $.id()
+      # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
+      - If: $externalRouterId != null
+        Then:
+          - $template:
+              resources:
+                $fipName:
+                  depends_on:
+                    - $._getRouterInterfaceName()
+          - $result.template: $result.template.mergeWith($template)
 
-  getExternalNetId:
+      - Return: $result
+
+  _getRouterInterfaceName:
     Body:
-      Return: $.netExplorer.getExternalNetworkIdForRouter($.externalRouterId)
+      Return: format('ri-{0}', $.id())
+
+  _getNetworkName:
+    Body:
+      Return: format('network-{0}', $.id())
+
+  _getSubnetName:
+    Body:
+      Return: format('subnet-{0}', $.id())
+
+  _getExternalNetId:
+    Body:
+      Return: $._netExplorer.getExternalNetworkIdForRouter($.externalRouterId)

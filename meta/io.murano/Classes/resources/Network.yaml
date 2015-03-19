@@ -1,11 +1,20 @@
 Namespaces:
-    =: io.murano.resources
+  =: io.murano.resources
+  std: io.murano
 
 Name: Network
 
 Methods:
-  getNetworkName:
-  getSubnetName:
-  getRouterInterfaceName:
-  getExternalNetId:
   deploy:
+
+  joinInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)

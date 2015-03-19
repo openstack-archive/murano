@@ -165,3 +165,13 @@ class NetworkExplorer(murano_object.MuranoObject):
         net = netaddr.IPNetwork(
             '{0}/{1}'.format(self._settings.env_ip_template, mask_width))
         return list(net.subnet(width - bits_for_hosts))
+
+    # noinspection PyPep8Naming
+    def listNetworks(self, _context):
+        client = self._clients.get_neutron_client(_context)
+        return client.list_networks()['networks']
+
+    # noinspection PyPep8Naming
+    def listSubnetworks(self, _context):
+        client = self._clients.get_neutron_client(_context)
+        return client.list_subnets()['subnets']

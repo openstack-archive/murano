@@ -1,0 +1,111 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+  sys: io.murano.system
+
+Name: ExistingNeutronNetwork
+
+Extends: NeutronNetworkBase
+
+Properties:
+  internalNetworkName:
+    Contract: $.string()
+    Default: null
+    Usage: InOut
+
+  internalSubnetworkName:
+    Contract: $.string()
+    Default: null
+    Usage: InOut
+
+  externalNetworkName:
+    Contract: $.string()
+    Default: null
+    Usage: InOut
+
+Workflow:
+  initialize:
+    Body:
+      - $._netExplorer: new(sys:NetworkExplorer)
+      - $._networks: null
+      - $._subnetworks: null
+      - $._internalNetworkId: null
+      - $._internalSubnetworkId: null
+      - $._externalNetworkId: null
+
+  deploy:
+    Body:
+      - If: $.internalNetworkName = null
+        Then:
+          $.internalNetworkName: $._getNetworks().where(
+             $.get('router:external') = false).first().name
+
+      - If: $._internalNetworkId = null
+        Then:
+          $._internalNetworkId: $._getNetworks().where(
+            $.name = $this.internalNetworkName or
+            $.id = $this.internalNetworkName).first().id
+
+      - If: $.internalSubnetworkName = null
+        Then:
+          $.internalSubnetworkName: $._getSubnetworks().where(
+            $.network_id = $this._internalNetworkId).first().name
+      - If: $._internalSubnetworkId = null
+        Then:
+          $._internalSubnetworkId: $._getSubnetworks().where(
+            ($.name = $this.internalSubnetworkName or
+              $.id = $this.internalSubnetworkName) and
+                $.network_id = $this._internalNetworkId).first().id
+
+      - If: $.externalNetworkName = null
+        Then:
+          $.externalNetworkName: $._getNetworks().where(
+            $.get('router:external') = true).select($.name).firstOrDefault()
+      - If: $._externalNetworkId = null and $.externalNetworkName != null
+        Then:
+          $._externalNetworkId: $._getNetworks().where(
+            $.name = $this.externalNetworkName or
+            $.id = $this.externalNetworkName).first().id
+
+  _getNetworks:
+    Body:
+      - If: $._networks = null
+        Then:
+          $._networks: $._netExplorer.listNetworks()
+      - Return: $._networks
+
+  _getSubnetworks:
+    Body:
+      - If: $._subnetworks = null
+        Then:
+          $._subnetworks : $._netExplorer.listSubnetworks()
+      - Return: $._subnetworks
+
+  joinInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)
+    Body:
+      - $fipName: null
+      - $floatingIpNeRef: null
+      - If: $assignFloatingIp
+        Then:
+          - $floatingIpNeRef: $._externalNetworkId
+          - $fipName: format('fip-{0}-{1}'. $.id(), $instance.name)
+
+      - Return: $.joinInstanceToNetwork(
+            instance => $instance,
+            securityGroupName => $securityGroupName,
+            sharedIps => $sharedIps,
+            netRef => $._internalNetworkId,
+            subnetRef => $._internalSubnetworkId,
+            floatingIpResourceName => $fipName,
+            floatingIpNeRef => $floatingIpNeRef
+          )

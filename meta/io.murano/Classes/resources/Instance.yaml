@@ -58,6 +58,7 @@ Methods:
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
       - $.instanceTemplate: {}
+      - $._floatingIpOutputName: null
 
   # Called after the Instance template pieces are in place. It
   # is at this stage alterations to the template should be made
@@ -126,23 +127,25 @@ Methods:
       - $outputs: $.environment.stack.output()
       # Changing this to use the .networks attribute instead of 'addresses'
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten()
-      - $.floatingIpAddress: $outputs.get(format('{0}-FloatingIPaddress', $this.name))
+      - If: $._floatingIpOutputName != null
+        Then:
+          - $.floatingIpAddress: $outputs.get($._floatingIpOutputName)
       - $.environment.instanceNotifier.trackCloudInstance($this)
 
   detectPrimaryNetwork:
     Body:
-      - $.primaryNetwork: null
+      - $._primaryNetwork: null
       - If: $.networks.primaryNetwork != null
         Then:
-          - $.primaryNetwork: $.networks.primaryNetwork
+          - $._primaryNetwork: $.networks.primaryNetwork
         Else:
           - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
             Then:
-              - $.primaryNetwork: $.environment.defaultNetworks.environment
+              - $._primaryNetwork: $.environment.defaultNetworks.environment
             Else:
               - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
                 Then:
-                  - $.primaryNetwork: $.environment.defaultNetworks.flat
+                  - $._primaryNetwork: $.environment.defaultNetworks.flat
 
   ensureNetworksDeployed:
     Body:
@@ -165,79 +168,35 @@ Methods:
       - securityGroupName:
           Contract: $.string()
     Body:
-      - If: $net = $.primaryNetwork
-        Then:
-          - $primary: true
-        Else:
-          - $primary: false
-
-      - If: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
-        Then:
-          - $assignFip: true
-
-        Else:
-          - $assignFip: false
-
-      - $portname: $.name + '-port-to-' + $net.id()
-      - $netRef: { get_resource: $net.getNetworkName() }
-      - $subnetRef: { get_resource: $net.getSubnetName() }
-      - $template:
-          resources:
-            $portname:
-              type: 'OS::Neutron::Port'
-              properties:
-                network: $netRef
-                fixed_ips:
-                  - subnet: $subnetRef
-                security_groups:
-                  - get_resource: $securityGroupName
-                replacement_policy: AUTO
-            $.name:
-              properties:
-                networks:
-                  - port:
-                      get_resource: $portname
-      - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-
+      - $primary: $net = $._primaryNetwork
+      - $assignFip: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
+      - $sharedIps: []
       - If: $primary
         Then:
-          - For: sip
-            In: $.sharedIps
-            Do:
-              - $template:
-                  resources:
-                    $portname:
-                      properties:
-                        allowed_address_pairs:
-                          - ip_address: $sip.getSharedIpRef()
-              - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-
-      - If: $assignFip
+          $sharedIps: $.sharedIps
+      - $joinResult: $net.joinInstance(
+            instance => $this,
+            securityGroupName => $securityGroupName,
+            assignFloatingIp => $assignFip,
+            sharedIps => $sharedIps
+          )
+      - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
+      
+      - If: $joinResult.portRef != null
         Then:
-          - $extNetId: $net.getExternalNetId()
-          - If: $extNetId != null
-            Then:
-              - $fip_name: $.name + '-FloatingIP-' + $net.id()
-              - $template:
-                  resources:
-                    $fip_name:
-                      type: 'OS::Neutron::FloatingIP'
-                      properties:
-                        floating_network: $extNetId
-                        port_id:
-                          get_resource: $portname
-                  outputs:
-                    $.name + '-FloatingIPaddress':
-                      value:
-                        get_attr: [$fip_name, floating_ip_address]
-                      description: Floating IP assigned
-              - If: $net.externalRouterId != null
-                Then:
-                  # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
-                  - $routerInterfaceName: $net.getRouterInterfaceName()
-                  - $template['resources'][$fip_name]['depends_on']: [$routerInterfaceName]
-              - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-              - $.setAttr(fipAssigned, true)
+          - $template:
+              resources:
+                $.name:
+                  properties:
+                    networks:
+                      - port:
+                          $joinResult.portRef
+          - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
+      - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
+
+      - If: $assignFip and $joinResult.instanceFipOutput != null
+        Then:
+          - $.setAttr(fipAssigned, true)
 
   destroy:
     # FIXME(smelikyan): All allocated resources should be cleaned-up on destroy
