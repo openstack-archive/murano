@@ -49,43 +49,14 @@ cp ${SVC_ROOT}/flannel/bin/flanneld ${SVC_ROOT}/flanneld
 
 rm -rf ${SVC_ROOT}/flannel
 
-# Obtain init scripts
-git clone https://github.com/GoogleCloudPlatform/kubernetes.git kubernetes-git
-
-pushd ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster
-
-for file in etcd flanneld kube-apiserver kube-controller-manager kube-proxy kube-scheduler kubelet; 
-    do echo -e "start on runlevel [235]\r\nstop on runlevel [016]" >> ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster/init_conf/$file.conf;
-done
-
-cp -R default_scripts/* /etc/default/
-cp -R init_conf/* /etc/init/
-cp -R initd_scripts/* /etc/init.d/
-popd
-
-cp -R ${SVC_ROOT}/kubernetes-git/cluster/ubuntu-cluster/* ${SVC_ROOT}/
-
-sed -i 's/"$etcdVersion" != "2.0.0"/"${etcdVersion%.*}" != "2.0"/g' ${SVC_ROOT}/configure.sh
-
-rm -rf ${SVC_ROOT}/kubernetes-git
 
 # Update system PATH
 sed -i 's/PATH="/PATH="\/opt\/bin:\/opt\/go\/bin:/g' /etc/environment
 
-update-rc.d etcd start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d flanneld start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d kube-apiserver start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d kube-controller-manager start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d kube-proxy start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d kube-scheduler start 70 3 4 5 . stop 20 0 1 6 .
-update-rc.d kubelet start 70 3 4 5 . stop 20 0 1 6 .
 
-update-rc.d etcd disable
-update-rc.d flanneld disable
-update-rc.d kube-apiserver disable
-update-rc.d kube-controller-manager disable
-update-rc.d kube-proxy disable
-update-rc.d kube-scheduler disable
-update-rc.d kubelet disable
+wget -O confd https://github.com/kelseyhightower/confd/releases/download/v0.7.1/confd-0.7.1-linux-amd64
+mv confd /usr/local/bin/confd
+chmod +x /usr/local/bin/confd
+mkdir -p /etc/confd/{conf.d,templates}
 
 popd
