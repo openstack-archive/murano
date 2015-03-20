@@ -56,7 +56,40 @@ class CongressRulesManager(object):
         self._rules = [self._create_relationship(rule, object_ids)
                        for rule in self._rules]
 
+        relations = [(rel.source_id, rel.target_id)
+                     for rel in self._rules
+                     if isinstance(rel, RelationshipRule)]
+        closure = self.transitive_closure(relations)
+
+        for rel in closure:
+            self._rules.append(ConnectedRule(rel[0], rel[1]))
+
         return self._rules
+
+    @staticmethod
+    def transitive_closure(relations):
+        """Computes transitive closure on a directed graph.
+
+        In other words computes reachability within the graph.
+        E.g. {(1, 2), (2, 3)} -> {(1, 2), (2, 3), (1, 3)}
+        (1, 3) was added because there is path from 1 to 3 in the graph.
+
+        :param relations: list of relations/edges in form of tuples
+        :return: transitive closure including original relations
+        """
+        closure = set(relations)
+        while True:
+            # Attempts to discover new transitive relations
+            # by joining 2 subsequent relations/edges within the graph.
+            new_relations = {(x, w) for x, y in closure
+                             for q, w in closure if q == y}
+            # Creates union with already discovered relations.
+            closure_until_now = closure | new_relations
+            # If no new relations were discovered in last cycle
+            # the computation is finished.
+            if closure_until_now == closure:
+                return closure
+            closure = closure_until_now
 
     def _walk(self, obj, func):
 
@@ -193,6 +226,16 @@ class RelationshipRule(object):
     def __str__(self):
         return 'murano:relationships+("{0}", "{1}", "{2}")'.format(
             self.source_id, self.target_id, self.rel_name)
+
+
+class ConnectedRule(object):
+    def __init__(self, source_id, target_id):
+        self.source_id = source_id
+        self.target_id = target_id
+
+    def __str__(self):
+        return 'murano:connected+("{0}", "{1}")'.format(
+            self.source_id, self.target_id)
 
 
 class ParentTypeRule(object):
