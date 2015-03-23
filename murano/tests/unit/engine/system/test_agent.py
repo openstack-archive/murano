@@ -78,6 +78,13 @@ class TestExecutionPlan(base.MuranoTestCase):
         template = self.agent.buildExecutionPlan(template, self.resources)
         self.assertEqual(template, self._get_telnet_application())
 
+    def test_execution_plan_v2_app_without_files(self):
+        template = yamllib.load(
+            self._read('application_without_files.template'),
+            Loader=self.yaml_loader)
+        template = self.agent.buildExecutionPlan(template, self.resources)
+        self.assertEqual(template, self._get_app_without_files())
+
     def _get_application(self):
         return {
             'Action': 'Execute',
@@ -112,6 +119,38 @@ class TestExecutionPlan(base.MuranoTestCase):
                         self.uuids[2],
                         self.uuids[3]
                     ],
+                    'Options': {
+                        'captureStderr': True,
+                        'captureStdout': True
+                    },
+                    'Type': 'Application',
+                    'Version': '1.0.0'
+                }
+            },
+            'Version': '1.0.0'
+        }
+
+    def _get_app_without_files(self):
+        return {
+            'Action': 'Execute',
+            'Body': 'return deploy(args.appName).stdout\n',
+            'Files': {
+                self.uuids[1]: {
+                    'Body': 'text',
+                    'BodyType': 'Text',
+                    'Name': 'deployTomcat.sh'
+                },
+            },
+            'FormatVersion': '2.0.0',
+            'ID': self.uuids[0],
+            'Name': 'Deploy Tomcat',
+            'Parameters': {
+                'appName': '$appName'
+            },
+            'Scripts': {
+                'deploy': {
+                    'EntryPoint': self.uuids[1],
+                    'Files': [],
                     'Options': {
                         'captureStderr': True,
                         'captureStdout': True

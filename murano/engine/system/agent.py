@@ -237,7 +237,7 @@ class Agent(murano_object.MuranoObject):
                 script['EntryPoint'] = self._place_file(
                     scripts_folder, script['EntryPoint'],
                     template, files, resources)
-            scripts_files = script['Files']
+            scripts_files = script.get('Files', [])
             script['Files'] = []
             for file in scripts_files:
                 file_id = self._place_file(scripts_folder, file,
