@@ -26,7 +26,8 @@ class ObjRef(object):
 
 
 def serialize_object(obj):
-    if isinstance(obj, (collections.Sequence, collections.Set)):
+    if isinstance(obj, (collections.Sequence, collections.Set)) and not \
+            isinstance(obj, types.StringTypes):
         return [serialize_object(t) for t in obj]
     elif isinstance(obj, collections.Mapping):
         result = {}

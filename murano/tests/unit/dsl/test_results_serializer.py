@@ -17,6 +17,7 @@ import types
 
 from testtools import matchers
 
+from murano.dsl import serializer
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
 
@@ -123,3 +124,21 @@ class TestResultsSerializer(test_case.DslTestCase):
         self.assertEqual(
             'John Snow',
             runner2.on(self._class1).testAttributes('John'))
+
+    def test_value_deserialization(self):
+        """Test serialization of arbitrary values that can be returned
+        from action methods
+        """
+
+        runner = self.new_runner(self._class2)
+        result = runner.testMethod()
+        self.assertEqual(
+            {
+                'key1': 'abc',
+                'key2': ['a', 'b', 'c'],
+                'key3': None,
+                'key4': False,
+                'key5': {'x': 'y'},
+                'key6': [{'w': 'q'}]
+            },
+            serializer.serialize_object(result))
