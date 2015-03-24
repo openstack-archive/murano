@@ -71,6 +71,12 @@ class TestCongressRules(unittest.TestCase):
 
         return rules_str
 
+    def test_transitive_closure(self):
+        closure = congress.CongressRulesManager.transitive_closure(
+            [(1, 2), (2, 3), (3, 4)])
+        self.assertTrue((1, 4) in closure)
+        self.assertTrue((2, 4) in closure)
+
     def test_empty_model(self):
         congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(None)
@@ -100,6 +106,17 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue(
             'murano:relationships+("0aafd67e-72e9-4ae0-bb62-fe724f77df2a", '
             '"ed8df2b0-ddd2-4009-b3c9-2e7a368f3cb8", "instance")' in rules_str)
+
+    def test_convert_model_transitive_relationships(self):
+        rules_str = self._create_rules_str('model_with_relations.yaml')
+
+        self.assertTrue(
+            'murano:connected+("50fa68ff-cd9a-4845-b573-2c80879d158d", '
+            '"8ce94f23-f16a-40a1-9d9d-a877266c315d")' in rules_str)
+
+        self.assertTrue(
+            'murano:connected+("8ce94f23-f16a-40a1-9d9d-a877266c315d", '
+            '"fc6b8c41-166f-4fc9-a640-d82009e0a03d")' in rules_str)
 
     def test_convert_model_complex(self):
         self._create_and_check_rules_str('model_complex')
