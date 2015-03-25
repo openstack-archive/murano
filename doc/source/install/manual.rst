@@ -137,7 +137,7 @@ Install the API service and Engine
 
     .. code-block:: console
         $ cd ~/murano/murano/etc/murano
-        $ cp murano.conf.sample murano.conf
+        $ ln -s murano.conf.sample murano.conf
     ..
 
 #.  Edit ``murano.conf`` with your favorite editor. Below is an example
@@ -257,40 +257,45 @@ Install Murano Dashboard
         $ git clone https://github.com/stackforge/murano-dashboard
     ..
 
-#.  Create a virtual environment and install dashboard prerequisites. Use *tox* for that.
-    According to tox.ini config, this command also installs horizon (openstack dashboard).
-    It's not listed in murano-dashboard dependencies,
-    since in production murano supposed to be a horizon plugin and is used above existing horizon.
-
-    .. note::
-
-     | By default horizon is installed from the master branch, according to tox config file.
-     | Note, that previous murano versions may be incompatible with horizon master.
-     | So, to install desired horizon version, edit *tox.ini* file and provide
-       in *deps* parameter of [testenv] section link to the desired package
-       from http://tarballs.openstack.org/horizon
-
-    ..
-    .. code-block:: console
-
-        $ cd ~/murano/murano-dashboard
-        $ tox -e venv -- pip freeze
-    ..
-
-#.  Copy configuration local settings configuration file.
+#.  Clone horizon repository
 
     .. code-block:: console
 
-        $ cd ~/murano/murano-dashboard/muranodashboard/local
-        $ cp local_settings.py.example local_settings.py
+        $ git clone https://github.com/openstack/horizon
     ..
 
-#.  And edit it according to your Openstack installation.
+#.  Create venv and install muranodashboard as editable module.
 
     .. code-block:: console
 
-        $ vim ./local_settings.py
+        $ cd horizon
+        $ tox -e venv -- pip install -e ../murano-dashboard
     ..
+
+#.  Copy muranodashboard plugin file.
+
+    This step enables murano panel in horizon dashboard.
+
+    .. code-block:: console
+
+        $ cp ../murano-dashboard/muranodashboard/local/_50_murano.py openstack_dashboard/local/enabled/
+    ..
+
+#.  Prepare local settings.
+
+    To get more information, check out official
+    `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
+
+    .. code-block:: console
+
+        $ cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
+
+    .. code-block:: console
+
+        $ tox -e venv -- python manage.py syncdb
+    ..
+
+#.  Customize local settings according to Openstack installation.
 
     .. code-block:: python
 
@@ -335,25 +340,6 @@ Install Murano Dashboard
         MURANO_API_URL = 'http://localhost:8082'
     ..
 
-#.  Prepare murano
-
-    Murano UI is a plugin for Openstack Dashboard (Horizon). Horizon allows dashboards,
-    panels and panel groups to be added without modifying the default settings.
-    To get more information, go the the official `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#pluggable-settings-label>`_
-
-
-    There is special script that sets up murano-dashboard with horizon in one action.
-    It is called *prepare_murano.sh* and located under repository root. This script
-    copies actual openstack_dashboard settings file from horizon and puts murano plugin file to the right place.
-    Openstack_dashboard location parameter should be provided:
-
-    .. code-block:: console
-
-        $ cd ~/murano/murano-dashboard
-        $ ./prepare_murano.sh --openstack-dashboard .tox/venv/lib/python2.7/site-packages/openstack_dashboard
-
-    ..
-
 #.  Perform database synchronization.
 
     Optional step. Needed in case you set up database as a session backend.
@@ -362,6 +348,8 @@ Install Murano Dashboard
 
         $ tox -e venv -- python manage.py syncdb
     ..
+
+   You can reply 'no' since for development purpose separate user is not needed.
 
 #.  Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
 
