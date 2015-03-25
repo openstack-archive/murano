@@ -116,7 +116,7 @@ Methods:
       - If: $assignFloatingIp
         Then:
           - $extNetId: $._getExternalNetId()
-          - $fipName: format('fip-{0}-{1}'. $.id(), $instance.name)
+          - $fipName: format('fip-{0}-{1}', $.id(), $instance.name)
 
       - $result: $.joinInstanceToNetwork(
             instance => $instance,

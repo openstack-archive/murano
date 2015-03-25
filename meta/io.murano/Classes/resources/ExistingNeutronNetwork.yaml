@@ -98,7 +98,7 @@ Workflow:
       - If: $assignFloatingIp
         Then:
           - $floatingIpNeRef: $._externalNetworkId
-          - $fipName: format('fip-{0}-{1}'. $.id(), $instance.name)
+          - $fipName: format('fip-{0}-{1}', $.id(), $instance.name)
 
       - Return: $.joinInstanceToNetwork(
             instance => $instance,
