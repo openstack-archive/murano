@@ -313,6 +313,7 @@ class MuranoClient(rest_client.RestClient):
 
 
 class TestCase(test.BaseTestCase):
+
     @classmethod
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
@@ -390,7 +391,8 @@ class NegativeTestCase(TestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        cls.isolated_creds = isolated_creds.IsolatedCreds(cls.__name__)
+        cls.isolated_creds = isolated_creds.IsolatedCreds('v2',
+                                                          name=cls.__name__)
         creds = cls.isolated_creds.get_alt_creds()
         mgr = clients.Manager(credentials=creds)
         cls.alt_client = MuranoClient(mgr.auth_provider)
