@@ -179,9 +179,6 @@ class ApiStats(Base, TimestampMixin):
     cpu_count = sa.Column(sa.Integer())
     cpu_percent = sa.Column(sa.Float())
 
-    def to_dict(self):
-        dictionary = super(ApiStats, self).to_dict()
-        return dictionary
 
 package_to_category = sa.Table('package_to_category',
                                Base.metadata,
@@ -218,10 +215,6 @@ class Instance(Base):
     type_title = sa.Column('type_title', sa.String(512))
     unit_count = sa.Column('unit_count', sa.Integer())
     tenant_id = sa.Column('tenant_id', sa.String(36), nullable=False)
-
-    def to_dict(self):
-        dictionary = super(Instance, self).to_dict()
-        return dictionary
 
 
 class Package(Base, TimestampMixin):
@@ -284,10 +277,6 @@ class Category(Base, TimestampMixin):
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
-
-    def to_dict(self):
-        dictionary = super(Category, self).to_dict()
-        return dictionary
 
 
 class Tag(Base, TimestampMixin):
