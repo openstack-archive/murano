@@ -36,11 +36,11 @@ class TimestampMixin(object):
     def update(self, values):
         """dict.update() behaviour."""
         self.updated = timeutils.utcnow()
-        super(_MuranoBase, self).update(values)
+        super(TimestampMixin, self).update(values)
 
     def __setitem__(self, key, value):
         self.updated = timeutils.utcnow()
-        super(_MuranoBase, self).__setitem__(key, value)
+        super(TimestampMixin, self).__setitem__(key, value)
 
 
 class _MuranoBase(models.ModelBase):
