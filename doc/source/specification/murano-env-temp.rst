@@ -397,7 +397,7 @@ Create an environment from an environment template
 ::
 
     {
-        'name': 'environment_name'
+        "name": "environment_name"
     }
 
 *Response*
