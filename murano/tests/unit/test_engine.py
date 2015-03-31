@@ -1,3 +1,4 @@
+# coding: utf-8
 # Copyright (c) 2014 Mirantis Inc.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -163,6 +164,19 @@ class TestYaqlExpression(base.MuranoTestCase):
         yaql_expr = yaql_expression.YaqlExpression('string')
 
         self.assertEqual('string', yaql_expr.expression)
+
+    def test_unicode_expression(self):
+        yaql_expr = yaql_expression.YaqlExpression(u"'yaql ♥ unicode'")
+
+        self.assertEqual(u"'yaql ♥ unicode'".encode('utf-8'),
+                         yaql_expr.expression)
+
+    def test_unicode_expression_expression(self):
+        yaql_expr = yaql_expression.YaqlExpression(u"'yaql ♥ unicode'")
+        yaql_expr2 = yaql_expression.YaqlExpression(yaql_expr)
+
+        self.assertEqual(u"'yaql ♥ unicode'".encode('utf-8'),
+                         yaql_expr2.expression)
 
     def test_evaluate_calls(self):
         string = 'string'
