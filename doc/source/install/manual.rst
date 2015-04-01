@@ -290,11 +290,6 @@ Install Murano Dashboard
 
         $ cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
 
-    .. code-block:: console
-
-        $ tox -e venv -- python manage.py syncdb
-    ..
-
 #.  Customize local settings according to Openstack installation.
 
     .. code-block:: python
@@ -349,7 +344,7 @@ Install Murano Dashboard
         $ tox -e venv -- python manage.py syncdb
     ..
 
-   You can reply 'no' since for development purpose separate user is not needed.
+    You can reply 'no' since for development purpose separate user is not needed.
 
 #.  Run Django server at 127.0.0.1:8000 or provide different IP and PORT parameters.
 
