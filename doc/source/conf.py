@@ -16,19 +16,13 @@ import os
 import sys
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
+
 # If extensions (or modules to document with autodoc) are in another directory,
 # add these directories to sys.path here. If the directory is relative to the
 # documentation root, use os.path.abspath to make it absolute, like shown here.
 sys.path.insert(0, os.path.abspath('../../'))
 sys.path.insert(0, os.path.abspath('../'))
 sys.path.insert(0, os.path.abspath('./'))
-
-
-from murano.version import version_info
-
-# Supress warnings for docs that aren't used yet
-#unused_docs = [
-#]
 
 # -- General configuration -----------------------------------------------------
 
@@ -39,7 +33,7 @@ from murano.version import version_info
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
               'sphinx.ext.coverage', 'sphinx.ext.pngmath',
-              'sphinx.ext.viewcode']
+              'sphinx.ext.viewcode', 'sphinxcontrib.httpdomain']
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -56,6 +50,7 @@ project = 'Murano'
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
 # built documents.
+from murano.version import version_info
 release = version_info.release_string()
 version = version_info.version_string()
 
@@ -79,8 +74,10 @@ show_authors = False
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
-html_theme_path = ['.']
-html_theme = '_theme'
+
+if on_rtd:
+    html_theme_path = ['.']
+    html_theme = 'sphinx_rtd_theme'
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
