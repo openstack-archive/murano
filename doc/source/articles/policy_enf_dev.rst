@@ -33,10 +33,10 @@ Value of property ``type`` is used as ``type_name`` parameter:
 
 Transformed to these rules:
 
-- ``murano:objects+("83bff5ac", "83bff5ac", "io.murano.Environment")``
+- ``murano:objects+("83bff5ac", "tenant_id", "io.murano.Environment")``
 - ``murano:objects+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
 
-.. note:: In case of rule for environment ``environment_id``, ``object_id`` are the same.
+.. note:: The owner of the environment is a tenant
 
 
 ``murano:properties(object_id, property_name, property_value)``
@@ -84,10 +84,6 @@ Transformed to these rules:
 - ``murano:properties+("be3c5155", "networks.customNetworks", "10.0.1.0")``
 - ``murano:properties+("be3c5155", "networks.customNetworks", "10.0.2.0")``
 
-There is one special property on environment for tenant_id:
-
-- ``murano:properties+("...", "tenant_id", "123")``
-
 ``murano:relationships(source, target, name)``
 """"""""""""""""""""""""""""""""""""""""""""""
 
@@ -126,6 +122,11 @@ Also if we define inner object inside other object, they will have relationship 
 Transformed to this rule:
 
 - ``murano:relationships+("0aafd67e", "ed8df2b0", "instance")``
+
+There are special relationships "services" from the environment to its applications:
+
+- ``murano:relationships+("env_id", "app_id", "services")``
+
 
 ``murano:parent_types(object_id, parent_name)``
 """""""""""""""""""""""""""""""""""""""""""""""
