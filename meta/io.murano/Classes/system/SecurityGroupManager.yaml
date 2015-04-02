@@ -1,0 +1,26 @@
+Namespaces:
+    =: io.murano.system
+    std: io.murano
+
+Name: SecurityGroupManager
+
+Properties:
+  environment:
+    Contract: $.class(std:Environment).notNull()
+
+  defaultGroupName:
+    Contract: $.string()
+    Default: format('MuranoSecurityGroup-{0}', $.environment.name)
+
+Methods:
+  addGroupIngress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName

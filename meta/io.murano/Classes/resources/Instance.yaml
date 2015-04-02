@@ -180,8 +180,10 @@ Methods:
             assignFloatingIp => $assignFip,
             sharedIps => $sharedIps
           )
-      - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
-      
+      - If: $joinResult.template != null
+        Then:
+          - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
+
       - If: $joinResult.portRef != null
         Then:
           - $template:
@@ -192,6 +194,16 @@ Methods:
                       - port:
                           $joinResult.portRef
           - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
+      - If: $joinResult.secGroupName != null
+        Then:
+          - $template:
+              resources:
+                $.name:
+                  properties:
+                    security_groups:
+                      - $joinResult.secGroupName
+          - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
+
       - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
 
       - If: $assignFip and $joinResult.instanceFipOutput != null

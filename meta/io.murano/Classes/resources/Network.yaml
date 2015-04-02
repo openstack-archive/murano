@@ -18,3 +18,8 @@ Methods:
       - sharedIps:
           Contract:
             - $.class(std:SharedIp)
+
+  generateSecurityGroupManager:
+    Arguments:
+      - environment:
+          Contract: $.class(std:Environment).notNull()

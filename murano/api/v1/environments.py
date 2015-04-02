@@ -59,7 +59,7 @@ class Controller(object):
             try:
                 environment = envs.EnvironmentServices.create(
                     body.copy(),
-                    request.context.tenant)
+                    request.context)
             except db_exc.DBDuplicateEntry:
                 msg = _('Environment with specified name already exists')
                 LOG.exception(msg)

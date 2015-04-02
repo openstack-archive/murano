@@ -1,0 +1,57 @@
+Namespaces:
+  =: io.murano.system
+  std: io.murano
+
+Name: AwsSecurityGroupManager
+
+Extends: SecurityGroupManager
+
+Methods:
+  addGroupIngress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+    Body:
+      - $ext_keys:
+          true:
+            ext_key: remote_ip_prefix
+            ext_val: '0.0.0.0/0'
+          false:
+            ext_key: remote_mode
+            ext_val: remote_group_id
+
+      - $stack: $.environment.stack
+      - $template:
+          resources:
+            $groupName:
+              type: 'AWS::EC2::SecurityGroup'
+              properties:
+                GroupDescription: format('Composite security group of Murano environment {0}', $.environment.name)
+                SecurityGroupIngress:
+                  - FromPort: '-1'
+                    ToPort: '-1'
+                    IpProtocol: icmp
+                    CidrIp: '0.0.0.0/0'
+      - $.environment.stack.updateTemplate($template)
+
+      - $ingress: $rules.select(dict(
+            FromPort => str($.FromPort),
+            ToPort => str($.ToPort),
+            IpProtocol => $.IpProtocol,
+            CidrIp => '0.0.0.0/0'
+          ))
+
+      - $template:
+          resources:
+            $groupName:
+              type: 'AWS::EC2::SecurityGroup'
+              properties:
+                SecurityGroupIngress: $ingress
+      - $.environment.stack.updateTemplate($template)

@@ -18,11 +18,11 @@ from oslo.config import cfg
 from oslo.utils import importutils
 
 
-def get_client(environment):
+def get_client(token, tenant_id):
     settings = _get_keystone_settings()
     kwargs = {
-        'token': environment.token,
-        'tenant_id': environment.tenant_id,
+        'token': token,
+        'tenant_id': tenant_id,
         'auth_url': settings['auth_url']
     }
     kwargs.update(settings['ssl'])
@@ -58,12 +58,12 @@ def _admin_client(trust_id=None, project_name=None):
     return client
 
 
-def get_client_for_trusts(environment):
-    return _admin_client(environment.trust_id)
+def get_client_for_trusts(trust_id):
+    return _admin_client(trust_id)
 
 
-def create_trust(environment):
-    client = get_client(environment)
+def create_trust(token, tenant_id):
+    client = get_client(token, tenant_id)
 
     settings = _get_keystone_settings()
     trustee_id = get_client_for_admin(
@@ -74,14 +74,14 @@ def create_trust(environment):
                                  trustee_user=trustee_id,
                                  impersonation=True,
                                  role_names=roles,
-                                 project=environment.tenant_id)
+                                 project=tenant_id)
 
     return trust.id
 
 
-def delete_trust(environment):
-    keystone_client = get_client_for_trusts(environment)
-    keystone_client.trusts.delete(environment.trust_id)
+def delete_trust(trust_id):
+    keystone_client = get_client_for_trusts(trust_id)
+    keystone_client.trusts.delete(trust_id)
 
 
 def _get_keystone_settings():
