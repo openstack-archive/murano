@@ -148,9 +148,12 @@ Content-Type: application/json
         fake_now = timeutils.utcnow()
         timeutils.utcnow.override_time = fake_now
 
-        expected = {'name': 'new_category',
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1]}
+        expected = {
+            'name': 'new_category',
+            'created': timeutils.isotime(fake_now)[:-1],
+            'updated': timeutils.isotime(fake_now)[:-1],
+            'package_count': 0,
+        }
 
         body = {'name': 'new_category'}
         req = self._post('/catalog/categories', json.dumps(body))

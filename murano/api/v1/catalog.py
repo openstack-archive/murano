@@ -265,7 +265,6 @@ class Controller(object):
     def delete(self, req, package_id):
         target = {'package_id': package_id}
         policy.check("delete_package", req.context, target)
-
         db_api.package_delete(package_id, req.context)
 
     def get_category(self, req, category_id):

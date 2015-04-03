@@ -441,13 +441,15 @@ List categories
                 "id": "0420045dce7445fabae7e5e61fff9e2f",
                 "updated": "2014-12-26T13:57:04",
                 "name": "Web",
-                "created": "2014-12-26T13:57:04"
+                "created": "2014-12-26T13:57:04",
+                "package_count": 1
             },
             {
                 "id": "3dd486b1e26f40ac8f35416b63f52042",
                 "updated": "2014-12-26T13:57:04",
-            "name": "Databases",
-            "created": "2014-12-26T13:57:04"
+                "name": "Databases",
+                "created": "2014-12-26T13:57:04",
+                "package_count": 0
             }]
         }
 
@@ -490,7 +492,8 @@ Get category details
             }
         ],
         "name": "Web",
-        "created": "2015-01-28T17:00:19"
+        "created": "2015-01-28T17:00:19",
+        "package_count": 1
     }
 
 +----------------+-----------------------------------------------------------+
@@ -541,6 +544,7 @@ Add new category
         "name": "category_name",
         "created": "2013-11-30T03:23:42Z",
         "updated": "2013-11-30T03:23:44Z",
+        "package_count": 0
     }
 
 

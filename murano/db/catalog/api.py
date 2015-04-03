@@ -416,6 +416,9 @@ def category_add(category_name):
 
     with session.begin():
         category.update({'name': category_name})
+        # NOTE(kzaitsev) update package_count, so we can safely access from
+        # outside the session
+        category.package_count = 0
         category.save(session)
 
     return category

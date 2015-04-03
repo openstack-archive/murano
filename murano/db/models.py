@@ -278,6 +278,17 @@ class Category(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(80), nullable=False, index=True, unique=True)
 
+    package_count = sa_orm.column_property(
+        sa.select([sa.func.count(package_to_category.c.package_id)]).
+        where(package_to_category.c.category_id == id).
+        correlate_except(package_to_category)
+    )
+
+    def to_dict(self):
+        d = super(Category, self).to_dict()
+        d['package_count'] = self.package_count
+        return d
+
 
 class Tag(Base, TimestampMixin):
     """Represents tags in the datastore."""
