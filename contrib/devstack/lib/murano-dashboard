@@ -29,7 +29,6 @@ HORIZON_LOCAL_CONFIG=${HORIZON_LOCAL_CONFIG:-$HORIZON_DIR/openstack_dashboard/lo
 # Set up default repos
 MURANO_DASHBOARD_REPO=${MURANO_DASHBOARD_REPO:-${GIT_BASE}/stackforge/murano-dashboard.git}
 MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-master}
-MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
 
 # Set up default directories
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
@@ -95,8 +94,6 @@ DATABASES = {
     }
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-HORIZON_CONFIG['dashboards'] += ('murano',)
-INSTALLED_APPS += ('muranodashboard','floppyforms',)
 MIDDLEWARE_CLASSES += ('muranodashboard.middleware.ExceptionMiddleware',)
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
@@ -105,6 +102,9 @@ EOF
 
     # Insert changes into dashboard config before the line matching the pattern
     insert_config_block "$HORIZON_CONFIG" "$horizon_config_part" "from openstack_dashboard import policy"
+
+    # Install Murano as plugin for Horizon
+    ln -s $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 }
 
 
@@ -146,6 +146,7 @@ function install_murano_dashboard() {
 function cleanup_murano_dashboard() {
     echo_summary "Cleanup Murano Dashboard"
     remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
+    rm $HORIZON_DIR/openstack_dashboard/local/enabled/_50_murano.py
 }
 
 
