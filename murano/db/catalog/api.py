@@ -14,6 +14,7 @@
 
 from oslo.config import cfg
 from oslo.db.sqlalchemy import utils
+import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
 # TODO(ruhe) use exception declared in openstack/common/db
@@ -327,7 +328,8 @@ def package_search(filters, context, limit=None):
                         condition = getattr(pkg, attr).any(
                             getattr(models, fk_fields[attr]).name.like(_word))
                         conditions.append(condition)
-                    else:
+                    elif isinstance(getattr(pkg, attr)
+                                    .property.columns[0].type, sa.String):
                         conditions.append(getattr(pkg, attr).like(_word))
         query = query.filter(or_(*conditions))
 
