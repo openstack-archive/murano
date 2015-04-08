@@ -35,18 +35,11 @@ class CongressRulesManager(object):
             return self._rules
 
         self._env_id = model['?']['id']
-        # Environment owner is tenant.
-        self._owner_id = tenant_id
-
-        # Arbitrary property for tenant_id.
-        if tenant_id is not None:
-            r = PropertyRule(self._env_id, 'tenant_id', tenant_id)
-            self._rules.append(r)
 
         state_rule = StateRule(self._env_id, 'pending')
         self._rules.append(state_rule)
 
-        self._walk(model, self._process_item)
+        self._walk(model, owner_id=tenant_id)
 
         # Convert MuranoProperty containing reference to another object
         # to MuranoRelationship.
@@ -91,33 +84,42 @@ class CongressRulesManager(object):
                 return closure
             closure = closure_until_now
 
-    def _walk(self, obj, func):
+    def _walk(self, obj, owner_id, path=()):
 
         if obj is None:
             return
 
         obj = self._to_dict(obj)
-        func(obj)
+        new_owner = self._process_item(obj, owner_id, path) or owner_id
         if isinstance(obj, list):
             for v in obj:
-                self._walk(v, func)
+                self._walk(v, new_owner, path)
         elif isinstance(obj, dict):
             for key, value in obj.iteritems():
-                self._walk(value, func)
+                self._walk(value, new_owner, path + (key, ))
 
-    def _process_item(self, obj):
+    def _process_item(self, obj, owner_id, path):
         if isinstance(obj, dict) and '?' in obj:
-            obj2 = self._create_object_rule(obj)
-            # Owner of components in environment is environment itself.
-            self._owner_id = self._env_id
+            obj_rule = self._create_object_rule(obj, owner_id)
 
-            self._rules.append(obj2)
-            self._rules.extend(self._create_propety_rules(obj2.obj_id, obj))
+            self._rules.append(obj_rule)
+            # the environment has 'services' relationships
+            # to all its top-level applications
+            # traversal path is used to test whether
+            # we are at the right place within the tree
+            if path == ('applications',):
+                self._rules.append(RelationshipRule(self._env_id,
+                                                    obj_rule.obj_id,
+                                                    "services"))
+            self._rules.extend(
+                self._create_propety_rules(obj_rule.obj_id, obj))
 
             cls = obj['?']['type']
             types = self._get_parent_types(cls, self._class_loader)
             self._rules.extend(self._create_parent_type_rules(obj['?']['id'],
                                                               types))
+            # current object will be the owner for its subtree
+            return obj_rule.obj_id
 
     @staticmethod
     def _to_dict(obj):
@@ -127,8 +129,8 @@ class CongressRulesManager(object):
         else:
             return obj
 
-    def _create_object_rule(self, app):
-        return ObjectRule(app['?']['id'], self._owner_id, app['?']['type'])
+    def _create_object_rule(self, app, owner_id):
+        return ObjectRule(app['?']['id'], owner_id, app['?']['type'])
 
     def _create_propety_rules(self, obj_id, obj, prefix=""):
         rules = []

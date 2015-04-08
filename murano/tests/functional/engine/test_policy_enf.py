@@ -24,14 +24,19 @@ import murano.tests.functional.common.tempest_utils as tempest_utils
 import murano.tests.functional.common.utils as common_utils
 
 CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
+                  'murano_env_of_object(oid,eid):-'
+                  'murano:connected(eid,oid),'
+                  'murano:objects(eid,tid,"io.murano.Environment")',
                   'predeploy_errors(eid, obj_id, msg):-'
-                  'murano:objects(obj_id, eid, type),'
+                  'murano:objects(obj_id, pid, type),'
+                  'murano_env_of_object(obj_id, eid),'
                   'murano:properties(obj_id, "flavor", flavor_name),'
                   'invalid_flavor_name(flavor_name),'
                   'murano:properties(obj_id, "name", obj_name),'
                   'concat(obj_name, ": bad flavor", msg)',
                   'predeploy_errors(eid, obj_id, msg):-'
-                  'murano:objects(obj_id, eid, type),'
+                  'murano:objects(obj_id, pid, type),'
+                  'murano_env_of_object(obj_id, eid),'
                   'murano:properties(obj_id, "keyname", key_name),'
                   'missing_key(key_name),'
                   'murano:properties(obj_id, "name", obj_name),'

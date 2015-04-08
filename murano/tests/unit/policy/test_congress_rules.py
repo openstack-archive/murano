@@ -118,6 +118,17 @@ class TestCongressRules(unittest.TestCase):
             'murano:connected+("8ce94f23-f16a-40a1-9d9d-a877266c315d", '
             '"fc6b8c41-166f-4fc9-a640-d82009e0a03d")' in rules_str)
 
+    def test_convert_model_services_relationship(self):
+        rules_str = self._create_rules_str('model_with_relations.yaml')
+
+        self.assertTrue(
+            'murano:relationships+("3409bdd0590e4c60b70fda5e6777ff96", '
+            '"8ce94f23-f16a-40a1-9d9d-a877266c315d", "services")' in rules_str)
+
+        self.assertTrue(
+            'murano:relationships+("3409bdd0590e4c60b70fda5e6777ff96", '
+            '"50fa68ff-cd9a-4845-b573-2c80879d158d", "services")' in rules_str)
+
     def test_convert_model_complex(self):
         self._create_and_check_rules_str('model_complex')
 
@@ -189,16 +200,15 @@ class TestCongressRules(unittest.TestCase):
         self.assertTrue('murano:objects+("1", "{0}", "t1")'.format(tenant_id)
                         in rules_str)
         self.assertTrue('murano:objects+("2", "1", "t2")' in rules_str)
-        self.assertTrue('murano:objects+("3", "1", "t3")' in rules_str)
+        self.assertTrue('murano:objects+("3", "2", "t3")' in rules_str)
 
-    def test_tenant_id(self):
+    def test_environment_owner(self):
         model = self._load_file("model.yaml")
         congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(model, tenant_id='tenant1')
         rules_str = ", \n".join(map(str, rules))
-        self.assertTrue(
-            'murano:properties+("c86104748a0c4907b4c5981e6d3bce9f", '
-            '"tenant_id", "tenant1")' in rules_str)
+        self.assertTrue('murano:objects+("c86104748a0c4907b4c5981e6d3bce9f", '
+                        '"tenant1", "io.murano.Environment")' in rules_str)
 
     def test_wordpress(self):
         class_loader = MockClassLoader([
