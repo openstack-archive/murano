@@ -237,18 +237,16 @@ class Agent(murano_object.MuranoObject):
                 raise ValueError('No entry point in script ' + name)
 
             if 'Application' in script['Type']:
-                script['EntryPoint'] = self._place_file(
-                    scripts_folder, script['EntryPoint'],
-                    template, files, resources)
-            scripts_files = script.get('Files', [])
-            script['Files'] = []
-            for file in scripts_files:
-                file_id = self._place_file(scripts_folder, file,
-                                           template, files, resources)
-                if self._is_url(file):
-                    script['Files'].append(file)
-                else:
-                    script['Files'].append(file_id)
+                script['EntryPoint'] = self._place_file(scripts_folder,
+                                                        script['EntryPoint'],
+                                                        template, resources,
+                                                        files)
+            if 'Files' in script:
+                for i, file in enumerate(script['Files']):
+                    script['Files'][i] = self._place_file(scripts_folder,
+                                                          file, template,
+                                                          resources,
+                                                          files)
         return template
 
     def _is_url(self, file):
@@ -277,46 +275,59 @@ class Agent(murano_object.MuranoObject):
             name = name[1: -1]
         return name
 
-    def _get_file(self, file):
+    def _get_file_value(self, file):
         if isinstance(file, dict):
-            return file.values()[0]
-        else:
-            return file
+            file = file.values()[0]
+        return file
 
-    def _place_file(self, folder, file, template, files, resources):
+    def _get_body(self, file, resources, folder):
+        use_base64 = self._is_base64(file)
+        if use_base64 and file.startswith('<') and file.endswith('>'):
+            file = file[1: -1]
+        body = resources.string(os.path.join(folder, file))
+        if use_base64:
+            body = body.encode('base64')
+        return body
+
+    def _is_base64(self, file):
+        return file.startswith('<') and file.endswith('>')
+
+    def _get_body_type(self, file):
+        return 'Base64' if self._is_base64(file) else 'Text'
+
+    def _place_file(self, folder, file, template, resources, files):
+        file_value = self._get_file_value(file)
         name = self._get_name(file)
-        location = self._get_file(file)
         file_id = uuid.uuid4().hex
 
-        if self._is_url(location):
-            key = '='.join((name, location))
-            if key in files:
-                return files[key]
+        if self._is_url(file_value):
+            template['Files'][file_id] = self._get_file_des_downloadable(file)
+            files[name] = file_id
 
-            template['Files'][file_id] = {
-                'Name': name,
-                'URL': location,
-                'Type': 'Downloadable'
-            }
-            files[key] = file_id
         else:
-            if name in files:
-                return files[name]
-
-            use_base64 = False
-            if location.startswith('<') and location.endswith('>'):
-                use_base64 = True
-                location = location[1: -1]
-
-            body_type = 'Base64' if use_base64 else 'Text'
-            body = resources.string(os.path.join(folder, location))
-            if use_base64:
-                body = body.encode('base64')
-
-            template['Files'][file_id] = {
-                'Name': name,
-                'BodyType': body_type,
-                'Body': body
-            }
+            template['Files'][file_id] = self._get_file_description(file,
+                                                                    resources,
+                                                                    folder)
             files[name] = file_id
         return file_id
+
+    def _get_file_des_downloadable(self, file):
+        name = self._get_name(file)
+        file = self._get_file_value(file)
+        return {
+            'Name': str(name),
+            'URL': file,
+            'Type': 'Downloadable'
+        }
+
+    def _get_file_description(self, file, resources, folder):
+        name = self._get_name(file)
+        file_value = self._get_file_value(file)
+
+        body_type = self._get_body_type(file_value)
+        body = self._get_body(file_value, resources, folder)
+        return {
+            'Name': name,
+            'BodyType': body_type,
+            'Body': body
+        }
