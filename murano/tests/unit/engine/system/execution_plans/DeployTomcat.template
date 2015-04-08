@@ -1,13 +1,10 @@
 FormatVersion: 2.0.0
 Version: 1.0.0
 Name: Deploy Tomcat
-
 Parameters:
   appName: $appName
-
 Body: |
-  return deploy(args.appName).stdout
-
+  deploy(args.appName)
 Scripts:
   deploy:
     Type: Application
@@ -15,5 +12,5 @@ Scripts:
     EntryPoint: deployTomcat.sh
     Files: []
     Options:
-      captureStdout: true
+      captureStdout: false
       captureStderr: true
