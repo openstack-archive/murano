@@ -82,7 +82,8 @@ def package_get(package_id_or_name, context):
     """
     session = db_session.get_session()
     package = _package_get(package_id_or_name, session)
-    _authorize_package(package, context, allow_public=True)
+    if not context.is_admin:
+        _authorize_package(package, context, allow_public=True)
     return package
 
 
@@ -234,7 +235,8 @@ def package_update(pkg_id_or_name, changes, context):
     session = db_session.get_session()
     with session.begin():
         pkg = _package_get(pkg_id_or_name, session)
-        _authorize_package(pkg, context)
+        if not context.is_admin:
+            _authorize_package(pkg, context)
 
         for change in changes:
             pkg = operation_methods[change['op']](pkg, change)
@@ -376,7 +378,10 @@ def package_delete(package_id_or_name, context):
 
     with session.begin():
         package = _package_get(package_id_or_name, session)
-        _authorize_package(package, context)
+        if not context.is_admin and package.owner_id != context.tenant:
+            raise exc.HTTPForbidden(
+                explanation='Package is not owned by the'
+                            ' tenant "{0}"'.format(context.tenant))
         session.delete(package)
 
 
