@@ -21,6 +21,7 @@ from oslo import messaging
 from oslo.messaging import target
 from oslo.serialization import jsonutils
 
+from murano.common import auth_utils
 from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.common import plugin_loader
@@ -28,7 +29,6 @@ from murano.common import rpc
 from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import serializer
-from murano.engine import auth_utils
 from murano.engine import client_manager
 from murano.engine import environment
 from murano.engine import package_class_loader
@@ -233,13 +233,14 @@ class TaskExecutor(object):
             return
         trust_id = self._environment.system_attributes.get('TrustId')
         if not trust_id:
-            trust_id = auth_utils.create_trust(self._environment)
+            trust_id = auth_utils.create_trust(self._environment.token,
+                                               self._environment.tenant_id)
             self._environment.system_attributes['TrustId'] = trust_id
         self._environment.trust_id = trust_id
 
     def _delete_trust(self):
         trust_id = self._environment.trust_id
         if trust_id:
-            auth_utils.delete_trust(self._environment)
+            auth_utils.delete_trust(self._environment.trust_id)
             self._environment.system_attributes['TrustId'] = None
             self._environment.trust_id = None

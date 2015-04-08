@@ -80,6 +80,8 @@ class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
                    return_value=self.mock_engine_rpc).start()
         mock.patch(self.RPC_IMPORT + '.api',
                    return_value=self.mock_api_rpc).start()
+        mock.patch('murano.db.services.environments.EnvironmentServices.'
+                   'get_network_driver', return_value='neutron').start()
 
         self.addCleanup(mock.patch.stopall)
 

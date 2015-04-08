@@ -19,10 +19,11 @@ import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
 from oslo.config import cfg
 
+from murano.common import auth_utils
 from murano.common import config
 from murano.dsl import helpers
-from murano.engine import auth_utils
 from murano.engine import environment
+
 
 try:
     # integration with congress is optional
@@ -77,8 +78,9 @@ class ClientManager(object):
         if not config.CONF.engine.use_trusts:
             use_trusts = False
         env = self._get_environment(context)
-        factory = lambda _1, _2: auth_utils.get_client_for_trusts(env) \
-            if use_trusts else auth_utils.get_client(env)
+        factory = lambda _1, _2: \
+            auth_utils.get_client_for_trusts(env.trust_id) \
+            if use_trusts else auth_utils.get_client(env.token, env.tenant_id)
 
         return self.get_client(context, 'keystone', use_trusts, factory)
 

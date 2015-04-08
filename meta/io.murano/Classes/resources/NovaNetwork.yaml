@@ -1,0 +1,57 @@
+Namespaces:
+  =: io.murano.resources
+  std: io.murano
+  sys: io.murano.system
+
+Name: NovaNetwork
+
+Extends: Network
+
+Methods:
+  joinInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)
+    Body:
+      - $fipName: null
+      - $template: null
+      - $instanceFipOutput: null
+      - If: $assignFloatingIp
+        Then:
+          - $instanceFipOutput: $instance.name + '-floatingIPaddress'
+          - $fipName: format('fip-nn-{0}', $instance.name)
+          - $template:
+              resources:
+                $fipName:
+                  type: 'OS::Nova::FloatingIP'
+                $fipName + 'Assignment':
+                  type: 'OS::Nova::FloatingIPAssociation'
+                  properties:
+                    floating_ip:
+                      get_resource: $fipName
+                    server_id:
+                      get_resource: $instance.name
+              outputs:
+                $instanceFipOutput:
+                  value:
+                    get_attr: [$fipName, ip]
+                  description: format('Floating IP of {0}', $instance.name)
+      - Return:
+          template: $template
+          secGroupName:
+            get_resource: $securityGroupName
+          instanceFipOutput: instanceFipOutput
+
+  generateSecurityGroupManager:
+    Arguments:
+      - environment:
+          Contract: $.class(std:Environment).notNull()
+    Body:
+      - Return: new(sys:AwsSecurityGroupManager, environment => $environment)

@@ -22,7 +22,6 @@ Classes:
   io.murano.SharedIp: SharedIp.yaml
   io.murano.File: File.yaml
 
-  io.murano.system.SecurityGroupManager: SecurityGroupManager.yaml
 
   io.murano.resources.Network: resources/Network.yaml
   io.murano.resources.Instance: resources/Instance.yaml
@@ -35,6 +34,7 @@ Classes:
   io.murano.resources.NeutronNetworkBase: resources/NeutronNetworkBase.yaml
   io.murano.resources.NeutronNetwork: resources/NeutronNetwork.yaml
   io.murano.resources.ExistingNeutronNetwork: resources/ExistingNeutronNetwork.yaml
+  io.murano.resources.NovaNetwork: resources/NovaNetwork.yaml
 
   io.murano.system.Agent: system/Agent.yaml
   io.murano.system.AgentListener: system/AgentListener.yaml
@@ -43,3 +43,6 @@ Classes:
   io.murano.system.InstanceNotifier: system/InstanceNotifier.yaml
   io.murano.system.StatusReporter: system/StatusReporter.yaml
   io.murano.system.NetworkExplorer: system/NetworkExplorer.yaml
+  io.murano.system.SecurityGroupManager: system/SecurityGroupManager.yaml
+  io.murano.system.NeutronSecurityGroupManager: system/NeutronSecurityGroupManager.yaml
+  io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml

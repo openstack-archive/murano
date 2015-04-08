@@ -17,17 +17,38 @@
 Network Configuration
 ---------------------
 
-To work with Murano, tenant network in Openstack installation should be configured in a certain way.
-This configuration may be set up automatically with the provision of several parameters in config file or manually.
+Murano may work in various networking environments and is capable to detect the
+current network configuration and choose the appropriate settings automatically.
+However, some additional actions are required to support advanced scenarios.
 
-Murano has advanced networking features that give you ability to not care about configuring networks
-for your application. By default it will create an isolated network for each environment and join
+
+Nova network support
+^^^^^^^^^^^^^^^^^^^^
+
+Nova Network is simplest networking solution, which has limited capabilities
+but is available on any OpenStack deployment without the need to deploy any
+additional components.
+
+When a new Murano Environment is created, Murano checks if a dedicated
+networking service (i.e. Neutron) exists in the current OpenStack deployment.
+It relies on Keystone's service catalog for that.
+If such a service is not present, Murano automatically falls back to Nova
+Network. No further configuration is needed in this case, all the VMs spawned
+by Murano will be joining the same Network.
+
+Neutron support
+^^^^^^^^^^^^^^^
+
+If Neutron is installed, Murano enables its advanced networking features that
+give you ability to not care about configuring networks for your application.
+
+By default it will create an isolated network for each environment and join
 all VMs needed by your application to that network. To install and configure application in
 just spawned virtual machine Murano also requires a router connected to the external network.
 
 
-Automatic network configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Automatic Neutron network configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 To create router automatically, provide the following parameters in config file:
 
@@ -49,8 +70,8 @@ To figure out the name of the external network, perform the following command:
 
 During the first deploy, required networks and router with specified name will be created and set up.
 
-Manual network configuration
-^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+Manual neutron network configuration
+^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
 * Step 1. Create public network
 

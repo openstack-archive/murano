@@ -1,6 +1,7 @@
 Namespaces:
   =: io.murano.resources
   std: io.murano
+  sys: io.murano.system
 
 Name: NeutronNetworkBase
 
@@ -80,3 +81,11 @@ Methods:
           portRef:
             get_resource: $portName
           instanceFipOutput: $instanceFipOutput
+
+
+  generateSecurityGroupManager:
+    Arguments:
+      - environment:
+          Contract: $.class(std:Environment).notNull()
+    Body:
+      - Return: new(sys:NeutronSecurityGroupManager, environment => $environment)
