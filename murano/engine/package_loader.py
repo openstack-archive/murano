@@ -45,12 +45,13 @@ class PackageLoader(six.with_metaclass(abc.ABCMeta)):
 
 
 class ApiPackageLoader(PackageLoader):
-    def __init__(self, murano_client_factory):
+    def __init__(self, murano_client_factory, tenant_id):
         self._cache_directory = self._get_cache_directory()
         self._murano_client_factory = murano_client_factory
+        self.tenant_id = tenant_id
 
     def get_package_by_class(self, name):
-        filter_opts = {'class_name': name, 'limit': 1}
+        filter_opts = {'class_name': name}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:
@@ -59,7 +60,7 @@ class ApiPackageLoader(PackageLoader):
         return self._get_package_by_definition(package_definition)
 
     def get_package(self, name):
-        filter_opts = {'fqn': name, 'limit': 1}
+        filter_opts = {'fqn': name}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:
@@ -82,15 +83,19 @@ class ApiPackageLoader(PackageLoader):
 
     def _get_definition(self, filter_opts):
         try:
-            packages = self._murano_client_factory().packages.filter(
-                **filter_opts)
-            try:
-                return packages.next()
-            except StopIteration:
+            packages = list(self._murano_client_factory().packages.filter(
+                **filter_opts))
+            if len(packages) > 1:
+                LOG.debug('Ambiguous package resolution: '
+                          'more then 1 package found for query "{0}", '
+                          'will resolve based on the ownership'.
+                          format(filter_opts))
+                return get_best_package_match(packages, self.tenant_id)
+            elif len(packages) == 1:
+                return packages[0]
+            else:
                 LOG.debug('There are no packages matching filter '
                           '{0}'.format(filter_opts))
-                # TODO(smelikyan): This exception should be replaced with one
-                # defined in python-muranoclient
                 raise LookupError()
         except muranoclient_exc.HTTPException:
             LOG.debug('Failed to get package definition from repository')
@@ -187,3 +192,19 @@ class DirectoryPackageLoader(PackageLoader):
             self._packages_by_name[package.full_name] = package
 
             self._processed_entries.add(entry)
+
+
+def get_best_package_match(packages, tenant_id):
+    public = None
+    other = []
+    for package in packages:
+        if package.owner_id == tenant_id:
+            return package
+        elif package.is_public:
+            public = package
+        else:
+            other.append(package)
+    if public is not None:
+        return public
+    elif other:
+        return other[0]

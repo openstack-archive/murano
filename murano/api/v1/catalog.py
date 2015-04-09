@@ -149,7 +149,6 @@ class Controller(object):
                     policy.check('publicize_package', req.context)
                 break
         package = db_api.package_update(package_id, body, req.context)
-
         return package.to_dict()
 
     def get(self, req, package_id):
