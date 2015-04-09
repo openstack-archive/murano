@@ -181,7 +181,8 @@ class ControllerTest(object):
         environ['REQUEST_METHOD'] = method
 
         req = wsgi.Request(environ)
-        req.context = utils.dummy_context(user, tenant)
+        req.context = utils.dummy_context(user, tenant,
+                                          is_admin=self.is_admin)
         self.context = req.context
         req.content_type = content_type
         req.body = data
