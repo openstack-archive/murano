@@ -7,6 +7,13 @@ if is_service_enabled murano; then
         if is_service_enabled horizon; then
             source $TOP_DIR/lib/murano-dashboard
         fi
+    elif [[ "$1" == "stack" && "$2" == "pre-install" ]]; then
+        echo_summary "Configuring Murano pre-requisites"
+        if is_service_enabled n-net; then
+            disable_service n-net
+            enable_service q-svc q-agt q-dhcp q-l3 q-meta q-metering
+        fi
+        enable_service heat h-api h-api-cfn h-api-cw h-eng
     elif [[ "$1" == "stack" && "$2" == "install" ]]; then
         echo_summary "Installing Murano"
         install_murano
