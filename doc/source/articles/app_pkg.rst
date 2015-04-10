@@ -13,6 +13,8 @@
       License for the specific language governing permissions and limitations
       under the License.
 
+.. _app_pkg:
+
 ====================================
 Composing application package manual
 ====================================
@@ -145,6 +147,7 @@ General application metadata should be described in the application manifest fil
 * **Author** - person or company name which created an application package
 * **Classes** - MuranoPL class list, on which application deployment is based
 * **Tags** - list of words, associated with this application. Will be helpful during the search. *Optional* parameter
+* **Require** - list of applications with versions, required by this application. Currently only used by repository importing mechanism. *Optional* parameter
 
 .. _Telnet Manifest:
 
@@ -164,8 +167,39 @@ Example *manifest.yaml*
      io.murano.apps.linux.Telnet: telnet.yaml
     UI: telnet.yaml
     Logo: telnet.png
+    Require:
+      io.murano.apps.TelnetHelper: 0.0.1
 
-Step 6.  Compose a zip archive
+Step 6.  Prepare images.lst file
+================================
+
+This step is optional. If you plan on providing images required by your
+application, you can include ``images.lst`` file with image specifications
+
+Example *images.lst*
+
+.. code-block:: yaml
+
+    Images:
+    - Name: 'my_image.qcow2'
+      Hash: '64d7c1cd2b6f60c92c14662941cb7913'
+      Meta:
+        title: 'tef'
+        type: 'linux'
+      DiskFormat: qcow2
+      ContainerFormat: bare
+    - Name: 'my_other_image.qcow2'
+      Hash: '64d7c1cd2b6f60c92c14662941cb7913'
+      Meta:
+        title: 'tef'
+        type: 'linux'
+      DiskFormat: qcow2
+      ContainerFormat: bare
+      Url: 'http://path.to/images/file.qcow2'
+
+If *Url* is omitted - the images would be searched for in the Murano Repository.
+
+Step 7.  Compose a zip archive
 ==============================
 
 An application archive should have the following structure
@@ -184,5 +218,7 @@ An application archive should have the following structure
     Image file should be placed in the root folder. It can have any name, just specify it in the manifest file or skip to use default *logo.png* name
 * *manifest.yaml*
     Application manifest file. It's an application entry point. The file name is fixed.
+* *images.lst*
+    List of required images. Optional file.
 
 Congratulations! Your application is ready to be uploaded to an Application Catalog.
