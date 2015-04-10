@@ -60,7 +60,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             'ui_definition': pkg.raw_ui,
             'class_definitions': pkg.classes,
             'archive': pkg.blob,
-            'categories': []
+            'categories': [],
         }
         return pkg, package
 
@@ -90,9 +90,12 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
     def test_add_public_unauthorized(self):
         policy.set_rules({
             'upload_package': '@',
-            'publicize_package': 'role:is_admin or is_admin:True'
+            'publicize_package': 'is_admin:True',
+            'delete_package': 'is_admin:True',
         })
 
+        self.expect_policy_check('upload_package')
+        self.expect_policy_check('delete_package', mock.ANY)
         self.expect_policy_check('upload_package')
         self.expect_policy_check('publicize_package')
         self.expect_policy_check('upload_package')
@@ -106,37 +109,51 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         body = '''\
 
 --BOUNDARY
-Content-Disposition: form-data; name="ziparchive"
-Content-Type: text/plain:
+Content-Disposition: form-data; name="__metadata__"
+
+{0}
+--BOUNDARY
+Content-Disposition: form-data; name="ziparchive"; filename="file.zip"
 
 This is a fake zip archive
---BOUNDARY
-Content-Disposition: form-data; name="metadata"; filename="test.json"
-Content-Type: application/json
-
-%s
---BOUNDARY--''' % package_metadata
+--BOUNDARY--'''
 
         with mock.patch('murano.packages.load_utils.load_from_file') as lff:
             lff.return_value = package_from_dir
+
+            # Uploading a non-public package
             req = self._post(
                 '/catalog/packages',
-                body,
+                body.format(json.dumps({'is_public': False})),
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
-                params={"is_public": "true"})
+            )
+            res = req.get_response(self.api)
+            self.assertEqual(200, res.status_code)
+
+            self.is_admin = True
+            app_id = json.loads(res.body)['id']
+            req = self._delete('/catalog/packages/{0}'.format(app_id))
             res = req.get_response(self.api)
 
-            # Nobody has access to upload public images
+            self.is_admin = False
+            # Uploading a public package fails
+            req = self._post(
+                '/catalog/packages',
+                body.format(json.dumps({'is_public': True})),
+                content_type='multipart/form-data; ; boundary=BOUNDARY',
+            )
+            res = req.get_response(self.api)
             self.assertEqual(403, res.status_code)
 
+            # Uploading a public package passes for admin
             self.is_admin = True
             req = self._post(
                 '/catalog/packages',
-                body,
+                body.format(json.dumps({'is_public': True})),
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
-                params={"is_public": "true"})
+            )
             res = req.get_response(self.api)
-            self.assertEqual(403, res.status_code)
+            self.assertEqual(200, res.status_code)
 
     def test_add_category(self):
         """Check that category added successfully
