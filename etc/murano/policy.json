@@ -3,10 +3,33 @@
     "admin_api": "is_admin:True",
     "default": "",
 
-    "update_package": "rule:admin_api",
-    "upload_package": "rule:admin_api",
-    "delete_package": "rule:admin_api",
+    "get_package": "rule:default",
+    "upload_package": "rule:default",
+    "modify_package": "rule:default",
+    "publicize_package": "rule:admin_api",
+    "manage_public_package": "rule:default",
+    "delete_package": "rule:default",
+    "download_package": "rule:default",
+
+    "get_category": "rule:default",
     "delete_category": "rule:admin_api",
-    "add_category": "rule:admin_api"
+    "add_category": "rule:admin_api",
+
+    "list_deployments": "rule:default",
+    "statuses_deployments": "rule:default",
+
+    "list_environments": "rule:default",
+    "show_environment": "rule:default",
+    "update_environment": "rule:default",
+    "create_environment": "rule:default",
+    "delete_environment": "rule:default",
+
+    "list_env_templates": "rule:default",
+    "create_env_template": "rule:default",
+    "show_env_template": "rule:default",
+    "update_env_template": "rule:default",
+    "delete_env_template": "rule:default",
+
+    "execute_action": "rule:default"
 }
 

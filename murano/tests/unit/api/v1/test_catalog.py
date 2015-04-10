@@ -94,9 +94,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         })
 
         self.expect_policy_check('upload_package')
-        self.expect_policy_check('publicize_image')
+        self.expect_policy_check('publicize_package')
         self.expect_policy_check('upload_package')
-        self.expect_policy_check('publicize_image')
+        self.expect_policy_check('publicize_package')
 
         file_obj_str = cStringIO.StringIO("This is some dummy data")
         file_obj = mock.MagicMock(cgi.FieldStorage)
