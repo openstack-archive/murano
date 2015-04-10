@@ -49,9 +49,16 @@ Methods:
             get_resource: $securityGroupName
           instanceFipOutput: instanceFipOutput
 
+
   generateSecurityGroupManager:
     Arguments:
       - environment:
           Contract: $.class(std:Environment).notNull()
     Body:
       - Return: new(sys:AwsSecurityGroupManager, environment => $environment)
+
+
+  describe:
+    Body:
+      - Return:
+          provider: NovaNetwork

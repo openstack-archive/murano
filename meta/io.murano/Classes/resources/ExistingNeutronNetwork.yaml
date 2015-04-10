@@ -93,6 +93,7 @@ Workflow:
           Contract:
             - $.class(std:SharedIp)
     Body:
+      - $.deploy()
       - $fipName: null
       - $floatingIpNeRef: null
       - If: $assignFloatingIp
@@ -109,3 +110,15 @@ Workflow:
             floatingIpResourceName => $fipName,
             floatingIpNeRef => $floatingIpNeRef
           )
+
+
+  describe:
+    Body:
+      - $.deploy()
+      - Return:
+          provider: Neutron
+          netRef: $._internalNetworkId
+          subnetRef: $._internalSubnetworkId
+          floatingIpNeRef: $._externalNetworkId
+
+

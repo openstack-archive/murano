@@ -41,6 +41,7 @@ Methods:
       - $._environment: $.find(std:Environment).require()
       - $._netExplorer: new(sys:NetworkExplorer)
 
+
   deploy:
     Body:
       - If: not $.getAttr(deployed, false)
@@ -66,6 +67,7 @@ Methods:
           - $._environment.stack.push()
           - $.setAttr(deployed, true)
 
+
   _createNetwork:
     Body:
       - Return:
@@ -74,6 +76,7 @@ Methods:
               type: 'OS::Neutron::Net'
               properties:
                 name: format('{0}-{1}', $.name, $.id())
+
 
   _createSubnet:
     Body:
@@ -87,6 +90,7 @@ Methods:
                 dns_nameservers: [ $.dnsNameserver ]
                 cidr: $.subnetCidr
 
+
   _createRouterInterface:
     Body:
       - Return:
@@ -96,6 +100,7 @@ Methods:
               properties:
                 router_id: $.externalRouterId
                 subnet: { get_resource: $._getSubnetName() }
+
 
   joinInstance:
     Arguments:
@@ -109,6 +114,7 @@ Methods:
           Contract:
             - $.class(std:SharedIp)
     Body:
+      - $.deploy()
       - $netRef: { get_resource: $._getNetworkName() }
       - $subnetRef: { get_resource: $._getSubnetName() }
       - $extNetId: null
@@ -140,17 +146,33 @@ Methods:
 
       - Return: $result
 
+
+  describe:
+    Body:
+      - $.deploy()
+      - Return:
+          provider: Neutron
+          netRef:
+            get_resource: $._getNetworkName()
+          subnetRef:
+            get_resource: $._getSubnetName()
+          floatingIpNeRef: $._getExternalNetId()
+
+
   _getRouterInterfaceName:
     Body:
       Return: format('ri-{0}', $.id())
+
 
   _getNetworkName:
     Body:
       Return: format('network-{0}', $.id())
 
+
   _getSubnetName:
     Body:
       Return: format('subnet-{0}', $.id())
+
 
   _getExternalNetId:
     Body:
