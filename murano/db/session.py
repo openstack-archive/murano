@@ -15,10 +15,13 @@
 """Session management functions."""
 import threading
 
+from oslo.db import exception
 from oslo.db import options
 from oslo.db.sqlalchemy import session as db_session
+from oslo.utils import timeutils
 
 from murano.common import config
+from murano.db.models import Lock
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
@@ -28,6 +31,8 @@ options.set_defaults(CONF)
 
 _FACADE = None
 _LOCK = threading.Lock()
+
+MAX_LOCK_RETRIES = 10
 
 
 def _create_facade_lazily():
@@ -49,3 +54,40 @@ def get_engine():
 def get_session(**kwargs):
     facade = _create_facade_lazily()
     return facade.get_session(**kwargs)
+
+
+def get_lock(name, session=None):
+    if session is None:
+        session = get_session()
+        nested = False
+    else:
+        nested = session.transaction is not None
+    return _get_or_create_lock(name, session, nested)
+
+
+def _get_or_create_lock(name, session, nested, retry=0):
+    if nested:
+        session.begin_nested()
+    else:
+        session.begin()
+    existing = session.query(Lock).get(name)
+    if existing is None:
+        try:
+            # no lock found, creating a new one
+            lock = Lock(id=name, ts=timeutils.utcnow())
+            lock.save(session)
+            return session.transaction
+            # lock created and acquired
+        except exception.DBDuplicateEntry:
+            session.rollback()
+            if retry >= MAX_LOCK_RETRIES:
+                raise
+            else:
+                # other transaction has created a lock, repeat to acquire
+                # via update
+                return _get_or_create_lock(name, session, nested, retry + 1)
+    else:
+        # lock found, acquiring by doing update
+        existing.ts = timeutils.utcnow()
+        existing.save(session)
+        return session.transaction

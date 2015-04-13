@@ -311,10 +311,16 @@ class Class(Base, TimestampMixin):
     package_id = sa.Column(sa.String(36), sa.ForeignKey('package.id'))
 
 
+class Lock(Base):
+    __tablename__ = 'locks'
+    id = sa.Column(sa.String(50), primary_key=True)
+    ts = sa.Column(sa.DateTime, nullable=False)
+
+
 def register_models(engine):
     """Creates database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
-              ApiStats, Package, Category, Class, Instance)
+              ApiStats, Package, Category, Class, Instance, Lock)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -322,6 +328,6 @@ def register_models(engine):
 def unregister_models(engine):
     """Drops database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
-              ApiStats, Package, Category, Class)
+              ApiStats, Package, Category, Class, Lock)
     for model in models:
         model.metadata.drop_all(engine)
