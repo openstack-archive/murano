@@ -1,0 +1,18 @@
+action("deleteEnv")
+
+murano:states-(eid,st) :- deleteEnv(eid), murano:states( eid, st)
+
+murano:parent_types-(tid, type) :- deleteEnv(eid), murano:connected(eid, tid),murano:parent_types(tid,type)
+murano:parent_types-(eid, type) :- deleteEnv(eid), murano:parent_types(eid,type)
+
+murano:properties-(oid, pn, pv) :- deleteEnv(eid), murano:connected( eid, oid),murano:properties(oid, pn, pv)
+murano:properties-(eid, pn, pv) :- deleteEnv(eid), murano:properties(eid, pn, pv)
+
+murano:objects-(oid, pid, ot) :- deleteEnv(eid), murano:connected(eid, oid), murano:objects(oid, pid, ot)
+murano:objects-(eid, tnid, ot) :- deleteEnv(eid), murano:objects(eid, tnid, ot)
+
+murano:relationships-(sid,tid, rt) :- deleteEnv(eid), murano:connected( eid, sid), murano:relationships( sid, tid, rt)
+murano:relationships-(eid,tid, rt) :- deleteEnv(eid), murano:relationships( eid, tid, rt)
+
+murano:connected-(tid, tid2) :- deleteEnv(eid), murano:connected(eid, tid), murano:connected(tid,tid2)
+murano:connected-(eid,tid) :- deleteEnv(eid), murano:connected(eid,tid)

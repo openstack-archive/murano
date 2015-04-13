@@ -23,26 +23,6 @@ import testtools
 import murano.tests.functional.common.tempest_utils as tempest_utils
 import murano.tests.functional.common.utils as common_utils
 
-CONGRESS_RULES = ['invalid_flavor_name("really.bad.flavor")',
-                  'murano_env_of_object(oid,eid):-'
-                  'murano:connected(eid,oid),'
-                  'murano:objects(eid,tid,"io.murano.Environment")',
-                  'predeploy_errors(eid, obj_id, msg):-'
-                  'murano:objects(obj_id, pid, type),'
-                  'murano_env_of_object(obj_id, eid),'
-                  'murano:properties(obj_id, "flavor", flavor_name),'
-                  'invalid_flavor_name(flavor_name),'
-                  'murano:properties(obj_id, "name", obj_name),'
-                  'concat(obj_name, ": bad flavor", msg)',
-                  'predeploy_errors(eid, obj_id, msg):-'
-                  'murano:objects(obj_id, pid, type),'
-                  'murano_env_of_object(obj_id, eid),'
-                  'murano:properties(obj_id, "keyname", key_name),'
-                  'missing_key(key_name),'
-                  'murano:properties(obj_id, "name", obj_name),'
-                  'concat(obj_name, ": missing key", msg)',
-                  'missing_key("")']
-
 
 class PolicyEnforcement(testtools.TestCase,
                         tempest_utils.TempestDeployTestMixin):
@@ -57,21 +37,18 @@ class PolicyEnforcement(testtools.TestCase,
     def setUpClass(cls):
         super(PolicyEnforcement, cls).setUpClass()
 
-        with common_utils.ignored(Exception):
-            cls.congress_client().create_policy(
-                cls.create_policy_req('murano_system'))
-            cls.congress_client().create_policy(
-                cls.create_policy_req('murano'))
+        cls._create_policy(["murano", "murano_system"])
+        cls._create_policy(["murano_action"], kind="action")
 
         with common_utils.ignored(murano_exceptions.HTTPInternalServerError):
-            cls.upload_policy_enf_app()
+            cls._upload_policy_enf_app()
 
     @classmethod
     def tearDownClass(cls):
         cls.purge_uploaded_packages()
 
     @classmethod
-    def upload_policy_enf_app(cls):
+    def _upload_policy_enf_app(cls):
         app_dir = 'io.murano.apps.test.PolicyEnforcementTestApp'
         zip_file_path = cls.zip_dir(os.path.dirname(__file__), app_dir)
         cls.init_list("_package_files")
@@ -81,24 +58,32 @@ class PolicyEnforcement(testtools.TestCase,
             {"categories": ["Web"], "tags": ["tag"]},
             zip_file_path)
 
-    def setUp(self):
-        super(PolicyEnforcement, self).setUp()
-        self.rules = []
-
-        rule_posts = [{"rule": rule} for rule in CONGRESS_RULES]
-        for rule_post in rule_posts:
-            with common_utils.ignored(keystone_exceptions.Conflict):
-                self.rules.append(self.congress_client().create_policy_rule(
-                    'murano_system',
-                    rule_post))
-
     def tearDown(self):
         super(PolicyEnforcement, self).tearDown()
         self.purge_environments()
 
-        for rule in self.rules:
-            self.congress_client().delete_policy_rule(
-                "murano_system", rule["id"])
+    @classmethod
+    def _create_policy(cls, policy_names, kind=None):
+        for name in policy_names:
+            policy_req = {"name": name}
+            if kind:
+                policy_req["kind"] = kind
+            with common_utils.ignored(keystone_exceptions.Conflict):
+                cls.congress_client().create_policy(policy_req)
+
+            rules = []
+            rules_file = os.path.join(
+                os.path.dirname(__file__),
+                "rules_" + name + ".txt")
+
+            if os.path.isfile(rules_file):
+                with open(rules_file) as f:
+                    rules = [rule.strip() for rule in f.readlines()
+                             if rule.strip()]
+            for rule in rules:
+                with common_utils.ignored(keystone_exceptions.Conflict):
+                    cls.congress_client().create_policy_rule(name,
+                                                             {'rule': rule})
 
     def _create_test_app(self, flavor, key):
         """Application create request body

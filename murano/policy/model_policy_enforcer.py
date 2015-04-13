@@ -66,9 +66,14 @@ class ModelPolicyEnforcer(object):
         rules = congress_rules.CongressRulesManager().convert(
             model, class_loader, self._environment.tenant_id)
 
-        rules_str = " ".join(map(str, rules))
+        rules_str = map(str, rules)
+        env_id = model['?']['id']
+        # cleanup of data populated by murano driver
+        rules_str.insert(0, 'deleteEnv("{0}")'.format(env_id))
+
+        rules_line = " ".join(rules_str)
         LOG.debug('Congress rules: \n  ' +
-                  '\n  '.join(map(str, rules)))
+                  '\n  '.join(rules_str))
 
         validation_result = client.execute_policy_action(
             "murano_system",
@@ -76,12 +81,11 @@ class ModelPolicyEnforcer(object):
             False,
             False,
             {'query': 'predeploy_errors(eid, oid, msg)',
-             'action_policy': 'action',
-             'sequence': rules_str})
+             'action_policy': 'murano_action',
+             'sequence': rules_line})
 
         if validation_result["result"]:
 
-            env_id = model['?']['id']
             messages = self._parse_messages(env_id,
                                             validation_result["result"])
 
