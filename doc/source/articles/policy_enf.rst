@@ -28,38 +28,9 @@ records in the *murano* policy. Congress will only give feedback on whether the 
 
 Example
 =======
-In this example we will
-    #. Set-up murano to perform validation using congress engine.
-    #. Create rules that prohibit creating VM instances with flavor with more than 2048 MB ram.
+In this example we will create rules that prohibit creating VM instances with flavor with more than 2048 MB ram.
 
-Setup
------
-#. Enable policy enforcement in murano
-
-    - edit */etc/murano/murano.conf*:
-
-    .. code-block:: ini
-
-        [engine]
-        # Enable model policy enforcer using Congress (boolean value)
-        enable_model_policy_enforcer = true
-    ..
-
-    - restart murano-engine
-
-#. Create **murano** and **murano_system** policies
-
-    - Check if policies **murano** and **murano_system** were created by datasource driver:
-        ``congress policy list``
-    - If there are no **murano** and **murano_system** policies then create them by performing following commands:
-
-    .. code-block:: console
-
-        (openstack) congress policy create murano
-        (openstack) congress policy create murano_system
-    ..
-
-    .. note:: Commands are performed in console started by ``openstack`` command
+Prior creating rules your OpenStack installation has to be configured as described in :ref:`policyenf_setup`.
 
 Example rules
 -------------
@@ -73,7 +44,9 @@ Example rules
     .. code-block:: console
 
         predeploy_errors(eid, obj_id, msg) :-
-           murano:objects(obj_id, eid, type),
+           murano:objects(obj_id, pid, type),
+           murano:objects(eid, tid, "io.murano.Environment"),
+           murano:connected(eid, pid),
            murano:properties(obj_id, "flavor", flavor_name),
            flavor_ram(flavor_name, ram),
            gt(ram, 2048),
@@ -85,7 +58,7 @@ Example rules
 
     .. code-block:: console
 
-      congress policy rule create murano_system "predeploy_errors(eid, obj_id, msg) :- murano:objects(obj_id, eid, type), murano:properties(obj_id, \"flavor\", flavor_name), flavor_ram(flavor_name, ram), gt(ram, 2048), murano:properties(obj_id, \"name\", obj_name), concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
+      congress policy rule create murano_system "predeploy_errors(eid, obj_id, msg) :- murano:objects(obj_id, pid, type), murano:objects(eid, tid, \"io.murano.Environment\"), murano:connected(eid, pid), murano:properties(obj_id, \"flavor\", flavor_name), flavor_ram(flavor_name, ram), gt(ram, 2048), murano:properties(obj_id, \"name\", obj_name), concat(obj_name, \": instance flavor has RAM size over 2048MB\", msg)"
     ..
 
     In this example we used data from policy **murano** which is represented by ``murano:properties``. There are stored rows with decomposition of model representing murano application. We also used built-in functions of congress - ``gt`` - greater-than, and ``concat`` which joins two strings into variable.

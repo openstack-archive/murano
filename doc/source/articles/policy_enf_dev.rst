@@ -2,6 +2,8 @@
 Murano Policy Enforcement - Developer Guide
 ===========================================
 
+.. _policyenf_dev:
+
 This document describes internals of murano policy enforcement.
 
 Model Decomposition
@@ -11,16 +13,17 @@ Models of Murano applications are transformed to set of rules that are processed
 
 There are several "tables" created in murano policy for different kind of rules:
 
-- ``murano:objects(environment_id, object_id, type_name)``
+- ``murano:objects(object_id, parent_id, type_name)``
 - ``murano:properties(object_id, property_name, property_value)``
 - ``murano:relationships(source, target, name)``
-- ``murano:parent_types(object_id, parent_name)``
+- ``murano:connected(source, target)``
+- ``murano:parent_types(object_id, parent_type_name)``
 - ``murano:states(environment_id, state)``
 
-``murano:objects(environment_id, object_id, type_name)``
+``murano:objects(object_id, parent_id, type_name)``
 """"""""""""""""""""""""""""""""""""""""""""""""""""""""
 
-This rule is used for representation of all objects in murano model (environment, applications, instances, ...).
+This rule is used for representation of all objects in Murano model (environment, applications, instances, ...).
 Value of property ``type`` is used as ``type_name`` parameter:
 
 .. code-block:: yaml
@@ -126,6 +129,32 @@ Transformed to this rule:
 There are special relationships "services" from the environment to its applications:
 
 - ``murano:relationships+("env_id", "app_id", "services")``
+
+
+``murano:connected(source, target)``
+""""""""""""""""""""""""""""""""""""
+
+This table stores both direct and indirect connections between instances. It is derived from the ``murano:relationships``:
+
+.. code-block:: yaml
+
+    applications:
+    - '?':
+        id: 0aafd67e
+        type: io.murano.databases.MySql
+      instance:
+        '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
+    - '?':
+        id: 50fa68ff
+        type: io.murano.apps.WordPress
+      database: 0aafd67e
+..
+
+Transformed to rules:
+
+- ``murano:connected+("50fa68ff", "0aafd67e")`` # WordPress to MySql
+- ``murano:connected+("50fa68ff", "ed8df2b0")`` # WordPress to LinuxMuranoInstance
+- ``murano:connected+("0aafd67e", "ed8df2b0")`` # MySql to LinuxMuranoInstance
 
 
 ``murano:parent_types(object_id, parent_name)``
