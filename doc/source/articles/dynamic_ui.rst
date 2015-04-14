@@ -139,12 +139,31 @@ field's type and other attributes values. Among the most common
 attributes are:
 
 * **label** - name, that will be displayed in the form; defaults to **name** being capitalized.
-* **description** - description, that will be displayed in the description area. Use yaml line folding character >- to keep the correct formatting during data transferring.
+* **description** - description, that will be displayed in the description area.
+  Use yaml line folding character >- to keep the correct formatting during data transferring.
 * **descriptionTitle** - title of the description, defaults to **label**; displayed in the description area
-* **hidden** whether field should be visible or not in the input area. Note that hidden field's description will still be visible in the descriptions area (if given). Hidden fields are used storing some data to be used by other, visible fields. 
+* **hidden** whether field should be visible or not in the input area.
+  Note that hidden field's description will still be visible in the descriptions area (if given).
+  Hidden fields are used storing some data to be used by other, visible fields.
 * **minLength**, **maxLength** (for string fields) and **minValue**, **maxValue** (for integer fields) are transparently translated into django validation properties.
-* **validators** is a list of dictionaries, each dictionary should at least have *expr* key, under that key either some `YAQL <https://github.com/ativelkov/yaql/blob/master/README.md>` expression is stored, either one-element dictionary with *regexpValidator* key (and some regexp string as value). Another possible key of a validator dictionary is *message*, and although it is not required, it is highly desirable to specify it - otherwise, when validator fails (i.e. regexp doesn't match or YAQL expression evaluates to false) no message will be shown. Note that field-level validators use YAQL context different from all other attributes and section: here *$* root object is set to the value of field being validated (to make expressions shorter).
-* **widgetMedia** sets some custom *CSS* and *JavaScript* used for the field's widget rendering. Mostly they are used to do some client-side field enabling/disabling, hiding/unhiding etc. This is a temporary field which will be dropped once Version 3 of Dynamic UI is implemented (since it will transparently translate YAQL expressions into the appropriate *JavaScript*).
+* **validators** is a list of dictionaries, each dictionary should at least have *expr* key, under that key either some `YAQL <https://github.com/stackforge/yaql/blob/master/README.rst>`_ expression is stored, either one-element dictionary with *regexpValidator* key (and some regexp string as value). Another possible key of a validator dictionary is *message*, and although it is not required, it is highly desirable to specify it - otherwise, when validator fails (i.e. regexp doesn't match or YAQL expression evaluates to false) no message will be shown. Note that field-level validators use YAQL context different from all other attributes and section: here *$* root object is set to the value of field being validated (to make expressions shorter).
+* **widgetMedia** sets some custom *CSS* and *JavaScript* used for the field's widget rendering. Note, that files should be placed to Django static folder in advance.
+  Mostly they are used to do some client-side field enabling/disabling, hiding/unhiding etc.
+  This is a temporary field which will be dropped once Version 3 of Dynamic UI is implemented (since it will transparently translate YAQL expressions into the appropriate *JavaScript*).
+* **requirements** is used only with flavor field and prevents user to pick unstable for a deployment flavor.
+  It allows to set minimum ram (in MBs), disk space (in GBs) or virtual CPU quantity.
+
+  Example that shows how to hide items, smaller than regular 'small' flavor in flavor select field:
+
+  .. code-block:: yaml
+
+   - name: flavor
+          type: flavor
+          label: Instance flavor
+          requirements:
+              min_disk: 20
+              min_vcpus: 2
+              min_memory_mb: 2048
 
 Besides field-level validators form-level validators also exist. They
 use **standard context** for YAQL evaluation and are required when
