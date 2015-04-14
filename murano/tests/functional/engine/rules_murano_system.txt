@@ -1,0 +1,4 @@
+missing_key("")
+invalid_flavor_name("really.bad.flavor")
+predeploy_errors(eid, obj_id, msg) :- murano:objects(obj_id, eid, type), murano:properties(obj_id, "flavor", flavor_name), invalid_flavor_name(flavor_name), murano:properties(obj_id, "name", obj_name), concat(obj_name, ": bad flavor", msg)
+predeploy_errors(eid, obj_id, msg) :- murano:objects(obj_id, eid, type), murano:properties(obj_id, "keyname", key_name), missing_key(key_name), murano:properties(obj_id, "name", obj_name), concat(obj_name, ": missing key", msg)
