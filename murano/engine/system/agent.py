@@ -80,6 +80,12 @@ class Agent(murano_object.MuranoObject):
                 'Use of murano-agent is disallowed '
                 'by the server configuration')
 
+    def _prepare_message(self, template, msg_id):
+        msg = messaging.Message()
+        msg.body = template
+        msg.id = msg_id
+        return msg
+
     def _send(self, template, wait_results, timeout, _context):
         """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
@@ -88,10 +94,7 @@ class Agent(murano_object.MuranoObject):
             listener = self._environment.agentListener
             listener.subscribe(msg_id, event, _context)
 
-        msg = messaging.Message()
-        msg.body = template
-        msg.id = msg_id
-
+        msg = self._prepare_message(template, msg_id)
         with common.create_rmq_client() as client:
             client.send(message=msg, key=self._queue)
 
