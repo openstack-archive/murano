@@ -235,11 +235,22 @@ def package_update(pkg_id_or_name, changes, context):
     session = db_session.get_session()
     with session.begin():
         pkg = _package_get(pkg_id_or_name, session)
+        was_private = not pkg.is_public
         if not context.is_admin:
             _authorize_package(pkg, context)
 
         for change in changes:
             pkg = operation_methods[change['op']](pkg, change)
+        became_public = pkg.is_public
+        class_names = [clazz.name for clazz in pkg.class_definitions]
+        if was_private and became_public:
+            with db_session.get_lock("public_packages", session):
+                _check_for_existing_classes(session, class_names, None,
+                                            check_public=True,
+                                            ignore_package_with_id=pkg.id)
+                _check_for_public_packages_with_fqn(session,
+                                                    pkg.fully_qualified_name,
+                                                    pkg.id)
         session.add(pkg)
     return pkg
 
@@ -359,16 +370,37 @@ def package_upload(values, tenant_id):
     composite_attr_to_func = {'categories': _get_categories,
                               'tags': _get_tags,
                               'class_definitions': _get_class_definitions}
-    with session.begin():
+    is_public = values.get('is_public', False)
+
+    if is_public:
+        public_lock = db_session.get_lock("public_packages", session)
+    else:
+        public_lock = None
+    tenant_lock = db_session.get_lock("classes_of_" + tenant_id, session)
+    try:
+        _check_for_existing_classes(session, values.get('class_definitions'),
+                                    tenant_id, check_public=is_public)
+        if is_public:
+            _check_for_public_packages_with_fqn(
+                session,
+                values.get('fully_qualified_name'))
         for attr, func in composite_attr_to_func.iteritems():
             if values.get(attr):
                 result = func(values[attr], session)
                 setattr(package, attr, result)
                 del values[attr]
-
         package.update(values)
         package.owner_id = tenant_id
         package.save(session)
+        tenant_lock.commit()
+        if public_lock is not None:
+            public_lock.commit()
+    except Exception:
+        tenant_lock.rollback()
+        if public_lock is not None:
+            public_lock.rollback()
+        raise
+
     return package
 
 
@@ -442,3 +474,49 @@ def category_delete(category_id):
             LOG.error(msg)
             raise exc.HTTPNotFound(msg)
         session.delete(category)
+
+
+def _check_for_existing_classes(session, class_names, tenant_id,
+                                check_public=False,
+                                ignore_package_with_id=None):
+    if not class_names:
+        return
+    q = session.query(models.Class.name).filter(
+        models.Class.name.in_(class_names))
+    private_filter = None
+    public_filter = None
+    predicate = None
+    if tenant_id is not None:
+        private_filter = models.Class.package.has(
+            models.Package.owner_id == tenant_id)
+    if check_public:
+        public_filter = models.Class.package.has(
+            models.Package.is_public)
+    if private_filter is not None and public_filter is not None:
+        predicate = sa.or_(private_filter, public_filter)
+    elif private_filter is not None:
+        predicate = private_filter
+    elif public_filter is not None:
+        predicate = public_filter
+    if predicate is not None:
+        q = q.filter(predicate)
+    if ignore_package_with_id is not None:
+        q = q.filter(models.Class.package_id != ignore_package_with_id)
+    if q.first() is not None:
+        msg = _('Class with the same full name is already '
+                'registered in the visibility scope')
+        LOG.error(msg)
+        raise exc.HTTPConflict(msg)
+
+
+def _check_for_public_packages_with_fqn(session, fqn,
+                                        ignore_package_with_id=None):
+    q = session.query(models.Package.id).\
+        filter(models.Package.is_public).\
+        filter(models.Package.fully_qualified_name == fqn)
+    if ignore_package_with_id is not None:
+        q = q.filter(models.Package.id != ignore_package_with_id)
+    if q.first() is not None:
+        msg = _('Package with the same Name is already made public')
+        LOG.error(msg)
+        raise exc.HTTPConflict(msg)

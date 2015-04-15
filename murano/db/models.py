@@ -220,15 +220,15 @@ class Instance(Base):
 class Package(Base, TimestampMixin):
     """Represents a meta information about application package."""
     __tablename__ = 'package'
-
+    __table_args__ = (sa.Index('ix_package_fqn_and_owner',
+                               'fully_qualified_name',
+                               'owner_id', unique=True),)
     id = sa.Column(sa.String(36),
                    primary_key=True,
                    default=uuidutils.generate_uuid)
     archive = sa.Column(st.LargeBinary())
     fully_qualified_name = sa.Column(sa.String(128),
-                                     nullable=False,
-                                     index=True,
-                                     unique=True)
+                                     nullable=False)
     type = sa.Column(sa.String(20), nullable=False, default='class')
     author = sa.Column(sa.String(80), default='Openstack')
     supplier = sa.Column(st.JsonBlob(), nullable=True, default={})
@@ -251,7 +251,8 @@ class Package(Base, TimestampMixin):
                                      cascade='save-update, merge',
                                      lazy='joined')
     class_definitions = sa_orm.relationship(
-        "Class", cascade='save-update, merge, delete', lazy='joined')
+        "Class", cascade='save-update, merge, delete', lazy='joined',
+        backref='package')
 
     def to_dict(self):
         d = self.__dict__.copy()

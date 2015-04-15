@@ -139,7 +139,8 @@ class TaskExecutor(object):
             murano_client_factory = lambda: \
                 self._environment.clients.get_murano_client(self._environment)
             with package_loader.ApiPackageLoader(
-                    murano_client_factory) as pkg_loader:
+                    murano_client_factory,
+                    self._environment.tenant_id) as pkg_loader:
                 return self._execute(pkg_loader)
         finally:
             if self._model['Objects'] is None:
