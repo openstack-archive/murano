@@ -98,7 +98,7 @@ Just set *ssl* parameter to True to enable ssl.
     ssl = True
 
 If you want to configure Murano Agent in a different way change
-the default template. It can be found in Murano Core Library, located at */https://github.com/stackforge/murano/blob/master/meta/io.murano/Resources/Agent-v1.template.* Take
+the default template. It can be found in Murano Core Library, located at *http://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Resources/Agent-v1.template*. Take
 a look at appSettings section:
 
 ::

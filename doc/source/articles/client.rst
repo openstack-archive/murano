@@ -30,7 +30,7 @@ To install latest murano CLI client run the following command in your shell::
     pip install python-muranoclient
 
 Alternatively you can checkout the latest version from
-https://github.com/stackforge/python-muranoclient
+https://git.openstack.org/cgit/openstack/python-muranoclient
 
 
 Using CLI client
@@ -60,7 +60,7 @@ To get the latest bash completion script download `murano.bash_completion`_
 from the source repository and add it to your completion scripts.
 
 
-.. _murano.bash_completion: https://raw.githubusercontent.com/stackforge/python-muranoclient/master/tools/murano.bash_completion
+.. _murano.bash_completion: https://git.openstack.org/cgit/openstack/python-muranoclient/plain/tools/murano.bash_completion
 
 
 Listing currently installed packages

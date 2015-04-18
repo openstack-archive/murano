@@ -41,10 +41,10 @@ Murano consists of several source code repositories:
     * `python-muranoclient`_ - Client library and CLI client for Murano
 
 
-.. _murano: https://git.openstack.org/cgit/stackforge/murano/
-.. _murano-agent: https://git.openstack.org/cgit/stackforge/murano-agent/
-.. _murano-dashboard: https://git.openstack.org/cgit/stackforge/murano-dashboard/
-.. _python-muranoclient: https://git.openstack.org/cgit/stackforge/python-muranoclient/
+.. _murano: https://git.openstack.org/cgit/openstack/murano/
+.. _murano-agent: https://git.openstack.org/cgit/openstack/murano-agent/
+.. _murano-dashboard: https://git.openstack.org/cgit/openstack/murano-dashboard/
+.. _python-muranoclient: https://git.openstack.org/cgit/openstack/python-muranoclient/
 
 
 This documentation offers information on how Murano works and how to

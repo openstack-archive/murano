@@ -119,7 +119,7 @@ Install the API service and Engine
     .. code-block:: console
 
         $ cd ~/murano
-        $ git clone https://github.com/stackforge/murano
+        $ git clone git://git.openstack.org/openstack/murano
     ..
 
 #.  Set up Murano config file
@@ -254,14 +254,14 @@ Install Murano Dashboard
     .. code-block:: console
 
         $ cd ~/murano
-        $ git clone https://github.com/stackforge/murano-dashboard
+        $ git clone git://git.openstack.org/openstack/murano-dashboard
     ..
 
 #.  Clone horizon repository
 
     .. code-block:: console
 
-        $ git clone https://github.com/openstack/horizon
+        $ git clone git://git.openstack.org/openstack/horizon
     ..
 
 #.  Create venv and install muranodashboard as editable module.
@@ -369,7 +369,7 @@ Murano App Incubator.
     .. code-block:: console
 
         $ cd ~/murano
-        $ git clone https://github.com/stackforge/murano-apps
+        $ git clone git://git.openstack.org/openstack/murano-apps
     ..
 
 2.  Import every package you need from this repository, using the command

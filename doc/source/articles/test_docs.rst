@@ -43,7 +43,7 @@ Murano Automated Tests: UI Tests
 ================================
 
 Murano project has a Web User Interface and all possible user scenarios should be tested.
-All UI tests are located at the https://git.openstack.org/cgit/stackforge/murano-dashboard/tree/muranodashboard/tests/functional
+All UI tests are located at the https://git.openstack.org/cgit/openstack/murano-dashboard/tree/muranodashboard/tests/functional
 
 Automated tests for Murano Web UI are written in Python using special Selenium library. This library is used to automate web browser interaction from Python.
 For more information please visit https://selenium-python.readthedocs.org/
@@ -63,7 +63,7 @@ First of all make sure that all additional components are installed.
 
 * Clone murano-dashboard git repository:
 
-  * git clone git://git.openstack.org/stackforge/murano-dashboard*
+  * git clone git://git.openstack.org/openstack/murano-dashboard*
 * Change default settings:
 
   * Copy muranodashboard/tests/functional/config/config.conf.example to config.conf
@@ -122,14 +122,14 @@ Murano Automated Tests: Tempest Tests
 
 All Murano services have tempest-based automated tests, which allow to verify API interfaces and deployment scenarious.
 
-Tempest tests for Murano are located at the: https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional
+Tempest tests for Murano are located at the: https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional
 
 The following Python files are contain basic tests suites for different Murano components.
 
 API Tests
 +++++++++
 
-Murano API tests are run on devstack gate and located at https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional/api
+Murano API tests are run on devstack gate and located at https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional/api
 
 * *test_murano_envs.py* contains test suite with actions on murano's environments(create, delete, get and etc.)
 * *test_murano_sessions.py* contains test suite with actions on murano's sessions(create, delete, get and etc.)
@@ -139,7 +139,7 @@ Murano API tests are run on devstack gate and located at https://git.openstack.o
 Engine Tests
 +++++++++++++++++++
 
-Murano Engine Tests are run on murano-ci : https://git.openstack.org/cgit/stackforge/murano/tree/murano/tests/functional/engine
+Murano Engine Tests are run on murano-ci : https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional/engine
 
 * *base.py* contains base test class and tests with actions on deploy Murano services such as 'Telnet' and 'Apache'.
 
