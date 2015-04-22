@@ -39,5 +39,8 @@ if is_service_enabled murano; then
     if [[ "$1" == "unstack" ]]; then
         stop_murano
         cleanup_murano
+        if is_service_enabled horizon; then
+            cleanup_murano_dashboard
+        fi
     fi
 fi
