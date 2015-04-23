@@ -93,6 +93,10 @@ Example *telnet.yaml*
 
     Name: Telnet
 
+    # Inheritance from io.murano.Application class
+    # (located at Murano Core library) indicates,
+    # that this is a complete application
+    # and that 'deploy' method has to be defined.
     Extends: std:Application
 
     Properties:
@@ -103,23 +107,29 @@ Example *telnet.yaml*
         Contract: $.class(res:Instance).notNull()
 
 
-    Workflow:
+    Methods:
       deploy:
         Body:
+          # Determine the environment to which the application belongs.
+          # This message will be stored in deployment logs and available in UI
           - $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instace.')
+          # Deploy VM
           - $.instance.deploy()
           - $this.find(std:Environment).reporter.report($this, 'Instance is created. Setup Telnet service.')
+          # Create instance of murano resource class. Agent will use it to find
+          # corresponding execution plan by the file name
           - $resources: new('io.murano.system.Resources')
           # Deploy Telnet
           - $template: $resources.yaml('DeployTelnet.template')
+          # Send prepared execution plan to Murano agent
           - $.instance.agent.call($template, $resources)
           - $this.find(std:Environment).reporter.report($this, 'Telnet service setup is done.')
 
 
 Note, that
 
-* *io.murano.system.Resources* is a system class, defined in MuranoPL. More information about MuranoPL system classes is available here: :ref:`class_definitions`.
-* *io.murano.resources.Instance* is a class, defined in the core Murano library, which is available here. :ref:`This library <core_library>` contains Murano Agent templates and virtual machine initialization scripts.
+* *io.murano.system.Resources* is a system class, defined in MuranoPL. MuranoPL system classes are described `here <http://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes>`_.
+* *io.murano.resources.Instance* is a class, defined in the core Murano library, contains Murano Agent templates and virtual machine initialization scripts.
 * $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instance.') - this is the way of sending reports to Murano dashboard during deployment
 
 Step 3.  Prepare dynamic UI form definition

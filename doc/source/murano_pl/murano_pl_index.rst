@@ -25,5 +25,3 @@ Content
 .. toctree::
 
    murano_pl
-   system_classes
-   core_classes
