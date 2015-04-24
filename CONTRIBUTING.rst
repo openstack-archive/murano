@@ -41,6 +41,8 @@ Project Hosting Details
 
     * https://git.openstack.org/cgit/openstack/python-muranoclient
 
+    * https://git.openstack.org/cgit/openstack/murano-apps
+
 * Code Review
     * https://review.openstack.org/#/q/murano+AND+status:+open,n,z
 
