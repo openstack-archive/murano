@@ -186,7 +186,8 @@ class HeatStack(murano_object.MuranoObject):
                 trust_client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,
-                    template=template)
+                    template=template,
+                    disable_rollback=True)
                 self._wait_state(
                     _context,
                     lambda status: status == 'UPDATE_COMPLETE')
