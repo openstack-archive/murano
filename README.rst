@@ -1,27 +1,25 @@
 Murano
 ======
+
 Murano Project introduces an application catalog, which allows application
 developers and cloud administrators to publish various cloud-ready
-applications in a browsable‎ categorised catalog, which may be used by the
-cloud users (including the inexperienced ones) to pick-up the needed
-applications and services and composes the reliable environments out of them
-in a "push-the-button" manner.
+applications in a browsable‎ categorised catalog. Cloud users
+-- including inexperienced ones -- can then use the catalog to
+compose reliable application environments with the push of a button.
 
 
 Project Resources
 -----------------
 
-Project status, bugs, and blueprints are tracked on Launchpad:
+* `Murano Official Documentation <http://murano.readthedocs.org>`_
 
-  https://launchpad.net/murano
+* Project status, bugs, and blueprints are tracked on
+  `Launchpad <https://launchpad.net/murano>`_
 
-Developer documentation can be found here:
+* Additional resources are linked from the project
+  `Wiki <https://wiki.openstack.org/wiki/Murano>`_ page
 
-  https://murano.readthedocs.org
-
-Additional resources are linked from the project wiki page:
-
-  https://wiki.openstack.org/wiki/Murano
+* `Python client <https://github.com/openstack/python-muranoclient>`_
 
 License
 -------
