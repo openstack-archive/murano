@@ -255,8 +255,11 @@ def package_update(pkg_id_or_name, changes, context):
     return pkg
 
 
-def package_search(filters, context, limit=None):
+def package_search(filters, context, limit=None, catalog=False):
     """Search packages with different filters
+      Catalog param controls the base query creation. Catalog queries
+      only search packages a user can deploy. Non-catalog queries searches
+      packages a user can edit.
       * Admin is allowed to browse all the packages
       * Regular user is allowed to browse all packages belongs to user tenant
         and all other packages marked is_public.
@@ -266,45 +269,28 @@ def package_search(filters, context, limit=None):
         request and then to use the ID of the last package from the response
         as the marker parameter in a subsequent limited request.
     """
+
     session = db_session.get_session()
     pkg = models.Package
 
-    # If the packages search specifies the inclusion of disabled packages,
-    # we handle this differently for admins vs non-admins:
-    # For admins: *don't* require pkg.enabled == True (no changes to query)
-    # For non-admins: add an OR-condition to filter for packages that are owned
-    #                 by the tenant in the current context
-    # Otherwise: in all other cases, we return only enabled packages
-    if filters.get('include_disabled', '').lower() == 'true':
-        include_disabled = True
-    else:
-        include_disabled = False
+    query = session.query(pkg)
 
-    if context.is_admin:
-        if not include_disabled:
-            # NOTE(efedorova): is needed for SA 0.7.9, but could be done
-            # simpler in SA 0.8. See http://goo.gl/9stlKu for a details
-            query = session.query(pkg).filter(pkg.__table__.c.enabled)
-        else:
-            query = session.query(pkg)
-    elif filters.get('owned', '').lower() == 'true':
-        if not include_disabled:
-            query = session.query(pkg).filter(
-                (pkg.owner_id == context.tenant) & pkg.enabled
-            )
-        else:
-            query = session.query(pkg).filter(pkg.owner_id == context.tenant)
+    if catalog:
+        # Only show packages one can deploy, i.e. own + public
+        query = query.filter(or_(
+            pkg.owner_id == context.tenant, pkg.is_public)
+        )
     else:
-        if not include_disabled:
-            query = session.query(pkg).filter(
-                or_((pkg.is_public & pkg.enabled),
-                    ((pkg.owner_id == context.tenant) & pkg.enabled))
-            )
-        else:
-            query = session.query(pkg).filter(
-                or_((pkg.is_public & pkg.enabled),
-                    pkg.owner_id == context.tenant)
-            )
+        # Show packages one can edit.
+        if not context.is_admin:
+            query = query.filter(pkg.owner_id == context.tenant)
+        # No else here admin can edit everything.
+
+    if not filters.get('include_disabled', '').lower() == 'true':
+        query = query.filter(pkg.enabled)
+
+    if filters.get('owned', '').lower() == 'true':
+        query = query.filter(pkg.owner_id == context.tenant)
 
     if 'type' in filters.keys():
         query = query.filter(pkg.type == filters['type'].title())
@@ -347,12 +333,14 @@ def package_search(filters, context, limit=None):
         query = query.filter(or_(*conditions))
 
     sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
-                 filters.get('order_by', []) or ['name']]
+                 filters.get('order_by', ['name'])]
+
     marker = filters.get('marker')
-    # TODO(btully): sort_dir is always None - not getting passed as a filter?
     sort_dir = filters.get('sort_dir')
+
     if marker is not None:  # set marker to real object instead of its id
         marker = _package_get(marker, session)
+
     query = utils.paginate_query(
         query, pkg, limit, sort_keys, marker, sort_dir)
 
