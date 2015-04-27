@@ -178,13 +178,17 @@ class Controller(object):
         policy.check("get_package", req.context)
 
         filters = _get_filters(req.GET.items())
+
         limit = _validate_limit(filters.get('limit'))
         if limit is None:
             limit = CONF.packages_opts.limit_param_default
         limit = min(CONF.packages_opts.api_limit_max, limit)
 
         result = {}
-        packages = db_api.package_search(filters, req.context, limit)
+
+        catalog = req.GET.pop('catalog', '').lower() == 'true'
+        packages = db_api.package_search(
+            filters, req.context, limit, catalog=catalog)
         if len(packages) == limit:
             result['next_marker'] = packages[-1].id
         result['packages'] = [package.to_dict() for package in packages]
