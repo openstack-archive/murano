@@ -1,0 +1,46 @@
+Namespaces:
+  =: io.murano.conflang.puppet.ExamplePuppet
+  std: io.murano
+  res: io.murano.resources
+  sys: io.murano.system
+
+
+Name: ExamplePuppet
+
+Extends: std:Application
+
+Properties:
+
+  instance:
+    Contract: $.class(res:Instance).notNull()
+
+Methods:
+  initialize:
+    Body:
+      - $._environment: $.find(std:Environment).require()
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+          - $._environment.reporter.report($this, 'Creating VM for Example Chef example ')
+          - $securityGroupIngress:
+              - ToPort: 22
+                FromPort: 22
+                IpProtocol: tcp
+                External: true
+          - $._environment.securityGroupManager.addGroupIngress($securityGroupIngress)
+          - $.instance.deploy()
+          - $resources: new(sys:Resources)
+          # Deploy Puppet example
+          - $template: $resources.yaml('DeployExamplePuppet.template')
+
+          - $._environment.reporter.report($this, 'Instance is created. Deploying Example Puppet')
+          - $.instance.agent.call($template, $resources)
+          - If: $.instance.assignFloatingIp
+            Then:
+              - $host: $.instance.floatingIpAddress
+            Else:
+              - $host: $.instance.ipAddresses[0]
+          - $._environment.reporter.report($this, format('Example Puppet is installed at {0}', $host))
+          - $.setAttr(deployed, true)

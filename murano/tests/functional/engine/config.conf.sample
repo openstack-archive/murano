@@ -26,6 +26,9 @@
 # image for linux services
 # linux_image = default_linux
 
+# murano instance type
+# instance_type = io.murano.resources.LinuxMuranoInstance
+
 # image for docker applications
 # docker_image = debian-8-docker.qcow2
 
