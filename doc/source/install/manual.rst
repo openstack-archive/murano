@@ -35,9 +35,9 @@ Ubuntu
 .. code-block:: console
 
     $ sudo apt-get install python-pip python-dev \
-    > libmysqlclient-dev libpq-dev \
-    > libxml2-dev libxslt1-dev \
-    > libffi-dev
+      libmysqlclient-dev libpq-dev \
+      libxml2-dev libxslt1-dev \
+      libffi-dev
 ..
 
 Fedora
@@ -209,7 +209,7 @@ Install the API service and Engine
 
         $ cd ~/murano/murano
         $ tox -e venv -- murano-db-manage \
-        > --config-file ./etc/murano/murano.conf upgrade
+          --config-file ./etc/murano/murano.conf upgrade
     ..
 
 #.  Open a new console and launch Murano API. A separate terminal is
@@ -218,8 +218,7 @@ Install the API service and Engine
     .. code-block:: console
 
         $ cd ~/murano/murano
-        $ tox -e venv -- murano-api \
-        > --config-file ./etc/murano/murano.conf
+        $ tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
     ..
 
 #.  Import Core Murano Library.
@@ -227,9 +226,9 @@ Install the API service and Engine
     .. code-block:: console
 
         $ cd ~/murano/murano
-        $ tox -e venv -- murano-manage \
-        > --config-file ./etc/murano/murano.conf \
-        > import-package ./meta/io.murano
+        $ pushd ./meta/io.murano; zip -r ../../io.murono.zip *; popd;
+        $ tox -e venv -- murano --murano-url http://localhost:8082 \
+          package-import io.murono.zip
     ..
 
 #. Open a new console and launch Murano Engine. A separate terminal is
@@ -360,11 +359,10 @@ Install Murano Dashboard
 Import Murano Applications
 ==========================
 
-Murano provides excellent catalog services, but it also requires applications
-which to provide. This section describes how to import Murano Applications from
-Murano App Incubator.
+Applications are needed to be imported
+to fill the catalog. It can be done via dashboard, but also possible via CLI:
 
-1.  Clone Murano App Incubator repository.
+1.  Clone Murano Apps repository.
 
     .. code-block:: console
 
@@ -378,8 +376,8 @@ Murano App Incubator.
     .. code-block:: console
 
         $ cd ~/murano/murano
-        $ tox -e venv -- murano-manage \
-        > --config-file ./etc/murano/murano.conf \
-        > import-package ../murano-app-incubator/%APPLICATION_DIRECTORY_NAME%
+        $ pushd ../murano-apps/Docker/Applications/%APP-NAME%/package; \
+          zip -r ~/murano/murano/app.zip *; popd;
+        $ tox -e venv -- murano --murano-url http://localhost:8082 package-import app.zip
 
 .. include:: configure_network.rst
