@@ -14,7 +14,7 @@
 
 import types
 
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 from webob import exc
 
 from murano.common.i18n import _

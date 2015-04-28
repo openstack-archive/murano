@@ -21,7 +21,7 @@ import os
 import uuid
 
 import mock
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 
 from murano.api.v1 import catalog
 from murano.common import policy

@@ -15,7 +15,7 @@
 
 
 import mock
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 
 from murano.api.v1 import actions
 from murano.common import policy

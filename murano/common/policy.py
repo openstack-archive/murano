@@ -14,7 +14,7 @@
 
 # Based on designate/policy.py
 
-from oslo.config import cfg
+from oslo_config import cfg
 from webob import exc as exceptions
 
 from murano.common.i18n import _

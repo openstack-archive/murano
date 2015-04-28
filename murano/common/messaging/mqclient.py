@@ -18,7 +18,7 @@ import ssl as ssl_module
 
 from eventlet import patcher
 kombu = patcher.import_patched('kombu')
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 from subscription import Subscription
 
 

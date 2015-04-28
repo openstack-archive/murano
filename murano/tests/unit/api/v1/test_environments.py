@@ -15,8 +15,8 @@
 
 import json
 
-from oslo.config import cfg
-from oslo.utils import timeutils
+from oslo_config import cfg
+from oslo_utils import timeutils
 
 from murano.api.v1 import environments
 from murano.common import config

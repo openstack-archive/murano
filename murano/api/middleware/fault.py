@@ -17,7 +17,7 @@ Cinder's faultwrapper
 import sys
 import traceback
 
-from oslo.config import cfg
+from oslo_config import cfg
 import webob
 
 from murano.common import wsgi

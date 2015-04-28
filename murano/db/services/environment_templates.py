@@ -17,7 +17,7 @@ from murano.db import models
 from murano.db import session as db_session
 from murano.openstack.common import log as logging
 
-from oslo.db import exception as db_exc
+from oslo_db import exception as db_exc
 
 LOG = logging.getLogger(__name__)
 

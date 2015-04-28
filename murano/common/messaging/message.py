@@ -15,7 +15,7 @@
 
 import logging
 
-from oslo.serialization import jsonutils
+from oslo_serialization import jsonutils
 
 log = logging.getLogger("murano-common.messaging")
 

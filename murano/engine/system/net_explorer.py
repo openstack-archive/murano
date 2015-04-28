@@ -16,7 +16,7 @@ import math
 
 import netaddr
 from netaddr.strategy import ipv4
-from oslo.utils import uuidutils
+from oslo_utils import uuidutils
 
 import murano.common.config as config
 import murano.dsl.helpers as helpers

@@ -27,7 +27,7 @@ import signal
 
 from eventlet.green import subprocess
 from eventlet import greenthread
-from oslo.utils import strutils
+from oslo_utils import strutils
 import six
 
 from murano.openstack.common._i18n import _

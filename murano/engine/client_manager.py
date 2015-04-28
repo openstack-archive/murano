@@ -17,7 +17,7 @@ import heatclient.client as hclient
 import keystoneclient
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
-from oslo.config import cfg
+from oslo_config import cfg
 
 from murano.common import auth_utils
 from murano.common import config

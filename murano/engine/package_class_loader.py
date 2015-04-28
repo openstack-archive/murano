@@ -17,7 +17,7 @@ import json
 import os.path
 import sys
 
-from oslo.config import cfg
+from oslo_config import cfg
 import yaml
 
 from murano.dsl import class_loader

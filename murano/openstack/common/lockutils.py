@@ -26,7 +26,7 @@ import threading
 import time
 import weakref
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from murano.openstack.common import fileutils
 from murano.openstack.common._i18n import _, _LE, _LI

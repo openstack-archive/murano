@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo.config import cfg
-from oslo.db.sqlalchemy import utils
+from oslo_config import cfg
+from oslo_db.sqlalchemy import utils
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes

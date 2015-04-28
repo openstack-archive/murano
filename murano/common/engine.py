@@ -17,9 +17,9 @@ import traceback
 import uuid
 
 import eventlet.debug
-from oslo import messaging
-from oslo.messaging import target
-from oslo.serialization import jsonutils
+import oslo_messaging as messaging
+from oslo_messaging import target
+from oslo_serialization import jsonutils
 
 from murano.common import auth_utils
 from murano.common import config

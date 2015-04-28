@@ -15,8 +15,8 @@
 """
 SQLAlchemy models for murano data
 """
-from oslo.db.sqlalchemy import models
-from oslo.utils import timeutils
+from oslo_db.sqlalchemy import models
+from oslo_utils import timeutils
 import sqlalchemy as sa
 from sqlalchemy.ext import declarative
 from sqlalchemy import orm as sa_orm

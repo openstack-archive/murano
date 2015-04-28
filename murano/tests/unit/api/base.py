@@ -18,7 +18,7 @@ import urllib
 
 import fixtures
 import mock
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 import routes
 import webob
 

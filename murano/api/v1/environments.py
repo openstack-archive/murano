@@ -14,7 +14,7 @@
 
 import re
 
-from oslo.db import exception as db_exc
+from oslo_db import exception as db_exc
 from sqlalchemy import desc
 from webob import exc
 
