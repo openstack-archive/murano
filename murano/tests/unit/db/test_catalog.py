@@ -30,6 +30,9 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         self.context = utils.dummy_context(tenant_id=self.tenant_id)
         self.context_2 = utils.dummy_context(tenant_id=self.tenant_id_2)
 
+        self.context_admin = utils.dummy_context(tenant_id=self.tenant_id)
+        self.context_admin.is_admin = True
+
     def _create_categories(self):
         api.category_add('cat1')
         api.category_add('cat2')
@@ -57,6 +60,163 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
             'path': path,
             'value': value
         }
+
+    def test_package_search_search(self):
+        pkg1 = api.package_upload(
+            self._stub_package(
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        pkg2 = api.package_upload(
+            self._stub_package(
+                tags=[],
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        res = api.package_search(
+            {'search': 'tag1'}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'search': pkg1.fully_qualified_name}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'search': pkg2.fully_qualified_name}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'search': 'not_a_valid_uuid'}, self.context)
+        self.assertEqual(len(res), 0)
+
+        res = api.package_search(
+            {'search': 'some text'}, self.context)
+        self.assertEqual(len(res), 2)
+
+    def test_package_search_tags(self):
+        api.package_upload(
+            self._stub_package(
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                tags=[],
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        res = api.package_search(
+            {'tag': ['tag1']}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'tag': ['tag2']}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'tag': ['tag3']}, self.context)
+        self.assertEqual(len(res), 0)
+
+    def test_package_search_type(self):
+        api.package_upload(
+            self._stub_package(
+                type="Application",
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                type="Library",
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        res = api.package_search(
+            {'type': 'Library'}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'type': 'Application'}, self.context)
+        self.assertEqual(len(res), 1)
+
+    def test_package_search_disabled(self):
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                enabled=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                enabled=False,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        res = api.package_search(
+            {'include_disabled': 'false'}, self.context)
+        self.assertEqual(len(res), 1)
+        res = api.package_search(
+            {'include_disabled': 'true'}, self.context)
+        self.assertEqual(len(res), 2)
+
+    def test_package_search_owned(self):
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
+
+        res = api.package_search({'owned': 'true'}, self.context_admin)
+        self.assertEqual(len(res), 1)
+        res = api.package_search({'owned': 'false'}, self.context_admin)
+        self.assertEqual(len(res), 2)
+
+    def test_package_search_no_filters_catalog(self):
+        res = api.package_search({}, self.context, catalog=True)
+        self.assertEqual(len(res), 0)
+
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                is_public=False,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
+        api.package_upload(
+            self._stub_package(
+                is_public=False,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
+
+        # catalog=True should show public + mine
+        res = api.package_search({}, self.context, catalog=True)
+        self.assertEqual(len(res), 3)
+
+        res = api.package_search({}, self.context_admin, catalog=True)
+        self.assertEqual(len(res), 3)
+
+    def test_package_search_no_filters(self):
+        res = api.package_search({}, self.context)
+        self.assertEqual(len(res), 0)
+
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                is_public=False,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+
+        api.package_upload(
+            self._stub_package(
+                is_public=True,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
+        api.package_upload(
+            self._stub_package(
+                is_public=False,
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
+
+        # I can only edit mine pkgs
+        res = api.package_search({}, self.context)
+        self.assertEqual(len(res), 2)
+        for pkg in res:
+            self.assertEqual(pkg.owner_id, self.tenant_id)
+
+        # Admin can see everything
+        res = api.package_search({}, self.context_admin)
+        self.assertEqual(len(res), 4)
 
     def test_list_empty_categories(self):
         res = api.category_get_names()
