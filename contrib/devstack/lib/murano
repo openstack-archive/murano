@@ -121,6 +121,7 @@ function configure_murano_rpc_backend() {
     inicomment $MURANO_CONF_FILE DEFAULT rpc_backend
 
     iniset $MURANO_CONF_FILE rabbitmq host $RABBIT_HOST
+    iniset $MURANO_CONF_FILE rabbitmq login $RABBIT_USERID
     iniset $MURANO_CONF_FILE rabbitmq password $RABBIT_PASSWORD
 
     # Set non-default rabbit virtual host if required.
