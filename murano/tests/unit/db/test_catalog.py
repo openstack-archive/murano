@@ -11,6 +11,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import unittest
 import uuid
 
 from oslo.db import exception as db_exception
@@ -60,6 +61,150 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
             'path': path,
             'value': value
         }
+
+    def test_order_by(self):
+        pkgs = []
+        for i in range(10):
+            package = api.package_upload(self._stub_package(
+                name=str(uuid.uuid4()),
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            pkgs.append(package)
+
+        pkg_created = [pkg.id for pkg in sorted(
+            pkgs, key=lambda _pkg: _pkg.created)]
+        pkg_name = [pkg.id for pkg in sorted(
+            pkgs, key=lambda _pkg: _pkg.name)]
+        pkg_fqn = [pkg.id for pkg in sorted(
+            pkgs, key=lambda _pkg: _pkg.fully_qualified_name)]
+
+        for order, pkg_ids in zip(['created', 'name', 'fqn'],
+                                  [pkg_created, pkg_name, pkg_fqn]):
+            res = api.package_search(
+                {'order_by': [order]}, self.context, limit=10)
+            self.assertEqual(len(res), 10)
+            self.assertEqual(pkg_ids, [r.id for r in res])
+
+    def test_order_by_compound(self):
+        pkgs_a, pkgs_z = [], []
+        for i in range(5):
+            package = api.package_upload(self._stub_package(
+                name='z',
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            pkgs_z.append(package)
+        for i in range(5):
+            package = api.package_upload(self._stub_package(
+                name='a',
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            pkgs_a.append(package)
+
+        # sort pkg ids by pkg created
+        pkg_a_id = [pkg.id for pkg in sorted(
+            pkgs_a, key=lambda _pkg: _pkg.created)]
+        pkg_z_id = [pkg.id for pkg in sorted(
+            pkgs_z, key=lambda _pkg: _pkg.created)]
+
+        res = api.package_search(
+            {'order_by': ['name', 'created']}, self.context, limit=10)
+        self.assertEqual(len(res), 10)
+        self.assertEqual(pkg_a_id + pkg_z_id, [r.id for r in res])
+
+    def test_pagination_backwards(self):
+        """Creates 10 packages with unique names and iterates backwards,
+        checking that package order is correct.
+        """
+        pkgs = []
+        for i in range(10):
+            package = api.package_upload(self._stub_package(
+                name=str(uuid.uuid4()),
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            pkgs.append(package)
+
+        # sort pkg ids by pkg name
+        pkg_ids = [pkg.id for pkg in sorted(pkgs, key=lambda _pkg: _pkg.name)]
+
+        res = api.package_search({}, self.context, limit=10)
+        self.assertEqual(len(res), 10)
+        self.assertEqual(pkg_ids, [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search(
+            {'marker': marker,
+             'sort_dir': 'desc'}, self.context, limit=5)
+        self.assertEqual(len(res), 5)
+        self.assertEqual(list(reversed(pkg_ids[4:9])),
+                         [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search(
+            {'marker': marker,
+             'sort_dir': 'desc'}, self.context, limit=5)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(list(reversed(pkg_ids[0:4])),
+                         [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search(
+            {'marker': marker,
+             'sort_dir': 'desc'}, self.context, limit=5)
+        self.assertEqual(len(res), 0)
+
+    def test_pagination(self):
+        """Creates 10 packages with unique names and iterates through them,
+        checking that package order is correct.
+        """
+
+        pkgs = []
+        for i in range(10):
+            package = api.package_upload(self._stub_package(
+                name=str(uuid.uuid4()),
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            pkgs.append(package)
+
+        # sort pkg ids by pkg name
+        pkg_ids = [pkg.id for pkg in sorted(pkgs, key=lambda _pkg: _pkg.name)]
+
+        res = api.package_search({}, self.context, limit=4)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(pkg_ids[0:4], [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 4)
+        self.assertEqual(pkg_ids[4:8], [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 2)
+        self.assertEqual(pkg_ids[8:10], [r.id for r in res])
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 0)
+
+    @unittest.expectedFailure
+    def test_pagination_loops_through_names(self):
+        """Creates 10 packages with the same name and iterates through them,
+        checking that package are not skipped.
+        """
+
+        # TODO(kzaitsev): fix https://bugs.launchpad.net/murano/+bug/1448782
+        for i in range(10):
+            api.package_upload(self._stub_package(
+                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+        res = api.package_search({}, self.context, limit=4)
+        self.assertEqual(len(res), 4)
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 4)
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 2)
+        marker = res[-1].id
+
+        res = api.package_search({'marker': marker}, self.context, limit=4)
+        self.assertEqual(len(res), 0)
 
     def test_package_search_search(self):
         pkg1 = api.package_upload(
