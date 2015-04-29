@@ -7,7 +7,7 @@ coverage>=3.6
 discover
 fixtures>=0.3.14
 mock>=1.0
-oslotest>=1.5.1,<1.6.0  # Apache-2.0
+oslotest>=1.5.1  # Apache-2.0
 posix_ipc
 sqlalchemy-migrate>=0.9.5
 tempest-lib>=0.4.0
@@ -16,13 +16,13 @@ testresources>=0.2.4
 testscenarios>=0.4
 testtools>=0.9.36,!=1.2.0
 unittest2
-pylint>=1.3.0  # GNU GPL v2
+pylint==1.4.1  # GNU GPL v2
 
 # Some of the tests use real MySQL and Postgres databases
 MySQL-python
 psycopg2
 
 # doc build requirements
-oslosphinx>=2.5.0,<2.6.0  # Apache-2.0
+oslosphinx>=2.5.0  # Apache-2.0
 sphinx>=1.1.2,!=1.2.0,!=1.3b1,<1.3
 sphinxcontrib-httpdomain
