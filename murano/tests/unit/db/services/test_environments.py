@@ -13,7 +13,7 @@
 #    under the License.
 import datetime as dt
 
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 
 from murano.db import models
 from murano.db.services import environments

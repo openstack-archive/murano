@@ -26,9 +26,9 @@ postgres=# create database openstack_citest with owner openstack_citest;
 import datetime
 import uuid
 
-from oslo.db import exception as db_exc
-from oslo.db.sqlalchemy import test_base
-from oslo.db.sqlalchemy import utils as db_utils
+from oslo_db import exception as db_exc
+from oslo_db.sqlalchemy import test_base
+from oslo_db.sqlalchemy import utils as db_utils
 
 from murano.db.migration import migration
 from murano.tests.unit.db.migration import test_migrations_base as base

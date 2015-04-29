@@ -18,8 +18,8 @@ import os
 import tempfile
 
 import jsonschema
-from oslo.config import cfg
-from oslo.db import exception as db_exc
+from oslo_config import cfg
+from oslo_db import exception as db_exc
 from webob import exc
 
 import murano.api.v1

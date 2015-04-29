@@ -21,8 +21,8 @@
 import sys
 import traceback
 
-from oslo.config import cfg
-from oslo.db import exception as db_exception
+from oslo_config import cfg
+from oslo_db import exception as db_exception
 
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api

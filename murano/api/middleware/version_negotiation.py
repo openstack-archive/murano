@@ -18,7 +18,7 @@ and/or Accept headers and attempts to negotiate an API controller to
 return
 """
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from murano.api import versions
 from murano.common import wsgi

@@ -15,7 +15,7 @@
 
 import json
 
-from oslo.config import cfg
+from oslo_config import cfg
 
 from murano.api.v1 import environments
 from murano.api.v1 import sessions

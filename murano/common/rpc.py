@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo import messaging
-from oslo.messaging import rpc
-from oslo.messaging import target
+import oslo_messaging as messaging
+from oslo_messaging import rpc
+from oslo_messaging import target
 
 from murano.common import config
 

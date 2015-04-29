@@ -26,7 +26,7 @@ down_revision = None
 import uuid
 
 from alembic import op
-from oslo.utils import timeutils
+from oslo_utils import timeutils
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import table as sa_table
 

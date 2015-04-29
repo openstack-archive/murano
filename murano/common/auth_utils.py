@@ -14,8 +14,8 @@
 
 
 from keystoneclient.v3 import client as ks_client
-from oslo.config import cfg
-from oslo.utils import importutils
+from oslo_config import cfg
+from oslo_utils import importutils
 
 
 def get_client(token, tenant_id):

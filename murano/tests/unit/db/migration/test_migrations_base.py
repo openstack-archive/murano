@@ -29,7 +29,7 @@ from alembic import command
 from alembic import config as alembic_config
 from alembic import migration
 from alembic import script as alembic_script
-from oslo.config import cfg
+from oslo_config import cfg
 
 from murano.common.i18n import _LE
 import murano.db.migration

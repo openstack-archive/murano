@@ -14,10 +14,10 @@
 
 import uuid
 
-from oslo import messaging
-from oslo.messaging.notify import dispatcher as oslo_dispatcher
-from oslo.messaging import target
-from oslo.utils import timeutils
+import oslo_messaging as messaging
+from oslo_messaging.notify import dispatcher as oslo_dispatcher
+from oslo_messaging import target
+from oslo_utils import timeutils
 from sqlalchemy import desc
 
 from murano.common import config

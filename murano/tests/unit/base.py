@@ -12,7 +12,7 @@
 # limitations under the License.
 
 import fixtures
-from oslo.config import cfg
+from oslo_config import cfg
 import testtools
 
 from murano.db import api as db_api

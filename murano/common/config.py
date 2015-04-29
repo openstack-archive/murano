@@ -22,7 +22,7 @@ import logging.handlers
 import os
 import sys
 
-from oslo.config import cfg
+from oslo_config import cfg
 from paste import deploy
 
 from murano.common.i18n import _

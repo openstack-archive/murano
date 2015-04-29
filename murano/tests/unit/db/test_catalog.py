@@ -13,7 +13,7 @@
 
 import uuid
 
-from oslo.db import exception as db_exception
+from oslo_db import exception as db_exception
 from webob import exc
 
 from murano.db.catalog import api

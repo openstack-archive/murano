@@ -28,8 +28,8 @@ import eventlet
 eventlet.patcher.monkey_patch(all=False, socket=True)
 import eventlet.wsgi
 import jsonschema
-from oslo.config import cfg
-from oslo.serialization import jsonutils
+from oslo_config import cfg
+from oslo_serialization import jsonutils
 import routes
 import routes.middleware
 import webob.dec
