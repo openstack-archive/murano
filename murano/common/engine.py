@@ -62,7 +62,8 @@ class TaskProcessingEndpoint(object):
         except Exception as e:
             LOG.exception(_LE('Error during task execution for tenant %s'),
                           task['tenant_id'])
-            result['action'] = TaskExecutor.exception_result(e)
+            result['action'] = TaskExecutor.exception_result(
+                e, traceback.format_exc())
             msg_env = Environment(task['id'])
             reporter = status_reporter.StatusReporter()
             reporter.initialize(msg_env)
@@ -158,30 +159,30 @@ class TaskExecutor(object):
         action_result = None
         exception = None
         exception_traceback = None
+
         try:
-            LOG.info(_LI('Invoking pre-execution hooks'))
+            LOG.info(_LI('Invoking pre-cleanup hooks'))
             self.environment.start()
-            # Skip execution of action in case no action is provided.
-            # Model will be just loaded, cleaned-up and unloaded.
-            # Most of the time this is used for deletion of environments.
-            if self.action:
-                action_result = self._invoke(exc)
+            exc.cleanup(self._model)
         except Exception as e:
             exception = e
-            if isinstance(e, dsl_exception.MuranoPlException):
-                LOG.error('\n' + e.format(prefix='  '))
-            else:
-                exception_traceback = traceback.format_exc()
-                LOG.exception(
-                    _LE("Exception %(exc)s occured"
-                        " during invocation of %(method)s"),
-                    {'exc': e, 'method': self.action['method']})
-            reporter = status_reporter.StatusReporter()
-            reporter.initialize(obj)
-            reporter.report_error(obj, str(e))
+            exception_traceback = TaskExecutor._log_exception(e, obj, '<GC>')
         finally:
-            LOG.info(_LI('Invoking post-execution hooks'))
+            LOG.info(_LI('Invoking post-cleanup hooks'))
             self.environment.finish()
+
+        if exception is None and self.action:
+            try:
+                LOG.info(_LI('Invoking pre-execution hooks'))
+                self.environment.start()
+                action_result = self._invoke(exc)
+            except Exception as e:
+                exception = e
+                exception_traceback = TaskExecutor._log_exception(
+                    e, obj, self.action['method'])
+            finally:
+                LOG.info(_LI('Invoking post-execution hooks'))
+                self.environment.finish()
 
         model = serializer.serialize_model(obj, exc)
         model['SystemData'] = self._environment.system_attributes
@@ -202,18 +203,31 @@ class TaskExecutor(object):
         return result
 
     @staticmethod
-    def exception_result(exception, exception_traceback=None):
-        record = {
+    def _log_exception(e, root, method_name):
+        if isinstance(e, dsl_exception.MuranoPlException):
+            LOG.error('\n' + e.format(prefix='  '))
+            exception_traceback = e.format()
+        else:
+            exception_traceback = traceback.format_exc()
+            LOG.exception(
+                _LE("Exception %(exc)s occurred"
+                    " during invocation of %(method)s"),
+                {'exc': e, 'method': method_name})
+        if root is not None:
+            reporter = status_reporter.StatusReporter()
+            reporter.initialize(root)
+            reporter.report_error(root, str(e))
+        return exception_traceback
+
+    @staticmethod
+    def exception_result(exception, exception_traceback):
+        return {
             'isException': True,
             'result': {
                 'message': str(exception),
+                'details': exception_traceback
             }
         }
-        if isinstance(exception, dsl_exception.MuranoPlException):
-            record['result']['details'] = exception.format()
-        else:
-            record['result']['details'] = exception_traceback
-        return record
 
     def _validate_model(self, obj, action, class_loader):
         if config.CONF.engine.enable_model_policy_enforcer:
