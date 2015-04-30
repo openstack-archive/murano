@@ -65,6 +65,6 @@ def yaql_constructor(loader, node):
     result.source_file_position = build_position(node)
     return result
 
-yaml.add_constructor(u'!yaql', yaql_constructor, YaqlYamlLoader)
-yaml.add_implicit_resolver(u'!yaql', yaql_expression.YaqlExpression,
-                           Loader=YaqlYamlLoader)
+YaqlYamlLoader.add_constructor(u'!yaql', yaql_constructor)
+YaqlYamlLoader.add_implicit_resolver(u'!yaql', yaql_expression.YaqlExpression,
+                                     None)
