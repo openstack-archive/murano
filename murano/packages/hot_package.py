@@ -116,12 +116,10 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         contract = '$'
 
         parameter_type = value['type']
-        if parameter_type == 'string':
+        if parameter_type in ('string', 'comma_delimited_list', 'json'):
             contract += '.string()'
         elif parameter_type == 'number':
             contract += '.int()'
-        elif parameter_type == 'json':
-            contract += '.object()'
         else:
             raise ValueError('Unsupported parameter type ' + parameter_type)
 
@@ -295,7 +293,7 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             'label': name.title().replace('_', ' ')
         }
         parameter_type = parameter_spec['type']
-        if parameter_type == 'string':
+        if parameter_type in ('string', 'json', 'comma_delimited_list'):
             translated['type'] = 'string'
         elif parameter_type == 'number':
             translated['type'] = 'integer'
@@ -404,5 +402,4 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
                 }
             ]
         }
-
         return translated
