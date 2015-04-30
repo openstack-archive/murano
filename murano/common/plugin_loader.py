@@ -76,7 +76,7 @@ class PluginLoader(object):
                     LOG.warning(_LW("Disabling class '%(class_name)s' in "
                                     "'%(dist)s' due to conflict") %
                                 dict(class_name=class_name, dist=package_name))
-                    self.packages[package_name].plugins.pop(class_name)
+                    self.packages[package_name].classes.pop(class_name)
 
     @staticmethod
     def is_plugin_enabled(extension):
