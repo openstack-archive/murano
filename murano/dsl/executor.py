@@ -262,7 +262,6 @@ class MuranoDslExecutor(object):
         self._attribute_store.load(data.get('Attributes') or [])
         result = self._object_store.load(data.get('Objects'),
                                          None, self._root_context)
-        self.cleanup(data)
         return result
 
     def cleanup(self, data):
