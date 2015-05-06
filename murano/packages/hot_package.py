@@ -203,6 +203,10 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         for key, value in (hot.get('parameters') or {}).items():
             template_parameters[key] = YAQL("$." + key)
 
+        copy_outputs = []
+        for key, value in (hot.get('outputs') or {}).items():
+            copy_outputs.append({YAQL('$.' + key): YAQL('$outputs.' + key)})
+
         deploy = [
             {YAQL('$environment'): YAQL(
                 "$.find('io.murano.Environment').require()"
@@ -232,17 +236,28 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
 
             YAQL("$reporter.report($this, "
                  "'Stack creation has started')"),
-            YAQL('$stack.push()'),
-            {YAQL('$outputs'): YAQL('$stack.output()')},
-            YAQL("$reporter.report($this, "
-                 "'Stack was successfully created')"),
+            {
+                'Try': [YAQL('$stack.push()')],
+                'Catch': [
+                    {
+                        'As': 'e',
+                        'Do': [
+                            YAQL("$reporter.report_error($this, $e.message)"),
+                            {'Rethrow': None}
+                        ]
+                    }
+                ],
+                'Else': [
+                    {YAQL('$outputs'): YAQL('$stack.output()')},
+                    {'Do': copy_outputs},
+                    YAQL("$reporter.report($this, "
+                         "'Stack was successfully created')"),
 
-            YAQL("$reporter.report($this, "
-                 "'Application deployment has finished')"),
+                    YAQL("$reporter.report($this, "
+                         "'Application deployment has finished')"),
+                ]
+            }
         ]
-        for key, value in (hot.get('outputs') or {}).items():
-            deploy.append({YAQL('$.' + key): YAQL(
-                '$outputs.' + key)})
 
         destroy = [
             {YAQL('$stack'): YAQL(
