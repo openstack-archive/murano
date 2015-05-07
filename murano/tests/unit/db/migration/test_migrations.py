@@ -24,6 +24,7 @@ postgres=# create database openstack_citest with owner openstack_citest;
 """
 
 import datetime
+import sqlalchemy
 import uuid
 
 from oslo_db import exception as db_exc
@@ -59,6 +60,11 @@ class MuranoMigrationsCheckers(object):
         t = db_utils.get_table(engine, table)
         index_names = [idx.name for idx in t.indexes]
         self.assertIn(index, index_names)
+
+    def assertColumnType(self, engine, table, column, sqltype):
+        t = db_utils.get_table(engine, table)
+        col = getattr(t.c, column)
+        self.assertIsInstance(col.type, sqltype)
 
     def assertIndexMembers(self, engine, table, index, members):
         self.assertIndexExists(engine, table, index)
@@ -122,12 +128,21 @@ class MuranoMigrationsCheckers(object):
 
     def _check_002(self, engine, data):
         self.assertEqual('002', migration.version(engine))
-        self.assertColumnExists(engine, 'package', 'supplier_logo')
+        self.assertColumnsExists(engine,
+                                 'package',
+                                 ['supplier_logo', 'supplier'])
 
     def _check_003(self, engine, data):
         self.assertEqual('003', migration.version(engine))
         self.assertColumnExists(engine, 'task', 'action')
         self.assertColumnExists(engine, 'status', 'task_id')
+
+    def _check_004(self, engine, data):
+        self.assertEqual('004', migration.version(engine))
+        self.assertColumnType(engine,
+                              'package',
+                              'description',
+                              sqlalchemy.Text)
 
     def _check_005(self, engine, data):
         self.assertEqual('005', migration.version(engine))
@@ -138,6 +153,21 @@ class MuranoMigrationsCheckers(object):
     def _check_006(self, engine, data):
         self.assertEqual('006', migration.version(engine))
         self.assertColumnExists(engine, 'task', 'result')
+
+    def _check_007(self, engine, data):
+        self.assertEqual('007', migration.version(engine))
+        self.assertColumnExists(engine, 'locks', 'id')
+        self.assertColumnExists(engine, 'locks', 'ts')
+
+    def _check_008(self, engine, data):
+        self.assertEqual('008', migration.version(engine))
+        self.assertIndexExists(engine,
+                               'class_definition',
+                               'ix_class_definition_name')
+
+        self.assertIndexExists(engine,
+                               'package',
+                               'ix_package_fqn_and_owner')
 
 
 class TestMigrationsMySQL(MuranoMigrationsCheckers,
