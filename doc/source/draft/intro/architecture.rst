@@ -1,0 +1,5 @@
+.. _architecture:
+
+============
+Architecture
+============

@@ -111,9 +111,18 @@ contribute to the project.
 
    specification/index
 
+
 Indices and tables
 ==================
 
 * :ref:`genindex`
 * :ref:`modindex`
 * :ref:`search`
+
+BETA: Murano documentation
+==========================
+
+.. toctree::
+   :maxdepth: 1
+
+   draft/index
