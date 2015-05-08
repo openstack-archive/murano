@@ -20,3 +20,12 @@ export PYTHONPATH=$PYTHONPATH:$TEMPEST_DIR
 
 #installing requirements for tempest
 pip install -r $TEMPEST_DIR/requirements.txt
+
+#installing test requirements for murano
+pip install -r ../test-requirements.txt
+
+# Get admin credentials
+cwd=$(pwd)
+cd /opt/stack/new/devstack
+source openrc admin admin
+cd $cwd

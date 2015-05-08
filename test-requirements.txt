@@ -7,10 +7,11 @@ coverage>=3.6
 discover
 fixtures>=0.3.14
 mock>=1.0
+nose
 oslotest>=1.5.1  # Apache-2.0
 posix_ipc
 sqlalchemy-migrate>=0.9.5
-tempest-lib>=0.4.0
+tempest-lib>=0.5.0
 testrepository>=0.0.18
 testresources>=0.2.4
 testscenarios>=0.4

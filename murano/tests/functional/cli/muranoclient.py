@@ -12,27 +12,26 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-from tempest_lib.cli import base  # noqa
+import os
 
-from tempest import config
-
-CONF = config.CONF
+from tempest_lib.cli import base
 
 
 class ClientTestBase(base.ClientTestBase):
 
-    def murano(self, action, flags='', params='', admin=True, fail_ok=False):
-        """Executes murano command for the given action."""
+    def murano(self, action, flags='', params='',
+               fail_ok=False, endpoint_type='publicURL', merge_stderr=True):
         return self.clients.cmd_with_auth(
-            'murano', action, flags, params, admin, fail_ok)
+            'murano', action, flags, params, fail_ok, merge_stderr)
 
     def _get_clients(self):
         clients = base.CLIClient(
-            CONF.identity.admin_username,
-            CONF.identity.admin_password,
-            CONF.identity.admin_tenant_name,
-            CONF.identity.uri,
-            CONF.cli.cli_dir
+            username=os.environ.get('OS_USERNAME'),
+            password=os.environ.get('OS_PASSWORD'),
+            tenant_name=os.environ.get('OS_TENANT_NAME'),
+            uri=os.environ.get('OS_AUTH_URL'),
+            # FIXME: see how it's done in saharaclient
+            cli_dir='/usr/local/bin'
         )
         return clients
 
