@@ -226,9 +226,9 @@ Install the API service and Engine
     .. code-block:: console
 
         $ cd ~/murano/murano
-        $ pushd ./meta/io.murano; zip -r ../../io.murono.zip *; popd;
+        $ pushd ./meta/io.murano; zip -r ../../io.murano.zip *; popd;
         $ tox -e venv -- murano --murano-url http://localhost:8082 \
-          package-import io.murono.zip
+          package-import --is-public io.murano.zip
     ..
 
 #. Open a new console and launch Murano Engine. A separate terminal is
