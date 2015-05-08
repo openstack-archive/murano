@@ -7,8 +7,5 @@
 HOT packages
 ============
 
-Compose a package
-~~~~~~~~~~~~~~~~~
+.. include:: hotpackages/compose.rst
 
-Upload a package
-~~~~~~~~~~~~~~~~
