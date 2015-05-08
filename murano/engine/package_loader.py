@@ -82,6 +82,7 @@ class ApiPackageLoader(PackageLoader):
         return directory
 
     def _get_definition(self, filter_opts):
+        filter_opts['catalog'] = True
         try:
             packages = list(self._murano_client_factory().packages.filter(
                 **filter_opts))
