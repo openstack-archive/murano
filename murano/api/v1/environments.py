@@ -52,10 +52,10 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        LOG.debug('Environments:Create <Body {0}>'.format(body))
+        LOG.debug(u'Environments:Create <Body {0}>'.format(body))
         policy.check('create_environment', request.context)
-        LOG.debug('ENV NAME: {0}>'.format(body['name']))
-        if VALID_NAME_REGEX.match(str(body['name'])):
+        name = unicode(body['name'])
+        if VALID_NAME_REGEX.match(name):
             try:
                 environment = envs.EnvironmentServices.create(
                     body.copy(),
