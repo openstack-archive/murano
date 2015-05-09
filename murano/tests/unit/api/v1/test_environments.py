@@ -1,3 +1,4 @@
+# coding: utf-8
 # Copyright (c) 2014 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -108,6 +109,20 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'name': 'my+#env'}
+        req = self._post('/environments', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+
+    def test_unicode_environment_name_create(self):
+        """Check that an unicode env name results in an HTTPClientError."""
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        body = {'name': u'yaql ♥ unicode'.encode('utf-8')}
         req = self._post('/environments', json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
