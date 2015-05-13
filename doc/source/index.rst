@@ -51,6 +51,22 @@ This documentation offers information on how Murano works and how to
 contribute to the project.
 
 
+Developing Applications
+~~~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   draft/appdev-guide/step_by_step
+   draft/appdev-guide/exec_plan
+   draft/appdev-guide/hot_packages
+   draft/appdev-guide/murano_pl
+   draft/appdev-guide/murano_packages
+   draft/appdev-guide/examples
+   draft/appdev-guide/use_cases
+   draft/appdev-guide/faq
+
+
 **Installation**
 
 .. toctree::
