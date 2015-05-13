@@ -39,6 +39,7 @@ Admin User Guide
 .. toctree::
    :maxdepth: 2
 
+   admin-guide/prepare_lab
    admin-guide/installation
    admin-guide/manage_images
    admin-guide/manage_categories
