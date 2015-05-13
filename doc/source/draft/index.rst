@@ -22,8 +22,8 @@ Introduction
    intro/use_cases
    intro/user_stories
 
-End User Guide
-~~~~~~~~~~~~~~
+Using Murano
+~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
@@ -33,7 +33,7 @@ End User Guide
    enduser-guide/manage_applications
    enduser-guide/troubleshooting
 
-Admin User Guide
+Deploying Murano
 ~~~~~~~~~~~~~~~~
 
 .. toctree::
