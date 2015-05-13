@@ -7,11 +7,6 @@
 Murano packages
 ===============
 
-Package structure
-~~~~~~~~~~~~~~~~~
-
-Dynamic UI definition specification
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Murano package repository
-~~~~~~~~~~~~~~~~~~~~~~~~~
+.. include:: muranopackages/package_structure.rst
+.. include:: muranopackages/dynamic_ui.rst
+.. include:: muranopackages/repository.rst
