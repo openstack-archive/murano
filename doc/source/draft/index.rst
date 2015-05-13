@@ -47,7 +47,6 @@ Admin User Guide
    admin-guide/use_cli
    admin-guide/admin_troubleshooting
 
-
 Developing Applications
 ~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -63,7 +62,6 @@ Developing Applications
    appdev-guide/use_cases
    appdev-guide/faq
 
-
 Contributing
 ~~~~~~~~~~~~
 
@@ -76,7 +74,6 @@ Contributing
    contributor-guide/deploy_local_dev_env
    contributor-guide/testing
    contributor-guide/doc_guidelines
-
 
 Appendix
 ~~~~~~~~
