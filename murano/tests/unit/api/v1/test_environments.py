@@ -196,6 +196,63 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         self.assertEqual(expected, json.loads(result.body))
 
+    def test_update_environment_with_existing_name(self):
+        self._set_policy_rules(
+            {'update_environment': '@'}
+        )
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        expected = dict(
+            id='111',
+            name='env1',
+            version=0,
+            networking={},
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '111'}
+                },
+                'Attributes': []
+            }
+        )
+        e = models.Environment(**expected)
+        test_utils.save_models(e)
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        expected = dict(
+            id='222',
+            name='env2',
+            version=0,
+            networking={},
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '222'}
+                },
+                'Attributes': []
+            }
+        )
+        e = models.Environment(**expected)
+        test_utils.save_models(e)
+
+        self.expect_policy_check('update_environment',
+                                 {'environment_id': '111'})
+
+        body = {
+            'name': 'env2'
+        }
+        req = self._put('/environments/111', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(409, result.status_code)
+
     def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call."""
         self._set_policy_rules(

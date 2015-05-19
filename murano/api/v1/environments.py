@@ -126,8 +126,13 @@ class Controller(object):
 
         LOG.debug('ENV NAME: {0}>'.format(body['name']))
         if VALID_NAME_REGEX.match(str(body['name'])):
-            environment.update(body)
-            environment.save(session)
+            try:
+                environment.update(body)
+                environment.save(session)
+            except db_exc.DBDuplicateEntry:
+                msg = _('Environment with specified name already exists')
+                LOG.exception(msg)
+                raise exc.HTTPConflict(explanation=msg)
         else:
             msg = _('Environment name must contain only alphanumeric '
                     'or "_-." characters, must start with alpha')
