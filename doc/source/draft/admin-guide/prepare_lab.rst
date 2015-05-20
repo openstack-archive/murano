@@ -49,21 +49,17 @@ Supported Operation Systems
 
 * libffi-dev
 
-* libmysqlclient-dev
-
 * libpq-dev
 
 * python-openssl
 
 * mysql-client
 
-* python-mysqldb
-
 Install all the requirements on Ubuntu by running::
 
   # apt-get install gcc python-pip python-dev \
-  libxml2-dev libxslt-dev libffi-dev libmysqlclient-dev \
-  libpq-dev python-openssl mysql-client python-mysqldb
+  libxml2-dev libxslt-dev libffi-dev \
+  libpq-dev python-openssl mysql-client
 
 *CentOS*
 
@@ -85,13 +81,11 @@ Install all the requirements on Ubuntu by running::
 
 * mysql
 
-* MySQL-python
-
 Install all the requirements on CentOS by running::
 
   # yum install gcc python-pip python-devel libxml2-devel \
   libxslt-devel libffi-devel postgresql-devel pyOpenSSL \
-  mysql MySQL-python
+  mysql
 
 .. _lab_requirements:
 
