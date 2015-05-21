@@ -194,18 +194,28 @@ Example *images.lst*
     - Name: 'my_image.qcow2'
       Hash: '64d7c1cd2b6f60c92c14662941cb7913'
       Meta:
-        title: 'tef'
+        title: 'This Name Helps Me Select This Image'
         type: 'linux'
       DiskFormat: qcow2
       ContainerFormat: bare
     - Name: 'my_other_image.qcow2'
       Hash: '64d7c1cd2b6f60c92c14662941cb7913'
       Meta:
-        title: 'tef'
+        title: 'This Name Helps Me Select This Image'
         type: 'linux'
       DiskFormat: qcow2
       ContainerFormat: bare
       Url: 'http://path.to/images/file.qcow2'
+
+.. note ::
+
+     ``Hash`` key is ignored right now.
+     If you have 2 apps, both of which require the same image, importing these
+     apps can cause this image to be downloaded twice. This situation occurs,
+     because image hash is not available until the moment glance downloads it.
+     It produces a situation, when there are two images with the same name
+     (but with different hashes). If image name is written in the app
+     definition, heat would not be able to create the template, based on that definition.
 
 If *Url* is omitted - the images would be searched for in the Murano Repository.
 
