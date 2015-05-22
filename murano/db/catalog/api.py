@@ -264,6 +264,7 @@ def package_search(filters, context, manage_public=False,
         request and then to use the ID of the last package from the response
         as the marker parameter in a subsequent limited request.
     """
+    # pylint: disable=too-many-branches
 
     session = db_session.get_session()
     pkg = models.Package
@@ -293,6 +294,8 @@ def package_search(filters, context, manage_public=False,
     if 'type' in filters.keys():
         query = query.filter(pkg.type == filters['type'].title())
 
+    if 'id' in filters:
+        query = query.filter(models.Package.id.in_(filters['id']))
     if 'category' in filters.keys():
         query = query.filter(pkg.categories.any(
             models.Category.name.in_(filters['category'])))

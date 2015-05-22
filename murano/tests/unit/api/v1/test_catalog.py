@@ -162,6 +162,41 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             '/v1/catalog/packages/', params={'catalog': 'False'}))
         self.assertEqual(2, len(result['packages']))
 
+    def test_packages_filter_by_id(self):
+        """GET /catalog/packages with parameter "id" returns packages
+        filtered by id.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        _, package1_data = self._test_package()
+        _, package2_data = self._test_package()
+
+        package1_data['fully_qualified_name'] += '_1'
+        package1_data['name'] += '_1'
+        package1_data['class_definitions'] = (u'test.mpl.v1.app.Thing1',)
+        package2_data['fully_qualified_name'] += '_2'
+        package2_data['name'] += '_2'
+        package2_data['class_definitions'] = (u'test.mpl.v1.app.Thing2',)
+
+        expected_package = db_catalog_api.package_upload(package1_data, '')
+        db_catalog_api.package_upload(package2_data, '')
+
+        req = self._get('/catalog/packages',
+                        params={'id': expected_package.id})
+        self.expect_policy_check('get_package')
+        self.expect_policy_check('manage_public_package')
+
+        res = req.get_response(self.api)
+        self.assertEqual(200, res.status_code)
+
+        self.assertEqual(len(res.json['packages']), 1)
+
+        found_package = res.json['packages'][0]
+
+        self.assertEqual(found_package['id'], expected_package.id)
+
     def test_packages(self):
         self._set_policy_rules(
             {'get_package': '',
