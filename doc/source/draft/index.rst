@@ -3,9 +3,9 @@
 
 .. _content:
 
-===============================
-Welcome to Murano Documentation
-===============================
+======================================
+Welcome to Murano Documentation (BETA)
+======================================
 
 .. TODO add Abstract (OG)
 
