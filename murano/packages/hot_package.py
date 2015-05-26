@@ -120,6 +120,8 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             contract += '.string()'
         elif parameter_type == 'number':
             contract += '.int()'
+        elif parameter_type == 'boolean':
+            contract += '.bool()'
         else:
             raise ValueError('Unsupported parameter type ' + parameter_type)
 
@@ -332,10 +334,15 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             'label': name.title().replace('_', ' ')
         }
         parameter_type = parameter_spec['type']
-        if parameter_type in ('string', 'json', 'comma_delimited_list'):
-            translated['type'] = 'string'
-        elif parameter_type == 'number':
+        if parameter_type == 'number':
             translated['type'] = 'integer'
+        elif parameter_type == 'boolean':
+            translated['type'] = 'boolean'
+        else:
+            # string, json, and comma_delimited_list parameters are all
+            # displayed as strings in UI. Any unsuported parameter would also
+            # be displayed as strings.
+            translated['type'] = 'string'
 
         label = parameter_spec.get('label')
         if label:
