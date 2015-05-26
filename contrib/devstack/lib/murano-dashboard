@@ -36,6 +36,8 @@ MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
 
 MURANO_DASHBOARD_CACHE_DIR=${MURANO_DASHBOARD_CACHE_DIR:-/tmp/murano}
 
+MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://storage.apps.openstack.org/'}
+
 # Functions
 # ---------
 
@@ -95,6 +97,7 @@ DATABASES = {
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 MIDDLEWARE_CLASSES += ('muranodashboard.middleware.ExceptionMiddleware',)
+MURANO_REPO_URL = '$MURANO_REPOSITORY_URL'
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
 
