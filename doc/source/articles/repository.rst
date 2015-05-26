@@ -56,7 +56,7 @@ Bundle file is a json or a yaml file with the following structure:
     }
 
 Glance images can be auto-imported by client, when mentioned in ``images.lst``
-inside the package. Please see :ref:`app_pkg` for more info about pakcage
+inside the package. Please see :ref:`app_pkg` for more info about package
 composition.
 When importing images from ``image.lst`` file client simply searches for a
 file with the same name as the ``Name`` attribute of the image in the

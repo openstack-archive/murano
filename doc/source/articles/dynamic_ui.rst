@@ -16,7 +16,7 @@
 .. _DynamicUISpec:
 
 ===================================
-Dynamic UI Definition specification
+Dynamic UI definition specification
 ===================================
 
 The main purpose of Dynamic UI is to generate application creation
@@ -110,7 +110,7 @@ as *$.appConfiguration.name*. This context will be called as
 Forms
 =====
 
-This section describes markup elements for defining forms (which are currently rendered and validated with Django). Each form has name, field definitions (mandatory) and validator definitions (optionally). Note that each form is splitted into 2 parts - input area (left side, where all the controls are located) and description area (right side, where descriptions of the controls are located).
+This section describes markup elements for defining forms (which are currently rendered and validated with Django). Each form has name, field definitions (mandatory) and validator definitions (optionally). Note that each form is split into 2 parts - input area (left side, where all the controls are located) and description area (right side, where descriptions of the controls are located).
 
 Each field should contain:
 
@@ -222,7 +222,7 @@ fields.
              type: flavor
              label: Instance flavor
              description: >-
-               Select registered in Openstack flavor. Consider that service performance
+               Select registered in OpenStack flavor. Consider that service performance
                depends on this parameter.
              required: false
            - name: osImage

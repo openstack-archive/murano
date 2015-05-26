@@ -112,10 +112,10 @@ Murano Repository.
 would inspect images already present in the image database. Unless image with
 the specific name and hash is present client would attempt to download it.
 
-For more info about specifiying images and requirements for the package see
+For more info about specifying images and requirements for the package see
 package creation docs: :ref:`app_pkg`.
 
-If any of the packages, being installed is already registerd in Murano, client
+If any of the packages, being installed is already registered in Murano, client
 would ask you what do do with it. You can specify the default action with
 ``--exists-action``, passing `s` for skip, `u` for update, and `a` for abort.
 
@@ -162,7 +162,7 @@ Running::
 
     murano package-download <PKG_ID> > file.zip
 
-would download the zip arhive with specified package
+would download the zip archive with specified package
 
 Creating a package
 ==================
@@ -189,7 +189,7 @@ It is possible to create/update/delete environments with following commands::
    murano environment-rename <OLD_NAME_OR_ID> <NEW_NAME>
    murano environment-show <NAME_OR_ID>
 
-You can get list of deployments for environmet with::
+You can get list of deployments for environment with::
 
    murano deployment-list <NAME_OR_ID>
 
@@ -203,8 +203,8 @@ It is possible to create/update/delete categories with following commands::
    murano category-list
    murano category-show <ID>
 
-Managing Environmet Templates
-=============================
+Managing environment templates
+==============================
 
 It is possible to manage environment templates with following commands::
 
