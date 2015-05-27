@@ -160,7 +160,7 @@ Transformed to rules:
 ``murano:parent_types(object_id, parent_name)``
 """""""""""""""""""""""""""""""""""""""""""""""
 
-Each object in murano has class type and these classes can inherit from one or more parents:
+Each object in murano has a class type and these classes can inherit from one or more parents:
 
 e.g. ``LinuxMuranoInstance`` > ``LinuxInstance`` > ``Instance``
 

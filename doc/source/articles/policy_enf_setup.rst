@@ -49,7 +49,7 @@ following command.
 
    - **murano** policy
 
-      Policy is created by Congress' Murano datasource driver, which is part of
+      Policy is created by Congress' murano datasource driver, which is part of
       Congress. It has to be configured for the OpenStack tenant where Murano
       application will be deployed. Datasource driver retrieves deployed Murano
       environments and populates Congress' murano policy tables

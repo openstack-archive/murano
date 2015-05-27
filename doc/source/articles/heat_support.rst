@@ -14,7 +14,7 @@
       under the License.
 
 ==================================================
-Uploading HOT templates to the Application Catalog
+Uploading HOT templates to the application catalog
 ==================================================
 
 Murano is an Application catalog which intends to support applications, defined in different formats. As a first step to universality, heat orchestration template support was added.

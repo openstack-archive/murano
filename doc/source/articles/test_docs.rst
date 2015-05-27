@@ -14,7 +14,7 @@
       under the License.
 
 ==================================
-Murano Automated Tests Description
+Murano automated tests description
 ==================================
 This page describes automated tests for a Murano project:
 
@@ -23,7 +23,7 @@ This page describes automated tests for a Murano project:
 * how execute tests on a local machine
 * how to find the the root of problems with FAILed tests
 
-Murano Continuous Integration Service
+Murano continuous integration service
 =====================================
 Murano project has separate CI server, which runs tests for all commits and verifies that new code does not break anything.
 
@@ -39,10 +39,10 @@ There you can find each job for each repository: one for the **murano** and anot
 Other jobs allow to build and test Murano documentation and perform another usefull work to support Murano CI infrastructure.
 All jobs are run on fresh installation of operation system and all components are installed on each run.
 
-Murano Automated Tests: UI Tests
+Murano automated tests: UI tests
 ================================
 
-Murano project has a Web User Interface and all possible user scenarios should be tested.
+The murano project has a web user interface and all possible user scenarios should be tested.
 All UI tests are located at the https://git.openstack.org/cgit/openstack/murano-dashboard/tree/muranodashboard/tests/functional
 
 Automated tests for Murano Web UI are written in Python using special Selenium library. This library is used to automate web browser interaction from Python.
@@ -120,7 +120,7 @@ There are also a number of command line options that can be used to control the 
 Murano Automated Tests: Tempest Tests
 =====================================
 
-All Murano services have tempest-based automated tests, which allow to verify API interfaces and deployment scenarious.
+All Murano services have tempest-based automated tests, which allow to verify API interfaces and deployment scenarios.
 
 Tempest tests for Murano are located at the: https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional
 

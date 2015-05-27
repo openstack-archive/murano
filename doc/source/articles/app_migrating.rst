@@ -17,7 +17,7 @@
 Migrating applications from Murano v0.5 to Stable/Juno
 ======================================================
 
-Applications created for Murano v0.5, unfortunately, are not suported in Murano
+Applications created for Murano v0.5, unfortunately, are not supported in Murano
 stable/juno. This document provides the application code changes required for
 compatibility with the stable/juno Murano version.
 
