@@ -157,7 +157,7 @@ General application metadata should be described in the application manifest fil
 * **Author** - person or company name which created an application package
 * **Classes** - MuranoPL class list, on which application deployment is based
 * **Tags** - list of words, associated with this application. Will be helpful during the search. *Optional* parameter
-* **Require** - list of applications with versions, required by this application. Currently only used by repository importing mechanism. *Optional* parameter
+* **Require** - a dict of application names with versions, required by this application. Currently only used by repository importing mechanism. Versions can be omitted (or set to null), in that case package with no version would be imported. *Optional* parameter
 
 .. _Telnet Manifest:
 
@@ -179,6 +179,7 @@ Example *manifest.yaml*
     Logo: telnet.png
     Require:
       io.murano.apps.TelnetHelper: 0.0.1
+      io.murano.apps.TelnetDoc:
 
 Step 6.  Prepare images.lst file
 ================================
