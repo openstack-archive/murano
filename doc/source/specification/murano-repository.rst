@@ -13,7 +13,7 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-Application Catalog API
+Application catalog API
 =======================
 
 Manage application definitions in the Application Catalog.
@@ -220,13 +220,13 @@ Display details for a package.
 
 **Response 403**
 
-*  In attempt to get non-public package by user whose tenant is not an owner of this package.
+*  In attempt to get a non-public package by a user whose tenant is not an owner of this package.
 
 **Response 404**
 
-*  In case specified package id doesn't exist.
+*  In case the specified package id doesn't exist.
 
-Update a Package
+Update a package
 ================
 
 `/v1/catalog/packages/{id} [PATCH]`
