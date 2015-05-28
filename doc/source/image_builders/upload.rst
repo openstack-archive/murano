@@ -16,12 +16,12 @@
 
 
 ========================
-Upload Image Into Glance
+Upload image into glance
 ========================
 
-To deploy applications with Murano, virtual machine images should be uploaded into Glance in a special way - *murano_image_info* property should be set.
+To deploy applications with murano, virtual machine images should be uploaded into glance in a special way - *murano_image_info* property should be set.
 
-1. Use the glance image-create command to import your disk image to Glance:
+1. Use the glance image-create command to import your disk image to glance:
 
 .. code-block:: console
 
@@ -40,7 +40,7 @@ Replace the command line arguments to glance image-create with the appropriate v
 
 .. code-block:: text
 
-  murano_image_info='{"title": "Windows 2012 Standart Edition", "type": "windows.2012"}'
+  murano_image_info='{"title": "Windows 2012 Standard Edition", "type": "windows.2012"}'
 ..
 
 where:
@@ -61,7 +61,7 @@ where:
 
 .. code-block:: text
 
-  murano_image_info='{"title": "Windows 2012 Standart Edition", "type": "windows.2012"}'
+  murano_image_info='{"title": "Windows 2012 Standard Edition", "type": "windows.2012"}'
 ..
 
 .. warning::
@@ -72,7 +72,7 @@ where:
 
 .. note::
 
-  Already existing image could be marked in a simple way in Horizon UI with Murano dashboard installed.
+  Existing images could be marked in a simple way in the horizon UI with the murano dashboard installed.
   Navigate to *Murano -> Manage -> Images -> Mark Image* and fill up a form:
 
   *  **Image** - ws-2012-std
@@ -85,7 +85,7 @@ After these steps desired image can be chosen in application creation wizard.
 
 .. _murano_image_types:
 
-Murano Image Types
+Murano image types
 ------------------
 
 .. list-table::
