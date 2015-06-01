@@ -20,7 +20,7 @@ unittest2
 pylint==1.4.1  # GNU GPL v2
 
 # Some of the tests use real MySQL and Postgres databases
-MySQL-python
+PyMySQL>=0.6.2  # MIT License
 psycopg2
 
 # doc build requirements

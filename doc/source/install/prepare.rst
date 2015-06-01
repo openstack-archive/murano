@@ -44,15 +44,11 @@ System prerequisites
 
 * libffi-dev
 
-* libmysqlclient-dev
-
 * libpq-dev
 
 * python-openssl
 
 * mysql-client
-
-* python-mysqldb
 
 *CentOS*
 
@@ -73,8 +69,6 @@ System prerequisites
 * pyOpenSSL
 
 * mysql
-
-* MySQL-python
 
 
 Lab Requirements
