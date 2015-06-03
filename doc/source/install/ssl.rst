@@ -41,7 +41,7 @@ See the example below:
 The use of SSL is automatically started after point to HTTPS protocol
 instead of HTTP during registration Murano API service in endpoints
 (Change publicurl argument to start with \https://).
-SSL for Murano API is implemented like in any other Openstack component.
+SSL for Murano API is implemented like in any other OpenStack component.
 This realization is based on ssl python module so more information about
 it can be found `here`_.
 

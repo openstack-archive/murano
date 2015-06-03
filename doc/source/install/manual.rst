@@ -124,7 +124,7 @@ Install the API service and Engine
 
 #.  Set up Murano config file
 
-    Murano has common config file for API and Engine servicies.
+    Murano has common config file for API and Engine services.
 
     First, generate sample configuration file, using tox
 
@@ -245,7 +245,7 @@ Install Murano Dashboard
 ========================
 
  Murano API & Engine services provide the core of Murano. However, your need a
- control plane to use it. This section decribes how to install and run Murano
+ control plane to use it. This section describes how to install and run Murano
  Dashboard.
 
 #.  Clone the repository with Murano Dashboard.
@@ -289,7 +289,7 @@ Install Murano Dashboard
 
         $ cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
 
-#.  Customize local settings according to Openstack installation.
+#.  Customize local settings according to OpenStack installation.
 
     .. code-block:: python
 
