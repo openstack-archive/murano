@@ -16,16 +16,16 @@
 
 
 =============
-Windows Image
+Windows image
 =============
 
-Murano requires a Windows Image in QCOW2 format to be built and uploaded into Glance.
+Murano requires a Windows image in QCOW2 format to be built and uploaded into glance.
 
-The easiest way to build Windows image for Murano is to build it on the host where your OpenStack is installed.
+The easiest way to build a Windows image for murano is to build it on the host where your OpenStack is installed.
 
 
 
-Prepare Image Builder Host
+Prepare image builder host
 ==========================
 
 
@@ -37,7 +37,7 @@ Install KVM
   This guide was tested on Ubuntu Server 12.04 x64.
 ..
 
-KVM is a default hypervisor in OpenStack, so our build scripts are targeted to this hypervisor only. It may change in future, though.
+KVM is a default hypervisor in OpenStack, so our build scripts are targeted to this hypervisor only. It may change in the future, though.
 
 Install KVM and some additional packages that are required by our scripts
 
@@ -55,7 +55,7 @@ Check that your hardware supports hardware virtualization.
   KVM acceleration can be used
 ..
 
-If your output differs, check that harware virtualization is enabled in your BIOS settings. You also could try import KVM kernel module
+If your output differs, check that hardware virtualization is enabled in your BIOS settings. You also could try import KVM kernel module
 
 .. code-block:: console
 
@@ -73,11 +73,11 @@ It might be helpful to add an appropriate module name into **/etc/modules** file
 
 
 
-Configure Shared Resource
+Configure shared resource
 =========================
 
-Murano Image Builder uses a shared folder located on the host system as an installation source for components.
-Makefile from image builder will copy required files to their locations, but you have to manually configure samba share.
+The murano image builder uses a shared folder located on the host system as an installation source for components.
+Makefile from the image builder will copy the required files to their locations, but you have to manually configure samba share.
 To do this, use the steps below.
 
 * Install samba
@@ -126,13 +126,13 @@ To do this, use the steps below.
 
 
 
-Download Prerequisites
+Download prerequisites
 ======================
 
 
 .. _windows_installation_iso:
 
-Windows Server Installation ISO
+Windows server installation ISO
 -------------------------------
 
 .. list-table::
@@ -154,7 +154,7 @@ Windows Server Installation ISO
 
 .. warning::
 
-  Windows Server 2008 R2 must include Service Pack 1 updates. This is required to install PowerShell V3 which is required by Murano Agent.
+  Windows Server 2008 R2 must include Service Pack 1 updates. This is required to install PowerShell V3 which is required by the murano Agent.
 ..
 
 |
@@ -195,14 +195,14 @@ Required Components
 
 .. warning::
 
-  PowerShell V3 is a **mandatory** prerequisite. It is required by Murano Agent. To check your PowerShell version use PowerShell command *Get-Host*.
+  PowerShell V3 is a **mandatory** prerequisite. It is required by the murano Agent. To check your PowerShell version use PowerShell command *Get-Host*.
 ..
 
 .. warning::
 
   When downloading VirtIO drivers choose only stable versions.
   Unstable versions might lead to errors during guest unattended installation.
-  You can check the latest version avaible here: http://alt.fedoraproject.org/pub/alt/virtio-win/stable
+  You can check the latest version available here: http://alt.fedoraproject.org/pub/alt/virtio-win/stable
 ..
 
 |
@@ -220,7 +220,7 @@ Required Components
 Optional Components
 -------------------
 
-These components are not mandatory for Murano Agent to function properly.
+These components are not mandatory for the murano agent to function properly.
 However, they may help you work with the image after deployment.
 
 .. list-table::
@@ -253,14 +253,14 @@ However, they may help you work with the image after deployment.
 
 
 
-Additional Tools
+Additional tools
 ================
 
 Tools from this section are not necessary to build an image.
-However, they may be helpful if you want to create an image with different configuration.
+However, they may be helpful if you want to create an image with a different configuration.
 
 
-Windows Assessment and Deployment Kit (ADK)
+Windows assessment and deployment kit (ADK)
 -------------------------------------------
 
 *Windows ADK* is required if you want to build your own answer files for auto unattended Windows installation.
@@ -268,12 +268,12 @@ Windows Assessment and Deployment Kit (ADK)
 Download it from http://www.microsoft.com/en-us/download/details.aspx?id=30652
 
 
-Floppy Image With Unattended File
+Floppy image with unattended file
 ---------------------------------
 
 Floppy image with answer file for unattended installation is needed to automate Windows installation process.
 
-* Create emtpy floppy image in your home folder
+* Create empty floppy image in your home folder
 
   .. code-block:: console
 
@@ -297,7 +297,7 @@ Floppy image with answer file for unattended installation is needed to automate 
 
 * Download **autounattend.xml.template** file from https://github.com/openstack/murano-deployment/tree/master/contrib/windows/image-builder/share/files
 
-  This folder contains unatteded files for several Windows versions, choose one that matches your Windows version.
+  This folder contains unattended files for several Windows versions, choose one that matches your Windows version.
 
 * Copy that file to mounted floppy image
 
@@ -317,13 +317,13 @@ Floppy image with answer file for unattended installation is needed to automate 
 
 
 
-Build Windows Image with Murano
+Build Windows image with murano
 ===============================
 
 
 .. _build_image_using_image_builder_scripts:
 
-Build Windows Image Using Image Builder Script
+Build Windows image using image builder script
 ----------------------------------------------
 
 * Clone **murano-deployment** repository
@@ -380,8 +380,8 @@ Build Windows Image Using Image Builder Script
 
 
 
-Build Windows Image Manualy
----------------------------
+Build windows image manually
+----------------------------
 
 .. note::
 
@@ -389,7 +389,7 @@ Build Windows Image Manualy
 ..
 
 
-Get Post-Install Scripts
+Get post-install scripts
 ------------------------
 
 There are a few scripts which perform all the required post-installation tasks.
@@ -399,8 +399,8 @@ They all are located in http://git.openstack.org/cgit/openstack/murano-deploymen
 
 .. note::
 
-  There are subfolders for each supported Windows Version.
-  Choose one that matches Windows Version you are building.
+  There are subfolders for each supported Windows version.
+  Choose one that matches Windows version you are building.
 ..
 
 This folder contains several scripts
@@ -419,7 +419,7 @@ This folder contains several scripts
     - Prepares system to be syspreped (cleans log files, stops some services and so on), and starts sysprep
 
   * - Start-AtFirstBoot.ps1
-    - Performes basic after-installation tasks
+    - Performs basic after-installation tasks
 ..
 
 
@@ -491,10 +491,10 @@ Install OS
 
 Launch your virtual machine, connect to its virtual console and complete OS installation. At the end of this step you should have Windows Server system that you are able to log into.
 
-Install Prerequisites and Murano
+Install prerequisites and murano
 --------------------------------
 
-* Create folders where Murano components will be installed
+* Create folders where murano components will be installed
 
   .. list-table::
     :header-rows: 1
@@ -513,18 +513,18 @@ Install Prerequisites and Murano
       - PowerShell modules required by Murano
 
     * - C:\\Murano\\Scripts
-      - PowerShell scrtips and other files required by Murano
+      - PowerShell scripts and other files required by murano
   ..
 
 * Open **Explorer** and navigate to **\\192.168.122.1\share** **192.168.122.1** is an IP address of KVM hypervisor assigned by default.
 
-* Copy Murano Agent files into C:\Murano\Agent
+* Copy the murano agent files into C:\Murano\Agent
 
 * Copy CoreFunctions directory (entire directory!) into C:\Murano\Modules
 
 * Install .NET 4.0
 
-* Register Murano Agent
+* Register the murano agent
 
   .. code-block:: cmd
 
@@ -560,7 +560,7 @@ Install Prerequisites and Murano
 Convert the image from RAW to QCOW2 format
 ------------------------------------------
 
-The image must be converted from RAW format to QCOW2 before being imported into Glance.
+The image must be converted from RAW format to QCOW2 before being imported into glance.
 
 .. code-block:: console
 
