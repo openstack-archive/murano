@@ -19,7 +19,7 @@ from webob import exc as exceptions
 
 from murano.common.i18n import _
 import murano.openstack.common.log as logging
-from murano.openstack.common import policy
+from oslo_policy import policy
 
 LOG = logging.getLogger(__name__)
 
@@ -48,8 +48,7 @@ def set_rules(data, default_rule=None, overwrite=True):
     LOG.debug(msg, data, default_rule, overwrite)
 
     if isinstance(data, dict):
-        rules = dict((k, policy.parse_rule(v)) for k, v in data.items())
-        rules = policy.Rules(rules, default_rule)
+        rules = policy.Rules.from_dict(data, default_rule)
     else:
         rules = policy.Rules.load_json(data, default_rule)
 
@@ -60,7 +59,7 @@ def init(default_rule=None, use_conf=True):
     global _ENFORCER
     if not _ENFORCER:
         LOG.debug("Enforcer is not present, recreating.")
-        _ENFORCER = policy.Enforcer(use_conf=use_conf)
+        _ENFORCER = policy.Enforcer(CONF, use_conf=use_conf)
     _ENFORCER.load_rules()
 
 

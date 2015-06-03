@@ -24,7 +24,6 @@ import mock
 from oslo_utils import timeutils
 
 from murano.api.v1 import catalog
-from murano.common import policy
 from murano.db.catalog import api as db_catalog_api
 from murano.db import models
 from murano.packages import load_utils
@@ -259,7 +258,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertEqual(imghdr.what('', result), 'png')
 
     def test_add_public_unauthorized(self):
-        policy.set_rules({
+        self._set_policy_rules({
             'upload_package': '@',
             'publicize_package': 'is_admin:True',
             'delete_package': 'is_admin:True',
