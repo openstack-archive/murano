@@ -143,14 +143,18 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, environment_id):
-        LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
         target = {"environment_id": environment_id}
         policy.check('delete_environment', request.context, target)
-        sessions_controller = sessions.Controller()
-        session = sessions_controller.configure(request, environment_id)
-        session_id = session['id']
-        envs.EnvironmentServices.delete(environment_id, session_id)
-        sessions_controller.deploy(request, environment_id, session_id)
+        if request.GET.get('abandon', '').lower() == 'true':
+            LOG.debug('Environments:Abandon  <Id: {0}>'.format(environment_id))
+            envs.EnvironmentServices.remove(environment_id)
+        else:
+            LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
+            sessions_controller = sessions.Controller()
+            session = sessions_controller.configure(request, environment_id)
+            session_id = session['id']
+            envs.EnvironmentServices.delete(environment_id, session_id)
+            sessions_controller.deploy(request, environment_id, session_id)
 
     @request_statistics.stats_count(API_NAME, 'LastStatus')
     def last(self, request, environment_id):

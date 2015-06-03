@@ -201,47 +201,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
             {'update_environment': '@'}
         )
 
-        fake_now = timeutils.utcnow()
-        timeutils.utcnow.override_time = fake_now
-
-        expected = dict(
-            id='111',
-            name='env1',
-            version=0,
-            networking={},
-            created=fake_now,
-            updated=fake_now,
-            tenant_id=self.tenant,
-            description={
-                'Objects': {
-                    '?': {'id': '111'}
-                },
-                'Attributes': []
-            }
-        )
-        e = models.Environment(**expected)
-        test_utils.save_models(e)
-
-        fake_now = timeutils.utcnow()
-        timeutils.utcnow.override_time = fake_now
-
-        expected = dict(
-            id='222',
-            name='env2',
-            version=0,
-            networking={},
-            created=fake_now,
-            updated=fake_now,
-            tenant_id=self.tenant,
-            description={
-                'Objects': {
-                    '?': {'id': '222'}
-                },
-                'Attributes': []
-            }
-        )
-        e = models.Environment(**expected)
-        test_utils.save_models(e)
+        self._create_fake_environment('env1', '111')
+        self._create_fake_environment('env2', '222')
 
         self.expect_policy_check('update_environment',
                                  {'environment_id': '111'})
@@ -255,17 +216,17 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call."""
-        self._set_policy_rules(
-            {'delete_environment': '@'}
-        )
-        self.expect_policy_check(
-            'delete_environment', {'environment_id': '12345'}
-        )
+        self._test_delete_or_abandon(abandon=False)
 
+    def test_abandon_environment(self):
+        """Cjeck that abandon feature works"""
+        self._test_delete_or_abandon(abandon=True)
+
+    def _create_fake_environment(self, env_name='my-env', env_id='123'):
         fake_now = timeutils.utcnow()
         expected = dict(
-            id='12345',
-            name='my-env',
+            id=env_id,
+            name=env_name,
             version=0,
             networking={},
             created=fake_now,
@@ -273,7 +234,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
             tenant_id=self.tenant,
             description={
                 'Objects': {
-                    '?': {'id': '12345'}
+                    '?': {'id': '{0}'.format(env_id)}
                 },
                 'Attributes': {}
             }
@@ -281,7 +242,21 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         e = models.Environment(**expected)
         test_utils.save_models(e)
 
-        req = self._delete('/environments/12345')
+    def _test_delete_or_abandon(self, abandon, env_name='my-env',
+                                env_id='123'):
+        self._set_policy_rules(
+            {'delete_environment': '@'}
+        )
+        self.expect_policy_check(
+            'delete_environment',
+            {'environment_id': '{0}'.format(env_id)}
+        )
+
+        self._create_fake_environment(env_name, env_id)
+
+        path = '/environments/{0}'.format(env_id)
+
+        req = self._delete(path, params={'abandon': abandon})
         result = req.get_response(self.api)
 
         # Should this be expected behavior?

@@ -286,8 +286,29 @@ Delete environment
 +----------+----------------------------------+----------------------------------+
 | Method   | URI                              | Description                      |
 +==========+==================================+==================================+
-| DELETE   | /environments/{id}               | Remove specified Environment.    |
+| DELETE   | /environments/{id}?abandon       | Remove specified Environment.    |
 +----------+----------------------------------+----------------------------------+
+
+
+*Parameters:*
+
+* `abandon` - boolean, indicates how to delete environment. *False* is used if
+  all resources used by environment must be destroyed; *True* is used when just
+  database must be cleaned
+
+
+*Response*
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Environment deleted successfully                      |
++----------------+-----------------------------------------------------------+
+| 403            | User is not allowed to delete this resource               |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified environment doesn`t exist            |
++----------------+-----------------------------------------------------------+
+
 
 Environment configuration API
 =============================
