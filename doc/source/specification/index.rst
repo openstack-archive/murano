@@ -22,9 +22,9 @@ General information
 
 * **Introduction**
 
-    Murano Service API is a programmatic interface used for interaction with
-    Murano. Other interaction mechanisms like Murano Dashboard or Murano CLI
-    should use API as underlying protocol for interaction.
+    The murano service API is a programmatic interface used for interaction with
+    murano. Other interaction mechanisms like the murano dashboard or the murano CLI
+    should use the API as an underlying protocol for interaction.
 
 * **Allowed HTTPs requests**
 
@@ -53,9 +53,9 @@ General information
 
 * **Authentication**
 
-    All requests include a Keystone authentication token header
-    (X-Auth-Token). Clients must authenticate with Keystone before
-    interacting with the Murano service.
+    All requests include a keystone authentication token header
+    (X-Auth-Token). Clients must authenticate with keystone before
+    interacting with the murano service.
 
 .. include:: murano-api.rst
 .. include:: murano-repository.rst

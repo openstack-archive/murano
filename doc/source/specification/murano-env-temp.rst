@@ -13,10 +13,10 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-Environment Template API
+Environment template API
 ========================
 
-Manage environment template definitions in Murano. It is possible to create, update, delete and deploy into Openstack by translating
+Manage environment template definitions in Murano. It is possible to create, update, delete and deploy into OpenStack by translating
 it into an environment. In addition, applications can be added or delete to the environment template.
 
 **Environment Template Properties**
@@ -67,7 +67,7 @@ List Environments Templates
 
 *Response*
 
-This call returns list of environment templates. Only the basic properties are
+This call returns a list of environment templates. Only the basic properties are
 returned.
 
 ::
@@ -96,7 +96,7 @@ returned.
     }
 
 
-Create Environment Template
+Create environment template
 ---------------------------
 
 +----------------------+------------+---------------------------------------------------------+
@@ -145,8 +145,8 @@ Create Environment Template
 +----------------+-----------------------------------------------------------+
 
 
-Get Environment Templates Details
------------------------
+Get environment templates details
+---------------------------------
 
 *Request*
 
@@ -156,7 +156,7 @@ environment template.
 +----------+--------------------------------+-------------------------------------------------+
 | Method   | URI                            | Description                                     |
 +==========+================================+=================================================+
-| GET      | /templates/{env-temp-id}       | Obtains the enviroment template information     |
+| GET      | /templates/{env-temp-id}       | Obtains the environment template information     |
 +----------+--------------------------------+-------------------------------------------------+
 
 * `env-temp-id` - environment template ID, required
@@ -192,7 +192,7 @@ environment template.
 | 404            | The environment template does not exit                    |
 +----------------+-----------------------------------------------------------+
 
-Delete Environment Template
+Delete environment template
 ---------------------------
 
 *Request*
