@@ -7,17 +7,37 @@
 Welcome to Murano Documentation
 ===============================
 
-.. TODO add Abstract (OG)
+**Murano** is an open source OpenStack project that
+combines an application catalog with versatile
+tooling to simplify and accelerate packaging and
+deployment. It can be used with almost any application
+and service in OpenStack, and is extensible to
+other clouds.
 
+This documentation guides application developers
+through the process of composing an application
+package to get it ready for uploading to Murano.
 
-Introduction
-~~~~~~~~~~~~
+Besides the deployment rules and requirements,
+it contains information on how to manage images,
+categories, and repositories using the murano client that
+will surely be helpful for cloud administrators.
+
+It also explains to end users how they can use the catalog
+directly from the dashboard. These include guidance on how
+to manage applications and environments.
+
+And of course, it provides information on how to contribute
+to the project.
+
+Introduction to Murano
+~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 2
 
-   intro/whats_murano
    intro/key_features
+   intro/target_users
    intro/architecture
    intro/use_cases
    intro/user_stories
