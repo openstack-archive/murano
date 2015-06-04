@@ -20,7 +20,6 @@ import itertools
 import murano.common.config
 import murano.common.wsgi
 import murano.openstack.common.log
-import murano.openstack.common.policy
 import murano.openstack.common.sslutils
 
 
@@ -50,7 +49,6 @@ _opt_lists = [
         murano.openstack.common.log.generic_log_opts,
         murano.openstack.common.log.log_opts,
         murano.openstack.common.log.logging_cli_opts,
-        murano.openstack.common.policy.policy_opts
     ])),
 ]
 

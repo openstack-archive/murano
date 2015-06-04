@@ -206,7 +206,7 @@ class ControllerTest(object):
                                   params=params, user=user, tenant=tenant)
 
     def _set_policy_rules(self, rules):
-        policy.set_rules(rules)
+        policy.set_rules(rules, default_rule='default')
 
     def expect_policy_check(self, action, target={}):
         self._policy_check_expectations.append((action, target))
