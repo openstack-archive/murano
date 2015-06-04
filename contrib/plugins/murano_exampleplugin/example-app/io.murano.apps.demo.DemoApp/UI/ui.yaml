@@ -76,6 +76,4 @@ Forms:
           label: Hostname
           type: string
           required: false
-          widgetMedia:
-            js: ['muranodashboard/js/support_placeholder.js']
-            css: {all: ['muranodashboard/css/support_placeholder.css']}
+

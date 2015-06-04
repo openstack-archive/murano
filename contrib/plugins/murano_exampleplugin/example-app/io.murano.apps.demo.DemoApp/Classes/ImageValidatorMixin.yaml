@@ -11,7 +11,7 @@ Properties:
   requiredType:
     Contract: $.string().notNull()
 
-Workflow:
+Methods:
   validateImage:
     Body:
       - Try:
