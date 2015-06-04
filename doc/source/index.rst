@@ -89,8 +89,6 @@ Developing Applications
 .. toctree::
    :maxdepth: 1
 
-   murano_pl/murano_pl_index
-   articles/dynamic_ui
    articles/workflow
    articles/policy_enf_index
 
@@ -111,13 +109,6 @@ Developing Applications
    :maxdepth: 1
 
    articles/client
-
-**Repository**
-
-.. toctree::
-   :maxdepth: 1
-
-   articles/repository
 
 **Guidelines**
 
