@@ -3,9 +3,9 @@
 
 .. _content:
 
-===============================
-Welcome to Murano Documentation
-===============================
+======================================
+Welcome to Murano Documentation (BETA)
+======================================
 
 **Murano** is an open source OpenStack project that
 combines an application catalog with versatile
