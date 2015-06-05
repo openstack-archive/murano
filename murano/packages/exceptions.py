@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import murano.openstack.common.exception as e
+import murano.common.exceptions as e
 
 
 class PackageException(e.Error):
