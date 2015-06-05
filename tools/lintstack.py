@@ -27,7 +27,15 @@ from pylint import lint
 from pylint.reporters import text
 from six.moves import cStringIO as StringIO
 
-enabled_codes="R0801,R0911,R0912,R0913,R0914,R0915"
+# enabled checks
+# http://pylint-messages.wikidot.com/all-codes
+ENABLED_CODES=(
+    # refactor category
+    "R0801", "R0911", "R0912", "R0913", "R0914", "R0915",
+    # warning category
+    "W0612", "W0613", "W0703",
+    # convention category
+     "C1001")
 
 KNOWN_PYLINT_EXCEPTIONS_FILE = "tools/pylint_exceptions"
 
@@ -78,6 +86,8 @@ class LintOutput(object):
         # duplicate code output needs special handling
         if "duplicate-code" in code:
             filename, lineno = cls.get_duplicate_code_location(remaining_lines)
+            # fixes incorrectly reported file path
+            line = line.replace(matched[0], filename)
 
         line_content = cls.get_line_content(filename, lineno)
         return cls(filename, lineno, line_content, code, message,
@@ -89,7 +99,6 @@ class LintOutput(object):
         is a unique error identifier, value is a list of LintOutput
         """
         result = {}
-        print(msg)
         lines = msg.splitlines()
         while lines:
             line = lines.pop(0)
@@ -134,7 +143,7 @@ class ErrorKeys(object):
 def run_pylint():
     buff = StringIO()
     reporter = text.ParseableTextReporter(output=buff)
-    args = ["-rn", "--disable=all", "--enable=" + enabled_codes ,"murano"]
+    args = ["-rn", "--disable=all", "--enable=" + ",".join(ENABLED_CODES),"murano"]
     lint.Run(args, reporter=reporter, exit=False)
     val = buff.getvalue()
     buff.close()
@@ -146,7 +155,6 @@ def generate_error_keys(msg=None):
     if msg is None:
         msg = run_pylint()
 
-    print(msg)
     errors = LintOutput.from_msg_to_dict(msg)
     with open(KNOWN_PYLINT_EXCEPTIONS_FILE, "w") as f:
         ErrorKeys.print_json(errors, output=f)
@@ -160,15 +168,16 @@ def validate(newmsg=None):
         newmsg = run_pylint()
     errors = LintOutput.from_msg_to_dict(newmsg)
 
+    print()
     print("Unique errors reported by pylint: was %d, now %d."
           % (len(known), len(errors)))
     passed = True
     for err_key, err_list in errors.items():
         for err in err_list:
             if err_key not in known:
+                print()
                 print(err.lintoutput)
                 print(err.review_str())
-                print()
                 passed = False
     if passed:
         print("Congrats! pylint check passed.")
@@ -179,6 +188,7 @@ def validate(newmsg=None):
                 print(json.dumps(i))
             print("Consider regenerating the exception file if you will.")
     else:
+        print()
         print("Please fix the errors above. If you believe they are false "
               "positives, run 'tools/lintstack.py generate' to overwrite.")
         sys.exit(1)
