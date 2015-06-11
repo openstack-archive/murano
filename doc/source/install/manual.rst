@@ -318,7 +318,7 @@ Install Murano Dashboard
         DATABASES = {
             'default': {
             'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': '/tmp/murano-dashboard.sqlite',
+            'NAME': 'murano-dashboard.sqlite',
             }
         }
 
