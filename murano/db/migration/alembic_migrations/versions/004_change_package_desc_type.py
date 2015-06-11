@@ -35,7 +35,7 @@ MYSQL_CHARSET = 'utf8'
 
 def upgrade():
     engine = op.get_bind()
-    if engine.dialect.dialect_description == 'mysql+mysqldb':
+    if engine.dialect.dialect_description.startswith('mysql'):
         engine.execute('SET FOREIGN_KEY_CHECKS=0')
 
     if engine.dialect.dialect_description == 'postgresql+psycopg2':
@@ -78,7 +78,7 @@ def upgrade():
                     'package',
                     ['fully_qualified_name'])
 
-    if engine.dialect.dialect_description == 'mysql+mysqldb':
+    if engine.dialect.dialect_description.startswith('mysql'):
         engine.execute('SET FOREIGN_KEY_CHECKS=1')
 
     if engine.dialect.dialect_description == 'postgresql+psycopg2':
@@ -103,7 +103,7 @@ def upgrade():
 
 def downgrade():
     engine = op.get_bind()
-    if engine.dialect.dialect_description == 'mysql+mysqldb':
+    if engine.dialect.dialect_description.startswith('mysql'):
         engine.execute('SET FOREIGN_KEY_CHECKS=0')
 
     if engine.dialect.dialect_description == 'postgresql+psycopg2':
@@ -146,7 +146,7 @@ def downgrade():
                     'package',
                     ['fully_qualified_name'])
 
-    if engine.dialect.dialect_description == 'mysql+mysqldb':
+    if engine.dialect.dialect_description.startswith('mysql'):
         engine.execute('SET FOREIGN_KEY_CHECKS=1')
 
     if engine.dialect.dialect_description == 'postgresql+psycopg2':
