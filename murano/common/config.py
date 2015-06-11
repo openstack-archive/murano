@@ -201,7 +201,10 @@ engine_opts = [
                 help=_("Create resources using trust token rather "
                        "than user's token")),
     cfg.BoolOpt('enable_model_policy_enforcer', default=False,
-                help=_('Enable model policy enforcer using Congress'))
+                help=_('Enable model policy enforcer using Congress')),
+    cfg.IntOpt('agent_timeout', default=3600,
+               help=_('Time for waiting for a response from murano agent'
+                      'during the deployment'))
 ]
 
 # TODO(sjmc7): move into engine opts?
