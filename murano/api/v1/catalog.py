@@ -24,11 +24,11 @@ from webob import exc
 
 import murano.api.v1
 from murano.api.v1 import schemas
+from murano.common import exceptions
 from murano.common import policy
 from murano.common import wsgi
 from murano.db.catalog import api as db_api
 from murano.common.i18n import _, _LW
-from murano.openstack.common import exception
 from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
@@ -46,7 +46,7 @@ PKG_PARAMS_MAP = murano.api.v1.PKG_PARAMS_MAP
 def _check_content_type(req, content_type):
     try:
         req.get_content_type((content_type,))
-    except exception.InvalidContentType:
+    except exceptions.InvalidContentType:
         msg = _("Content-Type must be '{0}'").format(content_type)
         LOG.error(msg)
         raise exc.HTTPBadRequest(explanation=msg)
