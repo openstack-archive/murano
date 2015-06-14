@@ -22,6 +22,7 @@ import urlparse
 import uuid
 
 import eventlet.event
+from oslo_config import cfg
 
 import murano.common.config as config
 import murano.common.exceptions as exceptions
@@ -32,6 +33,7 @@ import murano.dsl.yaql_expression as yaql_expression
 import murano.engine.system.common as common
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 class AgentException(Exception):
@@ -121,7 +123,9 @@ class Agent(murano_object.MuranoObject):
         else:
             return None
 
-    def call(self, template, resources, _context, timeout=600):
+    def call(self, template, resources, _context, timeout=None):
+        if timeout is None:
+            timeout = CONF.engine.agent_timeout
         self._check_enabled()
         plan = self.buildExecutionPlan(template, resources)
         return self._send(plan, True, timeout, _context)
@@ -131,7 +135,9 @@ class Agent(murano_object.MuranoObject):
         plan = self.buildExecutionPlan(template, resources)
         return self._send(plan, False, 0, _context)
 
-    def callRaw(self, plan, _context, timeout=600):
+    def callRaw(self, plan, _context, timeout=None):
+        if timeout is None:
+            timeout = CONF.engine.agent_timeout
         self._check_enabled()
         return self._send(plan, True, timeout, _context)
 
