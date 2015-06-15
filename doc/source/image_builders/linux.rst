@@ -40,9 +40,9 @@ Clone the components required to build an image to that directory:
 .. code-block:: console
 
     $ cd $GITDIR
-    $ git clone git://git.openstack.org/cgit/openstack/murano
-    $ git clone git://git.openstack.org/cgit/openstack/murano-agent
-    $ git clone git://git.openstack.org/cgit/openstack/diskimage-builder
+    $ git clone git://git.openstack.org/openstack/murano
+    $ git clone git://git.openstack.org/openstack/murano-agent
+    $ git clone git://git.openstack.org/openstack/diskimage-builder
 
 
 Checkout a change request that allows to build an image using disk image builder

@@ -330,7 +330,7 @@ Build Windows image using image builder script
 
   .. code-block:: console
 
-    $ git clone git://git.openstack.org/cgit/openstack/murano-deployment.git
+    $ git clone git://git.openstack.org/openstack/murano-deployment.git
   ..
 
 * Change directory to image-builder folder
