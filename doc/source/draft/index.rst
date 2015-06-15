@@ -40,7 +40,6 @@ Introduction to Murano
    intro/target_users
    intro/architecture
    intro/use_cases
-   intro/user_stories
 
 Using Murano
 ~~~~~~~~~~~~
