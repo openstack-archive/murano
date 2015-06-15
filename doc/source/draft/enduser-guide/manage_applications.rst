@@ -73,7 +73,7 @@ murano applications repository:
    .. image:: figures/repository.png
 
 #. At this step, the package is already uploaded. If necessary,
-   verify and update in the information about the package, then
+   verify and update the information about the package, then
    click **Next**.
 #. Choose one or multiple categories from the **Application Category**
    menu, then click **Create**.
