@@ -335,9 +335,9 @@ The following block constructs are available:
 | |   - block                 |                                                                                       |
 +-----------------------------+---------------------------------------------------------------------------------------+
 | | While: predicate()        | | ``predicate()`` must be evaluated to ``True`` or ``False``                          |
-| | Do:``                     |                                                                                       |
-|   | - code                  |                                                                                       |
-|   | - block                 |                                                                                       |
+| | Do:                       |                                                                                       |
+| |   - code                  |                                                                                       |
+| |   - block                 |                                                                                       |
 +-----------------------------+---------------------------------------------------------------------------------------+
 | | For: variableName         | | ``collection`` must be a YAQL expression returning iterable collection or           |
 | | In: collection            |    evaluatable array as in assignment instructions, for example, ``[1, 2, $x]``       |
