@@ -197,7 +197,7 @@ engine_opts = [
                 help=_('Disallow the use of murano-agent')),
     cfg.StrOpt('class_configs', default='/etc/murano/class-configs',
                help=_('Path to class configuration files')),
-    cfg.BoolOpt('use_trusts', default=False,
+    cfg.BoolOpt('use_trusts', default=True,
                 help=_("Create resources using trust token rather "
                        "than user's token")),
     cfg.BoolOpt('enable_model_policy_enforcer', default=False,
