@@ -92,7 +92,7 @@ METADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'
 DATABASES = {
     'default': {
         'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join(METADATA_CACHE_DIR, 'openstack-dashboard.sqlite')
+        'NAME': os.path.join('$MURANO_DASHBOARD_DIR', 'openstack-dashboard.sqlite')
     }
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
