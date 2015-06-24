@@ -172,9 +172,11 @@ class ControllerTest(object):
         return self._simple_request(path, params=params, user=user,
                                     tenant=tenant)
 
-    def _delete(self, path, user=DEFAULT_USER, tenant=DEFAULT_TENANT):
-        return self._simple_request(path, method='DELETE', user=user,
-                                    tenant=tenant)
+    def _delete(self, path, params=None, user=DEFAULT_USER,
+                tenant=DEFAULT_TENANT):
+        params = params or {}
+        return self._simple_request(path, params=params, method='DELETE',
+                                    user=user, tenant=tenant)
 
     def _data_request(self, path, data, content_type='application/json',
                       method='POST', params={},
