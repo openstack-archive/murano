@@ -18,6 +18,7 @@ import socket
 import time
 
 import eventlet
+from oslo_service import service
 import psutil
 
 from murano.api import v1
@@ -26,7 +27,6 @@ from murano.common import config
 from murano.common.i18n import _LE
 from murano.db.services import stats as db_stats
 from murano.openstack.common import log as logging
-from murano.openstack.common import service
 
 
 CONF_STATS = config.CONF.stats
