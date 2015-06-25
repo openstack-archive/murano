@@ -15,3 +15,4 @@ YAQL languages. The sections below describe these languages.
 .. include:: murano_pl/yaql.rst
 .. include:: murano_pl/class_templ.rst
 .. include:: murano_pl/core_classes.rst
+.. include:: murano_pl/actions.rst

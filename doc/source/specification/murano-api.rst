@@ -850,3 +850,84 @@ General Request Statistics
         }
     ]
 
+
+Actions API
+===========
+
+Murano Actions are simple MuranoPL methods, that can be called on deployed applications.
+Application contains a list with available actions. Actions may return a result.
+
+Execute an action
+-----------------
+
+Generate task with executing specified action. Input parameters may be provided.
+
+*Request*
+
+**Content-Type**
+  application/json
+
++----------------+-----------------------------------------------------------+------------------------------------+
+| Method         | URI                                                       | Header                             |
++================+===========================================================+====================================+
+| POST           | /environments/<env_id>/actions/<action_id>                |                                    |
++----------------+-----------------------------------------------------------+------------------------------------+
+
+**Parameters:**
+
+* `env_id` - environment ID, required
+* `actions_id` - action ID to execute, required
+
+::
+
+  "{<action_property>: value}"
+
+  or
+
+  "{}" in case action has no properties
+
+*Response*
+
+Task ID that executes specified action is returned
+
+**Content-Type**
+  application/json
+
+::
+
+  {
+      "task_id": "620e883070ad40a3af566d465aa156ef"
+  }
+
+GET action result
+-----------------
+
+Request result value after action execution finish. Not all actions have return values.
+
+
+*Request*
+
++----------------+-----------------------------------------------------------+------------------------------------+
+| Method         | URI                                                       | Header                             |
++================+===========================================================+====================================+
+| GET            | /environments/<env_id>/actions/<task_id>                  |                                    |
++----------------+-----------------------------------------------------------+------------------------------------+
+
+**Parameters:**
+
+* `env_id` - environment ID, required
+* `task_id` - task ID, generated on desired action execution
+
+*Response*
+
+Json, describing action result is returned. Result type and value are provided.
+
+**Content-Type**
+  application/json
+
+::
+
+    {
+      "isException": false,
+        "result": ["item1", "item2"]
+    }
