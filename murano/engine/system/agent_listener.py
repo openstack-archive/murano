@@ -22,8 +22,8 @@ from murano.dsl import helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.engine.system.common as common
-
 from murano.openstack.common import log as logging
+
 
 LOG = logging.getLogger(__name__)
 

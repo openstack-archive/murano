@@ -23,10 +23,11 @@ Create Date: 2014-05-29 16:32:33.698760
 revision = '001'
 down_revision = None
 
+import uuid
+
 from alembic import op
 import sqlalchemy as sa
 from sqlalchemy.sql.expression import table as sa_table
-import uuid
 
 from murano.common import consts
 from murano.db.sqla import types as st
@@ -252,7 +253,7 @@ def upgrade():
     )
 
     _create_default_categories(op)
-    ### end Alembic commands ###
+    # end Alembic commands #
 
 
 def downgrade():
@@ -272,4 +273,4 @@ def downgrade():
     op.drop_table('category')
     op.drop_table('tag')
     op.drop_table('environment')
-    ### end Alembic commands ###
+    # end Alembic commands #

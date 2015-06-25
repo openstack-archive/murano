@@ -38,7 +38,7 @@ class SysLogHandlersTestCase(base.MuranoTestCase):
         self.logger.binary_name = 'Foo_application'
 
     def test_rfc_format(self):
-        """Ensure syslog msg contains APP-NAME for RFC wrapped handler"""
+        """Ensure syslog msg contains APP-NAME for RFC wrapped handler."""
         logrecord = logging.LogRecord('name', 'WARN', '/tmp', 1,
                                       'Message', None, None)
         expected = logging.LogRecord('name', 'WARN', '/tmp', 1,
@@ -47,7 +47,7 @@ class SysLogHandlersTestCase(base.MuranoTestCase):
                          expected.getMessage())
 
     def test_standard_format(self):
-        """Ensure syslog msg isn't modified for standard handler"""
+        """Ensure syslog msg isn't modified for standard handler."""
         logrecord = logging.LogRecord('name', 'WARN', '/tmp', 1,
                                       'Message', None, None)
         expected = logrecord

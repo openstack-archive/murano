@@ -1,5 +1,5 @@
 [gerrit]
 host=review.openstack.org
 port=29418
-project=stackforge/murano.git
+project=openstack/murano.git
 defaultbranch=stable/juno

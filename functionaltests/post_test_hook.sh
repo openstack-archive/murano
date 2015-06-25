@@ -14,6 +14,12 @@
 
 # This script is executed inside post_test_hook function in devstack gate.
 
+# Installing tempest requirements
+sudo pip install -r /opt/stack/new/tempest/requirements.txt
+
+# Installing test-requirements
+sudo pip install -r /opt/stack/new/murano/test-requirements.txt
+
 cd /opt/stack/new/murano/functionaltests
 sudo ./run_tests.sh
 RETVAL=$?

@@ -13,8 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import anyjson
 import logging
+
+import anyjson
+
 
 log = logging.getLogger("murano-common.messaging")
 

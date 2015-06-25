@@ -56,7 +56,8 @@ class EnvironmentServices(object):
         :param environment_id: Id of environment for which we checking status.
         :return: Environment status
         """
-        #Deploying: there is at least one valid session with status `deploying`
+        # Deploying: there is at least one valid session with status
+        # `deploying`
         session_list = sessions.SessionServices.get_sessions(environment_id)
         has_opened = False
         for session in session_list:
@@ -77,7 +78,7 @@ class EnvironmentServices(object):
 
     @staticmethod
     def create(environment_params, tenant_id):
-        #tagging environment by tenant_id for later checks
+        # tagging environment by tenant_id for later checks
         """Creates environment with specified params, in particular - name
 
            :param environment_params: Dict, e.g. {'name': 'env-name'}
@@ -106,7 +107,7 @@ class EnvironmentServices(object):
         with unit.begin():
             unit.add(environment)
 
-        #saving environment as Json to itself
+        # saving environment as Json to itself
         environment.update({'description': data})
         environment.save(unit)
 

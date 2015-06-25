@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
 from tempest.test import attr
 from tempest_lib import exceptions
 
@@ -192,20 +190,12 @@ class TestServices(base.TestCase):
                           sess['id'],
                           service['?']['id'])
 
-    @testtools.skip("https://bugs.launchpad.net/murano/+bug/1295573")
-    @attr(type='negative')
-    def test_get_service_without_sess_id(self):
+    @attr(type='smoke')
+    def test_get_services_without_sess_id(self):
         env = self.create_environment('test')
-
-        sess = self.client.create_session(env['id'])[1]
-
-        service = self.create_demo_service(env['id'], sess['id'])[1]
-
-        self.assertRaises(exceptions.Unauthorized,
-                          self.client.get_service,
-                          env['id'],
-                          "",
-                          service['?']['id'])
+        resp, body = self.client.get_services_list(env['id'], None)
+        self.assertEqual(resp.status, 200)
+        self.assertEqual([], body)
 
 
 class TestServicesTenantIsolation(base.NegativeTestCase):

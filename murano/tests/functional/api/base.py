@@ -18,8 +18,8 @@ import time
 import uuid
 
 import requests
-
 from tempest import clients
+from tempest.common import cred_provider
 from tempest.common import isolated_creds
 from tempest import config
 from tempest import test
@@ -44,9 +44,8 @@ class MuranoClient(rest_client.RestClient):
         return resp, json.loads(body)
 
     def create_environment(self, name):
-        post_body = '{"name": "%s"}' % name
-
-        resp, body = self.post('v1/environments', post_body)
+        body = {'name': name}
+        resp, body = self.post('v1/environments', json.dumps(body))
 
         return resp, json.loads(body)
 
@@ -110,7 +109,7 @@ class MuranoClient(rest_client.RestClient):
         resp, body = self.post(url.format(environment_id, session_id),
                                post_body)
 
-        return resp, json.loads(body)
+        return resp
 
     def create_service(self, environment_id, session_id, post_body):
         post_body = json.dumps(post_body)
@@ -142,9 +141,10 @@ class MuranoClient(rest_client.RestClient):
 
     def get_services_list(self, environment_id, session_id):
         headers = self.get_headers()
-        headers.update(
-            {'X-Configuration-Session': session_id}
-        )
+        if session_id:
+            headers.update(
+                {'X-Configuration-Session': session_id}
+            )
 
         resp, body = self.get(
             'v1/environments/{0}/services'.format(environment_id),
@@ -225,13 +225,16 @@ class MuranoClient(rest_client.RestClient):
 
 
 class TestCase(test.BaseTestCase):
+
     @classmethod
     def setUpClass(cls):
         super(TestCase, cls).setUpClass()
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        mgr = clients.Manager()
+        cls.creds = cred_provider.get_configured_credentials(
+            credential_type='identity_admin')
+        mgr = clients.Manager(cls.creds)
         cls.client = MuranoClient(mgr.auth_provider)
 
     def setUp(self):
@@ -287,7 +290,12 @@ class NegativeTestCase(TestCase):
 
         # If no credentials are provided, the Manager will use those
         # in CONF.identity and generate an auth_provider from them
-        creds = isolated_creds.IsolatedCreds('v2', name=cls.__name__).\
-            get_alt_creds()
+        cls.isolated_creds = isolated_creds.IsolatedCreds('v2',
+                                                          name=cls.__name__)
+        creds = cls.isolated_creds.get_alt_creds()
         mgr = clients.Manager(credentials=creds)
         cls.alt_client = MuranoClient(mgr.auth_provider)
+
+    @classmethod
+    def purge_creds(cls):
+        cls.isolated_creds.clear_isolated_creds()

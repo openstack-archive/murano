@@ -14,10 +14,10 @@
 # limitations under the License.
 
 import mock
-from murano.tests.unit import base
 
 from murano.dsl import murano_object
 from murano.engine.system import heat_stack
+from murano.tests.unit import base
 
 
 MOD_NAME = 'murano.engine.system.heat_stack'

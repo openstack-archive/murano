@@ -14,9 +14,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import eventlet
 import os
 import sys
+
+import eventlet
+
 
 if os.name == 'nt':
     # eventlet monkey patching causes subprocess.Popen to fail on Windows

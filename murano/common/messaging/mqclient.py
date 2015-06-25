@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import anyjson
 import logging
 import ssl as ssl_module
 
+import anyjson
 from eventlet import patcher
+
 kombu = patcher.import_patched('kombu')
 from subscription import Subscription
 

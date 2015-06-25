@@ -14,10 +14,12 @@
 # limitations under the License.
 
 import json as jsonlib
+
 import yaml as yamllib
 
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_object as murano_object
+
 
 if hasattr(yamllib, 'CSafeLoader'):
     yaml_loader = yamllib.CSafeLoader

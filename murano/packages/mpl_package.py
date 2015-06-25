@@ -14,6 +14,7 @@
 
 import os
 import sys
+
 import yaml
 
 import murano.packages.application_package

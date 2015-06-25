@@ -15,13 +15,13 @@
 
 import base64
 import collections
+import itertools
 import random
 import re
 import string
 import time
 import types
 
-import itertools
 import jsonpatch
 import jsonpointer
 import yaql.context

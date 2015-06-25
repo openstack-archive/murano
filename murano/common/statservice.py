@@ -12,16 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import eventlet
 import json
-import psutil
 import socket
 import time
+
+import eventlet
+import psutil
 
 from murano.api import v1
 from murano.api.v1 import request_statistics
 from murano.common import config
-
 from murano.db.services import stats as db_stats
 from murano.openstack.common.gettextutils import _  # noqa
 from murano.openstack.common import log as logging

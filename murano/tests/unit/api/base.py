@@ -13,11 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import fixtures
 import logging
+import urllib
+
+import fixtures
 import mock
 import routes
-import urllib
 import webob
 
 from murano.api.v1 import request_statistics
@@ -28,6 +29,7 @@ from murano.common import wsgi
 from murano.openstack.common import timeutils
 from murano.tests.unit import base
 from murano.tests.unit import utils
+
 
 TEST_DEFAULT_LOGLEVELS = {'migrate': logging.WARN, 'sqlalchemy': logging.WARN}
 
@@ -52,14 +54,14 @@ class FakeLogMixin:
             fixtures.FakeLogger(level=logging.DEBUG))
         base_list = set([nlog.split('.')[0]
                          for nlog in logging.Logger.manager.loggerDict])
-        for base in base_list:
-            if base in TEST_DEFAULT_LOGLEVELS:
+        for element in base_list:
+            if element in TEST_DEFAULT_LOGLEVELS:
                 self.useFixture(fixtures.FakeLogger(
-                    level=TEST_DEFAULT_LOGLEVELS[base],
-                    name=base))
-            elif base != 'murano':
+                    level=TEST_DEFAULT_LOGLEVELS[element],
+                    name=element))
+            elif element != 'murano':
                 self.useFixture(fixtures.FakeLogger(
-                    name=base))
+                    name=element))
 
 
 class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
@@ -102,7 +104,7 @@ class ControllerTest(object):
     def __init__(self, *args, **kwargs):
         super(ControllerTest, self).__init__(*args, **kwargs)
 
-        #cfg.CONF.set_default('host', 'server.test')
+        # cfg.CONF.set_default('host', 'server.test')
         self.api_version = '1.0'
         self.tenant = 'test_tenant'
         self.mock_policy_check = None

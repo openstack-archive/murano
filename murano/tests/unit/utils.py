@@ -23,7 +23,7 @@ def dummy_context(user='test_username', tenant_id='test_tenant_id',
     return context.RequestContext.from_dict({
         'tenant': tenant_id,
         'user': user,
-        #'roles': roles,  # Commented until policy check changes land
+        # 'roles': roles,  # Commented until policy check changes land
         'is_admin': is_admin,
 
     })

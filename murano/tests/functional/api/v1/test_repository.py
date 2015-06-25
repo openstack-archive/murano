@@ -14,15 +14,15 @@
 
 import os
 import uuid
-import zipfile
 
 from tempest.test import attr
 from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
+from murano.tests.functional.common import utils as common_utils
 
 
-class TestCaseRepository(base.TestCase):
+class TestCaseRepository(base.TestCase, common_utils.ZipUtilsMixin):
 
     @classmethod
     def setUpClass(cls):
@@ -32,15 +32,7 @@ class TestCaseRepository(base.TestCase):
         cls.location = os.path.realpath(
             os.path.join(os.getcwd(), os.path.dirname(__file__)))
 
-        __folderpath__ = os.path.join(cls.location, "DummyTestApp")
-        __rootlen__ = len(__folderpath__) + 1
-
-        with zipfile.ZipFile(os.path.join(cls.location,
-                                          "DummyTestApp.zip"), "w") as zf:
-            for dirname, _, files in os.walk(__folderpath__):
-                for filename in files:
-                    fn = os.path.join(dirname, filename)
-                    zf.write(fn, fn[__rootlen__:])
+        cls.zip_dir(cls.location, "DummyTestApp")
 
     def setUp(self):
         super(TestCaseRepository, self).setUp()
@@ -190,6 +182,7 @@ class TestRepositoryNegativeForbidden(base.NegativeTestCase,
         super(TestRepositoryNegativeForbidden, cls).tearDownClass()
 
         cls.client.delete_package(cls.package['id'])
+        cls.purge_creds()
 
     @attr(type='negative')
     def test_update_package_from_another_tenant(self):

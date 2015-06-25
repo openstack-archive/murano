@@ -33,13 +33,13 @@ class SessionServices(object):
         # Here we duplicate logic for reducing calls to database
         # Checks for validation is same as in validate.
         query = unit.query(models.Session).filter(
-            #Get all session for this environment
+            # Get all session for this environment
             models.Session.environment_id == environment_id,
-            #Only sessions with same version as current env version are valid
+            # Only sessions with same version as current env version are valid
         )
 
         if state:
-            #in this state, if state is not specified return in all states
+            # in this state, if state is not specified return in all states
             query = query.filter(models.Session.state == state),
 
         return query.order_by(models.Session.version.desc(),
@@ -79,17 +79,18 @@ class SessionServices(object):
         :param session: Session for validation
         """
 
-        #if other session is deploying now current session is invalid
+        # if other session is deploying now current session is invalid
         unit = db_session.get_session()
 
-        #if environment version is higher then version on which current session
-        #is created then other session was already deployed
+        # if environment version is higher then version on which
+        # current session
+        # is created then other session was already deployed
         current_env = unit.query(models.Environment).\
             get(session.environment_id)
         if current_env.version > session.version:
             return False
 
-        #if other session is deploying now current session is invalid
+        # if other session is deploying now current session is invalid
         other_is_deploying = unit.query(models.Session).filter_by(
             environment_id=session.environment_id,
             state=states.SessionState.DEPLOYING
@@ -109,7 +110,7 @@ class SessionServices(object):
         :param token: auth token that is going to be used by orchestration
         """
 
-        #Set X-Auth-Token for conductor
+        # Set X-Auth-Token for conductor
 
         deleted = session.description['Objects'] is None
         action_name = None if deleted else 'deploy'

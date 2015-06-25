@@ -20,20 +20,20 @@ eventlet.patcher.monkey_patch(all=False, socket=True)
 
 import datetime
 import errno
-import jsonschema
 import re
 import socket
 import sys
 import time
+from xml.dom import minidom
+from xml.parsers import expat
 
 import eventlet.wsgi
+import jsonschema
 from oslo.config import cfg
 import routes
 import routes.middleware
 import webob.dec
 import webob.exc
-from xml.dom import minidom
-from xml.parsers import expat
 
 from murano.api.v1 import schemas
 from murano.openstack.common import exception
@@ -473,7 +473,7 @@ class XMLDictSerializer(DictSerializer):
         self._add_xmlns(node, has_atom)
         return node.toprettyxml(indent='    ', encoding='UTF-8')
 
-    #NOTE (ameade): the has_atom should be removed after all of the
+    # NOTE (ameade): the has_atom should be removed after all of the
     # xml serializers and view builders have been updated to the current
     # spec that required all responses include the xmlns:atom, the has_atom
     # flag is to prevent current tests from breaking
@@ -493,7 +493,7 @@ class XMLDictSerializer(DictSerializer):
         if xmlns:
             result.setAttribute('xmlns', xmlns)
 
-        #TODO(bcwaldon): accomplish this without a type-check
+        # TODO(bcwaldon): accomplish this without a type-check
         if type(data) is list:
             collections = metadata.get('list_collections', {})
             if nodename in collections:
@@ -512,7 +512,7 @@ class XMLDictSerializer(DictSerializer):
             for item in data:
                 node = self._to_xml_node(doc, metadata, singular, item)
                 result.appendChild(node)
-        #TODO(bcwaldon): accomplish this without a type-check
+        # TODO(bcwaldon): accomplish this without a type-check
         elif type(data) is dict:
             collections = metadata.get('dict_collections', {})
             if nodename in collections:

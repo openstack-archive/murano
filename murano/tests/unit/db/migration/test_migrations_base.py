@@ -394,7 +394,7 @@ class BaseWalkMigrationTestCase(BaseMigrationTestCase):
         database functionality (reset default settings and session cleanup).
         """
         CONF.set_override('connection', str(engine.url), group='database')
-        #session.cleanup()
+        # session.cleanup()
 
     def _test_mysql_opportunistically(self):
         # Test that table creation on mysql only builds InnoDB tables
@@ -453,11 +453,11 @@ class BaseWalkMigrationTestCase(BaseMigrationTestCase):
         """
         self.ALEMBIC_CONFIG.stdout = buf = io.StringIO()
         CONF.set_override('connection', str(engine.url), group='database')
-        #session.cleanup()
+        # session.cleanup()
         getattr(command, alembic_command)(*args, **kwargs)
         res = buf.getvalue().strip()
         LOG.debug('Alembic command `%s` returns: %s' % (alembic_command, res))
-        #session.cleanup()
+        # session.cleanup()
         return res
 
     def _up_and_down_versions(self):

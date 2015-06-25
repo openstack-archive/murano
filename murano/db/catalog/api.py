@@ -249,7 +249,7 @@ def package_search(filters, context, limit=None):
 
     if context.is_admin:
         if not include_disabled:
-            #NOTE(efedorova): is needed for SA 0.7.9, but could be done
+            # NOTE(efedorova): is needed for SA 0.7.9, but could be done
             # simpler in SA 0.8. See http://goo.gl/9stlKu for a details
             query = session.query(pkg).filter(pkg.__table__.c.enabled)
         else:

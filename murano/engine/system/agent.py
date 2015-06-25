@@ -15,12 +15,12 @@
 
 import copy
 import datetime
+import logging
 import os
 import types
 import uuid
 
 import eventlet.event
-import logging
 
 import murano.common.config as config
 import murano.common.exceptions as exceptions
@@ -29,6 +29,7 @@ import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.dsl.yaql_expression as yaql_expression
 import murano.engine.system.common as common
+
 
 LOG = logging.getLogger(__name__)
 

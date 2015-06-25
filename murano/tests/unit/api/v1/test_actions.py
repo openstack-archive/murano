@@ -64,11 +64,21 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         rpc_task = {
             'tenant_id': self.tenant,
-            'model': {'Objects': {'applications': [], '?':
-            {
-                '_actions': {'actionsID_action': {
-                'name': 'Testaction', 'enabled': True}},
-                'id': '12345'}}, 'Attributes': {}},
+            'model': {
+                'Objects': {
+                    'applications': [],
+                    '?': {
+                        '_actions': {
+                            'actionsID_action': {
+                                'name': 'Testaction',
+                                'enabled': True
+                            }
+                        },
+                        'id': '12345'
+                    }
+                },
+                'Attributes': {}
+            },
             'action': {
                 'method': 'Testaction',
                 'object_id': '12345',

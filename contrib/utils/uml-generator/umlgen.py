@@ -16,6 +16,7 @@
 import argparse
 import os
 import re
+
 import yaml
 
 
@@ -119,7 +120,7 @@ class DslPlantUmlNode(DslSpec):
                 if match:
                     ns = self.get_ns(match.group(1))
                     ext_classes.append(self.get_dn(match.group(1)))
-                    if not ns in namespaces:
+                    if ns not in namespaces:
                         namespaces.append(ns)
                 uml_class.add_attribute(
                     name,
@@ -178,7 +179,7 @@ class DslPlantUmlGraph():
         if level == 0:
             for edge in self._edges:
                 self._file.write('{from_node} {type} {to_node}\n'
-                    .format(**edge))
+                                 .format(**edge))
             self._file.write('@enduml\n')
             self._file.close()
 
@@ -190,7 +191,7 @@ class DslPlantUmlGraph():
 
     def add_edge(self, from_node, to_node, edge_type):
         edge = {'from_node': from_node, 'to_node': to_node, 'type': edge_type}
-        if not edge in self._edges:
+        if edge not in self._edges:
             self._edges.append(edge)
 
     def set_option(self, key, value):
