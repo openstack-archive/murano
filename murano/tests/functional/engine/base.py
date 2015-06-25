@@ -18,6 +18,8 @@ import uuid
 
 import murano.tests.functional.engine.muranomanager as core
 
+CONF = core.CONF
+
 
 class MuranoBase(core.MuranoTestsCore):
 
@@ -25,8 +27,8 @@ class MuranoBase(core.MuranoTestsCore):
     def setUpClass(cls):
         super(MuranoBase, cls).setUpClass()
 
-        cls.linux = core.CONF.murano.linux_image
-        cls.flavor = core.CONF.murano.standard_flavor
+        cls.linux = CONF.murano.linux_image
+        cls.flavor = CONF.murano.standard_flavor
 
         cls.pkgs_path = os.path.abspath(os.path.join(
             os.path.dirname(__file__),

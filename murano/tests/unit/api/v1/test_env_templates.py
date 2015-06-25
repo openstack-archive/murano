@@ -19,10 +19,11 @@ from oslo_config import cfg
 from oslo_utils import timeutils
 
 from murano.api.v1 import templates
-from murano.common import config
 from murano.db import models
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
+
+CONF = cfg.CONF
 
 
 class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
@@ -430,7 +431,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
             cfg.StrOpt('config_file', default='murano.conf'),
             cfg.StrOpt('project', default='murano'),
         ]
-        config.CONF.register_opts(opts)
+        CONF.register_opts(opts)
         self._set_policy_rules(
             {'create_env_template': '@',
              'create_environment': '@'}
@@ -459,7 +460,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
             cfg.StrOpt('config_file', default='murano.conf'),
             cfg.StrOpt('project', default='murano'),
         ]
-        config.CONF.register_opts(opts)
+        CONF.register_opts(opts)
         self._set_policy_rules(
             {'create_env_template': '@',
              'create_environment': '@'}

@@ -13,14 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from oslo_config import cfg
 import oslo_messaging as messaging
 
-from murano.common import config
 from murano.common import uuidutils
 from murano.dsl import murano_class
 from murano.openstack.common import log as logging
 
-
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -30,8 +30,7 @@ class StatusReporter(object):
 
     def initialize(self, environment):
         if StatusReporter.transport is None:
-            StatusReporter.transport = \
-                messaging.get_transport(config.CONF)
+            StatusReporter.transport = messaging.get_transport(CONF)
         self._notifier = messaging.Notifier(
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),

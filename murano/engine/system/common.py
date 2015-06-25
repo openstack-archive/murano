@@ -13,12 +13,15 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import murano.common.config as config
+from oslo_config import cfg
+
 import murano.common.messaging as messaging
+
+CONF = cfg.CONF
 
 
 def create_rmq_client():
-    rabbitmq = config.CONF.rabbitmq
+    rabbitmq = CONF.rabbitmq
     connection_params = {
         'login': rabbitmq.login,
         'password': rabbitmq.password,

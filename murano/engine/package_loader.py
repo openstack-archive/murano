@@ -21,9 +21,9 @@ import tempfile
 import uuid
 
 from muranoclient.common import exceptions as muranoclient_exc
+from oslo_config import cfg
 import six
 
-from murano.common import config
 from murano.common.i18n import _LE
 from murano.dsl import exceptions
 from murano.engine import yaql_yaml_loader
@@ -31,6 +31,7 @@ from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
 
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -71,7 +72,7 @@ class ApiPackageLoader(PackageLoader):
     @staticmethod
     def _get_cache_directory():
         base_directory = (
-            config.CONF.packages_opts.packages_cache or
+            CONF.packages_opts.packages_cache or
             os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
         )
         directory = os.path.abspath(os.path.join(base_directory,

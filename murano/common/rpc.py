@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_messaging import rpc
 from oslo_messaging import target
 
-from murano.common import config
+CONF = cfg.CONF
 
 TRANSPORT = None
 
@@ -43,7 +44,7 @@ class EngineClient(object):
 def api():
     global TRANSPORT
     if TRANSPORT is None:
-        TRANSPORT = messaging.get_transport(config.CONF)
+        TRANSPORT = messaging.get_transport(CONF)
 
     return ApiClient(TRANSPORT)
 
@@ -51,6 +52,6 @@ def api():
 def engine():
     global TRANSPORT
     if TRANSPORT is None:
-        TRANSPORT = messaging.get_transport(config.CONF)
+        TRANSPORT = messaging.get_transport(CONF)
 
     return EngineClient(TRANSPORT)

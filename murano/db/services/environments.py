@@ -13,10 +13,10 @@
 #    under the License.
 
 from keystoneclient import exceptions as ks_exceptions
+from oslo_config import cfg
 import yaml
 
 from murano.common import auth_utils
-from murano.common import config
 from murano.common import uuidutils
 from murano.db import models
 from murano.db.services import sessions
@@ -24,6 +24,7 @@ from murano.db import session as db_session
 from murano.openstack.common import log as logging
 from murano.services import states
 
+CONF = cfg.CONF
 
 LOG = logging.getLogger(__name__)
 DEFAULT_NETWORK_TYPES = {
@@ -205,8 +206,8 @@ class EnvironmentServices(object):
 
     @staticmethod
     def generate_default_networks(env_name, network_driver):
-        net_config = config.CONF.find_file(
-            config.CONF.networking.network_config_file)
+        net_config = CONF.find_file(
+            CONF.networking.network_config_file)
         if net_config:
             LOG.debug("Loading network configuration from file")
             with open(net_config) as f:

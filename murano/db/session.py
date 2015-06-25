@@ -15,17 +15,17 @@
 """Session management functions."""
 import threading
 
+from oslo_config import cfg
 from oslo_db import exception
 from oslo_db import options
 from oslo_db.sqlalchemy import session as db_session
 from oslo_utils import timeutils
 
-from murano.common import config
 from murano.db.models import Lock
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
-CONF = config.CONF
+CONF = cfg.CONF
 
 options.set_defaults(CONF)
 

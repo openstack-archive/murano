@@ -20,10 +20,11 @@ from oslo_config import cfg
 from oslo_utils import timeutils
 
 from murano.api.v1 import environments
-from murano.common import config
 from murano.db import models
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
+
+CONF = cfg.CONF
 
 
 class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
@@ -38,7 +39,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
             cfg.StrOpt('config_file', default='murano.conf'),
             cfg.StrOpt('project', default='murano'),
         ]
-        config.CONF.register_opts(opts)
+        CONF.register_opts(opts)
 
     def test_list_empty_environments(self):
         """Check that with no environments an empty list is returned."""

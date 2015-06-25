@@ -24,11 +24,12 @@ import types
 
 import jsonpatch
 import jsonpointer
+from oslo_config import cfg
 import yaql.context
 
-import murano.common.config as cfg
 import murano.dsl.helpers as helpers
 
+CONF = cfg.CONF
 
 _random_string_counter = None
 
@@ -120,12 +121,12 @@ def _base64decode(value):
 @yaql.context.EvalArg('group', types.StringTypes)
 @yaql.context.EvalArg('setting', types.StringTypes)
 def _config(group, setting):
-    return cfg.CONF[group][setting]
+    return CONF[group][setting]
 
 
 @yaql.context.EvalArg('setting', types.StringTypes)
 def _config_default(setting):
-    return cfg.CONF[setting]
+    return CONF[setting]
 
 
 @yaql.context.EvalArg('value', types.StringTypes)

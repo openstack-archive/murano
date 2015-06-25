@@ -16,15 +16,15 @@ import math
 
 import netaddr
 from netaddr.strategy import ipv4
+from oslo_config import cfg
 from oslo_utils import uuidutils
 
-import murano.common.config as config
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 from murano.openstack.common import log as logging
 
-
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
@@ -35,7 +35,7 @@ class NetworkExplorer(murano_object.MuranoObject):
         environment = helpers.get_environment(_context)
         self._clients = environment.clients
         self._tenant_id = environment.tenant_id
-        self._settings = config.CONF.networking
+        self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
 
     # noinspection PyPep8Naming
