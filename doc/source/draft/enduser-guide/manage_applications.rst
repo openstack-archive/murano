@@ -13,9 +13,11 @@ Import an application package
 There are several ways of importing an application package into
 murano:
 
-* from a zip file
-* from murano applications repository
-* from bundles of applications
+* :ref:`from a zip file <ui_zip>`
+* :ref:`from murano applications repository <ui_repo>`
+* :ref:`from bundles of applications <ui_bundles>`
+
+.. _ui_zip:
 
 From a zip file
 ---------------
@@ -49,6 +51,8 @@ Perform the following steps to import an application package from a
   appears at the top right corner when the application is successfully
   downloaded.
 
+.. _ui_repo:
+
 From a repository
 -----------------
 
@@ -77,6 +81,8 @@ murano applications repository:
    click **Next**.
 #. Choose one or multiple categories from the **Application Category**
    menu, then click **Create**.
+
+.. _ui_bundles:
 
 From a bundle of applications
 -----------------------------
