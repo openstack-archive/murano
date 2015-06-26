@@ -17,13 +17,13 @@ import copy
 
 import eventlet
 import heatclient.exc as heat_exc
+from oslo_log import log as logging
 
 import murano.common.utils as utils
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 from murano.common.i18n import _LI, _LW
-import murano.openstack.common.log as logging
 
 LOG = logging.getLogger(__name__)
 

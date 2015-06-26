@@ -14,14 +14,13 @@
 
 import functools as func
 
+from oslo_log import log as logging
 from webob import exc
-
 
 from murano.api.v1 import request_statistics
 from murano.common.helpers import token_sanitizer
 from murano.common import wsgi
 from murano.db.services import core_services
-from murano.openstack.common import log as logging
 from murano import utils
 
 

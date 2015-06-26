@@ -37,7 +37,6 @@ from oslo_service import service
 
 from murano.common import config
 from murano.common import engine
-from murano.openstack.common import log
 
 CONF = config.CONF
 
@@ -45,7 +44,6 @@ CONF = config.CONF
 def main():
     try:
         config.parse_args()
-        log.setup('murano')
 
         launcher = service.ServiceLauncher(CONF)
         launcher.launch_service(engine.get_rpc_service())

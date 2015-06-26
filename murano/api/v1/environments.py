@@ -15,6 +15,7 @@
 import re
 
 from oslo_db import exception as db_exc
+from oslo_log import log as logging
 from sqlalchemy import desc
 from webob import exc
 
@@ -28,7 +29,6 @@ from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db import session as db_session
 from murano.common.i18n import _, _LI
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

@@ -15,11 +15,11 @@
 # Based on designate/policy.py
 
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_policy import policy
 from webob import exc as exceptions
 
 from murano.common.i18n import _
-import murano.openstack.common.log as logging
 
 LOG = logging.getLogger(__name__)
 
@@ -77,13 +77,13 @@ def check(rule, ctxt, target={}, do_raise=True, exc=exceptions.HTTPForbidden):
         extra = {'policy': {'rule': rule, 'target': target}}
 
         if result:
-            LOG.audit(_("Policy check succeeded for rule "
-                        "'%(rule)s' on target %(target)s"),
-                      {'rule': rule, 'target': repr(target)}, extra=extra)
+            LOG.info(_("Policy check succeeded for rule "
+                       "'%(rule)s' on target %(target)s"),
+                     {'rule': rule, 'target': repr(target)}, extra=extra)
         else:
-            LOG.audit(_("Policy check failed for rule "
-                        "'%(rule)s' on target: %(target)s"),
-                      {'rule': rule, 'target': repr(target)}, extra=extra)
+            LOG.info(_("Policy check failed for rule "
+                       "'%(rule)s' on target: %(target)s"),
+                     {'rule': rule, 'target': repr(target)}, extra=extra)
 
 
 def check_is_admin(context):

@@ -16,11 +16,11 @@ import inspect
 import re
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import six
 from stevedore import dispatch
 
 from murano.common.i18n import _LE, _LI, _LW
-from murano.openstack.common import log as logging
 
 
 CONF = cfg.CONF

@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
 from webob import exc
 
 from murano.common import policy
@@ -21,7 +22,6 @@ from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
 from murano.common.i18n import _LI, _LE, _
-from murano.openstack.common import log as logging
 from murano.services import actions
 from murano.services import states
 

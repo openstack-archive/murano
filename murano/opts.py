@@ -20,7 +20,6 @@ import oslo_service.sslutils
 
 import murano.common.config
 import murano.common.wsgi
-import murano.openstack.common.log
 
 
 def build_list(opt_list):
@@ -44,10 +43,6 @@ _opt_lists = [
         murano.common.config.bind_opts,
         murano.common.config.file_server,
         murano.common.wsgi.socket_opts,
-        murano.openstack.common.log.common_cli_opts,
-        murano.openstack.common.log.generic_log_opts,
-        murano.openstack.common.log.log_opts,
-        murano.openstack.common.log.logging_cli_opts,
     ])),
 ]
 

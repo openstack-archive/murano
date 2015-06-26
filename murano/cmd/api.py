@@ -15,7 +15,6 @@
 #    under the License.
 
 
-import logging
 import os
 import sys
 
@@ -35,6 +34,7 @@ if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
     sys.path.insert(0, root)
 
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_service import service
 from paste import deploy
 
@@ -45,7 +45,6 @@ from murano.common import policy
 from murano.common import server
 from murano.common import statservice as stats
 from murano.common import wsgi
-from murano.openstack.common import log
 
 CONF = cfg.CONF
 
@@ -110,10 +109,6 @@ def load_paste_app(app_name=None):
 
         app = deploy.loadapp("config:%s" % conf_file, name=app_name)
 
-        # Log the options used when starting if we're in debug mode...
-        if CONF.debug:
-            CONF.log_opt_values(logger, logging.DEBUG)
-
         return app
     except (LookupError, ImportError) as e:
         msg = _("Unable to load %(app_name)s from configuration file"
@@ -127,7 +122,6 @@ def load_paste_app(app_name=None):
 def main():
     try:
         config.parse_args()
-        log.setup('murano')
         request_statistics.init_stats()
         policy.init()
 

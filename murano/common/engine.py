@@ -18,6 +18,7 @@ import uuid
 
 import eventlet.debug
 from oslo_config import cfg
+from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_messaging import target
 from oslo_serialization import jsonutils
@@ -36,7 +37,6 @@ from murano.engine import package_loader
 from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
 from murano.common.i18n import _LI, _LE
-from murano.openstack.common import log as logging
 from murano.policy import model_policy_enforcer as enforcer
 
 CONF = cfg.CONF

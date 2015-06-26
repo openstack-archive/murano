@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_db.sqlalchemy import utils
+from oslo_log import log as logging
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
@@ -23,7 +24,7 @@ from webob import exc
 from murano.db import models
 from murano.db import session as db_session
 from murano.common.i18n import _, _LW
-from murano.openstack.common import log as logging
+
 
 CONF = cfg.CONF
 

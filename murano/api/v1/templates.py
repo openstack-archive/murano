@@ -13,6 +13,7 @@
 #    under the License.
 
 from oslo_db import exception as db_exc
+from oslo_log import log as logging
 from webob import exc
 
 from murano.api.v1 import environments as envs_api
@@ -25,7 +26,6 @@ from murano.db.services import core_services
 from murano.db.services import environment_templates as env_temps
 from murano.db.services import environments as envs
 from murano.db.services import sessions
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

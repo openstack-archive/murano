@@ -14,6 +14,7 @@
 
 from keystoneclient import exceptions as ks_exceptions
 from oslo_config import cfg
+from oslo_log import log as logging
 import yaml
 
 from murano.common import auth_utils
@@ -21,7 +22,6 @@ from murano.common import uuidutils
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.openstack.common import log as logging
 from murano.services import states
 
 CONF = cfg.CONF

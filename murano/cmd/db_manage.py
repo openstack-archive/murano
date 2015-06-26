@@ -14,7 +14,6 @@ from oslo_config import cfg
 from oslo_db import options
 
 from murano.db.migration import migration
-from murano.openstack.common import log
 
 CONF = cfg.CONF
 options.set_defaults(CONF)
@@ -78,5 +77,4 @@ def main():
     config.murano_config = CONF
 
     CONF(project='murano')
-    log.setup('murano')
     CONF.command.func(config)

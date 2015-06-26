@@ -23,11 +23,11 @@ import traceback
 
 from oslo_config import cfg
 from oslo_db import exception as db_exception
+from oslo_log import log as logging
 
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
 from murano.common.i18n import _LI, _LE
-from murano.openstack.common import log as logging
 from murano.packages import load_utils
 from murano import version
 
@@ -154,7 +154,6 @@ def main():
         CONF(sys.argv[1:], project='murano', prog='murano-manage',
              version=version.version_string,
              default_config_files=default_config_files)
-        logging.setup("murano")
     except RuntimeError as e:
         LOG.error(_LE("failed to initialize murano-manage: %s") % e)
         sys.exit("ERROR: %s" % e)

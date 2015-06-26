@@ -15,15 +15,15 @@
 
 import eventlet
 import greenlet
-from oslo_config import cfg
 
+from oslo_config import cfg
+from oslo_log import log as logging
 
 import murano.common.exceptions as exceptions
 from murano.dsl import helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
 import murano.engine.system.common as common
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

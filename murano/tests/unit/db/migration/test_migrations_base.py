@@ -30,10 +30,10 @@ from alembic import config as alembic_config
 from alembic import migration
 from alembic import script as alembic_script
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from murano.common.i18n import _LE
 import murano.db.migration
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF

@@ -16,7 +16,8 @@
 import logging
 import sys
 
-from murano.openstack.common import log
+from oslo_log import handlers
+
 from murano.tests.unit import base
 
 
@@ -30,8 +31,8 @@ class SysLogHandlersTestCase(base.MuranoTestCase):
             self.skip("SKIP: This test work on Linux platform only.")
 
         self.facility = logging.handlers.SysLogHandler.LOG_USER
-        self.rfclogger = log.RFCSysLogHandler(address='/dev/log',
-                                              facility=self.facility)
+        self.rfclogger = handlers.RFCSysLogHandler(address='/dev/log',
+                                                   facility=self.facility)
         self.rfclogger.binary_name = 'Foo_application'
         self.logger = logging.handlers.SysLogHandler(address='/dev/log',
                                                      facility=self.facility)

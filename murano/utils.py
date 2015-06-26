@@ -14,13 +14,13 @@
 
 import functools
 
+from oslo_log import log as logging
 from webob import exc
 
 from murano.common.i18n import _LI
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.openstack.common import log as logging
 from murano.services import states
 
 LOG = logging.getLogger(__name__)

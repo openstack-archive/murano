@@ -15,9 +15,9 @@
 from murano.common import uuidutils
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common import log as logging
 
 from oslo_db import exception as db_exc
+from oslo_log import log as logging
 
 LOG = logging.getLogger(__name__)
 
