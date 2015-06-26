@@ -321,65 +321,94 @@ strings as all their keys.
 
 The following block constructs are available:
 
-+-----------------------------+---------------------------------------------------------------------------------------+
-| Assignment                  | Explanation                                                                           |
-+=============================+=======================================================================================+
-| | Return: value             | | returns value from a method                                                         |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | If: predicate()           | | ``predicate()`` is a YAQL expression that must be evaluated to ``True`` or ``False``|
-| | Then:                     |                                                                                       |
-| |   - code                  | | The ``Else`` section is optional                                                    |
-| |   - block                 | | One-line code blocks can be written as scalars rather than an array.                |
-| | Else:                     |                                                                                       |
-| |   - code                  |                                                                                       |
-| |   - block                 |                                                                                       |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | While: predicate()        | | ``predicate()`` must be evaluated to ``True`` or ``False``                          |
-| | Do:                       |                                                                                       |
-| |   - code                  |                                                                                       |
-| |   - block                 |                                                                                       |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | For: variableName         | | ``collection`` must be a YAQL expression returning iterable collection or           |
-| | In: collection            |    evaluatable array as in assignment instructions, for example, ``[1, 2, $x]``       |
-| | Do:                       |                                                                                       |
-| |   - code                  | | Inside a code block loop, a variable is accessible as ``$variableName``             |
-| |   - block                 |                                                                                       |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | Repeat:                   | | Repeats the code block specified number of times                                    |
-| | Do:                       |                                                                                       |
-| |   - code                  |                                                                                       |
-| |   - block                 |                                                                                       |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | Break:                    | | Breaks from loop                                                                    |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | Match:                    | | Matches the result of ``$valueExpression()`` against a set of possible values       |
-| |  case1:                   |   (cases). The code block of first matched case is executed.                          |
-| |     - code                |                                                                                       |
-| |     - block               | | If no case matched and the default key is present                                   |
-| |  case2:                   |   than the ``Default`` code block get executed.                                       |
-| |     - code                | | The case values are constant values (not expressions).                              |
-| |     - block               |                                                                                       |
-| | Value: $valueExpression() |                                                                                       |
-| | Default:                  |                                                                                       |
-| |     - code                |                                                                                       |
-| |     - block               |                                                                                       |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | Switch:                   | | All code blocks that have their predicate evaluated to ``True`` are executed,       |
-| |   $predicate1() :         |   but the order of predicate evaluation is not fixed.                                 |
-| |       - code              |                                                                                       |
-| |       - block             |                                                                                       |
-| |   $predicate2() :         |                                                                                       |
-| |       - code              |                                                                                       |
-| |       - block             |                                                                                       |
-| | Default:                  | | The ``Default`` key is optional.                                                    |
-| |     - code                |                                                                                       |
-| |     - block               | | If no predicate evaluated to ``True``, the ``Default`` code block get executed.     |
-+-----------------------------+---------------------------------------------------------------------------------------+
-| | Parallel:                 | | Executes all instructions in code block in a separate green threads in parallel.    |
-| |     - code                |                                                                                       |
-| |     - block               |                                                                                       |
-| | Limit: 5                  | | The limit is optional and means the maximum number of concurrent green threads.     |
-+-----------------------------+---------------------------------------------------------------------------------------+
++---------------------------+---------------------------------------------------------------------------------------+
+| Assignment                | Explanation                                                                           |
++===========================+=======================================================================================+
+| | Return: value           | | Returns value from a method                                                         |
++---------------------------+---------------------------------------------------------------------------------------+
+| | If: predicate()         | | ``predicate()`` is a YAQL expression that must be evaluated to ``True`` or ``False``|
+| | Then:                   |                                                                                       |
+| |   - code                | | The ``Else`` section is optional                                                    |
+| |   - block               | | One-line code blocks can be written as scalars rather than an array.                |
+| | Else:                   |                                                                                       |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+| | While: predicate()      | | ``predicate()`` must be evaluated to ``True`` or ``False``                          |
+| | Do:                     |                                                                                       |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+| | For: variableName       | | ``collection`` must be a YAQL expression returning iterable collection or           |
+| | In: collection          |    evaluatable array as in assignment instructions, for example, ``[1, 2, $x]``       |
+| | Do:                     |                                                                                       |
+| |   - code                | | Inside a code block loop, a variable is accessible as ``$variableName``             |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Repeat:                 | | Repeats the code block specified number of times                                    |
+| | Do:                     |                                                                                       |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Break:                  | | Breaks from loop                                                                    |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Match:                  | | Matches the result of ``$valExpression()`` against a set of possible values         |
+| |   case1:                |   (cases). The code block of first matched case is executed.                          |
+| |     - code              |                                                                                       |
+| |     - block             | | If no case matched and the default key is present                                   |
+| |   case2:                |   than the ``Default`` code block get executed.                                       |
+| |     - code              | | The case values are constant values (not expressions).                              |
+| |     - block             |                                                                                       |
+| | Value: $valExpression() |                                                                                       |
+| | Default:                |                                                                                       |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Switch:                 | | All code blocks that have their predicate evaluated to ``True`` are executed,       |
+| |   $predicate1():        |   but the order of predicate evaluation is not fixed.                                 |
+| |     - code              |                                                                                       |
+| |     - block             |                                                                                       |
+| |   $predicate2():        |                                                                                       |
+| |     - code              |                                                                                       |
+| |     - block             |                                                                                       |
+| | Default:                | | The ``Default`` key is optional.                                                    |
+| |   - code                |                                                                                       |
+| |   - block               | | If no predicate evaluated to ``True``, the ``Default`` code block get executed.     |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Parallel:               | | Executes all instructions in code block in a separate green threads in parallel.    |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
+| | Limit: 5                | | The limit is optional and means the maximum number of concurrent green threads.     |
++---------------------------+---------------------------------------------------------------------------------------+
+| | Try:                    | | Try and Catch are keywords that represent the handling of exceptions due to data    |
+| |   - code                |   or coding errors during program execution. A ``Try`` block is the block of code in  |
+| |   - block               |   which exceptions occur. A ``Catch`` block is the block of code, that is executed if |
+| | Catch:                  |   an exception occurred.                                                              |
+| | With: keyError          | | Exceptions are not declared in Murano PL. It means that exceptions of any types can |
+| | As: e                   |   be handled and generated. Generating of exception can be done with construct:       |
+| | Do:                     |   ``Throw: keyError``.                                                                |
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
+| | Else:                   | | The ``Else`` is optional block. ``Else`` block is executed if no exception occurred.|
+| |   - code                |                                                                                       |
+| |   - block               |                                                                                       |
+| | Finally:                | | The ``Finally`` also is optional. It's a place to put any code that will            |
+| |   - code                |   be executed, whether the try-block raised an exception or not.                      |
+| |   - block               |                                                                                       |
++---------------------------+---------------------------------------------------------------------------------------+
+
+Notice, that if you have more then one block construct in your workflow, you
+need to insert dashes before each construct. For example::
+
+  Body:
+    - If: predicate1()
+      Then:
+        - code
+        - block
+    - While: predicate2()
+      Do:
+        - code
+        - block
 
 Object model
 ------------
