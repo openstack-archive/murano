@@ -34,7 +34,7 @@ LOG = logging.getLogger(__name__)
 
 API_NAME = 'Environments'
 
-VALID_NAME_REGEX = re.compile('^[a-zA-Z]+[\w-]*$')
+VALID_NAME_REGEX = re.compile('^[a-zA-Z]+[\w.-]*$')
 
 
 class Controller(object):
