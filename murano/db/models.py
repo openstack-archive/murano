@@ -74,6 +74,13 @@ class Environment(Base, TimestampMixin):
     tasks = sa_orm.relationship('Task', backref='environment',
                                 cascade='save-update, merge, delete')
 
+    cf_spaces = sa_orm.relationship("CFSpace", backref='environment',
+                                    cascade='save-update, merge, delete')
+
+    cf_serv_inst = sa_orm.relationship("CFServiceInstance",
+                                       backref='environment',
+                                       cascade='save-update, merge, delete')
+
     def to_dict(self):
         dictionary = super(Environment, self).to_dict()
         del dictionary['description']
@@ -320,10 +327,45 @@ class Lock(Base):
     ts = sa.Column(sa.DateTime, nullable=False)
 
 
+class CFOrganization(Base):
+    __tablename__ = "cf_orgs"
+    id = sa.Column(sa.String(255), primary_key=True)
+    tenant = sa.Column(sa.String(255), nullable=False)
+
+
+class CFSpace(Base):
+    __tablename__ = "cf_spaces"
+    id = sa.Column(sa.String(255), primary_key=True)
+    environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'),
+                               nullable=False)
+
+    def to_dict(self):
+        dictionary = super(CFSpace, self).to_dict()
+        if 'environment' in dictionary:
+            del dictionary['environment']
+        return dictionary
+
+
+class CFServiceInstance(Base):
+    __tablename__ = 'cf_serv_inst'
+    id = sa.Column(sa.String(255), primary_key=True)
+    service_id = sa.Column(sa.String(255), nullable=False)
+    environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'),
+                               nullable=False)
+    tenant = sa.Column(sa.String(255), nullable=False)
+
+    def to_dict(self):
+        dictionary = super(CFSpace, self).to_dict()
+        if 'environment' in dictionary:
+            del dictionary['environment']
+        return dictionary
+
+
 def register_models(engine):
     """Creates database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
-              ApiStats, Package, Category, Class, Instance, Lock)
+              ApiStats, Package, Category, Class, Instance, Lock, CFSpace,
+              CFOrganization)
     for model in models:
         model.metadata.create_all(engine)
 
@@ -331,6 +373,7 @@ def register_models(engine):
 def unregister_models(engine):
     """Drops database tables for all models with the given engine."""
     models = (Environment, Status, Session, Task,
-              ApiStats, Package, Category, Class, Lock)
+              ApiStats, Package, Category, Class, Lock, CFOrganization,
+              CFSpace)
     for model in models:
         model.metadata.drop_all(engine)
