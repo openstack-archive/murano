@@ -1,7 +1,7 @@
 .. _use-cli:
 
 .. toctree::
-   :maxdepth: 2:
+   :maxdepth: 2
 
 =========
 Using CLI
@@ -15,6 +15,359 @@ Manage applications
 
 Manage environments
 ~~~~~~~~~~~~~~~~~~~
+
+Manage packages
+~~~~~~~~~~~~~~~
+
+This section describes how to manage packages using the command line
+interface. You can easily:
+
+* :ref:`import a package <cli_import>` or :ref:`bundles of packages <cli_bundles>`
+* :ref:`list the existing packages <cli_list>`
+* :ref:`display details for a package <cli_display>`
+* :ref:`download a package <cli_download>`
+* :ref:`delete a package <cli_delete>`
+* :ref:`create a package <cli_create>`
+
+.. _cli_import:
+
+Import a package
+----------------
+
+With the :command:`package-import` command you can import packages
+into murano in several different ways:
+
+* :ref:`from a local .zip file <cli_zip>`
+* :ref:`from murano app repository <cli_repo>`
+* :ref:`from an http URL <cli_url>`
+
+.. _cli_zip:
+
+**From a local .zip file**
+
+To import a package from a local .zip file, run:
+
+.. code-block:: console
+
+  # murano package-import /path/to/PACKAGE.zip
+
+where ``PACKAGE`` is the name of the package stored on your
+computer.
+
+For example:
+
+.. code-block:: console
+
+  # murano package-import /home/downloads/mysql.zip
+  Importing package io.murano.databases.MySql
+  +---------------------------------+------+--------------------------+--------------+---------+
+  | ID                              | Name | FQN                      | Author       |Is Public|
+  +---------------------------------+------+--------------------------+--------------+---------+
+  | 83e4038885c248e3a758f8217ff8241f| MySQL| io.murano.databases.MySql| Mirantis, Inc|         |
+  +---------------------------------+------+--------------------------+--------------+---------+
+
+To make the package available for users from other tenants, use the
+``--is-public`` parameter. For example:
+
+.. code-block:: console
+
+   # murano package-import --is-public mysql.zip
+
+.. note::
+
+   The :command:`package-import` command supports multiple positional
+   arguments. This means that you can import several packages at once.
+
+.. _cli_repo:
+
+**From murano app repository**
+
+.. |link_location| raw:: html
+
+   <a href="http://apps.openstack.org/#tab=murano-apps" target="_blank">murano applications repository</a>
+
+To import a package from murano applications repository, specify
+the URL of the repository with ``--murano-repo-url`` and a fully
+qualified package name. For package names, go to |link_location|,
+and click on the desired package to see its full name.
+
+.. note::
+
+   You can also specify the URL of the repository with the
+   corresponding MURANO_REPO_URL environment variable.
+
+
+The following example shows how to import the MySQL package from the
+murano applications repository:
+
+.. code-block:: console
+
+   # murano --murano-repo-url=http://storage.apps.openstack.org \
+   package-import io.murano.databases.MySql
+
+This command supports an optional ``--version`` parameter that instructs
+murano client to download a specified package version.
+
+The :command:`package-import` command inspects package requirements
+specified in the package’s manifest under the *Require* section, and
+attempts to import them from murano repository. The :command:`package-import`
+command also inspects any image prerequisites mentioned in the
+:file:`images.lst` file in the package. If there are any image
+requirements, client would inspect images already present in the image
+database. Unless image with the specific name is present, client would
+attempt to download it.
+
+.. TODO: Add a ref link to step-by-step (on specifying images and requirements
+   for packages).
+
+
+If any of the packages being installed is already registered in murano,
+the client asks you what to do with it. You can specify the default action
+with ``--exists-action``, passing ``s`` - for skip, ``u`` - for update, and
+``a`` - for abort.
+
+.. _cli_url:
+
+**From an URL**
+
+To import an application package from an URL, use the following command:
+
+.. code-block:: console
+
+  # murano package-import http://example.com/path/to/PACKAGE.zip
+
+The example below shows how to import a MySQL package from the
+murano applications repository using the package URL:
+
+.. code-block:: console
+
+  # murano package-import http://storage.apps.openstack.org/apps/io.murano.databases.MySql.zip
+  Inspecting required images
+  Importing package io.murano.databases.MySql
+  +----------------------------------+-------+--------------------------+--------------+----------+
+  | ID                               | Name  | FQN                      | Author       | Is Public|
+  +----------------------------------+-------+-----------------------------------------+----------+
+  | 1aa62196595f411399e4e48cc2f6a512 | MySQL | io.murano.databases.MySql| Mirantis, Inc|          |
+  +----------------------------------+-------+-----------------------------------------+----------+
+
+.. _cli_bundles:
+
+Import bundles of packages
+--------------------------
+
+With the :command:`bundle-import` command you can install packages in
+several different ways:
+
+* :ref:`from a local bundle <cli_local_bundle>`
+* :ref:`from an URL <cli_bundle_url>`
+* :ref:`from murano app repository <cli_bundle_repo>`
+
+When importing bundles, you can specify their categories with
+``-c/--categories`` and set their publicity with ``--public``.
+
+.. _cli_local_bundle:
+
+**From a local bundle**
+
+To import a bundle from the a local file system, use the following
+command:
+
+.. code-block:: console
+
+  # murano bundle-import /path/to/bundle/BUNDLE_NAME
+
+This command imports all the requirements of packages and
+images.
+
+When importing a bundle from a file system, the murano client
+searches for packages in a directory relative to the bundle location
+before attempting to download a package from repository. This facilitates
+cases with no Internet access.
+
+The following example shows the import of a monitoring bundle:
+
+.. code-block:: console
+
+ # murano bundle-import /home/downloads/monitoring.bundle
+ Inspecting required images
+ Importing package io.murano.apps.ZabbixServer
+ Importing package io.murano.apps.ZabbixAgent
+ +----------------------------------+---------------+-----------------------------+---------------+-----------+
+ | ID                               | Name          | FQN                         | Author        | Is Public |
+ +----------------------------------+---------------+-----------------------------+---------------+-----------+
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent  | io.murano.apps.ZabbixAgent  | Mirantis, Inc |           |
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server | io.murano.apps.ZabbixServer | Mirantis, Inc |           |
+ +----------------------------------+---------------+-----------------------------+---------------+-----------+
+
+.. note::
+
+   The :command:`bundle-import` command supports multiple positional
+   arguments. This means that you can import several bundles at once.
+
+.. _cli_bundle_url:
+
+**From an URL**
+
+To import a bundle from an URL, use the following command:
+
+.. code-block:: console
+
+  # murano bundle-import http://example.com/path/to/bundle/BUNDLE_NAME
+
+Where ``http://example.com/path/to/bundle/BUNDLE_NAME`` is any external http/https
+URL to load the bundle from.
+
+For example:
+
+.. code-block:: console
+
+  # murano bundle-import http://storage.apps.openstack.org/bundles/monitoring.bundle
+
+.. _cli_bundle_repo:
+
+**From murano applications repository**
+
+To import a bundle from murano applications repository, use the
+following command, where ``bundle_name`` stands for the bundle name:
+
+.. code-block:: console
+
+  # murano bundle-import BUNDLE_NAME
+
+For example:
+
+.. code-block:: console
+
+  # murano bundle-import monitoring
+
+.. |location| raw:: html
+
+   <a href="http://apps.openstack.org/#tab=murano-apps" target="_blank">murano applications repository</a>
+
+.. note::
+
+   For bundle names, go to |location|, click the
+   **Format** tab to show bundles first, and then click on
+   the desired bundle to see its name.
+
+.. _cli_list:
+
+List packages
+-------------
+
+To list all the existing packages you have, use the
+:command:`package-list` command. The result will show you the package
+ID, name, author and if it is public or not. For example:
+
+.. code-block:: console
+
+ # murano package-list
+ +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
+ | ID                               | Name               | FQN                                    | Author        | Is Public |
+ +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
+ | daa46cfd78c74c11bcbe66d3239e546e | Apache HTTP Server | io.murano.apps.apache.ApacheHttpServer | Mirantis, Inc |           |
+ | 5252c9897e864c9f940e08500056f155 | Cloud Foundry      | io.murano.apps.paas.CloudFoundry       | Mirantis, Inc |           |
+ | 1aa62196595f411399e4e48cc2f6a512 | MySQL              | io.murano.databases.MySql              | Mirantis, Inc |           |
+ | 11d73cfdc6d7447a910984d95090463b | SQL Library        | io.murano.databases                    | Mirantis, Inc |           |
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent       | io.murano.apps.ZabbixAgent             | Mirantis, Inc |           |
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server      | io.murano.apps.ZabbixServer            | Mirantis, Inc |           |
+ +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
+
+.. _cli_display:
+
+Show packages
+-------------
+
+To get full information about a package, use the :command:`package-show`
+command. For example:
+
+.. code-block:: console
+
+ # murano package-show 1aa62196595f411399e4e48cc2f6a512
+ +----------------------+-----------------------------------------------------+
+ | Property             | Value                                               |
+ +----------------------+-----------------------------------------------------+
+ | categories           |                                                     |
+ | class_definitions    | io.murano.databases.MySql                           |
+ | description          | MySql is a relational database management system    |
+ |                      | (RDBMS), and ships with no GUI tools to administer  |
+ |                      | MySQL databases or manage data contained within the |
+ |                      | databases.                                          |
+ | enabled              | True                                                |
+ | fully_qualified_name | io.murano.databases.MySql                           |
+ | id                   | 1aa62196595f411399e4e48cc2f6a512                    |
+ | is_public            | False                                               |
+ | name                 | MySQL                                               |
+ | owner_id             | 1ddb2c610d4e4c5dab5185e32554560a                    |
+ | tags                 | Database, MySql, SQL, RDBMS                         |
+ | type                 | Application                                         |
+ +----------------------+-----------------------------------------------------+
+
+.. _cli_delete:
+
+Delete a package
+----------------
+
+To delete a package, use the following command:
+
+.. code-block:: console
+
+  # murano package-delete PACKAGE_ID
+
+.. _cli_download:
+
+Download a package
+------------------
+
+With the following command you can download a .zip archive
+with a specified package:
+
+.. code-block:: console
+
+  # murano package-download PACKAGE_ID > FILE.zip
+
+You need to specify the package ID and enter the .zip file name
+under which to save the package.
+
+For example:
+
+.. code-block:: console
+
+  # murano package-download e44a3f526dfb4e08b3c1018c9968d911 > Wordpress.zip
+
+.. _cli_create:
+
+Create a package
+----------------
+
+With the murano client you can create application packages from package
+source files or directories. The :command:`package-create` command is
+useful when application package files are spread across several directories.
+This command has the following required parameters::
+
+ -r RESOURCES_DIRECTORY
+ -c CLASSES_DIRECTORY
+ --type TYPE
+ -o PACKAGE_NAME.zip
+ -f FULL_NAME
+ -n DISPLAY_NAME
+
+Example:
+
+.. code-block:: console
+
+  $ murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
+   -n mysql -f io.murano.MySQL -d Package -o MySQL.zip --type Library
+   Application package is available at /home/Downloads/MySQL.zip
+
+After this, the package is ready to be imported to the application
+catalog.
+
+The :command:`package-create` command is also useful for autogenerating
+packages from heat templates. In this case you do not need to manually
+specify so many parameters. For more information on automatic package
+composition, please see :ref:`Automatic package composing <compose_package>`
+
 
 Manage categories
 ~~~~~~~~~~~~~~~~~
