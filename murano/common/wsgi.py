@@ -151,6 +151,10 @@ class Service(service.Service):
         """
         super(Service, self).stop()
 
+    def reset(self):
+        super(Service, self).reset()
+        logging.setup(cfg.CONF, 'murano')
+
     def _run(self, application, socket):
         """Start a WSGI server in a new green thread."""
         logger = logging.getLogger('eventlet.wsgi')
