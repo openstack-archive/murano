@@ -31,6 +31,15 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
 
+    @staticmethod
+    def _configure_opts():
+        opts = [
+            cfg.StrOpt('config_dir'),
+            cfg.StrOpt('config_file', default='murano.conf'),
+            cfg.StrOpt('project', default='murano'),
+        ]
+        config.CONF.register_opts(opts)
+
     def test_list_empty_environments(self):
         """Check that with no environments an empty list is returned."""
         self._set_policy_rules(
@@ -42,14 +51,35 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual({'environments': []}, json.loads(result.body))
 
+    def test_list_all_tenants(self):
+        """Check whether all_tenants param is taken into account."""
+
+        self._configure_opts()
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'list_environments_all_tenants': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        body = {'name': 'my_env'}
+        req = self._post('/environments', json.dumps(body), tenant="other")
+        req.get_response(self.api)
+
+        self._check_listing(False, 'list_environments', 0)
+        self._check_listing(True, 'list_environments_all_tenants', 1)
+
+    def _check_listing(self, all_tenants, expected_check, expected_count):
+        self.expect_policy_check(expected_check)
+        req = self._get('/environments', {'all_tenants': all_tenants})
+        response = req.get_response(self.api)
+        body = json.loads(response.body)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(expected_count, len(body['environments']))
+
     def test_create_environment(self):
         """Create an environment, test environment.show()."""
-        opts = [
-            cfg.StrOpt('config_dir'),
-            cfg.StrOpt('config_file', default='murano.conf'),
-            cfg.StrOpt('project', default='murano'),
-        ]
-        config.CONF.register_opts(opts)
+        self._configure_opts()
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',

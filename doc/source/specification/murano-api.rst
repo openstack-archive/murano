@@ -95,6 +95,14 @@ List environments
 |          |                                  | Environments                     |
 +----------+----------------------------------+----------------------------------+
 
+
+*Parameters:*
+
+* `all_tenants` - boolean, indicates whether environments from all tenants are listed.
+  *True* environments from all tenants are listed. Admin user required.
+  *False* environments only from current tenant are listed (default like option unspecified).
+
+
 *Response*
 
 
