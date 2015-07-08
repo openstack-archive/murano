@@ -25,7 +25,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
-from murano.common.i18n import _LE
+from murano.common.i18n import _LE, _LI
 from murano.dsl import exceptions
 from murano.engine import yaql_yaml_loader
 from murano.packages import exceptions as pkg_exc
@@ -92,7 +92,7 @@ class ApiPackageLoader(PackageLoader):
                           'more then 1 package found for query "{0}", '
                           'will resolve based on the ownership'.
                           format(filter_opts))
-                return get_best_package_match(packages, self.tenant_id)
+                return self._get_best_package_match(packages, self.tenant_id)
             elif len(packages) == 1:
                 return packages[0]
             else:
@@ -148,6 +148,21 @@ class ApiPackageLoader(PackageLoader):
             except OSError:
                 pass
 
+    def _get_best_package_match(self, packages):
+        public = None
+        other = []
+        for package in packages:
+            if package.owner_id == self.tenant_id:
+                return package
+            elif package.is_public:
+                public = package
+            else:
+                other.append(package)
+        if public is not None:
+            return public
+        elif other:
+            return other[0]
+
     def cleanup(self):
         shutil.rmtree(self._cache_directory, ignore_errors=True)
 
@@ -185,10 +200,11 @@ class DirectoryPackageLoader(PackageLoader):
                     folder, preload=True,
                     loader=yaql_yaml_loader.YaqlYamlLoader)
             except pkg_exc.PackageLoadError:
-                LOG.exception(_LE('Unable to load package from path: '
-                                  '{0}').format(entry))
+                LOG.info(_LI('Unable to load package from path: {0}').format(
+                    os.path.join(self._base_path, entry)))
                 continue
-
+            LOG.info(_LI('Loaded package from path {0}').format(
+                os.path.join(self._base_path, entry)))
             for c in package.classes:
                 self._packages_by_class[c] = package
             self._packages_by_name[package.full_name] = package
@@ -196,17 +212,37 @@ class DirectoryPackageLoader(PackageLoader):
             self._processed_entries.add(entry)
 
 
-def get_best_package_match(packages, tenant_id):
-    public = None
-    other = []
-    for package in packages:
-        if package.owner_id == tenant_id:
-            return package
-        elif package.is_public:
-            public = package
-        else:
-            other.append(package)
-    if public is not None:
-        return public
-    elif other:
-        return other[0]
+class CombinedPackageLoader(PackageLoader):
+    def __init__(self, murano_client_factory, tenant_id):
+        self.murano_client_factory = murano_client_factory
+        self.tenant_id = tenant_id
+        self.loader_from_api = ApiPackageLoader(self.murano_client_factory,
+                                                self.tenant_id)
+        self.loaders_from_dir = []
+
+        for directory in CONF.engine.load_packages_from:
+            if os.path.exists(directory):
+                self.loaders_from_dir.append(DirectoryPackageLoader(directory))
+
+    def get_package_by_class(self, name):
+        for loader in self.loaders_from_dir:
+            pkg = loader.get_package_by_class(name)
+            if pkg:
+                return pkg
+        return self.loader_from_api.get_package_by_class(name)
+
+    def get_package(self, name):
+        # Try to load from local directory first
+        for loader in self.loaders_from_dir:
+            pkg = loader.get_package(name)
+            if pkg:
+                return pkg
+        # If no package found, load package by API
+        return self.loader_from_api.get_package(name)
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.loader_from_api.cleanup()
+        return False

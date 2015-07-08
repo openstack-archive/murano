@@ -1,0 +1,8 @@
+Namespaces:
+    =: io.murano.test
+
+Extends: sys:TestFixture
+
+Name: MyTest
+
+Methods:

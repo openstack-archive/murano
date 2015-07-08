@@ -131,16 +131,9 @@ class TaskExecutor(object):
         self._create_trust()
 
         try:
-            # !!! please do not delete 2 commented lines of code below.
-            # Uncomment to make engine load packages from
-            # local folder rather than from API !!!
-
-            # pkg_loader = package_loader.DirectoryPackageLoader('./meta')
-            # return self._execute(pkg_loader)
-
             murano_client_factory = lambda: \
                 self._environment.clients.get_murano_client(self._environment)
-            with package_loader.ApiPackageLoader(
+            with package_loader.CombinedPackageLoader(
                     murano_client_factory,
                     self._environment.tenant_id) as pkg_loader:
                 return self._execute(pkg_loader)

@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.test.MyTest
+Name: Test case Example
+Description: |
+ Example of simple package
+Author: 'Mirantis, Inc'
+Tags: []
+Classes:
+ io.murano.test.MyTest: Mytest.yaml
