@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import yaml
-
 from keystoneclient import exceptions as ks_exceptions
+import yaml
 
 from murano.common import auth_utils
 from murano.common import config
