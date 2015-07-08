@@ -18,14 +18,9 @@ TEMPEST_DIR=${TEMPEST_DIR:-/opt/stack/new/tempest}
 # Add tempest source tree to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$TEMPEST_DIR
 
-#installing requirements for tempest
-pip install -r $TEMPEST_DIR/requirements.txt
-
-#installing test requirements for murano
-pip install -r ../test-requirements.txt
-
-# Get admin credentials
-cwd=$(pwd)
-cd /opt/stack/new/devstack
-source openrc admin admin
-cd $cwd
+# Using .venv for tempest installation
+pushd $TEMPEST_DIR
+python tools/install_venv.py
+source .venv/bin/activate
+pip install -r /opt/stack/new/murano/requirements.txt
+pip install -r /opt/stack/new/murano/test-requirements.txt
