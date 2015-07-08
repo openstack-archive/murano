@@ -25,8 +25,13 @@ echo "Successfully contacted Murano API"
 # Where tempest code lives
 TEMPEST_DIR=${TEMPEST_DIR:-/opt/stack/new/tempest}
 
-# Add tempest source tree to PYTHONPATH
-export PYTHONPATH=$PYTHONPATH:$TEMPEST_DIR
-
-nosetests -sv ../murano/tests/functional/api/v1
-
+# Using .venv for tempest installation
+pushd $TEMPEST_DIR
+python tools/install_venv.py
+source .venv/bin/activate
+pip install 'nose<=1.3.1'
+nosetests -sv /opt/stack/new/murano/murano/tests/functional/api/v1
+RETVAL=$?
+deactivate
+popd
+exit $RETVAL
