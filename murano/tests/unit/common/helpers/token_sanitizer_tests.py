@@ -25,11 +25,12 @@ class TokenSanitizerTests(base.MuranoTestCase):
         self.assertEqual(value['token'], self.sanitizer.message)
 
     def test_dict_with_few_value(self):
-        source = {'token': 'value', 'pass': 'value'}
+        source = {'token': 'value', 'pass': 'value', 'TrustId': 'value'}
         value = self.sanitizer.sanitize(source)
 
         self.assertEqual(value['token'], self.sanitizer.message)
         self.assertEqual(value['pass'], self.sanitizer.message)
+        self.assertEqual(value['TrustId'], self.sanitizer.message)
 
     def test_dict_with_nested_dict(self):
         source = {'obj': {'pass': 'value'}}
