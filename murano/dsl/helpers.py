@@ -145,8 +145,22 @@ def generate_id():
 
 
 def parallel_select(collection, func):
+    # workaround for eventlet issue 232
+    # https://github.com/eventlet/eventlet/issues/232
+    def wrapper(element):
+        try:
+            return func(element), False, None
+        except Exception as e:
+            return e, True, sys.exc_info()[2]
+
     gpool = eventlet.greenpool.GreenPool()
-    return list(gpool.imap(func, collection))
+    result = list(gpool.imap(wrapper, collection))
+    try:
+        exception = next(t for t in result if t[1])
+    except StopIteration:
+        return map(lambda t: t[0], result)
+    else:
+        raise exception[0], None, exception[2]
 
 
 def to_python_codestyle(name):
