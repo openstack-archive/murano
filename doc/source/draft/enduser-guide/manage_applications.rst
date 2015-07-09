@@ -108,8 +108,43 @@ Perform the following steps to import a bundle of applications:
 Search for an application in the catalog
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Add and delete an application
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+When you have imported many applications and want to quickly find
+a required one, you can filter them by category, tags and words that
+the application name or description contains:
+
+In dashboard, navigate to :menuselection:`Murano > Application Catalog
+> Applications`.
+
+The page is divided into two sections:
+
+* **Recent Activity** shows the most recently imported or deployed
+  applications
+
+* the bottom section contains all the available applications sorted
+  alphabetically
+
+To view all the applications of a specific category, select it from
+the **App Category** drop-down list:
+
+  .. image:: figures/app-category.png
+
+To filter applications by tags or words from the application name or
+description, use the rightmost filter:
+
+  .. image:: figures/app_filter.png
+
+.. note::
+
+   Tags can be specified during the import of an application package.
+
+For example, there is an application that has the word
+*community-developed* in description. Let's find it with the filter.
+The following screenshot shows you the result.
+
+ .. image:: figures/app_filter_example.png
+
+Delete an application
+~~~~~~~~~~~~~~~~~~~~~
 
 Deploy an application
 ~~~~~~~~~~~~~~~~~~~~~
