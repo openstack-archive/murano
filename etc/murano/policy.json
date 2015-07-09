@@ -19,6 +19,7 @@
     "statuses_deployments": "rule:default",
 
     "list_environments": "rule:default",
+    "list_environments_all_tenants": "rule:admin_api",
     "show_environment": "rule:default",
     "update_environment": "rule:default",
     "create_environment": "rule:default",
