@@ -21,7 +21,8 @@ class TokenSanitizer(object):
     Simply searches attribute with `look a like` name as one of
     the token and replace it value with message.
     """
-    def __init__(self, tokens=('token', 'pass'), message='*** SANITIZED ***'):
+    def __init__(self, tokens=('token', 'pass', 'trustid'),
+                 message='*** SANITIZED ***'):
         """Init method of TokenSanitizer.
         :param tokens:  iterable with tokens
         :param message: string by which each token going to be replaced
