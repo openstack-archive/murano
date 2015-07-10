@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # Plugin file for Murano services
 # -------------------------------
 
@@ -17,9 +18,11 @@ set -o xtrace
 MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/openstack/murano.git}
 MURANO_BRANCH=${MURANO_BRANCH:-master}
 
-MURANO_PYTHONCLIENT_REPO=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/openstack/python-muranoclient.git}
-MURANO_PYTHONCLIENT_BRANCH=${MURANO_PYTHONCLIENT_BRANCH:-master}
-MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
+# Variables, which used in this function
+# https://github.com/openstack-dev/devstack/blob/master/functions-common#L500-L506
+GITREPO["python-muranoclient"]=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/openstack/python-muranoclient.git}
+GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-master}
+GITDIR["python-muranoclient"]=$DEST/python-muranoclient
 
 # Set up default directories
 MURANO_DIR=$DEST/murano
@@ -224,16 +227,20 @@ function install_murano() {
 
     git_clone $MURANO_REPO $MURANO_DIR $MURANO_BRANCH
 
-    # TODO(ruhe): use setup_develop once Murano requirements match with global-requirement.txt
-    # both functions (setup_develop and setup_package) are defined at:
-    # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
-    setup_package $MURANO_DIR -e
+    setup_develop $MURANO_DIR
 }
 
 
 function install_murano_pythonclient() {
-    git_clone $MURANO_PYTHONCLIENT_REPO $MURANO_PYTHONCLIENT_DIR $MURANO_PYTHONCLIENT_BRANCH
-    setup_package $MURANO_PYTHONCLIENT_DIR -e
+# For using non-released client from git branch, need to add
+# LIBS_FROM_GIT=python-muranoclient parameter to localrc.
+# Otherwise, murano will install python-muranoclient from requirements.
+    if use_library_from_git "python-muranoclient"; then
+        git_clone_by_name "python-muranoclient"
+        setup_dev_lib "python-muranoclient"
+        # Installing bash_completion for murano
+        sudo install -D -m 0644 -o $STACK_USER {${GITDIR["python-muranoclient"]}/tools/,/etc/bash_completion.d/}murano.bash_completion
+    fi
 }
 
 
@@ -390,10 +397,8 @@ function install_murano_dashboard() {
     echo_summary "Install Murano Dashboard"
 
     git_clone $MURANO_DASHBOARD_REPO $MURANO_DASHBOARD_DIR $MURANO_DASHBOARD_BRANCH
-    # TODO(dteselkin): use setup_develop once Murano requirements match with global-requirement.txt
-    # both functions (setup_develop and setup_package) are defined at:
-    # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
-    setup_package $MURANO_DASHBOARD_DIR -e
+
+    setup_develop $MURANO_DASHBOARD_DIR
 }
 
 
