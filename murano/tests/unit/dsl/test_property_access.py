@@ -41,15 +41,15 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.UninitializedPropertyAccessError,
             self._runner.testUninitializedPrivatePropertyAccess)
         self.assertEqual(
-            'Access to uninitialized property privateName '
-            'in class SampleClass3 is forbidden', str(e))
+            'Access to uninitialized property "privateName" '
+            'in class "SampleClass3" is forbidden', str(e))
 
     def test_read_of_private_property_of_other_class(self):
         e = self.assertRaises(
             exceptions.PropertyAccessError,
             self._runner.testReadOfPrivatePropertyOfOtherClass)
         self.assertEqual(
-            'Property privateProperty in class DerivedFrom2Classes '
+            'Property "privateProperty" in class "DerivedFrom2Classes" '
             'cannot be read', str(e))
         self.assertEqual(['accessing property'], self.traces)
 
@@ -58,7 +58,7 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.PropertyAccessError,
             self._runner.testWriteOfPrivatePropertyOfOtherClass)
         self.assertEqual(
-            'Property privateProperty in class DerivedFrom2Classes '
+            'Property "privateProperty" in class "DerivedFrom2Classes" '
             'cannot be written', str(e))
 
     def test_access_ambiguous_property_with_resolver(self):
@@ -73,7 +73,7 @@ class TestPropertyAccess(test_case.DslTestCase):
             self._runner.on(self._multi_derived).
             testAccessAmbiguousPropertyWithoutResolver)
         self.assertEqual(
-            'Found more that one property ambiguousProperty1',
+            'Found more that one property "ambiguousProperty1"',
             str(e))
 
     def test_property_merge(self):
@@ -91,7 +91,7 @@ class TestPropertyAccess(test_case.DslTestCase):
             self._runner.on(self._multi_derived).
             testModifyUsageTestProperty1)
         self.assertEqual(
-            'Property usageTestProperty1 is immutable to the caller',
+            'Property "usageTestProperty1" is immutable to the caller',
             str(e))
         self.assertRaises(
             exceptions.NoWriteAccessError,

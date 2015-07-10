@@ -40,35 +40,36 @@ class DslInvalidOperationError(Exception):
 
 class NoMethodFound(Exception):
     def __init__(self, name):
-        super(NoMethodFound, self).__init__('Method %s is not found' % name)
+        super(NoMethodFound, self).__init__('Method "%s" is not found' % name)
 
 
 class NoClassFound(Exception):
     def __init__(self, name):
-        super(NoClassFound, self).__init__('Class %s is not found' % name)
+        super(NoClassFound, self).__init__('Class "%s" is not found' % name)
 
 
 class NoPackageFound(Exception):
     def __init__(self, name):
-        super(NoPackageFound, self).__init__('Package %s is not found' % name)
+        super(NoPackageFound, self).__init__(
+            'Package "%s" is not found' % name)
 
 
 class NoPackageForClassFound(Exception):
     def __init__(self, name):
-        super(NoPackageForClassFound, self).__init__('Package for class %s '
+        super(NoPackageForClassFound, self).__init__('Package for class "%s" '
                                                      'is not found' % name)
 
 
 class NoObjectFoundError(Exception):
     def __init__(self, object_id):
         super(NoObjectFoundError, self).__init__(
-            'Object %s is not found in object store' % object_id)
+            'Object "%s" is not found in object store' % object_id)
 
 
 class AmbiguousMethodName(Exception):
     def __init__(self, name):
         super(AmbiguousMethodName, self).__init__(
-            'Found more that one method %s' % name)
+            'Found more that one method "%s"' % name)
 
 
 class DslContractSyntaxError(Exception):
@@ -94,32 +95,32 @@ class PropertyAccessError(Exception):
 class AmbiguousPropertyNameError(PropertyAccessError):
     def __init__(self, name):
         super(AmbiguousPropertyNameError, self).__init__(
-            'Found more that one property %s' % name)
+            'Found more that one property "%s"' % name)
 
 
 class NoWriteAccess(PropertyAccessError):
     def __init__(self, name):
         super(NoWriteAccess, self).__init__(
-            'Property %s is immutable to the caller' % name)
+            'Property "%s" is immutable to the caller' % name)
 
 
 class NoWriteAccessError(PropertyAccessError):
     def __init__(self, name):
         super(NoWriteAccessError, self).__init__(
-            'Property %s is immutable to the caller' % name)
+            'Property "%s" is immutable to the caller' % name)
 
 
 class PropertyReadError(PropertyAccessError):
     def __init__(self, name, murano_class):
         super(PropertyAccessError, self).__init__(
-            'Property %s in class %s cannot be read' %
+            'Property "%s" in class "%s" cannot be read' %
             (name, murano_class.name))
 
 
 class PropertyWriteError(PropertyAccessError):
     def __init__(self, name, murano_class):
         super(PropertyAccessError, self).__init__(
-            'Property %s in class %s cannot be written' %
+            'Property "%s" in class "%s" cannot be written' %
             (name, murano_class.name))
 
 
@@ -127,4 +128,4 @@ class UninitializedPropertyAccessError(PropertyAccessError):
     def __init__(self, name, murano_class):
         super(PropertyAccessError, self).__init__(
             'Access to uninitialized property '
-            '%s in class %s is forbidden' % (name, murano_class.name))
+            '"%s" in class "%s" is forbidden' % (name, murano_class.name))
