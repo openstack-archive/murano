@@ -1,0 +1,15 @@
+Namespaces:
+    =: io.murano.test
+
+Extends: TestFixture
+
+Name: MyTest2
+
+Methods:
+  testSimple1:
+    Body:
+
+  testSimple2:
+    Body:
+
+    thisIsNotAtestMethod:

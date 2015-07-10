@@ -50,3 +50,5 @@ Classes:
   io.murano.system.NeutronSecurityGroupManager: system/NeutronSecurityGroupManager.yaml
   io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml
   io.murano.system.MistralClient: system/MistralClient.yaml
+
+  io.murano.test.TestFixture: test/TestFixture.yaml

@@ -1,0 +1,12 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.test.MyTest1
+Name: Test case Example
+Description: |
+ Example of test-case. Mocks are not used in this app
+Author: 'Mirantis, Inc'
+Tags: []
+Classes:
+ io.murano.test.MyTest1: Mytest1.yaml
+ io.murano.test.MyTest2: Mytest2.yaml
+ io.murano.test.MyTest3: Mytest3.yaml
