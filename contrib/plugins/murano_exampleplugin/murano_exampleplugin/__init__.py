@@ -15,12 +15,12 @@
 
 import json
 
+import cfg
 import glanceclient
+
 from murano.common import config
 import murano.dsl.helpers as helpers
 from murano.openstack.common import log as logging
-
-import cfg
 
 
 LOG = logging.getLogger(__name__)

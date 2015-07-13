@@ -15,11 +15,11 @@
 # Based on designate/policy.py
 
 from oslo_config import cfg
+from oslo_policy import policy
 from webob import exc as exceptions
 
 from murano.common.i18n import _
 import murano.openstack.common.log as logging
-from oslo_policy import policy
 
 LOG = logging.getLogger(__name__)
 

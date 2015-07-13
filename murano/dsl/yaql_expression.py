@@ -16,7 +16,6 @@ import re
 import types
 
 from oslo_utils import encodeutils
-
 import yaql
 import yaql.exceptions
 import yaql.expressions
