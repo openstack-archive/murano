@@ -387,3 +387,22 @@ This is a fake zip archive
         req = self._post('/catalog/categories', json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(403, result.status_code)
+
+    def test_add_long_category(self):
+        """Check that category, that contains more then 80 characters
+           fails to add
+        """
+
+        self._set_policy_rules({'add_category': '@'})
+        self.expect_policy_check('add_category')
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        body = {'name': 'cat' * 80}
+        req = self._post('/catalog/categories', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_message = result.text.replace('\n', '')
+        self.assertIn('Category name should be 80 characters maximum',
+                      result_message)

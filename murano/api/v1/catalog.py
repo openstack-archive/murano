@@ -299,12 +299,16 @@ class Controller(object):
 
     def add_category(self, req, body=None):
         policy.check("add_category", req.context)
-
-        if not body.get('name'):
+        category_name = body.get('name')
+        if not category_name:
             raise exc.HTTPBadRequest(
                 explanation='Please, specify a name of the category to create')
+        if len(category_name) > 80:
+            msg = _('Category name should be 80 characters maximum')
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
         try:
-            category = db_api.category_add(body['name'])
+            category = db_api.category_add(category_name)
         except db_exc.DBDuplicateEntry:
             msg = _('Category with specified name is already exist')
             LOG.error(msg)
