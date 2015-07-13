@@ -1,4 +1,4 @@
-.. manage_applications:
+.. _manage_applications:
 
 .. toctree::
    :maxdepth: 2
