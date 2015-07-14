@@ -30,6 +30,8 @@ import eventlet.wsgi
 import jsonschema
 from oslo_config import cfg
 from oslo_serialization import jsonutils
+from oslo_service import service
+from oslo_service import sslutils
 import routes
 import routes.middleware
 import webob.dec
@@ -40,8 +42,6 @@ from murano.common import exceptions
 from murano.common.i18n import _
 from murano.common import xmlutils
 from murano.openstack.common import log as logging
-from murano.openstack.common import service
-from murano.openstack.common import sslutils
 
 socket_opts = [
     cfg.IntOpt('backlog',
@@ -69,7 +69,7 @@ class Service(service.Service):
     """Provides a Service API for wsgi servers.
 
     This gives us the ability to launch wsgi servers with the
-    Launcher classes in service.py.
+    Launcher classes in oslo_service.service.py.
     """
 
     def __init__(self, application, port,
@@ -98,8 +98,8 @@ class Service(service.Service):
                 sock = eventlet.listen(bind_addr,
                                        backlog=backlog,
                                        family=family)
-                if sslutils.is_enabled():
-                    sock = sslutils.wrap(sock)
+                if sslutils.is_enabled(CONF):
+                    sock = sslutils.wrap(CONF, sock)
 
             except socket.error as err:
                 if err.args[0] != errno.EADDRINUSE:
