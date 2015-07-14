@@ -146,6 +146,10 @@ Methods:
               - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
                 Then:
                   - $._primaryNetwork: $.environment.defaultNetworks.flat
+                Else:
+                  - If: $.networks.customNetworks!= null
+                    Then:
+                      - $._primaryNetwork: $.networks.customNetworks.firstOrDefault()
 
   ensureNetworksDeployed:
     Body:
