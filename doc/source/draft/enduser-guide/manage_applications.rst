@@ -1,4 +1,4 @@
-.. manage_applications:
+.. _manage_applications:
 
 .. toctree::
    :maxdepth: 2
@@ -29,12 +29,16 @@ Perform the following steps to import an application package from a
 #. Click the **Import Package** button on the top right of the page.
 
    .. image:: figures/import_package.png
+      :alt: Package Definitions page: Import Package 1
+      :width: 630 px
 
 #. From the **Package source** drop-down list choose **File**, then
    click **Browse** to select a .zip file you want to import, and
    then click **Next**.
 
    .. image:: figures/browse_zip_file.png
+      :alt: Import Package dialog: zip file
+      :width: 630 px
 
 #. At this step, the package is already uploaded. If necessary,
    verify and update the information about the package, then
@@ -69,12 +73,16 @@ murano applications repository:
 #. Click the **Import Package** button on the top right of the page.
 
    .. image:: figures/import_package.png
+      :alt: Package Definitions page: Import Package 2
+      :width: 630 px
 
 #. From the **Package source** drop-down list, choose **Repository**,
    enter the package name, and then click **Next**. Note that you may
    also specify the version of the package.
 
    .. image:: figures/repository.png
+      :alt: Import Package dialog: Repository
+      :width: 630 px
 
 #. At this step, the package is already uploaded. If necessary,
    verify and update the information about the package, then
@@ -99,11 +107,15 @@ Perform the following steps to import a bundle of applications:
 #. Click the **Import Bundle** button on the top right of the page.
 
    .. image:: figures/import_bundle.png
+      :alt: Package Definitions page: Import Bundle
+      :width: 630 px
 
 #. From the **Package Bundle Source** drop-down list, choose
    **Repository**, enter the bundle name, and then click **Create**.
 
    .. image:: figures/bundle_name.png
+      :alt: Import Bundle dialog
+      :width: 630 px
 
 Search for an application in the catalog
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -126,12 +138,16 @@ The page is divided into two sections:
 To view all the applications of a specific category, select it from
 the **App Category** drop-down list:
 
-  .. image:: figures/app-category.png
+  .. image:: figures/app_category.png
+     :alt: Applications page: App Category
+     :width: 630 px
 
 To filter applications by tags or words from the application name or
 description, use the rightmost filter:
 
   .. image:: figures/app_filter.png
+     :alt: Applications page: Filter
+     :width: 630 px
 
 .. note::
 
@@ -142,6 +158,8 @@ For example, there is an application that has the word
 The following screenshot shows you the result.
 
  .. image:: figures/app_filter_example.png
+    :alt: Applications page: example
+    :width: 630 px
 
 Delete an application
 ~~~~~~~~~~~~~~~~~~~~~
