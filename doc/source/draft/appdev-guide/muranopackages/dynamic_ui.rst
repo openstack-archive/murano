@@ -24,9 +24,32 @@ The UI definition should be a valid yaml file and should contain the following s
 Version
 -------
 
-The latest version of a supported dynamic UI syntax is 2.
-This section is optional, the default version is set to 1.
-Murano Juno and Kilo supports version 2. Version 1 is obsolete.
+The syntax and format of dynamic UI definitions may change over time, so the
+concept of `format versions` is introduced. Each UI definition file may contain
+a top-level section called `Version` to indicate the minimum version of Murano
+Dynamic UI platform which is capable to process it.
+If the section is missing, the format version is assumed to be 1.
+
+The version consists of two non-negative integer segments, separated by a dot,
+i.e. has a form of `MAJOR.MINOR`.
+Dynamic UI platforms having the same MAJOR version component are compatible:
+i.e. the platform having the higher version may process UI definitions with
+lower versions if their MAJOR segments are the same.
+For example, Murano Dynamic UI platform of version 2.2 is able to process UI
+definitions of versions 2.0, 2.1 and 2.2, but is unable to process 2.3, 3.0 or
+1.9.
+
+Currently the latest version of Dynamic UI platform is 2.0. It is incompatible
+with UI definitions of Version 1, which were used in Murano releases before
+Juno.
+
+.. note::
+
+    Although the `Version` field is considered to be optional, it's default
+    value is 1.0, and thus such definitions can't be processed with the latest
+    Murano. So, be sure to specify the compatible format version when designing
+    your UI definitions.
+..
 
 Application and Templates
 -------------------------
