@@ -12,13 +12,13 @@
 # limitations under the License.
 
 import fixtures
-from oslo_config import cfg
 import testtools
 
+from murano.common import config
 from murano.db import api as db_api
 from murano.openstack.common import log
 
-CONF = cfg.CONF
+CONF = config.CONF
 log.setup('murano')
 
 

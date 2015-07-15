@@ -24,7 +24,6 @@ import uuid
 import eventlet.event
 from oslo_config import cfg
 
-import murano.common.config as config
 import murano.common.exceptions as exceptions
 import murano.common.messaging as messaging
 import murano.dsl.murano_class as murano_class
@@ -44,7 +43,7 @@ class AgentException(Exception):
 class Agent(murano_object.MuranoObject):
     def initialize(self, _context, host):
         self._enabled = False
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
             return
@@ -65,7 +64,7 @@ class Agent(murano_object.MuranoObject):
 
     def prepare(self):
         # (sjmc7) - turn this into a no-op if agents are disabled
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
             return
@@ -77,7 +76,7 @@ class Agent(murano_object.MuranoObject):
         return self._queue
 
     def _check_enabled(self):
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             raise exceptions.PolicyViolationException(
                 'Use of murano-agent is disallowed '
                 'by the server configuration')

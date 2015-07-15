@@ -49,6 +49,8 @@ MuranoGroup = [
                help="image for windows services")
 ]
 
+CONF = cfg.CONF
+
 
 def register_config(config, config_group, config_opts):
 
@@ -62,6 +64,6 @@ def load_config():
     path = os.path.join(__location, "config.conf")
 
     if os.path.exists(path):
-        cfg.CONF([], project='muranointegration', default_config_files=[path])
+        CONF([], project='muranointegration', default_config_files=[path])
 
-    register_config(cfg.CONF, murano_group, MuranoGroup)
+    register_config(CONF, murano_group, MuranoGroup)

@@ -14,13 +14,13 @@
 
 import uuid
 
+from oslo_config import cfg
 import oslo_messaging as messaging
 from oslo_messaging.notify import dispatcher as oslo_dispatcher
 from oslo_messaging import target
 from oslo_utils import timeutils
 from sqlalchemy import desc
 
-from murano.common import config
 from murano.common.helpers import token_sanitizer
 from murano.db import models
 from murano.db.services import environments
@@ -30,6 +30,7 @@ from murano.common.i18n import _, _LI, _LW
 from murano.openstack.common import log as logging
 from murano.services import states
 
+CONF = cfg.CONF
 
 RPC_SERVICE = None
 NOTIFICATION_SERVICE = None
@@ -195,7 +196,7 @@ def get_last_deployment(unit, env_id):
 def _prepare_rpc_service(server_id):
     endpoints = [ResultEndpoint()]
 
-    transport = messaging.get_transport(config.CONF)
+    transport = messaging.get_transport(CONF)
     s_target = target.Target('murano', 'results', server=server_id)
     return messaging.get_rpc_server(transport, s_target, endpoints, 'eventlet')
 
@@ -203,7 +204,7 @@ def _prepare_rpc_service(server_id):
 def _prepare_notification_service(server_id):
     endpoints = [report_notification, track_instance, untrack_instance]
 
-    transport = messaging.get_transport(config.CONF)
+    transport = messaging.get_transport(CONF)
     s_target = target.Target(topic='murano', server=server_id)
     dispatcher = oslo_dispatcher.NotificationDispatcher(
         [s_target], endpoints, None, True)

@@ -15,8 +15,9 @@
 
 import eventlet
 import greenlet
+from oslo_config import cfg
 
-import murano.common.config as config
+
 import murano.common.exceptions as exceptions
 from murano.dsl import helpers
 import murano.dsl.murano_class as murano_class
@@ -25,6 +26,7 @@ import murano.engine.system.common as common
 from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 class AgentListenerException(Exception):
@@ -35,7 +37,7 @@ class AgentListenerException(Exception):
 class AgentListener(murano_object.MuranoObject):
     def initialize(self, _context, name):
         self._enabled = False
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             return
         self._enabled = True
         self._results_queue = str('-execution-results-%s' % name.lower())
@@ -43,7 +45,7 @@ class AgentListener(murano_object.MuranoObject):
         self._receive_thread = None
 
     def _check_enabled(self):
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             LOG.debug(
                 'Use of murano-agent is disallowed '
                 'by the server configuration')
@@ -60,7 +62,7 @@ class AgentListener(murano_object.MuranoObject):
         return self._results_queue
 
     def start(self, _context):
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             # Noop
             LOG.debug("murano-agent is disabled by the server")
             return
@@ -71,7 +73,7 @@ class AgentListener(murano_object.MuranoObject):
             self._receive_thread = eventlet.spawn(self._receive)
 
     def stop(self):
-        if config.CONF.engine.disable_murano_agent:
+        if CONF.engine.disable_murano_agent:
             # Noop
             LOG.debug("murano-agent is disabled by the server")
             return

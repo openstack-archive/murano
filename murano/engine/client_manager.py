@@ -20,7 +20,6 @@ import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 
 from murano.common import auth_utils
-from murano.common import config
 from murano.dsl import helpers
 from murano.engine import environment
 
@@ -34,6 +33,8 @@ try:
     import mistralclient.api.client as mistralclient
 except ImportError as mistral_import_error:
     mistralclient = None
+
+CONF = cfg.CONF
 
 
 class ClientManager(object):
@@ -49,7 +50,7 @@ class ClientManager(object):
         return helpers.get_environment(context)
 
     def get_client(self, context, name, use_trusts, client_factory):
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         keystone_client = None if name == 'keystone' else \
@@ -75,7 +76,7 @@ class ClientManager(object):
             self._semaphore.release()
 
     def get_keystone_client(self, context, use_trusts=True):
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
         env = self._get_environment(context)
         factory = lambda _1, _2: \
@@ -95,7 +96,7 @@ class ClientManager(object):
         if not congress_client:
             # congress client was not imported
             raise congress_client_import_error
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         def factory(keystone_client, auth_token):
@@ -110,11 +111,11 @@ class ClientManager(object):
         return self.get_client(context, 'congress', use_trusts, factory)
 
     def get_heat_client(self, context, use_trusts=True):
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         def factory(keystone_client, auth_token):
-            heat_settings = config.CONF.heat
+            heat_settings = CONF.heat
 
             heat_url = keystone_client.service_catalog.url_for(
                 service_type='orchestration',
@@ -128,7 +129,7 @@ class ClientManager(object):
                 'insecure': heat_settings.insecure
             }
 
-            if not config.CONF.engine.use_trusts:
+            if not CONF.engine.use_trusts:
                 kwargs.update({
                     'username': 'badusername',
                     'password': 'badpassword'
@@ -138,11 +139,11 @@ class ClientManager(object):
         return self.get_client(context, 'heat', use_trusts, factory)
 
     def get_neutron_client(self, context, use_trusts=True):
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         def factory(keystone_client, auth_token):
-            neutron_settings = config.CONF.neutron
+            neutron_settings = CONF.neutron
 
             neutron_url = keystone_client.service_catalog.url_for(
                 service_type='network',
@@ -157,11 +158,11 @@ class ClientManager(object):
         return self.get_client(context, 'neutron', use_trusts, factory)
 
     def get_murano_client(self, context, use_trusts=True):
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         def factory(keystone_client, auth_token):
-            murano_settings = config.CONF.murano
+            murano_settings = CONF.murano
 
             murano_url = \
                 murano_settings.url or keystone_client.service_catalog.url_for(
@@ -183,11 +184,11 @@ class ClientManager(object):
         if not mistralclient:
             raise mistral_import_error
 
-        if not config.CONF.engine.use_trusts:
+        if not CONF.engine.use_trusts:
             use_trusts = False
 
         def factory(keystone_client, auth_token):
-            mistral_settings = config.CONF.mistral
+            mistral_settings = CONF.mistral
 
             endpoint_type = mistral_settings.endpoint_type
             service_type = mistral_settings.service_type

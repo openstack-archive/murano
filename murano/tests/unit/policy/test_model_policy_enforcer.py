@@ -12,14 +12,17 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
 import congressclient
 import mock
+from oslo_config import cfg
 
-from murano.common import config
 from murano.common import engine
 from murano.engine import client_manager
 from murano.policy import model_policy_enforcer
 from murano.tests.unit import base
+
+CONF = cfg.CONF
 
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
@@ -54,7 +57,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor = engine.TaskExecutor(self.task)
         executor._model_policy_enforcer = mock.Mock()
 
-        config.CONF.engine.enable_model_policy_enforcer = False
+        CONF.engine.enable_model_policy_enforcer = False
         executor._validate_model(self.obj, self.task['action'],
                                  self.class_loader)
 
@@ -64,7 +67,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor = engine.TaskExecutor(self.task)
         executor._model_policy_enforcer = mock.Mock()
 
-        config.CONF.engine.enable_model_policy_enforcer = True
+        CONF.engine.enable_model_policy_enforcer = True
         executor._validate_model(self.obj, self.task['action'],
                                  self.class_loader)
 
@@ -109,7 +112,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor = engine.TaskExecutor(self.task)
         executor._model_policy_enforcer = mock.Mock()
 
-        config.CONF.engine.enable_model_policy_enforcer = True
+        CONF.engine.enable_model_policy_enforcer = True
         executor._validate_model(self.obj, {'method': 'not_deploy'},
                                  self.class_loader)
 

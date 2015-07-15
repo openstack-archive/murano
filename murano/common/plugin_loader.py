@@ -15,15 +15,15 @@
 import inspect
 import re
 
+from oslo_config import cfg
 import six
 from stevedore import dispatch
 
-from murano.common import config
 from murano.common.i18n import _LE, _LI, _LW
 from murano.openstack.common import log as logging
 
 
-CONF = config.CONF
+CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 # regexp validator to ensure that the entry-point name is a valid MuranoPL
