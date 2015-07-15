@@ -127,3 +127,25 @@ class TestController(base.MuranoTestCase):
         resp = self.controller.deprovision(self.request, '555-555')
 
         self.assertEqual({}, resp)
+
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
+    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
+    def test_bind(self, mock_auth, mock_get_si, mock_client):
+        service = mock.MagicMock()
+        service.service_id = '111-111'
+        service.tenant_id = '222-222'
+        service.env_id = '333-333'
+        mock_get_si.return_value = service
+
+        services = [{'id': 'xxx-xxx-xxx',
+                     '?': {'id': '111-111'},
+                     'instance': {},
+                     'smthg': 'nothing'}]
+        mock_client.return_value.environments.get =\
+            mock.MagicMock(return_value=mock.MagicMock(services=services))
+
+        nice_resp = {'credentials': {'smthg': 'nothing', 'id': 'xxx-xxx-xxx'}}
+        resp = self.controller.bind(self.request, {}, '555-555', '666-666')
+
+        self.assertEqual(nice_resp, resp)
