@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from nose.plugins.attrib import attr as tag
 from tempest.test import attr
 from tempest_lib import exceptions
 import testtools
@@ -21,6 +22,7 @@ from murano.tests.functional.api import base
 
 class TestSessions(base.TestCase):
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_session(self):
         env = self.create_environment('test')
@@ -30,12 +32,14 @@ class TestSessions(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(env['id'], sess['environment_id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_session_before_env(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.create_session,
                           None)
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_delete_session(self):
         env = self.create_environment('test')
@@ -46,6 +50,7 @@ class TestSessions(base.TestCase):
 
         self.assertEqual(resp.status, 200)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_session_without_env_id(self):
         env = self.create_environment('test')
@@ -57,6 +62,7 @@ class TestSessions(base.TestCase):
                           None,
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_session(self):
         env = self.create_environment('test')
@@ -68,6 +74,7 @@ class TestSessions(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(session, sess)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_session_without_env_id(self):
         env = self.create_environment('test')
@@ -79,6 +86,7 @@ class TestSessions(base.TestCase):
                           None,
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_session_after_delete_env(self):
         env = self.create_environment('test')
@@ -92,6 +100,7 @@ class TestSessions(base.TestCase):
                           env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_double_delete_session(self):
         env = self.create_environment('test')
@@ -108,6 +117,7 @@ class TestSessions(base.TestCase):
 
 class TestSessionsTenantIsolation(base.NegativeTestCase):
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_session_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -115,6 +125,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.create_session, env['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_session_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -124,6 +135,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
                           self.alt_client.delete_session, env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_session_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -133,6 +145,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
                           self.alt_client.get_session, env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @testtools.skip("https://bugs.launchpad.net/murano/+bug/1382026")
     @attr(type='negative')
     def test_deploy_session_in_env_from_another_tenant(self):

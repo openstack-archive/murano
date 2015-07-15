@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from nose.plugins.attrib import attr as tag
 from tempest.test import attr
 from tempest_lib import exceptions
 
@@ -20,6 +21,7 @@ from murano.tests.functional.api import base
 
 class TestEnvironments(base.TestCase):
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_list_environments(self):
         resp, body = self.client.get_environments_list()
@@ -27,6 +29,7 @@ class TestEnvironments(base.TestCase):
         self.assertIn('environments', body)
         self.assertEqual(resp.status, 200)
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_and_delete_environment(self):
         environments_list_start = self.client.get_environments_list()[1]
@@ -51,6 +54,7 @@ class TestEnvironments(base.TestCase):
 
         self.environments.pop(self.environments.index(env))
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_environment(self):
         env = self.create_environment('test')
@@ -60,6 +64,7 @@ class TestEnvironments(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(environment['name'], 'test')
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_update_environment(self):
         env = self.create_environment('test')
@@ -69,18 +74,21 @@ class TestEnvironments(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(environment['name'], 'changed-environment-name')
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_update_environment_with_wrong_env_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.update_environment,
                           None)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_environment_with_wrong_env_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.client.delete_environment,
                           None)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_double_delete_environment(self):
         env = self.create_environment('test')
@@ -91,6 +99,7 @@ class TestEnvironments(base.TestCase):
                           self.client.delete_environment,
                           env['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_deleted_environment(self):
         env = self.create_environment('test')
@@ -104,6 +113,7 @@ class TestEnvironments(base.TestCase):
 
 class TestEnvironmentsTenantIsolation(base.NegativeTestCase):
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_environment_from_another_tenant(self):
         env = self.create_environment('test')
@@ -111,6 +121,7 @@ class TestEnvironmentsTenantIsolation(base.NegativeTestCase):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_environment, env['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_update_environment_from_another_tenant(self):
         env = self.create_environment('test')
@@ -118,6 +129,7 @@ class TestEnvironmentsTenantIsolation(base.NegativeTestCase):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.update_environment, env['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_environment_from_another_tenant(self):
         env = self.create_environment('test')
