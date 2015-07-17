@@ -42,7 +42,7 @@ _opt_lists = [
         murano.common.config.metadata_dir,
         murano.common.config.bind_opts,
         murano.common.config.file_server,
-        murano.common.wsgi.socket_opts,
+        murano.common.wsgi.wsgi_opts,
     ])),
 ]
 
