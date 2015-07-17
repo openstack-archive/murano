@@ -1,3 +1,4 @@
+#!/usr/bin/env bash
 # murano.sh - DevStack extras script to install Murano
 
 if is_service_enabled murano; then

@@ -3,4 +3,3 @@
 enable_service murano
 enable_service murano-api
 enable_service murano-engine
-enable_service muarno-dashboard

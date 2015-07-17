@@ -137,10 +137,8 @@ function install_murano_dashboard() {
     echo_summary "Install Murano Dashboard"
 
     git_clone $MURANO_DASHBOARD_REPO $MURANO_DASHBOARD_DIR $MURANO_DASHBOARD_BRANCH
-    # TODO(dteselkin): use setup_develop once Murano requirements match with global-requirement.txt
-    # both functions (setup_develop and setup_package) are defined at:
-    # http://git.openstack.org/cgit/openstack-dev/devstack/tree/functions-common
-    setup_package $MURANO_DASHBOARD_DIR -e
+
+    setup_develop $MURANO_DASHBOARD_DIR
 }
 
 
