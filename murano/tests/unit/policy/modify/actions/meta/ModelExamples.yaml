@@ -1,0 +1,11 @@
+Name: ModelExamples
+
+Properties:
+  sampleClass:
+    Contract: $.class(SampleClass1)
+  anotherSampleClass:
+    Contract: $.class(SampleClass1)
+  uninitialized:
+    Contract: $.class(SampleClass1)
+    Usage: Runtime
+

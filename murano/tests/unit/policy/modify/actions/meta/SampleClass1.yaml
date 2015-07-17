@@ -1,0 +1,19 @@
+Name: SampleClass1
+
+Properties:
+  stringProperty:
+    Contract: $.string().notNull()
+  numberProperty:
+    Contract: $.int().notNull()
+  numberProperty:
+    Contract: $.int()
+  boolProperty:
+    Contract: $.bool()
+  classProperty:
+    Contract: [$.class(SampleClass2).notNull()]
+  dictProperty:
+    Contract: {$.int(): $.string()}
+  dictClassProperty:
+    Contract: {$.string(): $.class(SampleClass2)}
+
+
