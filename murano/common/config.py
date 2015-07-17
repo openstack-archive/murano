@@ -162,9 +162,9 @@ networking_opts = [
                help='Template IP address for generating environment '
                'subnet cidrs'),
 
-    cfg.StrOpt('default_dns', default='8.8.8.8',
-               help='Default DNS nameserver to be assigned to '
-               'created Networks'),
+    cfg.ListOpt('default_dns', default=[],
+                help='List of default DNS nameservers to be assigned to '
+                     'created Networks'),
 
     cfg.StrOpt('external_network', default='ext-net',
                help='ID or name of the external network for routers '

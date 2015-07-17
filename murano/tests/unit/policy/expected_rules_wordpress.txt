@@ -2,7 +2,6 @@ murano:objects+("83bff5acf8354816b08cf9b4917c898d", "de305d5475b4431badb2eb6b9e5
 murano:properties+("83bff5acf8354816b08cf9b4917c898d", "name", "wordpress-env")
 murano:parent_types+("83bff5acf8354816b08cf9b4917c898d", "io.murano.Object")
 murano:objects+("c46770dec1db483ca2322914b842e50f", "83bff5acf8354816b08cf9b4917c898d", "io.murano.resources.NeutronNetwork")
-murano:properties+("c46770dec1db483ca2322914b842e50f", "useDefaultDns", "True")
 murano:properties+("c46770dec1db483ca2322914b842e50f", "name", "wordpress-env-network")
 murano:properties+("c46770dec1db483ca2322914b842e50f", "autogenerateSubnet", "True")
 murano:properties+("c46770dec1db483ca2322914b842e50f", "autoUplink", "True")

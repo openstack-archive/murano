@@ -3,11 +3,10 @@ defaultNetworks:
     '?': {id: c46770dec1db483ca2322914b842e50f, type: io.murano.resources.NeutronNetwork}
     autoUplink: true
     autogenerateSubnet: true
-    dnsNameserver: null
+    dnsNameservers: null
     externalRouterId: null
     name: wordpress-env-network
     subnetCidr: null
-    useDefaultDns: true
   flat: null
 name: wordpress-env
 '?': {type: io.murano.Environment, id: 83bff5acf8354816b08cf9b4917c898d}
