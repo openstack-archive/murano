@@ -16,11 +16,13 @@ please proceed with dedicated sections.
 Upload an application
 ~~~~~~~~~~~~~~~~~~~~~
 
+To upload an application to the catalog:
+
 #. Log in to the OpenStack dashboard.
 
 #. Navigate to :menuselection:`Murano > Manage > Package Definitions`.
 
-#. Click the :guilabel:`Import Package` button:
+#. Click on the :guilabel:`Import Package` button:
 
    .. image:: figures/qs_package_import.png
       :alt: Package Definitions page
@@ -61,6 +63,9 @@ Upload an application
 Deploy an application
 ~~~~~~~~~~~~~~~~~~~~~
 
+To add an application to an environment's component list
+and deploy the environment:
+
 #. Log in to the OpenStack dashboard.
 
 #. Navigate to :menuselection:`Murano > Application Catalog > Applications`.
@@ -86,8 +91,9 @@ Deploy an application
       :alt: Configure Application dialog 2
 
 #. Now the Apache HTTP Server application is successfully added to the newly
-   created ``quick-env-1`` environment. Click the :guilabel:`Deploy This Environment`
-   button to start the deployment:
+   created ``quick-env-1`` environment.
+   Click the :guilabel:`Deploy This Environment` button
+   to start the deployment:
 
    .. image:: figures/qs_quick_env.png
       :width: 600 px
@@ -100,9 +106,31 @@ Deploy an application
    details.
 
 
-Reconfigure an application
-~~~~~~~~~~~~~~~~~~~~~~~~~~
-
-
 Delete an application
 ~~~~~~~~~~~~~~~~~~~~~
+
+To delete an application that belongs to the environment:
+
+#. Log in to the OpenStack dashboard.
+
+#. Navigate to :menuselection:`Murano > Application Catalog > Environments`.
+
+#. Click on the name of the environment to view its details, which include
+   components, topology, and deployment history.
+
+#. In the :guilabel:`Component List` section, click on the
+   :guilabel:`Delete Component` button next to the application to be deleted.
+   Confirm the deletion.
+
+.. note::
+   If an application that you are deleting has already been deployed,
+   you should redeploy it to apply the recent changes. If the environment
+   has not been deployed with this component, the changes are applied
+   immediately on receiving the confirmation.
+
+.. warning::
+   Due to a known bug in Murano Kilo, resources allocated by a deleted
+   application might not be reclaimed until the deletion of an environment.
+   See `LP1417136 <https://bugs.launchpad.net/murano/+bug/1417136>`_
+   for the details.
+
