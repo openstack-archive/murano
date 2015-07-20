@@ -61,6 +61,10 @@ class Controller(object):
         LOG.debug(u'Environments:Create <Body {0}>'.format(body))
         policy.check('create_environment', request.context)
         name = unicode(body['name'])
+        if len(name) > 255:
+            msg = _('Environment name should be 255 characters maximum')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
         if VALID_NAME_REGEX.match(name):
             try:
                 environment = envs.EnvironmentServices.create(
