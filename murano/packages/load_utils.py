@@ -49,6 +49,9 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
         package = zipfile.ZipFile(archive_path)
         package.extractall(path=target_dir)
         return load_from_dir(target_dir, preload=True, loader=loader)
+    except ValueError as err:
+        raise e.PackageLoadError("Couldn't load package from file: "
+                                 "{0}".format(err))
     finally:
         if drop_dir:
             if created:
