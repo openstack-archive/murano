@@ -23,8 +23,6 @@ import webob
 from murano.common import wsgi
 from murano.packages import exceptions as pkg_exc
 
-cfg.CONF.import_opt('debug', 'murano.openstack.common.log')
-
 
 class HTTPExceptionDisguise(Exception):
     """Disguises HTTP exceptions so they can be handled by the webob fault

@@ -22,12 +22,12 @@ import uuid
 
 from muranoclient.common import exceptions as muranoclient_exc
 from oslo_config import cfg
+from oslo_log import log as logging
 import six
 
 from murano.common.i18n import _LE
 from murano.dsl import exceptions
 from murano.engine import yaql_yaml_loader
-from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
 

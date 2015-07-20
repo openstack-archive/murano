@@ -18,9 +18,9 @@ import types
 
 import eventlet
 import jsonschema
+from oslo_log import log as logging
 
 from murano.common.i18n import _, _LI
-from murano.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

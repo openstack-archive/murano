@@ -12,11 +12,12 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_log import log as logging
+
 from murano.api.v1 import request_statistics
 from murano.common import policy
 from murano.common import wsgi
 from murano.db.services import instances
-from murano.openstack.common import log as logging
 
 
 LOG = logging.getLogger(__name__)

@@ -18,13 +18,13 @@ import os.path
 import sys
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import yaml
 
 from murano.dsl import class_loader
 from murano.dsl import exceptions
 from murano.dsl import murano_package
 from murano.engine.system import yaql_functions
-from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exceptions
 
 CONF = cfg.CONF

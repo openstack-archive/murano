@@ -19,6 +19,7 @@ import time
 
 import eventlet
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_service import service
 import psutil
 
@@ -26,7 +27,6 @@ from murano.api import v1
 from murano.api.v1 import request_statistics
 from murano.common.i18n import _LE
 from murano.db.services import stats as db_stats
-from murano.openstack.common import log as logging
 
 CONF = cfg.CONF
 

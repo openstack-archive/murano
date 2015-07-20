@@ -20,6 +20,7 @@ import tempfile
 import jsonschema
 from oslo_config import cfg
 from oslo_db import exception as db_exc
+from oslo_log import log as logging
 from webob import exc
 
 import murano.api.v1
@@ -29,7 +30,6 @@ from murano.common import policy
 from murano.common import wsgi
 from murano.db.catalog import api as db_api
 from murano.common.i18n import _, _LW
-from murano.openstack.common import log as logging
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
 

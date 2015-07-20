@@ -13,11 +13,11 @@
 #    under the License.
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from murano.common.i18n import _
 from murano.common import wsgi
 import murano.context
-import murano.openstack.common.log as logging
 
 context_opts = [
     cfg.StrOpt('admin_role', default='admin',

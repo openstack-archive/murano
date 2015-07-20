@@ -15,6 +15,7 @@
 import uuid
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_messaging.notify import dispatcher as oslo_dispatcher
 from oslo_messaging import target
@@ -27,7 +28,6 @@ from murano.db.services import environments
 from murano.db.services import instances
 from murano.db import session
 from murano.common.i18n import _, _LI, _LW
-from murano.openstack.common import log as logging
 from murano.services import states
 
 CONF = cfg.CONF

@@ -44,11 +44,6 @@ level = WARNING
 handlers = stderr
 qualname = oslo.messaginga
 
-[handler_null]
-class = murano.openstack.common.log.NullHandler
-formatter = default
-args = ()
-
 [handler_stderr]
 class = StreamHandler
 args = (sys.stderr,)
@@ -63,12 +58,6 @@ formatter = context
 class: handlers.WatchedFileHandler
 args: ('murano.log',)
 formatter: context
-
-[formatter_context]
-class: murano.openstack.common.log.ContextFormatter
-args: (datefmt=datefmt)
-format: %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user)s %(tenant)s] %(instance)s%(message)s
-datefmt: %Y-%m-%d %H:%M:%S
 
 [formatter_default]
 format = %(message)s

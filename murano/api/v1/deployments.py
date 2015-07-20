@@ -11,6 +11,8 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
+
+from oslo_log import log as logging
 from sqlalchemy import desc
 from webob import exc
 
@@ -22,7 +24,6 @@ from murano.common import utils
 from murano.common import wsgi
 from murano.db import models
 from murano.db import session as db_session
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

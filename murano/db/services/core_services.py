@@ -14,6 +14,7 @@
 
 import types
 
+from oslo_log import log as logging
 from oslo_utils import timeutils
 from webob import exc
 
@@ -21,7 +22,6 @@ from murano.common.i18n import _
 from murano.common import utils
 from murano.db.services import environment_templates as env_temp
 from murano.db.services import environments as envs
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

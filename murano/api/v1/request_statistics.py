@@ -14,11 +14,12 @@
 
 import time
 
+from oslo_log import log as logging
+
 from murano.api import v1
 from murano.common.i18n import _LE
 from murano.common import wsgi
 from murano.db.services import stats
-from murano.openstack.common import log as logging
 
 LOG = logging.getLogger(__name__)
 

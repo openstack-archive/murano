@@ -19,10 +19,10 @@ return
 """
 
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from murano.api import versions
 from murano.common import wsgi
-import murano.openstack.common.log as logging
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)

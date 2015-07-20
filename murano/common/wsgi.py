@@ -29,6 +29,8 @@ eventlet.patcher.monkey_patch(all=False, socket=True)
 import eventlet.wsgi
 import jsonschema
 from oslo_config import cfg
+from oslo_log import log as logging
+from oslo_log import loggers
 from oslo_serialization import jsonutils
 from oslo_service import service
 from oslo_service import sslutils
@@ -41,7 +43,6 @@ from murano.api.v1 import schemas
 from murano.common import exceptions
 from murano.common.i18n import _
 from murano.common import xmlutils
-from murano.openstack.common import log as logging
 
 socket_opts = [
     cfg.IntOpt('backlog',
@@ -161,7 +162,7 @@ class Service(service.Service):
         eventlet.wsgi.server(socket,
                              application,
                              custom_pool=self.tg.pool,
-                             log=logging.WritableLogger(logger))
+                             log=loggers.WritableLogger(logger))
 
 
 class Middleware(object):

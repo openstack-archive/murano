@@ -17,11 +17,11 @@
 import json
 
 import eventlet
+from oslo_log import log as logging
 
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
-import murano.openstack.common.log as logging
 
 LOG = logging.getLogger(__name__)
 
