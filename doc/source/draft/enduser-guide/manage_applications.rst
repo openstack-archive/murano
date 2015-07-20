@@ -25,35 +25,43 @@ From a zip file
 Perform the following steps to import an application package from a
 .zip file:
 
-#. In horizon, navigate to Murano > Manage > Package Definitions.
-#. Click the **Import Package** button on the top right of the page.
+#. In OpenStack dashboard, navigate to
+   :menuselection:`Murano > Manage > Package Definitions`.
+#. Click the :guilabel:`Import Package` button on the top right of the
+   page.
 
    .. image:: figures/import_package.png
       :alt: Package Definitions page: Import Package 1
       :width: 630 px
 
-#. From the **Package source** drop-down list choose **File**, then
-   click **Browse** to select a .zip file you want to import, and
-   then click **Next**.
+#. From the :guilabel:`Package source` drop-down list
+   choose :guilabel:`File`, then click :guilabel:`Browse` to select a
+   .zip file you want to import, and then click :guilabel:`Next`.
 
    .. image:: figures/browse_zip_file.png
       :alt: Import Package dialog: zip file
       :width: 630 px
 
-#. At this step, the package is already uploaded. If necessary,
-   verify and update the information about the package, then
-   click **Next**.
-#. Optional: choose one or multiple categories from
-   the **Application Category** menu and click the **Create** button.
+#. At this step, the package is already uploaded. Choose a category
+   from the :guilabel:`Application Category` menu. You can select
+   multiple categories while holding down the :kbd:`Ctrl` key. If
+   necessary, verify and update the information about the package,
+   then click the :guilabel:`Create` button.
+
+   .. image:: figures/add_pkg_info.png
+      :alt: Import Package dialog: Description
+      :width: 630 px
 
 .. note::
   Though specifying a category is optional, we recommend that you
   specify at least one. It helps to filter applications in the
   catalog.
 
-| A message `Success: Package parameters successfully updated.`
-  appears at the top right corner when the application is successfully
-  downloaded.
+| Green messages appear at the top right corner when the application
+  is successfully uploaded. In case of a failure, you will see a red
+  message with the problem description. For more information, please
+  refer to the logs.
+
 
 .. _ui_repo:
 
@@ -69,26 +77,33 @@ murano applications repository:
   http://apps.openstack.org/#tab=murano-apps and click on the desired
   package to see its full name.
 
-#. In horizon, navigate to Murano > Manage > Package Definitions.
-#. Click the **Import Package** button on the top right of the page.
+#. In dashboard, navigate to
+   :menuselection:`Murano > Manage > Package Definitions`.
+#. Click the :guilabel:`Import Package` button on the top right of the
+   page.
 
    .. image:: figures/import_package.png
       :alt: Package Definitions page: Import Package 2
       :width: 630 px
 
-#. From the **Package source** drop-down list, choose **Repository**,
-   enter the package name, and then click **Next**. Note that you may
-   also specify the version of the package.
+#. From the :guilabel:`Package source` drop-down list,
+   choose :guilabel:`Repository`, enter the package name, and then
+   click :guilabel:`Next`. Note that you may also specify the version
+   of the package.
 
    .. image:: figures/repository.png
       :alt: Import Package dialog: Repository
       :width: 630 px
 
-#. At this step, the package is already uploaded. If necessary,
-   verify and update the information about the package, then
-   click **Next**.
-#. Choose one or multiple categories from the **Application Category**
-   menu, then click **Create**.
+#. At this step, the package is already uploaded. Choose a category
+   from the :guilabel:`Application Category` menu. You can select
+   multiple categories while holding down the :kbd:`Ctrl` key. If
+   necessary, verify and update the information about the package,
+   then click the :guilabel:`Create` button.
+
+   .. image:: figures/add_pkg_info.png
+      :alt: Import Package dialog: Description
+      :width: 630 px
 
 .. _ui_bundles:
 
@@ -103,15 +118,18 @@ Perform the following steps to import a bundle of applications:
   to http://apps.openstack.org/#tab=murano-apps and click on the
   desired bundle to see its full name.
 
-#. In horizon, navigate to Murano > Manage > Package Definitions.
-#. Click the **Import Bundle** button on the top right of the page.
+#. In dashboard, navigate to
+   :menuselection:`Murano > Manage > Package Definitions`.
+#. Click the :guilabel:`Import Bundle` button on the top right of the
+   page.
 
    .. image:: figures/import_bundle.png
       :alt: Package Definitions page: Import Bundle
       :width: 630 px
 
-#. From the **Package Bundle Source** drop-down list, choose
-   **Repository**, enter the bundle name, and then click **Create**.
+#. From the :guilabel:`Package Bundle Source` drop-down list, choose
+   :guilabel:`Repository`, enter the bundle name, and then 
+   click :guilabel:`Create`.
 
    .. image:: figures/bundle_name.png
       :alt: Import Bundle dialog
@@ -130,13 +148,13 @@ In dashboard, navigate to :menuselection:`Murano > Application Catalog
 The page is divided into two sections:
 
 * **Recent Activity** shows the most recently imported or deployed
-  applications
+  applications.
 
-* the bottom section contains all the available applications sorted
-  alphabetically
+* The bottom section contains all the available applications sorted
+  alphabetically.
 
 To view all the applications of a specific category, select it from
-the **App Category** drop-down list:
+the :guilabel:`App Category` drop-down list:
 
   .. image:: figures/app_category.png
      :alt: Applications page: App Category
@@ -163,6 +181,20 @@ The following screenshot shows you the result.
 
 Delete an application
 ~~~~~~~~~~~~~~~~~~~~~
+
+To delete an application, please perform the following steps:
+
+#. In dashboard, navigate to :menuselection:`Murano > Manage > Package
+   Definitions`.
+
+#. Select a package or multiple packages you want to delete and click
+   :guilabel:`Delete Packages`.
+
+   .. image:: figures/select_packages.png
+      :alt: Package Definitions page: Select packages
+      :width: 630 px
+
+#. Confirm the deletion.
 
 Deploy an application
 ~~~~~~~~~~~~~~~~~~~~~
