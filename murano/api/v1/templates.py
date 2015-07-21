@@ -71,6 +71,11 @@ class Controller(object):
                 msg = _('Env template body is incorrect')
                 LOG.exception(msg)
                 raise exc.HTTPClientError(msg)
+        if len(body['name']) > 255:
+            msg = _('Environment Template name should be 255 characters '
+                    'maximum')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
         try:
             template = env_temps.EnvTemplateServices.create(
                 body.copy(), request.context.tenant)

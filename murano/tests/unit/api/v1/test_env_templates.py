@@ -101,6 +101,24 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
 
+    def test_too_long_template_name_create(self):
+        """Check that a long template name results in an HTTPBadResquest."""
+        self._set_policy_rules(
+            {'list_env_templates': '@',
+             'create_env_template': '@',
+             'show_env_template': '@'}
+        )
+        self.expect_policy_check('create_env_template')
+
+        body = {'name': 'a' * 256}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        self.assertIn('Environment Template name should be 255 characters '
+                      'maximum',
+                      result_msg)
+
     def test_mallformed_body(self):
         """Check that an illegal temp name results in an HTTPClientError."""
         self._set_policy_rules(
