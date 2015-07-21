@@ -17,7 +17,7 @@ import functools
 from oslo_log import log as logging
 from webob import exc
 
-from murano.common.i18n import _LI
+from murano.common.i18n import _, _LI
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
@@ -26,22 +26,27 @@ from murano.services import states
 LOG = logging.getLogger(__name__)
 
 
+def check_env(request, environment_id):
+    unit = db_session.get_session()
+    environment = unit.query(models.Environment).get(environment_id)
+    if environment is None:
+        msg = _('Environment with id {0}'
+                ' not found').format(environment_id)
+        LOG.warning(msg)
+        raise exc.HTTPNotFound(explanation=msg)
+
+    if hasattr(request, 'context'):
+        if environment.tenant_id != request.context.tenant:
+            msg = _('User is not authorized to access'
+                    ' these tenant resources')
+            LOG.warning(msg)
+            raise exc.HTTPForbidden(explanation=msg)
+
+
 def verify_env(func):
     @functools.wraps(func)
     def __inner(self, request, environment_id, *args, **kwargs):
-        unit = db_session.get_session()
-        environment = unit.query(models.Environment).get(environment_id)
-        if environment is None:
-            LOG.info(_LI("Environment with id '{0}'"
-                         " not found").format(environment_id))
-            raise exc.HTTPNotFound()
-
-        if hasattr(request, 'context'):
-            if environment.tenant_id != request.context.tenant:
-                LOG.info(_LI('User is not authorized to access'
-                             ' these tenant resources'))
-                raise exc.HTTPUnauthorized()
-
+        check_env(request, environment_id)
         return func(self, request, environment_id, *args, **kwargs)
     return __inner
 

@@ -247,11 +247,22 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call."""
-        self._test_delete_or_abandon(abandon=False)
+        result = self._test_delete_or_abandon(abandon=False)
+        self.assertEqual('', result.body)
+        self.assertEqual(200, result.status_code)
 
     def test_abandon_environment(self):
-        """Cjeck that abandon feature works"""
-        self._test_delete_or_abandon(abandon=True)
+        """Check that abandon feature works"""
+        result = self._test_delete_or_abandon(abandon=True)
+        self.assertEqual('', result.body)
+        self.assertEqual(200, result.status_code)
+
+    def test_abandon_environment_of_different_tenant(self):
+        """Test abandon environment belongs to another tenant."""
+        result = self._test_delete_or_abandon(abandon=True, tenant='not_match')
+        self.assertEqual(403, result.status_code)
+        self.assertTrue(('User is not authorized to access these'
+                         ' tenant resources') in result.body)
 
     def _create_fake_environment(self, env_name='my-env', env_id='123'):
         fake_now = timeutils.utcnow()
@@ -274,7 +285,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         test_utils.save_models(e)
 
     def _test_delete_or_abandon(self, abandon, env_name='my-env',
-                                env_id='123'):
+                                env_id='123', tenant=None):
         self._set_policy_rules(
             {'delete_environment': '@'}
         )
@@ -287,9 +298,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         path = '/environments/{0}'.format(env_id)
 
-        req = self._delete(path, params={'abandon': abandon})
+        req = self._delete(path, params={'abandon': abandon},
+                           tenant=tenant or self.tenant)
         result = req.get_response(self.api)
 
-        # Should this be expected behavior?
-        self.assertEqual('', result.body)
-        self.assertEqual(200, result.status_code)
+        return result
