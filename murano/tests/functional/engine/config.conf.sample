@@ -1,27 +1,39 @@
 [murano]
 # keystone url
-#auth_url = http://127.0.0.1:5000/v2.0/
+# auth_url = http://127.0.0.1:5000/v2.0/
 
 # keystone user
-#user = admin
+# user = admin
 
 # password for keystone user
-#password = pass
+# password = admin
 
 # keystone tenant
-#tenant = admin
+# tenant = admin
+
+# keyname - used for debugging murano-agent
+# keyname = keyname
 
 # murano url
-#murano_url = http://localhost:8082
+# murano_url = http://127.0.0.1:8082
 
-# Flavor for simple checks
-#standard_flavor = m1.medium
+# Flavor for sanity checks
+# standard_flavor = m1.medium
 
 # Flavor for advanced checks
-#advanced_flavor = m1.large
+# advanced_flavor = m1.medium
 
 # image for linux services
-#linux_image = default_linux
+# linux_image = default_linux
+
+# image for docker applications
+# docker_image = debian-8-docker.qcow2
+
+# image for kubernetes applications
+# kubernetes_image = ubuntu14.04-x64-kubernetes.qcow2
 
 # image for windows services
-#windows_image = default_windows
+# windows_image = default_windows
+
+# image for hdp sandbox
+# hdp_image = hdp-sandbox

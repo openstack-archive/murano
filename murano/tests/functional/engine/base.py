@@ -16,7 +16,7 @@ import os
 import time
 import uuid
 
-import murano.tests.functional.engine.muranomanager as core
+import murano.tests.functional.engine.manager as core
 
 CONF = core.CONF
 
@@ -95,9 +95,9 @@ class MuranoBase(core.MuranoTestsCore):
 
         environment_name = 'Telnetenv' + uuid.uuid4().hex[:5]
 
-        env = self._quick_deploy(environment_name, post_body)
-
-        self.deployment_success_check(env, 23)
+        environment = self.deploy_apps(environment_name, post_body)
+        self.wait_for_environment_deploy(environment)
+        self.deployment_success_check(environment, 23)
 
     def test_deploy_apache(self):
         post_body = {
@@ -120,9 +120,9 @@ class MuranoBase(core.MuranoTestsCore):
 
         environment_name = 'Apacheenv' + uuid.uuid4().hex[:5]
 
-        env = self._quick_deploy(environment_name, post_body)
-
-        self.deployment_success_check(env, 80)
+        environment = self.deploy_apps(environment_name, post_body)
+        self.wait_for_environment_deploy(environment)
+        self.deployment_success_check(environment, 80)
 
     def test_deploy_postgresql(self):
         post_body = {
@@ -148,9 +148,9 @@ class MuranoBase(core.MuranoTestsCore):
 
         environment_name = 'Postgreenv' + uuid.uuid4().hex[:5]
 
-        env = self._quick_deploy(environment_name, post_body)
-
-        self.deployment_success_check(env, 5432)
+        environment = self.deploy_apps(environment_name, post_body)
+        self.wait_for_environment_deploy(environment)
+        self.deployment_success_check(environment, 5432)
 
     def test_deploy_tomcat(self):
         post_body = {
@@ -173,9 +173,9 @@ class MuranoBase(core.MuranoTestsCore):
 
         environment_name = 'Tomcatenv' + uuid.uuid4().hex[:5]
 
-        env = self._quick_deploy(environment_name, post_body)
-
-        self.deployment_success_check(env, 8080)
+        environment = self.deploy_apps(environment_name, post_body)
+        self.wait_for_environment_deploy(environment)
+        self.deployment_success_check(environment, 8080)
 
     def test_instance_refs_are_removed_after_application_is_removed(self):
         # FIXME(sergmelikyan): Revise this as part of proper fix for #1417136
@@ -188,7 +188,7 @@ class MuranoBase(core.MuranoTestsCore):
         application_id = application1['?']['id']
         instance_name = application1['instance']['name']
         apps = [application1, application2]
-        environment = self._quick_deploy(name, *apps)
+        environment = self.deploy_apps(name, *apps)
 
         # delete telnet application
         session = self.murano.sessions.configure(environment.id)
@@ -211,12 +211,12 @@ class MuranoBase(core.MuranoTestsCore):
         name = 'e' + uuid.uuid4().hex
 
         application = self._get_telnet_app()
-        environment = self._quick_deploy(name, application)
-
+        environment = self.deploy_apps(name, application)
+        self.wait_for_environment_deploy(environment)
         stack = self._get_stack(environment.id)
         self.assertIsNotNone(stack)
 
-        self.murano.environments.delete(environment.id)
+        self.murano_client().environments.delete(environment.id)
 
         start_time = time.time()
         while stack is not None:

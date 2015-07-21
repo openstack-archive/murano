@@ -18,6 +18,7 @@ testscenarios>=0.4
 testtools>=1.4.0
 unittest2
 pylint==1.4.1 # GNU GPL v2
+requests>=2.5.2
 
 # Some of the tests use real MySQL and Postgres databases
 PyMySQL>=0.6.2 # MIT License
