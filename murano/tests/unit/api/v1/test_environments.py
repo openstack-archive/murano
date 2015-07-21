@@ -158,6 +158,23 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
 
+    def test_too_long_environment_name_create(self):
+        """Check that an too long env name results in an HTTPBadResquest."""
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        body = {'name': 'a' * 256}
+        req = self._post('/environments', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        self.assertIn('Environment name should be 255 characters maximum',
+                      result_msg)
+
     def test_missing_environment(self):
         """Check that a missing environment results in an HTTPNotFound."""
         self._set_policy_rules(
