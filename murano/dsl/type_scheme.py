@@ -16,15 +16,15 @@ import sys
 import types
 import uuid
 
-import yaql.context
+from yaql.language import specs
+from yaql.language import utils
+from yaql.language import yaqltypes
 
+from murano.dsl import dsl
+from murano.dsl import dsl_types
 from murano.dsl import exceptions
-import murano.dsl.helpers
-import murano.dsl.murano_object
-import murano.dsl.yaql_expression as yaql_expression
-
-
-NoValue = object()
+from murano.dsl import helpers
+from murano.dsl import yaql_integration
 
 
 class TypeScheme(object):
@@ -36,11 +36,11 @@ class TypeScheme(object):
         self._spec = spec
 
     @staticmethod
-    def prepare_context(root_context, this, owner, object_store,
-                        namespace_resolver, default):
-        def _int(value):
-            value = value()
-            if value is NoValue:
+    def prepare_context(root_context, this, owner, default):
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def int_(value):
+            if value is dsl.NO_VALUE:
                 value = default
             if value is None:
                 return None
@@ -50,9 +50,10 @@ class TypeScheme(object):
                 raise exceptions.ContractViolationException(
                     'Value {0} violates int() contract'.format(value))
 
-        def _string(value):
-            value = value()
-            if value is NoValue:
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def string(value):
+            if value is dsl.NO_VALUE:
                 value = default
             if value is None:
                 return None
@@ -62,17 +63,18 @@ class TypeScheme(object):
                 raise exceptions.ContractViolationException(
                     'Value {0} violates string() contract'.format(value))
 
-        def _bool(value):
-            value = value()
-            if value is NoValue:
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def bool_(value):
+            if value is dsl.NO_VALUE:
                 value = default
             if value is None:
                 return None
             return True if value else False
 
-        def _not_null(value):
-            value = value()
-
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def not_null(value):
             if isinstance(value, TypeScheme.ObjRef):
                 return value
 
@@ -81,29 +83,34 @@ class TypeScheme(object):
                     'null value violates notNull() contract')
             return value
 
-        def _error():
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def error(value):
             raise exceptions.ContractViolationException('error() contract')
 
-        def _check(value, predicate):
-            value = value()
-            if isinstance(value, TypeScheme.ObjRef) or predicate(value):
+        @specs.parameter('value', nullable=True)
+        @specs.parameter('predicate', yaqltypes.Lambda(with_context=True))
+        @specs.method
+        def check(value, predicate):
+            if isinstance(value, TypeScheme.ObjRef) or predicate(
+                    root_context.create_child_context(), value):
                 return value
             else:
                 raise exceptions.ContractViolationException(
                     "Value {0} doesn't match predicate".format(value))
 
-        @yaql.context.EvalArg('obj', arg_type=(
-            murano.dsl.murano_object.MuranoObject,
-            TypeScheme.ObjRef,
-            types.NoneType
-        ))
-        def _owned(obj):
+        @specs.parameter('obj', TypeScheme.ObjRef, nullable=True)
+        @specs.name('owned')
+        @specs.method
+        def owned_ref(obj):
+            if obj is None:
+                return None
             if isinstance(obj, TypeScheme.ObjRef):
                 return obj
 
-            if obj is None:
-                return None
-
+        @specs.parameter('obj', dsl_types.MuranoObject)
+        @specs.method
+        def owned(obj):
             p = obj.owner
             while p is not None:
                 if p is this:
@@ -114,20 +121,21 @@ class TypeScheme(object):
                 'Object {0} violates owned() contract'.format(
                     obj.object_id))
 
-        @yaql.context.EvalArg('obj', arg_type=(
-            murano.dsl.murano_object.MuranoObject,
-            TypeScheme.ObjRef,
-            types.NoneType
-        ))
-        def _not_owned(obj):
+        @specs.parameter('obj', TypeScheme.ObjRef, nullable=True)
+        @specs.name('not_owned')
+        @specs.method
+        def not_owned_ref(obj):
             if isinstance(obj, TypeScheme.ObjRef):
                 return obj
 
             if obj is None:
                 return None
 
+        @specs.parameter('obj', dsl_types.MuranoObject)
+        @specs.method
+        def not_owned(obj):
             try:
-                _owned(obj)
+                owned(obj)
             except exceptions.ContractViolationException:
                 return obj
             else:
@@ -135,39 +143,34 @@ class TypeScheme(object):
                     'Object {0} violates notOwned() contract'.format(
                         obj.object_id))
 
-        @yaql.context.EvalArg('name', arg_type=str)
-        def _class(value, name):
-            return _class2(value, name, None)
-
-        @yaql.context.EvalArg('name', arg_type=str)
-        @yaql.context.EvalArg('default_name', arg_type=(str, types.NoneType))
-        def _class2(value, name, default_name):
-            name = namespace_resolver.resolve_name(name)
+        @specs.parameter('name', dsl.MuranoTypeName(
+            False, root_context))
+        @specs.parameter('default_name', dsl.MuranoTypeName(
+            True, root_context))
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def class_(value, name, default_name=None):
+            object_store = helpers.get_object_store(root_context)
             if not default_name:
                 default_name = name
-            else:
-                default_name = namespace_resolver.resolve_name(default_name)
-            value = value()
-            class_loader = murano.dsl.helpers.get_class_loader(root_context)
-            murano_class = class_loader.get_class(name)
+            murano_class = name.murano_class
             if not murano_class:
                 raise exceptions.NoClassFound(
                     'Class {0} cannot be found'.format(name))
             if value is None:
                 return None
-            if isinstance(value, murano.dsl.murano_object.MuranoObject):
+            if isinstance(value, dsl_types.MuranoObject):
                 obj = value
-            elif isinstance(value, types.DictionaryType):
+            elif isinstance(value, utils.MappingType):
                 if '?' not in value:
                     new_value = {'?': {
                         'id': uuid.uuid4().hex,
-                        'type': default_name
+                        'type': default_name.murano_class.name
                     }}
                     new_value.update(value)
                     value = new_value
 
-                obj = object_store.load(value, owner, root_context,
-                                        defaults=default)
+                obj = object_store.load(value, owner, defaults=default)
             elif isinstance(value, types.StringTypes):
                 obj = object_store.get(value)
                 if obj is None:
@@ -185,30 +188,24 @@ class TypeScheme(object):
                     'requested type {1}'.format(obj.type.name, name))
             return obj
 
-        @yaql.context.EvalArg('prefix', str)
-        @yaql.context.EvalArg('name', str)
-        def _validate(prefix, name):
-            return namespace_resolver.resolve_name(
-                '%s:%s' % (prefix, name))
-
-        context = yaql.context.Context(parent_context=root_context)
-        context.register_function(_validate, '#validate')
-        context.register_function(_int, 'int')
-        context.register_function(_string, 'string')
-        context.register_function(_bool, 'bool')
-        context.register_function(_check, 'check')
-        context.register_function(_not_null, 'notNull')
-        context.register_function(_error, 'error')
-        context.register_function(_class, 'class')
-        context.register_function(_class2, 'class')
-        context.register_function(_owned, 'owned')
-        context.register_function(_not_owned, 'notOwned')
+        context = yaql_integration.create_context()
+        context.register_function(int_)
+        context.register_function(string)
+        context.register_function(bool_)
+        context.register_function(check)
+        context.register_function(not_null)
+        context.register_function(error)
+        context.register_function(class_)
+        context.register_function(owned_ref)
+        context.register_function(owned)
+        context.register_function(not_owned_ref)
+        context.register_function(not_owned)
         return context
 
     def _map_dict(self, data, spec, context):
-        if data is None or data is NoValue:
+        if data is None or data is dsl.NO_VALUE:
             data = {}
-        if not isinstance(data, types.DictionaryType):
+        if not isinstance(data, utils.MappingType):
             raise exceptions.ContractViolationException(
                 'Supplied is not of a dictionary type')
         if not spec:
@@ -216,7 +213,7 @@ class TypeScheme(object):
         result = {}
         yaql_key = None
         for key, value in spec.iteritems():
-            if isinstance(key, yaql_expression.YaqlExpression):
+            if isinstance(key, dsl_types.YaqlExpression):
                 if yaql_key is not None:
                     raise exceptions.DslContractSyntaxError(
                         'Dictionary contract '
@@ -231,20 +228,19 @@ class TypeScheme(object):
             for key, value in data.iteritems():
                 if key in result:
                     continue
-                result[self._map(key, yaql_key, context)] = \
-                    self._map(value, yaql_value, context)
+                result[self._map(key, yaql_key, context)] = self._map(
+                    value, yaql_value, context)
 
-        return result
+        return utils.FrozenDict(result)
 
     def _map_list(self, data, spec, context):
-        if not isinstance(data, types.ListType):
-            if data is None or data is NoValue:
+        if not utils.is_sequence(data):
+            if data is None or data is dsl.NO_VALUE:
                 data = []
             else:
                 data = [data]
         if len(spec) < 1:
             return data
-        result = []
         shift = 0
         max_length = sys.maxint
         min_length = 0
@@ -261,11 +257,16 @@ class TypeScheme(object):
                 'Array length {0} is not within [{1}..{2}] range'.format(
                     len(data), min_length, max_length))
 
-        for index, item in enumerate(data):
-            spec_item = spec[-1 - shift] \
-                if index >= len(spec) - shift else spec[index]
-            result.append(self._map(item, spec_item, context))
-        return result
+        def map_func():
+            for index, item in enumerate(data):
+                spec_item = (
+                    spec[-1 - shift]
+                    if index >= len(spec) - shift
+                    else spec[index]
+                )
+                yield self._map(item, spec_item, context)
+
+        return tuple(map_func())
 
     def _map_scalar(self, data, spec):
         if data != spec:
@@ -275,28 +276,24 @@ class TypeScheme(object):
             return data
 
     def _map(self, data, spec, context):
-        child_context = yaql.context.Context(parent_context=context)
-        if isinstance(spec, yaql_expression.YaqlExpression):
-            child_context.set_data(data)
-            return spec.evaluate(context=child_context)
-        elif isinstance(spec, types.DictionaryType):
+        child_context = context.create_child_context()
+        if isinstance(spec, dsl_types.YaqlExpression):
+            child_context[''] = data
+            return spec(context=child_context)
+        elif isinstance(spec, utils.MappingType):
             return self._map_dict(data, spec, child_context)
-        elif isinstance(spec, types.ListType):
+        elif utils.is_sequence(spec):
             return self._map_list(data, spec, child_context)
-        elif isinstance(spec, (types.IntType,
-                               types.StringTypes,
-                               types.NoneType)):
+        else:
             return self._map_scalar(data, spec)
 
-    def __call__(self, data, context, this, owner, object_store,
-                 namespace_resolver, default):
+    def __call__(self, data, context, this, owner, default):
         # TODO(ativelkov, slagun): temporary fix, need a better way of handling
         # composite defaults
         # A bug (#1313694) has been filed
 
-        if data is NoValue:
-            data = default
+        if data is dsl.NO_VALUE:
+            data = helpers.evaluate(default, context)
 
-        context = self.prepare_context(
-            context, this, owner, object_store, namespace_resolver, default)
+        context = self.prepare_context(context, this, owner, default)
         return self._map(data, self._spec, context)

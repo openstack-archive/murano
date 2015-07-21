@@ -15,7 +15,6 @@
 
 import base64
 import collections
-import itertools
 import random
 import re
 import string
@@ -24,39 +23,56 @@ import types
 
 import jsonpatch
 import jsonpointer
-from oslo_config import cfg
-import yaql.context
+from yaql.language import specs
+from yaql.language import utils
+from yaql.language import yaqltypes
 
-import murano.dsl.helpers as helpers
+from murano.common import config as cfg
+from murano.dsl import helpers
+from murano.dsl import yaql_integration
 
-CONF = cfg.CONF
 
 _random_string_counter = None
 
 
-def _transform_json(json, mappings):
-    if isinstance(json, types.ListType):
-        return [_transform_json(t, mappings) for t in json]
+@specs.parameter('value', yaqltypes.String())
+@specs.extension_method
+def base64encode(value):
+    return base64.b64encode(value)
 
-    if isinstance(json, types.DictionaryType):
-        result = {}
-        for key, value in json.items():
-            result[_transform_json(key, mappings)] = \
-                _transform_json(value, mappings)
-        return result
 
-    elif isinstance(json, types.ListType):
-        result = []
-        for value in json:
-            result.append(_transform_json(value, mappings))
-        return result
+@specs.parameter('value', yaqltypes.String())
+@specs.extension_method
+def base64decode(value):
+    return base64.b64decode(value)
 
-    elif isinstance(json, types.StringTypes) and json.startswith('$'):
-        value = _convert_macro_parameter(json[1:], mappings)
+
+@specs.parameter('collection', yaqltypes.Iterable())
+@specs.parameter('composer', yaqltypes.Lambda())
+@specs.extension_method
+def pselect(collection, composer):
+    return helpers.parallel_select(collection, composer)
+
+
+@specs.parameter('mappings', collections.Mapping)
+@specs.extension_method
+def bind(obj, mappings):
+    if isinstance(obj, types.StringTypes) and obj.startswith('$'):
+        value = _convert_macro_parameter(obj[1:], mappings)
         if value is not None:
             return value
-
-    return json
+    elif utils.is_sequence(obj):
+        return [bind(t, mappings) for t in obj]
+    elif isinstance(obj, collections.Mapping):
+        result = {}
+        for key, value in obj.iteritems():
+            result[bind(key, mappings)] = bind(value, mappings)
+        return result
+    elif isinstance(obj, types.StringTypes) and obj.startswith('$'):
+        value = _convert_macro_parameter(obj[1:], mappings)
+        if value is not None:
+            return value
+    return obj
 
 
 def _convert_macro_parameter(macro, mappings):
@@ -73,155 +89,36 @@ def _convert_macro_parameter(macro, mappings):
         return mappings[macro]
 
 
-@yaql.context.EvalArg('format', types.StringTypes)
-def _format(format, *args):
-    return format.format(*[t() for t in args])
+@specs.parameter('group', yaqltypes.String())
+@specs.parameter('setting', yaqltypes.String())
+def config(group, setting):
+    return cfg.CONF[group][setting]
 
 
-@yaql.context.EvalArg('src', types.StringTypes)
-@yaql.context.EvalArg('substring', types.StringTypes)
-@yaql.context.EvalArg('value', types.StringTypes)
-def _replace_str(src, substring, value):
-    return src.replace(substring, value)
+@specs.parameter('setting', yaqltypes.String())
+@specs.name('config')
+def config_default(setting):
+    return cfg.CONF[setting]
 
 
-@yaql.context.EvalArg('src', types.StringTypes)
-@yaql.context.EvalArg('replacements', dict)
-def _replace_dict(src, replacements):
-    for key, value in replacements.iteritems():
-        if isinstance(src, str):
-            src = src.replace(key, str(value))
-        else:
-            src = src.replace(key, unicode(value))
-    return src
+@specs.parameter('string', yaqltypes.String())
+@specs.parameter('start', int)
+@specs.parameter('length', int)
+@specs.inject('delegate', yaqltypes.Delegate('substring', method=True))
+@specs.extension_method
+def substr(delegate, string, start, length=-1):
+    return delegate(string, start, length)
 
 
-def _len(value):
-    return len(value())
-
-
-def _coalesce(*args):
-    for t in args:
-        val = t()
-        if val:
-            return val
-    return None
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-def _base64encode(value):
-    return base64.b64encode(value)
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-def _base64decode(value):
-    return base64.b64decode(value)
-
-
-@yaql.context.EvalArg('group', types.StringTypes)
-@yaql.context.EvalArg('setting', types.StringTypes)
-def _config(group, setting):
-    return CONF[group][setting]
-
-
-@yaql.context.EvalArg('setting', types.StringTypes)
-def _config_default(setting):
-    return CONF[setting]
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-def _upper(value):
-    return value.upper()
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-def _lower(value):
-    return value.lower()
-
-
-@yaql.context.EvalArg('separator', types.StringTypes)
-def _join(separator, collection):
-    return separator.join(str(t) for t in collection())
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('separator', types.StringTypes)
-def _split(value, separator):
-    return value.split(separator)
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('prefix', types.StringTypes)
-def _startswith(value, prefix):
-    return value.startswith(prefix)
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('suffix', types.StringTypes)
-def _endswith(value, suffix):
-    return value.endswith(suffix)
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-def _trim(value):
-    return value.strip()
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('pattern', types.StringTypes)
-def _mathces(value, pattern):
-    return re.match(pattern, value) is not None
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('index', int)
-@yaql.context.EvalArg('length', int)
-def _substr3(value, index, length):
-    if length < 0:
-        return value[index:]
-    else:
-        return value[index:index + length]
-
-
-@yaql.context.EvalArg('value', types.StringTypes)
-@yaql.context.EvalArg('index', int)
-def _substr2(value, index):
-    return _substr3(value, index, -1)
-
-
-def _str(value):
-    value = value()
-    if value is None:
-        return ''
-    elif value is True:
-        return 'true'
-    elif value is False:
-        return 'false'
-    return unicode(value)
-
-
-def _int(value):
-    value = value()
-    if value is None:
-        return 0
-    return int(value)
-
-
-def _pselect(collection, composer):
-    if isinstance(collection, types.ListType):
-        return helpers.parallel_select(collection, composer)
-    else:
-        return helpers.parallel_select(collection(), composer)
-
-
-def _patch(obj, patch):
-    obj = obj()
-    patch = patch()
-    if not isinstance(patch, types.ListType):
-        patch = [patch]
+@specs.extension_method
+def patch_(obj, patch):
+    if not isinstance(patch, tuple):
+        patch = (patch,)
+    patch = yaql_integration.to_mutable(patch)
     patch = jsonpatch.JsonPatch(patch)
     try:
-        return patch.apply(obj)
+        obj = yaql_integration.to_mutable(obj)
+        return patch.apply(obj, in_place=True)
     except jsonpointer.JsonPointerException:
         return obj
 
@@ -252,7 +149,7 @@ def _int2base(x, base):
     return ''.join(digits)
 
 
-def _random_name():
+def random_name():
     """Replace '#' char in pattern with supplied number, if no pattern is
        supplied generate short and unique name for the host.
 
@@ -275,69 +172,10 @@ def _random_name():
     return prefix + timestamp + suffix
 
 
-@yaql.context.EvalArg('self', dict)
-def _values(self):
-    return self.values()
-
-
-@yaql.context.EvalArg('self', dict)
-def _keys(self):
-    return self.keys()
-
-
-@yaql.context.EvalArg('self', collections.Iterable)
-def _flatten(self):
-    for i in self:
-        if isinstance(i, collections.Iterable):
-            for ii in i:
-                yield ii
-        else:
-            yield i
-
-
-@yaql.context.EvalArg('self', dict)
-@yaql.context.EvalArg('other', dict)
-def _merge_with(self, other):
-    return helpers.merge_dicts(self, other)
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-@yaql.context.EvalArg('count', int)
-def _skip(collection, count):
-    return itertools.islice(collection, count, None)
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-@yaql.context.EvalArg('count', int)
-def _take(collection, count):
-    return itertools.islice(collection, count)
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-def _aggregate(collection, selector):
-    return reduce(selector, collection)
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-def _aggregate_with_seed(collection, selector, seed):
-    return reduce(selector, collection, seed())
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-def _first(collection):
-    return iter(collection).next()
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-def _first_or_default(collection):
-    try:
-        return iter(collection).next()
-    except StopIteration:
-        return None
-
-
-@yaql.context.EvalArg('collection', collections.Iterable)
-def _first_or_default2(collection, default):
+@specs.parameter('collection', yaqltypes.Iterable())
+@specs.parameter('default', nullable=True)
+@specs.extension_method
+def first_or_default(collection, default=None):
     try:
         return iter(collection).next()
     except StopIteration:
@@ -345,42 +183,19 @@ def _first_or_default2(collection, default):
 
 
 def register(context):
-    context.register_function(
-        lambda json, mappings: _transform_json(json(), mappings()), 'bind')
+    context.register_function(base64decode)
+    context.register_function(base64encode)
+    context.register_function(pselect)
+    context.register_function(bind)
+    context.register_function(random_name)
+    context.register_function(patch_)
+    context.register_function(config)
+    context.register_function(config_default)
+    context.register_function(substr)
+    context.register_function(first_or_default)
 
-    context.register_function(_format, 'format')
-    context.register_function(_replace_str, 'replace')
-    context.register_function(_replace_dict, 'replace')
-    context.register_function(_len, 'len')
-    context.register_function(_coalesce, 'coalesce')
-    context.register_function(_base64decode, 'base64decode')
-    context.register_function(_base64encode, 'base64encode')
-    context.register_function(_config, 'config')
-    context.register_function(_config_default, 'config')
-    context.register_function(_lower, 'toLower')
-    context.register_function(_upper, 'toUpper')
-    context.register_function(_join, 'join')
-    context.register_function(_split, 'split')
-    context.register_function(_pselect, 'pselect')
-    context.register_function(_startswith, 'startsWith')
-    context.register_function(_endswith, 'endsWith')
-    context.register_function(_trim, 'trim')
-    context.register_function(_mathces, 'matches')
-    context.register_function(_substr2, 'substr')
-    context.register_function(_substr3, 'substr')
-    context.register_function(_str, 'str')
-    context.register_function(_int, 'int')
-    context.register_function(_patch, 'patch')
-    context.register_function(_random_name, 'randomName')
-    # Temporary workaround, these functions should be moved to YAQL
-    context.register_function(_keys, 'keys')
-    context.register_function(_values, 'values')
-    context.register_function(_flatten, 'flatten')
-    context.register_function(_merge_with, 'mergeWith')
-    context.register_function(_skip, 'skip')
-    context.register_function(_take, 'take')
-    context.register_function(_aggregate, 'aggregate')
-    context.register_function(_aggregate_with_seed, 'aggregate')
-    context.register_function(_first, 'first')
-    context.register_function(_first_or_default, 'firstOrDefault')
-    context.register_function(_first_or_default2, 'firstOrDefault')
+    for t in ('to_lower', 'to_upper', 'trim', 'join', 'split',
+              'starts_with', 'ends_with', 'matches', 'replace',
+              'flatten'):
+        for spec in utils.to_extension_method(t, context):
+            context.register_function(spec)

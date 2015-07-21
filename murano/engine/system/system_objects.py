@@ -12,10 +12,7 @@
 # implied.
 # See the License for the specific language governing permissions and
 # limitations under the License.
-
-import inspect
-
-from murano.dsl import murano_class
+from murano.dsl import dsl
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.engine.system import heat_stack
@@ -26,25 +23,12 @@ from murano.engine.system import resource_manager
 from murano.engine.system import status_reporter
 
 
-def _auto_register(class_loader):
-    globs = globals().copy()
-    for module_name, value in globs.iteritems():
-        if inspect.ismodule(value):
-            for class_name in dir(value):
-                class_def = getattr(value, class_name)
-                if inspect.isclass(class_def) and hasattr(
-                        class_def, '_murano_class_name'):
-                    class_loader.import_class(class_def)
-
-
 def register(class_loader, package_loader):
-    _auto_register(class_loader)
-
-    @murano_class.classname('io.murano.system.Resources')
+    @dsl.name('io.murano.system.Resources')
     class ResourceManagerWrapper(resource_manager.ResourceManager):
-        def initialize(self, _context):
-            super(ResourceManagerWrapper, self).initialize(
-                package_loader, _context)
+        def __init__(self, context):
+            super(ResourceManagerWrapper, self).__init__(
+                package_loader, context)
 
     class_loader.import_class(agent.Agent)
     class_loader.import_class(agent_listener.AgentListener)

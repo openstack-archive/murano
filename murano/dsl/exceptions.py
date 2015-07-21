@@ -129,3 +129,7 @@ class UninitializedPropertyAccessError(PropertyAccessError):
         super(PropertyAccessError, self).__init__(
             'Access to uninitialized property '
             '"%s" in class "%s" is forbidden' % (name, murano_class.name))
+
+
+class CircularExpressionDependenciesError(Exception):
+    pass

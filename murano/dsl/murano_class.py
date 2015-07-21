@@ -13,23 +13,22 @@
 #    under the License.
 
 import collections
-import inspect
 
-import murano.dsl.exceptions as exceptions
-import murano.dsl.helpers as helpers
-import murano.dsl.murano_method as murano_method
-import murano.dsl.murano_object as murano_object
-import murano.dsl.typespec as typespec
-
-
-def classname(name):
-    def wrapper(cls):
-        cls._murano_class_name = name
-        return cls
-    return wrapper
+from murano.dsl import dsl
+from murano.dsl import dsl_types
+from murano.dsl import exceptions
+from murano.dsl import murano_method
+from murano.dsl import murano_object
+from murano.dsl import typespec
+from murano.dsl import yaql_integration
 
 
-class MuranoClass(object):
+class GeneratedNativeTypeMetaClass(type):
+    def __str__(cls):
+        return cls.__name__
+
+
+class MuranoClass(dsl_types.MuranoClass):
     def __init__(self, class_loader, namespace_resolver, name, package,
                  parents=None):
         self._package = package
@@ -44,12 +43,7 @@ class MuranoClass(object):
         else:
             self._parents = parents or [
                 class_loader.get_class('io.murano.Object')]
-
-        class_name = 'mc' + helpers.generate_id()
-        parents_class = [p.object_class for p in self._parents]
-        bases = tuple(parents_class) or (murano_object.MuranoObject,)
-
-        self.object_class = type(class_name, bases, {})
+        self._unique_methods = None
 
     @property
     def name(self):
@@ -71,17 +65,34 @@ class MuranoClass(object):
     def methods(self):
         return self._methods
 
+    def extend_with_class(self, cls):
+        ctor = yaql_integration.get_class_factory_definition(cls)
+        self.add_method('__init__', ctor)
+
+    @property
+    def unique_methods(self):
+        if self._unique_methods is None:
+            self._unique_methods = list(self._iterate_unique_methods())
+        return self._unique_methods
+
     def get_method(self, name):
         return self._methods.get(name)
 
     def add_method(self, name, payload):
         method = murano_method.MuranoMethod(self, name, payload)
         self._methods[name] = method
+        self._unique_methods = None
         return method
 
     @property
     def properties(self):
         return self._properties.keys()
+
+    def register_methods(self, context):
+        for method in self.unique_methods:
+            context.register_function(
+                method.yaql_function_definition,
+                name=method.yaql_function_definition.name)
 
     def add_property(self, name, property_typespec):
         if not isinstance(property_typespec, typespec.PropertySpec):
@@ -150,6 +161,16 @@ class MuranoClass(object):
             queue.extend(c.parents)
         return result
 
+    def _iterate_unique_methods(self):
+        names = set()
+        queue = collections.deque([self])
+        while queue:
+            c = queue.popleft()
+            names.update(c.methods.keys())
+            queue.extend(c.parents)
+        for name in names:
+            yield self.find_single_method(name)
+
     def find_property(self, name):
         result = []
         types = collections.deque([self])
@@ -160,14 +181,13 @@ class MuranoClass(object):
             types.extend(mc.parents)
         return result
 
-    def invoke(self, name, executor, this, parameters):
-        if not self.is_compatible(this):
-            raise Exception("'this' must be of compatible type")
-        args = executor.to_yaql_args(parameters)
-        return executor.invoke_method(name, this.cast(self), None, self, *args)
+    def invoke(self, name, executor, this, args, kwargs, context=None):
+        method = self.find_single_method(name)
+        return method.invoke(executor, this, args, kwargs, context)
 
     def is_compatible(self, obj):
-        if isinstance(obj, murano_object.MuranoObject):
+        if isinstance(obj, (murano_object.MuranoObject,
+                            dsl.MuranoObjectInterface)):
             return self.is_compatible(obj.type)
         if obj is self:
             return True
@@ -176,19 +196,20 @@ class MuranoClass(object):
                 return True
         return False
 
-    def new(self, owner, object_store, context, parameters=None,
-            object_id=None, **kwargs):
+    def new(self, owner, object_store, context=None, **kwargs):
+        if context is None:
+            context = object_store.context
+        obj = murano_object.MuranoObject(
+            self, owner, object_store.context, **kwargs)
 
-        obj = self.object_class(self, owner, object_store, context,
-                                object_id=object_id, **kwargs)
-        if parameters is not None:
-            argspec = inspect.getargspec(obj.initialize).args
-            if '_context' in argspec:
-                parameters['_context'] = context
-            if '_owner' in argspec:
-                parameters['_owner'] = owner
-            obj.initialize(**parameters)
-        return obj
+        def initializer(**params):
+            init_context = context.create_child_context()
+            init_context['?allowPropertyWrites'] = True
+            obj.initialize(init_context, object_store, params)
+            return obj
+
+        initializer.object = obj
+        return initializer
 
     def __str__(self):
         return 'MuranoClass({0})'.format(self.name)

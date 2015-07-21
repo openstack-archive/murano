@@ -92,7 +92,7 @@ class ApiPackageLoader(PackageLoader):
                           'more then 1 package found for query "{0}", '
                           'will resolve based on the ownership'.
                           format(filter_opts))
-                return self._get_best_package_match(packages, self.tenant_id)
+                return self._get_best_package_match(packages)
             elif len(packages) == 1:
                 return packages[0]
             else:

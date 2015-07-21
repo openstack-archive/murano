@@ -32,6 +32,7 @@ class TestResultsSerializer(test_case.DslTestCase):
         self._class1 = om.Object(
             'SampleClass1',
             stringProperty='string1',
+            arbitraryProperty={'a': [1, 2]},
             classProperty=self._class2)
         self._root_class = om.Object('ContractExamples',
                                      sampleClass=self._class1)
@@ -141,4 +142,4 @@ class TestResultsSerializer(test_case.DslTestCase):
                 'key5': {'x': 'y'},
                 'key6': [{'w': 'q'}]
             },
-            serializer.serialize_object(result))
+            serializer.serialize(result))

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import weakref
+
 from eventlet import semaphore
 import heatclient.client as hclient
 import keystoneclient
@@ -21,8 +23,6 @@ import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 
 from murano.common import auth_utils
-from murano.dsl import helpers
-from murano.engine import environment
 
 
 try:
@@ -39,23 +39,19 @@ CONF = cfg.CONF
 
 
 class ClientManager(object):
-    def __init__(self):
+    def __init__(self, environment):
         self._trusts_keystone_client = None
         self._token_keystone_client = None
         self._cache = {}
         self._semaphore = semaphore.BoundedSemaphore()
+        self._environment = weakref.proxy(environment)
 
-    def _get_environment(self, context):
-        if isinstance(context, environment.Environment):
-            return context
-        return helpers.get_environment(context)
-
-    def get_client(self, context, name, use_trusts, client_factory):
+    def get_client(self, name, use_trusts, client_factory):
         if not CONF.engine.use_trusts:
             use_trusts = False
 
         keystone_client = None if name == 'keystone' else \
-            self.get_keystone_client(context, use_trusts)
+            self.get_keystone_client(use_trusts)
 
         self._semaphore.acquire()
         try:
@@ -68,25 +64,24 @@ class ClientManager(object):
             if not client:
                 token = fresh_token
                 if not use_trusts:
-                    env = self._get_environment(context)
-                    token = env.token
+                    token = self._environment.token
                 client = client_factory(keystone_client, token)
                 self._cache[(name, use_trusts)] = (client, token)
             return client
         finally:
             self._semaphore.release()
 
-    def get_keystone_client(self, context, use_trusts=True):
+    def get_keystone_client(self, use_trusts=True):
         if not CONF.engine.use_trusts:
             use_trusts = False
-        env = self._get_environment(context)
         factory = lambda _1, _2: \
-            auth_utils.get_client_for_trusts(env.trust_id) \
-            if use_trusts else auth_utils.get_client(env.token, env.tenant_id)
+            auth_utils.get_client_for_trusts(self._environment.trust_id) \
+            if use_trusts else auth_utils.get_client(
+                self._environment.token, self._environment.tenant_id)
 
-        return self.get_client(context, 'keystone', use_trusts, factory)
+        return self.get_client('keystone', use_trusts, factory)
 
-    def get_congress_client(self, context, use_trusts=True):
+    def get_congress_client(self, use_trusts=True):
         """Client for congress services
 
         :return: initialized congress client
@@ -106,9 +101,9 @@ class ClientManager(object):
             return congress_client.Client(session=session,
                                           service_type='policy')
 
-        return self.get_client(context, 'congress', use_trusts, factory)
+        return self.get_client('congress', use_trusts, factory)
 
-    def get_heat_client(self, context, use_trusts=True):
+    def get_heat_client(self, use_trusts=True):
         if not CONF.engine.use_trusts:
             use_trusts = False
 
@@ -134,9 +129,9 @@ class ClientManager(object):
                 })
             return hclient.Client('1', heat_url, **kwargs)
 
-        return self.get_client(context, 'heat', use_trusts, factory)
+        return self.get_client('heat', use_trusts, factory)
 
-    def get_neutron_client(self, context, use_trusts=True):
+    def get_neutron_client(self, use_trusts=True):
         if not CONF.engine.use_trusts:
             use_trusts = False
 
@@ -153,9 +148,9 @@ class ClientManager(object):
                 ca_cert=neutron_settings.ca_cert or None,
                 insecure=neutron_settings.insecure)
 
-        return self.get_client(context, 'neutron', use_trusts, factory)
+        return self.get_client('neutron', use_trusts, factory)
 
-    def get_murano_client(self, context, use_trusts=True):
+    def get_murano_client(self, use_trusts=True):
         if not CONF.engine.use_trusts:
             use_trusts = False
 
@@ -176,9 +171,9 @@ class ClientManager(object):
                 auth_url=keystone_client.auth_url,
                 token=auth_token)
 
-        return self.get_client(context, 'murano', use_trusts, factory)
+        return self.get_client('murano', use_trusts, factory)
 
-    def get_mistral_client(self, context, use_trusts=True):
+    def get_mistral_client(self, use_trusts=True):
         if not mistralclient:
             raise mistral_import_error
 
@@ -202,4 +197,4 @@ class ClientManager(object):
                                         auth_token=auth_token,
                                         user_id=keystone_client.user_id)
 
-        return self.get_client(context, 'mistral', use_trusts, factory)
+        return self.get_client('mistral', use_trusts, factory)

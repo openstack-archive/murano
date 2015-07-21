@@ -12,11 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import murano.dsl.dsl_exception as dsl_exception
-import murano.dsl.expressions as expressions
-import murano.dsl.helpers as helpers
-import murano.dsl.macros as macros
-import murano.dsl.yaql_functions as yaql_functions
+from murano.dsl import constants
+from murano.dsl import dsl_exception
+from murano.dsl import expressions
+from murano.dsl import helpers
+from murano.dsl import macros
+from murano.dsl.principal_objects import stack_trace
+from murano.dsl import yaql_integration
 
 
 class ThrowMacro(expressions.DslExpression):
@@ -36,9 +38,8 @@ class ThrowMacro(expressions.DslExpression):
         for name in names:
             yield murano_class.namespace_resolver.resolve_name(name)
 
-    def execute(self, context, murano_class):
-        stacktrace = yaql_functions.new('io.murano.StackTrace', context,
-                                        includeNativeFrames=False)
+    def execute(self, context):
+        stacktrace = stack_trace.create_stack_trace(context, False)
         cause = None
         if self._cause:
             cause = helpers.evaluate(self._cause, context).get_property(
@@ -68,10 +69,12 @@ class CatchBlock(expressions.DslExpression):
         for name in names:
             yield murano_class.namespace_resolver.resolve_name(name)
 
-    def execute(self, context, murano_class):
+    def execute(self, context):
         exception = helpers.get_current_exception(context)
-        names = None if self._with is None else \
-            list(self._resolve_names(self._with, context))
+        names = (
+            None if self._with is None
+            else list(self._resolve_names(self._with, context))
+        )
 
         for name in exception.names:
             if self._with is None or name in names:
@@ -79,13 +82,13 @@ class CatchBlock(expressions.DslExpression):
                     if self._as:
                         wrapped = self._wrap_internal_exception(
                             exception, context, name)
-                        context.set_data(wrapped, self._as)
-                    self._code_block.execute(context, murano_class)
+                        context[self._as] = wrapped
+                    self._code_block.execute(context)
                 return True
         return False
 
     def _wrap_internal_exception(self, exception, context, name):
-        obj = yaql_functions.new('io.murano.Exception', context)
+        obj = yaql_integration.call_func(context, 'new', 'io.murano.Exception')
         obj.set_property('name', name)
         obj.set_property('message', exception.message)
         obj.set_property('stackTrace', exception.stacktrace)
@@ -102,43 +105,45 @@ class TryBlockMacro(expressions.DslExpression):
             if not isinstance(Catch, list):
                 Catch = [Catch]
             self._catch_block = [CatchBlock(**c) for c in Catch]
-        self._finally_block = None if Finally is None \
-            else macros.CodeBlock(Finally)
-        self._else_block = None if Else is None \
-            else macros.CodeBlock(Else)
+        self._finally_block = (
+            None if Finally is None
+            else macros.CodeBlock(Finally))
+        self._else_block = (
+            None if Else is None
+            else macros.CodeBlock(Else))
 
-    def execute(self, context, murano_class):
+    def execute(self, context):
         try:
-            self._try_block.execute(context, murano_class)
+            self._try_block.execute(context)
         except dsl_exception.MuranoPlException as e:
             caught = False
             if self._catch_block:
                 try:
-                    context.set_data(e, '?currentException')
+                    context[constants.CTX_CURRENT_EXCEPTION] = e
                     for cb in self._catch_block:
-                        if cb.execute(context, murano_class):
+                        if cb.execute(context):
                             caught = True
                             break
                     if not caught:
                         raise
                 finally:
-                    context.set_data(None, '?currentException')
+                    context[constants.CTX_CURRENT_EXCEPTION] = None
             else:
                 raise
         else:
             if self._else_block:
-                self._else_block.execute(context, murano_class)
+                self._else_block.execute(context)
         finally:
             if self._finally_block:
-                self._finally_block.execute(context, murano_class)
+                self._finally_block.execute(context)
 
 
 class RethrowMacro(expressions.DslExpression):
     def __init__(self, Rethrow):
         pass
 
-    def execute(self, context, murano_class):
-        exception = context.get_data('$?currentException')
+    def execute(self, context):
+        exception = context['$?currentException']
         if not exception:
             raise TypeError('Rethrow must be inside Catch')
         raise exception

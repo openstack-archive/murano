@@ -20,6 +20,7 @@ from murano.dsl import dsl_exception
 from murano.dsl import executor
 from murano.dsl import murano_object
 from murano.dsl import serializer
+from murano.dsl import yaql_integration
 from murano.engine import environment
 from murano.tests.unit.dsl.foundation import object_model
 
@@ -56,12 +57,13 @@ class Runner(object):
 
         self.executor = executor.MuranoDslExecutor(
             class_loader, environment.Environment())
-        self._root = self.executor.load(model)
+        self._root = self.executor.load(model).object
 
     def _execute(self, name, object_id, *args, **kwargs):
         obj = self.executor.object_store.get(object_id)
         try:
             final_args = []
+            final_kwargs = {}
             for arg in args:
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
@@ -69,8 +71,9 @@ class Runner(object):
             for name, arg in kwargs.iteritems():
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
-                final_args.append({name: arg})
-            return obj.type.invoke(name, self.executor, obj, tuple(final_args))
+                final_kwargs[name] = arg
+            return yaql_integration.to_mutable(obj.type.invoke(
+                name, self.executor, obj, tuple(final_args), final_kwargs))
         except dsl_exception.MuranoPlException as e:
             if not self.preserve_exception:
                 original_exception = getattr(e, 'original_exception', None)

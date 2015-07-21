@@ -15,22 +15,20 @@
 import inspect
 import types
 
-import yaql
-import yaql.context
-
-import murano.dsl.exceptions as exceptions
-import murano.dsl.helpers as helpers
-import murano.dsl.murano_class as murano_class
-import murano.dsl.murano_object as murano_object
-import murano.dsl.namespace_resolver as namespace_resolver
-import murano.dsl.principal_objects as principal_objects
-import murano.dsl.typespec as typespec
+from murano.dsl import exceptions
+from murano.dsl import murano_class
+from murano.dsl import murano_object
+from murano.dsl import namespace_resolver
+from murano.dsl import principal_objects
+from murano.dsl import typespec
+from murano.dsl import yaql_integration
 
 
 class MuranoClassLoader(object):
     def __init__(self):
         self._loaded_types = {}
         self._packages_cache = {}
+        self._imported_types = {object, murano_object.MuranoObject}
         principal_objects.register(self)
 
     def _get_package_for_class(self, class_name):
@@ -56,7 +54,7 @@ class MuranoClassLoader(object):
             else:
                 raise
 
-        namespaces = data.get('Namespaces', {})
+        namespaces = data.get('Namespaces') or {}
         ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
 
         parent_class_names = data.get('Extends')
@@ -71,14 +69,21 @@ class MuranoClassLoader(object):
         type_obj = murano_class.MuranoClass(self, ns_resolver, name,
                                             package, parent_classes)
 
-        properties = data.get('Properties', {})
+        properties = data.get('Properties') or {}
         for property_name, property_spec in properties.iteritems():
-            spec = typespec.PropertySpec(property_spec, type_obj)
+            spec = typespec.PropertySpec(property_spec)
             type_obj.add_property(property_name, spec)
 
         methods = data.get('Methods') or data.get('Workflow') or {}
+
+        method_mappings = {
+            'initialize': '.init',
+            'destroy': '.destroy'
+        }
+
         for method_name, payload in methods.iteritems():
-            type_obj.add_method(method_name, payload)
+            type_obj.add_method(
+                method_mappings.get(method_name, method_name), payload)
 
         self._loaded_types[name] = type_obj
         return type_obj
@@ -93,45 +98,30 @@ class MuranoClassLoader(object):
         raise NotImplementedError()
 
     def create_root_context(self):
-        return yaql.create_context(True)
+        return yaql_integration.create_context()
 
     def get_class_config(self, name):
         return {}
 
     def create_local_context(self, parent_context, murano_class):
-        return yaql.context.Context(parent_context=parent_context)
-
-    def _fix_parameters(self, kwargs):
-        result = {}
-        for key, value in kwargs.iteritems():
-            if key in ('class', 'for', 'from', 'is', 'lambda', 'as',
-                       'exec', 'assert', 'and', 'or', 'break', 'def',
-                       'del', 'try', 'while', 'yield', 'raise', 'while',
-                       'pass', 'return', 'not', 'print', 'in', 'import',
-                       'global', 'if', 'finally', 'except', 'else', 'elif',
-                       'continue', 'yield'):
-                key = '_' + key
-            result[key] = value
-        return result
+        return parent_context.create_child_context()
 
     def import_class(self, cls, name=None):
-        if not name:
-            if inspect.isclass(cls):
-                name = cls._murano_class_name
-            else:
-                name = cls.__class__._murano_class_name
+        if cls in self._imported_types:
+            return
 
+        name = name or getattr(cls, '__murano_name', None) or cls.__name__
         m_class = self.get_class(name, create_missing=True)
-        if inspect.isclass(cls):
-            if issubclass(cls, murano_object.MuranoObject):
-                m_class.object_class = cls
-            else:
-                mpc_name = 'mpc' + helpers.generate_id()
-                bases = (cls, murano_object.MuranoObject)
-                m_class.object_class = type(mpc_name, bases, {})
+        m_class.extend_with_class(cls)
 
-        for item in dir(cls):
-            method = getattr(cls, item)
-            if ((inspect.isfunction(method) or inspect.ismethod(method)) and
-                    not item.startswith('_')):
-                m_class.add_method(item, method)
+        for method_name in dir(cls):
+            if method_name.startswith('_'):
+                continue
+            method = getattr(cls, method_name)
+            if not inspect.ismethod(method):
+                continue
+            m_class.add_method(
+                yaql_integration.CONVENTION.convert_function_name(
+                    method_name),
+                method)
+        self._imported_types.add(cls)

@@ -12,28 +12,24 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import murano.dsl.helpers as helpers
-import murano.dsl.murano_class as murano_class
+from murano.dsl import dsl
+from murano.dsl import helpers
 
 
-@murano_class.classname('io.murano.Object')
+@dsl.name('io.murano.Object')
 class SysObject(object):
-    def setAttr(self, _context, name, value, owner=None):
+    def set_attr(self, this, context, name, value, owner=None):
         if owner is None:
-            owner = helpers.get_type(helpers.get_caller_context(_context))
-        if not isinstance(owner, murano_class.MuranoClass):
-            raise TypeError()
+            owner = helpers.get_type(helpers.get_caller_context(context))
 
-        attribute_store = helpers.get_attribute_store(_context)
-        attribute_store.set(self, owner, name, value)
+        attribute_store = helpers.get_attribute_store(context)
+        attribute_store.set(this.object, owner, name, value)
 
-    def getAttr(self, _context, name, default=None, owner=None):
+    def get_attr(self, this, context, name, default=None, owner=None):
         if owner is None:
-            owner = helpers.get_type(helpers.get_caller_context(_context))
-        if not isinstance(owner, murano_class.MuranoClass):
-            raise TypeError()
+            owner = helpers.get_type(helpers.get_caller_context(context))
 
-        attribute_store = helpers.get_attribute_store(_context)
+        attribute_store = helpers.get_attribute_store(context)
 
-        result = attribute_store.get(self, owner, name)
+        result = attribute_store.get(this.object, owner, name)
         return default if result is None else result

@@ -15,32 +15,35 @@
 import inspect
 import os.path
 
+from yaql import specs
+
+from murano.dsl import constants
+from murano.dsl import dsl
+from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import murano_class
-from murano.dsl import murano_object
-from murano.dsl import yaql_expression
+from murano.dsl import yaql_integration
 
 
-@murano_class.classname('io.murano.StackTrace')
-class StackTrace(murano_object.MuranoObject):
-
-    def initialize(self, _context, includeNativeFrames=True):
+@dsl.name('io.murano.StackTrace')
+class StackTrace(object):
+    def __init__(self, this, context, include_native_frames=True):
         frames = []
-        context = _context
+        caller_context = context
         while True:
-            if not context:
+            if not caller_context:
                 break
-            frames.append(compose_stack_frame(context))
-            context = helpers.get_caller_context(context)
-        frames.pop()
+            frame = compose_stack_frame(caller_context)
+            frames.append(frame)
+            caller_context = helpers.get_caller_context(caller_context)
         frames.reverse()
+        frames.pop()
 
-        if includeNativeFrames:
+        if include_native_frames:
             native_frames = []
             for frame in inspect.trace()[1:]:
-                location = yaql_expression.YaqlExpressionFilePosition(
+                location = dsl_types.ExpressionFilePosition(
                     os.path.abspath(frame[1]), frame[2],
-                    -1, -1, -1, -1, -1)
+                    -1, frame[2], -1)
                 method = frame[3]
                 native_frames.append({
                     'instruction': frame[4][0].strip(),
@@ -50,15 +53,17 @@ class StackTrace(murano_object.MuranoObject):
                 })
             frames.extend(native_frames)
 
-        self.set_property('frames', frames)
+        this.data().frames = frames
 
-    def toString(self, prefix=''):
-        return '\n'.join([format_frame(t, prefix)for t in self.get_property(
-            'frames')])
+    @specs.meta(constants.META_NO_TRACE, True)
+    @specs.meta('Usage', 'Action')
+    def to_string(self, this, prefix=''):
+        return '\n'.join([format_frame(t, prefix)for t in this['frames']])
 
 
 def compose_stack_frame(context):
     instruction = helpers.get_current_instruction(context)
+    method = helpers.get_current_method(context)
     return {
         'instruction': None if instruction is None
         else str(instruction),
@@ -66,8 +71,8 @@ def compose_stack_frame(context):
         'location': None if instruction is None
         else instruction.source_file_position,
 
-        'method': helpers.get_current_method(context),
-        'class': helpers.get_type(context)
+        'method': None if method is None else method.name,
+        'class': None if method is None else method.murano_class.name
     }
 
 
@@ -77,7 +82,7 @@ def format_frame(frame, prefix=''):
     murano_class = frame['class']
     location = frame['location']
     if murano_class:
-        method += ' of class ' + murano_class.name
+        method += ' of class ' + murano_class
 
     if location:
         args = (
@@ -89,8 +94,17 @@ def format_frame(frame, prefix=''):
             instruction,
             prefix
         )
-        return '{5}File "{0}", line {1}{2} in method {3}\n' \
-               '{5}    {4}'.format(*args)
+        return ('{5}File "{0}", line {1}{2} in method {3}\n'
+                '{5}    {4}').format(*args)
     else:
         return '{2}File <unknown> in method {0}\n{2}    {1}'.format(
             method, instruction, prefix)
+
+
+def create_stack_trace(context, include_native_frames=True):
+        stacktrace = yaql_integration.call_func(
+            context, 'new', 'io.murano.StackTrace',
+            includeNativeFrames=include_native_frames)
+        executor = helpers.get_executor(context)
+        return dsl.MuranoObjectInterface(
+            stacktrace, yaql_integration.ENGINE, executor)

@@ -1,0 +1,33 @@
+Name: CreatedClass1
+
+Properties:
+  property1:
+    Contract: $.string()
+
+  property2:
+    Contract: $.int()
+
+  xxx:
+    Contract: $
+    Usage: Out
+
+
+Methods:
+  .init:
+    Arguments:
+      - property1:
+          Contract: $.string()
+    Body:
+      - trace('CreatedClass1::.init')
+      - trace($property1)
+      - $.property1: STRING
+      - trace($.property1)
+      - trace($.property2)
+
+  createClass2:
+    Arguments:
+      - parent:
+          Contract: $.class(CreatingClass)
+    Body:
+      - $.xxx: new(CreatedClass2, $parent, QQQ, property1 => STR, property2 => 99)
+      - Return: $

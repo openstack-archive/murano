@@ -12,11 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.dsl import murano_class
-from murano.dsl import murano_object
+from murano.dsl import dsl
 
 
-@murano_class.classname('io.murano.Exception')
-class DslException(murano_object.MuranoObject):
-    def toString(self):
+@dsl.name('io.murano.Exception')
+class DslException(object):
+    def to_string(self):
         return self.get_property('nativeException').format()

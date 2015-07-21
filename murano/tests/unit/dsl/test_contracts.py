@@ -14,8 +14,8 @@
 
 import types
 
+from murano.dsl import dsl
 from murano.dsl import exceptions
-from murano.dsl import murano_object
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
 
@@ -26,6 +26,7 @@ class TestContracts(test_case.DslTestCase):
         self._runner = self.new_runner(
             om.Object(
                 'ContractExamples',
+                ordinaryProperty='PROPERTY',
                 sampleClass=om.Object(
                     'SampleClass1',
                     stringProperty='string1',
@@ -96,12 +97,12 @@ class TestContracts(test_case.DslTestCase):
     def test_class_contract(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
         result = self._runner.testClassContract(arg)
-        self.assertIsInstance(result, murano_object.MuranoObject)
+        self.assertIsInstance(result, dsl.MuranoObjectInterface)
 
     def test_class_contract_by_ref(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
         result = self._runner.testClassContract(arg)
-        self.assertEqual(result.object_id, arg.id)
+        self.assertEqual(result.id, arg.id)
 
     def test_class_contract_failure(self):
         self.assertRaises(
@@ -122,8 +123,8 @@ class TestContracts(test_case.DslTestCase):
     def test_class_from_id_contract(self):
         object_id = self._runner.root.get_property('sampleClass').object_id
         result = self._runner.testClassFromIdContract(object_id)
-        self.assertIsInstance(result, murano_object.MuranoObject)
-        self.assertEqual(result.object_id, object_id)
+        self.assertIsInstance(result, dsl.MuranoObjectInterface)
+        self.assertEqual(result.id, object_id)
 
     def test_check_contract(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
@@ -290,3 +291,7 @@ class TestContracts(test_case.DslTestCase):
     def test_default(self):
         self.assertEqual('value', self._runner.testDefault('value'))
         self.assertEqual('DEFAULT', self._runner.testDefault())
+
+    def test_default_expression(self):
+        self.assertEqual('PROPERTY', self._runner.testDefaultExpression())
+        self.assertEqual('value', self._runner.testDefaultExpression('value'))

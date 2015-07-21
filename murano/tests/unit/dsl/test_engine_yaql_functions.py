@@ -15,7 +15,7 @@
 import types
 
 from testtools import matchers
-import yaql.exceptions as yaql_exc
+from yaql.language import exceptions as yaql_exceptions
 
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -62,7 +62,7 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
             self._runner.testReplaceStr('John Kennedy', 'Kennedy', 'Doe'))
 
         self.assertRaises(
-            yaql_exc.YaqlExecutionException,
+            yaql_exceptions.NoMatchingMethodException,
             self._runner.testReplaceStr, None, 'Kennedy', 'Doe')
 
     def test_replace_dict(self):
@@ -120,7 +120,7 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
             'false',
             self._runner.testStr(False))
         self.assertEqual(
-            '',
+            'null',
             self._runner.testStr(None))
 
     def test_int(self):

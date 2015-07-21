@@ -12,12 +12,14 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
 import types
 
-import murano.dsl.helpers as helpers
-import murano.dsl.murano_method as murano_method
-import murano.dsl.murano_object as murano_object
+from yaql import utils
+
+from murano.dsl import dsl
+from murano.dsl import dsl_types
+from murano.dsl import helpers
+from murano.dsl import murano_method
 
 
 class ObjRef(object):
@@ -25,52 +27,48 @@ class ObjRef(object):
         self.ref_obj = obj
 
 
-def serialize_object(obj):
-    if isinstance(obj, (collections.Sequence, collections.Set)) and not \
-            isinstance(obj, types.StringTypes):
-        return [serialize_object(t) for t in obj]
-    elif isinstance(obj, collections.Mapping):
-        result = {}
-        for key, value in obj.iteritems():
-            result[key] = serialize_object(value)
-        return result
-    elif isinstance(obj, murano_object.MuranoObject):
-        return _serialize_object(obj, None)[0]
-    return obj
+def serialize(obj):
+    return serialize_model(obj, None, True)['Objects']
 
 
-def _serialize_object(root_object, designer_attributes=None):
+def _serialize_object(root_object, designer_attributes, allow_refs):
     serialized_objects = set()
-    tree = _pass1_serialize(
-        root_object, None, serialized_objects, designer_attributes)
-    _pass2_serialize(tree, serialized_objects)
-    return tree, serialized_objects
+
+    obj = root_object
+    while True:
+        obj, need_another_pass = _pass12_serialize(
+            obj, None, serialized_objects, designer_attributes)
+        if not need_another_pass:
+            break
+    tree = [obj]
+    _pass3_serialize(tree, serialized_objects, allow_refs)
+    return tree[0], serialized_objects
 
 
-def serialize_model(root_object, executor):
+def serialize_model(root_object, executor, allow_refs=False):
+    if executor is not None:
+        designer_attributes = executor.object_store.designer_attributes
+    else:
+        designer_attributes = None
+
     if root_object is None:
         tree = None
         tree_copy = None
         attributes = []
     else:
         tree, serialized_objects = _serialize_object(
-            root_object, executor.object_store.designer_attributes)
-        tree_copy, _ = _serialize_object(root_object, None)
-        attributes = executor.attribute_store.serialize(serialized_objects)
+            root_object, designer_attributes, allow_refs)
+        tree_copy, _ = _serialize_object(root_object, None, allow_refs)
+        if executor is not None:
+            attributes = executor.attribute_store.serialize(serialized_objects)
+        else:
+            attributes = []
 
     return {
         'Objects': tree,
         'ObjectsCopy': tree_copy,
         'Attributes': attributes
     }
-
-
-def _cmp_objects(obj1, obj2):
-    if obj1 is None and obj2 is None:
-        return True
-    if obj1 is None or obj2 is None:
-        return False
-    return obj1.object_id == obj2.object_id
 
 
 def _serialize_available_action(obj):
@@ -98,66 +96,91 @@ def _merge_actions(dict1, dict2):
     return result
 
 
-def _pass1_serialize(value, parent, serialized_objects,
-                     designer_attributes_getter):
+def _pass12_serialize(value, parent, serialized_objects,
+                      designer_attributes_getter):
+    if isinstance(value, dsl.MuranoObjectInterface):
+        value = value.object
     if isinstance(value, (types.StringTypes, types.IntType, types.FloatType,
                           types.BooleanType, types.NoneType)):
-        return value
-    elif isinstance(value, murano_object.MuranoObject):
-        if not _cmp_objects(value.owner, parent) \
-                or value.object_id in serialized_objects:
-            return ObjRef(value)
+        return value, False
+    if isinstance(value, dsl_types.MuranoObject):
+        if value.owner is not parent or value.object_id in serialized_objects:
+            return ObjRef(value), True
+    elif isinstance(value, ObjRef):
+        if (value.ref_obj.object_id not in serialized_objects
+                and is_nested_in(value.ref_obj.owner, parent)):
+            value = value.ref_obj
         else:
-            result = value.to_dictionary()
-            if designer_attributes_getter is not None:
-                result['?'].update(designer_attributes_getter(value.object_id))
-                # deserialize and merge list of actions
-                actions = _serialize_available_action(value)
-                result['?']['_actions'] = _merge_actions(
-                    result['?'].get('_actions', {}), actions)
-            serialized_objects.add(value.object_id)
-            return _pass1_serialize(
-                result, value, serialized_objects, designer_attributes_getter)
-
-    elif isinstance(value, types.DictionaryType):
+            return value, False
+    if isinstance(value, dsl_types.MuranoObject):
+        result = value.to_dictionary()
+        if designer_attributes_getter is not None:
+            result['?'].update(designer_attributes_getter(value.object_id))
+            # deserialize and merge list of actions
+            actions = _serialize_available_action(value)
+            result['?']['_actions'] = _merge_actions(
+                result['?'].get('_actions', {}), actions)
+        serialized_objects.add(value.object_id)
+        return _pass12_serialize(
+            result, value, serialized_objects, designer_attributes_getter)
+    elif isinstance(value, utils.MappingType):
         result = {}
+        need_another_pass = False
+
         for d_key, d_value in value.iteritems():
             result_key = str(d_key)
-            result[result_key] = _pass1_serialize(
+            result_value = _pass12_serialize(
                 d_value, parent, serialized_objects,
                 designer_attributes_getter)
-        return result
-    elif isinstance(value, types.ListType):
-        return [_pass1_serialize(t, parent, serialized_objects,
-                                 designer_attributes_getter) for t in value]
-    elif isinstance(value, types.TupleType):
-        return _pass1_serialize(
-            list(value), parent, serialized_objects,
-            designer_attributes_getter)
+            result[result_key] = result_value[0]
+            if result_value[1]:
+                need_another_pass = True
+        return result, need_another_pass
+    elif utils.is_sequence(value) or isinstance(value, utils.SetType):
+        need_another_pass = False
+        result = []
+        for t in value:
+            v, nmp = _pass12_serialize(
+                t, parent, serialized_objects, designer_attributes_getter)
+            if nmp:
+                need_another_pass = True
+            result.append(v)
+        return result, need_another_pass
     else:
         raise ValueError()
 
 
-def _pass2_serialize(value, serialized_objects):
-    if isinstance(value, types.DictionaryType):
-        for d_key, d_value in value.iteritems():
+def _pass3_serialize(value, serialized_objects, allow_refs=False):
+    if isinstance(value, dict):
+        for d_key, d_value in value.items():
             if isinstance(d_value, ObjRef):
-                if d_value.ref_obj.object_id in serialized_objects:
+                if (d_value.ref_obj.object_id in serialized_objects
+                        or allow_refs):
                     value[d_key] = d_value.ref_obj.object_id
                 else:
-                    value[d_key] = None
+                    del value[d_key]
             else:
-                _pass2_serialize(d_value, serialized_objects)
-    elif isinstance(value, types.ListType):
+                _pass3_serialize(d_value, serialized_objects, allow_refs)
+    elif isinstance(value, list):
         index = 0
         while index < len(value):
             item = value[index]
             if isinstance(item, ObjRef):
-                if item.ref_obj.object_id in serialized_objects:
+                if item.ref_obj.object_id in serialized_objects or allow_refs:
                     value[index] = item.ref_obj.object_id
                 else:
                     value.pop(index)
                     index -= 1
             else:
-                _pass2_serialize(item, serialized_objects)
+                _pass3_serialize(item, serialized_objects, allow_refs)
             index += 1
+    return value
+
+
+def is_nested_in(obj, ancestor):
+    while True:
+        if obj is ancestor:
+            return True
+        if obj is None:
+            return False
+        obj = obj.owner

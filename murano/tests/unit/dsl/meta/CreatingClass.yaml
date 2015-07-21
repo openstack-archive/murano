@@ -1,0 +1,21 @@
+Name: CreatingClass
+
+Properties:
+  yyy:
+    Contract: $
+    Usage: Out
+
+
+Methods:
+  .init:
+    Body:
+      trace('CreatingClass::.init')
+
+  testNew:
+    Body:
+      - new(CreatedClass1, property1 => string, property2 => 123)
+
+  testNewWithOwnership:
+    Body:
+      - $.yyy: new(CreatedClass1, property1 => string, property2 => 123)
+      - Return: $.yyy.createClass2($this)

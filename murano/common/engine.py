@@ -13,6 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import copy
 import traceback
 import uuid
 
@@ -28,15 +29,14 @@ from murano.common.helpers import token_sanitizer
 from murano.common import plugin_loader
 from murano.common import rpc
 from murano.dsl import dsl_exception
-from murano.dsl import executor
+from murano.dsl import executor as dsl_executor
 from murano.dsl import serializer
-from murano.engine import client_manager
 from murano.engine import environment
 from murano.engine import package_class_loader
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
 import murano.engine.system.system_objects as system_objects
-from murano.common.i18n import _LI, _LE
+from murano.common.i18n import _LI, _LE, _LW
 from murano.policy import model_policy_enforcer as enforcer
 
 CONF = cfg.CONF
@@ -47,30 +47,6 @@ PLUGIN_LOADER = None
 LOG = logging.getLogger(__name__)
 
 eventlet.debug.hub_exceptions(False)
-
-
-class TaskProcessingEndpoint(object):
-    @staticmethod
-    def handle_task(context, task):
-        s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        LOG.info(_LI('Starting processing task: {task_desc}').format(
-            task_desc=jsonutils.dumps(s_task)))
-
-        result = {'model': task['model']}
-        try:
-            task_executor = TaskExecutor(task)
-            result = task_executor.execute()
-        except Exception as e:
-            LOG.exception(_LE('Error during task execution for tenant %s'),
-                          task['tenant_id'])
-            result['action'] = TaskExecutor.exception_result(
-                e, traceback.format_exc())
-            msg_env = Environment(task['id'])
-            reporter = status_reporter.StatusReporter()
-            reporter.initialize(msg_env)
-            reporter.report_error(msg_env, str(e))
-        finally:
-            rpc.api().process_result(result, task['id'])
 
 
 def _prepare_rpc_service(server_id):
@@ -97,9 +73,28 @@ def get_plugin_loader():
     return PLUGIN_LOADER
 
 
-class Environment(object):
-    def __init__(self, object_id):
-        self.object_id = object_id
+class TaskProcessingEndpoint(object):
+    @classmethod
+    def handle_task(cls, context, task):
+        result = cls.execute(task)
+        rpc.api().process_result(result, task['id'])
+
+    @staticmethod
+    def execute(task):
+        s_task = token_sanitizer.TokenSanitizer().sanitize(task)
+        LOG.info(_LI('Starting processing task: {task_desc}').format(
+            task_desc=jsonutils.dumps(s_task)))
+
+        result = None
+        reporter = status_reporter.StatusReporter(task['id'])
+
+        try:
+            task_executor = TaskExecutor(task, reporter)
+            result = task_executor.execute()
+            return result
+        finally:
+            LOG.info(_LI('Finished processing task: {task_desc}').format(
+                task_desc=jsonutils.dumps(result)))
 
 
 class TaskExecutor(object):
@@ -115,118 +110,121 @@ class TaskExecutor(object):
     def model(self):
         return self._model
 
-    def __init__(self, task):
+    def __init__(self, task, reporter=None):
+        if reporter is None:
+            reporter = status_reporter.StatusReporter(task['id'])
         self._action = task.get('action')
         self._model = task['model']
         self._environment = environment.Environment()
         self._environment.token = task['token']
         self._environment.tenant_id = task['tenant_id']
         self._environment.system_attributes = self._model.get('SystemData', {})
-        self._environment.clients = client_manager.ClientManager()
+        self._reporter = reporter
 
         self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
             self._environment)
 
     def execute(self):
-        self._create_trust()
-
         try:
-            murano_client_factory = lambda: \
-                self._environment.clients.get_murano_client(self._environment)
-            with package_loader.CombinedPackageLoader(
-                    murano_client_factory,
-                    self._environment.tenant_id) as pkg_loader:
-                return self._execute(pkg_loader)
-        finally:
-            if self._model['Objects'] is None:
+            self._create_trust()
+        except Exception as e:
+            return self.exception_result(e, None, '<system>')
+
+        murano_client_factory = \
+            lambda: self._environment.clients.get_murano_client()
+        with package_loader.CombinedPackageLoader(
+                murano_client_factory,
+                self._environment.tenant_id) as pkg_loader:
+            result = self._execute(pkg_loader)
+        self._model['SystemData'] = self._environment.system_attributes
+        result['model'] = self._model
+
+        if (not self._model.get('Objects')
+                and not self._model.get('ObjectsCopy')):
+            try:
                 self._delete_trust()
+            except Exception:
+                LOG.warn(_LW('Cannot delete trust'), exc_info=True)
+
+        return result
 
     def _execute(self, pkg_loader):
         class_loader = package_class_loader.PackageClassLoader(pkg_loader)
         system_objects.register(class_loader, pkg_loader)
         get_plugin_loader().register_in_loader(class_loader)
 
-        exc = executor.MuranoDslExecutor(class_loader, self.environment)
-        obj = exc.load(self.model)
+        executor = dsl_executor.MuranoDslExecutor(
+            class_loader, self.environment)
+        try:
+            obj = executor.load(self.model)
+        except Exception as e:
+            return self.exception_result(e, None, '<load>')
 
-        self._validate_model(obj, self.action, class_loader)
-        action_result = None
-        exception = None
-        exception_traceback = None
+        try:
+            self._validate_model(obj, self.action, class_loader)
+        except Exception as e:
+            return self.exception_result(e, obj, '<validate>')
 
         try:
             LOG.info(_LI('Invoking pre-cleanup hooks'))
             self.environment.start()
-            exc.cleanup(self._model)
+            executor.cleanup(self._model)
         except Exception as e:
-            exception = e
-            exception_traceback = TaskExecutor._log_exception(e, obj, '<GC>')
+            return self.exception_result(e, obj, '<GC>')
         finally:
             LOG.info(_LI('Invoking post-cleanup hooks'))
             self.environment.finish()
+        self._model['ObjectsCopy'] = copy.deepcopy(self._model.get('Objects'))
 
-        if exception is None and self.action:
+        action_result = None
+        if self.action:
             try:
                 LOG.info(_LI('Invoking pre-execution hooks'))
                 self.environment.start()
-                action_result = self._invoke(exc)
+                try:
+                    action_result = self._invoke(executor)
+                finally:
+                    try:
+                        self._model = serializer.serialize_model(obj, executor)
+                    except Exception as e:
+                        return self.exception_result(e, None, '<model>')
             except Exception as e:
-                exception = e
-                exception_traceback = TaskExecutor._log_exception(
-                    e, obj, self.action['method'])
+                return self.exception_result(e, obj, self.action['method'])
             finally:
                 LOG.info(_LI('Invoking post-execution hooks'))
                 self.environment.finish()
 
-        model = serializer.serialize_model(obj, exc)
-        model['SystemData'] = self._environment.system_attributes
-        result = {
-            'model': model,
+        try:
+            action_result = serializer.serialize(action_result)
+        except Exception as e:
+            return self.exception_result(e, None, '<result>')
+
+        return {
             'action': {
-                'result': None,
+                'result': action_result,
                 'isException': False
             }
         }
-        if exception is not None:
-            result['action'] = TaskExecutor.exception_result(
-                exception, exception_traceback)
-            # NOTE(kzaitsev): Exception here means that it happened during
-            # cleanup. ObjectsCopy and Attributes would be empty if obj
-            # is empty. This would cause failed env to be deleted.
-            # Therefore restore these attrs from self._model
-            for attr in ['ObjectsCopy', 'Attributes']:
-                if not model.get(attr):
-                    model[attr] = self._model[attr]
-        else:
-            result['action']['result'] = serializer.serialize_object(
-                action_result)
 
-        return result
-
-    @staticmethod
-    def _log_exception(e, root, method_name):
-        if isinstance(e, dsl_exception.MuranoPlException):
-            LOG.error('\n' + e.format(prefix='  '))
-            exception_traceback = e.format()
+    def exception_result(self, exception, root, method_name):
+        if isinstance(exception, dsl_exception.MuranoPlException):
+            LOG.error('\n' + exception.format(prefix='  '))
+            exception_traceback = exception.format()
         else:
             exception_traceback = traceback.format_exc()
             LOG.exception(
                 _LE("Exception %(exc)s occurred"
                     " during invocation of %(method)s"),
-                {'exc': e, 'method': method_name})
-        if root is not None:
-            reporter = status_reporter.StatusReporter()
-            reporter.initialize(root)
-            reporter.report_error(root, str(e))
-        return exception_traceback
+                {'exc': exception, 'method': method_name})
+        self._reporter.report_error(root, str(exception))
 
-    @staticmethod
-    def exception_result(exception, exception_traceback):
         return {
-            'isException': True,
-            'result': {
-                'message': str(exception),
-                'details': exception_traceback
+            'action': {
+                'isException': True,
+                'result': {
+                    'message': str(exception),
+                    'details': exception_traceback
+                }
             }
         }
 
@@ -239,10 +237,10 @@ class TaskExecutor(object):
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
-        method_name, args = self.action['method'], self.action['args']
+        method_name, kwargs = self.action['method'], self.action['args']
 
         if obj is not None:
-            return obj.type.invoke(method_name, mpl_executor, obj, args)
+            return obj.type.invoke(method_name, mpl_executor, obj, (), kwargs)
 
     def _create_trust(self):
         if not CONF.engine.use_trusts:

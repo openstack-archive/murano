@@ -12,14 +12,16 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import inspect
-
-import murano.dsl.helpers as helpers
+from murano.dsl import constants
+from murano.dsl import dsl_types
+from murano.dsl import helpers
 
 
 class ObjectStore(object):
-    def __init__(self, class_loader, parent_store=None):
-        self._class_loader = class_loader
+    def __init__(self, context, parent_store=None):
+        self._context = context.create_child_context()
+        self._class_loader = helpers.get_class_loader(context)
+        self._context[constants.CTX_OBJECT_STORE] = self
         self._parent_store = parent_store
         self._store = {}
         self._designer_attributes_store = {}
@@ -33,9 +35,16 @@ class ObjectStore(object):
     def class_loader(self):
         return self._class_loader
 
+    @property
+    def context(self):
+        return self._context
+
     def get(self, object_id):
         if object_id in self._store:
-            return self._store[object_id]
+            result = self._store[object_id]
+            if not isinstance(result, dsl_types.MuranoObject):
+                result = None
+            return result
         if self._parent_store:
             return self._parent_store.get(object_id)
         return None
@@ -46,7 +55,7 @@ class ObjectStore(object):
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
-    def load(self, value, owner, context, defaults=None):
+    def load(self, value, owner, defaults=None):
         if value is None:
             return None
         if '?' not in value or 'type' not in value['?']:
@@ -57,39 +66,35 @@ class ObjectStore(object):
         class_obj = self._class_loader.get_class(obj_type)
         if not class_obj:
             raise ValueError()
-        if object_id in self._store:
-            obj = self._store[object_id]
-        else:
-            obj = class_obj.new(owner, self, context=context,
-                                object_id=object_id, defaults=defaults)
-            self._store[object_id] = obj
-            self._designer_attributes_store[object_id] = \
-                ObjectStore._get_designer_attributes(system_key)
-
-        argspec = inspect.getargspec(obj.initialize).args
-        if '_context' in argspec:
-            value['_context'] = context
-        if '_parent' in argspec:
-            value['_owner'] = owner
 
         try:
             if owner is None:
                 self._initializing = True
-            obj.initialize(**value)
+
+            if object_id in self._store:
+                factory = self._store[object_id]
+                if isinstance(factory, dsl_types.MuranoObject):
+                    return factory
+            else:
+                factory = class_obj.new(
+                    owner, self, context=self.context,
+                    name=system_key.get('name'),
+                    object_id=object_id, defaults=defaults)
+                self._store[object_id] = factory
+                system_value = ObjectStore._get_designer_attributes(system_key)
+                self._designer_attributes_store[object_id] = system_value
+
+            obj = factory(**value)
+            if not self._initializing:
+                self._store[object_id] = obj
             if owner is None:
                 self._initializing = False
-                obj.initialize(**value)
+                self._store[object_id] = factory(**value)
         finally:
             if owner is None:
                 self._initializing = False
 
-        if not self.initializing:
-            executor = helpers.get_executor(context)
-            methods = obj.type.find_all_methods('initialize')
-            methods.reverse()
-            for method in methods:
-                method.invoke(executor, obj, {})
-        return obj
+        return factory.object
 
     @staticmethod
     def _get_designer_attributes(header):

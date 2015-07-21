@@ -4,6 +4,9 @@ Properties:
   sampleClass:
     Contract: $.class(SampleClass1)
 
+  ordinaryProperty:
+    Contract: $.string()
+
 Methods:
   testStringContract:
     Arguments:
@@ -132,6 +135,14 @@ Methods:
       - arg:
           Contract: $.string()
           Default: DEFAULT
+    Body:
+      Return: $arg
+
+  testDefaultExpression:
+    Arguments:
+      - arg:
+          Contract: $.string()
+          Default: $.ordinaryProperty
     Body:
       Return: $arg
 

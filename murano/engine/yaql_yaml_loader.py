@@ -17,6 +17,7 @@ import yaml
 import yaml.composer
 import yaml.constructor
 
+from murano.dsl import dsl_types
 from murano.dsl import yaql_expression
 
 
@@ -49,14 +50,12 @@ YaqlYamlLoader.yaml_implicit_resolvers = resolvers
 
 
 def build_position(node):
-    return yaql_expression.YaqlExpressionFilePosition(
+    return dsl_types.ExpressionFilePosition(
         node.start_mark.name,
         node.start_mark.line + 1,
         node.start_mark.column + 1,
-        node.start_mark.index,
         node.end_mark.line + 1,
-        node.end_mark.column + 1,
-        node.end_mark.index - node.start_mark.index)
+        node.end_mark.column + 1)
 
 
 def yaql_constructor(loader, node):

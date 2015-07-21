@@ -5,6 +5,11 @@ Properties:
     Contract: $.string().notNull()
   classProperty:
     Contract: $.class(SampleClass2).notNull()
+  assignedProperty:
+    Contract: $
+    Usage: Runtime
+  arbitraryProperty:
+    Contract: $
 
 Workflow:
   testTrace:
@@ -54,13 +59,29 @@ Workflow:
       - $result.Arr[0]: 3
       - $result.Arr[$index - 1]: 5
       - $result.Arr[$index + 1][1]: 123
-      - $result.Dict: {}
+      #- $result.Dict: {}
       - $result.Dict.Key1: V1
       - $keyName: Key2
       - $result.Dict[$keyName]: {}
       - $result.Dict[$keyName]['a_b']: V2
       - $result.Dict[$keyName][toUpper($keyName)]: V3
       - Return: $result
+
+  testAssignmentOnProperty:
+    Body:
+      #- $.assignedProperty: {}
+      - $.assignedProperty.Arr: [1, 2, [10, 11]]
+      - $index: 1
+      - $.assignedProperty.Arr[0]: 3
+      - $.assignedProperty.Arr[$index - 1]: 5
+      - $.assignedProperty.Arr[$index + 1][1]: 123
+      #- $.assignedProperty.Dict: {}
+      - $.assignedProperty.Dict.Key1: V1
+      - $keyName: Key2
+      - $.assignedProperty.Dict[$keyName]: {}
+      - $.assignedProperty.Dict[$keyName]['a_b']: V2
+      - $.assignedProperty.Dict[$keyName][toUpper($keyName)]: V3
+      - Return: $.assignedProperty
 
 
   testAssignByCopy:

@@ -12,15 +12,18 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import itertools
 import types
 
-import yaql
-import yaql.context
-import yaql.expressions
+from yaql.language import expressions
+from yaql.language import specs
+from yaql.language import utils
+from yaql.language import yaqltypes
 
-import murano.dsl.murano_object as murano_object
-import murano.dsl.type_scheme as type_scheme
-import murano.dsl.yaql_expression as yaql_expression
+from murano.dsl import dsl_types
+from murano.dsl import exceptions
+from murano.dsl import yaql_expression
+from murano.dsl import yaql_integration
 
 
 class LhsExpression(object):
@@ -37,108 +40,95 @@ class LhsExpression(object):
 
     def __init__(self, expression):
         if isinstance(expression, (yaql_expression.YaqlExpression,
-                                   yaql.expressions.Expression)):
+                                   expressions.Statement)):
             self._expression = expression
         else:
-            self._expression = yaql.parse(str(expression))
-        self._current_obj = None
-        self._current_obj_name = None
+            self._expression = yaql_integration.parse(str(expression))
 
-    def _create_context(self, root_context, murano_class):
-        def _evaluate(thing):
-            if isinstance(thing, yaql.expressions.Expression.Callable):
-                thing.yaql_context = root_context
-                thing = thing()
-            return thing
-
-        def _get_value(src, key):
-            key = _evaluate(key)
-            if isinstance(src, types.DictionaryType):
-                return src.get(key)
-            elif isinstance(src, types.ListType) and isinstance(
-                    key, types.IntType):
-                return src[key]
-            elif isinstance(src, murano_object.MuranoObject) and isinstance(
-                    key, types.StringTypes):
-                self._current_obj = src
-                self._current_obj_name = key
-                return src.get_property(key, murano_class)
-            else:
-                raise TypeError()
-
-        def _set_value(src, key, value):
-            key = _evaluate(key)
-            if isinstance(src, types.DictionaryType):
-                old_value = src.get(key, type_scheme.NoValue)
-                src[key] = value
-                if self._current_obj is not None:
-                    try:
-                        p_value = self._current_obj.get_property(
-                            self._current_obj_name, murano_class)
-                        self._current_obj.set_property(
-                            self._current_obj_name, p_value, murano_class)
-                    except Exception as e:
-                        if old_value is not type_scheme.NoValue:
-                            src[key] = old_value
-                        else:
-                            src.pop(key, None)
-                        raise e
-            elif isinstance(src, types.ListType) and isinstance(
-                    key, types.IntType):
-                old_value = src[key]
-                src[key] = value
-                if self._current_obj is not None:
-                    try:
-                        p_value = self._current_obj.get_property(
-                            self._current_obj_name, murano_class)
-                        self._current_obj.set_property(
-                            self._current_obj_name, p_value, murano_class)
-                    except Exception as e:
-                        src[key] = old_value
-                        raise e
-
-            elif isinstance(src, murano_object.MuranoObject) and isinstance(
-                    key, types.StringTypes):
-                src.set_property(key, value, murano_class)
-            else:
-                raise TypeError()
-
+    def _create_context(self, root_context):
+        @specs.parameter('path', yaqltypes.Lambda(with_context=True))
         def get_context_data(path):
-            path = path()
+            path = path(root_context)
 
             def set_data(value):
                 if not path or path == '$' or path == '$this':
                     raise ValueError()
-                root_context.set_data(value, path)
+                root_context[path] = value
 
             return LhsExpression.Property(
-                lambda: root_context.get_data(path), set_data)
+                lambda: root_context[path], set_data)
 
-        @yaql.context.EvalArg('this', arg_type=LhsExpression.Property)
-        def attribution(this, arg_name):
-            arg_name = arg_name()
+        @specs.parameter('this', LhsExpression.Property)
+        @specs.parameter('key', yaqltypes.Keyword())
+        def attribution(this, key):
+            def setter(src_property, value):
+                src = src_property.get()
+                if isinstance(src, utils.MappingType):
+                    src_property.set(
+                        utils.FrozenDict(
+                            itertools.chain(
+                                src.iteritems(),
+                                ((key, value),))))
+                elif isinstance(src, dsl_types.MuranoObject):
+                    src.set_property(key, value, root_context)
+                else:
+                    raise ValueError(
+                        'attribution may only be applied to '
+                        'objects and dictionaries')
+
+            def getter(src):
+                if isinstance(src, utils.MappingType):
+                    return src.get(key, {})
+                elif isinstance(src, dsl_types.MuranoObject):
+                    self._current_obj = src
+                    self._current_obj_name = key
+                    try:
+                        return src.get_property(key, root_context)
+                    except exceptions.UninitializedPropertyAccessError:
+                        return {}
+
+                else:
+                    raise ValueError(
+                        'attribution may only be applied to '
+                        'objects and dictionaries')
+
             return LhsExpression.Property(
-                lambda: _get_value(this.get(), arg_name),
-                lambda value: _set_value(this.get(), arg_name, value))
+                lambda: getter(this.get()),
+                lambda value: setter(this, value))
 
-        @yaql.context.EvalArg("this", LhsExpression.Property)
+        @specs.parameter('this', LhsExpression.Property)
+        @specs.parameter('index', yaqltypes.Lambda(with_context=True))
         def indexation(this, index):
-            index = _evaluate(index)
+            index = index(root_context)
 
-            return LhsExpression.Property(
-                lambda: _get_value(this.get(), index),
-                lambda value: _set_value(this.get(), index, value))
+            def getter(src):
+                if utils.is_sequence(src):
+                    return src[index]
+                else:
+                    raise ValueError('indexation may only be applied to lists')
 
-        context = yaql.context.Context()
+            def setter(src_property, value):
+                src = src_property.get()
+                if utils.is_sequence(src):
+                    src_property.set(src[:index] + (value,) + src[index + 1:])
+
+            if isinstance(index, types.IntType):
+                return LhsExpression.Property(
+                    lambda: getter(this.get()),
+                    lambda value: setter(this, value))
+            else:
+                return attribution(this, index)
+
+        context = yaql_integration.create_empty_context()
         context.register_function(get_context_data, '#get_context_data')
         context.register_function(attribution, '#operator_.')
-        context.register_function(indexation, "where")
+        context.register_function(indexation, '#indexer')
         return context
 
-    def __call__(self, value, context, murano_class):
-        new_context = self._create_context(context, murano_class)
-        new_context.set_data(context.get_data('$'))
+    def __call__(self, value, context):
+        new_context = self._create_context(context)
+        new_context[''] = context['$']
         self._current_obj = None
         self._current_obj_name = None
-        property = self._expression.evaluate(context=new_context)
+        property = self._expression(context=new_context)
         property.set(value)

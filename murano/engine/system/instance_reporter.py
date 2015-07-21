@@ -18,7 +18,7 @@ from oslo_log import log as logging
 import oslo_messaging as messaging
 
 from murano.common import uuidutils
-from murano.dsl import murano_class
+from murano.dsl import dsl
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -28,23 +28,23 @@ APPLICATION = 100
 OS_INSTANCE = 200
 
 
-@murano_class.classname('io.murano.system.InstanceNotifier')
+@dsl.name('io.murano.system.InstanceNotifier')
 class InstanceReportNotifier(object):
     transport = None
 
-    def initialize(self, environment):
+    def __init__(self, environment):
         if InstanceReportNotifier.transport is None:
             InstanceReportNotifier.transport = messaging.get_transport(CONF)
         self._notifier = messaging.Notifier(
             InstanceReportNotifier.transport,
             publisher_id=uuidutils.generate_uuid(),
             topic='murano')
-        self._environment_id = environment.object_id
+        self._environment_id = environment.id
 
     def _track_instance(self, instance, instance_type,
                         type_title, unit_count):
         payload = {
-            'instance': instance.object_id,
+            'instance': instance.id,
             'environment': self._environment_id,
             'instance_type': instance_type,
             'type_name': instance.type.name,
@@ -56,21 +56,21 @@ class InstanceReportNotifier(object):
 
     def _untrack_instance(self, instance, instance_type):
         payload = {
-            'instance': instance.object_id,
+            'instance': instance.id,
             'environment': self._environment_id,
             'instance_type': instance_type,
         }
 
         self._notifier.info({}, 'murano.untrack_instance', payload)
 
-    def trackApplication(self, instance, title=None, unitCount=None):
-        self._track_instance(instance, APPLICATION, title, unitCount)
+    def track_application(self, instance, title=None, unit_count=None):
+        self._track_instance(instance, APPLICATION, title, unit_count)
 
-    def untrackApplication(self, instance):
+    def untrack_application(self, instance):
         self._untrack_instance(instance, APPLICATION)
 
-    def trackCloudInstance(self, instance):
+    def track_cloud_instance(self, instance):
         self._track_instance(instance, OS_INSTANCE, None, 1)
 
-    def untrackCloudInstance(self, instance):
+    def untrack_cloud_instance(self, instance):
         self._untrack_instance(instance, OS_INSTANCE)

@@ -1,4 +1,4 @@
-#    Copyright (c) 2014 Mirantis, Inc.
+#    Copyright (c) 2014 #Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,94 +12,50 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
+import contextlib
 import re
 import sys
 import types
 import uuid
 
 import eventlet.greenpool
-import yaql.expressions
+import eventlet.greenthread
+import yaql.language.exceptions
+import yaql.language.expressions
+from yaql.language import utils as yaqlutils
+
 
 from murano.common import utils
-import murano.dsl.murano_object
-import murano.dsl.yaql_expression as yaql_expression
+from murano.dsl import constants
+from murano.dsl import dsl_types
+
+KEYWORD_REGEX = re.compile(r'(?!__)\b[^\W\d]\w*\b')
+
+_threads_sequencer = 0
 
 
-def serialize(value, memo=None):
-    if memo is None:
-        memo = set()
-    if isinstance(value, types.DictionaryType):
-        result = {}
-        for d_key, d_value in value.iteritems():
-            result[d_key] = serialize(d_value, memo)
-        return result
-    elif isinstance(value, murano.dsl.murano_object.MuranoObject):
-        if value.object_id not in memo:
-            memo.add(value.object_id)
-            return serialize(value.to_dictionary(), memo)
-        else:
-            return value.object_id
-    elif isinstance(value, types.ListType):
-        return [serialize(t, memo) for t in value]
+def evaluate(value, context):
+    if isinstance(value, (dsl_types.YaqlExpression,
+                          yaql.language.expressions.Statement)):
+        return value(context)
+    elif isinstance(value, yaqlutils.MappingType):
+        return yaqlutils.FrozenDict(
+            (evaluate(d_key, context),
+             evaluate(d_value, context))
+            for d_key, d_value in value.iteritems())
+    elif yaqlutils.is_sequence(value):
+        return tuple(evaluate(t, context) for t in value)
+    elif isinstance(value, yaqlutils.SetType):
+        return frozenset(evaluate(t, context) for t in value)
+    elif yaqlutils.is_iterable(value):
+        return tuple(
+            evaluate(t, context)
+            for t in yaqlutils.limit_iterable(
+                value, constants.ITERATORS_LIMIT))
+    elif isinstance(value, dsl_types.MuranoObjectInterface):
+        return value.object
     else:
         return value
-
-
-def execute_instruction(instruction, action, context):
-    old_instruction = context.get_data('$?currentInstruction')
-    context.set_data(instruction, '?currentInstruction')
-    result = action()
-    context.set_data(old_instruction, '?currentInstruction')
-    return result
-
-
-def evaluate(value, context, max_depth=sys.maxint):
-    if isinstance(value, yaql.expressions.Expression):
-        value = yaql_expression.YaqlExpression(value)
-
-    if isinstance(value, yaql_expression.YaqlExpression):
-        func = lambda: evaluate(value.evaluate(context), context, 1)
-        if max_depth <= 0:
-            return func
-        else:
-            return execute_instruction(value, func, context)
-
-    elif isinstance(value, types.DictionaryType):
-        result = {}
-        for d_key, d_value in value.iteritems():
-            result[evaluate(d_key, context, max_depth - 1)] = \
-                evaluate(d_value, context, max_depth - 1)
-        return result
-    elif isinstance(value, types.ListType):
-        return [evaluate(t, context, max_depth - 1) for t in value]
-    elif isinstance(value, types.TupleType):
-        return tuple(evaluate(list(value), context, max_depth - 1))
-    elif callable(value):
-        return value()
-    elif isinstance(value, types.StringTypes):
-        return value
-    elif isinstance(value, collections.Iterable):
-        return list(value)
-    else:
-        return value
-
-
-def needs_evaluation(value):
-    if isinstance(value, (yaql_expression.YaqlExpression,
-                          yaql.expressions.Expression)):
-        return True
-    elif isinstance(value, types.DictionaryType):
-        for d_key, d_value in value.iteritems():
-            if needs_evaluation(d_value) or needs_evaluation(d_key):
-                return True
-    elif isinstance(value, types.StringTypes):
-        return False
-    elif isinstance(value, collections.Iterable):
-        for t in value:
-            if needs_evaluation(t):
-                return True
-    return False
 
 
 def merge_lists(list1, list2):
@@ -144,16 +100,17 @@ def generate_id():
     return uuid.uuid4().hex
 
 
-def parallel_select(collection, func):
+def parallel_select(collection, func, limit=1000):
     # workaround for eventlet issue 232
     # https://github.com/eventlet/eventlet/issues/232
     def wrapper(element):
         try:
-            return func(element), False, None
+            with contextual(get_context()):
+                return func(element), False, None
         except Exception as e:
             return e, True, sys.exc_info()[2]
 
-    gpool = eventlet.greenpool.GreenPool()
+    gpool = eventlet.greenpool.GreenPool(limit)
     result = list(gpool.imap(wrapper, collection))
     try:
         exception = next(t for t in result if t[1])
@@ -163,54 +120,101 @@ def parallel_select(collection, func):
         raise exception[0], None, exception[2]
 
 
-def to_python_codestyle(name):
-    s1 = re.sub('(.)([A-Z][a-z]+)', r'\1_\2', name)
-    return re.sub('([a-z0-9])([A-Z])', r'\1_\2', s1).lower()
-
-
 def enum(**enums):
     return type('Enum', (), enums)
 
 
-def get_executor(context):
-    return context.get_data('$?executor')
+def get_context():
+    current_thread = eventlet.greenthread.getcurrent()
+    return getattr(current_thread, '__murano_context', None)
 
 
-def get_class_loader(context):
-    return context.get_data('$?classLoader')
+def get_executor(context=None):
+    context = context or get_context()
+    return context[constants.CTX_EXECUTOR]
 
 
-def get_type(context):
-    return context.get_data('$?type')
+def get_class_loader(context=None):
+    context = context or get_context()
+    return context[constants.CTX_CLASS_LOADER]
 
 
-def get_environment(context):
-    return context.get_data('$?environment')
+def get_type(context=None):
+    context = context or get_context()
+    return context[constants.CTX_TYPE]
 
 
-def get_object_store(context):
-    return context.get_data('$?objectStore')
+def get_environment(context=None):
+    context = context or get_context()
+    return context[constants.CTX_ENVIRONMENT]
 
 
-def get_this(context):
-    return context.get_data('$?this')
+def get_object_store(context=None):
+    context = context or get_context()
+    return context[constants.CTX_OBJECT_STORE]
 
 
-def get_caller_context(context):
-    return context.get_data('$?callerContext')
+def get_this(context=None):
+    context = context or get_context()
+    return context[constants.CTX_THIS]
 
 
-def get_attribute_store(context):
-    return context.get_data('$?attributeStore')
+def get_caller_context(context=None):
+    context = context or get_context()
+    return context[constants.CTX_CALLER_CONTEXT]
 
 
-def get_current_instruction(context):
-    return context.get_data('$?currentInstruction')
+def get_attribute_store(context=None):
+    context = context or get_context()
+    return context[constants.CTX_ATTRIBUTE_STORE]
 
 
-def get_current_method(context):
-    return context.get_data('$?currentMethod')
+def get_current_instruction(context=None):
+    context = context or get_context()
+    return context[constants.CTX_CURRENT_INSTRUCTION]
 
 
-def get_current_exception(context):
-    return context.get_data('$?currentException')
+def get_current_method(context=None):
+    context = context or get_context()
+    return context[constants.CTX_CURRENT_METHOD]
+
+
+def get_current_exception(context=None):
+    context = context or get_context()
+    return context[constants.CTX_CURRENT_EXCEPTION]
+
+
+def are_property_modifications_allowed(context=None):
+    context = context or get_context()
+    return context[constants.CTX_ALLOW_PROPERTY_WRITES] or False
+
+
+def is_keyword(text):
+    return KEYWORD_REGEX.match(text) is not None
+
+
+def get_current_thread_id():
+    global _threads_sequencer
+
+    current_thread = eventlet.greenthread.getcurrent()
+    thread_id = getattr(current_thread, '__thread_id', None)
+    if thread_id is None:
+        thread_id = 'T' + str(_threads_sequencer)
+        _threads_sequencer += 1
+        setattr(current_thread, '__thread_id', thread_id)
+    return thread_id
+
+
+@contextlib.contextmanager
+def contextual(ctx):
+    current_thread = eventlet.greenthread.getcurrent()
+    current_context = getattr(current_thread, '__murano_context', None)
+    if ctx:
+        setattr(current_thread, '__murano_context', ctx)
+    try:
+        yield
+    finally:
+        if current_context:
+            setattr(current_thread, '__murano_context', current_context)
+        elif hasattr(current_thread, '__murano_context'):
+            delattr(current_thread, '__murano_context')

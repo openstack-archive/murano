@@ -36,7 +36,7 @@ class DslTestCase(base.MuranoTestCase):
         self._class_loader = test_class_loader.TestClassLoader(
             directory, 'tests', sys_class_loader)
         self.register_function(
-            lambda data: self._traces.append(data()), 'trace')
+            lambda data: self._traces.append(data), 'trace')
         self._traces = []
         test_class_loader.TestClassLoader.clear_configs()
         eventlet.debug.hub_exceptions(False)

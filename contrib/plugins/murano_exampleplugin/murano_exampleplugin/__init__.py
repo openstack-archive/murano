@@ -28,11 +28,10 @@ CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
-# noinspection PyPep8Naming
 class GlanceClient(object):
-    def initialize(self, _context):
-        client_manager = helpers.get_environment(_context).clients
-        self.client = client_manager.get_client(_context, "glance", True,
+    def __init__(self, context):
+        client_manager = helpers.get_environment(context).clients
+        self.client = client_manager.get_client(context, "glance", True,
                                                 self.create_glance_client)
 
     def list(self):
@@ -44,7 +43,7 @@ class GlanceClient(object):
             except StopIteration:
                 break
 
-    def getByName(self, name):
+    def get_by_name(self, name):
         images = list(self.client.images.list(filters={"name": name}))
         if len(images) > 1:
             raise AmbiguousNameException(name)
@@ -53,7 +52,7 @@ class GlanceClient(object):
         else:
             return GlanceClient._format(images[0])
 
-    def getById(self, imageId):
+    def get_by_id(self, imageId):
         image = self.client.images.get(imageId)
         return GlanceClient._format(image)
 

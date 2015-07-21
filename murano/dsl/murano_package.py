@@ -12,8 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from murano.dsl import dsl_types
 
-class MuranoPackage(object):
+
+class MuranoPackage(dsl_types.MuranoPackage):
     def __init__(self):
         super(MuranoPackage, self).__init__()
         self._name = None

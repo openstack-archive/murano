@@ -19,9 +19,8 @@ import json
 import eventlet
 from oslo_log import log as logging
 
-import murano.dsl.helpers as helpers
-import murano.dsl.murano_class as murano_class
-import murano.dsl.murano_object as murano_object
+from murano.dsl import dsl
+from murano.dsl import helpers
 
 LOG = logging.getLogger(__name__)
 
@@ -30,17 +29,17 @@ class MistralError(Exception):
     pass
 
 
-@murano_class.classname('io.murano.system.MistralClient')
-class MistralClient(murano_object.MuranoObject):
-    def initialize(self, _context):
-        self._clients = helpers.get_environment(_context).clients
+@dsl.name('io.murano.system.MistralClient')
+class MistralClient(object):
+    def __init__(self, context):
+        self._clients = helpers.get_environment(context).clients
 
-    def upload(self, _context, definition):
-        mistral_client = self._clients.get_mistral_client(_context)
+    def upload(self, definition):
+        mistral_client = self._clients.get_mistral_client()
         mistral_client.workflows.create(definition)
 
-    def run(self, _context, name, timeout=600, inputs=None, params=None):
-        mistral_client = self._clients.get_mistral_client(_context)
+    def run(self, name, timeout=600, inputs=None, params=None):
+        mistral_client = self._clients.get_mistral_client()
         execution = mistral_client.executions.create(workflow_name=name,
                                                      workflow_input=inputs,
                                                      params=params)

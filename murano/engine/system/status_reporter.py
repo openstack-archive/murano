@@ -13,33 +13,39 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import types
+
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
 
 from murano.common import uuidutils
-from murano.dsl import murano_class
+from murano.dsl import dsl
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-@murano_class.classname('io.murano.system.StatusReporter')
+@dsl.name('io.murano.system.StatusReporter')
 class StatusReporter(object):
     transport = None
 
-    def initialize(self, environment):
+    def __init__(self, environment):
         if StatusReporter.transport is None:
             StatusReporter.transport = messaging.get_transport(CONF)
         self._notifier = messaging.Notifier(
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),
             topic='murano')
-        self._environment_id = environment.object_id
+        if isinstance(environment, types.StringTypes):
+            self._environment_id = environment
+        else:
+            self._environment_id = environment.id
 
     def _report(self, instance, msg, details=None, level='info'):
         body = {
-            'id': instance.object_id,
+            'id': (self._environment_id if instance is None
+                   else instance.id),
             'text': msg,
             'details': details,
             'level': level,
@@ -50,5 +56,9 @@ class StatusReporter(object):
     def report(self, instance, msg):
         self._report(instance, msg)
 
+    def report_error_(self, instance, msg):
+        self._report(instance, msg, None, 'error')
+
+    @dsl.name('report_error')
     def report_error(self, instance, msg):
         self._report(instance, msg, None, 'error')

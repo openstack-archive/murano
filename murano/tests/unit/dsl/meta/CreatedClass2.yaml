@@ -1,0 +1,20 @@
+Name: CreatedClass2
+
+Properties:
+  property1:
+    Contract: $.string()
+
+  property2:
+    Contract: $.int()
+
+
+
+
+Methods:
+
+  .init:
+    Body:
+      - $.find(CreatingClass).require()
+      - trace('CreatedClass2::.init')
+
+

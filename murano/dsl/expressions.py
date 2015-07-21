@@ -14,10 +14,10 @@
 
 import types
 
-import murano.dsl.dsl_exception as dsl_exception
-import murano.dsl.helpers as helpers
-import murano.dsl.lhs_expression as lhs_expression
-import murano.dsl.yaql_expression as yaql_expression
+from murano.dsl import dsl_exception
+from murano.dsl import helpers
+from murano.dsl import lhs_expression
+from murano.dsl import yaql_expression
 
 _macros = []
 
@@ -36,7 +36,7 @@ def register_macro(cls):
 
 
 class DslExpression(object):
-    def execute(self, context, murano_class):
+    def execute(self, context):
         pass
 
 
@@ -64,11 +64,11 @@ class Statement(DslExpression):
     def expression(self):
         return self._expression
 
-    def execute(self, context, murano_class):
+    def execute(self, context):
         try:
             result = helpers.evaluate(self.expression, context)
             if self.destination:
-                self.destination(result, context, murano_class)
+                self.destination(result, context)
             return result
         except dsl_exception.MuranoPlException:
             raise

@@ -131,8 +131,7 @@ Methods:
       - $.environment.stack.updateTemplate($.instanceTemplate)
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
-      # Changing this to use the .networks attribute instead of 'addresses'
-      - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten()
+      - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten().distinct()
       - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
         Then:

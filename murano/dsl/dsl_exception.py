@@ -14,7 +14,7 @@
 
 import sys
 
-import murano.dsl.yaql_functions as yaql_functions
+from murano.dsl.principal_objects import stack_trace
 
 
 class MuranoPlException(Exception):
@@ -51,7 +51,7 @@ class MuranoPlException(Exception):
 
     @staticmethod
     def from_python_exception(exception, context):
-        stacktrace = yaql_functions.new('io.murano.StackTrace', context)
+        stacktrace = stack_trace.create_stack_trace(context)
         exception_type = type(exception)
         names = ['{0}.{1}'.format(exception_type.__module__,
                                   exception_type.__name__)]
@@ -72,10 +72,11 @@ class MuranoPlException(Exception):
             return self._names
 
     def format(self, prefix=''):
-        text = '{3}{0}: {1}\n' \
-               '{3}Traceback (most recent call last):\n' \
-               '{2}'.format(self._format_name(), self.message,
-                            self.stacktrace.toString(prefix + '  '), prefix)
+        text = ('{3}{0}: {1}\n'
+                '{3}Traceback (most recent call last):\n'
+                '{2}').format(
+            self._format_name(), self.message,
+            self.stacktrace().toString(prefix + '  '), prefix)
         if self._cause is not None:
             text += '\n\n{0} Caused by {1}'.format(
                 prefix, self._cause.format(prefix + ' ').lstrip())

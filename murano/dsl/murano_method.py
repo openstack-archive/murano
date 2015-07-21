@@ -13,13 +13,16 @@
 #    under the License.
 
 import collections
-import inspect
 import types
 
-import murano.dsl.macros as macros
-import murano.dsl.typespec as typespec
-import murano.dsl.virtual_exceptions as virtual_exceptions
-import murano.dsl.yaql_expression as yaql_expression
+from yaql.language import specs
+
+from murano.dsl import dsl
+from murano.dsl import dsl_types
+from murano.dsl import macros
+from murano.dsl import typespec
+from murano.dsl import virtual_exceptions
+from murano.dsl import yaql_integration
 
 
 macros.register()
@@ -32,26 +35,27 @@ class MethodUsages(object):
     All = set([Action, Runtime])
 
 
-def methodusage(usage):
-    def wrapper(method):
-        method._murano_method_usage = usage
-        return method
-    return wrapper
-
-
-class MuranoMethod(object):
+class MuranoMethod(dsl_types.MuranoMethod):
     def __init__(self, murano_class, name, payload):
         self._name = name
         self._murano_class = murano_class
 
         if callable(payload):
-            self._body = payload
-            self._arguments_scheme = self._generate_arguments_scheme(payload)
-            self._usage = getattr(payload, '_murano_method_usage',
-                                  MethodUsages.Runtime)
+            if isinstance(payload, specs.FunctionDefinition):
+                self._body = payload
+            else:
+                self._body = yaql_integration.get_function_definition(payload)
+            self._arguments_scheme = None
+            self._usage = (self._body.meta.get('usage') or
+                           self._body.meta.get('Usage') or
+                           MethodUsages.Runtime)
+            if (self._body.name.startswith('#')
+                    or self._body.name.startswith('*')):
+                raise ValueError(
+                    'Import of special yaql functions is forbidden')
         else:
             payload = payload or {}
-            self._body = self._prepare_body(payload.get('Body') or [], name)
+            self._body = macros.MethodBlock(payload.get('Body') or [], name)
             self._usage = payload.get('Usage') or MethodUsages.Runtime
             arguments_scheme = payload.get('Arguments') or []
             if isinstance(arguments_scheme, types.DictionaryType):
@@ -59,12 +63,14 @@ class MuranoMethod(object):
                                     arguments_scheme.iteritems()]
             self._arguments_scheme = collections.OrderedDict()
             for record in arguments_scheme:
-                if not isinstance(record, types.DictionaryType) \
-                        or len(record) > 1:
+                if (not isinstance(record, types.DictionaryType)
+                        or len(record) > 1):
                     raise ValueError()
                 name = record.keys()[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
-                    record[name], murano_class)
+                    record[name])
+        self._yaql_function_definition = \
+            yaql_integration.build_wrapper_function_definition(self)
 
     @property
     def name(self):
@@ -79,35 +85,31 @@ class MuranoMethod(object):
         return self._arguments_scheme
 
     @property
+    def yaql_function_definition(self):
+        return self._yaql_function_definition
+
+    @property
     def usage(self):
         return self._usage
+
+    @usage.setter
+    def usage(self, value):
+        self._usage = value
 
     @property
     def body(self):
         return self._body
 
-    def _generate_arguments_scheme(self, func):
-        func_info = inspect.getargspec(func)
-        data = [(name, {'Contract': yaql_expression.YaqlExpression('$')})
-                for name in func_info.args]
-        if inspect.ismethod(func):
-            data = data[1:]
-        defaults = func_info.defaults or tuple()
-        for i in xrange(len(defaults)):
-            data[i + len(data) - len(defaults)][1]['Default'] = defaults[i]
-        result = collections.OrderedDict([
-            (name, typespec.ArgumentSpec(declaration, self.murano_class))
-            for name, declaration in data])
-        if '_context' in result:
-            del result['_context']
-        return result
-
-    def _prepare_body(self, body, name):
-        return macros.MethodBlock(body, name)
-
     def __repr__(self):
         return 'MuranoMethod({0}::{1})'.format(
             self.murano_class.name, self.name)
 
-    def invoke(self, executor, this, parameters):
-        return self.murano_class.invoke(self.name, executor, this, parameters)
+    def invoke(self, executor, this, args, kwargs, context=None,
+               skip_stub=False):
+        if not self.murano_class.is_compatible(this):
+            raise Exception("'this' must be of compatible type")
+        if isinstance(this, dsl.MuranoObjectInterface):
+            this = this.object
+        return executor.invoke_method(
+            self, this.cast(self.murano_class),
+            context, args, kwargs, skip_stub)

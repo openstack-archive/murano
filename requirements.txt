@@ -19,7 +19,7 @@ netaddr>=0.7.12
 PyYAML>=3.1.0
 jsonpatch>=1.1
 keystonemiddleware>=2.0.0
-yaql!=0.3.0,>=0.2.7 # Apache 2.0 License
+yaql>=1.0.0 # Apache 2.0 License
 
 # For paste.util.template used in keystone.common.template
 Paste

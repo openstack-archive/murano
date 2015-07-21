@@ -23,12 +23,11 @@ import uuid
 import eventlet.event
 from oslo_config import cfg
 from oslo_log import log as logging
+from yaql import specs
 
 import murano.common.exceptions as exceptions
 import murano.common.messaging as messaging
-import murano.dsl.murano_class as murano_class
-import murano.dsl.murano_object as murano_object
-import murano.dsl.yaql_expression as yaql_expression
+from murano.dsl import dsl
 import murano.engine.system.common as common
 
 LOG = logging.getLogger(__name__)
@@ -39,24 +38,23 @@ class AgentException(Exception):
     pass
 
 
-@murano_class.classname('io.murano.system.Agent')
-class Agent(murano_object.MuranoObject):
-    def initialize(self, _context, host):
+@dsl.name('io.murano.system.Agent')
+class Agent(object):
+    def __init__(self, interfaces, host):
         self._enabled = False
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
             return
 
-        self._environment = self._get_environment(_context)
+        self._environment = self._get_environment(interfaces, host)
         self._enabled = True
         self._queue = str('e%s-h%s' % (
-            self._environment.object_id, host.object_id)).lower()
+            self._environment.id, host.id)).lower()
 
-    def _get_environment(self, _context):
-        return yaql_expression.YaqlExpression(
-            "$host.find('io.murano.Environment').require()"
-        ).evaluate(_context)
+    def _get_environment(self, interfaces, host):
+        return interfaces.yaql()(
+            "$.find('io.murano.Environment').require()", host)
 
     @property
     def enabled(self):
@@ -72,7 +70,7 @@ class Agent(murano_object.MuranoObject):
         with common.create_rmq_client() as client:
             client.declare(self._queue, enable_ha=True, ttl=86400000)
 
-    def queueName(self):
+    def queue_name(self):
         return self._queue
 
     def _check_enabled(self):
@@ -87,13 +85,13 @@ class Agent(murano_object.MuranoObject):
         msg.id = msg_id
         return msg
 
-    def _send(self, template, wait_results, timeout, _context):
+    def _send(self, template, wait_results, timeout):
         """Send a message over the MQ interface."""
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()
-            listener = self._environment.agentListener
-            listener.subscribe(msg_id, event, _context)
+            listener = self._environment['agentListener']
+            listener().subscribe(msg_id, event)
 
         msg = self._prepare_message(template, msg_id)
         with common.create_rmq_client() as client:
@@ -105,7 +103,7 @@ class Agent(murano_object.MuranoObject):
                     result = event.wait()
 
             except eventlet.Timeout:
-                listener.unsubscribe(msg_id)
+                listener().unsubscribe(msg_id)
                 raise exceptions.TimeoutException(
                     'The Agent does not respond'
                     'within {0} seconds'.format(timeout))
@@ -122,40 +120,44 @@ class Agent(murano_object.MuranoObject):
         else:
             return None
 
-    def call(self, template, resources, _context, timeout=None):
+    @specs.parameter(
+        'resources', dsl.MuranoObjectType('io.murano.system.Resources'))
+    def call(self, template, resources, timeout=None):
         if timeout is None:
             timeout = CONF.engine.agent_timeout
         self._check_enabled()
-        plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, True, timeout, _context)
+        plan = self.build_execution_plan(template, resources())
+        return self._send(plan, True, timeout)
 
-    def send(self, template, resources, _context):
+    @specs.parameter(
+        'resources', dsl.MuranoObjectType('io.murano.system.Resources'))
+    def send(self, template, resources):
         self._check_enabled()
-        plan = self.buildExecutionPlan(template, resources)
-        return self._send(plan, False, 0, _context)
+        plan = self.build_execution_plan(template, resources())
+        return self._send(plan, False, 0)
 
-    def callRaw(self, plan, _context, timeout=None):
+    def call_raw(self, plan, timeout=None):
         if timeout is None:
             timeout = CONF.engine.agent_timeout
         self._check_enabled()
-        return self._send(plan, True, timeout, _context)
+        return self._send(plan, True, timeout)
 
-    def sendRaw(self, plan, _context):
+    def send_raw(self, plan):
         self._check_enabled()
-        return self._send(plan, False, 0, _context)
+        return self._send(plan, False, 0)
 
-    def isReady(self, _context, timeout=100):
+    def is_ready(self, timeout=100):
         try:
-            self.waitReady(_context, timeout)
+            self.wait_ready(timeout)
         except exceptions.TimeoutException:
             return False
         else:
             return True
 
-    def waitReady(self, _context, timeout=100):
+    def wait_ready(self, timeout=100):
         self._check_enabled()
         template = {'Body': 'return', 'FormatVersion': '2.0.0', 'Scripts': {}}
-        self.call(template, False, _context, timeout)
+        self.call(template, False, timeout)
 
     def _process_v1_result(self, result):
         if result['IsException']:
@@ -203,7 +205,7 @@ class Agent(murano_object.MuranoObject):
             'timestamp': datetime.datetime.now().isoformat()
         }
 
-    def buildExecutionPlan(self, template, resources):
+    def build_execution_plan(self, template, resources):
         template = copy.deepcopy(template)
         if not isinstance(template, types.DictionaryType):
             raise ValueError('Incorrect execution plan ')
@@ -310,9 +312,8 @@ class Agent(murano_object.MuranoObject):
             files[name] = file_id
 
         else:
-            template['Files'][file_id] = self._get_file_description(file,
-                                                                    resources,
-                                                                    folder)
+            template['Files'][file_id] = self._get_file_description(
+                file, resources, folder)
             files[name] = file_id
         return file_id
 

@@ -13,7 +13,7 @@
 #    under the License.
 
 from murano.dsl import exceptions
-import murano.dsl.type_scheme as type_scheme
+from murano.dsl import type_scheme
 
 
 class PropertyUsages(object):
@@ -28,8 +28,7 @@ class PropertyUsages(object):
 
 
 class Spec(object):
-    def __init__(self, declaration, owner_class):
-        self._namespace_resolver = owner_class.namespace_resolver
+    def __init__(self, declaration):
         self._contract = type_scheme.TypeScheme(declaration['Contract'])
         self._usage = declaration.get('Usage') or 'In'
         self._default = declaration.get('Default')
@@ -39,12 +38,10 @@ class Spec(object):
                 'Unknown type {0}. Must be one of ({1})'.format(
                     self._usage, ', '.join(PropertyUsages.All)))
 
-    def validate(self, value, this, owner, context,
-                 object_store, default=None):
+    def validate(self, value, context, this, owner, default=None):
         if default is None:
             default = self.default
-        return self._contract(value, context, this, owner, object_store,
-                              self._namespace_resolver, default)
+        return self._contract(value, context, this, owner, default)
 
     @property
     def default(self):
