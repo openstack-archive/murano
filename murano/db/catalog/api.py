@@ -416,7 +416,7 @@ def category_get(category_id, session=None, packages=False):
 
     category = session.query(models.Category).get(category_id)
     if not category:
-        msg = _("Category id or '{0}' not found").format(category_id)
+        msg = _("Category id '{0}' not found").format(category_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
     if packages:
