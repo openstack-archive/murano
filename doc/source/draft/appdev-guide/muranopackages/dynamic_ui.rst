@@ -39,7 +39,7 @@ For example, Murano Dynamic UI platform of version 2.2 is able to process UI
 definitions of versions 2.0, 2.1 and 2.2, but is unable to process 2.3, 3.0 or
 1.9.
 
-Currently the latest version of Dynamic UI platform is 2.0. It is incompatible
+Currently the latest version of Dynamic UI platform is 2.1. It is incompatible
 with UI definitions of Version 1, which were used in Murano releases before
 Juno.
 
@@ -69,7 +69,7 @@ used. Two yaql functions are used for object model generation:
 * **generateHostname** is used for machine hostname generation; it accepts 2 arguments: name pattern (string) and index (integer). If '#' symbol is present in name pattern, it will be replaced with the index provided. If pattern is not given, a random name will be generated.
 * **repeat** is used to produce a list of data snippets, given the template snippet (first argument) and number of times it should be reproduced (second argument). Inside that template snippet current step can be referenced as *$index*.
 
-.. note:
+.. note::
    Note, that while evaluating YAQL expressions referenced from
    **Application** section (as well as almost all attributes inside
    **Forms** section, see later) *$* root object is set to the list of
@@ -144,6 +144,8 @@ Currently supported options for **type** attribute are:
 * flavor - specific field, used for selection instance flavor from a list
 * keypair - specific field, used for selecting a keypair from a list
 * azone - specific field, used for selecting instance availability zone from a list
+* network - specific field, used to select a network and subnet from a list of
+  the ones available to the current user
 * any other value is considered to be a fully qualified name for some Application package and is rendered as a pair of controls: one for selecting already existing Applications of that type in an Environment, second - for creating a new Application of that type and selecting it
 
 Other arguments (and whether they are required or not) depends on a
@@ -176,6 +178,41 @@ attributes are the following:
               min_disk: 20
               min_vcpus: 2
               min_memory_mb: 2048
+
+* **include_subnets** is used only with network field. `True` by default.
+  If `True`, the field list includes all the possible combinations of network
+  and subnet. E.g. if there are two available networks X and Y, and X has two
+  subnets A and B, while Y has a single subnet C, then the list will include 3
+  items: (X, A), (X, B), (Y, C). If set to `False` only network names will be
+  listed, without their subnets.
+
+* **filter** is used only with network field. `None` by default. If set to a
+  regexp string, will be used to display only the networks with names matching
+  the given regexp.
+
+* **murano_networks** is used only with network field. `None` by default. May
+  have values `None`, `exclude` or `translate`. Defines the handling of
+  networks which are created by murano.
+  Such networks usually have very long randomly generated names, and thus look
+  ugly when displayed in the list. If this value is set to `exclude` then these
+  networks are not shown in the list at all. If set to `translate` the
+  names of such networks are replaced by a string `Network of %env_name%`.
+
+  .. note::
+     This functionality is based on the simple string matching of the
+     network name prefix and the names of all the accessible murano
+     environments. If the environment is renamed after the initial deployment
+     this feature will not be able to properly translate or exclude its network
+     name.
+
+* **allow_auto** is used only with network field. `True` by default. Defines if
+  the default value of the dropdown (labeled "Auto") should be present in the
+  list. The default value is a tuple consisting of two `None` values. The logic
+  on how to treat this value is up to application developer. It is suggested to
+  use this field to indicate that the instance should join default environment
+  network. For use-cases where such behavior is not desired, this parameter
+  should be set to `False`.
+
 
 Besides field-level validators, form-level validators also exist. They
 use **standard context** for YAQL evaluation and are required when

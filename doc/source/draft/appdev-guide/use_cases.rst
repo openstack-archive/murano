@@ -155,4 +155,85 @@ So, you need to specify the maximum instance number in the UI form related to th
 After the deployment, the LB virtual IP, by which an application is accessible,
 is displayed.
 
+Configuring Network Access for VMs
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+By default, each VM instance deployed by ``io.murano.resources.Instance`` class
+or its descendants joins an environment's default network. This network gets
+created when the Environment is deployed for the first time, a subnet is
+created in it and is uplinked to a router which is detected automatically based
+on its name.
+
+This behavior may be overridden in two different ways.
+
+Using existing network as environment's default
+-----------------------------------------------
+
+This option is available for users when they create a new environment in the
+Dashboard. A dropdown control is displayed next to the input field prompting
+for the name of environment. By default this control provides to create a new
+network, but the user may opt to choose some already existing network to be the
+default for the environment being created. If the network has more than one
+subnet, the list will include all the available options with their CIDRs
+shown. The selected network will be used as environment's default, so no new
+network will be created.
+
+.. note::
+
+  Murano does not check the configuration or topology of the network selected
+  this way. It is up to the user to ensure that the network is uplinked to some
+  external network via a router - otherwise the murano engine will not be able
+  to communicate with the agents on the deployed VMs. If the Applications being
+  deployed require internet connectivity it is up to the user to ensure that
+  this net provides it, than DNS nameservers are set and accessible etc.
+
+
+Modifying the App UI to prompt user for network
+-----------------------------------------------
+
+The application package may be designed to ask user about the network they want
+to use for the VMs deployed by this particular application. This allows to
+override the default environment's network setting regardless of its value.
+
+To do this, application developer has to include a ``network`` field into the
+Dynamic UI definition of the app. The value returned by this field is a tuple
+of network_id and a subnet_id. This values may be passed as the
+input properties for ``io.murano.resources.ExistingNeutronNetwork`` object
+which may be in its turn passed to an instance of
+``io.murano.resources.Instance`` as its network configuration.
+
+The UI definition may look like this:
+
+.. code-block:: yaml
+
+  Templates:
+    customJoinNet:
+      - ?:
+          type: io.murano.resources.ExistingNeutronNetwork
+        internalNetworkName: $.instanceConfiguration.network[0]
+        internalSubnetworkName: $.instanceConfiguration.network[1]
+  Application:
+    ?:
+      type: com.example.someApplicationName
+    instance:
+      ?:
+        type: io.murano.resources.LinuxMuranoInstance
+    networks:
+      useEnvironmentNetwork: $.instanceConfiguration.network[0]=null
+      useFlatNetwork: false
+      customNetworks: switch($.instanceConfiguration.network[0], $=null=>list(), $!=null=>$customJoinNet)
+  Forms:
+    - instanceConfiguration:
+        fields:
+          - name: network
+            type: network
+            label: Network
+            description: Select a network to join. 'Auto' corresponds to a default environment's network.
+            required: false
+            murano_networks: translate
+
+For more details on the Dynamic UI its controls and templates please refer to
+its :ref:`specification <DynamicUISpec>`.
+
+
 
