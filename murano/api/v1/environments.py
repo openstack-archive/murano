@@ -29,6 +29,7 @@ from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db import session as db_session
 from murano.common.i18n import _, _LI
+from murano.utils import check_env
 
 LOG = logging.getLogger(__name__)
 
@@ -156,6 +157,7 @@ class Controller(object):
         target = {"environment_id": environment_id}
         policy.check('delete_environment', request.context, target)
         if request.GET.get('abandon', '').lower() == 'true':
+            check_env(request, environment_id)
             LOG.debug('Environments:Abandon  <Id: {0}>'.format(environment_id))
             envs.EnvironmentServices.remove(environment_id)
         else:
