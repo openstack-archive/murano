@@ -36,7 +36,11 @@ if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import service
-from paste import deploy
+
+# It appears that with the pylint 1.2 release one can not
+# check packages that import from namespace packages anymore,
+# so using this workaround to solve the problem
+import paste.deploy as deploy
 
 from murano.api.v1 import request_statistics
 from murano.common import config
