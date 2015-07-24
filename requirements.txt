@@ -1,14 +1,15 @@
 # The order of packages is significant, because pip processes them in the order
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
-pbr<2.0,>=0.11
+pbr<2.0,>=1.3
 Babel>=1.3
 SQLAlchemy<1.1.0,>=0.9.7
 stevedore>=1.5.0 # Apache-2.0
 alembic>=0.7.2
 eventlet>=0.17.4
 PasteDeploy>=1.5.0
-Routes!=2.0,>=1.12.3
+Routes!=2.0,!=2.1,>=1.12.3;python_version=='2.7'
+Routes!=2.0,>=1.12.3;python_version!='2.7'
 WebOb>=1.2.3
 kombu>=3.0.7
 psutil<2.0.0,>=1.1.1
@@ -17,8 +18,8 @@ six>=1.9.0
 netaddr>=0.7.12
 PyYAML>=3.1.0
 jsonpatch>=1.1
-keystonemiddleware>=1.5.0
-yaql>=0.2.6,<0.3 # Apache 2.0 License
+keystonemiddleware>=2.0.0
+yaql!=0.3.0,>=0.2.7 # Apache 2.0 License
 
 # For paste.util.template used in keystone.common.template
 Paste
@@ -29,15 +30,15 @@ python-heatclient>=0.3.0
 python-neutronclient<3,>=2.3.11
 python-muranoclient>=0.5.6
 python-congressclient>=1.0.0
-oslo.db>=1.10.0 # Apache-2.0
+oslo.db>=1.12.0 # Apache-2.0
 oslo.config>=1.11.0 # Apache-2.0
 oslo.policy>=0.5.0 # Apache-2.0
-oslo.messaging>=1.16.0 # Apache-2.0
+oslo.messaging!=1.17.0,!=1.17.1,>=1.16.0 # Apache-2.0
 oslo.serialization>=1.4.0 # Apache-2.0
 oslo.service>=0.1.0 # Apache-2.0
-oslo.utils>=1.6.0 # Apache-2.0
+oslo.utils>=1.9.0 # Apache-2.0
 oslo.i18n>=1.5.0 # Apache-2.0
-oslo.log>=1.2.0  # Apache-2.0
+oslo.log>=1.6.0 # Apache-2.0
 
 # not listed in global requirements
-python-mistralclient!=1.0.0.0b1,>=1.0.0
+python-mistralclient>=1.0.0
