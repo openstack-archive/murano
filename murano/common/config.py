@@ -194,8 +194,11 @@ engine_opts = [
     cfg.BoolOpt('enable_model_policy_enforcer', default=False,
                 help=_('Enable model policy enforcer using Congress')),
     cfg.IntOpt('agent_timeout', default=3600,
-               help=_('Time for waiting for a response from murano agent'
-                      'during the deployment'))
+               help=_('Time for waiting for a response from murano agent '
+                      'during the deployment')),
+    cfg.ListOpt('load_packages_from', default=[],
+                help=_('List of directories to load local packages from. '
+                       'If not provided, packages will be loaded by API'))
 ]
 
 # TODO(sjmc7): move into engine opts?
