@@ -94,7 +94,8 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         parameters.update(HotPackage._translate_outputs(hot))
         translated['Properties'] = parameters
 
-        translated.update(HotPackage._generate_workflow(hot))
+        files = HotPackage._translate_files(self._source_directory)
+        translated.update(HotPackage._generate_workflow(hot, files))
         self._translated_class = translated
 
     @staticmethod
@@ -150,6 +151,24 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         return result
 
     @staticmethod
+    def _translate_files(source_directory):
+        heat_files_dir = os.path.join(source_directory, 'Resources/HotFiles')
+        result = {}
+        if os.path.isdir(heat_files_dir):
+            result = HotPackage._build_heat_files_dict(heat_files_dir)
+        return result
+
+    @staticmethod
+    def _build_heat_files_dict(basedir):
+        result = []
+        for root, _, files in os.walk(os.path.abspath(basedir)):
+            for f in files:
+                full_path = os.path.join(root, f)
+                relative_path = os.path.relpath(full_path, basedir)
+                result.append(relative_path)
+        return result
+
+    @staticmethod
     def _translate_constraint(constraint):
         if 'allowed_values' in constraint:
             return HotPackage._translate_allowed_values_constraint(
@@ -200,10 +219,14 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         return str(value)
 
     @staticmethod
-    def _generate_workflow(hot):
+    def _generate_workflow(hot, files):
         template_parameters = {}
         for key, value in (hot.get('parameters') or {}).items():
             template_parameters[key] = YAQL("$." + key)
+        hot_files_map = {}
+        for f in files:
+            file_path = "$resources.string('HotFiles/%s')" % f
+            hot_files_map[f] = YAQL(file_path)
 
         copy_outputs = []
         for key, value in (hot.get('outputs') or {}).items():
@@ -232,8 +255,10 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             {YAQL('$resources'): YAQL("new('io.murano.system.Resources')")},
             {YAQL('$template'): YAQL("$resources.yaml(type($this))")},
             {YAQL('$parameters'): template_parameters},
+            {YAQL('$files'): hot_files_map},
             YAQL('$stack.setTemplate($template)'),
             YAQL('$stack.setParameters($parameters)'),
+            YAQL('$stack.setFiles($files)'),
 
             YAQL("$reporter.report($this, 'Stack creation has started')"),
             {

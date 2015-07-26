@@ -40,6 +40,7 @@ class HeatStack(murano_object.MuranoObject):
         self._name = name
         self._template = None
         self._parameters = {}
+        self._files = {}
         self._applied = True
         self._description = description
         self._clients = helpers.get_environment(_context).clients
@@ -82,6 +83,10 @@ class HeatStack(murano_object.MuranoObject):
 
     def setParameters(self, parameters):
         self._parameters = parameters
+        self._applied = False
+
+    def setFiles(self, files):
+        self._files = files
         self._applied = False
 
     def updateTemplate(self, _context, template):
@@ -174,6 +179,7 @@ class HeatStack(murano_object.MuranoObject):
                     stack_name=self._name,
                     parameters=self._parameters,
                     template=template,
+                    files=self._files,
                     disable_rollback=True)
 
                 self._wait_state(
@@ -186,6 +192,7 @@ class HeatStack(murano_object.MuranoObject):
                 trust_client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,
+                    files=self._files,
                     template=template,
                     disable_rollback=True)
                 self._wait_state(

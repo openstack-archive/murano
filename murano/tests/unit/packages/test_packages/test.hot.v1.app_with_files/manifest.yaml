@@ -1,0 +1,17 @@
+Format: Heat.HOT/1.0
+Type: Application
+FullName: test.hot.v1.app
+Name: Test HOT v1 App
+Description: Test HOT v1 Application
+Author: Test Runner
+Tags: [Linux]
+Logo: test_logo.png
+Supplier:
+  Name: Supplier Name
+  CompanyUrl:
+    Text: Example Company
+    Link: http://example.com
+  Logo: test_supplier_logo.png
+  Summary: Company summary goes here
+  Description: Marked up company description goes here
+
