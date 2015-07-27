@@ -17,39 +17,27 @@ from webob import exc
 
 from murano.common import policy
 from murano.common import wsgi
-from murano.db import models
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
 from murano.common.i18n import _LI, _LE, _
 from murano.services import actions
 from murano.services import states
+from murano.utils import verify_env
 
 
 LOG = logging.getLogger(__name__)
 
 
 class Controller(object):
-    def _validate_environment(self, unit, request, environment_id):
-        environment = unit.query(models.Environment).get(environment_id)
 
-        if environment is None:
-            LOG.info(_LI('Environment <EnvId {0}> '
-                         'is not found').format(environment_id))
-            raise exc.HTTPNotFound
-
-        if environment.tenant_id != request.context.tenant:
-            LOG.info(_LI('User is not authorized to access '
-                         'this tenant resources.'))
-            raise exc.HTTPUnauthorized
-
+    @verify_env
     def execute(self, request, environment_id, action_id, body):
         policy.check("execute_action", request.context, {})
 
         LOG.debug('Action:Execute <ActionId: {0}>'.format(action_id))
 
         unit = db_session.get_session()
-        self._validate_environment(unit, request, environment_id)
 
         # no new session can be opened if environment has deploying status
         env_status = envs.EnvironmentServices.get_status(environment_id)
@@ -72,13 +60,13 @@ class Controller(object):
             action_id, session, unit, request.context.auth_token, body or {})
         return {'task_id': task_id}
 
+    @verify_env
     def get_result(self, request, environment_id, task_id):
         policy.check("execute_action", request.context, {})
 
         LOG.debug('Action:GetResult <TaskId: {0}>'.format(task_id))
 
         unit = db_session.get_session()
-        self._validate_environment(unit, request, environment_id)
         result = actions.ActionServices.get_result(environment_id, task_id,
                                                    unit)
 

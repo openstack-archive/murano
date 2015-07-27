@@ -84,5 +84,5 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         )
         response = request.get_response(self.api)
 
-        # Should be unauthorized!
-        self.assertEqual(response.status_code, 401)
+        # Should be forbidden!
+        self.assertEqual(response.status_code, 403)

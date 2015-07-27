@@ -112,7 +112,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
     def test_create_session_in_env_from_another_tenant(self):
         env = self.create_environment('test')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.create_session, env['id'])
 
     @attr(type='negative')
@@ -120,7 +120,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
         env = self.create_environment('test')
         sess = self.client.create_session(env['id'])[1]
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_session, env['id'],
                           sess['id'])
 
@@ -129,7 +129,7 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
         env = self.create_environment('test')
         sess = self.client.create_session(env['id'])[1]
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_session, env['id'],
                           sess['id'])
 
@@ -139,6 +139,6 @@ class TestSessionsTenantIsolation(base.NegativeTestCase):
         env = self.create_environment('test')
         sess = self.client.create_session(env['id'])[1]
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.deploy_session, env['id'],
                           sess['id'])

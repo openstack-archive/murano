@@ -108,19 +108,19 @@ class TestEnvironmentsTenantIsolation(base.NegativeTestCase):
     def test_get_environment_from_another_tenant(self):
         env = self.create_environment('test')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_environment, env['id'])
 
     @attr(type='negative')
     def test_update_environment_from_another_tenant(self):
         env = self.create_environment('test')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.update_environment, env['id'])
 
     @attr(type='negative')
     def test_delete_environment_from_another_tenant(self):
         env = self.create_environment('test')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_environment, env['id'])

@@ -176,13 +176,11 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                       result_msg)
 
     def test_missing_environment(self):
-        """Check that a missing environment results in an HTTPNotFound."""
-        self._set_policy_rules(
-            {'show_environment': '@'}
-        )
-        self.expect_policy_check('show_environment',
-                                 {'environment_id': 'no-such-id'})
+        """Check that a missing environment results in an HTTPNotFound.
 
+        Environment check will be made in the decorator and raises,
+        no need to check policy in this testcase.
+        """
         req = self._get('/environments/no-such-id')
         result = req.get_response(self.api)
         self.assertEqual(404, result.status_code)

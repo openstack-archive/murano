@@ -24,6 +24,7 @@ from murano.common import utils
 from murano.common import wsgi
 from murano.db import models
 from murano.db import session as db_session
+from murano.utils import verify_env
 
 LOG = logging.getLogger(__name__)
 
@@ -32,12 +33,12 @@ API_NAME = 'Deployments'
 
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
+    @verify_env
     def index(self, request, environment_id):
         target = {"environment_id": environment_id}
         policy.check("list_deployments", request.context, target)
 
         unit = db_session.get_session()
-        verify_and_get_env(unit, environment_id, request)
         query = unit.query(models.Task) \
             .filter_by(environment_id=environment_id) \
             .order_by(desc(models.Task.created))
@@ -74,20 +75,6 @@ class Controller(object):
 
         result = query.all()
         return {'reports': [status.to_dict() for status in result]}
-
-
-def verify_and_get_env(db_session, environment_id, request):
-    environment = db_session.query(models.Environment).get(environment_id)
-    if not environment:
-        LOG.info(_LI(
-            'Environment with id {0} not found').format(environment_id))
-        raise exc.HTTPNotFound
-
-    if environment.tenant_id != request.context.tenant:
-        LOG.info(_LI(
-            'User is not authorized to access this tenant resources.'))
-        raise exc.HTTPUnauthorized
-    return environment
 
 
 def _patch_description(description):
