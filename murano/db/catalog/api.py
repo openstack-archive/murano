@@ -36,25 +36,14 @@ SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
 LOG = logging.getLogger(__name__)
 
 
-def _package_get(package_id_or_name, session):
+def _package_get(package_id, session):
     # TODO(sjmc7): update openstack/common and pull in
     # uuidutils, check that package_id_or_name resembles a
     # UUID before trying to treat it as one
-    package = session.query(models.Package).get(package_id_or_name)
+    package = session.query(models.Package).get(package_id)
     if not package:
-        # Try using the FQN name instead. Since FQNs right now are unique,
-        # don't need to do any logic to figure out if we have the right one.
-        # # TODO(sjmc7): Revisit for precedence rules.
-        #  Heat does this in nicer way, giving each stack an unambiguous ID of
-        # stack_name/id and redirecting to it in the API. We need to do some
-        # reworking for precedence rules later, so maybe take a look at this
-        package = session.query(models.Package).filter_by(
-            fully_qualified_name=package_id_or_name
-        ).first()
-
-    if not package:
-        msg = _("Package id or name '{0}' not found").\
-            format(package_id_or_name)
+        msg = _("Package id '{0}' not found").\
+            format(package_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(explanation=msg)
 
@@ -76,13 +65,13 @@ def _authorize_package(package, context, allow_public=False):
             raise exc.HTTPForbidden(explanation=msg)
 
 
-def package_get(package_id_or_name, context):
+def package_get(package_id, context):
     """Return package details
        :param package_id: ID or name of a package, string
        :returns: detailed information about package, dict
     """
     session = db_session.get_session()
-    package = _package_get(package_id_or_name, session)
+    package = _package_get(package_id, session)
     if not context.is_admin:
         _authorize_package(package, context, allow_public=True)
     return package
@@ -393,12 +382,12 @@ def package_upload(values, tenant_id):
     return package
 
 
-def package_delete(package_id_or_name, context):
-    """Delete a package by name or by ID."""
+def package_delete(package_id, context):
+    """Delete a package by ID."""
     session = db_session.get_session()
 
     with session.begin():
-        package = _package_get(package_id_or_name, session)
+        package = _package_get(package_id, session)
         if not context.is_admin and package.owner_id != context.tenant:
             raise exc.HTTPForbidden(
                 explanation='Package is not owned by the'
