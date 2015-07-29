@@ -15,6 +15,7 @@
 from eventlet import semaphore
 import heatclient.client as hclient
 import keystoneclient
+import keystoneclient.auth.identity.access as access
 import muranoclient.v1.client as muranoclient
 import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
@@ -100,10 +101,7 @@ class ClientManager(object):
             use_trusts = False
 
         def factory(keystone_client, auth_token):
-            auth = keystoneclient.auth.identity.v2.Token(
-                auth_url=cfg.CONF.keystone_authtoken.auth_uri,
-                tenant_name=keystone_client.tenant_name,
-                token=auth_token)
+            auth = access.AccessInfoPlugin(keystone_client.auth_ref)
             session = keystoneclient.session.Session(auth=auth)
             return congress_client.Client(session=session,
                                           service_type='policy')
@@ -198,7 +196,6 @@ class ClientManager(object):
                 endpoint_type=endpoint_type)
 
             return mistralclient.client(mistral_url=mistral_url,
-                                        auth_url=keystone_client.auth_url,
                                         project_id=keystone_client.tenant_id,
                                         endpoint_type=endpoint_type,
                                         service_type=service_type,
