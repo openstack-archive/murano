@@ -142,7 +142,10 @@ murano_opts = [
     cfg.ListOpt('enabled_plugins', default=None,
                 help="List of enabled Extension Plugins. "
                      "Remove or leave commented to enable all installed "
-                     "plugins.")
+                     "plugins."),
+
+    cfg.StrOpt('region_name_for_services',
+               help="Default region name used to get services endpoints.")
 ]
 
 networking_opts = [
