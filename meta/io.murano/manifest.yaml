@@ -46,3 +46,4 @@ Classes:
   io.murano.system.SecurityGroupManager: system/SecurityGroupManager.yaml
   io.murano.system.NeutronSecurityGroupManager: system/NeutronSecurityGroupManager.yaml
   io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml
+  io.murano.system.MistralClient: system/MistralClient.yaml
