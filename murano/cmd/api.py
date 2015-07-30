@@ -34,6 +34,7 @@ if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
     sys.path.insert(0, root)
 
 from oslo_config import cfg
+from oslo_log import log as logging
 from oslo_service import service
 
 from murano.api.v1 import request_statistics
@@ -53,6 +54,7 @@ def main():
         request_statistics.init_stats()
         policy.init()
 
+        logging.setup(CONF, 'murano')
         launcher = service.ServiceLauncher(CONF)
 
         app = app_loader.load_paste_app('murano')
