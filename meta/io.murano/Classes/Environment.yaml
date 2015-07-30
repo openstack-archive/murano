@@ -67,10 +67,6 @@ Methods:
   deploy:
     Usage: Action
     Body:
-      - $minimalStack:
-          resources: {}
-      - $.stack.updateTemplate($minimalStack)
-      - $.stack.push()
       - $.applications.pselect($.deploy())
 
   destroy:
