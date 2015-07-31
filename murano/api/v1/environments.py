@@ -21,6 +21,7 @@ from webob import exc
 
 from murano.api.v1 import request_statistics
 from murano.api.v1 import sessions
+from murano.common.i18n import _
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
@@ -28,8 +29,8 @@ from murano.db import models
 from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db import session as db_session
-from murano.common.i18n import _, _LI
 from murano.utils import check_env
+from murano.utils import verify_env
 
 LOG = logging.getLogger(__name__)
 
@@ -84,6 +85,7 @@ class Controller(object):
         return environment.to_dict()
 
     @request_statistics.stats_count(API_NAME, 'Show')
+    @verify_env
     def show(self, request, environment_id):
         LOG.debug('Environments:Show <Id: {0}>'.format(environment_id))
         target = {"environment_id": environment_id}
@@ -91,17 +93,6 @@ class Controller(object):
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
-
-        if environment is None:
-            LOG.info(_LI('Environment <EnvId {0}> is not found').format(
-                environment_id))
-            raise exc.HTTPNotFound
-
-        if environment.tenant_id != request.context.tenant:
-            LOG.info(_LI('User is not authorized to access '
-                         'this tenant resources.'))
-            raise exc.HTTPUnauthorized
-
         env = environment.to_dict()
         env['status'] = envs.EnvironmentServices.get_status(env['id'])
 
@@ -116,6 +107,7 @@ class Controller(object):
         return env
 
     @request_statistics.stats_count(API_NAME, 'Update')
+    @verify_env
     def update(self, request, environment_id, body):
         LOG.debug('Environments:Update <Id: {0}, '
                   'Body: {1}>'.format(environment_id, body))
@@ -124,17 +116,6 @@ class Controller(object):
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
-
-        if environment is None:
-            LOG.info(_LI('Environment <EnvId {0}> not '
-                         'found').format(environment_id))
-            raise exc.HTTPNotFound
-
-        if environment.tenant_id != request.context.tenant:
-            LOG.info(_LI('User is not authorized to access '
-                         'this tenant resources.'))
-            raise exc.HTTPUnauthorized
-
         LOG.debug('ENV NAME: {0}>'.format(body['name']))
         if VALID_NAME_REGEX.match(str(body['name'])):
             try:

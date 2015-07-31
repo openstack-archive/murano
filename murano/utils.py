@@ -41,6 +41,7 @@ def check_env(request, environment_id):
                     ' these tenant resources')
             LOG.warning(msg)
             raise exc.HTTPForbidden(explanation=msg)
+    return environment
 
 
 def verify_env(func):
