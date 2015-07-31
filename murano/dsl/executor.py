@@ -101,6 +101,7 @@ class MuranoDslExecutor(object):
             method, this, context, params)
 
     def _invoke_method_implementation(self, method, this, context, params):
+        result = None
         body = method.body
         if not body:
             return None
@@ -153,7 +154,8 @@ class MuranoDslExecutor(object):
             LOG.debug(
                 "{0}: End execution: {1} with exception {2}".format(
                     thread_marker, method_info, e))
-            raise
+            if method._name != 'destroy':
+                raise
         else:
             LOG.debug(
                 "{0}: End execution: {1}".format(thread_marker, method_info))
