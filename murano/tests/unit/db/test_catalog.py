@@ -497,3 +497,27 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         api.package_update(id1, [patch], self.context)
         self.assertRaises(exc.HTTPConflict, api.package_update,
                           id2, [patch], self.context_2)
+
+    def test_category_paginate(self):
+        """Paginate through a list of categories using limit and marker"""
+
+        category_names = ['cat1', 'cat2', 'cat3', 'cat4', 'cat5']
+        categories = []
+        for name in category_names:
+            categories.append(api.category_add(name))
+        uuids = [c.id for c in categories]
+
+        page = api.categories_list(limit=2)
+
+        self.assertEqual(category_names[:2], [c.name for c in page])
+
+        last = page[-1].id
+        page = api.categories_list(limit=3, marker=last)
+        self.assertEqual(category_names[2:5], [c.name for c in page])
+
+        page = api.categories_list(marker=uuids[-1])
+        self.assertEqual([], page)
+
+        category_names.reverse()
+        page = api.categories_list({'sort_dir': 'desc'})
+        self.assertEqual(category_names, [c.name for c in page])

@@ -406,3 +406,54 @@ This is a fake zip archive
         result_message = result.text.replace('\n', '')
         self.assertIn('Category name should be 80 characters maximum',
                       result_message)
+
+    def test_list_category(self):
+        names = ['cat1', 'cat2']
+        for name in names:
+            db_catalog_api.category_add(name)
+
+        self._set_policy_rules({'get_category': '@'})
+        self.expect_policy_check('get_category')
+
+        req = self._get('/catalog/categories')
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        result_categories = json.loads(result.body)['categories']
+        self.assertEqual(2, len(result_categories))
+        self.assertEqual(names, [c['name'] for c in result_categories])
+
+        params = {'sort_keys': 'created,  id'}
+        req = self._get('/catalog/categories', params)
+        self.expect_policy_check('get_category')
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        result_categories = json.loads(result.body)['categories']
+        self.assertEqual(names, [c['name'] for c in result_categories])
+
+        names.reverse()
+
+        params = {'sort_dir': 'desc'}
+        req = self._get('/catalog/categories', params)
+        self.expect_policy_check('get_category')
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        result_categories = json.loads(result.body)['categories']
+        self.assertEqual(names, [c['name'] for c in result_categories])
+
+    def test_list_category_negative(self):
+        self._set_policy_rules({'get_category': '@'})
+        self.expect_policy_check('get_category')
+
+        req = self._get('/catalog/categories', {'sort_dir': 'test'})
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+
+        self.expect_policy_check('get_category')
+        req = self._get('/catalog/categories', {'sort_keys': 'test'})
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+
+        self.expect_policy_check('get_category')
+        req = self._get('/catalog/categories', {'test': ['test']})
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)

@@ -21,6 +21,7 @@ import jsonschema
 from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
+from oslo_log import versionutils
 from webob import exc
 
 import murano.api.v1
@@ -120,6 +121,23 @@ def _validate_body(body):
 class Controller(object):
     """WSGI controller for application catalog resource in Murano v1 API."""
 
+    def _validate_limit(self, value):
+            if value is None:
+                return
+            try:
+                value = int(value)
+            except ValueError:
+                msg = _("limit param must be an integer")
+                LOG.error(msg)
+                raise exc.HTTPBadRequest(explanation=msg)
+
+            if value <= 0:
+                msg = _("limit param must be positive")
+                LOG.error(msg)
+                raise exc.HTTPBadRequest(explanation=msg)
+
+            return value
+
     def update(self, req, body, package_id):
         """List of allowed changes:
             { "op": "add", "path": "/tags", "value": [ "foo", "bar" ] }
@@ -158,28 +176,11 @@ class Controller(object):
         return package.to_dict()
 
     def search(self, req):
-        def _validate_limit(value):
-            if value is None:
-                return
-            try:
-                value = int(value)
-            except ValueError:
-                msg = _("limit param must be an integer")
-                LOG.error(msg)
-                raise exc.HTTPBadRequest(explanation=msg)
-
-            if value <= 0:
-                msg = _("limit param must be positive")
-                LOG.error(msg)
-                raise exc.HTTPBadRequest(explanation=msg)
-
-            return value
-
         policy.check("get_package", req.context)
 
         filters = _get_filters(req.GET.items())
 
-        limit = _validate_limit(filters.get('limit'))
+        limit = self._validate_limit(filters.get('limit'))
         if limit is None:
             limit = CONF.packages_opts.limit_param_default
         limit = min(CONF.packages_opts.api_limit_max, limit)
@@ -287,15 +288,65 @@ class Controller(object):
         category = db_api.category_get(category_id, packages=True)
         return category.to_dict()
 
+    @versionutils.deprecated(as_of=versionutils.deprecated.LIBERTY,
+                             in_favor_of='categories.list()')
     def show_categories(self, req):
         policy.check("get_category", req.context)
         categories = db_api.categories_list()
         return {'categories': [category.name for category in categories]}
 
     def list_categories(self, req):
+        """List all categories with pagination and sorting
+           Acceptable filter params:
+           :param sort_keys: an array of fields used to sort the list
+           :param sort_dir: the direction of the sort ('asc' or 'desc')
+           :param limit: the number of categories to list
+           :param marker: the ID of the last item in the previous page
+        """
+        def _get_category_filters(req):
+            query_params = {}
+            valid_query_params = ['sort_keys', 'sort_dir', 'limit', 'marker']
+            for key, value in req.GET.items():
+                if key not in valid_query_params:
+                    raise exc.HTTPBadRequest(
+                        _('Bad value passed to filter.'
+                          ' Got {key}, exected:{valid}').format(
+                            key=key, valid=', '.join(valid_query_params)))
+                if key == 'sort_keys':
+                    available_sort_keys = ['name', 'created',
+                                           'updated', 'package_count', 'id']
+                    value = [v.strip() for v in value.split(',')]
+                    for sort_key in value:
+                        if sort_key not in available_sort_keys:
+                            raise exc.HTTPBadRequest(
+                                explanation=_('Invalid sort key: {sort_key}.'
+                                              ' Must be one of the following:'
+                                              ' {available}').format(
+                                    sort_key=sort_key,
+                                    available=', '.join(available_sort_keys)))
+                if key == 'sort_dir':
+                    if value not in ['asc', 'desc']:
+                        msg = _('Invalid sort direction: {0}').format(value)
+                        raise exc.HTTPBadRequest(explanation=msg)
+                query_params[key] = value
+            return query_params
+
         policy.check("get_category", req.context)
-        categories = db_api.categories_list()
-        return {'categories': [category.to_dict() for category in categories]}
+
+        filters = _get_category_filters(req)
+
+        marker = filters.get('marker')
+        limit = self._validate_limit(filters.get('limit'))
+
+        result = {}
+        categories = db_api.categories_list(filters,
+                                            limit=limit,
+                                            marker=marker)
+        if len(categories) == limit:
+            result['next_marker'] = categories[-1].id
+
+        result['categories'] = [category.to_dict() for category in categories]
+        return result
 
     def add_category(self, req, body=None):
         policy.check("add_category", req.context)
