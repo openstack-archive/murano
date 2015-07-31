@@ -292,13 +292,12 @@ class Request(webob.Request):
                                      'application/murano-packages-json-patch',
                                      'multipart/form-data')
     default_accept_types = ('application/json', 'application/xml')
-    default_accept_type = 'application/json'
 
     def best_match_content_type(self, supported_content_types=None):
         """Determine the requested response content-type.
 
         Based on the query extension then the Accept header.
-        Defaults to default_accept_type if we don't find a preference
+        Raise UnsupportedContentType exception if we don't find a preference
 
         """
         supported_content_types = (supported_content_types or
@@ -311,7 +310,9 @@ class Request(webob.Request):
                 return ctype
 
         bm = self.accept.best_match(supported_content_types)
-        return bm or self.default_accept_type
+        if not bm:
+            raise exceptions.UnsupportedContentType(content_type=self.accept)
+        return bm
 
     def get_content_type(self, allowed_content_types=None):
         """Determine content type of the request body.
@@ -327,7 +328,7 @@ class Request(webob.Request):
                                  self.default_request_content_types)
 
         if content_type not in allowed_content_types:
-            raise exceptions.InvalidContentType(content_type=content_type)
+            raise exceptions.UnsupportedContentType(content_type=content_type)
         return content_type
 
 
@@ -366,7 +367,7 @@ class Resource(object):
 
         try:
             action, action_args, accept = self.deserialize_request(request)
-        except exceptions.InvalidContentType:
+        except exceptions.UnsupportedContentType:
             msg = _("Unsupported Content-Type")
             return webob.exc.HTTPUnsupportedMediaType(explanation=msg)
         except exceptions.MalformedRequestBody:
@@ -610,7 +611,7 @@ class ResponseSerializer(object):
         try:
             return self.body_serializers[content_type]
         except (KeyError, TypeError):
-            raise exceptions.InvalidContentType(content_type=content_type)
+            raise exceptions.UnsupportedContentType(content_type=content_type)
 
 
 class RequestHeadersDeserializer(ActionDispatcher):
@@ -671,7 +672,7 @@ class RequestDeserializer(object):
 
         try:
             content_type = request.get_content_type()
-        except exceptions.InvalidContentType as e:
+        except exceptions.UnsupportedContentType as e:
             msg = "Unrecognized Content-Type provided in request: {0}"
             LOG.debug(unicode(msg).format(str(e)))
             raise
@@ -682,7 +683,7 @@ class RequestDeserializer(object):
 
         try:
             deserializer = self.get_body_deserializer(content_type)
-        except exceptions.InvalidContentType:
+        except exceptions.UnsupportedContentType:
             LOG.debug("Unable to deserialize body as provided Content-Type")
             raise
 
@@ -692,7 +693,7 @@ class RequestDeserializer(object):
         try:
             return self.body_deserializers[content_type]
         except (KeyError, TypeError):
-            raise exceptions.InvalidContentType(content_type=content_type)
+            raise exceptions.UnsupportedContentType(content_type=content_type)
 
     def get_expected_content_type(self, request):
         return request.best_match_content_type(self.supported_content_types)

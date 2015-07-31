@@ -46,7 +46,7 @@ PKG_PARAMS_MAP = murano.api.v1.PKG_PARAMS_MAP
 def _check_content_type(req, content_type):
     try:
         req.get_content_type((content_type,))
-    except exceptions.InvalidContentType:
+    except exceptions.UnsupportedContentType:
         msg = _("Content-Type must be '{0}'").format(content_type)
         LOG.error(msg)
         raise exc.HTTPBadRequest(explanation=msg)

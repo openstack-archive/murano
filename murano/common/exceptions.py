@@ -46,8 +46,8 @@ class OpenstackException(Exception):
         return self._error_string
 
 
-class InvalidContentType(OpenstackException):
-    msg_fmt = "Invalid content type %(content_type)s"
+class UnsupportedContentType(OpenstackException):
+    msg_fmt = "Unsupported content type %(content_type)s"
 
 
 class MalformedRequestBody(OpenstackException):
