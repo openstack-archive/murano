@@ -44,6 +44,11 @@ level = WARNING
 handlers = stderr
 qualname = oslo.messaginga
 
+[handler_null]
+class = oslo_log.handlers.NullHandler
+formatter = default
+args = ()
+
 [handler_stderr]
 class = StreamHandler
 args = (sys.stderr,)
@@ -61,3 +66,9 @@ formatter: context
 
 [formatter_default]
 format = %(message)s
+
+[formatter_context]
+class: oslo_log.formatters.ContextFormatter
+args: (datefmt=datefmt)
+format: %(asctime)s.%(msecs)03d %(process)d %(levelname)s %(name)s [%(request_id)s %(user)s %(tenant)s] %(instance)s%(message)s
+datefmt: %Y-%m-%d %H:%M:%S
