@@ -102,7 +102,7 @@ class ResultEndpoint(object):
             **{'environment_id': environment.id,
                'state': states.SessionState.DEPLOYING if not deleted
                else states.SessionState.DELETING}).first()
-        if num_errors > 0:
+        if num_errors > 0 or result['action'].get('isException'):
             conf_session.state = \
                 states.SessionState.DELETE_FAILURE if deleted else \
                 states.SessionState.DEPLOY_FAILURE
@@ -111,14 +111,15 @@ class ResultEndpoint(object):
         conf_session.save(unit)
 
         # output application tracking information
+        services = []
+        objects = model['Objects']
+        if objects:
+            services = objects.get('services')
         message = _LI('EnvId: {0} TenantId: {1} Status: {2} Apps: {3}').format(
             environment.id,
             environment.tenant_id,
             _('Failed') if num_errors + num_warnings > 0 else _('Successful'),
-            ', '.join(map(
-                lambda a: a['?']['type'],
-                model['Objects']['services']
-            ))
+            ', '.join(map(lambda a: a['?']['type'], services))
         )
         LOG.info(message)
 
