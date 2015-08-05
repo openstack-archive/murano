@@ -30,6 +30,7 @@ from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db import session as db_session
 from murano.utils import check_env
+from murano.utils import check_session
 from murano.utils import verify_env
 
 LOG = logging.getLogger(__name__)
@@ -99,6 +100,9 @@ class Controller(object):
         session_id = None
         if hasattr(request, 'context') and request.context.session:
             session_id = request.context.session
+        if session_id:
+            env_session = session.query(models.Session).get(session_id)
+            check_session(request, environment_id, env_session, session_id)
 
         # add services to env
         get_data = core_services.CoreServices.get_data

@@ -44,6 +44,24 @@ def check_env(request, environment_id):
     return environment
 
 
+def check_session(request, environment_id, session, session_id):
+    """Validate, that a session is ok."""
+    if session is None:
+        msg = _('Session <SessionId {id}> is not found').format(id=session_id)
+        LOG.error(msg)
+        raise exc.HTTPNotFound(explanation=msg)
+
+    if session.environment_id != environment_id:
+        msg = _('Session <SessionId {session_id}> is not tied '
+                'with Environment <EnvId {environment_id}>').format(
+                    session_id=session_id,
+                    environment_id=environment_id)
+        LOG.error(msg)
+        raise exc.HTTPNotFound(explanation=msg)
+
+    check_env(request, environment_id)
+
+
 def verify_env(func):
     @functools.wraps(func)
     def __inner(self, request, environment_id, *args, **kwargs):

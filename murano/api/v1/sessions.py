@@ -24,26 +24,13 @@ from murano.db.services import sessions
 from murano.db import session as db_session
 from murano.services import states
 from murano.utils import check_env
+from murano.utils import check_session
 
 LOG = logging.getLogger(__name__)
 API_NAME = 'Sessions'
 
 
 class Controller(object):
-
-    def _check_session(self, request, environment_id, session, session_id):
-        if session is None:
-            msg = _('Session <SessionId {0}> is not found').format(session_id)
-            LOG.error(msg)
-            raise exc.HTTPNotFound(explanation=msg)
-
-        if session.environment_id != environment_id:
-            msg = _('Session <SessionId {0}> is not tied with Environment '
-                    '<EnvId {1}>').format(session_id, environment_id)
-            LOG.error(msg)
-            raise exc.HTTPNotFound(explanation=msg)
-
-        check_env(request, environment_id)
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def configure(self, request, environment_id):
@@ -72,7 +59,7 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        self._check_session(request, environment_id, session, session_id)
+        check_session(request, environment_id, session, session_id)
 
         user_id = request.context.user
         msg = _('User <UserId {0}> is not authorized to access session'
@@ -95,7 +82,7 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        self._check_session(request, environment_id, session, session_id)
+        check_session(request, environment_id, session, session_id)
 
         user_id = request.context.user
         if session.user_id != user_id:
@@ -122,7 +109,7 @@ class Controller(object):
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
 
-        self._check_session(request, environment_id, session, session_id)
+        check_session(request, environment_id, session, session_id)
 
         if not sessions.SessionServices.validate(session):
             msg = _('Session <SessionId {0}> is invalid').format(session_id)
