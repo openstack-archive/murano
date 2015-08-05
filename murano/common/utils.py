@@ -20,7 +20,7 @@ import eventlet
 import jsonschema
 from oslo_log import log as logging
 
-from murano.common.i18n import _, _LI
+from murano.common.i18n import _, _LE
 
 
 LOG = logging.getLogger(__name__)
@@ -238,10 +238,9 @@ def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
                 try:
                     return f(*args, **kwargs)
                 except ExceptionToCheck as e:
-
-                    LOG.exception(e)
-                    LOG.info(_LI("Retrying in {0} seconds...").format(mdelay))
-
+                    LOG.exception(_LE("An exception occured {exc}. Retrying in"
+                                      "{time} seconds").format(exc=e,
+                                                               time=mdelay))
                     eventlet.sleep(mdelay)
 
                     if not forever:

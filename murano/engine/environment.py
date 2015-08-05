@@ -43,7 +43,7 @@ class Environment(object):
                 delegate()
             except Exception:
                 LOG.exception(_LE('Unhandled exception on invocation of '
-                                  'pre-execution hook'))
+                              'pre-execution hook'))
         self._set_up_list = []
 
     def finish(self):
@@ -52,5 +52,5 @@ class Environment(object):
                 delegate()
             except Exception:
                 LOG.exception(_LE('Unhandled exception on invocation of '
-                                  'post-execution hook'))
+                              'post-execution hook'))
         self._tear_down_list = []

@@ -20,6 +20,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common import exceptions
+from murano.common.i18n import _LE
 from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.engine.system import common
@@ -45,9 +46,8 @@ class AgentListener(object):
 
     def _check_enabled(self):
         if CONF.engine.disable_murano_agent:
-            LOG.debug(
-                'Use of murano-agent is disallowed '
-                'by the server configuration')
+            LOG.error(_LE('Use of murano-agent is disallowed '
+                          'by the server configuration'))
 
             raise exceptions.PolicyViolationException(
                 'Use of murano-agent is disallowed '
@@ -105,8 +105,9 @@ class AgentListener(object):
                         continue
                     msg.ack()
                     msg_id = msg.body.get('SourceID', msg.id)
-                    LOG.debug("Got execution result: id '{0}'"
-                              " body '{1}'".format(msg_id, msg.body))
+                    LOG.debug("Got execution result: id '{msg_id}'"
+                              " body '{body}'".format(msg_id=msg_id,
+                                                      body=msg.body))
                     if msg_id in self._subscriptions:
                         event = self._subscriptions.pop(msg_id)
                         event.send(msg.body)

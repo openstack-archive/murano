@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from murano.common.i18n import _
 from murano.common import uuidutils
 from murano.db import models
 from murano.db import session as db_session
@@ -56,8 +57,8 @@ class EnvTemplateServices(object):
             try:
                 unit.add(env_template)
             except db_exc.DBDuplicateEntry:
-                msg = 'Environment template specified name already exists'
-                LOG.exception(msg)
+                msg = _('Environment template specified name already exists')
+                LOG.error(msg)
                 raise db_exc.DBDuplicateEntry(explanation=msg)
         env_template.update({'description': env_template_params})
         env_template.save(unit)

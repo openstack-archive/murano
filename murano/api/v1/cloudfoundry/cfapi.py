@@ -159,7 +159,7 @@ class Controller(object):
                      .format(space_id=space_guid,
                              environment_id=environment_id))
 
-        LOG.debug('Auth: %s' % keystone.auth_ref)
+        LOG.debug('Keystone endpoint: {0}'.format(keystone.auth_ref))
         tenant_id = keystone.project_id
         ctx = context.RequestContext(user=user, tenant=tenant_id)
 
@@ -234,9 +234,9 @@ class Controller(object):
 
         session_id = create_session(m_cli, environment_id)
         env = m_cli.environments.get(environment_id, session_id)
-        LOG.debug('Got environment %s' % env)
+        LOG.debug('Got environment {0}'.format(env))
         service = self._get_service(env, service_id)
-        LOG.debug('Got service %s' % service)
+        LOG.debug('Got service {0}'.format(service))
         credentials = {}
         for k, v in six.iteritems(service):
             if k not in filtered:

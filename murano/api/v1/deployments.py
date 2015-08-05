@@ -18,7 +18,7 @@ from webob import exc
 
 from murano.api.v1 import request_statistics
 from murano.common.helpers import token_sanitizer
-from murano.common.i18n import _LI
+from murano.common.i18n import _LE
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
@@ -87,12 +87,13 @@ def _patch_description(description):
 def verify_and_get_deployment(db_session, environment_id, deployment_id):
     deployment = db_session.query(models.Task).get(deployment_id)
     if not deployment:
-        LOG.info(_LI('Deployment with id {0} not found').format(deployment_id))
+        LOG.error(_LE('Deployment with id {id} not found')
+                  .format(id=deployment_id))
         raise exc.HTTPNotFound
     if deployment.environment_id != environment_id:
-        LOG.info(_LI('Deployment with id {0} not found'
-                     ' in environment {1}').format(deployment_id,
-                                                   environment_id))
+        LOG.error(_LE('Deployment with id {d_id} not found in environment'
+                      '{env_id}').format(d_id=deployment_id,
+                                         env_id=environment_id))
         raise exc.HTTPBadRequest
 
     deployment.description = _patch_description(deployment.description)

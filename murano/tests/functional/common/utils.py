@@ -133,8 +133,8 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         status = environment.manager.get(environment.id).status
         while states.SessionState.DEPLOYING == status:
             if time.time() - start_time > timeout:
-                err_msg = ('Deployment not finished in {0} seconds'
-                           .format(timeout))
+                err_msg = ('Deployment not finished in {amount} seconds'
+                           .format(amount=timeout))
                 LOG.error(err_msg)
                 raise RuntimeError(err_msg)
             time.sleep(5)
@@ -180,11 +180,11 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         deployment = cls.get_last_deployment(environment)
         try:
             details = deployment.result['result']['details']
-            LOG.warning('Details:\n {0}'.format(details))
+            LOG.warning('Details:\n {details}'.format(details=details))
         except Exception as e:
             LOG.error(e)
         report = cls.get_deployment_report(environment, deployment)
-        LOG.debug('Report:\n {0}\n'.format(report))
+        LOG.debug('Report:\n {report}\n'.format(report=report))
 
 # -----------------------------Service methods---------------------------------
 
@@ -199,7 +199,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
                         If False - returns a specific class <Service>
         """
 
-        LOG.debug('Added service:\n {0}'.format(data))
+        LOG.debug('Added service:\n {data}'.format(data=data))
         service = cls.murano_client().services.post(environment.id,
                                                     path='/', data=data,
                                                     session_id=session.id)
@@ -291,7 +291,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         tn.write('GET / HTTP/1.0\n\n')
         try:
             buf = tn.read_all()
-            LOG.debug('Data:\n {0}'.format(buf))
+            LOG.debug('Data:\n {data}'.format(data=buf))
             if len(buf) != 0:
                 tn.sock.sendall(telnetlib.IAC + telnetlib.NOP)
                 return
@@ -299,7 +299,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
                 raise RuntimeError('Resource at {0}:{1} not exist'.
                                    format(ip, port))
         except socket.error as e:
-            LOG.debug('Socket Error: {0}'.format(e))
+            LOG.error('Socket Error: {error}'.format(error=e))
 
     @classmethod
     def get_ip_by_appname(cls, environment, appname):

@@ -19,10 +19,10 @@ import eventlet
 import heatclient.exc as heat_exc
 from oslo_log import log as logging
 
+from murano.common.i18n import _LW
 from murano.common import utils
 from murano.dsl import dsl
 from murano.dsl import helpers
-from murano.common.i18n import _LI, _LW
 
 LOG = logging.getLogger(__name__)
 
@@ -179,7 +179,7 @@ class HeatStack(object):
             self._template['description'] = self._description
 
         template = copy.deepcopy(self._template)
-        LOG.info(_LI('Pushing: {0}').format(template))
+        LOG.debug('Pushing: {template}'.format(template=template))
 
         current_status = self._get_status()
         resources = template.get('Resources') or template.get('resources')
@@ -222,7 +222,8 @@ class HeatStack(object):
             self._wait_state(
                 lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
         except heat_exc.NotFound:
-            LOG.warn(_LW('Stack {0} already deleted?').format(self._name))
+            LOG.warning(_LW('Stack {stack_name} already deleted?')
+                        .format(stack_name=self._name))
 
         self._template = {}
         self._applied = True

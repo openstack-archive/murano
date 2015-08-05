@@ -57,13 +57,13 @@ class StatsCollectingService(service.Service):
 
     def update_stats(self):
         LOG.debug("Updating statistic information.")
-        LOG.debug("Stats object: %s" % v1.stats)
-        LOG.debug("Stats: Requests:%s  Errors: %s Ave.Res.Time %2.4f\n"
-                  "Per tenant: %s" %
-                  (v1.stats.request_count,
-                   v1.stats.error_count,
-                   v1.stats.average_time,
-                   v1.stats.requests_per_tenant))
+        LOG.debug("Stats object: {stats}".format(stats=v1.stats))
+        LOG.debug("Stats: Requests:{amount}  Errors: {error}"
+                  "Ave.Res.Time {time:2.4f}\n Per tenant: {req_count}".format(
+                      amount=v1.stats.request_count,
+                      error=v1.stats.error_count,
+                      time=v1.stats.average_time,
+                      req_count=v1.stats.requests_per_tenant))
         try:
             stats = self._stats_db.get_stats_by_host(self._hostname)
             if stats is None:
@@ -93,5 +93,5 @@ class StatsCollectingService(service.Service):
             stats.cpu_percent = psutil.cpu_percent()
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
-            LOG.exception(_LE("Failed to get statistics object "
-                          "form a database. %s"), e)
+            LOG.exception(_LE("Failed to get statistics object from a "
+                              "database. {error_code}").format(error_code=e))

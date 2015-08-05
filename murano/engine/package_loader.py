@@ -96,7 +96,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                                                  uuid.uuid4().hex))
         os.makedirs(directory)
 
-        LOG.debug('Cache for package loader is located at: %s' % directory)
+        LOG.debug('Cache for package loader is located at: {dir}'.format(
+            dir=directory))
         return directory
 
     def _get_definition(self, filter_opts):
@@ -105,16 +106,15 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             packages = list(self._murano_client_factory().packages.filter(
                 **filter_opts))
             if len(packages) > 1:
-                LOG.debug('Ambiguous package resolution: '
-                          'more then 1 package found for query "{0}", '
-                          'will resolve based on the ownership'.
-                          format(filter_opts))
+                LOG.debug('Ambiguous package resolution: more then 1 package '
+                          'found for query "{opts}", will resolve based on the'
+                          ' ownership'.format(opts=filter_opts))
                 return self._get_best_package_match(packages)
             elif len(packages) == 1:
                 return packages[0]
             else:
                 LOG.debug('There are no packages matching filter '
-                          '{0}'.format(filter_opts))
+                          '{filter}'.format(optst=filter_opts))
                 raise LookupError()
         except muranoclient_exc.HTTPException:
             LOG.debug('Failed to get package definition from repository')
@@ -140,8 +140,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             try:
                 return load_utils.load_from_dir(package_directory)
             except pkg_exc.PackageLoadError:
-                LOG.exception(_LE(
-                    'Unable to load package from cache. Clean-up...'))
+                LOG.error(_LE('Unable to load package from cache. Clean-up.'))
                 shutil.rmtree(package_directory, ignore_errors=True)
         try:
             package_data = self._murano_client_factory().packages.download(

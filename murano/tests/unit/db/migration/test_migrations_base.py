@@ -65,7 +65,8 @@ class BaseWalkMigrationTestCase(object):
         CONF.set_override('connection', str(engine.url), group='database')
         getattr(command, alembic_command)(*args, **kwargs)
         res = buf.getvalue().strip()
-        LOG.debug('Alembic command `%s` returns: %s' % (alembic_command, res))
+        LOG.debug('Alembic command `{command}` returns: {result}'.format(
+            command=alembic_command, result=res))
         return res
 
     def _up_and_down_versions(self):
@@ -179,7 +180,6 @@ class BaseWalkMigrationTestCase(object):
                 if check:
                     check(engine, data)
         except Exception:
-            LOG.error(_LE(
-                "Failed to migrate to version %(ver)s on engine %(eng)s") %
-                {'ver': version, 'eng': engine})
+            LOG.error(_LE("Failed to migrate to version {ver} on engine {eng}")
+                      .format(ver=version, eng=engine))
             raise

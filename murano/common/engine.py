@@ -153,7 +153,7 @@ class TaskExecutor(object):
             try:
                 self._delete_trust()
             except Exception:
-                LOG.warn(_LW('Cannot delete trust'), exc_info=True)
+                LOG.warning(_LW('Cannot delete trust'), exc_info=True)
 
         return result
 
@@ -174,20 +174,20 @@ class TaskExecutor(object):
                 return self.exception_result(e, obj, '<validate>')
 
         try:
-            LOG.info(_LI('Invoking pre-cleanup hooks'))
+            LOG.debug('Invoking pre-cleanup hooks')
             self.environment.start()
             executor.cleanup(self._model)
         except Exception as e:
             return self.exception_result(e, obj, '<GC>')
         finally:
-            LOG.info(_LI('Invoking post-cleanup hooks'))
+            LOG.debug('Invoking post-cleanup hooks')
             self.environment.finish()
         self._model['ObjectsCopy'] = copy.deepcopy(self._model.get('Objects'))
 
         action_result = None
         if self.action:
             try:
-                LOG.info(_LI('Invoking pre-execution hooks'))
+                LOG.debug('Invoking pre-execution hooks')
                 self.environment.start()
                 try:
                     action_result = self._invoke(executor)
@@ -199,7 +199,7 @@ class TaskExecutor(object):
             except Exception as e:
                 return self.exception_result(e, obj, self.action['method'])
             finally:
-                LOG.info(_LI('Invoking post-execution hooks'))
+                LOG.debug('Invoking post-execution hooks')
                 self.environment.finish()
 
         try:

@@ -50,7 +50,8 @@ class PluginLoader(object):
         dist_name = str(extension.entry_point.dist)
         name = extension.entry_point.name
         if not NAME_RE.match(name):
-            LOG.warning(_LW("Entry-point 'name' %s is invalid") % name)
+            LOG.warning(_LW("Entry-point 'name' {name} is invalid").format(
+                name=name))
             return
         name = "%s.%s" % (self.namespace, name)
         name_map.setdefault(name, []).append(dist_name)
@@ -64,19 +65,21 @@ class PluginLoader(object):
         try:
             package.classes[name] = initialize_plugin(plugin)
         except Exception:
-            LOG.exception(_LE("Unable to initialize plugin for %s") % name)
+            LOG.exception(_LE("Unable to initialize plugin for {name}").format(
+                name=name))
             return
-        LOG.info(_LI("Loaded class '%(class_name)s' from '%(dist)s'")
-                 % dict(class_name=name, dist=dist_name))
+        LOG.info(_LI("Loaded class {class_name} from {dist}").format(
+                 class_name=name, dist=dist_name))
 
     def cleanup_duplicates(self, name_map):
         for class_name, package_names in six.iteritems(name_map):
             if len(package_names) >= 2:
                 LOG.warning(_LW("Class is defined in multiple packages!"))
                 for package_name in package_names:
-                    LOG.warning(_LW("Disabling class '%(class_name)s' in "
-                                    "'%(dist)s' due to conflict") %
-                                dict(class_name=class_name, dist=package_name))
+                    LOG.warning(_LW("Disabling class {class_name} in {dist} "
+                                    "due to conflict").format(
+                                        class_name=class_name,
+                                        dist=package_name))
                     self.packages[package_name].classes.pop(class_name)
 
     @staticmethod
@@ -89,9 +92,8 @@ class PluginLoader(object):
 
     @staticmethod
     def _on_load_failure(manager, ep, exc):
-        LOG.warning(_LW("Error loading entry-point '%(ep)s' "
-                        "from package '%(dist)s': %(err)s")
-                    % dict(ep=ep.name, dist=ep.dist, err=exc))
+        LOG.warning(_LW("Error loading entry-point {ep} from package {dist}: "
+                        "{err}").format(ep=ep.name, dist=ep.dist, err=exc))
 
     def register_in_loader(self, package_loader):
         for package in six.itervalues(self.packages):
@@ -103,7 +105,7 @@ def initialize_plugin(plugin):
     if hasattr(plugin, "init_plugin"):
         initializer = getattr(plugin, "init_plugin")
         if inspect.ismethod(initializer) and initializer.__self__ is plugin:
-            LOG.debug("Initializing plugin class %s" % plugin)
+            LOG.debug("Initializing plugin class {name}".format(name=plugin))
             initializer()
     return plugin
 

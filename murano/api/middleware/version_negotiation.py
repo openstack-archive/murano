@@ -22,6 +22,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.api import versions
+from murano.common.i18n import _LW
 from murano.common import wsgi
 
 CONF = cfg.CONF
@@ -41,11 +42,10 @@ class VersionNegotiationFilter(wsgi.Middleware):
 
     def process_request(self, req):
         """Try to find a version first in the accept header, then the URL."""
-        msg = ("Determining version of request:"
-               " %(method)s %(path)s Accept: %(accept)s")
-        args = {'method': req.method, 'path': req.path, 'accept': req.accept}
-        LOG.debug(msg % args)
-
+        LOG.debug(("Determining version of request:{method} {path}"
+                   "Accept: {accept}").format(method=req.method,
+                                              path=req.path,
+                                              accept=req.accept))
         LOG.debug("Using url versioning")
         # Remove version in url so it doesn't conflict later
         req_version = self._pop_path_info(req)
@@ -53,13 +53,13 @@ class VersionNegotiationFilter(wsgi.Middleware):
         try:
             version = self._match_version_string(req_version)
         except ValueError:
-            LOG.debug("Unknown version. Returning version choices.")
+            LOG.warning(_LW("Unknown version. Returning version choices."))
             return self.versions_app
 
         req.environ['api.version'] = version
         req.path_info = ''.join(('/v', str(version), req.path_info))
-        LOG.debug("Matched version: v%d", version)
-        LOG.debug('new path %s' % req.path_info)
+        LOG.debug("Matched version: v{version}".format(version=version))
+        LOG.debug('new path {path}'.format(path=req.path_info))
         return None
 
     def _match_version_string(self, subject):

@@ -158,16 +158,18 @@ class MuranoDslExecutor(object):
             if frame['location']:
                 caller_str = ' called from ' + stack_trace.format_frame(frame)
 
-        LOG.trace('{0}: Begin execution {1}({2}){3}'.format(
-            thread_id, method_name, params_str, caller_str))
+        LOG.trace('{thread}: Begin execution {method}({params}){caller}'
+                  .format(thread=thread_id, method=method_name,
+                          params=params_str, caller=caller_str))
         try:
             def log_result(result):
-                LOG.trace('{0}: End execution {1} with result {2}'.format(
-                    thread_id, method_name, result))
+                LOG.trace('{thread}: End execution {method} with result '
+                          '{result}'.format(thread=thread_id,
+                                            method=method_name, result=result))
             yield log_result
         except Exception as e:
-            LOG.trace('{0}: End execution {1} with exception {2}'.format(
-                thread_id, method_name, e))
+            LOG.trace('{thread}: End execution {method} with exception {exc}'
+                      .format(thread=thread_id, method=method_name, exc=e))
             raise
 
     @staticmethod
