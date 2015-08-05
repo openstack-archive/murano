@@ -15,7 +15,6 @@
 
 import copy
 import datetime
-import logging
 import os
 import types
 import urlparse
@@ -23,6 +22,7 @@ import uuid
 
 import eventlet.event
 from oslo_config import cfg
+from oslo_log import log as logging
 
 import murano.common.exceptions as exceptions
 import murano.common.messaging as messaging

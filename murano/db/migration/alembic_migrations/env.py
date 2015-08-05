@@ -10,8 +10,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-# from logging.config import fileConfig
-
 from alembic import context
 from sqlalchemy import create_engine, pool
 
