@@ -14,7 +14,6 @@
 
 import contextlib
 import json
-import logging
 import os
 import random
 import socket
@@ -27,6 +26,7 @@ from keystoneclient import exceptions as ks_exceptions
 from keystoneclient.v2_0 import client as ksclient
 from muranoclient import client as mclient
 import muranoclient.common.exceptions as exceptions
+from oslo_log import log as logging
 import yaml
 
 from murano.services import states

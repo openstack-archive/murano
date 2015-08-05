@@ -13,11 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
-
+from oslo_log import log as logging
 from oslo_serialization import jsonutils
 
-log = logging.getLogger("murano-common.messaging")
+LOG = logging.getLogger("murano-common.messaging")
 
 
 class Message(object):
@@ -32,7 +31,7 @@ class Message(object):
                 jsonutils.loads(message_handle.body)
         except ValueError as e:
             self.body = None
-            log.exception(e)
+            LOG.exception(e)
 
     @property
     def body(self):

@@ -12,11 +12,11 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import logging
 import socket
 import time
 import uuid
 
+from oslo_log import log as logging
 import requests
 import testresources
 import testtools

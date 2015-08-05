@@ -13,16 +13,12 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import logging
 import ssl as ssl_module
 
 from eventlet import patcher
 kombu = patcher.import_patched('kombu')
 from oslo_serialization import jsonutils
 from subscription import Subscription
-
-
-log = logging.getLogger("murano-common.messaging")
 
 
 class MqClient(object):
