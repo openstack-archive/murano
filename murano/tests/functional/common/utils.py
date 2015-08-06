@@ -403,13 +403,15 @@ class DeployTestMixin(ZipUtilsMixin):
 # -----------------------Methods for environment CRUD--------------------------
 
     @classmethod
-    def create_environment(cls):
+    def create_environment(cls, name=None):
         """Creates Murano environment with random name.
 
 
+        :param name: Environment name
         :return: Murano environment
         """
-        name = cls.rand_name('MuranoTe')
+        if not name:
+            name = cls.rand_name('MuranoTe')
         environment = cls.murano_client().environments.create({'name': name})
         cls._environments.append(environment)
         return environment

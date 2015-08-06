@@ -12,6 +12,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import os
 import socket
 import time
 import uuid
@@ -201,3 +202,18 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
                 "id": str(uuid.uuid4())
             }
         }
+
+    @classmethod
+    def upload_app(cls, app_dir, name, tags):
+        """Zip and upload application to Murano
+
+        :param app_dir: Unzipped dir with an application
+        :param name: Application name
+        :param tags: Application tags
+        :return: Uploaded package
+        """
+        zip_file_path = cls.zip_dir(os.path.dirname(__file__), app_dir)
+        cls.init_list("_package_files")
+        cls._package_files.append(zip_file_path)
+        return cls.upload_package(
+            name, tags, zip_file_path)
