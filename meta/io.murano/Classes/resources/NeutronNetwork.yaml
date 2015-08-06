@@ -23,6 +23,10 @@ Properties:
     Contract: $.bool().notNull()
     Default: true
 
+  openstackId:
+    Contract: $.string()
+    Usage: Out
+
   subnetCidr:
     Contract: $.string()
     Usage: InOut
@@ -62,17 +66,26 @@ Methods:
 
           - $._environment.stack.updateTemplate($template)
           - $._environment.stack.push()
+          - $outputs: $._environment.stack.output()
+          - $.openstackId: $outputs.get(format('{0}-id', $this.name))
           - $.setAttr(deployed, true)
 
 
   _createNetwork:
     Body:
-      - Return:
+      - $netName: $._getNetworkName()
+      - $template:
           resources:
-            $._getNetworkName():
+            $netName:
               type: 'OS::Neutron::Net'
               properties:
                 name: format('{0}-{1}', $.name, $.id())
+          outputs:
+            format('{0}-id', $.name):
+              description: format('ID of {0} network', $.name)
+              value:
+                get_resource: $netName
+      - Return: $template
 
 
   _createSubnet:

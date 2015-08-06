@@ -17,6 +17,9 @@ Properties:
   keyname:
     Contract: $.string()
     Default: null
+  openstackId:
+    Contract: $.string()
+    Usage: Out
   availabilityZone:
     Contract: $.string().notNull()
     Default: nova
@@ -116,6 +119,10 @@ Methods:
               description: format('Network IPs assigned to {0} instance', $.name)
               value:
                 get_attr: [ $.name, networks ]
+            format('{0}-id', $.name):
+              description: format('ID of {0} instance', $.name)
+              value:
+                get_resource: $.name
 
       - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
@@ -126,6 +133,7 @@ Methods:
       - $outputs: $.environment.stack.output()
       # Changing this to use the .networks attribute instead of 'addresses'
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten()
+      - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
         Then:
           - $.floatingIpAddress: $outputs.get($._floatingIpOutputName)
