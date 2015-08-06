@@ -78,6 +78,8 @@ class Controller(object):
 
 
 def _patch_description(description):
+    if not description:
+        description = {}
     description['services'] = description.pop('applications', [])
     return token_sanitizer.TokenSanitizer().sanitize(description)
 
