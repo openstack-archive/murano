@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from nose.plugins.attrib import attr as tag
 from tempest.test import attr
 from tempest_lib import exceptions
 
@@ -20,6 +21,7 @@ from murano.tests.functional.api import base
 
 class TestEnvTemplate(base.TestCase):
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_list_env_templates(self):
         """Check getting the list of environment templates."""
@@ -28,6 +30,7 @@ class TestEnvTemplate(base.TestCase):
         self.assertIn('templates', body)
         self.assertEqual(resp.status, 200)
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_and_delete_env_template(self):
         """It checks the creation and deletion of an enviroment template."""
@@ -53,6 +56,7 @@ class TestEnvTemplate(base.TestCase):
 
         self.env_templates.pop(self.env_templates.index(env_template))
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_env_template(self):
         """Check getting information about an environment template."""
@@ -65,6 +69,7 @@ class TestEnvTemplate(base.TestCase):
         self.assertEqual(env_obtained_template['name'], 'test_env_temp')
         self.client.delete_env_template(env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_env_template_with_apps(self):
         """Check the creation of an environment template with applications."""
@@ -77,6 +82,7 @@ class TestEnvTemplate(base.TestCase):
         self.assertEqual(len(apps_template), 1)
         self.client.delete_env_template(env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_app_in_env_template(self):
         """Check the creationg of applications in an environment template."""
@@ -93,6 +99,7 @@ class TestEnvTemplate(base.TestCase):
 
         self.client.delete_env_template(env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_delete_app_in_env_template(self):
         """Check the deletion of applications in an environmente template."""
@@ -111,6 +118,7 @@ class TestEnvTemplate(base.TestCase):
 
         self.client.delete_env_template(env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_env_from_template(self):
         """Check the creation of an environment from a template."""
@@ -125,6 +133,7 @@ class TestEnvTemplate(base.TestCase):
         self.client.delete_env_template(env_template['id'])
         self.client.delete_environment(env['environment_id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_environment_with_wrong_env_id(self):
         """Check the deletion of an wrong environment template request."""
@@ -132,6 +141,7 @@ class TestEnvTemplate(base.TestCase):
                           self.client.delete_env_template,
                           None)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_environment_with_wrong_payload(self):
         """Check the deletion of an wrong environment template request."""
@@ -139,6 +149,7 @@ class TestEnvTemplate(base.TestCase):
                           self.client.create_env_template,
                           '-+3')
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_double_delete_env_template(self):
         """Check the deletion of an wrong environment template request."""
@@ -150,6 +161,7 @@ class TestEnvTemplate(base.TestCase):
                           self.client.delete_env_template,
                           env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_deleted_env_template(self):
         """Check the deletion of an wrong environment template request."""
@@ -164,6 +176,7 @@ class TestEnvTemplate(base.TestCase):
 
 class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_env_template_from_another_tenant(self):
         """It tests getting information from an environment
@@ -176,6 +189,7 @@ class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
 
         self.client.delete_env_template(env_template['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_env_template_from_another_tenant(self):
         """It tests deleting information from an environment

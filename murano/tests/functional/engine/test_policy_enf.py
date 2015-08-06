@@ -14,6 +14,8 @@
 
 import muranoclient.common.exceptions as murano_exceptions
 
+from nose.plugins.attrib import attr as tag
+
 import murano.tests.functional.common.utils as common_utils
 import murano.tests.functional.engine.integration_base as core
 
@@ -38,6 +40,7 @@ class PolicyEnforcement(core.CongressIntegration):
         super(PolicyEnforcement, self).tearDown()
         self.purge_environments()
 
+    @tag('all', 'coverage')
     def test_deploy_policy_fail_flavor(self):
         """Test expects failure due to blacklisted flavor."""
 
@@ -46,6 +49,7 @@ class PolicyEnforcement(core.CongressIntegration):
                                   key="test-key"),
             "bad flavor")
 
+    @tag('all', 'coverage')
     def test_deploy_policy_fail_key(self):
         """Test expects failure due to empty key name."""
 

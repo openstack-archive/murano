@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from nose.plugins.attrib import attr as tag
 from tempest.test import attr
 from tempest_lib import exceptions
 
@@ -20,6 +21,7 @@ from murano.tests.functional.api import base
 
 class TestServices(base.TestCase):
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_services_list(self):
         env = self.create_environment('test')
@@ -32,6 +34,7 @@ class TestServices(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertTrue(isinstance(services_list, list))
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_services_list_without_env_id(self):
         env = self.create_environment('test')
@@ -43,6 +46,7 @@ class TestServices(base.TestCase):
                           None,
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_services_list_after_delete_env(self):
         env = self.create_environment('test')
@@ -56,6 +60,7 @@ class TestServices(base.TestCase):
                           env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_services_list_after_delete_session(self):
         env = self.create_environment('test')
@@ -69,6 +74,7 @@ class TestServices(base.TestCase):
                           env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_and_delete_demo_service(self):
         env = self.create_environment('test')
@@ -95,6 +101,7 @@ class TestServices(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(services_list), len(services_list_))
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_demo_service_without_env_id(self):
         env = self.create_environment('test')
@@ -106,6 +113,7 @@ class TestServices(base.TestCase):
                           None,
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_demo_service_without_sess_id(self):
         env = self.create_environment('test')
@@ -117,6 +125,7 @@ class TestServices(base.TestCase):
                           env['id'],
                           "")
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_demo_service_without_env_id(self):
         env = self.create_environment('test')
@@ -131,6 +140,7 @@ class TestServices(base.TestCase):
                           sess['id'],
                           service['?']['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_demo_service_without_session_id(self):
         env = self.create_environment('test')
@@ -145,6 +155,7 @@ class TestServices(base.TestCase):
                           "",
                           service['?']['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_double_delete_service(self):
         env = self.create_environment('test')
@@ -161,6 +172,7 @@ class TestServices(base.TestCase):
                           sess['id'],
                           service['?']['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_service(self):
         env = self.create_environment('test')
@@ -176,6 +188,7 @@ class TestServices(base.TestCase):
         self.assertEqual(resp.status, 200)
         self.assertEqual(service, service_)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_service_without_env_id(self):
         env = self.create_environment('test')
@@ -190,6 +203,7 @@ class TestServices(base.TestCase):
                           sess['id'],
                           service['?']['id'])
 
+    @tag('all', 'coverage')
     @attr(type='smoke')
     def test_get_services_without_sess_id(self):
         env = self.create_environment('test')
@@ -200,6 +214,7 @@ class TestServices(base.TestCase):
 
 class TestServicesTenantIsolation(base.NegativeTestCase):
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_list_services_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -209,6 +224,7 @@ class TestServicesTenantIsolation(base.NegativeTestCase):
                           self.alt_client.get_services_list, env['id'],
                           sess['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_create_service_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -218,6 +234,7 @@ class TestServicesTenantIsolation(base.NegativeTestCase):
                           self.create_demo_service, env['id'],
                           sess['id'], client=self.alt_client)
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_delete_service_in_env_from_another_tenant(self):
         env = self.create_environment('test')
@@ -228,6 +245,7 @@ class TestServicesTenantIsolation(base.NegativeTestCase):
                           self.alt_client.delete_service, env['id'],
                           sess['id'], service['?']['id'])
 
+    @tag('all', 'coverage')
     @attr(type='negative')
     def test_get_service_in_env_from_another_tenant(self):
         env = self.create_environment('test')

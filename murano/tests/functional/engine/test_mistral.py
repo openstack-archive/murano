@@ -14,6 +14,8 @@
 
 import uuid
 
+from nose.plugins.attrib import attr as tag
+
 import murano.tests.functional.common.utils as common_utils
 import murano.tests.functional.engine.integration_base as core
 
@@ -39,6 +41,7 @@ class MistralTest(core.MistralIntegration):
         with common_utils.ignored(Exception):
             cls.purge_uploaded_packages()
 
+    @tag('all', 'coverage')
     def test_deploy_package_success(self):
         # Test expects successful deployment and one output: input_1_value.
 

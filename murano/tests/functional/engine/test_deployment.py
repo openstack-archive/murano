@@ -14,6 +14,8 @@
 
 import uuid
 
+from nose.plugins.attrib import attr as tag
+
 import murano.tests.functional.engine.manager as core
 
 
@@ -37,6 +39,7 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
         cls.purge_environments()
         cls.purge_uploaded_packages()
 
+    @tag('gate', 'all', 'coverage')
     def test_app_deployment(self):
         post_body = {
             "instance": {
