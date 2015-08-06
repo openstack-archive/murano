@@ -79,7 +79,6 @@ Methods:
 
   deploy:
     Body:
-
       - $securityGroupName: coalesce(
             $.securityGroupName,
             $.environment.securityGroupManager.defaultGroupName
@@ -130,6 +129,8 @@ Methods:
       - If: $._floatingIpOutputName != null
         Then:
           - $.floatingIpAddress: $outputs.get($._floatingIpOutputName)
+          - If: $.floatingIpAddress != null
+            Then: $.setAttr(fipAssigned, true)
       - $.environment.instanceNotifier.trackCloudInstance($this)
 
   detectPrimaryNetwork:
@@ -209,10 +210,6 @@ Methods:
           - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
       - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
-
-      - If: $assignFip and $joinResult.instanceFipOutput != null
-        Then:
-          - $.setAttr(fipAssigned, true)
 
   destroy:
     # FIXME(smelikyan): All allocated resources should be cleaned-up on destroy
