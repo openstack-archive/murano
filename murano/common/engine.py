@@ -196,6 +196,13 @@ class TaskExecutor(object):
         if exception is not None:
             result['action'] = TaskExecutor.exception_result(
                 exception, exception_traceback)
+            # NOTE(kzaitsev): Exception here means that it happened during
+            # cleanup. ObjectsCopy and Attributes would be empty if obj
+            # is empty. This would cause failed env to be deleted.
+            # Therefore restore these attrs from self._model
+            for attr in ['ObjectsCopy', 'Attributes']:
+                if not model.get(attr):
+                    model[attr] = self._model[attr]
         else:
             result['action']['result'] = serializer.serialize_object(
                 action_result)
