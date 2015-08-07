@@ -1,0 +1,55 @@
+Namespaces:
+  =: io.murano.configuration
+  std: io.murano
+  sys: io.murano.system
+
+Name: Linux
+
+Methods:
+  runCommand:
+    Arguments:
+      - agent:
+          Contract: $.class(sys:Agent)
+      - command:
+          Contract: $.string().notNull()
+      - helpText:
+          Contract: $.string()
+          Default: null
+    Body:
+      - $resources: new(sys:Resources)
+      - If: $helpText != null
+        Then:
+          - $planName: $helpText
+        Else:
+          - $planName: format('Execute {0}', $command)
+      - $template: $resources.yaml('RunCommand.template').bind(dict(
+            command => $command,
+            planName => $planName
+          ))
+      - $agent.call($template, $resources)
+
+  putFile:
+    Arguments:
+      - agent:
+          Contract: $.class(sys:Agent)
+      - fileContent:
+          Contract: $.string().notNull()
+      - path:
+          Contract: $.string().notNull()
+      - helpText:
+          Contract: $.string()
+          Default: null
+    Body:
+      - $data: base64encode($fileContent)
+      - $resources: new(sys:Resources)
+      - If: $helpText != null
+        Then:
+          - $planName: $helpText
+        Else:
+          - $planName: format('Put to {0}', $path)
+      - $template: $resources.yaml('PutFile.template').bind(dict(
+            path => $path,
+            fileContent => $data,
+            planName => $planName
+          ))
+      - $agent.call($template, $resources)

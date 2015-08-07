@@ -23,6 +23,8 @@ Classes:
   io.murano.File: File.yaml
 
 
+  io.murano.configuration.Linux: configuration/Linux.yaml
+
   io.murano.resources.Network: resources/Network.yaml
   io.murano.resources.Instance: resources/Instance.yaml
   io.murano.resources.LinuxInstance: resources/LinuxInstance.yaml

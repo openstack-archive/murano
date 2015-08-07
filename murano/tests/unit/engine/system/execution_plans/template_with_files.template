@@ -1,0 +1,26 @@
+FormatVersion: 2.0.0
+Version: 1.0.0
+Name: Deploy Tomcat 
+
+Parameters:
+  appName: $appName
+
+Body: |
+  return deploy(args.appName).stdout
+
+Files:
+  updateScript:
+    BodyType: Text
+    Name: updateScript 
+    Body: text
+
+Scripts:
+  deploy:
+    Type: Application
+    Version: 1.0.0
+    EntryPoint: deployTomcat.sh
+    Files:
+      - updateScript
+    Options:
+      captureStdout: true
+      captureStderr: true

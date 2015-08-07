@@ -1,0 +1,26 @@
+FormatVersion: 2.0.0
+Version: 1.0.0
+Name: $planName
+
+Parameters:
+  path: $path
+
+Body: |
+  return putFile("'{0}'".format(args.path)).exitCode
+
+Files:
+  destinationFile:
+    BodyType: Base64
+    Name: destinationFile
+    Body: $fileContent
+
+Scripts:
+  putFile:
+    Type: Application
+    Version: 1.0.0
+    EntryPoint: putFile.sh
+    Files:
+      - destinationFile
+    Options:
+      captureStdout: true
+      captureStderr: true

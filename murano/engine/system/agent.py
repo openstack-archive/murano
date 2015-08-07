@@ -250,10 +250,11 @@ class Agent(object):
                                                         files)
             if 'Files' in script:
                 for i, file in enumerate(script['Files']):
-                    script['Files'][i] = self._place_file(scripts_folder,
-                                                          file, template,
-                                                          resources,
-                                                          files)
+                    if self._get_name(file) not in files:
+                        script['Files'][i] = self._place_file(
+                            scripts_folder, file, template, resources, files)
+                    else:
+                        script['Files'][i] = files[file]
         return template
 
     def _is_url(self, file):
