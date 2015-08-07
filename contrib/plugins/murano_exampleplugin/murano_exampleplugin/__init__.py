@@ -17,9 +17,10 @@ import json
 
 import cfg
 import glanceclient
+from oslo_config import cfg as config
 from oslo_log import log as logging
 
-from murano.common import config
+
 import murano.dsl.helpers as helpers
 
 
