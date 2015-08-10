@@ -179,10 +179,11 @@ The following screenshot shows you the result.
     :alt: Applications page: example
     :width: 630 px
 
-Delete an application
-~~~~~~~~~~~~~~~~~~~~~
+Delete an application package
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To delete an application, please perform the following steps:
+To delete an application package from the catalog, please perform
+the following steps:
 
 #. In dashboard, navigate to :menuselection:`Murano > Manage > Package
    Definitions`.
@@ -196,6 +197,9 @@ To delete an application, please perform the following steps:
 
 #. Confirm the deletion.
 
+Add an application to environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
 Deploy an application
 ~~~~~~~~~~~~~~~~~~~~~
 
@@ -204,3 +208,39 @@ Show an application topology
 
 Show a deployment log location
 ------------------------------
+
+Delete an application
+~~~~~~~~~~~~~~~~~~~~~
+
+To delete an application that belongs to the environment:
+
+#. In OpenStack dashboard, navigate to :menuselection:`Murano >
+   Application Catalog > Environments`.
+
+#. Click on the name of the environment you want to delete an
+   application from.
+
+   .. image:: figures/environments.png
+      :width: 630 px
+      :alt: Environments page
+
+#. In the :guilabel:`Component List` section, click the
+   :guilabel:`Delete Component` button next to the application you
+   want to delete. Then confirm the deletion.
+
+   .. image:: figures/delete_application.png
+      :width: 630 px
+      :alt: Environment Components page
+
+.. note::
+   If the application that you are deleting has already been deployed,
+   you should redeploy the environment to apply the recent changes.
+   If the environment has not been deployed with this component,
+   the changes are applied immediately on receiving the confirmation.
+
+.. warning::
+   Due to a known bug in murano as of Kilo release, the OS resources
+   allocated by a deleted application might not be reclaimed until
+   you delete the environment. See the `Deallocating stack resources
+   <https://blueprints.launchpad.net/murano/+spec/deallocating-stack-resources>`_
+   blueprint for details.
