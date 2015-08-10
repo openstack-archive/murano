@@ -1,0 +1,101 @@
+
+Namespaces:
+  sys: io.murano.system
+
+Name: TestLogger
+
+Methods:
+  testCreate:
+    Body:
+      - Return: logger('name')
+
+  testDebug:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.debug('str')
+      - $log.debug('str', 1)
+      - $log.debug('str {0}', message)
+      - $log.debug('str {message}', message=>message)
+      - $log.debug('str {message}{0}')
+
+  testTrace:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.trace('str')
+      - $log.trace('str', 1)
+      - $log.trace('str {0}', message)
+      - $log.trace('str {message}', message=>message)
+      - $log.trace('str {message}{0}')
+
+  testInfo:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.info('str')
+      - $log.info('str', 1)
+      - $log.info('str {0}', message)
+      - $log.info('str {message}', message=>message)
+      - $log.info('str {message}{0}')
+
+  testWarning:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.warning('str')
+      - $log.warning('str', 1)
+      - $log.warning('str {0}', message)
+      - $log.warning('str {message}', message=>message)
+      - $log.warning('str {message}{0}')
+
+  testError:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.error('str')
+      - $log.error('str', 1)
+      - $log.error('str {0}', message)
+      - $log.error('str {message}', message=>message)
+      - $log.error('str {message}{0}')
+
+  testCritical:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      - $log.critical('str')
+      - $log.critical('str', 1)
+      - $log.critical('str {0}', message)
+      - $log.critical('str {message}', message=>message)
+      - $log.critical('str {message}{0}')
+
+  testException:
+    Arguments:
+      - log:
+          Contract: $.class(sys:Logger).notNull()
+    Body:
+      Try:
+        - $.doThrow()
+      Catch:
+        With: exceptionName
+        As: e
+        Do:
+          - $log.exception($e, 'str')
+          - $log.exception($e, 'str', 1)
+          - $log.exception($e, 'str {0}', message)
+          - $log.exception($e, 'str {message}', message=>message)
+          - $log.exception($e, 'str {message}{0}')
+      Finally:
+
+
+  doThrow:
+    Body:
+      - Throw: exceptionName
+        Message: exception message
+

@@ -162,6 +162,15 @@ def not_equal(obj1, obj2):
     return obj1 is not obj2
 
 
+@specs.parameter('logger_name', yaqltypes.String(True))
+def logger(context, logger_name):
+    """Instantiate Logger"""
+    log = yaql_integration.call_func(
+        context, 'new', 'io.murano.system.Logger',
+        logger_name=logger_name)
+    return log
+
+
 def register(context):
     context.register_function(cast)
     context.register_function(new)
@@ -179,3 +188,4 @@ def register(context):
     context.register_function(ns_resolve)
     context.register_function(equal)
     context.register_function(not_equal)
+    context.register_function(logger)
