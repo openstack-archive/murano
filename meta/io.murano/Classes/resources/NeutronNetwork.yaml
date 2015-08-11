@@ -48,7 +48,7 @@ Methods:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
-          - If: $.dnsNameservers = null
+          - If: len($.dnsNameservers) = 0
             Then:
               - $.dnsNameservers: $._netExplorer.getDefaultDns()
           - $template: $._createNetwork()
