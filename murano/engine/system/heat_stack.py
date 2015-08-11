@@ -40,6 +40,7 @@ class HeatStack(object):
         self._template = None
         self._parameters = {}
         self._files = {}
+        self._hot_environment = ''
         self._applied = True
         self._description = description
         self._clients = helpers.get_environment().clients
@@ -86,6 +87,10 @@ class HeatStack(object):
 
     def set_files(self, files):
         self._files = files
+        self._applied = False
+
+    def set_hot_environment(self, hot_environment):
+        self._hot_environment = hot_environment
         self._applied = False
 
     def update_template(self, template):
@@ -186,6 +191,7 @@ class HeatStack(object):
                     parameters=self._parameters,
                     template=template,
                     files=self._files,
+                    environment=self._hot_environment,
                     disable_rollback=True)
 
                 self._wait_state(lambda status: status == 'CREATE_COMPLETE')
@@ -197,6 +203,7 @@ class HeatStack(object):
                     stack_id=self._name,
                     parameters=self._parameters,
                     files=self._files,
+                    environment=self._hot_environment,
                     template=template,
                     disable_rollback=True)
                 self._wait_state(
