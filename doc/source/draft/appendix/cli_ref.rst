@@ -16,7 +16,7 @@ For help on a specific ``murano`` command, enter:
 
 .. code-block:: console
 
-    $ murano help COMMAND
+    murano help COMMAND
 
     murano usage
     usage: murano \[--version] \[-d] \[-v] \[-k] \[--os-cacert <ca-certificate>]

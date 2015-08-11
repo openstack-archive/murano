@@ -25,7 +25,7 @@ To deploy applications with murano, virtual machine images should be uploaded in
 
 .. code-block:: console
 
-  $ glance image-create --name <NAME>  --is-public true \
+  glance image-create --name <NAME>  --is-public true \
   > --disk-format qcow2 --container-format bare \
   > --file <IMAGE_FILE> --property <IMAGE_METADATA>
 ..
@@ -52,7 +52,7 @@ where:
 
 .. code-block:: console
 
-  $ glance image-update <IMAGE_ID> --property <IMAGE_MATADATA>
+  glance image-update <IMAGE_ID> --property <IMAGE_MATADATA>
 ..
 
 *  Replace **<IMAGE_ID>** with image id from the previous command output.

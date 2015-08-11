@@ -3,9 +3,9 @@
 
 2. Copy Murano integration scripts to Devstack::
 
-      $ cp lib/murano ${DEVSTACK_DIR}/lib
-      $ cp lib/murano-dashboard ${DEVSTACK_DIR}/lib
-      $ cp extras.d/70-murano.sh ${DEVSTACK_DIR}/extras.d
+      cp lib/murano ${DEVSTACK_DIR}/lib
+      cp lib/murano-dashboard ${DEVSTACK_DIR}/lib
+      cp extras.d/70-murano.sh ${DEVSTACK_DIR}/extras.d
 
 3. Create a ``localrc`` file as input to devstack.
 
@@ -21,4 +21,4 @@
 
 5. Deploy your OpenStack Cloud with Murano::
 
-   $ ./stack.sh
+      ./stack.sh

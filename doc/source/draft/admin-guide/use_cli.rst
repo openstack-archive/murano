@@ -356,9 +356,9 @@ Example:
 
 .. code-block:: console
 
-  $ murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
-   -n mysql -f io.murano.MySQL -d Package -o MySQL.zip --type Library
-   Application package is available at /home/Downloads/MySQL.zip
+  murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
+  -n mysql -f io.murano.MySQL -d Package -o MySQL.zip --type Library
+  Application package is available at /home/Downloads/MySQL.zip
 
 After this, the package is ready to be imported to the application
 catalog.

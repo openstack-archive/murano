@@ -50,23 +50,23 @@ Check that your hardware supports hardware virtualization.
 
 .. code-block:: console
 
-  $ kvm-ok
-  INFO: /dev/kvm exists
-  KVM acceleration can be used
+  kvm-ok
+  # INFO: /dev/kvm exists
+  # KVM acceleration can be used
 ..
 
 If your output differs, check that hardware virtualization is enabled in your BIOS settings. You also could try import KVM kernel module
 
 .. code-block:: console
 
-  $ sudo modprobe kvm-intel
+  sudo modprobe kvm-intel
 ..
 
 or
 
 .. code-block:: cosole
 
-  $ sudo modprobe kvm-amd
+  sudo modprobe kvm-amd
 ..
 
 It might be helpful to add an appropriate module name into **/etc/modules** file to auto-load it during system boot. Sometimes it is required on Ubuntu systems.
@@ -277,22 +277,22 @@ Floppy image with answer file for unattended installation is needed to automate 
 
   .. code-block:: console
 
-    $ mkdir ~/flp/files
-    $ mkdir ~/flp/mnt
+    mkdir ~/flp/files
+    mkdir ~/flp/mnt
   ..
 
   .. code-block:: console
 
-    $ dd bs=512 count=2880 if=/dev/zero of=~/flp/floppy.img
-    $ mkfs.msdos ~/flp/floppy.img
+    dd bs=512 count=2880 if=/dev/zero of=~/flp/floppy.img
+    mkfs.msdos ~/flp/floppy.img
   ..
 
 * Mount the image
 
   .. code-block:: console
 
-      $ mkdir ~/flp/mnt
-      $ sudo mount -o loop ~/floppy.img ~/flp/mnt
+      mkdir ~/flp/mnt
+      sudo mount -o loop ~/floppy.img ~/flp/mnt
   ..
 
 * Download **autounattend.xml.template** file from https://github.com/openstack/murano-deployment/tree/master/contrib/windows/image-builder/share/files
@@ -303,7 +303,7 @@ Floppy image with answer file for unattended installation is needed to automate 
 
   .. code-block:: console
 
-      $ cp ~/autounattend.xml.template ~/flp/mnt/autounattend.xml
+      cp ~/autounattend.xml.template ~/flp/mnt/autounattend.xml
   ..
 
 * Replace string **%_IMAGE_BUILDER_IP_%** in that file with **192.168.122.1**
@@ -312,7 +312,7 @@ Floppy image with answer file for unattended installation is needed to automate 
 
   .. code-block:: console
 
-      $ sudo umount ~/flp/mnt
+      sudo umount ~/flp/mnt
   ..
 
 
@@ -330,21 +330,21 @@ Build Windows image using image builder script
 
   .. code-block:: console
 
-    $ git clone git://git.openstack.org/openstack/murano-deployment.git
+    git clone git://git.openstack.org/openstack/murano-deployment.git
   ..
 
 * Change directory to image-builder folder
 
   .. code-block:: console
 
-    $ cd murano-deployment/contrib/windows/image-builder
+    cd murano-deployment/contrib/windows/image-builder
   ..
 
 * Create folder structure for image builder
 
   .. code-block:: console
 
-    $ sudo make build-root
+    sudo make build-root
   ..
 
 * Download build prerequisites, and copy them to correct folders
@@ -357,21 +357,21 @@ Build Windows image using image builder script
 
   .. code-block:: console
 
-    $ sudo make test-build-files
+    sudo make test-build-files
   ..
 
 * Get list of available images
 
   .. code-block:: console
 
-    $ make
+    make
   ..
 
 * Run image build process (e.g. to build Windows Server 2012)
 
   .. code-block:: console
 
-    $ sudo make ws-2012-std
+    sudo make ws-2012-std
   ..
 
 * Wait until process finishes
@@ -439,7 +439,7 @@ Using CLI Tools
 
   .. code-block:: console
 
-    $ qemu-img create -f raw /var/lib/libvirt/images/ws-2012.img 40G
+    qemu-img create -f raw /var/lib/libvirt/images/ws-2012.img 40G
   ..
 
 2. Start the VM

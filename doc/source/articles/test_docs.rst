@@ -114,7 +114,7 @@ It's located in *muranodashboard/tests/functional* folder.
 There are also a number of command line options that can be used to control the test execution and generated outputs. For more details about *nosetests*, try:
 ::
 
- $ nosetests -h
+ nosetests -h
 
 
 Murano Automated Tests: Tempest Tests

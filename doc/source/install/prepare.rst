@@ -120,13 +120,13 @@ Steps to reproduce test:
 
    ::
 
-       ># ps aux | grep kvm
+       ps aux | grep kvm
 
 3. Make 5 copies of Windows image file:
 
    ::
 
-       ># for i in $(seq 5); do \
+       for i in $(seq 5); do \
        cp ws-2012-std.qcow2 ws-2012-std-$i.qcow2; done
 
 4. Create script start-vm.sh in the folder with .qcow2 files:
@@ -146,28 +146,28 @@ Steps to reproduce test:
 
    ::
 
-       ># ./start-vm.sh 1
+       sudo ./start-vm.sh 1
 
 6. Turn VM off. You may simply kill all KVM processes by
 
    ::
 
-       ># killall kvm
+       sudo killall kvm
 
 7. Start FIVE instances with command below (as root) and measure time
-interval between ALL VM’s launch and the moment when LAST Server Manager
-window appears. To view VM’s desktops, connect with VNC viewer to your
-host to VNC screens :1 thru :5 (ports 5901-5905):
+   interval between ALL VM’s launch and the moment when LAST Server Manager
+   window appears. To view VM’s desktops, connect with VNC viewer to your
+   host to VNC screens :1 thru :5 (ports 5901-5905):
 
    ::
 
-    ># ./start-vm.sh 5
+       sudo ./start-vm.sh 5
 
 8. Turn VMs off. You may simply kill all KVM processes by
 
    ::
 
-    ># killall kvm
+       sudo killall kvm
 
 Baseline Data
 =============

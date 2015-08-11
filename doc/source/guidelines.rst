@@ -11,7 +11,7 @@ To check your code against PEP 8 run:
 
 ::
 
-    $ tox -e pep8
+    tox -e pep8
 
 
 .. seealso::
@@ -37,13 +37,13 @@ Murano repo on Python 2.7:
 
 ::
 
-    $ tox -e py27
+    tox -e py27
 
 For Python 2.6:
 
 ::
 
-    $ tox -e py26
+    tox -e py26
 
 
 Documentation Guidelines
@@ -72,7 +72,7 @@ Run the following command to build docs locally.
 
 ::
 
-    $ tox -e docs
+    tox -e docs
 
 
 .. _PEP 8: http://www.python.org/dev/peps/pep-0008/

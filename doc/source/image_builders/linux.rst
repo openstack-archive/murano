@@ -31,18 +31,18 @@ for cloning git repositories:
 
 .. code-block:: console
 
-    $ export GITDIR=~/git
-    $ mkdir -p $GITDIR
+    export GITDIR=~/git
+    mkdir -p $GITDIR
 
 
 Clone the components required to build an image to that directory:
 
 .. code-block:: console
 
-    $ cd $GITDIR
-    $ git clone git://git.openstack.org/openstack/murano
-    $ git clone git://git.openstack.org/openstack/murano-agent
-    $ git clone git://git.openstack.org/openstack/diskimage-builder
+    cd $GITDIR
+    git clone git://git.openstack.org/openstack/murano
+    git clone git://git.openstack.org/openstack/murano-agent
+    git clone git://git.openstack.org/openstack/diskimage-builder
 
 
 Checkout a change request that allows to build an image using disk image builder
@@ -50,30 +50,30 @@ completely installed to virtual environment:
 
 .. code-block:: console
 
-    $ cd $GITDIR/diskimage-builder
-    $ git fetch https://review.openstack.org/openstack/diskimage-builder refs/changes/02/168002/2 && git checkout FETCH_HEAD
+    cd $GITDIR/diskimage-builder
+    git fetch https://review.openstack.org/openstack/diskimage-builder refs/changes/02/168002/2 && git checkout FETCH_HEAD
 
 
 Install additional packages required by disk image builder:
 
 .. code-block:: console
 
-    $ sudo apt-get install qemu-utils curl python-tox
+    sudo apt-get install qemu-utils curl python-tox
 
 
 Export paths where additional dib elements are located:
 
 .. code-block:: console
 
-    $ export ELEMENTS_PATH=$GITDIR/murano/contrib/elements:$GITDIR/murano-agent/contrib/elements
+    export ELEMENTS_PATH=$GITDIR/murano/contrib/elements:$GITDIR/murano-agent/contrib/elements
 
 
 And build Ubuntu-based image with the murano agent:
 
 .. code-block:: console
 
-    $ cd $GITDIR/diskimage-builder
-    $ tox -e venv -- disk-image-create vm ubuntu murano-agent -o ../murano-agent.qcow2
+    cd $GITDIR/diskimage-builder
+    tox -e venv -- disk-image-create vm ubuntu murano-agent -o ../murano-agent.qcow2
 
 
 If you need a Fedora based image, replace 'ubuntu' to 'fedora' in the last command.
