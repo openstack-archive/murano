@@ -18,8 +18,12 @@ signed OpenStack's contributor's agreement:
 Project Hosting Details
 =======================
 
-* Bug tracker
-    https://launchpad.net/murano
+* Bug trackers
+    * General murano tracker: https://launchpad.net/murano
+
+    * Python client tracker: https://launchpad.net/python-muranoclient
+
+    * Tracker for bugs related to specific apps: https://launchpad.net/murano-apps
 
 * Mailing list (prefix subjects with ``[Murano]`` for faster responses)
     http://lists.openstack.org/cgi-bin/mailman/listinfo/openstack-dev
