@@ -35,7 +35,9 @@ ENABLED_CODES=(
     # warning category
     "W0612", "W0613", "W0703",
     # convention category
-     "C1001")
+    "C1001")
+
+LINE_PATTERN = r"(\S+):(\d+): \[(\S+)(, \S*)?] (.*)"
 
 KNOWN_PYLINT_EXCEPTIONS_FILE = "tools/pylint_exceptions"
 
@@ -46,13 +48,14 @@ class LintOutput(object):
     _cached_content = None
 
     def __init__(self, filename, lineno, line_content, code, message,
-                 lintoutput):
+                 lintoutput, additional_content):
         self.filename = filename
         self.lineno = lineno
         self.line_content = line_content
         self.code = code
         self.message = message
         self.lintoutput = lintoutput
+        self.additional_content = additional_content
 
     @classmethod
     def get_duplicate_code_location(cls, remaining_lines):
@@ -76,22 +79,32 @@ class LintOutput(object):
 
     @classmethod
     def from_line(cls, line, remaining_lines):
-        m = re.search(r"(\S+):(\d+): \[(\S+)(, \S*)?] (.*)", line)
+        m = re.search(LINE_PATTERN, line)
         if not m:
             return None
         matched = m.groups()
         filename, lineno, code, message = (matched[0], int(matched[1]),
                                            matched[2], matched[-1])
+        additional_content = None
 
         # duplicate code output needs special handling
         if "duplicate-code" in code:
+            line_count = 0
+            for next_line in remaining_lines:
+                if re.search(LINE_PATTERN, next_line):
+                    break
+                line_count += 1
+            if line_count:
+                additional_content = remaining_lines[0:line_count]
+
             filename, lineno = cls.get_duplicate_code_location(remaining_lines)
             # fixes incorrectly reported file path
             line = line.replace(matched[0], filename)
+            line = line.replace(":%s:" % matched[1], "")
 
         line_content = cls.get_line_content(filename, lineno)
         return cls(filename, lineno, line_content, code, message,
-                   line.rstrip())
+                   line.rstrip(), additional_content)
 
     @classmethod
     def from_msg_to_dict(cls, msg):
@@ -178,6 +191,11 @@ def validate(newmsg=None):
                 print()
                 print(err.lintoutput)
                 print(err.review_str())
+                if err.additional_content:
+                    max_len = max(map(len, err.additional_content))
+                    print("-" * max_len)
+                    print(os.linesep.join(err.additional_content))
+                    print("-" * max_len)
                 passed = False
     if passed:
         print("Congrats! pylint check passed.")
