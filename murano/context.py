@@ -13,38 +13,23 @@
 #    under the License.
 
 from murano.common import policy
+from oslo_context import context
 
 
-class RequestContext(object):
-    """Stores information about the security context under which the user
-    accesses the system, as well as additional request information.
+class RequestContext(context.RequestContext):
+    """Class that stores context info about an API request.
 
-    TODO: (sjmc7) - extend openstack.common.context
+    Stores creditentials of the user, that is accessing API
+    as well as additional request information.
     """
 
-    def __init__(self, auth_token=None, user=None,
-                 tenant=None, session=None, is_admin=None,
-                 roles=None):
-        self.auth_token = auth_token
-        self.user = user
-        self.tenant = tenant
+    def __init__(self, session=None,
+                 roles=None, is_admin=None,
+                 **kwargs):
+        super(RequestContext, self).__init__(**kwargs)
         self.session = session
-        self.is_admin = is_admin
         self.roles = roles or []
 
+        self.is_admin = is_admin
         if self.is_admin is None:
             self.is_admin = policy.check_is_admin(self)
-
-    def to_dict(self):
-        return {
-            'user': self.user,
-            'tenant': self.tenant,
-            'auth_token': self.auth_token,
-            'session': self.session,
-            'roles': self.roles,
-            'is_admin': self.is_admin
-        }
-
-    @classmethod
-    def from_dict(cls, values):
-        return cls(**values)

@@ -146,6 +146,7 @@ class ControllerTest(object):
             'SCRIPT_NAME': '/v1',
             'PATH_INFO': path,
             'wsgi.url_scheme': 'http',
+            'QUERY_STRING': '',
         }
 
     def _simple_request(self, path, params=None, method='GET',

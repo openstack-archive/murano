@@ -19,8 +19,11 @@ from murano.db import session
 
 def dummy_context(user='test_username', tenant_id='test_tenant_id',
                   password='password', roles=[], user_id=None,
-                  is_admin=False):
+                  is_admin=False, request_id='dummy-request'):
+    # NOTE(kzaitsev) passing non-False value by default to request_id, to
+    # prevent generation during tests.
     return context.RequestContext.from_dict({
+        'request_id': request_id,
         'tenant': tenant_id,
         'user': user,
         # 'roles': roles,  # Commented until policy check changes land
