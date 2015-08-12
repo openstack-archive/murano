@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_middleware import request_id as oslo_request_id
 
 from murano.common.i18n import _
 from murano.common import wsgi
@@ -48,6 +49,7 @@ class ContextMiddleware(wsgi.Middleware):
             'auth_token': req.headers.get('X-Auth-Token'),
             'session': req.headers.get('X-Configuration-Session'),
             'is_admin': CONF.admin_role in roles,
+            'request_id': req.environ.get(oslo_request_id.ENV_REQUEST_ID),
             'roles': roles
         }
         req.context = murano.context.RequestContext(**kwargs)
