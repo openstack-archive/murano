@@ -47,7 +47,7 @@ Methods:
           template: $template
           secGroupName:
             get_resource: $securityGroupName
-          instanceFipOutput: instanceFipOutput
+          instanceFipOutput: $instanceFipOutput
 
 
   generateSecurityGroupManager:
