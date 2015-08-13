@@ -413,9 +413,20 @@ def category_get(category_id, session=None, packages=False):
     return category
 
 
-def categories_list():
+def categories_list(filters=None, limit=None, marker=None):
+    if filters is None:
+        filters = {}
+    sort_keys = filters.get('sort_keys', ['name'])
+    sort_dir = filters.get('sort_dir', 'asc')
+
     session = db_session.get_session()
-    return session.query(models.Category).all()
+    query = session.query(models.Category)
+    if marker is not None:
+        marker = category_get(marker, session)
+
+    query = utils.paginate_query(
+        query, models.Category, limit, sort_keys, marker, sort_dir)
+    return query.all()
 
 
 def category_get_names():
