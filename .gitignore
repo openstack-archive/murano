@@ -1,3 +1,6 @@
+#swap file
+*.swp
+
 #IntelJ Idea
 .idea/
 
