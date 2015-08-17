@@ -257,6 +257,39 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         self.assertEqual(imghdr.what('', result), 'png')
 
+    def test_download_package(self):
+        self._set_policy_rules(
+            {'download_package': '@'}
+        )
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        self.expect_policy_check('download_package',
+                                 {'package_id': saved_package.id})
+
+        req = self._get_with_accept('/catalog/packages/%s/download'
+                                    % saved_package.id,
+                                    accept='application/octet-stream')
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(200, result.status_code)
+
+    def test_download_package_negative(self):
+
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        req = self._get_with_accept('/catalog/packages/%s/download'
+                                    % saved_package.id,
+                                    accept='application/foo')
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(415, result.status_code)
+
     def test_add_public_unauthorized(self):
         self._set_policy_rules({
             'upload_package': '@',

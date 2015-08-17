@@ -173,6 +173,14 @@ class ControllerTest(object):
         return self._simple_request(path, params=params, user=user,
                                     tenant=tenant)
 
+    def _get_with_accept(self, path, params=None, user=DEFAULT_USER,
+                         tenant=DEFAULT_TENANT,
+                         accept='application/octet-stream'):
+        req = self._simple_request(path, params=params, user=user,
+                                   tenant=tenant)
+        req.accept = accept
+        return req
+
     def _delete(self, path, params=None, user=DEFAULT_USER,
                 tenant=DEFAULT_TENANT):
         params = params or {}
