@@ -116,7 +116,7 @@ class ClientManager(object):
         def factory(keystone_client, auth_token):
             heat_settings = config.CONF.heat
 
-            heat_url = keystone_client.service_catalog.url_for(
+            heat_url = keystone_client.service_catalog.url_for(region_name=config.CONF.default_region_name,
                 service_type='orchestration',
                 endpoint_type=heat_settings.endpoint_type)
 
@@ -144,7 +144,7 @@ class ClientManager(object):
         def factory(keystone_client, auth_token):
             neutron_settings = config.CONF.neutron
 
-            neutron_url = keystone_client.service_catalog.url_for(
+            neutron_url = keystone_client.service_catalog.url_for(region_name=config.CONF.default_region_name,
                 service_type='network',
                 endpoint_type=neutron_settings.endpoint_type)
 
@@ -164,7 +164,7 @@ class ClientManager(object):
             murano_settings = config.CONF.murano
 
             murano_url = \
-                murano_settings.url or keystone_client.service_catalog.url_for(
+                murano_settings.url or keystone_client.service_catalog.url_for(region_name=config.CONF.default_region_name,
                     service_type='application_catalog',
                     endpoint_type=murano_settings.endpoint_type)
 
@@ -192,7 +192,7 @@ class ClientManager(object):
             endpoint_type = mistral_settings.endpoint_type
             service_type = mistral_settings.service_type
 
-            mistral_url = keystone_client.service_catalog.url_for(
+            mistral_url = keystone_client.service_catalog.url_for(region_name=config.CONF.default_region_name,
                 service_type=service_type,
                 endpoint_type=endpoint_type)
 

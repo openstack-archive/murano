@@ -263,7 +263,7 @@ class EnvironmentServices(object):
     def get_network_driver(context):
         ks = auth_utils.get_client(context.auth_token, context.tenant)
         try:
-            ks.service_catalog.url_for(service_type='network')
+            ks.service_catalog.url_for(region_name=config.CONF.default_region_name, service_type='network')
         except ks_exceptions.EndpointNotFound:
             LOG.debug("Will use NovaNetwork as a network driver")
             return "nova"

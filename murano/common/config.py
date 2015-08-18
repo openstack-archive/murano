@@ -245,6 +245,10 @@ CONF.register_opts(packages_opts, group='packages_opts')
 CONF.register_opts(stats_opts, group='stats')
 CONF.register_opts(networking_opts, group='networking')
 
+default_region_name = [
+    cfg.StrOpt('default-region-name', help='Default region name when get endpoint from keystone')
+]
+CONF.register_cli_opts(default_region_name)
 
 def parse_args(args=None, usage=None, default_config_files=None):
     CONF(args=args,
