@@ -17,10 +17,11 @@ import shutil
 import sys
 import types
 
+import semantic_version
 import yaml
 
 from murano.dsl import yaql_expression
-import murano.packages.application_package
+from murano.packages import application_package
 from murano.packages import exceptions
 
 YAQL = yaql_expression.YaqlExpression
@@ -40,12 +41,30 @@ def yaql_representer(dumper, data):
 Dumper.add_representer(YAQL, yaql_representer)
 
 
-class HotPackage(murano.packages.application_package.ApplicationPackage):
-    def __init__(self, source_directory, manifest, loader):
+class HotPackage(application_package.ApplicationPackage):
+    def __init__(self, source_directory, manifest, loader, runtime_version):
         super(HotPackage, self).__init__(source_directory, manifest, loader)
         self._translated_class = None
         self._source_directory = source_directory
         self._translated_ui = None
+
+        self._full_name = manifest.get('FullName')
+        if not self._full_name:
+            raise exceptions.PackageFormatError(
+                'FullName not specified')
+        self._check_full_name(self._full_name)
+        self._package_type = manifest.get('Type')
+        if self._package_type not in application_package.PackageTypes.ALL:
+            raise exceptions.PackageFormatError('Invalid Package Type')
+        self._display_name = manifest.get('Name', self._full_name)
+        self._description = manifest.get('Description')
+        self._author = manifest.get('Author')
+        self._supplier = manifest.get('Supplier') or {}
+        self._logo = manifest.get('Logo')
+        self._tags = manifest.get('Tags')
+        self._version = semantic_version.Version(manifest.get(
+            'Version', '0.0.0'))
+        self._runtime_version = runtime_version
 
     @property
     def classes(self):
@@ -71,11 +90,11 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             self._translate_class()
         return self._translated_class
 
-    def validate(self):
+    def load(self):
         self.get_class(self.full_name)
         if not self._translated_ui:
             self._translated_ui = self._translate_ui()
-        super(HotPackage, self).validate()
+        super(HotPackage, self).load()
 
     def _translate_class(self):
         template_file = os.path.join(self._source_directory, 'template.yaml')

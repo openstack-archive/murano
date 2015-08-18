@@ -14,17 +14,19 @@
 
 import os
 import shutil
+import string
 import sys
 import tempfile
 import zipfile
 
+import semantic_version
 import yaml
 
 from murano.engine import yaql_yaml_loader
 import murano.packages.application_package
 import murano.packages.exceptions as e
-import murano.packages.versions.hot_v1
-import murano.packages.versions.mpl_v1
+import murano.packages.hot_package
+import murano.packages.mpl_package
 
 
 def load_from_file(archive_path, target_dir=None, drop_dir=False,
@@ -64,9 +66,12 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
 def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
                   loader=yaql_yaml_loader.YaqlYamlLoader):
     formats = {
-        '1.0': murano.packages.versions.mpl_v1,
-        'MuranoPL/1.0': murano.packages.versions.mpl_v1,
-        'Heat.HOT/1.0': murano.packages.versions.hot_v1
+        'MuranoPL': {
+            ('1.0.0', '1.0.0'): murano.packages.mpl_package.MuranoPlPackage,
+        },
+        'Heat.HOT': {
+            ('1.0.0', '1.0.0'): murano.packages.hot_package.HotPackage
+        }
     }
 
     if not os.path.isdir(source_directory) or not os.path.exists(
@@ -84,12 +89,24 @@ def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
         raise e.PackageLoadError(
             "Unable to load due to '{0}'".format(str(ex))), None, trace
     if content:
-        p_format = str(content.get('Format'))
-        if not p_format or p_format not in formats:
+        p_format_spec = str(content.get('Format') or 'MuranoPL/1.0')
+        if p_format_spec[0] in string.digits:
+            p_format_spec = 'MuranoPL/' + p_format_spec
+        parts = p_format_spec.split('/', 1)
+        if parts[0] not in formats:
             raise e.PackageFormatError(
                 'Unknown or missing format version')
-        package = formats[p_format].create(source_directory, content, loader)
-        formats[p_format].load(package, content)
-        if preload:
-            package.validate()
-        return package
+        format_set = formats[parts[0]]
+        version = semantic_version.Version('0.0.0')
+        if len(parts) > 1:
+            version = semantic_version.Version.coerce(parts[1])
+        for key, value in format_set.iteritems():
+            min_version = semantic_version.Version(key[0])
+            max_version = semantic_version.Version(key[1])
+            if min_version <= version <= max_version:
+                package = value(source_directory, content, loader, version)
+                if preload:
+                    package.load()
+                return package
+        raise e.PackageFormatError(
+            'Unsupported {0} format version {1}'.format(parts[0], version))
