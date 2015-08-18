@@ -291,7 +291,9 @@ class Request(webob.Request):
                                      'application/xml',
                                      'application/murano-packages-json-patch',
                                      'multipart/form-data')
-    default_accept_types = ('application/json', 'application/xml')
+    default_accept_types = ('application/json',
+                            'application/xml',
+                            'application/octet-stream')
 
     def best_match_content_type(self, supported_content_types=None):
         """Determine the requested response content-type.
