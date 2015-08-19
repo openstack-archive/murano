@@ -26,6 +26,8 @@ def get_client(token, tenant_id):
         'auth_url': settings['auth_url']
     }
     kwargs.update(settings['ssl'])
+
+    kwargs['region_name'] = settings['region_name']
     keystone = ks_client.Client(**kwargs)
     keystone.management_url = settings['auth_url']
 
@@ -46,6 +48,7 @@ def _admin_client(trust_id=None, project_name=None):
     for key in ('username', 'password', 'auth_url'):
         kwargs[key] = settings[key]
     kwargs.update(settings['ssl'])
+    kwargs['region_name'] = settings['region_name']
 
     client = ks_client.Client(**kwargs)
 
@@ -95,6 +98,7 @@ def _get_keystone_settings():
             'cacert': cfg.CONF.keystone.ca_file,
             'insecure': cfg.CONF.keystone.insecure,
             'cert': cfg.CONF.keystone.cert_file,
-            'key': cfg.CONF.keystone.key_file
-        }
+            'key': cfg.CONF.keystone.key_file,
+        },
+        'region_name': cfg.CONF.murano.region_name_for_services
     }
