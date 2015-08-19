@@ -25,8 +25,9 @@ import murano.packages.exceptions as e
 class PackageTypes(object):
     Library = 'Library'
     Environment = 'Environment'
+    Cloud = 'Cloud'
     Application = 'Application'
-    ALL = [Library, Environment, Application]
+    ALL = [Library, Environment, Cloud, Application]
 
 
 class ApplicationPackage(object):
