@@ -20,10 +20,10 @@ from tempest.test import attr
 from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
-from murano.tests.functional.common import utils as common_utils
+import murano.tests.functional.common.zip_utils_mixin as zip_utils
 
 
-class TestCaseRepository(base.TestCase, common_utils.ZipUtilsMixin):
+class TestCaseRepository(base.TestCase, zip_utils.ZipUtilsMixin):
 
     @classmethod
     def setUpClass(cls):

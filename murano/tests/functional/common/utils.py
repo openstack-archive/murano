@@ -19,7 +19,6 @@ import random
 import socket
 import telnetlib
 import time
-import zipfile
 
 from heatclient import client as heatclient
 from keystoneclient import exceptions as ks_exceptions
@@ -30,6 +29,7 @@ from oslo_log import log as logging
 import yaml
 
 from murano.services import states
+import murano.tests.functional.common.zip_utils_mixin as zip_utils
 import murano.tests.functional.engine.config as cfg
 
 CONF = cfg.cfg.CONF
@@ -69,21 +69,7 @@ def memoize(f):
     return decorated_function
 
 
-class ZipUtilsMixin(object):
-    @staticmethod
-    def zip_dir(parent_dir, dir):
-        abs_path = os.path.join(parent_dir, dir)
-        path_len = len(abs_path) + 1
-        zip_file = abs_path + ".zip"
-        with zipfile.ZipFile(zip_file, "w") as zf:
-            for dir_name, _, files in os.walk(abs_path):
-                for filename in files:
-                    fn = os.path.join(dir_name, filename)
-                    zf.write(fn, fn[path_len:])
-        return zip_file
-
-
-class DeployTestMixin(ZipUtilsMixin):
+class DeployTestMixin(zip_utils.ZipUtilsMixin):
     cfg.load_config()
 
 # -----------------------------Clients methods---------------------------------
