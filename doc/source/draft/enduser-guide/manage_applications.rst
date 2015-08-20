@@ -200,6 +200,156 @@ the following steps:
 Add an application to environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
+After uploading an application, the second step is to add it to an
+environment. You can do this:
+
+* :ref:`from environment details page <from_env>`
+* :ref:`from applications catalog page <from_cat>`
+
+.. _from_env:
+
+From environment details page
+-----------------------------
+
+#. In OpenStack dashboard, navigate to
+   :menuselection:`Murano > Application catalog > Environments`.
+
+#. Find the environment you want to manage and click
+   :guilabel:`Manage Components`, or simply click on the environment's
+   name.
+
+#. Procced with the :ref:`Drop Components here <drag_and_drop>` field
+   or the :ref:`Add Component <add_component>` button.
+
+.. _drag_and_drop:
+
+**Use of Drop Components here field**
+
+#. On the Environment Components page, drag and drop a desired
+   application into the :guilabel:`Drop Components here` field under
+   the :guilabel:`Application Components` section.
+
+   .. image:: figures/add_to_env/drag_and_drop.png
+      :alt: Environment Components page: Drag and drop a component
+      :width: 630 px
+
+#. Configure the application. Note that the settings may vary from app to app
+   and are predefined by the application author. When done, click
+   :guilabel:`Next`, then click :guilabel:`Create`.
+
+Now the application appears in the :guilabel:`Component List` section on
+the Environment Components page.
+
+.. _add_component:
+
+**Use of Add Component button**
+
+#. On the Environment Components page, click :guilabel:`Add Component`.
+
+   .. image:: figures/add_to_env/add_component.png
+      :alt: Environment Components page: Add component
+      :width: 630 px
+
+#. Find the application you want to add and click :guilabel:`Add to Env`.
+
+   .. image:: figures/add_to_env/add_to_env.png
+      :alt: Applications page: Add to Env
+      :width: 630 px
+
+#. Configure the application and click :guilabel:`Next`. Note that the
+   settings may vary from app to app and are predefined by the
+   application author.
+
+#. To add more applications, check :guilabel:`Add more applications
+   to the environment`, then click :guilabel:`Create` and repeat the
+   steps above. Otherwise, just click :guilabel:`Create`.
+
+   .. image:: figures/add_to_env/add_more_apps.png
+      :alt: Configure Application dialog: Add more applications
+      :width: 630 px
+
+   Now the application appears in the :guilabel:`Component List` section
+   on the Environment Components page.
+
+.. _from_cat:
+
+From applications catalog page
+------------------------------
+
+#. In OpenStack dashboard, navigate to
+   :menuselection:`Murano > Application catalog > Applications`.
+
+#. On the Applications catalog page, use one of the following methods:
+
+   * `Quick deploy`_. Automatically creates an
+     environment, adds the selected application, and redirects you
+     to the page with the environment components.
+   * `Add to Env`_. Adds an application to an already
+     existing environment.
+
+.. _Quick deploy:
+
+**Quick Deploy button**
+
+#. Find the application you want to add and click
+   :guilabel:`Quick Deploy`. Let's add Apache Tomcat, for example.
+
+   .. image:: figures/add_to_env/quick_deploy.png
+      :alt: Applications page: Quick Deploy
+      :width: 630 px
+
+
+#. Configure the application. Note that the settings may vary from app to
+   app and are predefined by the application author. When done, click
+   :guilabel:`Next`, then click :guilabel:`Create`. In the example
+   below we assign a floating IP address.
+
+   .. image:: figures/add_to_env/configure_app.png
+      :alt: Configure Application dialog
+      :width: 630 px
+
+Now the Apache Tomcat application is successfully added to an
+automatically created ``quick-env-1`` environment.
+
+   .. image:: figures/add_to_env/quick_env.png
+      :alt: Environment Components page: Select packages
+      :width: 630 px
+
+.. _Add to Env:
+
+**Add to Env button**
+
+#. From the :guilabel:`Environment` drop-down list, select the
+   required environment.
+
+   .. image:: figures/add_to_env/add_from_cat.png
+      :alt: Applications page: Select environment
+      :width: 630 px
+
+#. Find the application you want to add and click
+   :guilabel:`Add to Env`. Let's add Apache Tomcat, for example.
+
+   .. image:: figures/add_to_env/add_to_env.png
+      :alt: Applications page: Add to Env
+      :width: 630 px
+
+#. Configure the application and click :guilabel:`Next`. Note that the
+   settings may vary from app to app and are predefined by the
+   application author. In the example below we assign a floating
+   IP address.
+
+   .. image:: figures/add_to_env/configure_app.png
+      :alt: Configure Application dialog
+      :width: 630 px
+
+#. To add more applications, check :guilabel:`Add more applications
+   to the environment`, then click :guilabel:`Create` and repeat the
+   steps above. Otherwise, just click :guilabel:`Create`.
+
+   .. image:: figures/add_to_env/add_more_apps.png
+      :alt: Configure Application dialog: Add more applications
+      :width: 630 px
+
 Deploy an application
 ~~~~~~~~~~~~~~~~~~~~~
 
