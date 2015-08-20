@@ -82,14 +82,26 @@ class Controller(object):
         environment = session.query(models.Environment).get(environment_id)
 
         if environment is None:
-            LOG.info(_LI('Environment <EnvId {0}> is not found').format(
-                environment_id))
-            raise exc.HTTPNotFound
+            if environment_id == envs.get_cloud_id():
+                try:
+                    body = {'id':envs.get_cloud_id(), 'name':'hybrid-cloud'}
+                    environment = envs.EnvironmentServices.create(
+                        body.copy(),
+                        request.context)
+                except db_exc.DBDuplicateEntry:
+                    msg = _('Environment with specified name already exists')
+                    LOG.exception(msg)
+                    raise exc.HTTPConflict(explanation=msg)
+            else:
+                LOG.info(_LI('Environment <EnvId {0}> is not found').format(
+                    environment_id))
+                raise exc.HTTPNotFound
 
-        if environment.tenant_id != request.context.tenant:
-            LOG.info(_LI('User is not authorized to access '
-                         'this tenant resources.'))
-            raise exc.HTTPUnauthorized
+        if environment_id != envs.get_cloud_id():
+            if environment.tenant_id != request.context.tenant:
+                LOG.info(_LI('User is not authorized to access '
+                             'this tenant resources.'))
+                raise exc.HTTPUnauthorized
 
         env = environment.to_dict()
         env['status'] = envs.EnvironmentServices.get_status(env['id'])

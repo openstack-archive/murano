@@ -25,6 +25,9 @@ from murano.db import session as db_session
 from murano.openstack.common import log as logging
 from murano.services import states
 
+def get_cloud_id():
+    return 'f5032119beb8413784212a60fd8ea121'
+
 
 LOG = logging.getLogger(__name__)
 DEFAULT_NETWORK_TYPES = {
@@ -94,9 +97,16 @@ class EnvironmentServices(object):
            :param context: request context to get the tenant id and the token
            :return: Created Environment
         """
-        objects = {'?': {
-            'id': uuidutils.generate_uuid(),
-        }}
+        if environment_params.get('id') == get_cloud_id():
+            objects = {'?': {
+                'id': get_cloud_id(),
+            }}
+            environment_params['tenant_id'] = get_cloud_id()
+        else:
+            objects = {'?': {
+                'id': uuidutils.generate_uuid(),
+            }}
+            environment_params['tenant_id'] = context.tenant
         network_driver = EnvironmentServices.get_network_driver(context)
         objects.update(environment_params)
         if not objects.get('defaultNetworks'):
@@ -104,7 +114,6 @@ class EnvironmentServices(object):
                 EnvironmentServices.generate_default_networks(objects['name'],
                                                               network_driver)
         objects['?']['type'] = 'io.murano.Environment'
-        environment_params['tenant_id'] = context.tenant
 
         data = {
             'Objects': objects,

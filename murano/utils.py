@@ -23,6 +23,8 @@ from murano.db import session as db_session
 from murano.openstack.common import log as logging
 from murano.services import states
 
+from murano.db.services import environments as envs
+
 LOG = logging.getLogger(__name__)
 
 
@@ -37,10 +39,11 @@ def verify_env(func):
             raise exc.HTTPNotFound()
 
         if hasattr(request, 'context'):
-            if environment.tenant_id != request.context.tenant:
-                LOG.info(_LI('User is not authorized to access'
-                             ' these tenant resources'))
-                raise exc.HTTPUnauthorized()
+            if environment_id != envs.get_cloud_id():
+                if environment.tenant_id != request.context.tenant:
+                    LOG.info(_LI('User is not authorized to access'
+                                 ' these tenant resources'))
+                    raise exc.HTTPUnauthorized()
 
         return func(self, request, environment_id, *args, **kwargs)
     return __inner

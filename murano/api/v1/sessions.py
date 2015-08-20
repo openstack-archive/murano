@@ -40,11 +40,12 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPNotFound(explanation=msg)
 
-        if environment.tenant_id != request.context.tenant:
-            msg = _('User is not authorized to access '
-                    'this tenant resources.')
-            LOG.error(msg)
-            raise exc.HTTPUnauthorized(explanation=msg)
+        if environment_id != envs.get_cloud_id():
+            if environment.tenant_id != request.context.tenant:
+                msg = _('User is not authorized to access '
+                        'this tenant resources.')
+                LOG.error(msg)
+                raise exc.HTTPUnauthorized(explanation=msg)
 
     def _check_session(self, request, environment_id, session, session_id):
         if session is None:
