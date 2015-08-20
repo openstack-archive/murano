@@ -48,7 +48,10 @@ class EnvironmentServices(object):
             filter_by(**filters).all()
 
         for env in environments:
-            env['status'] = EnvironmentServices.get_status(env['id'])
+            if env.id == get_cloud_id():
+                environments.remove(env)
+            else:
+                env['status'] = EnvironmentServices.get_status(env['id'])
 
         return environments
 
