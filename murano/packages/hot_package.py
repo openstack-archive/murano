@@ -242,7 +242,8 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             {
                 'If': YAQL('$.getAttr(generatedHeatStackName) = null'),
                 'Then': [
-                    YAQL('$.setAttr(generatedHeatStackName, randomName())')
+                    YAQL("$.setAttr(generatedHeatStackName, "
+                         "'{0}_{1}'.format(randomName(), id($environment)))")
                 ]
             },
             {YAQL('$stack'): YAQL(
@@ -288,6 +289,7 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             {YAQL('$stack'): YAQL(
                 "new('io.murano.system.HeatStack', "
                 "name => $.getAttr(generatedHeatStackName))")},
+
             YAQL('$stack.delete()')
         ]
 
