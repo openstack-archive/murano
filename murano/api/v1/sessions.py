@@ -137,6 +137,7 @@ class Controller(object):
 
         unit = db_session.get_session()
         session = unit.query(models.Session).get(session_id)
+        session.tenant_id = request.context.tenant
 
         self._check_session(request, environment_id, session, session_id)
 

@@ -109,10 +109,11 @@ class EnvironmentServices(object):
             environment_params['tenant_id'] = context.tenant
         network_driver = EnvironmentServices.get_network_driver(context)
         objects.update(environment_params)
-        if not objects.get('defaultNetworks'):
-            objects['defaultNetworks'] = \
-                EnvironmentServices.generate_default_networks(objects['name'],
-                                                              network_driver)
+        if environment_params.get('id') != get_cloud_id():
+            if not objects.get('defaultNetworks'):
+                objects['defaultNetworks'] = \
+                    EnvironmentServices.generate_default_networks(objects['name'],
+                                                                  network_driver)
         objects['?']['type'] = 'io.murano.Environment'
 
         data = {
@@ -243,6 +244,9 @@ class EnvironmentServices(object):
     def deploy(session, unit, token):
         environment = unit.query(models.Environment).get(
             session.environment_id)
+        
+        if session.environment_id == get_cloud_id():
+            environment.tenant_id = session.tenant_id;
 
         if (session.description['Objects'] is None and
                 'ObjectsCopy' not in session.description):
