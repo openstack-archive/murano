@@ -23,11 +23,11 @@ class TestEnvTemplate(base.TestCase):
 
     @tag('all', 'coverage')
     @attr(type='smoke')
-    def test_list_env_templates(self):
+    def test_list_empty_env_templates(self):
         """Check getting the list of environment templates."""
         resp, body = self.client.get_env_templates_list()
 
-        self.assertIn('templates', body)
+        self.assertEqual(0, len(body))
         self.assertEqual(resp.status, 200)
 
     @tag('all', 'coverage')
@@ -36,23 +36,24 @@ class TestEnvTemplate(base.TestCase):
         """It checks the creation and deletion of an enviroment template."""
         env_templates_list_start = self.client.get_env_templates_list()[1]
 
-        resp, env_template = self.client.create_env_template('test_env_temp')
+        resp, env_template = self.create_env_template('test_env_temp')
         self.env_templates.append(env_template)
 
         self.assertEqual(resp.status, 200)
+        self.assertFalse(env_template['is_public'])
         self.assertEqual('test_env_temp', env_template['name'])
 
         env_templates_list = self.client.get_env_templates_list()[1]
 
-        self.assertEqual(len(env_templates_list_start['templates']) + 1,
-                         len(env_templates_list['templates']))
+        self.assertEqual(len(env_templates_list_start) + 1,
+                         len(env_templates_list))
 
         self.client.delete_env_template(env_template['id'])
 
         env_templates_list = self.client.get_env_templates_list()[1]
 
-        self.assertEqual(len(env_templates_list_start['templates']),
-                         len(env_templates_list['templates']))
+        self.assertEqual(len(env_templates_list_start),
+                         len(env_templates_list))
 
         self.env_templates.pop(self.env_templates.index(env_template))
 
@@ -60,78 +61,151 @@ class TestEnvTemplate(base.TestCase):
     @attr(type='smoke')
     def test_get_env_template(self):
         """Check getting information about an environment template."""
-        resp, env_template = self.client.create_env_template('test_env_temp')
+        resp, env_template = self.create_env_template('test_env_temp')
 
         resp, env_obtained_template =\
             self.client.get_env_template(env_template['id'])
 
         self.assertEqual(resp.status, 200)
         self.assertEqual(env_obtained_template['name'], 'test_env_temp')
-        self.client.delete_env_template(env_template['id'])
 
     @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_env_template_with_apps(self):
         """Check the creation of an environment template with applications."""
         resp, env_template = \
-            self.client.create_env_template_with_apps('test_env_temp')
+            self.create_env_template_with_apps('test_env_temp')
         self.assertEqual(resp.status, 200)
         resp, apps_template = \
             self.client.get_apps_in_env_template(env_template['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(apps_template), 1)
-        self.client.delete_env_template(env_template['id'])
 
     @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_app_in_env_template(self):
         """Check the creationg of applications in an environment template."""
-        resp, env_template = self.client.create_env_template('test_env_temp')
-        resp, apps = self.client.get_apps_in_env_template(env_template['id'])
+        resp, env_temp = self.create_env_template('test_env_temp')
+        self.assertEqual(resp.status, 200)
+
+        resp, apps = self.client.get_apps_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(apps), 0)
 
-        resp, apps = self.client.create_app_in_env_template(env_template['id'])
+        resp, apps = self.client.create_app_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
-        resp, apps = self.client.get_apps_in_env_template(env_template['id'])
+        resp, apps = self.client.get_apps_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(apps), 1)
-
-        self.client.delete_env_template(env_template['id'])
 
     @tag('all', 'coverage')
     @attr(type='smoke')
     def test_delete_app_in_env_template(self):
         """Check the deletion of applications in an environmente template."""
-        resp, env_template = self.client.create_env_template('test_env_temp')
-
-        resp, apps = self.client.create_app_in_env_template(env_template['id'])
+        resp, env_temp = self.create_env_template_with_apps('test_env_temp')
         self.assertEqual(resp.status, 200)
-        resp, apps = self.client.get_apps_in_env_template(env_template['id'])
+        resp, apps = self.client.get_apps_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(apps), 1)
-        resp = self.client.delete_app_in_env_template(env_template['id'])
+        resp = self.client.delete_app_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
-        resp, apps = self.client.get_apps_in_env_template(env_template['id'])
+        resp, apps = self.client.get_apps_in_env_template(env_temp['id'])
         self.assertEqual(resp.status, 200)
         self.assertEqual(len(apps), 0)
 
-        self.client.delete_env_template(env_template['id'])
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_create_public_env_template(self):
+        """Check the creation of a public environment template."""
+        resp, env_temp = self.create_public_env_template('test_env_temp')
+        self.assertEqual(resp.status, 200)
+        resp, env = self.client.get_env_template(env_temp['id'])
+        self.assertEqual(resp.status, 200)
+        self.assertTrue(env['is_public'], 200)
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_clone_env_template(self):
+        """Check the creation of a public environment template."""
+        resp, env_template = self.\
+            create_public_env_template('test_env_temp')
+        self.assertEqual(resp.status, 200)
+        resp, cloned_templ = self.clone_env_template(env_template['id'],
+                                                     'cloned_template')
+        self.assertEqual(resp.status, 200)
+        self.assertTrue(cloned_templ['name'], 'cloned_template')
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_clone_env_template_private(self):
+        """Check the creation of a public environment template."""
+        resp, env_template = self.\
+            create_env_template('test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertRaises(exceptions.Forbidden,
+                          self.clone_env_template,
+                          env_template['id'], 'cloned_template')
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_get_public_env_templates(self):
+        """Check the deletion of applications in an environmente template."""
+        resp, public_env_template = \
+            self.create_public_env_template('public_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(public_env_template['is_public'], True)
+        resp, private_env_template = \
+            self.create_env_template('private_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(private_env_template['is_public'], False)
+        resp, public_envs = self.client.get_public_env_templates_list()
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(len(public_envs), 1)
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_get_private_env_templates(self):
+        """Check the deletion of applications in an environmente template."""
+        resp, public_env_template = \
+            self.create_public_env_template('public_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(public_env_template['is_public'], True)
+        resp, private_env_template = \
+            self.create_env_template('private_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(private_env_template['is_public'], False)
+        resp, private_envs = self.client.get_private_env_templates_list()
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(len(private_envs), 1)
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
+    def test_get_env_templates(self):
+        """Check the deletion of applications in an environmente template."""
+        resp, public_env_template = \
+            self.create_public_env_template('public_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(public_env_template['is_public'], True)
+        resp, private_env_template = \
+            self.create_env_template('private_test_env_temp')
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(private_env_template['is_public'], False)
+        resp, envs_templates = self.client.get_env_templates_list()
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(len(envs_templates), 2)
 
     @tag('all', 'coverage')
     @attr(type='smoke')
     def test_create_env_from_template(self):
         """Check the creation of an environment from a template."""
         resp, env_template = \
-            self.client.create_env_template_with_apps('test_env_temp')
+            self.create_env_template_with_apps('test_env_temp')
         self.assertEqual(resp.status, 200)
 
-        resp, env = self.client.create_env_from_template(env_template['id'],
-                                                         "env")
+        resp, env = self.create_env_from_template(env_template['id'],
+                                                  "env")
         self.assertEqual(resp.status, 200)
-
-        self.client.delete_env_template(env_template['id'])
-        self.client.delete_environment(env['environment_id'])
+        self.assertIsNotNone(env)
 
     @tag('all', 'coverage')
     @attr(type='negative')
@@ -153,7 +227,7 @@ class TestEnvTemplate(base.TestCase):
     @attr(type='negative')
     def test_double_delete_env_template(self):
         """Check the deletion of an wrong environment template request."""
-        _, env_template = self.client.create_env_template('test_env_temp')
+        _, env_template = self.create_env_template('test_env_temp')
 
         self.client.delete_env_template(env_template['id'])
 
@@ -165,7 +239,7 @@ class TestEnvTemplate(base.TestCase):
     @attr(type='negative')
     def test_get_deleted_env_template(self):
         """Check the deletion of an wrong environment template request."""
-        _, env_template = self.client.create_env_template('test_env_temp')
+        _, env_template = self.create_env_template('test_env_temp')
 
         self.client.delete_env_template(env_template['id'])
 
@@ -182,12 +256,10 @@ class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
         """It tests getting information from an environment
         template from another user.
         """
-        env_template = self.create_env_template('test_env_temp')
+        _, env_template = self.create_env_template('test_env_temp')
 
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_env_template, env_template['id'])
-
-        self.client.delete_env_template(env_template['id'])
 
     @tag('all', 'coverage')
     @attr(type='negative')
@@ -195,9 +267,8 @@ class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
         """It tests deleting information from an environment
         template from another user.
         """
-        env_template = self.create_env_template('test_env_temp')
+        _, env_template = self.create_env_template('test_env_temp')
 
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_env_template,
                           env_template['id'])
-        self.client.delete_env_template(env_template['id'])

@@ -59,6 +59,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         expected = {'tenant_id': self.tenant,
                     'id': 'env_template_id',
+                    'is_public': False,
                     'name': 'mytemp',
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
@@ -85,6 +86,138 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/templates/%s' % self.uuids[0])
         result = req.get_response(self.api)
         self.assertEqual(expected, json.loads(result.body))
+
+    def test_list_public_env_templates(self):
+        """Create an template, test templates.public()."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'list_env_templates': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+
+        body = {'name': 'mytemp2', 'is_public': True}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertTrue(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('list_env_templates')
+        req = self._get('/templates', {'is_public': True})
+
+        result = req.get_response(self.api)
+        self.assertEqual(1, len(json.loads(result.body)))
+        self.assertTrue(json.loads(result.body)['templates'][0]['is_public'])
+
+    def test_clone_env_templates(self):
+        """Create an template, test templates.public()."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'clone_env_template': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp2', 'is_public': True}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        env_template_id = json.loads(result.body)['id']
+        self.assertTrue(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('clone_env_template')
+        body = {'name': 'clone', 'is_public': False}
+        req = self._post('/templates/%s/clone' % env_template_id,
+                         json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertFalse(json.loads(result.body)['is_public'])
+        self.assertEqual('clone', json.loads(result.body)['name'])
+
+    def test_clone_env_templates_private(self):
+        """Create an template, test templates.public()."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'clone_env_template': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp2', 'is_public': False}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        env_template_id = json.loads(result.body)['id']
+        self.assertFalse(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('clone_env_template')
+        body = {'name': 'clone', 'is_public': False}
+        req = self._post('/templates/%s/clone' % env_template_id,
+                         json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(result.status_code, 403)
+
+    def test_list_public_env_templates_default(self):
+        """Create an template, test list public with no
+        public templates.
+        """
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'list_env_templates': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp'}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertFalse(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('list_env_templates')
+        req = self._get('/templates', {'is_public': True})
+        result = req.get_response(self.api)
+
+        self.assertFalse(0, len(json.loads(result.body)))
+
+    def test_list_private_env_templates(self):
+        """Create an template, test list public with no
+        public templates.
+        """
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'list_env_templates': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp', 'is_public': False}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertFalse(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('list_env_templates')
+        req = self._get('/templates', {'is_public': False})
+        result = req.get_response(self.api)
+        self.assertEqual(1, len(json.loads(result.body)['templates']))
+
+    def test_list_env_templates(self):
+        """Create an template, test list public with no
+        public templates.
+        """
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'list_env_templates': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp', 'is_public': False}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertFalse(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp1', 'is_public': True}
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertTrue(json.loads(result.body)['is_public'])
+
+        self.expect_policy_check('list_env_templates')
+        req = self._get('/templates')
+        result = req.get_response(self.api)
+
+        self.assertEqual(2, len(json.loads(result.body)['templates']))
 
     def test_illegal_template_name_create(self):
         """Check that an illegal temp name results in an HTTPClientError."""
@@ -114,7 +247,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_msg = result.text.replace('\n', '')
-        self.assertIn('Environment Template name should be 255 characters '
+        self.assertIn('Environment template name should be 255 characters '
                       'maximum',
                       result_msg)
 
@@ -158,6 +291,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         expected = dict(
             id='12345',
+            is_public=False,
             name='my-temp',
             version=0,
             created=fake_now,
@@ -242,6 +376,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         timeutils.utcnow.override_time = fake_now
         expected = {'tenant_id': self.tenant,
                     'id': self.uuids[0],
+                    'is_public': False,
                     'name': 'env_template_name',
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],

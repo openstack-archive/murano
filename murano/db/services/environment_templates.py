@@ -19,6 +19,7 @@ from murano.db import session as db_session
 
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
+from sqlalchemy.sql import or_
 
 LOG = logging.getLogger(__name__)
 
@@ -35,6 +36,19 @@ class EnvTemplateServices(object):
         unit = db_session.get_session()
         templates = unit.query(models.EnvironmentTemplate). \
             filter_by(**filters).all()
+
+        return templates
+
+    @staticmethod
+    def get_env_templates_or_by(filters):
+        """Returns list of environment-templates.
+
+           :param filters: property filters
+           :return: Returns list of environment-templates
+        """
+        unit = db_session.get_session()
+        templates = unit.query(models.EnvironmentTemplate). \
+            filter(or_(*filters)).all()
 
         return templates
 
@@ -166,3 +180,32 @@ class EnvTemplateServices(object):
         """
         session = db_session.get_session()
         return session.query(models.EnvironmentTemplate).get(env_template_id)
+
+    @staticmethod
+    def clone(env_template_id, tenant_id, env_template_name, is_public):
+        """Clones environment-template with specified params, in particular - name.
+
+           :param env_template_params: Dict, e.g. {'name': 'temp-name'}
+           :param tenant_id: Tenant Id
+           :return: Created Template
+        """
+
+        template = EnvTemplateServices.get_env_template(env_template_id)
+        env_template_params = template.to_dict()
+        env_template_params['id'] = uuidutils.generate_uuid()
+        env_template_params['tenant_id'] = tenant_id
+        env_template_params['name'] = env_template_name
+        env_template_params['is_public'] = is_public
+        env_temp_desc = EnvTemplateServices.get_description(env_template_id)
+        if "services" in env_temp_desc:
+            env_template_params['services'] = env_temp_desc['services']
+
+        env_template = models.EnvironmentTemplate()
+        env_template.update(env_template_params)
+
+        unit = db_session.get_session()
+        with unit.begin():
+            unit.add(env_template)
+        env_template.update({'description': env_template_params})
+        env_template.save(unit)
+        return env_template

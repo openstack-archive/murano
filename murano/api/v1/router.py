@@ -121,6 +121,10 @@ class API(wsgi.Router):
                        controller=templates_resource,
                        action='create_environment',
                        conditions={'method': ['POST']})
+        mapper.connect('/templates/{env_template_id}/clone',
+                       controller=templates_resource,
+                       action='clone',
+                       conditions={'method': ['POST']})
 
         applications_resource = template_applications.create_resource()
         mapper.connect('/templates/{env_template_id}/services',
