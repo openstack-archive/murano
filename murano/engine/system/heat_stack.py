@@ -163,10 +163,11 @@ class HeatStack(murano_object.MuranoObject):
             self._template['description'] = self._description
 
         template = copy.deepcopy(self._template)
-        LOG.info(_LI('Pushing: {0}').format(template))
+        LOG.info(_LI('Pushing {0}: {1}').format(self._name, template))
 
         current_status = self._get_status(_context)
         resources = template.get('Resources') or template.get('resources')
+        LOG.info(_LI("{0} current status: {1}").format(self._name, current_status))
         if current_status == 'NOT_FOUND':
             if resources is not None:
                 token_client = self._clients.get_heat_client(_context, False)
