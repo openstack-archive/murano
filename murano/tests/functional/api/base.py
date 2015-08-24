@@ -210,13 +210,28 @@ class MuranoClient(rest_client.RestClient):
         return self.delete('v1/catalog/packages/{0}'.format(id))
 
     def download_package(self, id):
-        return self.get('v1/catalog/packages/{0}/download'.format(id))
+        headers = {
+            'X-Auth-Token': self.auth_provider.get_token(),
+            'content-type': 'application/octet-stream'
+        }
+        return self.get('v1/catalog/packages/{0}/download'.format(id),
+                        headers=headers)
 
     def get_ui_definition(self, id):
-        return self.get('v1/catalog/packages/{0}/ui'.format(id))
+        headers = {
+            'X-Auth-Token': self.auth_provider.get_token(),
+            'content-type': 'text/plain'
+        }
+        return self.get('v1/catalog/packages/{0}/ui'.format(id),
+                        headers=headers)
 
     def get_logo(self, id):
-        return self.get('v1/catalog/packages/{0}/logo'.format(id))
+        headers = {
+            'X-Auth-Token': self.auth_provider.get_token(),
+            'content-type': 'application/octet-stream'
+        }
+        return self.get('v1/catalog/packages/{0}/logo'.format(id),
+                        headers=headers)
 
     def list_categories(self):
         resp, body = self.get('v1/catalog/packages/categories')

@@ -289,6 +289,74 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(415, result.status_code)
+        self.assertTrue('Unsupported Content-Type' in result.body)
+
+    def test_get_ui_definition(self):
+        self._set_policy_rules(
+            {'get_package': '@'}
+        )
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        self.expect_policy_check('get_package',
+                                 {'package_id': saved_package.id})
+
+        req = self._get_with_accept('/catalog/packages/%s/ui'
+                                    % saved_package.id,
+                                    accept="text/plain")
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(200, result.status_code)
+
+    def test_get_ui_definition_negative(self):
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        req = self._get_with_accept('/catalog/packages/%s/ui'
+                                    % saved_package.id,
+                                    accept='application/foo')
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(415, result.status_code)
+        self.assertTrue('Unsupported Content-Type' in result.body)
+
+    def test_get_logo(self):
+        self._set_policy_rules(
+            {'get_package': '@'}
+        )
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        self.expect_policy_check('get_package',
+                                 {'package_id': saved_package.id})
+
+        req = self._get_with_accept('/catalog/packages/%s/logo'
+                                    % saved_package.id,
+                                    accept="application/octet-stream")
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(200, result.status_code)
+        self.assertEqual(package['logo'], result.body)
+
+    def test_get_logo_negative(self):
+        package_from_dir, package = self._test_package()
+
+        saved_package = db_catalog_api.package_upload(package, '')
+
+        req = self._get_with_accept('/catalog/packages/%s/logo'
+                                    % saved_package.id,
+                                    accept='application/foo')
+
+        result = req.get_response(self.api)
+
+        self.assertEqual(415, result.status_code)
+        self.assertTrue('Unsupported Content-Type' in result.body)
 
     def test_add_public_unauthorized(self):
         self._set_policy_rules({
