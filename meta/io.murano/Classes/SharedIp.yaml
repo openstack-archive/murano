@@ -34,11 +34,9 @@ Workflow:
                 $aapPortName:
                   type: 'OS::Neutron::Port'
                   properties:
-                    network_id:
-                      get_resource: $.network.name + '-net-' + $.network.id()
+                    network_id: $.network.describe().netRef
                     fixed_ips:
-                      - subnet_id:
-                          get_resource: $.network.name + '-subnet-' + $.network.id()
+                      - subnet_id: $.network.describe().subnetRef
               outputs:
                 $aapPortName+'-virtualIp':
                   value:
@@ -47,20 +45,15 @@ Workflow:
           - $.environment.stack.updateTemplate($template)
           - If: $.assignFloatingIp
             Then:
-              - $extNetId: $.network.getExternalNetId()
+              - $extNetId: $.network.describe().floatingIpNeRef
               - $fip_name: format('Shared-Floating-ip-{0}', $.id())
-              - $fip_assoc_name: format('Shared-Floating-ip-assoc-{0}', $.id())
+
               - $template:
                   resources:
                     $fip_name:
                       type: 'OS::Neutron::FloatingIP'
                       properties:
                         floating_network_id: $extNetId
-                    $fip_assoc_name:
-                      type: 'OS::Neutron::FloatingIPAssociation'
-                      properties:
-                        floatingip_id:
-                          get_resource: $fip_name
                         port_id:
                           get_resource: $aapPortName
                   outputs:
