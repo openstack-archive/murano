@@ -102,6 +102,42 @@ def needs_evaluation(value):
     return False
 
 
+def exclude_lists(list1, list2):
+    result = []
+    for item in list1:
+        exists = False
+        for old_item in list2:
+            if not utils.is_different(item, old_item):
+                exists = True
+                break
+        if not exists:
+            result.append(item)
+    return result
+
+def exclude_dicts(dict1, dict2, max_levels=0):
+    result = {}
+    for key, value1 in dict1.items():
+        if key in dict2:
+            value2 = dict2[key]
+            if type(value2) != type(value1):
+                if (isinstance(value1, types.StringTypes) and
+                        isinstance(value2, types.StringTypes)):
+                    continue
+                raise TypeError()
+            if max_levels != 1 and isinstance(value2, types.DictionaryType):
+                res = exclude_dicts(
+                    value1, value2,
+                    0 if max_levels == 0 else max_levels - 1)
+                if len(res) > 0:
+                    result[key] = res
+            elif max_levels != 1 and isinstance(value2, types.ListType):
+                res = exclude_lists(value1, value2)
+                if len(res) > 0:
+                    result[key] = res
+        else:
+            result[key] = value1
+    return result
+
 def merge_lists(list1, list2):
     result = []
     for item in list1 + list2:
@@ -113,7 +149,6 @@ def merge_lists(list1, list2):
         if not exists:
             result.append(item)
     return result
-
 
 def merge_dicts(dict1, dict2, max_levels=0):
     result = {}

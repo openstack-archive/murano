@@ -95,6 +95,18 @@ class HeatStack(murano_object.MuranoObject):
         self._template = helpers.merge_dicts(self._template, template)
         self._applied = False
 
+    def excludeTemplate(self, _context, template):
+        template_version = template.get('heat_template_version',
+                                        HEAT_TEMPLATE_VERSION)
+        if template_version != HEAT_TEMPLATE_VERSION:
+            err_msg = ("Currently only heat_template_version %s "
+                       "is supported." % HEAT_TEMPLATE_VERSION)
+            raise HeatStackError(err_msg)
+        self.current(_context)
+        self._template = helpers.exclude_dicts(self._template, template)
+        LOG.info("excluding {1} as {0}".format(self._template, template))
+        self._applied = False
+
     @staticmethod
     def _remove_system_params(parameters):
         return dict((k, v) for k, v in parameters.iteritems() if
