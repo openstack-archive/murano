@@ -20,7 +20,7 @@ import eventlet.debug
 
 from murano.tests.unit import base
 from murano.tests.unit.dsl.foundation import runner
-from murano.tests.unit.dsl.foundation import test_class_loader
+from murano.tests.unit.dsl.foundation import test_package_loader
 
 
 class DslTestCase(base.MuranoTestCase):
@@ -30,19 +30,19 @@ class DslTestCase(base.MuranoTestCase):
             inspect.getfile(self.__class__)), 'meta')
         root_meta_directory = os.path.join(
             os.path.dirname(__file__), '../../../../../meta')
-        sys_class_loader = test_class_loader.TestClassLoader(
+        sys_package_loader = test_package_loader.TestPackageLoader(
             os.path.join(root_meta_directory, 'io.murano/Classes'),
-            'murano.io')
-        self._class_loader = test_class_loader.TestClassLoader(
-            directory, 'tests', sys_class_loader)
+            'io.murano')
+        self._package_loader = test_package_loader.TestPackageLoader(
+            directory, 'tests', sys_package_loader)
+        self._functions = {}
         self.register_function(
             lambda data: self._traces.append(data), 'trace')
         self._traces = []
-        test_class_loader.TestClassLoader.clear_configs()
         eventlet.debug.hub_exceptions(False)
 
     def new_runner(self, model):
-        return runner.Runner(model, self.class_loader)
+        return runner.Runner(model, self.package_loader, self._functions)
 
     @property
     def traces(self):
@@ -53,13 +53,14 @@ class DslTestCase(base.MuranoTestCase):
         self._traces = []
 
     @property
-    def class_loader(self):
-        return self._class_loader
+    def package_loader(self):
+        return self._package_loader
 
     def register_function(self, func, name):
-        self.class_loader.register_function(func, name)
+        self._functions[name] = func
 
-    def find_attribute(self, model, obj_id, obj_type, name):
+    @staticmethod
+    def find_attribute(model, obj_id, obj_type, name):
         for entry in model['Attributes']:
             if tuple(entry[:3]) == (obj_id, obj_type, name):
                 return entry[3]

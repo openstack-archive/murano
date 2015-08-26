@@ -13,8 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import abc
 import os
+import os.path
 import shutil
 import sys
 import tempfile
@@ -23,10 +23,13 @@ import uuid
 from muranoclient.common import exceptions as muranoclient_exc
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 
 from murano.common.i18n import _LE, _LI
+from murano.dsl import constants
 from murano.dsl import exceptions
+from murano.dsl import package_loader
+from murano.engine import murano_package
+from murano.engine.system import system_objects
 from murano.engine import yaql_yaml_loader
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
@@ -35,39 +38,53 @@ CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
-class PackageLoader(six.with_metaclass(abc.ABCMeta)):
-    @abc.abstractmethod
-    def get_package(self, name):
-        pass
-
-    @abc.abstractmethod
-    def get_package_by_class(self, name):
-        pass
-
-
-class ApiPackageLoader(PackageLoader):
-    def __init__(self, murano_client_factory, tenant_id):
+class ApiPackageLoader(package_loader.MuranoPackageLoader):
+    def __init__(self, murano_client_factory, tenant_id, root_loader=None):
         self._cache_directory = self._get_cache_directory()
         self._murano_client_factory = murano_client_factory
         self.tenant_id = tenant_id
+        self._class_cache = {}
+        self._package_cache = {}
+        self._root_loader = root_loader or self
 
-    def get_package_by_class(self, name):
-        filter_opts = {'class_name': name}
+    def load_class_package(self, class_name, version_spec):
+        packages = self._class_cache.get(class_name)
+        if packages:
+            version = version_spec.select(packages.iterkeys())
+            if version:
+                return packages[version]
+
+        filter_opts = {'class_name': class_name}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:
             exc_info = sys.exc_info()
-            raise exceptions.NoPackageForClassFound(name), None, exc_info[2]
-        return self._get_package_by_definition(package_definition)
+            raise (exceptions.NoPackageForClassFound(class_name),
+                   None, exc_info[2])
+        return self._to_dsl_package(
+            self._get_package_by_definition(package_definition))
 
-    def get_package(self, name):
-        filter_opts = {'fqn': name}
+    def load_package(self, package_name, version_spec):
+        packages = self._package_cache.get(package_name)
+        if packages:
+            version = version_spec.select(packages.iterkeys())
+            if version:
+                return packages[version]
+
+        filter_opts = {'fqn': package_name}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:
             exc_info = sys.exc_info()
-            raise exceptions.NoPackageFound(name), None, exc_info[2]
-        return self._get_package_by_definition(package_definition)
+            raise exceptions.NoPackageFound(package_name), None, exc_info[2]
+        return self._to_dsl_package(
+            self._get_package_by_definition(package_definition))
+
+    def register_package(self, package):
+        for name in package.classes:
+            self._class_cache.setdefault(name, {})[package.version] = package
+        self._package_cache.setdefault(package.name, {})[
+            package.version] = package
 
     @staticmethod
     def _get_cache_directory():
@@ -76,7 +93,7 @@ class ApiPackageLoader(PackageLoader):
             os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
         )
         directory = os.path.abspath(os.path.join(base_directory,
-                                                 str(uuid.uuid4())))
+                                                 uuid.uuid4().hex))
         os.makedirs(directory)
 
         LOG.debug('Cache for package loader is located at: %s' % directory)
@@ -103,10 +120,21 @@ class ApiPackageLoader(PackageLoader):
             LOG.debug('Failed to get package definition from repository')
             raise LookupError()
 
+    def _to_dsl_package(self, app_package):
+        dsl_package = murano_package.MuranoPackage(
+            self._root_loader, app_package)
+        for name in app_package.classes:
+            dsl_package.register_class(
+                (lambda cls: lambda: app_package.get_class(cls))(name),
+                name)
+        if app_package.full_name == constants.CORE_LIBRARY:
+            system_objects.register(dsl_package)
+        self.register_package(dsl_package)
+        return dsl_package
+
     def _get_package_by_definition(self, package_def):
         package_id = package_def.id
-        package_name = package_def.fully_qualified_name
-        package_directory = os.path.join(self._cache_directory, package_name)
+        package_directory = os.path.join(self._cache_directory, package_id)
 
         if os.path.exists(package_directory):
             try:
@@ -135,7 +163,8 @@ class ApiPackageLoader(PackageLoader):
                 package_file.name,
                 target_dir=package_directory,
                 drop_dir=False,
-                loader=yaql_yaml_loader.YaqlYamlLoader
+                loader=yaql_yaml_loader.YaqlYamlLoader,
+                preload=False
             )
         except IOError:
             msg = 'Unable to extract package data for %s' % package_id
@@ -174,75 +203,128 @@ class ApiPackageLoader(PackageLoader):
         return False
 
 
-class DirectoryPackageLoader(PackageLoader):
-    def __init__(self, base_path):
+class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
+    def __init__(self, base_path, root_loader=None):
         self._base_path = base_path
-        self._processed_entries = set()
         self._packages_by_class = {}
         self._packages_by_name = {}
-
+        self._loaded_packages = set()
+        self._root_loader = root_loader or self
         self._build_index()
 
-    def get_package(self, name):
-        return self._packages_by_name.get(name)
-
-    def get_package_by_class(self, name):
-        return self._packages_by_class.get(name)
-
     def _build_index(self):
-        for entry in os.listdir(self._base_path):
-            folder = os.path.join(self._base_path, entry)
-            if not os.path.isdir(folder) or entry in self._processed_entries:
-                continue
-
+        for folder in self.search_package_folders(self._base_path):
             try:
                 package = load_utils.load_from_dir(
-                    folder, preload=True,
+                    folder, preload=False,
                     loader=yaql_yaml_loader.YaqlYamlLoader)
+                dsl_package = murano_package.MuranoPackage(
+                    self._root_loader, package)
+                for class_name in package.classes:
+                    dsl_package.register_class(
+                        (lambda pkg, cls:
+                            lambda: pkg.get_class(cls))(package, class_name),
+                        class_name
+                    )
+                if dsl_package.name == constants.CORE_LIBRARY:
+                    system_objects.register(dsl_package)
+                self.register_package(dsl_package)
             except pkg_exc.PackageLoadError:
                 LOG.info(_LI('Unable to load package from path: {0}').format(
-                    os.path.join(self._base_path, entry)))
+                    folder))
                 continue
-            LOG.info(_LI('Loaded package from path {0}').format(
-                os.path.join(self._base_path, entry)))
-            for c in package.classes:
-                self._packages_by_class[c] = package
-            self._packages_by_name[package.full_name] = package
+            LOG.info(_LI('Loaded package from path {0}').format(folder))
 
-            self._processed_entries.add(entry)
+    def load_class_package(self, class_name, version_spec):
+        packages = self._packages_by_class.get(class_name)
+        if not packages:
+            raise exceptions.NoPackageForClassFound(class_name)
+        version = version_spec.select(packages.iterkeys())
+        if not version:
+            raise exceptions.NoPackageForClassFound(class_name)
+        return packages[version]
+
+    def load_package(self, package_name, version_spec):
+        packages = self._packages_by_name.get(package_name)
+        if not packages:
+            raise exceptions.NoPackageFound(package_name)
+        version = version_spec.select(packages.iterkeys())
+        if not version:
+            raise exceptions.NoPackageFound(package_name)
+        return packages[version]
+
+    def register_package(self, package):
+        for c in package.classes:
+            self._packages_by_class.setdefault(c, {})[
+                package.version] = package
+        self._packages_by_name.setdefault(package.name, {})[
+            package.version] = package
+
+    @property
+    def packages(self):
+        for package_versions in self._packages_by_name.itervalues():
+            for package in package_versions.itervalues():
+                yield package
+
+    @staticmethod
+    def split_path(path):
+        tail = True
+        while tail:
+            path, tail = os.path.split(path)
+            if tail:
+                yield path
+
+    @classmethod
+    def search_package_folders(cls, path):
+        packages = set()
+        for folder, _, files in os.walk(path):
+            if 'manifest.yaml' in files:
+                found = False
+                for part in cls.split_path(folder):
+                    if part in packages:
+                        found = True
+                        break
+                if not found:
+                    packages.add(folder)
+                    yield folder
 
 
-class CombinedPackageLoader(PackageLoader):
-    def __init__(self, murano_client_factory, tenant_id):
-        self.murano_client_factory = murano_client_factory
-        self.tenant_id = tenant_id
-        self.loader_from_api = ApiPackageLoader(self.murano_client_factory,
-                                                self.tenant_id)
-        self.loaders_from_dir = []
+class CombinedPackageLoader(package_loader.MuranoPackageLoader):
+    def __init__(self, murano_client_factory, tenant_id, root_loader=None):
+        root_loader = root_loader or self
+        self.api_loader = ApiPackageLoader(
+            murano_client_factory, tenant_id, root_loader)
+        self.directory_loaders = []
 
-        for directory in CONF.engine.load_packages_from:
-            if os.path.exists(directory):
-                self.loaders_from_dir.append(DirectoryPackageLoader(directory))
+        for folder in CONF.engine.load_packages_from:
+            if os.path.exists(folder):
+                self.directory_loaders.append(DirectoryPackageLoader(
+                    folder, root_loader))
 
-    def get_package_by_class(self, name):
-        for loader in self.loaders_from_dir:
-            pkg = loader.get_package_by_class(name)
-            if pkg:
-                return pkg
-        return self.loader_from_api.get_package_by_class(name)
+    def load_package(self, package_name, version_spec):
+        for loader in self.directory_loaders:
+            try:
+                return loader.load_package(package_name, version_spec)
+            except exceptions.NoPackageFound:
+                continue
+        return self.api_loader.load_package(
+            package_name, version_spec)
 
-    def get_package(self, name):
-        # Try to load from local directory first
-        for loader in self.loaders_from_dir:
-            pkg = loader.get_package(name)
-            if pkg:
-                return pkg
-        # If no package found, load package by API
-        return self.loader_from_api.get_package(name)
+    def load_class_package(self, class_name, version_spec):
+        for loader in self.directory_loaders:
+            try:
+                return loader.load_class_package(class_name, version_spec)
+            except exceptions.NoPackageForClassFound:
+                continue
+        return self.api_loader.load_class_package(
+            class_name, version_spec)
+
+    def register_package(self, package):
+        self.api_loader.register_package(package)
 
     def __enter__(self):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.loader_from_api.cleanup()
+        self.api_loader.cleanup()
         return False

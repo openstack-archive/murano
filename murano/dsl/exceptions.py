@@ -72,6 +72,12 @@ class AmbiguousMethodName(Exception):
             'Found more that one method "%s"' % name)
 
 
+class AmbiguousClassName(Exception):
+    def __init__(self, name):
+        super(AmbiguousClassName, self).__init__(
+            'Found more that one version of class "%s"' % name)
+
+
 class DslContractSyntaxError(Exception):
     pass
 

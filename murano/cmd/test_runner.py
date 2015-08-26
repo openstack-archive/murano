@@ -27,15 +27,14 @@ from oslo_utils import importutils
 from murano import version
 from murano.common.i18n import _, _LE
 from murano.common import config
-from murano.common import engine
 from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import executor
+from murano.dsl import helpers
 from murano.engine import client_manager
 from murano.engine import environment
-from murano.engine import package_class_loader
 from murano.engine import package_loader
-from murano.engine.system import system_objects
+
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -55,7 +54,13 @@ else:
 
 def _load_package(pkg_loader, name):
     try:
-        package = pkg_loader.get_package(name)
+        parts = name.rsplit('/')
+        if len(parts) == 2:
+            name, pkg_version = parts
+            version_spec = helpers.parse_version_spec(pkg_version)
+        else:
+            version_spec = helpers.parse_version_spec('*')
+        package = pkg_loader.load_package(name, version_spec)
     except exceptions.NoPackageFound:
         if not CONF.engine.load_packages_from:
             msg = _('Local package is not found since "load-packages-from" '
@@ -108,7 +113,7 @@ def _get_methods_to_run(package, tests_to_run, class_to_methods):
     return methods_to_run
 
 
-def _get_all_test_methods(exc, package, class_loader):
+def _get_all_test_methods(exc, package):
     """Initiate objects of package classes and get test methods.
 
        Check, if test class and test case name are valid.
@@ -120,10 +125,10 @@ def _get_all_test_methods(exc, package, class_loader):
     child_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
 
     for pkg_class_name in package.classes:
-        class_obj = class_loader.get_class(pkg_class_name)
+        class_obj = package.find_class(pkg_class_name, False)
 
         obj = class_obj.new(None, exc.object_store, child_context)()
-        if BASE_CLASS not in [p.name for p in class_obj.parents]:
+        if not helpers.is_instance_of(obj, BASE_CLASS, '*'):
             LOG.debug('Class {0} is not inherited from {1}. '
                       'Skipping it.'.format(pkg_class_name, BASE_CLASS))
             continue
@@ -203,17 +208,13 @@ def run_tests(args):
     # Replace location of loading packages with provided from command line.
     if load_packages_from:
         cfg.CONF.engine.load_packages_from = load_packages_from
-    with package_loader.CombinedPackageLoader(murano_client_factory,
-                                              client.tenant_id) as pkg_loader:
-        class_loader = package_class_loader.PackageClassLoader(pkg_loader)
-        engine.get_plugin_loader().register_in_loader(class_loader)
-        system_objects.register(class_loader, pkg_loader)
-        exc = executor.MuranoDslExecutor(class_loader, test_env)
+    with package_loader.CombinedPackageLoader(
+            murano_client_factory, client.tenant_id) as pkg_loader:
+        # engine.get_plugin_loader().register_in_loader(class_loader)
+        exc = executor.MuranoDslExecutor(pkg_loader, test_env)
 
         package = _load_package(pkg_loader, provided_pkg_name)
-        class_to_methods, class_to_obj = _get_all_test_methods(exc,
-                                                               package,
-                                                               class_loader)
+        class_to_methods, class_to_obj = _get_all_test_methods(exc, package)
 
         run_set = _get_methods_to_run(package, tests_to_run, class_to_methods)
         if run_set:

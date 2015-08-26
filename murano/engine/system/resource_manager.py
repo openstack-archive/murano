@@ -17,7 +17,8 @@ import json as jsonlib
 
 import yaml as yamllib
 
-import murano.dsl.helpers as helpers
+from murano.dsl import dsl
+from murano.dsl import helpers
 
 if hasattr(yamllib, 'CSafeLoader'):
     yaml_loader = yamllib.CSafeLoader
@@ -39,10 +40,11 @@ yaml_loader.add_constructor(u'tag:yaml.org,2002:timestamp',
                             _construct_yaml_str)
 
 
+@dsl.name('io.murano.system.Resources')
 class ResourceManager(object):
-    def __init__(self, package_loader, context):
+    def __init__(self, context):
         murano_class = helpers.get_type(helpers.get_caller_context(context))
-        self._package = package_loader.get_package(murano_class.package.name)
+        self._package = murano_class.package
 
     def string(self, name):
         path = self._package.get_resource(name)

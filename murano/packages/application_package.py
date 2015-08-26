@@ -47,6 +47,7 @@ class ApplicationPackage(object):
         self._blob_cache = None
         self._version = None
         self._runtime_version = None
+        self._requirements = {}
 
     @property
     def full_name(self):
@@ -57,8 +58,16 @@ class ApplicationPackage(object):
         return self._version
 
     @property
+    def classes(self):
+        return tuple()
+
+    @property
     def runtime_version(self):
         return self._runtime_version
+
+    @property
+    def requirements(self):
+        return self._requirements
 
     @property
     def package_type(self):
@@ -101,6 +110,9 @@ class ApplicationPackage(object):
         if not self._blob_cache:
             self._blob_cache = _pack_dir(self._source_directory)
         return self._blob_cache
+
+    def get_class(self, name):
+        raise exceptions.PackageClassLoadError(name)
 
     def get_resource(self, name):
         resources_dir = os.path.join(self._source_directory, 'Resources')

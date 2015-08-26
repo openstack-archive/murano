@@ -145,31 +145,23 @@ def build_wrapper_function_definition(murano_method):
 
 
 def _build_native_wrapper_function_definition(murano_method):
+    @specs.method
+    @specs.name(murano_method.name)
     def payload(__context, __sender, *args, **kwargs):
         executor = helpers.get_executor(__context)
         args = tuple(to_mutable(arg) for arg in args)
         kwargs = to_mutable(kwargs)
         return murano_method.invoke(
-            executor, __sender, args[1:], kwargs, __context, True)
+            executor, __sender, args, kwargs, __context, True)
 
-    fd = murano_method.body.strip_hidden_parameters()
-    fd.payload = payload
-    for v in fd.parameters.itervalues():
-        if v.position == 0:
-            v.value_type = yaqltypes.PythonType(dsl_types.MuranoObject, False)
-            break
-    fd.insert_parameter(specs.ParameterDefinition(
-        '?1', yaqltypes.Context(), 0))
-    fd.insert_parameter(specs.ParameterDefinition(
-        '?2', yaqltypes.Sender(), 1))
-    return fd
+    return specs.get_function_definition(payload)
 
 
 def _build_mpl_wrapper_function_definition(murano_method):
     def payload(__context, __sender, *args, **kwargs):
         executor = helpers.get_executor(__context)
         return murano_method.invoke(
-            executor, __sender.object, args, kwargs, __context, True)
+            executor, __sender, args, kwargs, __context, True)
 
     fd = specs.FunctionDefinition(
         murano_method.name, payload, is_function=False, is_method=True)
@@ -185,7 +177,7 @@ def _build_mpl_wrapper_function_definition(murano_method):
         '__context', yaqltypes.Context(), 0))
 
     fd.set_parameter(specs.ParameterDefinition(
-        '__sender', dsl.MuranoObjectType(murano_method.murano_class), 1))
+        '__sender', yaqltypes.PythonType(dsl_types.MuranoObject, False), 1))
 
     return fd
 

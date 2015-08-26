@@ -30,7 +30,7 @@ import murano.packages.mpl_package
 
 
 def load_from_file(archive_path, target_dir=None, drop_dir=False,
-                   loader=yaql_yaml_loader.YaqlYamlLoader):
+                   loader=yaql_yaml_loader.YaqlYamlLoader, preload=True):
     if not os.path.isfile(archive_path):
         raise e.PackageLoadError('Unable to find package file')
     created = False
@@ -50,7 +50,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
                                        "zip archive".format(archive_path))
         package = zipfile.ZipFile(archive_path)
         package.extractall(path=target_dir)
-        return load_from_dir(target_dir, preload=True, loader=loader)
+        return load_from_dir(target_dir, preload=preload, loader=loader)
     except ValueError as err:
         raise e.PackageLoadError("Couldn't load package from file: "
                                  "{0}".format(err))

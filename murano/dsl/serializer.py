@@ -18,7 +18,6 @@ from yaql import utils
 
 from murano.dsl import dsl
 from murano.dsl import dsl_types
-from murano.dsl import helpers
 from murano.dsl import murano_method
 
 
@@ -71,28 +70,15 @@ def serialize_model(root_object, executor, allow_refs=False):
     }
 
 
-def _serialize_available_action(obj):
-    def _serialize(obj_type):
-        actions = {}
-        for name, method in obj_type.methods.iteritems():
-            if method.usage == murano_method.MethodUsages.Action:
-                action_id = '{0}_{1}'.format(obj.object_id, name)
-                actions[action_id] = {
-                    'name': name,
-                    'enabled': True
-                }
-        for parent in obj_type.parents:
-            parent_actions = _serialize(parent)
-            actions = helpers.merge_dicts(parent_actions, actions)
-        return actions
-    return _serialize(obj.type)
-
-
-def _merge_actions(dict1, dict2):
-    result = helpers.merge_dicts(dict1, dict2)
-    for action_id in dict1:
-        if action_id not in dict2:
-            del result[action_id]
+def _serialize_available_action(obj, current_actions):
+    result = {}
+    actions = obj.type.find_methods(
+        lambda m: m.usage == murano_method.MethodUsages.Action)
+    for action in actions:
+        action_id = '{0}_{1}'.format(obj.object_id, action.name)
+        entry = current_actions.get(action_id, {'enabled': True})
+        entry['name'] = action.name
+        result[action_id] = entry
     return result
 
 
@@ -117,9 +103,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         if designer_attributes_getter is not None:
             result['?'].update(designer_attributes_getter(value.object_id))
             # deserialize and merge list of actions
-            actions = _serialize_available_action(value)
-            result['?']['_actions'] = _merge_actions(
-                result['?'].get('_actions', {}), actions)
+            result['?']['_actions'] = _serialize_available_action(
+                value, result['?'].get('_actions', {}))
         serialized_objects.add(value.object_id)
         return _pass12_serialize(
             result, value, serialized_objects, designer_attributes_getter)

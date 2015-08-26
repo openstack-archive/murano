@@ -1,4 +1,4 @@
-#    Copyright (c) 2014 #Mirantis, Inc.
+#    Copyright (c) 2014 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,14 +12,17 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import collections
 import contextlib
 import re
+import string
 import sys
 import types
 import uuid
 
 import eventlet.greenpool
 import eventlet.greenthread
+import semantic_version
 import yaql.language.exceptions
 import yaql.language.expressions
 from yaql.language import utils as yaqlutils
@@ -28,6 +31,7 @@ from yaql.language import utils as yaqlutils
 from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import dsl_types
+from murano.dsl import exceptions
 
 KEYWORD_REGEX = re.compile(r'(?!__)\b[^\W\d]\w*\b')
 
@@ -134,11 +138,6 @@ def get_executor(context=None):
     return context[constants.CTX_EXECUTOR]
 
 
-def get_class_loader(context=None):
-    context = context or get_context()
-    return context[constants.CTX_CLASS_LOADER]
-
-
 def get_type(context=None):
     context = context or get_context()
     return context[constants.CTX_TYPE]
@@ -152,6 +151,11 @@ def get_environment(context=None):
 def get_object_store(context=None):
     context = context or get_context()
     return context[constants.CTX_OBJECT_STORE]
+
+
+def get_package_loader(context=None):
+    context = context or get_context()
+    return context[constants.CTX_PACKAGE_LOADER]
 
 
 def get_this(context=None):
@@ -189,6 +193,12 @@ def are_property_modifications_allowed(context=None):
     return context[constants.CTX_ALLOW_PROPERTY_WRITES] or False
 
 
+def get_class(name, context=None):
+    context = context or get_context()
+    murano_class = get_type(context)
+    return murano_class.package.find_class(name)
+
+
 def is_keyword(text):
     return KEYWORD_REGEX.match(text) is not None
 
@@ -218,3 +228,83 @@ def contextual(ctx):
             setattr(current_thread, '__murano_context', current_context)
         elif hasattr(current_thread, '__murano_context'):
             delattr(current_thread, '__murano_context')
+
+
+def parse_version_spec(version_spec):
+    if isinstance(version_spec, semantic_version.Spec):
+        return version_spec
+    if isinstance(version_spec, semantic_version.Version):
+        return semantic_version.Spec('==' + str(version_spec))
+    if not version_spec:
+        version_spec = '0'
+    version_spec = str(version_spec).translate(None, string.whitespace)
+    if version_spec[0].isdigit():
+        version_spec = '==' + str(version_spec)
+    version_spec = semantic_version.Spec(version_spec)
+    return version_spec
+
+
+def traverse(seed, producer=None, track_visited=True):
+    if not yaqlutils.is_iterable(seed):
+        seed = [seed]
+    visited = None if not track_visited else set()
+    queue = collections.deque(seed)
+    while queue:
+        item = queue.popleft()
+        if track_visited:
+            if item in visited:
+                continue
+            visited.add(item)
+        produced = (yield item)
+        if produced is None and producer:
+            produced = producer(item)
+        if produced:
+            queue.extend(produced)
+
+
+def cast(obj, murano_class, pov_or_version_spec=None):
+    if isinstance(obj, dsl_types.MuranoObjectInterface):
+        obj = obj.object
+    if isinstance(pov_or_version_spec, dsl_types.MuranoClass):
+        pov_or_version_spec = pov_or_version_spec.package
+    elif isinstance(pov_or_version_spec, types.StringTypes):
+        pov_or_version_spec = parse_version_spec(pov_or_version_spec)
+    if isinstance(murano_class, dsl_types.MuranoClass):
+        if pov_or_version_spec is None:
+            pov_or_version_spec = parse_version_spec(murano_class.version)
+        murano_class = murano_class.name
+
+    candidates = []
+    for cls in obj.type.ancestors():
+        if cls.name != murano_class:
+            continue
+        elif isinstance(pov_or_version_spec, semantic_version.Version):
+            if cls.version != pov_or_version_spec:
+                continue
+        elif isinstance(pov_or_version_spec, semantic_version.Spec):
+            if cls.version not in pov_or_version_spec:
+                continue
+        elif isinstance(pov_or_version_spec, dsl_types.MuranoPackage):
+            requirement = pov_or_version_spec.requirements.get(
+                cls.package.name)
+            if requirement is None:
+                raise exceptions.NoClassFound(murano_class)
+            if cls.version not in requirement:
+                continue
+        elif pov_or_version_spec is not None:
+            raise ValueError('pov_or_version_spec of unsupported '
+                             'type {0}'.format(type(pov_or_version_spec)))
+        candidates.append(cls)
+    if not candidates:
+        raise exceptions.NoClassFound(murano_class)
+    elif len(candidates) > 1:
+        raise exceptions.AmbiguousClassName(murano_class)
+    return obj.cast(candidates[0])
+
+
+def is_instance_of(obj, class_name, pov_or_version_spec=None):
+    try:
+        cast(obj, class_name, pov_or_version_spec)
+        return True
+    except (exceptions.NoClassFound, exceptions.AmbiguousClassName):
+        return False

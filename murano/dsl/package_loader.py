@@ -1,4 +1,4 @@
-#    Copyright (c) 2014 Mirantis, Inc.
+#    Copyright (c) 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,12 +12,21 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.dsl.principal_objects import exception
-from murano.dsl.principal_objects import stack_trace
-from murano.dsl.principal_objects import sys_object
+import abc
+
+import six
 
 
-def register(package):
-    package.register_class(sys_object.SysObject)
-    package.register_class(stack_trace.StackTrace)
-    package.register_class(exception.DslException)
+@six.add_metaclass(abc.ABCMeta)
+class MuranoPackageLoader(object):
+    @abc.abstractmethod
+    def load_package(self, package_name, version_spec):
+        pass
+
+    @abc.abstractmethod
+    def load_class_package(self, class_name, version_spec):
+        pass
+
+    @abc.abstractmethod
+    def register_package(self, package):
+        pass

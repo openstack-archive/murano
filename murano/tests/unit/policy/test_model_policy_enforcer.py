@@ -27,7 +27,7 @@ CONF = cfg.CONF
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
     obj = mock.Mock()
-    class_loader = mock.Mock()
+    package_loader = mock.Mock()
 
     model_dict = mock.Mock()
     obj.to_dictionary = mock.Mock(return_value=model_dict)
@@ -59,7 +59,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         CONF.engine.enable_model_policy_enforcer = False
         executor._validate_model(self.obj, self.task['action'],
-                                 self.class_loader)
+                                 self.package_loader)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
@@ -69,11 +69,11 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         CONF.engine.enable_model_policy_enforcer = True
         executor._validate_model(self.obj, self.task['action'],
-                                 self.class_loader)
+                                 self.package_loader)
 
         executor._model_policy_enforcer \
             .validate.assert_called_once_with(self.model_dict,
-                                              self.class_loader)
+                                              self.package_loader)
 
     def test_validation_pass(self):
         self.congress_client_mock.execute_policy_action.return_value = \
@@ -114,6 +114,6 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         CONF.engine.enable_model_policy_enforcer = True
         executor._validate_model(self.obj, {'method': 'not_deploy'},
-                                 self.class_loader)
+                                 self.package_loader)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)

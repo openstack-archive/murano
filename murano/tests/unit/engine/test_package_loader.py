@@ -14,16 +14,16 @@ import os
 
 import mock
 from oslo_config import cfg
+import semantic_version
 
+from murano.dsl import murano_package as dsl_package
 from murano.engine import package_loader
-from murano.packages import mpl_package
 from murano.tests.unit import base
 
 CONF = cfg.CONF
 
 
 class TestCombinedPackageLoader(base.MuranoTestCase):
-
     @classmethod
     def setUpClass(cls):
         super(TestCombinedPackageLoader, cls).setUpClass()
@@ -34,34 +34,39 @@ class TestCombinedPackageLoader(base.MuranoTestCase):
         cls.loader = package_loader.CombinedPackageLoader(
             cls.murano_client_factory, 'test_tenant_id')
         cls.api_loader = mock.MagicMock()
-        cls.loader.loader_from_api = cls.api_loader
+        cls.loader.api_loader = cls.api_loader
 
         cls.local_pkg_name = 'io.murano.test.MyTest'
         cls.api_pkg_name = 'test.mpl.v1.app.Thing'
 
     def test_loaders_initialized(self):
-        self.assertEqual(1, len(self.loader.loaders_from_dir),
+        self.assertEqual(1, len(self.loader.directory_loaders),
                          'One directory class loader should be initialized'
                          ' since there is one valid murano pl package in the'
                          ' provided directory in config.')
-        self.assertIsInstance(self.loader.loaders_from_dir[0],
+        self.assertIsInstance(self.loader.directory_loaders[0],
                               package_loader.DirectoryPackageLoader)
 
     def test_get_package_by_class_directory_loader(self):
-        result = self.loader.get_package_by_class(self.local_pkg_name)
-        self.assertIsInstance(result, mpl_package.MuranoPlPackage)
+        spec = semantic_version.Spec('*')
+        result = self.loader.load_class_package(self.local_pkg_name, spec)
+        self.assertIsInstance(result, dsl_package.MuranoPackage)
 
     def test_get_package_by_name_directory_loader(self):
-        result = self.loader.get_package(self.local_pkg_name)
-        self.assertIsInstance(result, mpl_package.MuranoPlPackage)
+        spec = semantic_version.Spec('*')
+        result = self.loader.load_package(self.local_pkg_name, spec)
+        self.assertIsInstance(result, dsl_package.MuranoPackage)
 
     def test_get_package_by_class_api_loader(self):
-        self.loader.get_package(self.api_pkg_name)
+        spec = semantic_version.Spec('*')
+        self.loader.load_package(self.api_pkg_name, spec)
 
-        self.api_loader.get_package.assert_called_with(self.api_pkg_name)
+        self.api_loader.load_package.assert_called_with(
+            self.api_pkg_name, spec)
 
     def test_get_package_api_loader(self):
-        self.loader.get_package_by_class(self.api_pkg_name)
+        spec = semantic_version.Spec('*')
+        self.loader.load_class_package(self.api_pkg_name, spec)
 
-        self.api_loader.get_package_by_class.assert_called_with(
-            self.api_pkg_name)
+        self.api_loader.load_class_package.assert_called_with(
+            self.api_pkg_name, spec)

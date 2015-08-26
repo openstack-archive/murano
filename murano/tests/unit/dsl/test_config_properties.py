@@ -19,7 +19,7 @@ from murano.tests.unit.dsl.foundation import test_case
 class TestConfigProperties(test_case.DslTestCase):
     def test_config_property(self):
         obj = om.Object('ConfigProperties')
-        self.class_loader.set_config_value(obj, 'cfgProperty', '987')
+        self.package_loader.set_config_value(obj, 'cfgProperty', '987')
         runner = self.new_runner(obj)
         runner.testPropertyValues()
         self.assertEqual(
@@ -38,7 +38,7 @@ class TestConfigProperties(test_case.DslTestCase):
 
     def test_config_affects_default(self):
         obj = om.Object('ConfigProperties')
-        self.class_loader.set_config_value(obj, 'normalProperty', 'custom')
+        self.package_loader.set_config_value(obj, 'normalProperty', 'custom')
         runner = self.new_runner(obj)
         runner.testPropertyValues()
         self.assertEqual(
@@ -48,7 +48,7 @@ class TestConfigProperties(test_case.DslTestCase):
 
     def test_config_not_affects_in_properties(self):
         obj = om.Object('ConfigProperties', normalProperty='qq')
-        self.class_loader.set_config_value(obj, 'normalProperty', 'custom')
+        self.package_loader.set_config_value(obj, 'normalProperty', 'custom')
         runner = self.new_runner(obj)
         runner.testPropertyValues()
         self.assertEqual(

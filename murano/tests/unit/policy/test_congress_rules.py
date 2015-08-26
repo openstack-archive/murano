@@ -20,35 +20,64 @@ import unittest2 as unittest
 import yaml
 
 from murano.common import uuidutils
+from murano.dsl import helpers
+from murano.dsl import package_loader
 import murano.policy.congress_rules as congress
 
 TENANT_ID = 'de305d5475b4431badb2eb6b9e546013'
 
 
-class MockClassLoader(object):
+class MockPackageLoader(package_loader.MuranoPackageLoader):
     def __init__(self, rules):
         """Create rules like this: ['child->parent', 'child->parent2']."""
 
-        self._rules_dict = {}
+        self._classes = {}
+        rules_dict = {}
         for rule in rules:
             split = rule.split('->')
-            if split[0] in self._rules_dict:
-                self._rules_dict[split[0]].append(split[1])
-            else:
-                self._rules_dict[split[0]] = [split[1]]
+            rules_dict.setdefault(split[0], []).append(split[1])
+        classes = (self.get_class(cls, rules_dict) for cls in rules_dict)
+        self._package = MockPackage(classes)
 
-    def get_class(self, name):
-        if name not in self._rules_dict:
-            return None
-        parents = []
-        for parent_name in self._rules_dict[name]:
-            parents.append(MockClass({'name': parent_name}))
-        return MockClass({'parents': parents})
+    def get_class(self, name, rules_dict):
+        if name in self._classes:
+            return self._classes[name]
+        parents = [self.get_class(parent, rules_dict)
+                   for parent in rules_dict.get(name, [])]
+        result = MockClass({'name': name, 'declared_parents': parents})
+        self._classes[name] = result
+        return result
+
+    def register_package(self, package):
+        pass
+
+    def load_class_package(self, class_name, version_spec):
+        return self._package
+
+    def load_package(self, package_name, version_spec):
+        return self._package
+
+
+class MockPackage(object):
+    def __init__(self, classes):
+        self._classes = {}
+        for cls in classes:
+            self._classes[cls.name] = cls
+
+    @property
+    def classes(self):
+        return self._classes.keys()
+
+    def find_class(self, name, *args, **kwargs):
+        return self._classes.get(name)
 
 
 class MockClass(object):
     def __init__(self, entries):
         self.__dict__.update(entries)
+
+    def ancestors(self):
+        return helpers.traverse(self, lambda t: t.declared_parents)
 
 
 class TestCongressRules(unittest.TestCase):
@@ -60,11 +89,11 @@ class TestCongressRules(unittest.TestCase):
         with open(model_file) as stream:
             return yaml.load(stream)
 
-    def _create_rules_str(self, model_file, class_loader=None):
+    def _create_rules_str(self, model_file, package_loader=None):
         model = self._load_file(model_file)
 
         congress_rules = congress.CongressRulesManager()
-        rules = congress_rules.convert(model, class_loader,
+        rules = congress_rules.convert(model, package_loader,
                                        tenant_id=TENANT_ID)
         rules_str = ", \n".join(map(str, rules))
         print rules_str
@@ -143,14 +172,14 @@ class TestCongressRules(unittest.TestCase):
         #       \     /
         # io.murano.apps.linux.Git
 
-        class_loader = MockClassLoader([
+        package_loader = MockPackageLoader([
             'io.murano.apps.linux.Git->parent1',
             'io.murano.apps.linux.Git->parent2',
             'parent1->grand-parent',
             'parent2->grand-parent'
         ])
 
-        rules_str = self._create_rules_str('model.yaml', class_loader)
+        rules_str = self._create_rules_str('model.yaml', package_loader)
 
         self.assertTrue(
             'murano:parent_types+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f",'
@@ -211,7 +240,7 @@ class TestCongressRules(unittest.TestCase):
                         '"tenant1", "io.murano.Environment")' in rules_str)
 
     def test_wordpress(self):
-        class_loader = MockClassLoader([
+        package_loader = MockPackageLoader([
             'io.murano.Environment->io.murano.Object',
             'io.murano.resources.NeutronNetwork->io.murano.resources.Network',
             'io.murano.resources.Network->io.murano.Object',
@@ -230,11 +259,11 @@ class TestCongressRules(unittest.TestCase):
             'io.murano.resources.LinuxInstance'
         ])
 
-        self._create_and_check_rules_str('wordpress', class_loader)
+        self._create_and_check_rules_str('wordpress', package_loader)
 
-    def _create_and_check_rules_str(self, model_name, class_loader=None):
+    def _create_and_check_rules_str(self, model_name, package_loader=None):
         rules_str = self._create_rules_str(
-            '{0}.yaml'.format(model_name), class_loader)
+            '{0}.yaml'.format(model_name), package_loader)
         self._check_expected_rules(rules_str,
                                    'expected_rules_{0}.txt'.format(model_name))
         return rules_str

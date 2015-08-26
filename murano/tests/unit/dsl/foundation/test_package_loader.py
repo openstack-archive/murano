@@ -17,49 +17,59 @@ import os.path
 
 import yaml
 
-from murano.dsl import class_loader
-from murano.dsl import exceptions
 from murano.dsl import murano_package
 from murano.dsl import namespace_resolver
-from murano.engine.system import yaql_functions
+from murano.dsl import package_loader
 from murano.engine import yaql_yaml_loader
 from murano.tests.unit.dsl.foundation import object_model
 
 
-class TestClassLoader(class_loader.MuranoClassLoader):
+class TestPackage(murano_package.MuranoPackage):
+    def __init__(self, package_loader, name, version,
+                 runtime_version, requirements, configs):
+        self.__configs = configs
+        super(TestPackage, self).__init__(
+            package_loader, name, version,
+            runtime_version, requirements)
+
+    def get_class_config(self, name):
+        return self.__configs.get(name, {})
+
+
+class TestPackageLoader(package_loader.MuranoPackageLoader):
     _classes_cache = {}
-    _configs = {}
 
     def __init__(self, directory, package_name, parent_loader=None):
-        self._package = murano_package.MuranoPackage()
-        self._package.name = package_name
-        self._parent = parent_loader
-        if directory in TestClassLoader._classes_cache:
-            self._classes = TestClassLoader._classes_cache[directory]
+        self._package_name = package_name
+        if directory in TestPackageLoader._classes_cache:
+            self._classes = TestPackageLoader._classes_cache[directory]
         else:
             self._classes = {}
             self._build_index(directory)
-            TestClassLoader._classes_cache[directory] = self._classes
-        self._functions = {}
-        super(TestClassLoader, self).__init__()
+            TestPackageLoader._classes_cache[directory] = self._classes
+        self._parent = parent_loader
+        self._configs = {}
+        self._package = TestPackage(
+            self, package_name, None, None, None, self._configs)
+        for name, payload in self._classes.iteritems():
+            self._package.register_class(payload, name)
+        super(TestPackageLoader, self).__init__()
 
-    def find_package_name(self, class_name):
+    def load_package(self, package_name, version_spec):
+        if package_name == self._package_name:
+            return self._package
+        elif self._parent:
+            return self._parent.load_package(package_name, version_spec)
+        else:
+            raise KeyError(package_name)
+
+    def load_class_package(self, class_name, version_spec):
         if class_name in self._classes:
-            return self._package.name
-        if self._parent:
-            return self._parent.find_package_name(class_name)
-        return None
-
-    def load_package(self, class_name):
-        return self._package
-
-    def load_definition(self, name):
-        try:
-            return self._classes[name]
-        except KeyError:
-            if self._parent:
-                return self._parent.load_definition(name)
-            raise exceptions.NoClassFound(name)
+            return self._package
+        elif self._parent:
+            return self._parent.load_class_package(class_name, version_spec)
+        else:
+            raise KeyError(class_name)
 
     def _build_index(self, directory):
         yamls = [os.path.join(dirpath, f)
@@ -84,25 +94,11 @@ class TestClassLoader(class_loader.MuranoClassLoader):
         class_name = ns.resolve_name(data['Name'])
         self._classes[class_name] = data
 
-    def create_root_context(self):
-        context = super(TestClassLoader, self).create_root_context()
-        yaql_functions.register(context)
-        for name, func in self._functions.iteritems():
-            context.register_function(func, name)
-        return context
-
-    def register_function(self, func, name):
-        self._functions[name] = func
-
-    def get_class_config(self, name):
-        return TestClassLoader._configs.get(name, {})
-
     def set_config_value(self, class_name, property_name, value):
         if isinstance(class_name, object_model.Object):
             class_name = class_name.type_name
-        TestClassLoader._configs.setdefault(class_name, {})[
+        self._configs.setdefault(class_name, {})[
             property_name] = value
 
-    @staticmethod
-    def clear_configs():
-        TestClassLoader._configs = {}
+    def register_package(self, package):
+        super(TestPackageLoader, self).register_package(package)

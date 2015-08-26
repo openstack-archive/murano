@@ -48,9 +48,10 @@ class MuranoPlPackage(application_package.ApplicationPackage):
         self._ui = manifest.get('UI', 'ui.yaml')
         self._logo = manifest.get('Logo')
         self._tags = manifest.get('Tags')
-        self._version = semantic_version.Version(manifest.get(
-            'Version', '0.0.0'))
+        self._version = semantic_version.Version.coerce(str(manifest.get(
+            'Version', '0.0.0')))
         self._runtime_version = runtime_version
+        self._requirements = manifest.get('Require') or {}
 
     @property
     def classes(self):
@@ -97,7 +98,7 @@ class MuranoPlPackage(application_package.ApplicationPackage):
     def _load_class(self, name):
         if name not in self._classes:
             raise exceptions.PackageClassLoadError(
-                name, 'Class not defined in this package')
+                name, 'Class not defined in package ' + self.full_name)
         def_file = self._classes[name]
         full_path = os.path.join(self._source_directory, 'Classes', def_file)
         if not os.path.isfile(full_path):
