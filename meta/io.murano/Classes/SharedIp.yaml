@@ -35,6 +35,7 @@ Workflow:
                   type: 'OS::Neutron::Port'
                   properties:
                     network_id: $.network.describe().netRef
+                    replacement_policy: AUTO
                     fixed_ips:
                       - subnet_id: $.network.describe().subnetRef
               outputs:
