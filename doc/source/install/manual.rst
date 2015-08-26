@@ -34,7 +34,7 @@ Ubuntu
 
 .. code-block:: console
 
-    $ sudo apt-get install python-pip python-dev \
+    sudo apt-get install python-pip python-dev \
       libmysqlclient-dev libpq-dev \
       libxml2-dev libxslt1-dev \
       libffi-dev
@@ -51,7 +51,7 @@ Fedora
 
 .. code-block:: console
 
-    $ sudo yum install gcc python-setuptools python-devel python-pip
+    sudo yum install gcc python-setuptools python-devel python-pip
 ..
 
 
@@ -60,8 +60,8 @@ CentOS
 
 .. code-block:: console
 
-    $ sudo yum install gcc python-setuptools python-devel
-    $ sudo easy_install pip
+    sudo yum install gcc python-setuptools python-devel
+    sudo easy_install pip
 ..
 
 
@@ -70,7 +70,7 @@ Install tox
 
 .. code-block:: console
 
-    $ sudo pip install tox
+    sudo pip install tox
 ..
 
 
@@ -91,12 +91,13 @@ To use MySQL database you should install it and create an empty database first:
 
 .. code-block:: console
 
-    $ apt-get install python-mysqldb mysql-server
+    apt-get install python-mysqldb mysql-server
 ..
 
 .. code-block:: console
 
-    $ mysql -u root -p
+    mysql -u root -p
+
     mysql> CREATE DATABASE murano;
     mysql> GRANT ALL PRIVILEGES ON murano.* TO 'murano'@'localhost' \
         IDENTIFIED BY 'MURANO_DBPASS';
@@ -111,15 +112,15 @@ Install the API service and Engine
 
     .. code-block:: console
 
-        $ mkdir ~/murano
+        mkdir ~/murano
     ..
 
 #.  Clone the Murano git repository to the management server.
 
     .. code-block:: console
 
-        $ cd ~/murano
-        $ git clone git://git.openstack.org/openstack/murano
+        cd ~/murano
+        git clone git://git.openstack.org/openstack/murano
     ..
 
 #.  Set up Murano config file
@@ -130,14 +131,15 @@ Install the API service and Engine
 
     .. code-block:: console
 
-        $ tox -e genconfig
+        tox -e genconfig
     ..
 
     And make a copy of it for further modifications
 
     .. code-block:: console
-        $ cd ~/murano/murano/etc/murano
-        $ ln -s murano.conf.sample murano.conf
+
+        cd ~/murano/murano/etc/murano
+        ln -s murano.conf.sample murano.conf
     ..
 
 #.  Edit ``murano.conf`` with your favorite editor. Below is an example
@@ -203,16 +205,16 @@ Install the API service and Engine
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ tox
+        cd ~/murano/murano
+        tox
     ..
 
 #.  Create database tables for Murano.
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ tox -e venv -- murano-db-manage \
+        cd ~/murano/murano
+        tox -e venv -- murano-db-manage \
           --config-file ./etc/murano/murano.conf upgrade
     ..
 
@@ -221,27 +223,29 @@ Install the API service and Engine
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
+        cd ~/murano/murano
+        tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
     ..
 
 #.  Import Core Murano Library.
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ pushd ./meta/io.murano; zip -r ../../io.murano.zip *; popd;
-        $ tox -e venv -- murano --murano-url http://localhost:8082 \
+        cd ~/murano/murano
+        pushd ./meta/io.murano
+        zip -r ../../io.murano.zip *
+        popd
+        tox -e venv -- murano --murano-url http://localhost:8082 \
           package-import --is-public io.murano.zip
     ..
 
 #. Open a new console and launch Murano Engine. A separate terminal is
-    required because the console will be locked by a running process.
+   required because the console will be locked by a running process.
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ tox -e venv -- murano-engine --config-file ./etc/murano/murano.conf
+        cd ~/murano/murano
+        tox -e venv -- murano-engine --config-file ./etc/murano/murano.conf
     ..
 
 
@@ -256,23 +260,23 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        $ cd ~/murano
-        $ git clone git://git.openstack.org/openstack/murano-dashboard
+        cd ~/murano
+        git clone git://git.openstack.org/openstack/murano-dashboard
     ..
 
 #.  Clone horizon repository
 
     .. code-block:: console
 
-        $ git clone git://git.openstack.org/openstack/horizon
+        git clone git://git.openstack.org/openstack/horizon
     ..
 
 #.  Create venv and install muranodashboard as editable module.
 
     .. code-block:: console
 
-        $ cd horizon
-        $ tox -e venv -- pip install -e ../murano-dashboard
+        cd horizon
+        tox -e venv -- pip install -e ../murano-dashboard
     ..
 
 #.  Copy muranodashboard plugin file.
@@ -281,7 +285,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        $ cp ../murano-dashboard/muranodashboard/local/_50_murano.py openstack_dashboard/local/enabled/
+        cp ../murano-dashboard/muranodashboard/local/_50_murano.py openstack_dashboard/local/enabled/
     ..
 
 #.  Prepare local settings.
@@ -291,7 +295,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        $ cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
+        cp openstack_dashboard/local/local_settings.py.example openstack_dashboard/local/local_settings.py
 
 #.  Customize local settings according to OpenStack installation.
 
@@ -344,7 +348,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        $ tox -e venv -- python manage.py syncdb
+        tox -e venv -- python manage.py syncdb
     ..
 
     You can reply 'no' since for development purpose separate user is not needed.
@@ -353,7 +357,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        $ tox -e venv -- python manage.py runserver <IP:PORT>
+        tox -e venv -- python manage.py runserver <IP:PORT>
     ..
 
     Development server will be restarted automatically on every code change.
@@ -370,8 +374,8 @@ to fill the catalog. It can be done via dashboard, but also possible via CLI:
 
     .. code-block:: console
 
-        $ cd ~/murano
-        $ git clone git://git.openstack.org/openstack/murano-apps
+        cd ~/murano
+        git clone git://git.openstack.org/openstack/murano-apps
     ..
 
 2.  Import every package you need from this repository, using the command
@@ -379,9 +383,10 @@ to fill the catalog. It can be done via dashboard, but also possible via CLI:
 
     .. code-block:: console
 
-        $ cd ~/murano/murano
-        $ pushd ../murano-apps/Docker/Applications/%APP-NAME%/package; \
-          zip -r ~/murano/murano/app.zip *; popd;
-        $ tox -e venv -- murano --murano-url http://localhost:8082 package-import app.zip
+        cd ~/murano/murano
+        pushd ../murano-apps/Docker/Applications/%APP-NAME%/package
+        zip -r ~/murano/murano/app.zip *
+        popd
+        tox -e venv -- murano --murano-url http://localhost:8082 package-import app.zip
 
 .. include:: configure_network.rst

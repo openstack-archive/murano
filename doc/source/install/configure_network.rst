@@ -66,7 +66,7 @@ To figure out the name of the external network, perform the following command:
 
 .. code-block:: console
 
-    $ neutron net-external-list
+    neutron net-external-list
 
 During the first deploy, required networks and router with specified name will be created and set up.
 
