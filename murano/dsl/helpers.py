@@ -114,6 +114,17 @@ def exclude_lists(list1, list2):
             result.append(item)
     return result
 
+def check_dicts(dict):
+    for key,value in dict.items():
+        if isinstance(value, types.DictionaryType):
+            return check_dicts(value)
+        elif isinstance(value, types.ListType):
+            if len(value) > 0:
+                return True
+        else:
+            return True
+    return False
+
 def exclude_dicts(dict1, dict2, max_levels=0):
     result = {}
     for key, value1 in dict1.items():
@@ -129,7 +140,8 @@ def exclude_dicts(dict1, dict2, max_levels=0):
                     value1, value2,
                     0 if max_levels == 0 else max_levels - 1)
                 if len(res) > 0:
-                    result[key] = res
+                    if check_dicts(res):
+                        result[key] = res
             elif max_levels != 1 and isinstance(value2, types.ListType):
                 res = exclude_lists(value1, value2)
                 if len(res) > 0:
