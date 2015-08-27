@@ -71,7 +71,7 @@ class MuranoClassLoader(object):
 
         properties = data.get('Properties') or {}
         for property_name, property_spec in properties.iteritems():
-            spec = typespec.PropertySpec(property_spec)
+            spec = typespec.PropertySpec(property_spec, type_obj)
             type_obj.add_property(property_name, spec)
 
         methods = data.get('Methods') or data.get('Workflow') or {}
