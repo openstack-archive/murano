@@ -15,8 +15,6 @@
 import fnmatch
 import os.path
 
-import yaml
-
 from murano.dsl import murano_package
 from murano.dsl import namespace_resolver
 from murano.dsl import package_loader
@@ -25,15 +23,18 @@ from murano.tests.unit.dsl.foundation import object_model
 
 
 class TestPackage(murano_package.MuranoPackage):
-    def __init__(self, package_loader, name, version,
+    def __init__(self, pkg_loader, name, version,
                  runtime_version, requirements, configs):
         self.__configs = configs
         super(TestPackage, self).__init__(
-            package_loader, name, version,
+            pkg_loader, name, version,
             runtime_version, requirements)
 
     def get_class_config(self, name):
         return self.__configs.get(name, {})
+
+    def get_resource(self, name):
+        pass
 
 
 class TestPackageLoader(package_loader.MuranoPackageLoader):
@@ -41,6 +42,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
 
     def __init__(self, directory, package_name, parent_loader=None):
         self._package_name = package_name
+        self._yaml_loader = yaql_yaml_loader.get_loader('1.0')
         if directory in TestPackageLoader._classes_cache:
             self._classes = TestPackageLoader._classes_cache[directory]
         else:
@@ -80,7 +82,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
 
     def _load_class(self, class_def_file):
         with open(class_def_file) as stream:
-            data = yaml.load(stream, yaql_yaml_loader.YaqlYamlLoader)
+            data = self._yaml_loader(stream.read(), class_def_file)
 
         if 'Name' not in data:
             return

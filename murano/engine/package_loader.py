@@ -125,7 +125,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._root_loader, app_package)
         for name in app_package.classes:
             dsl_package.register_class(
-                (lambda cls: lambda: app_package.get_class(cls))(name),
+                (lambda cls: lambda: get_class(app_package, cls))(name),
                 name)
         if app_package.full_name == constants.CORE_LIBRARY:
             system_objects.register(dsl_package)
@@ -138,9 +138,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
 
         if os.path.exists(package_directory):
             try:
-                return load_utils.load_from_dir(
-                    package_directory, preload=True,
-                    loader=yaql_yaml_loader.YaqlYamlLoader)
+                return load_utils.load_from_dir(package_directory)
             except pkg_exc.PackageLoadError:
                 LOG.exception(_LE(
                     'Unable to load package from cache. Clean-up...'))
@@ -159,13 +157,11 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             with tempfile.NamedTemporaryFile(delete=False) as package_file:
                 package_file.write(package_data)
 
-            return load_utils.load_from_file(
-                package_file.name,
-                target_dir=package_directory,
-                drop_dir=False,
-                loader=yaql_yaml_loader.YaqlYamlLoader,
-                preload=False
-            )
+            with load_utils.load_from_file(
+                    package_file.name,
+                    target_dir=package_directory,
+                    drop_dir=False) as app_package:
+                return app_package
         except IOError:
             msg = 'Unable to extract package data for %s' % package_id
             exc_info = sys.exc_info()
@@ -215,15 +211,13 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
     def _build_index(self):
         for folder in self.search_package_folders(self._base_path):
             try:
-                package = load_utils.load_from_dir(
-                    folder, preload=False,
-                    loader=yaql_yaml_loader.YaqlYamlLoader)
+                package = load_utils.load_from_dir(folder)
                 dsl_package = murano_package.MuranoPackage(
                     self._root_loader, package)
                 for class_name in package.classes:
                     dsl_package.register_class(
                         (lambda pkg, cls:
-                            lambda: pkg.get_class(cls))(package, class_name),
+                            lambda: get_class(pkg, cls))(package, class_name),
                         class_name
                     )
                 if dsl_package.name == constants.CORE_LIBRARY:
@@ -328,3 +322,10 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
     def __exit__(self, exc_type, exc_val, exc_tb):
         self.api_loader.cleanup()
         return False
+
+
+def get_class(package, name):
+    version = package.runtime_version
+    loader = yaql_yaml_loader.get_loader(version)
+    contents, file_id = package.get_class(name)
+    return loader(contents, file_id)

@@ -80,8 +80,12 @@ def create_context():
     return ROOT_CONTEXT.create_child_context()
 
 
-def parse(expression):
-    return ENGINE(expression)
+def choose_yaql_engine(version):
+    return ENGINE
+
+
+def parse(expression, version):
+    return choose_yaql_engine(version)(expression)
 
 
 def call_func(__context, __name, *args, **kwargs):

@@ -226,8 +226,22 @@ class Controller(object):
             tempf.write(content)
             package_meta['archive'] = content
         try:
-            pkg_to_upload = load_utils.load_from_file(
-                tempf.name, target_dir=None, drop_dir=True)
+            with load_utils.load_from_file(
+                    tempf.name, target_dir=None,
+                    drop_dir=True) as pkg_to_upload:
+                # extend dictionary for update db
+                for k, v in PKG_PARAMS_MAP.iteritems():
+                    if hasattr(pkg_to_upload, k):
+                        package_meta[v] = getattr(pkg_to_upload, k)
+                try:
+                    package = db_api.package_upload(
+                        package_meta, req.context.tenant)
+                except db_exc.DBDuplicateEntry:
+                    msg = _('Package with specified full '
+                            'name is already registered')
+                    LOG.exception(msg)
+                    raise exc.HTTPConflict(msg)
+                return package.to_dict()
         except pkg_exc.PackageLoadError as e:
             msg = _("Couldn't load package from file: {0}").format(e)
             LOG.exception(msg)
@@ -235,19 +249,6 @@ class Controller(object):
         finally:
             LOG.debug("Deleting package archive temporary file")
             os.remove(tempf.name)
-
-        # extend dictionary for update db
-        for k, v in PKG_PARAMS_MAP.iteritems():
-            if hasattr(pkg_to_upload, k):
-                package_meta[v] = getattr(pkg_to_upload, k)
-
-        try:
-            package = db_api.package_upload(package_meta, req.context.tenant)
-        except db_exc.DBDuplicateEntry:
-            msg = _('Package with specified full name is already registered')
-            LOG.exception(msg)
-            raise exc.HTTPConflict(msg)
-        return package.to_dict()
 
     def get_ui(self, req, package_id):
         target = {'package_id': package_id}

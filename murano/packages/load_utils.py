@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
 import os
 import shutil
 import string
@@ -22,15 +23,13 @@ import zipfile
 import semantic_version
 import yaml
 
-from murano.engine import yaql_yaml_loader
-import murano.packages.application_package
 import murano.packages.exceptions as e
 import murano.packages.hot_package
 import murano.packages.mpl_package
 
 
-def load_from_file(archive_path, target_dir=None, drop_dir=False,
-                   loader=yaql_yaml_loader.YaqlYamlLoader, preload=True):
+@contextlib.contextmanager
+def load_from_file(archive_path, target_dir=None, drop_dir=False):
     if not os.path.isfile(archive_path):
         raise e.PackageLoadError('Unable to find package file')
     created = False
@@ -50,7 +49,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
                                        "zip archive".format(archive_path))
         package = zipfile.ZipFile(archive_path)
         package.extractall(path=target_dir)
-        return load_from_dir(target_dir, preload=preload, loader=loader)
+        yield load_from_dir(target_dir)
     except ValueError as err:
         raise e.PackageLoadError("Couldn't load package from file: "
                                  "{0}".format(err))
@@ -63,8 +62,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False,
                     os.unlink(os.path.join(target_dir, f))
 
 
-def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
-                  loader=yaql_yaml_loader.YaqlYamlLoader):
+def load_from_dir(source_directory, filename='manifest.yaml'):
     formats = {
         'MuranoPL': {
             ('1.0.0', '1.0.0'): murano.packages.mpl_package.MuranoPlPackage,
@@ -104,9 +102,6 @@ def load_from_dir(source_directory, filename='manifest.yaml', preload=False,
             min_version = semantic_version.Version(key[0])
             max_version = semantic_version.Version(key[1])
             if min_version <= version <= max_version:
-                package = value(source_directory, content, loader, version)
-                if preload:
-                    package.load()
-                return package
+                return value(source_directory, content, parts[0], version)
         raise e.PackageFormatError(
             'Unsupported {0} format version {1}'.format(parts[0], version))

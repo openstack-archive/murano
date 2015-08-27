@@ -36,8 +36,8 @@ class MuranoPackage(dsl_types.MuranoPackage):
         super(MuranoPackage, self).__init__()
         self._package_loader = weakref.proxy(package_loader)
         self._name = name
-        self._version = self._parse_version(version)
-        self._runtime_version = self._parse_version(runtime_version)
+        self._version = helpers.parse_version(version)
+        self._runtime_version = helpers.parse_version(runtime_version)
         self._requirements = {
             name: semantic_version.Spec('==' + str(self._version.major))
         }
@@ -182,11 +182,3 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 except exceptions.NoClassFound:
                     continue
         raise exceptions.NoClassFound(name)
-
-    @staticmethod
-    def _parse_version(version):
-        if isinstance(version, semantic_version.Version):
-            return version
-        if not version:
-            version = '0'
-        return semantic_version.Version.coerce(str(version))
