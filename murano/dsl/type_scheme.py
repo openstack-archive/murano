@@ -161,6 +161,8 @@ class TypeScheme(object):
                 return None
             if isinstance(value, dsl_types.MuranoObject):
                 obj = value
+            elif isinstance(value, dsl_types.MuranoObjectInterface):
+                obj = value.object
             elif isinstance(value, utils.MappingType):
                 if '?' not in value:
                     new_value = {'?': {
