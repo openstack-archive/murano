@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import weakref
+
 from murano.dsl import exceptions
 from murano.dsl import type_scheme
 
@@ -28,7 +30,8 @@ class PropertyUsages(object):
 
 
 class Spec(object):
-    def __init__(self, declaration):
+    def __init__(self, declaration, container_class):
+        self._container_class = weakref.ref(container_class)
         self._contract = type_scheme.TypeScheme(declaration['Contract'])
         self._usage = declaration.get('Usage') or 'In'
         self._default = declaration.get('Default')
@@ -38,10 +41,12 @@ class Spec(object):
                 'Unknown type {0}. Must be one of ({1})'.format(
                     self._usage, ', '.join(PropertyUsages.All)))
 
-    def validate(self, value, context, this, owner, default=None):
+    def validate(self, value, this, owner, default=None):
         if default is None:
             default = self.default
-        return self._contract(value, context, this, owner, default)
+        return self._contract(
+            value, this.cast(self._container_class()).context,
+            this, owner, default)
 
     @property
     def default(self):

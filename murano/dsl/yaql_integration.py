@@ -61,7 +61,7 @@ class ContractedValue(yaqltypes.GenericType):
             True, None,
             lambda value, sender, context, *args, **kwargs:
                 self._value_spec.validate(
-                    value, sender.context, helpers.get_this(context),
+                    value, sender.real_this,
                     context[constants.CTX_ARGUMENT_OWNER]))
 
     def convert(self, value, *args, **kwargs):

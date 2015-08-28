@@ -26,7 +26,7 @@ class MuranoObject(dsl_types.MuranoObject):
                  name=None, known_classes=None, defaults=None, this=None):
         if known_classes is None:
             known_classes = {}
-        self.__owner = owner
+        self.__owner = owner.real_this if owner else None
         self.__object_id = object_id or helpers.generate_id()
         self.__type = murano_class
         self.__properties = {}
@@ -222,7 +222,7 @@ class MuranoObject(dsl_types.MuranoObject):
 
                 obj = self.cast(mc)
                 values_to_assign.append((obj, spec.validate(
-                    value, context or self.context, self.real_this,
+                    value, self.real_this,
                     self.real_this, default=default)))
             for obj, value in values_to_assign:
                 obj.__properties[name] = value
@@ -240,7 +240,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 return parent.cast(type)
             except TypeError:
                 continue
-        raise TypeError('Cannot cast')
+        raise TypeError('Cannot cast {0} to {1}'.format(self, type))
 
     def __repr__(self):
         return '<{0} {1} ({2})>'.format(
