@@ -91,7 +91,7 @@ class CongressRulesManager(object):
 
         obj = self._to_dict(obj)
         new_owner = self._process_item(obj, owner_id, path) or owner_id
-        if isinstance(obj, list):
+        if isinstance(obj, list) or isinstance(obj, tuple):
             for v in obj:
                 self._walk(v, new_owner, path)
         elif isinstance(obj, dict):
@@ -150,7 +150,7 @@ class CongressRulesManager(object):
                 if isinstance(value, dict):
                     rules.extend(self._create_propety_rules(
                         obj_id, value, prefix + key + "."))
-                elif isinstance(value, list):
+                elif isinstance(value, list) or isinstance(obj, tuple):
                     for v in value:
                         v = self._to_dict(v)
                         if not isinstance(v, dict):

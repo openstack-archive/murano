@@ -160,10 +160,11 @@ class TaskExecutor(object):
         except Exception as e:
             return self.exception_result(e, None, '<load>')
 
-        try:
-            self._validate_model(obj, self.action, class_loader)
-        except Exception as e:
-            return self.exception_result(e, obj, '<validate>')
+        if obj is not None:
+            try:
+                self._validate_model(obj.object, self.action, class_loader)
+            except Exception as e:
+                return self.exception_result(e, obj, '<validate>')
 
         try:
             LOG.info(_LI('Invoking pre-cleanup hooks'))
@@ -230,10 +231,9 @@ class TaskExecutor(object):
 
     def _validate_model(self, obj, action, class_loader):
         if CONF.engine.enable_model_policy_enforcer:
-            if obj is not None:
-                if action is not None and action['method'] == 'deploy':
-                    self._model_policy_enforcer.validate(obj.to_dictionary(),
-                                                         class_loader)
+            if action is not None and action['method'] == 'deploy':
+                self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                     class_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
