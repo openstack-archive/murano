@@ -28,12 +28,15 @@ from murano.common import auth_utils
 from murano.common.helpers import token_sanitizer
 from murano.common import plugin_loader
 from murano.common import rpc
+from murano.dsl import context_manager
 from murano.dsl import dsl_exception
+from murano.dsl import executor as dsl_executor
+from murano.dsl import linked_context
 from murano.dsl import serializer
 from murano.engine import environment
-from murano.engine import executor as engine_executor
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
+from murano.engine.system import yaql_functions
 from murano.common.i18n import _LI, _LE, _LW
 from murano.policy import model_policy_enforcer as enforcer
 
@@ -69,6 +72,14 @@ def get_plugin_loader():
     if PLUGIN_LOADER is None:
         PLUGIN_LOADER = plugin_loader.PluginLoader()
     return PLUGIN_LOADER
+
+
+class ContextManager(context_manager.ContextManager):
+    def create_root_context(self, runtime_version):
+        root_context = super(ContextManager, self).create_root_context(
+            runtime_version)
+        return linked_context.link(
+            root_context, yaql_functions.get_context(runtime_version))
 
 
 class TaskProcessingEndpoint(object):
@@ -149,8 +160,8 @@ class TaskExecutor(object):
     def _execute(self, pkg_loader):
         get_plugin_loader().register_in_loader(pkg_loader)
 
-        executor = engine_executor.Executor(
-            pkg_loader, self.environment)
+        executor = dsl_executor.MuranoDslExecutor(
+            pkg_loader, ContextManager(), self.environment)
         try:
             obj = executor.load(self.model)
         except Exception as e:

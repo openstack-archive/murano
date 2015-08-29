@@ -28,7 +28,6 @@ from murano import version
 from murano.common.i18n import _, _LE
 from murano.common import config
 from murano.common import engine
-from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import executor
 from murano.dsl import helpers
@@ -122,13 +121,10 @@ def _get_all_test_methods(exc, package):
     """
     class_to_obj = {}
     class_to_methods = {}
-    child_context = exc.object_store.context.create_child_context()
-    child_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
-
     for pkg_class_name in package.classes:
         class_obj = package.find_class(pkg_class_name, False)
 
-        obj = class_obj.new(None, exc.object_store, child_context)()
+        obj = class_obj.new(None, exc.object_store)(None)
         if not helpers.is_instance_of(obj, BASE_CLASS, '*'):
             LOG.debug('Class {0} is not inherited from {1}. '
                       'Skipping it.'.format(pkg_class_name, BASE_CLASS))
@@ -212,7 +208,8 @@ def run_tests(args):
     with package_loader.CombinedPackageLoader(
             murano_client_factory, client.tenant_id) as pkg_loader:
         engine.get_plugin_loader().register_in_loader(pkg_loader)
-        exc = executor.MuranoDslExecutor(pkg_loader, test_env)
+        exc = executor.MuranoDslExecutor(
+            pkg_loader, engine.ContextManager(), test_env)
 
         package = _load_package(pkg_loader, provided_pkg_name)
         class_to_methods, class_to_obj = _get_all_test_methods(exc, package)

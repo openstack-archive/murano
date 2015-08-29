@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import weakref
+
 from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
@@ -22,7 +24,7 @@ from murano.dsl import yaql_integration
 
 
 class MuranoObject(dsl_types.MuranoObject):
-    def __init__(self, murano_class, owner, context, object_id=None,
+    def __init__(self, murano_class, owner, object_store, object_id=None,
                  name=None, known_classes=None, defaults=None, this=None):
         if known_classes is None:
             known_classes = {}
@@ -35,8 +37,7 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__this = this
         self.__name = name
         self.__extension = None
-        self.__context = self.__setup_context(context)
-        object_store = helpers.get_object_store(context)
+        self.__object_store = weakref.ref(object_store)
         self.__config = murano_class.package.get_class_config(
             murano_class.name)
         if not isinstance(self.__config, dict):
@@ -46,27 +47,14 @@ class MuranoObject(dsl_types.MuranoObject):
             name = parent_class.name
             if name not in known_classes:
                 obj = parent_class.new(
-                    owner, object_store, context,
-                    object_id=self.__object_id,
-                    known_classes=known_classes,
-                    defaults=defaults, this=self.real_this).object
+                    owner, object_store, object_id=self.__object_id,
+                    known_classes=known_classes, defaults=defaults,
+                    this=self.real_this).object
 
                 self.__parents[name] = known_classes[name] = obj
             else:
                 self.__parents[name] = known_classes[name]
         self.__initialized = False
-
-    def __setup_context(self, context):
-        context = context.create_child_context()
-        context[constants.CTX_THIS] = self.real_this
-        context[constants.CTX_TYPE] = self.type
-        context['this'] = self.real_this
-        context[''] = self.real_this
-        return context
-
-    @property
-    def context(self):
-        return self.__context
 
     @property
     def extension(self):
@@ -79,6 +67,10 @@ class MuranoObject(dsl_types.MuranoObject):
     @extension.setter
     def extension(self, value):
         self.__extension = value
+
+    @property
+    def object_store(self):
+        return self.__object_store()
 
     def initialize(self, context, object_store, params):
         if self.__initialized:
@@ -153,9 +145,8 @@ class MuranoObject(dsl_types.MuranoObject):
             parent.initialize(context, object_store, params)
 
         if not object_store.initializing and init:
-            init_context = context.create_child_context()
-            init_context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            init.invoke(executor, self.real_this, (), init_args, init_context)
+            context[constants.CTX_ARGUMENT_OWNER] = self.real_this
+            init.invoke(executor, self.real_this, (), init_args, context)
             self.__initialized = True
 
     @property
@@ -203,6 +194,8 @@ class MuranoObject(dsl_types.MuranoObject):
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
         declared_properties = start_type.find_property(name)
+        if context is None:
+            context = self.object_store.executor.create_object_context(self)
         if len(declared_properties) > 0:
             declared_properties = self.type.find_property(name)
             values_to_assign = []
@@ -216,7 +209,7 @@ class MuranoObject(dsl_types.MuranoObject):
 
                 default = self.__config.get(name, spec.default)
                 default = self.__defaults.get(name, default)
-                default = helpers.evaluate(default, context or self.context)
+                default = helpers.evaluate(default, context)
 
                 obj = self.cast(mc)
                 values_to_assign.append((obj, spec.validate(

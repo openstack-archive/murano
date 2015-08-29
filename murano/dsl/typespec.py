@@ -45,7 +45,8 @@ class Spec(object):
         if default is None:
             default = self.default
         return self._contract(
-            value, this.cast(self._container_class()).context,
+            value, this.object_store.executor.create_object_context(
+                this.cast(self._container_class())),
             this, owner, default)
 
     @property

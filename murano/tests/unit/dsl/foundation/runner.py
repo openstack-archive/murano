@@ -16,8 +16,11 @@
 import sys
 import types
 
+from murano.dsl import context_manager
+from murano.dsl import dsl
 from murano.dsl import dsl_exception
 from murano.dsl import executor
+from murano.dsl import linked_context
 from murano.dsl import murano_object
 from murano.dsl import serializer
 from murano.dsl import yaql_integration
@@ -26,14 +29,16 @@ from murano.engine.system import yaql_functions
 from murano.tests.unit.dsl.foundation import object_model
 
 
-class TestExecutor(executor.MuranoDslExecutor):
-    def __init__(self, package_loader, env, functions):
+class TestContextManager(context_manager.ContextManager):
+    def __init__(self, functions):
         self.__functions = functions
-        super(TestExecutor, self).__init__(package_loader, env)
 
-    def create_root_context(self):
-        context = super(TestExecutor, self).create_root_context()
-        yaql_functions.register(context)
+    def create_root_context(self, runtime_version):
+        root_context = super(TestContextManager, self).create_root_context(
+            runtime_version)
+        context = linked_context.link(
+            root_context, yaql_functions.get_context(runtime_version))
+        context = context.create_child_context()
         for name, func in self.__functions.iteritems():
             context.register_function(func, name)
         return context
@@ -69,8 +74,9 @@ class Runner(object):
         if 'Objects' not in model:
             model = {'Objects': model}
 
-        self.executor = TestExecutor(
-            package_loader, environment.Environment(), functions)
+        self.executor = executor.MuranoDslExecutor(
+            package_loader, TestContextManager(functions),
+            environment.Environment())
         self._root = self.executor.load(model).object
 
     def _execute(self, name, object_id, *args, **kwargs):
@@ -86,8 +92,11 @@ class Runner(object):
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_kwargs[name] = arg
-            return yaql_integration.to_mutable(obj.type.invoke(
-                name, self.executor, obj, tuple(final_args), final_kwargs))
+            runtime_version = obj.type.package.runtime_version
+            yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
+            return dsl.to_mutable(obj.type.invoke(
+                name, self.executor, obj, tuple(final_args), final_kwargs),
+                yaql_engine)
         except dsl_exception.MuranoPlException as e:
             if not self.preserve_exception:
                 original_exception = getattr(e, 'original_exception', None)

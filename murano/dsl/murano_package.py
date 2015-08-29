@@ -16,7 +16,6 @@ import inspect
 import weakref
 
 import semantic_version
-from yaql.language import utils
 
 from murano.dsl import constants
 from murano.dsl import dsl_types
@@ -24,9 +23,7 @@ from murano.dsl import exceptions
 from murano.dsl import helpers
 from murano.dsl import murano_class
 from murano.dsl import murano_object
-from murano.dsl import namespace_resolver
 from murano.dsl import principal_objects
-from murano.dsl import typespec
 from murano.dsl import yaql_integration
 
 
@@ -88,41 +85,10 @@ class MuranoPackage(dsl_types.MuranoPackage):
         return {}
 
     def _register_mpl_class(self, data, name=None):
-        if name in self._classes:
-            return self._classes[name]
-
-        namespaces = data.get('Namespaces') or {}
-        ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
-
-        parent_class_names = data.get('Extends')
-        parent_classes = []
-        if parent_class_names:
-            if not utils.is_sequence(parent_class_names):
-                parent_class_names = [parent_class_names]
-            for parent_name in parent_class_names:
-                full_name = ns_resolver.resolve_name(parent_name)
-                parent_classes.append(self.find_class(full_name))
-
-        type_obj = murano_class.MuranoClass(
-            ns_resolver, name, self, parent_classes)
-
-        properties = data.get('Properties') or {}
-        for property_name, property_spec in properties.iteritems():
-            spec = typespec.PropertySpec(property_spec, type_obj)
-            type_obj.add_property(property_name, spec)
-
-        methods = data.get('Methods') or data.get('Workflow') or {}
-
-        method_mappings = {
-            'initialize': '.init',
-            'destroy': '.destroy'
-        }
-
-        for method_name, payload in methods.iteritems():
-            type_obj.add_method(
-                method_mappings.get(method_name, method_name), payload)
-
-        self._classes[name] = type_obj
+        type_obj = self._classes.get(name)
+        if not type_obj:
+            type_obj = murano_class.MuranoClass.create(data, self, name)
+            self._classes[name] = type_obj
         return type_obj
 
     def _register_native_class(self, cls, name):
@@ -153,6 +119,8 @@ class MuranoPackage(dsl_types.MuranoPackage):
         if inspect.isclass(cls):
             name = name or getattr(cls, '__murano_name', None) or cls.__name__
             self._native_load_queue[name] = cls
+        elif isinstance(cls, murano_class.MuranoClass):
+            self._classes[cls.name] = cls
         else:
             self._load_queue[name] = cls
 
@@ -182,3 +150,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 except exceptions.NoClassFound:
                     continue
         raise exceptions.NoClassFound(name)
+
+    @property
+    def context(self):
+        return None

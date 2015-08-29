@@ -22,6 +22,7 @@ from murano.dsl import helpers
 from murano.dsl import yaql_expression
 
 
+@helpers.memoize
 def get_loader(version):
     version = helpers.parse_version(version)
 

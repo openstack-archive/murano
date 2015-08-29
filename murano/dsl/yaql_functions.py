@@ -19,14 +19,14 @@ from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
 
+from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import yaql_integration
+from murano.dsl import linked_context
 
 
 @specs.parameter('value', dsl_types.MuranoObject)
-@specs.extension_method
 def id_(value):
     return value.object_id
 
@@ -34,7 +34,6 @@ def id_(value):
 @specs.parameter('value', dsl_types.MuranoObject)
 @specs.parameter('type__', dsl.MuranoTypeName())
 @specs.parameter('version_spec', yaqltypes.String(True))
-@specs.extension_method
 def cast(context, value, type__, version_spec=None):
     return helpers.cast(
         value, type__.murano_class.name,
@@ -53,7 +52,7 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         if helpers.is_keyword(key):
             new_context[key] = value
     return __type_name.murano_class.new(
-        __owner, object_store, new_context, name=__object_name)(**parameters)
+        __owner, object_store, name=__object_name)(new_context, **parameters)
 
 
 @specs.parameter('type_name', dsl.MuranoTypeName())
@@ -65,12 +64,11 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
 def new_from_dict(type_name, context, parameters,
                   owner=None, object_name=None, extra=None):
     return new(context, type_name, owner, object_name, extra,
-               **yaql_integration.filter_parameters_dict(parameters))
+               **helpers.filter_parameters_dict(parameters))
 
 
 @specs.parameter('sender', dsl_types.MuranoObject)
 @specs.parameter('func', yaqltypes.Lambda())
-@specs.extension_method
 def super_(context, sender, func=None):
     cast_type = helpers.get_type(context)
     if func is None:
@@ -81,7 +79,6 @@ def super_(context, sender, func=None):
 
 @specs.parameter('value', dsl_types.MuranoObject)
 @specs.parameter('func', yaqltypes.Lambda())
-@specs.extension_method
 def psuper(context, value, func=None):
     if func is None:
         return super_(context, value)
@@ -113,7 +110,6 @@ def sleep_(seconds):
 
 
 @specs.parameter('object_', dsl_types.MuranoObject)
-@specs.extension_method
 def type_(object_):
     return object_.type.name
 
@@ -135,8 +131,12 @@ def obj_attribution(context, obj, property_name):
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
 def op_dot(context, sender, expr, operator):
-    ctx2 = context.create_child_context()
-    sender.type.register_methods(ctx2)
+    executor = helpers.get_executor(context)
+    type_context = executor.context_manager.create_class_context(sender.type)
+    obj_context = executor.context_manager.create_object_context(sender)
+    ctx2 = linked_context.link(
+        linked_context.link(context, type_context),
+        obj_context)
     return operator(ctx2, sender, expr)
 
 
@@ -165,16 +165,7 @@ def not_equal(obj1, obj2):
     return obj1 is not obj2
 
 
-@specs.parameter('logger_name', yaqltypes.String(True))
-def logger(context, logger_name):
-    """Instantiate Logger"""
-    log = yaql_integration.call_func(
-        context, 'new', 'io.murano.system.Logger',
-        logger_name=logger_name)
-    return log
-
-
-def register(context):
+def register(context, runtime_version):
     context.register_function(cast)
     context.register_function(new)
     context.register_function(new_from_dict)
@@ -191,4 +182,8 @@ def register(context):
     context.register_function(ns_resolve)
     context.register_function(equal)
     context.register_function(not_equal)
-    context.register_function(logger)
+
+    if runtime_version < constants.RUNTIME_VERSION_2_0:
+        for t in ('id', 'cast', 'super', 'psuper', 'type'):
+            for spec in utils.to_extension_method(t, context):
+                context.register_function(spec)

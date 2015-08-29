@@ -14,6 +14,7 @@
 
 import collections
 import contextlib
+import functools
 import re
 import string
 import sys
@@ -135,7 +136,8 @@ def get_context():
 
 def get_executor(context=None):
     context = context or get_context()
-    return context[constants.CTX_EXECUTOR]
+    result = context[constants.CTX_EXECUTOR]
+    return None if not result else result()
 
 
 def get_type(context=None):
@@ -150,12 +152,13 @@ def get_environment(context=None):
 
 def get_object_store(context=None):
     context = context or get_context()
-    return context[constants.CTX_OBJECT_STORE]
+    return context[constants.CTX_THIS].object_store
 
 
 def get_package_loader(context=None):
     context = context or get_context()
-    return context[constants.CTX_PACKAGE_LOADER]
+    result = context[constants.CTX_PACKAGE_LOADER]
+    return None if not result else result()
 
 
 def get_this(context=None):
@@ -170,7 +173,8 @@ def get_caller_context(context=None):
 
 def get_attribute_store(context=None):
     context = context or get_context()
-    return context[constants.CTX_ATTRIBUTE_STORE]
+    store = context[constants.CTX_ATTRIBUTE_STORE]
+    return None if not store else store()
 
 
 def get_current_instruction(context=None):
@@ -181,6 +185,11 @@ def get_current_instruction(context=None):
 def get_current_method(context=None):
     context = context or get_context()
     return context[constants.CTX_CURRENT_METHOD]
+
+
+def get_yaql_engine(context=None):
+    context = context or get_context()
+    return context[constants.CTX_YAQL_ENGINE]
 
 
 def get_current_exception(context=None):
@@ -316,3 +325,25 @@ def is_instance_of(obj, class_name, pov_or_version_spec=None):
         return True
     except (exceptions.NoClassFound, exceptions.AmbiguousClassName):
         return False
+
+
+def filter_parameters_dict(parameters):
+    parameters = parameters.copy()
+    for name in parameters.keys():
+        if not is_keyword(name):
+            del parameters[name]
+    return parameters
+
+
+def memoize(func):
+    cache = {}
+
+    @functools.wraps(func)
+    def wrap(*args):
+        if args not in cache:
+            result = func(*args)
+            cache[args] = result
+            return result
+        else:
+            return cache[args]
+    return wrap

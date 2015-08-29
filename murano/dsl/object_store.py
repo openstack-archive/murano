@@ -12,19 +12,19 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.dsl import constants
+import weakref
+
+
 from murano.dsl import dsl_types
 from murano.dsl import helpers
 
 
 class ObjectStore(object):
-    def __init__(self, context, parent_store=None):
-        self._context = context.create_child_context()
-        self._package_loader = helpers.get_package_loader(context)
-        self._context[constants.CTX_OBJECT_STORE] = self
+    def __init__(self, executor, parent_store=None):
         self._parent_store = parent_store
         self._store = {}
         self._designer_attributes_store = {}
+        self._executor = weakref.ref(executor)
         self._initializing = False
 
     @property
@@ -32,8 +32,8 @@ class ObjectStore(object):
         return self._initializing
 
     @property
-    def context(self):
-        return self._context
+    def executor(self):
+        return self._executor()
 
     def get(self, object_id):
         if object_id in self._store:
@@ -51,7 +51,7 @@ class ObjectStore(object):
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
-    def load(self, value, owner, defaults=None):
+    def load(self, value, owner, context=None, defaults=None):
         if value is None:
             return None
         if '?' not in value or 'type' not in value['?']:
@@ -63,10 +63,10 @@ class ObjectStore(object):
             system_key.get('classVersion'))
 
         if 'package' not in system_key:
-            package = self._package_loader.load_class_package(
+            package = self.executor.package_loader.load_class_package(
                 obj_type, version_spec)
         else:
-            package = self._package_loader.load_package(
+            package = self.executor.package_loader.load_package(
                 system_key['package'], version_spec)
         class_obj = package.find_class(obj_type, False)
 
@@ -80,19 +80,21 @@ class ObjectStore(object):
                     return factory
             else:
                 factory = class_obj.new(
-                    owner, self, context=self.context,
+                    owner, self,
                     name=system_key.get('name'),
                     object_id=object_id, defaults=defaults)
                 self._store[object_id] = factory
                 system_value = ObjectStore._get_designer_attributes(system_key)
                 self._designer_attributes_store[object_id] = system_value
 
-            obj = factory(**value)
+            init_context = self.executor.create_object_context(
+                factory.object, context)
+            obj = factory(init_context, **value)
             if not self._initializing:
                 self._store[object_id] = obj
             if owner is None:
                 self._initializing = False
-                self._store[object_id] = factory(**value)
+                self._store[object_id] = factory(init_context, **value)
         finally:
             if owner is None:
                 self._initializing = False

@@ -14,6 +14,7 @@
 
 import collections
 import types
+import weakref
 
 from yaql.language import specs
 
@@ -38,7 +39,7 @@ class MethodUsages(object):
 class MuranoMethod(dsl_types.MuranoMethod):
     def __init__(self, murano_class, name, payload):
         self._name = name
-        self._murano_class = murano_class
+        self._murano_class = weakref.ref(murano_class)
 
         if callable(payload):
             if isinstance(payload, specs.FunctionDefinition):
@@ -78,7 +79,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
 
     @property
     def murano_class(self):
-        return self._murano_class
+        return self._murano_class()
 
     @property
     def arguments_scheme(self):

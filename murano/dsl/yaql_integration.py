@@ -14,6 +14,7 @@
 
 import inspect
 
+import yaql
 from yaql.language import contexts
 from yaql.language import conventions
 from yaql.language import factory
@@ -25,30 +26,45 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
+from murano.dsl import yaql_functions
 
 
-LEGACY_ENGINE_OPTIONS = {
+ENGINE_10_OPTIONS = {
     'yaql.limitIterators': constants.ITERATORS_LIMIT,
     'yaql.memoryQuota': constants.EXPRESSION_MEMORY_QUOTA,
+    'yaql.convertSetsToLists': True,
+    'yaql.convertTuplesToLists': True,
     'yaql.iterableDicts': True
 }
 
+ENGINE_20_OPTIONS = {
+    'yaql.limitIterators': constants.ITERATORS_LIMIT,
+    'yaql.memoryQuota': constants.EXPRESSION_MEMORY_QUOTA,
+    'yaql.convertSetsToLists': True,
+    'yaql.convertTuplesToLists': True
+}
 
-def _create_engine():
+
+def _create_engine(runtime_version):
     engine_factory = factory.YaqlFactory()
     engine_factory.insert_operator(
         '.', True, ':', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, True)
-    return engine_factory.create(options=LEGACY_ENGINE_OPTIONS)
+    options = (ENGINE_10_OPTIONS
+               if runtime_version < constants.RUNTIME_VERSION_2_0
+               else ENGINE_20_OPTIONS)
+    return engine_factory.create(options=options)
 
 
 @specs.name('#finalize')
 def _finalize(obj, context):
     return helpers.evaluate(obj, context)
 
-
-ENGINE = _create_engine()
 CONVENTION = conventions.CamelCaseConvention()
-ROOT_CONTEXT = legacy.create_context(
+ENGINE_10 = _create_engine(constants.RUNTIME_VERSION_1_0)
+ENGINE_20 = _create_engine(constants.RUNTIME_VERSION_2_0)
+ROOT_CONTEXT_10 = legacy.create_context(
+    convention=CONVENTION, finalizer=_finalize)
+ROOT_CONTEXT_20 = yaql.create_context(
     convention=CONVENTION, finalizer=_finalize)
 
 
@@ -71,25 +87,34 @@ class ContractedValue(yaqltypes.GenericType):
 
 
 def create_empty_context():
-    context = contexts.Context()
+    context = contexts.Context(convention=CONVENTION)
     context.register_function(_finalize)
     return context
 
 
-def create_context():
-    return ROOT_CONTEXT.create_child_context()
+@helpers.memoize
+def create_context(runtime_version):
+    if runtime_version < constants.RUNTIME_VERSION_2_0:
+        context = ROOT_CONTEXT_10.create_child_context()
+    else:
+        context = ROOT_CONTEXT_20.create_child_context()
+    context[constants.CTX_YAQL_ENGINE] = choose_yaql_engine(runtime_version)
+    yaql_functions.register(context, runtime_version)
+    return context
 
 
-def choose_yaql_engine(version):
-    return ENGINE
+def choose_yaql_engine(runtime_version):
+    return (ENGINE_10 if runtime_version < constants.RUNTIME_VERSION_1_0
+            else ENGINE_20)
 
 
-def parse(expression, version):
-    return choose_yaql_engine(version)(expression)
+def parse(expression, runtime_version):
+    return choose_yaql_engine(runtime_version)(expression)
 
 
 def call_func(__context, __name, *args, **kwargs):
-    return __context(__name, ENGINE)(*args, **kwargs)
+    engine = __context[constants.CTX_YAQL_ENGINE]
+    return __context(__name, engine)(*args, **kwargs)
 
 
 def _infer_parameter_type(name, class_name):
@@ -149,12 +174,15 @@ def build_wrapper_function_definition(murano_method):
 
 
 def _build_native_wrapper_function_definition(murano_method):
+    runtime_version = murano_method.murano_class.package.runtime_version
+    engine = choose_yaql_engine(runtime_version)
+
     @specs.method
     @specs.name(murano_method.name)
     def payload(__context, __sender, *args, **kwargs):
         executor = helpers.get_executor(__context)
-        args = tuple(to_mutable(arg) for arg in args)
-        kwargs = to_mutable(kwargs)
+        args = tuple(dsl.to_mutable(arg, engine) for arg in args)
+        kwargs = dsl.to_mutable(kwargs, engine)
         return murano_method.invoke(
             executor, __sender, args, kwargs, __context, True)
 
@@ -186,11 +214,14 @@ def _build_mpl_wrapper_function_definition(murano_method):
     return fd
 
 
-def get_class_factory_definition(cls):
+def get_class_factory_definition(cls, murano_class):
+    runtime_version = murano_class.package.runtime_version
+    engine = choose_yaql_engine(runtime_version)
+
     def payload(__context, __sender, *args, **kwargs):
         assert __sender is None
-        args = tuple(to_mutable(arg) for arg in args)
-        kwargs = to_mutable(kwargs)
+        args = tuple(dsl.to_mutable(arg, engine) for arg in args)
+        kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):
             return cls(*args, **kwargs)
 
@@ -227,15 +258,3 @@ def filter_parameters(__fd, *args, **kwargs):
             if name not in __fd.parameters:
                 del kwargs[name]
     return args, kwargs
-
-
-def filter_parameters_dict(parameters):
-    parameters = parameters.copy()
-    for name in parameters.keys():
-        if not helpers.is_keyword(name):
-            del parameters[name]
-    return parameters
-
-
-def to_mutable(obj):
-    return dsl.to_mutable(obj, ENGINE)

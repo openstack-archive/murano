@@ -52,7 +52,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         self._parent = parent_loader
         self._configs = {}
         self._package = TestPackage(
-            self, package_name, None, None, None, self._configs)
+            self, package_name, None, '1.0', None, self._configs)
         for name, payload in self._classes.iteritems():
             self._package.register_class(payload, name)
         super(TestPackageLoader, self).__init__()

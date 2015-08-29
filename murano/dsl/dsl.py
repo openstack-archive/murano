@@ -64,7 +64,7 @@ class MuranoType(yaqltypes.PythonType):
         result = super(MuranoType, self).convert(
             value, sender, context, function_spec, engine, *args, **kwargs)
         if isinstance(result, dsl_types.MuranoObject):
-            return MuranoObjectInterface(result, engine)
+            return MuranoObjectInterface(result)
         return result
 
 
@@ -76,7 +76,7 @@ class ThisParameterType(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
                 *args, **kwargs):
         this = helpers.get_this(context)
         executor = helpers.get_executor(context)
-        return MuranoObjectInterface(this, engine, executor)
+        return MuranoObjectInterface(this, executor)
 
 
 class InterfacesParameterType(yaqltypes.HiddenParameterType,
@@ -87,7 +87,7 @@ class InterfacesParameterType(yaqltypes.HiddenParameterType,
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
         this = helpers.get_this(context)
-        return Interfaces(engine, this)
+        return Interfaces(this)
 
 
 class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
@@ -151,10 +151,9 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
                 context[constants.CTX_CURRENT_INSTRUCTION] = NativeInstruction(
                     frame[4][0].strip(), location)
 
-    def __init__(self, mpl_object, engine, executor=None):
+    def __init__(self, mpl_object, executor=None):
         self.__object = mpl_object
         self.__executor = executor
-        self.__engine = engine
 
     @property
     def object(self):
@@ -188,7 +187,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             helpers.cast(
                 self.__object, murano_class,
                 version_spec or helpers.get_type()),
-            self.__engine, self.__executor)
+            self.__executor)
 
     def is_instance_of(self, murano_class, version_spec=None):
         return helpers.is_instance_of(
@@ -201,7 +200,8 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def __getitem__(self, item):
         context = helpers.get_context()
         return to_mutable(
-            self.__object.get_property(item, context), self.__engine)
+            self.__object.get_property(item, context),
+            helpers.get_yaql_engine(context))
 
     def __setitem__(self, key, value):
         context = helpers.get_context()
@@ -217,28 +217,27 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
 
 class YaqlInterface(object):
-    def __init__(self, engine, sender=utils.NO_VALUE):
-        self.__engine = engine
+    def __init__(self, sender=utils.NO_VALUE):
         self.__sender = sender
 
     @property
     def context(self):
-        return self.__context
+        return helpers.get_context()
 
     @property
     def engine(self):
-        return self.__engine
+        return helpers.get_yaql_engine(self.context)
 
     @property
     def sender(self):
         return self.__sender
 
     def on(self, sender):
-        return YaqlInterface(self.engine, sender)
+        return YaqlInterface(sender)
 
     def __getattr__(self, item):
         def stub(*args, **kwargs):
-            context = helpers.get_context()
+            context = self.context
             args = tuple(helpers.evaluate(arg, context) for arg in args)
             kwargs = dict((key, helpers.evaluate(value, context))
                           for key, value in kwargs.iteritems())
@@ -265,12 +264,11 @@ class YaqlInterface(object):
 
 
 class Interfaces(object):
-    def __init__(self, engine, mpl_object):
-        self.__engine = engine
+    def __init__(self, mpl_object):
         self.__object = mpl_object
 
     def yaql(self, sender=utils.NO_VALUE):
-        return YaqlInterface(self.__engine, sender)
+        return YaqlInterface(sender)
 
     def this(self):
         return self.methods(self.__object)
@@ -278,7 +276,7 @@ class Interfaces(object):
     def methods(self, mpl_object):
         if mpl_object is None:
             return None
-        return MuranoObjectInterface(mpl_object, self.__engine)
+        return MuranoObjectInterface(mpl_object)
 
     @property
     def environment(self):
@@ -292,7 +290,7 @@ class Interfaces(object):
         caller = helpers.get_this(caller_context)
         if caller is None:
             return None
-        return MuranoObjectInterface(caller, self.__engine)
+        return MuranoObjectInterface(caller)
 
     @property
     def attributes(self):
@@ -321,7 +319,7 @@ class NativeInstruction(object):
 def to_mutable(obj, yaql_engine):
     def converter(value, limit_func, engine, rec):
         if isinstance(value, dsl_types.MuranoObject):
-            return MuranoObjectInterface(value, engine)
+            return MuranoObjectInterface(value)
         else:
             return utils.convert_output_data(value, limit_func, engine, rec)
 

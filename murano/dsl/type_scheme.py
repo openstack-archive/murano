@@ -24,7 +24,6 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
-from murano.dsl import yaql_integration
 
 
 class TypeScheme(object):
@@ -151,7 +150,7 @@ class TypeScheme(object):
         @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
         def class_(value, name, default_name=None, version_spec=None):
-            object_store = helpers.get_object_store(root_context)
+            object_store = this.object_store
             if not default_name:
                 default_name = name
             murano_class = name.murano_class
@@ -171,7 +170,8 @@ class TypeScheme(object):
                     new_value.update(value)
                     value = new_value
 
-                obj = object_store.load(value, owner, defaults=default)
+                obj = object_store.load(
+                    value, owner, root_context, defaults=default)
             elif isinstance(value, types.StringTypes):
                 obj = object_store.get(value)
                 if obj is None:
@@ -191,7 +191,7 @@ class TypeScheme(object):
                     'requested type {1}'.format(obj.type.name, name))
             return obj
 
-        context = yaql_integration.create_context()
+        context = root_context.create_child_context()
         context.register_function(int_)
         context.register_function(string)
         context.register_function(bool_)

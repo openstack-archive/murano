@@ -28,6 +28,8 @@ from yaql.language import utils
 from yaql.language import yaqltypes
 
 from murano.common import config as cfg
+from murano.dsl import constants
+from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import yaql_integration
 
@@ -111,13 +113,13 @@ def substr(delegate, string, start, length=-1):
 
 
 @specs.extension_method
-def patch_(obj, patch):
+def patch_(engine, obj, patch):
     if not isinstance(patch, tuple):
         patch = (patch,)
-    patch = yaql_integration.to_mutable(patch)
+    patch = dsl.to_mutable(patch, engine)
     patch = jsonpatch.JsonPatch(patch)
     try:
-        obj = yaql_integration.to_mutable(obj)
+        obj = dsl.to_mutable(obj, engine)
         return patch.apply(obj, in_place=True)
     except jsonpointer.JsonPointerException:
         return obj
@@ -182,7 +184,18 @@ def first_or_default(collection, default=None):
         return default
 
 
-def register(context):
+@specs.parameter('logger_name', yaqltypes.String(True))
+def logger(context, logger_name):
+    """Instantiate Logger"""
+    log = yaql_integration.call_func(
+        context, 'new', 'io.murano.system.Logger',
+        logger_name=logger_name)
+    return log
+
+
+@helpers.memoize
+def get_context(runtime_version):
+    context = yaql_integration.create_empty_context()
     context.register_function(base64decode)
     context.register_function(base64encode)
     context.register_function(pselect)
@@ -191,11 +204,16 @@ def register(context):
     context.register_function(patch_)
     context.register_function(config)
     context.register_function(config_default)
-    context.register_function(substr)
-    context.register_function(first_or_default)
+    context.register_function(logger)
 
-    for t in ('to_lower', 'to_upper', 'trim', 'join', 'split',
-              'starts_with', 'ends_with', 'matches', 'replace',
-              'flatten'):
-        for spec in utils.to_extension_method(t, context):
-            context.register_function(spec)
+    if runtime_version < constants.RUNTIME_VERSION_2_0:
+        context.register_function(substr)
+        context.register_function(first_or_default)
+
+        root_context = yaql_integration.create_context(runtime_version)
+        for t in ('to_lower', 'to_upper', 'trim', 'join', 'split',
+                  'starts_with', 'ends_with', 'matches', 'replace',
+                  'flatten'):
+            for spec in utils.to_extension_method(t, root_context):
+                context.register_function(spec)
+    return context

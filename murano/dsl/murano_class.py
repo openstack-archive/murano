@@ -16,6 +16,7 @@ import collections
 import weakref
 
 import semantic_version
+from yaql.language import utils
 
 from murano.dsl import constants
 from murano.dsl import dsl
@@ -24,16 +25,16 @@ from murano.dsl import exceptions
 from murano.dsl import helpers
 from murano.dsl import murano_method
 from murano.dsl import murano_object
+from murano.dsl import namespace_resolver
 from murano.dsl import typespec
 from murano.dsl import yaql_integration
 
 
 class MuranoClass(dsl_types.MuranoClass):
-    def __init__(self, namespace_resolver, name, package,
-                 parents=None):
+    def __init__(self, ns_resolver, name, package, parents=None):
         self._package = weakref.ref(package)
         self._methods = {}
-        self._namespace_resolver = namespace_resolver
+        self._namespace_resolver = ns_resolver
         self._name = name
         self._properties = {}
         self._config = {}
@@ -42,8 +43,45 @@ class MuranoClass(dsl_types.MuranoClass):
         else:
             self._parents = parents or [
                 package.find_class(constants.CORE_LIBRARY_OBJECT)]
-        self._unique_methods = None
+        self._context = None
         self._parent_mappings = self._build_parent_remappings()
+
+    @classmethod
+    def create(cls, data, package, name=None):
+        namespaces = data.get('Namespaces') or {}
+        ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
+
+        if not name:
+            name = ns_resolver.resolve_name(data['Name'])
+
+        parent_class_names = data.get('Extends')
+        parent_classes = []
+        if parent_class_names:
+            if not utils.is_sequence(parent_class_names):
+                parent_class_names = [parent_class_names]
+            for parent_name in parent_class_names:
+                full_name = ns_resolver.resolve_name(parent_name)
+                parent_classes.append(package.find_class(full_name))
+
+        type_obj = cls(ns_resolver, name, package, parent_classes)
+
+        properties = data.get('Properties') or {}
+        for property_name, property_spec in properties.iteritems():
+            spec = typespec.PropertySpec(property_spec, type_obj)
+            type_obj.add_property(property_name, spec)
+
+        methods = data.get('Methods') or data.get('Workflow') or {}
+
+        method_mappings = {
+            'initialize': '.init',
+            'destroy': '.destroy'
+        }
+
+        for method_name, payload in methods.iteritems():
+            type_obj.add_method(
+                method_mappings.get(method_name, method_name), payload)
+
+        return type_obj
 
     @property
     def name(self):
@@ -70,14 +108,8 @@ class MuranoClass(dsl_types.MuranoClass):
         return self._parent_mappings
 
     def extend_with_class(self, cls):
-        ctor = yaql_integration.get_class_factory_definition(cls)
+        ctor = yaql_integration.get_class_factory_definition(cls, self)
         self.add_method('__init__', ctor)
-
-    @property
-    def unique_methods(self):
-        if self._unique_methods is None:
-            self._unique_methods = list(self._iterate_unique_methods())
-        return self._unique_methods
 
     def get_method(self, name):
         return self._methods.get(name)
@@ -85,18 +117,12 @@ class MuranoClass(dsl_types.MuranoClass):
     def add_method(self, name, payload):
         method = murano_method.MuranoMethod(self, name, payload)
         self._methods[name] = method
-        self._unique_methods = None
+        self._context = None
         return method
 
     @property
     def properties(self):
         return self._properties.keys()
-
-    def register_methods(self, context):
-        for method in self.unique_methods:
-            context.register_function(
-                method.yaql_function_definition,
-                name=method.yaql_function_definition.name)
 
     def add_property(self, name, property_typespec):
         if not isinstance(property_typespec, typespec.PropertySpec):
@@ -161,7 +187,12 @@ class MuranoClass(dsl_types.MuranoClass):
         for c in self.ancestors():
             names.update(c.methods.keys())
         for name in names:
-            yield self.find_single_method(name)
+            try:
+                yield self.find_single_method(name)
+            except exceptions.AmbiguousMethodName as e:
+                def func(*args, **kwargs):
+                    raise e
+                yield murano_method.MuranoMethod(self, name, func)
 
     def find_property(self, name):
         result = []
@@ -197,14 +228,13 @@ class MuranoClass(dsl_types.MuranoClass):
             obj = obj.type
         return any(cls is self for cls in obj.ancestors())
 
-    def new(self, owner, object_store, context=None, **kwargs):
-        if context is None:
-            context = object_store.context
-        obj = murano_object.MuranoObject(
-            self, owner, object_store.context, **kwargs)
+    def new(self, owner, object_store, **kwargs):
+        obj = murano_object.MuranoObject(self, owner, object_store, **kwargs)
 
-        def initializer(**params):
-            init_context = context.create_child_context()
+        def initializer(__context, **params):
+            if __context is None:
+                __context = object_store.executor.create_object_context(obj)
+            init_context = __context.create_child_context()
             init_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
             obj.initialize(init_context, object_store, params)
             return obj
@@ -304,3 +334,13 @@ class MuranoClass(dsl_types.MuranoClass):
     def ancestors(self):
         for c in helpers.traverse(self, lambda t: t.parents(self)):
             yield c
+
+    @property
+    def context(self):
+        if not self._context:
+            self._context = yaql_integration.create_empty_context()
+            for m in self._iterate_unique_methods():
+                self._context.register_function(
+                    m.yaql_function_definition,
+                    name=m.yaql_function_definition.name)
+        return self._context

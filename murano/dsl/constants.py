@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import semantic_version
+
 EXPRESSION_MEMORY_QUOTA = 512 * 1024
 ITERATORS_LIMIT = 2000
 
@@ -25,11 +27,11 @@ CTX_CURRENT_EXCEPTION = '$?currentException'
 CTX_CURRENT_METHOD = '$?currentMethod'
 CTX_ENVIRONMENT = '$?environment'
 CTX_EXECUTOR = '$?executor'
-CTX_OBJECT_STORE = '$?objectStore'
 CTX_PACKAGE_LOADER = '$?packageLoader'
 CTX_SKIP_FRAME = '$?skipFrame'
 CTX_THIS = '$?this'
 CTX_TYPE = '$?type'
+CTX_YAQL_ENGINE = '$?yaqlEngine'
 
 DM_OBJECTS = 'Objects'
 DM_OBJECTS_COPY = 'ObjectsCopy'
@@ -39,3 +41,6 @@ META_NO_TRACE = '?noTrace'
 
 CORE_LIBRARY = 'io.murano'
 CORE_LIBRARY_OBJECT = 'io.murano.Object'
+
+RUNTIME_VERSION_1_0 = semantic_version.Version('1.0.0')
+RUNTIME_VERSION_2_0 = semantic_version.Version('2.0.0')
