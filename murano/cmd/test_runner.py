@@ -27,6 +27,7 @@ from oslo_utils import importutils
 from murano import version
 from murano.common.i18n import _, _LE
 from murano.common import config
+from murano.common import engine
 from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import executor
@@ -210,7 +211,7 @@ def run_tests(args):
         cfg.CONF.engine.load_packages_from = load_packages_from
     with package_loader.CombinedPackageLoader(
             murano_client_factory, client.tenant_id) as pkg_loader:
-        # engine.get_plugin_loader().register_in_loader(class_loader)
+        engine.get_plugin_loader().register_in_loader(pkg_loader)
         exc = executor.MuranoDslExecutor(pkg_loader, test_env)
 
         package = _load_package(pkg_loader, provided_pkg_name)
