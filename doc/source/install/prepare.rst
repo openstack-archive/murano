@@ -23,7 +23,7 @@ compare the results with baseline data provided.
 
 System prerequisites
 =====================
-**Supported Operation Systems**
+**Supported Operating Systems**
 
 * Ubuntu Server 12.04 LTS
 * RHEL/CentOS 6.4

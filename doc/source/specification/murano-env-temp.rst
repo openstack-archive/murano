@@ -189,7 +189,7 @@ environment template.
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
-| 404            | The environment template does not exit                    |
+| 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 
 Delete environment template
@@ -217,7 +217,7 @@ Delete environment template
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
-| 404            | The environment template does not exit                    |
+| 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 
 Adding application to environment template
@@ -298,7 +298,7 @@ Adding application to environment template
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
-| 404            | The environment template does not exit                    |
+| 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 
 Get applications information from an environment template
@@ -366,7 +366,7 @@ Get applications information from an environment template
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
-| 404            | The environment template does not exit                    |
+| 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 
 Create an environment from an environment template
@@ -422,7 +422,7 @@ Create an environment from an environment template
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
-| 404            | The environment template does not exit                    |
+| 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 | 409            | The environment already exists                            |
 +----------------+-----------------------------------------------------------+
