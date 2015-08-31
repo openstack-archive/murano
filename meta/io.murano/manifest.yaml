@@ -43,6 +43,7 @@ Classes:
   io.murano.system.HeatStack: system/HeatStack.yaml
   io.murano.system.Resources: system/Resources.yaml
   io.murano.system.InstanceNotifier: system/InstanceNotifier.yaml
+  io.murano.system.Logger: system/Logger.yaml
   io.murano.system.StatusReporter: system/StatusReporter.yaml
   io.murano.system.NetworkExplorer: system/NetworkExplorer.yaml
   io.murano.system.SecurityGroupManager: system/SecurityGroupManager.yaml

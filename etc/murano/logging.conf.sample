@@ -1,15 +1,20 @@
 [loggers]
-keys: root,murano
+keys: root,murano,applications
 
 [handlers]
-keys: watchedfile, stderr, stdout, null
+keys: watchedfile, applications, stderr, stdout, null
 
 [formatters]
 keys: context, default
 
 [logger_root]
 level = WARNING
-handlers = null
+handlers = watchedfile
+
+[logger_applications]
+level = DEBUG
+handlers = applications
+qualname = applications
 
 [logger_murano]
 level = INFO
@@ -64,9 +69,13 @@ class: handlers.WatchedFileHandler
 args: ('murano.log',)
 formatter: context
 
+[handler_applications]
+class: handlers.WatchedFileHandler
+args: ('applications.log',)
+formatter: context
+
 [formatter_default]
 format = %(message)s
-
 [formatter_context]
 class: oslo_log.formatters.ContextFormatter
 args: (datefmt=datefmt)
