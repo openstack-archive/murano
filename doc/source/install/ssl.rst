@@ -16,7 +16,7 @@
 =================
 SSL configuration
 =================
-Murano components are able to work with SSL. This chapter will help your
+Murano components are able to work with SSL. This chapter will help you
 to make proper settings with SSL configuration.
 
 HTTPS for Murano API
