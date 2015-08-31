@@ -1,0 +1,19 @@
+FormatVersion: 2.0.0
+Version: 1.0.0
+Name: $planName
+
+Parameters:
+  command: $command
+
+Body: |
+  return runCommand("'{0}'".format(args.command)).exitCode
+
+Scripts:
+  runCommand:
+    Type: Application
+    Version: 1.0.0
+    EntryPoint: runCommand.sh
+    Files: []
+    Options:
+      captureStdout: true
+      captureStderr: true

@@ -91,6 +91,13 @@ class TestExecutionPlan(base.MuranoTestCase):
         template = self.agent.build_execution_plan(template, self.resources)
         self.assertEqual(template, self._get_app_without_files())
 
+    def test_execution_plan_v2_app_with_file_in_template(self):
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+        template = self.agent.build_execution_plan(template, self.resources)
+        self.assertEqual(template, self._get_app_with_files_in_template())
+
     def _get_application(self):
         return {
             'Action': 'Execute',
@@ -124,6 +131,45 @@ class TestExecutionPlan(base.MuranoTestCase):
                     'Files': [
                         self.uuids[2],
                         self.uuids[3]
+                    ],
+                    'Options': {
+                        'captureStderr': True,
+                        'captureStdout': True
+                    },
+                    'Type': 'Application',
+                    'Version': '1.0.0'
+                }
+            },
+            'Version': '1.0.0'
+        }
+
+    def _get_app_with_files_in_template(self):
+        return {
+            'Action': 'Execute',
+            'Body': 'return deploy(args.appName).stdout\n',
+            'Files': {
+                self.uuids[1]: {
+                    'Body': 'text',
+                    'BodyType': 'Text',
+                    'Name': 'deployTomcat.sh'
+                },
+                'updateScript': {
+                    'Body': 'text',
+                    'BodyType': 'Text',
+                    'Name': 'updateScript'
+                },
+            },
+            'FormatVersion': '2.0.0',
+            'ID': self.uuids[0],
+            'Name': 'Deploy Tomcat',
+            'Parameters': {
+                'appName': '$appName'
+            },
+            'Scripts': {
+                'deploy': {
+                    'EntryPoint': self.uuids[1],
+                    'Files': [
+                        'updateScript'
                     ],
                     'Options': {
                         'captureStderr': True,
