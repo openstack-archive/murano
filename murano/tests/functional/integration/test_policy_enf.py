@@ -13,11 +13,10 @@
 # under the License.
 
 import muranoclient.common.exceptions as murano_exceptions
-
 from nose.plugins.attrib import attr as tag
 
 import murano.tests.functional.common.utils as common_utils
-import murano.tests.functional.engine.integration_base as core
+import murano.tests.functional.integration.integration_base as core
 
 
 class PolicyEnforcement(core.CongressIntegration):

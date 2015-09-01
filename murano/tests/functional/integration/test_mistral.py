@@ -17,7 +17,7 @@ import uuid
 from nose.plugins.attrib import attr as tag
 
 import murano.tests.functional.common.utils as common_utils
-import murano.tests.functional.engine.integration_base as core
+import murano.tests.functional.integration.integration_base as core
 
 
 class MistralTest(core.MistralIntegration):
