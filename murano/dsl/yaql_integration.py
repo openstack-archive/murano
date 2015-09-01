@@ -114,7 +114,10 @@ def parse(expression, runtime_version):
 
 def call_func(__context, __name, *args, **kwargs):
     engine = __context[constants.CTX_YAQL_ENGINE]
-    return __context(__name, engine)(*args, **kwargs)
+    return __context(__name, engine)(
+        *args,
+        **{CONVENTION.convert_parameter_name(key): value
+           for key, value in kwargs.iteritems()})
 
 
 def _infer_parameter_type(name, class_name):
@@ -229,7 +232,8 @@ def get_class_factory_definition(cls, murano_class):
         fd = specs.get_function_definition(
             cls.__init__.im_func,
             parameter_type_func=lambda name: _infer_parameter_type(
-                name, cls.__init__.im_class.__name__))
+                name, cls.__init__.im_class.__name__),
+            convention=CONVENTION)
     else:
         fd = specs.get_function_definition(lambda self: None)
         fd.meta[constants.META_NO_TRACE] = True
@@ -254,7 +258,8 @@ def filter_parameters(__fd, *args, **kwargs):
         if not helpers.is_keyword(name):
             del kwargs[name]
     if '**' not in __fd.parameters:
+        names = {p.alias or p.name for p in __fd.parameters.itervalues()}
         for name in kwargs.keys():
-            if name not in __fd.parameters:
+            if name not in names:
                 del kwargs[name]
     return args, kwargs
