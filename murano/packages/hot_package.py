@@ -23,8 +23,10 @@ from murano.dsl import yaql_expression
 import murano.packages.application_package
 from murano.packages import exceptions
 
-
 YAQL = yaql_expression.YaqlExpression
+RESOURCES_DIR_NAME = 'Resources/'
+HOT_FILES_DIR_NAME = 'HotFiles/'
+HOT_ENV_DIR_NAME = 'HotEnvironments/'
 
 
 class Dumper(yaml.Dumper):
@@ -33,6 +35,7 @@ class Dumper(yaml.Dumper):
 
 def yaql_representer(dumper, data):
     return dumper.represent_scalar(u'!yaql', str(data))
+
 
 Dumper.add_representer(YAQL, yaql_representer)
 
@@ -90,7 +93,17 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             'Extends': 'io.murano.Application'
         }
 
-        parameters = HotPackage._translate_parameters(hot)
+        hot_envs_path = os.path.join(self._source_directory,
+                                     RESOURCES_DIR_NAME,
+                                     HOT_ENV_DIR_NAME)
+
+        # if using hot environments, doing parameter validation with contracts
+        # will overwrite the parameters in the hot environment.
+        # don't validate parameters if hot environments exist.
+        validate_hot_parameters = (not os.path.isdir(hot_envs_path) or
+                                   not os.listdir(hot_envs_path))
+
+        parameters = HotPackage._build_properties(hot, validate_hot_parameters)
         parameters.update(HotPackage._translate_outputs(hot))
         translated['Properties'] = parameters
 
@@ -99,21 +112,44 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
         self._translated_class = translated
 
     @staticmethod
-    def _translate_parameters(hot):
+    def _build_properties(hot, validate_hot_parameters):
         result = {
             'generatedHeatStackName': {
                 'Contract': YAQL('$.string()'),
                 'Usage': 'Out'
+            },
+            'hotEnvironment': {
+                'Contract': YAQL('$.string()'),
+                'Usage': 'In'
+            },
+            'name': {
+                'Contract': YAQL('$.string().notNull()'),
+                'Usage': 'In',
+
             }
         }
-        for key, value in (hot.get('parameters') or {}).items():
-            result[key] = HotPackage._translate_parameter(value)
-        result['name'] = {'Usage': 'In',
-                          'Contract': YAQL('$.string().notNull()')}
+
+        if validate_hot_parameters:
+            params_dict = {}
+            for key, value in (hot.get('parameters') or {}).items():
+                param_contract = HotPackage._translate_param_to_contract(value)
+                params_dict[key] = param_contract
+            result['templateParameters'] = {
+                'Contract': params_dict,
+                'Default': {},
+                'Usage': 'In'
+            }
+        else:
+            result['templateParameters'] = {
+                'Contract': {},
+                'Default': {},
+                'Usage': 'In'
+            }
+
         return result
 
     @staticmethod
-    def _translate_parameter(value):
+    def _translate_param_to_contract(value):
         contract = '$'
 
         parameter_type = value['type']
@@ -132,12 +168,7 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             if translated:
                 contract += translated
 
-        result = {
-            'Contract': YAQL(contract),
-            "Usage": "In"
-        }
-        if 'default' in value:
-            result['Default'] = value['default']
+        result = YAQL(contract)
         return result
 
     @staticmethod
@@ -152,20 +183,21 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
 
     @staticmethod
     def _translate_files(source_directory):
-        heat_files_dir = os.path.join(source_directory, 'Resources/HotFiles')
-        result = {}
-        if os.path.isdir(heat_files_dir):
-            result = HotPackage._build_heat_files_dict(heat_files_dir)
-        return result
+        hot_files_path = os.path.join(source_directory,
+                                      RESOURCES_DIR_NAME,
+                                      HOT_FILES_DIR_NAME)
+
+        return HotPackage._build_hot_resources_dict(hot_files_path)
 
     @staticmethod
-    def _build_heat_files_dict(basedir):
+    def _build_hot_resources_dict(basedir):
         result = []
-        for root, _, files in os.walk(os.path.abspath(basedir)):
-            for f in files:
-                full_path = os.path.join(root, f)
-                relative_path = os.path.relpath(full_path, basedir)
-                result.append(relative_path)
+        if os.path.isdir(basedir):
+            for root, _, files in os.walk(os.path.abspath(basedir)):
+                for f in files:
+                    full_path = os.path.join(root, f)
+                    relative_path = os.path.relpath(full_path, basedir)
+                    result.append(relative_path)
         return result
 
     @staticmethod
@@ -220,13 +252,13 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
 
     @staticmethod
     def _generate_workflow(hot, files):
-        template_parameters = {}
-        for key, value in (hot.get('parameters') or {}).items():
-            template_parameters[key] = YAQL("$." + key)
         hot_files_map = {}
         for f in files:
-            file_path = "$resources.string('HotFiles/%s')" % f
+            file_path = "$resources.string('{0}{1}')".format(
+                HOT_FILES_DIR_NAME, f)
             hot_files_map[f] = YAQL(file_path)
+
+        hot_env = YAQL("$.hotEnvironment")
 
         copy_outputs = []
         for key, value in (hot.get('outputs') or {}).items():
@@ -254,12 +286,24 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
                  "'Application deployment has started')"),
 
             {YAQL('$resources'): YAQL("new('io.murano.system.Resources')")},
+
             {YAQL('$template'): YAQL("$resources.yaml(type($this))")},
-            {YAQL('$parameters'): template_parameters},
-            {YAQL('$files'): hot_files_map},
             YAQL('$stack.setTemplate($template)'),
+            {YAQL('$parameters'): YAQL("$.templateParameters")},
             YAQL('$stack.setParameters($parameters)'),
+            {YAQL('$files'): hot_files_map},
             YAQL('$stack.setFiles($files)'),
+            {YAQL('$hotEnv'): hot_env},
+            {
+                'If': YAQL("bool($hotEnv)"),
+                'Then': [
+                    {YAQL('$envRelPath'): YAQL("'{0}' + $hotEnv".format(
+                        HOT_ENV_DIR_NAME))},
+                    {YAQL('$hotEnvContent'): YAQL("$resources.string("
+                                                  "$envRelPath)")},
+                    YAQL('$stack.setHotEnvironment($hotEnvContent)')
+                ]
+            },
 
             YAQL("$reporter.report($this, 'Stack creation has started')"),
             {
@@ -323,8 +367,8 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
                 'label': 'Application Name',
                 'required': True,
                 'description':
-                        'Enter a desired name for the application.'
-                        ' Just A-Z, a-z, 0-9, and dash are allowed'
+                    'Enter a desired name for the application.'
+                    ' Just A-Z, a-z, 0-9, and dash are allowed'
             }
         ]
         used_parameters = set()
@@ -367,7 +411,7 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             translated['type'] = 'boolean'
         else:
             # string, json, and comma_delimited_list parameters are all
-            # displayed as strings in UI. Any unsuported parameter would also
+            # displayed as strings in UI. Any unsupported parameter would also
             # be displayed as strings.
             translated['type'] = 'string'
 
@@ -452,8 +496,12 @@ class HotPackage(murano.packages.application_package.ApplicationPackage):
             }
         }
         for i, record in enumerate(groups):
+            if i == 0:
+                section = app
+            else:
+                section = app.setdefault('templateParameters', {})
             for property_name in record[1]:
-                app[property_name] = YAQL(
+                section[property_name] = YAQL(
                     '$.group{0}.{1}'.format(i, property_name))
         app['name'] = YAQL('$.group0.name')
 
