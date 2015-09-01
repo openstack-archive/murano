@@ -202,12 +202,12 @@ Required Components
 
   When downloading VirtIO drivers choose only stable versions.
   Unstable versions might lead to errors during guest unattended installation.
-  You can check the latest version available here: http://alt.fedoraproject.org/pub/alt/virtio-win/stable
+  You can check the latest version available here: https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download
 ..
 
 |
 .. [#ws2012iso_link] http://technet.microsoft.com/en-us/evalcenter/hh670538.aspx
-.. [#virtio_iso_link] http://alt.fedoraproject.org/pub/alt/virtio-win/stable/virtio-win-0.1-74.iso
+.. [#virtio_iso_link] https://fedoraproject.org/wiki/Windows_Virtio_Drivers#Direct_download
 .. [#cloudbase_init_link] https://www.cloudbase.it/downloads/CloudbaseInitSetup_Beta.msi
 .. [#dot_net_40_link] http://www.microsoft.com/en-us/download/details.aspx?id=17718
 .. [#powershell_v3_link] http://www.microsoft.com/en-us/download/details.aspx?id=34595
