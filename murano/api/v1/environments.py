@@ -154,6 +154,7 @@ class Controller(object):
             sessions_controller.deploy(request, environment_id, session_id)
 
     @request_statistics.stats_count(API_NAME, 'LastStatus')
+    @verify_env
     def last(self, request, environment_id):
         session_id = None
         if hasattr(request, 'context') and request.context.session:

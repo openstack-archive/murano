@@ -279,6 +279,15 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertTrue(('User is not authorized to access these'
                          ' tenant resources') in result.body)
 
+    def test_get_last_status_of_different_tenant(self):
+        """Test get last services status of env belongs to another tenant."""
+        self._create_fake_environment('env1', '111')
+        req = self._get('/environments/111/lastStatus', tenant='not_match')
+        result = req.get_response(self.api)
+        self.assertEqual(403, result.status_code)
+        self.assertTrue(('User is not authorized to access these'
+                         ' tenant resources') in result.body)
+
     def _create_fake_environment(self, env_name='my-env', env_id='123'):
         fake_now = timeutils.utcnow()
         expected = dict(
