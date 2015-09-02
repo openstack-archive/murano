@@ -396,11 +396,21 @@ class DeployTestMixin(ZipUtilsMixin):
         try:
             for env in cls._environments:
                 with ignored(Exception):
+                    LOG.debug('Processing cleanup for environment {0} ({1})'.
+                              format(env.name, env.id))
                     cls.environment_delete(env.id)
                     cls.purge_stacks(env.id)
                     time.sleep(5)
         finally:
             cls._environments = []
+
+    @classmethod
+    def purge_stacks(cls, environment_id):
+        stack = cls._get_stack(environment_id)
+        if not stack:
+            return
+        else:
+            cls.heat_client().stacks.delete(stack.id)
 
 # -----------------------Methods for environment CRUD--------------------------
 
@@ -443,12 +453,17 @@ class DeployTestMixin(ZipUtilsMixin):
                 try:
                     cls.murano_client().environments.get(environment_id)
                 except exceptions.HTTPNotFound:
+                    LOG.debug('Environment with id {0} successfully deleted.'.
+                              format(environment_id))
                     return
             err_msg = ('Environment {0} was not deleted in {1} seconds'.
                        format(environment_id, timeout))
             LOG.error(err_msg)
             raise RuntimeError(err_msg)
-        except RuntimeError:
+        except Exception as exc:
+            LOG.debug('Environment with id {0} going to be abandoned.'.
+                      format(environment_id))
+            LOG.exception(exc)
             cls.murano_client().environments.delete(environment_id,
                                                     abandon=True)
 
@@ -471,11 +486,3 @@ class DeployTestMixin(ZipUtilsMixin):
         for stack in cls.heat_client().stacks.list():
             if environment_id in stack.description:
                 return stack
-
-    @classmethod
-    def purge_stacks(cls, environment_id):
-        stack = cls._get_stack(environment_id)
-        if not stack:
-            return
-        else:
-            cls.heat_client().stacks.delete(stack.id)
