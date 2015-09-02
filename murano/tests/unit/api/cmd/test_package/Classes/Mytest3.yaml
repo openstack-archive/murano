@@ -1,0 +1,13 @@
+Namespaces:
+    =: io.murano.test
+
+Name: MyTest3
+
+Methods:
+  testSimple1:
+    Body:
+
+  testSimple2:
+    Body:
+
+    thisIsNotAtestMethod:

@@ -1,0 +1,11 @@
+Namespaces:
+  =: io.murano.test
+
+Name: TestFixture
+
+Methods:
+  setUp:
+    Body:
+
+  tearDown:
+    Body:
