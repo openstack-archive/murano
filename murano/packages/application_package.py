@@ -16,10 +16,11 @@
 import imghdr
 import io
 import os
+import re
 import sys
 import zipfile
 
-import murano.packages.exceptions as e
+from murano.packages import exceptions
 
 
 class PackageTypes(object):
@@ -44,10 +45,20 @@ class ApplicationPackage(object):
         self._logo_cache = None
         self._supplier_logo_cache = None
         self._blob_cache = None
+        self._version = None
+        self._runtime_version = None
 
     @property
     def full_name(self):
         return self._full_name
+
+    @property
+    def version(self):
+        return self._version
+
+    @property
+    def runtime_version(self):
+        return self._runtime_version
 
     @property
     def package_type(self):
@@ -97,7 +108,7 @@ class ApplicationPackage(object):
             os.makedirs(resources_dir)
         return os.path.join(resources_dir, name)
 
-    def validate(self):
+    def load(self):
         self._load_logo(True)
         self._load_supplier_logo(True)
 
@@ -110,13 +121,14 @@ class ApplicationPackage(object):
         try:
             if validate:
                 if imghdr.what(full_path) != 'png':
-                    raise e.PackageLoadError("Logo is not in PNG format")
+                    raise exceptions.PackageLoadError(
+                        'Logo is not in PNG format')
             with open(full_path) as stream:
                 self._logo_cache = stream.read()
         except Exception as ex:
             trace = sys.exc_info()[2]
-            raise e.PackageLoadError(
-                "Unable to load logo: " + str(ex)), None, trace
+            raise exceptions.PackageLoadError(
+                'Unable to load logo: ' + str(ex)), None, trace
 
     def _load_supplier_logo(self, validate=False):
         if 'Logo' not in self._supplier:
@@ -129,14 +141,25 @@ class ApplicationPackage(object):
         try:
             if validate:
                 if imghdr.what(full_path) != 'png':
-                    raise e.PackageLoadError(
-                        "Supplier Logo is not in PNG format")
+                    raise exceptions.PackageLoadError(
+                        'Supplier Logo is not in PNG format')
             with open(full_path) as stream:
                 self._supplier_logo_cache = stream.read()
         except Exception as ex:
             trace = sys.exc_info()[2]
-            raise e.PackageLoadError(
-                "Unable to load supplier logo: " + str(ex)), None, trace
+            raise exceptions.PackageLoadError(
+                'Unable to load supplier logo: ' + str(ex)), None, trace
+
+    @staticmethod
+    def _check_full_name(full_name):
+        error = exceptions.PackageFormatError('Invalid FullName')
+        if re.match(r'^[\w\.]+$', full_name):
+            if full_name.startswith('.') or full_name.endswith('.'):
+                raise error
+            if '..' in full_name:
+                raise error
+        else:
+            raise error
 
 
 def _zipdir(path, zipf):

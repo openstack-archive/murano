@@ -15,14 +15,15 @@
 import os
 import sys
 
+import semantic_version
 import yaml
 
-import murano.packages.application_package
+from murano.packages import application_package
 from murano.packages import exceptions
 
 
-class MuranoPlPackage(murano.packages.application_package.ApplicationPackage):
-    def __init__(self, source_directory, manifest, loader):
+class MuranoPlPackage(application_package.ApplicationPackage):
+    def __init__(self, source_directory, manifest, loader, runtime_version):
         super(MuranoPlPackage, self).__init__(
             source_directory, manifest, loader)
 
@@ -31,6 +32,25 @@ class MuranoPlPackage(murano.packages.application_package.ApplicationPackage):
         self._ui_cache = None
         self._raw_ui_cache = None
         self._classes_cache = {}
+
+        self._full_name = manifest.get('FullName')
+        if not self._full_name:
+            raise exceptions.PackageFormatError('FullName not specified')
+        self._check_full_name(self._full_name)
+        self._package_type = manifest.get('Type')
+        if self._package_type not in application_package.PackageTypes.ALL:
+            raise exceptions.PackageFormatError('Invalid Package Type')
+        self._display_name = manifest.get('Name', self._full_name)
+        self._description = manifest.get('Description')
+        self._author = manifest.get('Author')
+        self._supplier = manifest.get('Supplier') or {}
+        self._classes = manifest.get('Classes')
+        self._ui = manifest.get('UI', 'ui.yaml')
+        self._logo = manifest.get('Logo')
+        self._tags = manifest.get('Tags')
+        self._version = semantic_version.Version(manifest.get(
+            'Version', '0.0.0'))
+        self._runtime_version = runtime_version
 
     @property
     def classes(self):
@@ -92,9 +112,9 @@ class MuranoPlPackage(murano.packages.application_package.ApplicationPackage):
                 str(ex))
             raise exceptions.PackageClassLoadError(name, msg), None, trace
 
-    def validate(self):
+    def load(self):
         self._classes_cache.clear()
         for class_name in self._classes:
             self.get_class(class_name)
         self._load_ui(True)
-        super(MuranoPlPackage, self).validate()
+        super(MuranoPlPackage, self).load()
