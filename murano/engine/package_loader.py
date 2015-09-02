@@ -27,6 +27,7 @@ from oslo_log import log as logging
 from murano.common.i18n import _LE, _LI
 from murano.dsl import constants
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import package_loader
 from murano.engine import murano_package
 from murano.engine.system import system_objects
@@ -54,7 +55,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             if version:
                 return packages[version]
 
-        filter_opts = {'class_name': class_name}
+        filter_opts = {'class_name': class_name,
+                       'version': helpers.breakdown_spec_to_query(
+                           version_spec)}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:
@@ -71,7 +74,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             if version:
                 return packages[version]
 
-        filter_opts = {'fqn': package_name}
+        filter_opts = {'fqn': package_name,
+                       'version': helpers.breakdown_spec_to_query(
+                           version_spec)}
         try:
             package_definition = self._get_definition(filter_opts)
         except LookupError:

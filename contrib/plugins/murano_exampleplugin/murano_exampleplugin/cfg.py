@@ -20,5 +20,5 @@ def init_config(conf):
         cfg.IntOpt('api_version', default=2),
         cfg.StrOpt('endpoint_type', default='publicURL')
     ]
-    conf.register_opts(opts, group="glance")
+    conf.register_opts(opts, group="images")
     return conf.glance

@@ -229,7 +229,35 @@ packages_opts = [
 
     cfg.IntOpt('api_limit_max', default=100,
                help='Maximum number of packages to be returned in a single '
-                    'pagination request')
+                    'pagination request'),
+
+    cfg.StrOpt('packages_service', default='murano',
+               help=_('The service to store murano packages: murano (stands '
+                      'for legacy behavior using murano-api) or glance '
+                      '(stands for Glance V3 artifact repository)'))
+]
+
+glance_opts = [
+    cfg.StrOpt('url', help='Optional murano url in format '
+                           'like http://0.0.0.0:9292 used by Glance API'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                '"insecure" SSL connections and transfers with Glance API.'),
+
+    cfg.StrOpt('ca_file',
+               help='(SSL) Tells Murano to use the specified certificate file '
+               'to verify the peer running Glance API.'),
+
+    cfg.StrOpt('cert_file',
+               help='(SSL) Tells Murano to use the specified client '
+               'certificate file when communicating with Glance.'),
+
+    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
+                                'communicate with Glance API.'),
+
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Glance endpoint type.')
 ]
 
 file_server = [
@@ -251,6 +279,7 @@ CONF.register_cli_opts(metadata_dir)
 CONF.register_opts(packages_opts, group='packages_opts')
 CONF.register_opts(stats_opts, group='stats')
 CONF.register_opts(networking_opts, group='networking')
+CONF.register_opts(glance_opts, group='glance')
 
 
 def parse_args(args=None, usage=None, default_config_files=None):
