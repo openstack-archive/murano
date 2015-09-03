@@ -295,7 +295,8 @@ class Request(webob.Request):
                             'application/xml',
                             'application/octet-stream')
 
-    def best_match_content_type(self, supported_content_types=None):
+    def best_match_content_type(self, action, supported_content_types=None,
+                                specific_content_types=None):
         """Determine the requested response content-type.
 
         Based on the query extension then the Accept header.
@@ -311,7 +312,11 @@ class Request(webob.Request):
             if ctype in supported_content_types:
                 return ctype
 
-        bm = self.accept.best_match(supported_content_types)
+        if specific_content_types and action in specific_content_types:
+            bm = self.accept.best_match(specific_content_types[action])
+        else:
+            bm = self.accept.best_match(supported_content_types)
+
         if not bm:
             raise exceptions.UnsupportedContentType(content_type=self.accept)
         return bm
@@ -630,9 +635,10 @@ class RequestDeserializer(object):
     """Break up a Request object into more useful pieces."""
 
     def __init__(self, body_deserializers=None, headers_deserializer=None,
-                 supported_content_types=None):
+                 supported_content_types=None, specific_content_types=None):
 
         self.supported_content_types = supported_content_types
+        self.specific_content_types = specific_content_types
 
         self.body_deserializers = {
             'application/xml': XMLDeserializer(),
@@ -660,7 +666,7 @@ class RequestDeserializer(object):
         action_args.update(self.deserialize_headers(request, action))
         action_args.update(self.deserialize_body(request, action))
 
-        accept = self.get_expected_content_type(request)
+        accept = self.get_expected_content_type(request, action)
 
         return (action, action_args, accept)
 
@@ -697,8 +703,10 @@ class RequestDeserializer(object):
         except (KeyError, TypeError):
             raise exceptions.UnsupportedContentType(content_type=content_type)
 
-    def get_expected_content_type(self, request):
-        return request.best_match_content_type(self.supported_content_types)
+    def get_expected_content_type(self, request, action):
+        return request.best_match_content_type(action,
+                                               self.supported_content_types,
+                                               self.specific_content_types)
 
     def get_action_args(self, request_environment):
         """Parse dictionary created by routes library."""

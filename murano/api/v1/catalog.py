@@ -377,17 +377,12 @@ class Controller(object):
         db_api.category_delete(category_id)
 
 
-class PackageSerializer(wsgi.ResponseSerializer):
-    def serialize(self, action_result, accept, action):
-        if action == 'get_ui':
-            accept = 'text/plain'
-        elif action in ('download', 'get_logo', 'get_supplier_logo'):
-            accept = 'application/octet-stream'
-        return super(PackageSerializer, self).serialize(action_result,
-                                                        accept,
-                                                        action)
-
-
 def create_resource():
-    serializer = PackageSerializer()
-    return wsgi.Resource(Controller(), serializer=serializer)
+    specific_content_types = {
+        'get_ui': ['text/plain'],
+        'download': ['application/octet-stream'],
+        'get_logo': ['application/octet-stream'],
+        'get_supplier_logo': ['application/octet-stream']}
+    deserializer = wsgi.RequestDeserializer(
+        specific_content_types=specific_content_types)
+    return wsgi.Resource(Controller(), deserializer=deserializer)
