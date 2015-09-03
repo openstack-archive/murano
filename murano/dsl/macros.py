@@ -180,7 +180,7 @@ class RepeatMacro(expressions.DslExpression):
 
     def execute(self, context):
         count = helpers.evaluate(self._count, context)
-        for t in range(0, count):
+        for _ in range(0, count):
             try:
                 self._code.execute(context)
             except exceptions.BreakException:
@@ -214,7 +214,7 @@ class SwitchMacro(expressions.DslExpression):
             raise exceptions.DslSyntaxError(
                 'Switch value must be of dictionary type')
         self._switch = Switch
-        for key, value in self._switch.iteritems():
+        for key in self._switch.iterkeys():
             if not isinstance(key, (yaql_expression.YaqlExpression,
                                     types.BooleanType)):
                 raise exceptions.DslSyntaxError(

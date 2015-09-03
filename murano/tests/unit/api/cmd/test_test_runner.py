@@ -80,7 +80,7 @@ class TestCaseShell(testtools.TestCase):
         return (stdout, stderr)
 
     def test_help(self):
-        stdout, stderr = self.shell('--help')
+        stdout, _ = self.shell('--help')
         usage = """usage: murano-test-runner [-h] [-v] [--config-file CONFIG_FILE]
                           [--os-auth-url OS_AUTH_URL]
                           [--os-username OS_USERNAME]
@@ -96,13 +96,12 @@ class TestCaseShell(testtools.TestCase):
         importutils.import_module('keystonemiddleware.auth_token')
         self.override_config('admin_user', 'new_value', 'keystone_authtoken')
 
-        stdout, stderr = self.shell(
-            '-p io.murano.test.MyTest1 io.murano.test.MyTest2')
+        self.shell('-p io.murano.test.MyTest1 io.murano.test.MyTest2')
 
         mock_client.assert_has_calls([mock.call(**self.auth_params)])
 
     def test_package_all_tests(self):
-        stdout, stderr = self.shell('-p io.murano.test.MyTest1')
+        _, stderr = self.shell('-p io.murano.test.MyTest1')
         # NOTE(efedorova): May be, there is a problem with test-runner, since
         # all logs are passed to stderr
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -112,7 +111,7 @@ class TestCaseShell(testtools.TestCase):
         self.assertNotIn('thisIsNotAtestMethod', stderr)
 
     def test_package_by_class(self):
-        stdout, stderr = self.shell(
+        _, stderr = self.shell(
             '-p io.murano.test.MyTest1 io.murano.test.MyTest2')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -121,7 +120,7 @@ class TestCaseShell(testtools.TestCase):
         self.assertIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
 
     def test_package_by_test_name(self):
-        stdout, stderr = self.shell(
+        _, stderr = self.shell(
             '-p io.murano.test.MyTest1 testSimple1')
 
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -130,7 +129,7 @@ class TestCaseShell(testtools.TestCase):
         self.assertNotIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
 
     def test_package_by_test_and_class_name(self):
-        stdout, stderr = self.shell(
+        _, stderr = self.shell(
             '-p io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -139,17 +138,17 @@ class TestCaseShell(testtools.TestCase):
         self.assertNotIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
 
     def test_service_methods(self):
-        stdout, stderr = self.shell(
+        _, stderr = self.shell(
             '-p io.murano.test.MyTest1 io.murano.test.MyTest1.testSimple1')
         self.assertIn('Executing: io.murano.test.MyTest1.setUp', stderr)
         self.assertIn('Executing: io.murano.test.MyTest1.tearDown', stderr)
 
     def test_package_is_not_provided(self):
-        stdout, stderr = self.shell(exitcode=1)
+        _, stderr = self.shell(exitcode=1)
         self.assertEqual(stderr, 'ERROR: Package name is required parameter.')
 
     def test_wrong_parent(self):
-        stdout, stderr = self.shell(
+        _, stderr = self.shell(
             '-p io.murano.test.MyTest1 io.murano.test.MyTest3', exitcode=1)
         self.assertIn('Class io.murano.test.MyTest3 is not inherited from'
                       ' io.murano.test.TestFixture. Skipping it.', stderr)

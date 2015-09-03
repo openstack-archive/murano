@@ -75,7 +75,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
 
     def _build_index(self, directory):
         yamls = [os.path.join(dirpath, f)
-                 for dirpath, dirnames, files in os.walk(directory)
+                 for dirpath, _, files in os.walk(directory)
                  for f in fnmatch.filter(files, '*.yaml')]
         for class_def_file in yamls:
             self._load_class(class_def_file)

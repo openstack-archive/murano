@@ -58,7 +58,7 @@ class MuranoPlException(Exception):
 
         result = MuranoPlException(
             names, str(exception), stacktrace)
-        exc_type, exc_value, exc_traceback = sys.exc_info()
+        _, _, exc_traceback = sys.exc_info()
         result.original_exception = exception
         result.original_traceback = exc_traceback
         return result

@@ -54,7 +54,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': ''}
         )
-        for i in range(7):
+        for dummy in range(7):
             self.expect_policy_check('get_package')
 
         pkg = self._add_pkg('test_tenant', type='Library')
@@ -106,7 +106,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': ''}
         )
-        for i in range(7):
+        for dummy in range(7):
             self.expect_policy_check('get_package')
 
         pkg = self._add_pkg('test_tenant', type='Library')
@@ -156,7 +156,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': ''}
         )
-        for i in range(9):
+        for dummy in range(9):
             self.expect_policy_check('get_package')
 
         result = self.controller.search(self._get('/v1/catalog/packages/'))
@@ -238,7 +238,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': '@'}
         )
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -261,7 +261,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'download_package': '@'}
         )
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -278,7 +278,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
     def test_download_package_negative(self):
 
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -295,7 +295,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': '@'}
         )
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -311,7 +311,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertEqual(200, result.status_code)
 
     def test_get_ui_definition_negative(self):
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -328,7 +328,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self._set_policy_rules(
             {'get_package': '@'}
         )
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -345,7 +345,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertEqual(package['logo'], result.body)
 
     def test_get_logo_negative(self):
-        package_from_dir, package = self._test_package()
+        _, package = self._test_package()
 
         saved_package = db_catalog_api.package_upload(package, '')
 
@@ -375,7 +375,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         file_obj_str = cStringIO.StringIO("This is some dummy data")
         file_obj = mock.MagicMock(cgi.FieldStorage)
         file_obj.file = file_obj_str
-        package_from_dir, package_metadata = self._test_package()
+        package_from_dir, _ = self._test_package()
 
         body = '''\
 

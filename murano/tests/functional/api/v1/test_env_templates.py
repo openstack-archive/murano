@@ -153,7 +153,7 @@ class TestEnvTemplate(base.TestCase):
     @attr(type='negative')
     def test_double_delete_env_template(self):
         """Check the deletion of an wrong environment template request."""
-        resp, env_template = self.client.create_env_template('test_env_temp')
+        _, env_template = self.client.create_env_template('test_env_temp')
 
         self.client.delete_env_template(env_template['id'])
 
@@ -165,7 +165,7 @@ class TestEnvTemplate(base.TestCase):
     @attr(type='negative')
     def test_get_deleted_env_template(self):
         """Check the deletion of an wrong environment template request."""
-        resp, env_template = self.client.create_env_template('test_env_temp')
+        _, env_template = self.client.create_env_template('test_env_temp')
 
         self.client.delete_env_template(env_template['id'])
 
