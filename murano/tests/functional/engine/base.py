@@ -125,6 +125,9 @@ class MuranoBase(core.MuranoTestsCore):
         self.deployment_success_check(environment, 80)
 
     def test_deploy_postgresql(self):
+        # FIXME(freerunner): Need to remove skip, when murano CI will support
+        # FIXME(freerunner): apps not only from murano-app-incubator
+        self.skipTest('Skipped due to bug #1491536')
         post_body = {
             "instance": {
                 "flavor": self.flavor,
