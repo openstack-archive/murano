@@ -19,6 +19,7 @@ import uuid
 import muranoclient.client as client
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 from webob import exc
 
 from murano.api.v1.cloudfoundry import auth as keystone_auth
@@ -84,6 +85,12 @@ class Controller(object):
                 "?": {plan_id: {"name": package.name},
                       "type": package.fully_qualified_name,
                       "id": id}}
+
+    def _get_service(self, env, service_id):
+        for service in env.services:
+            if service['?']['id'] == service_id:
+                return service
+        return None
 
     def list(self, req):
         user, passwd, keystone = self._check_auth(req)
@@ -211,11 +218,43 @@ class Controller(object):
         m_cli.sessions.deploy(environment_id, session_id)
         return {}
 
-    def bind(self, req, instance_id, id):
-        pass
+    def bind(self, req, body, instance_id, app_id):
+        filtered = [u'?', u'instance']
+        db_service = db_cf.get_service_for_instance(instance_id)
+        if not db_service:
+            return {}
 
-    def unbind(self, req, instance_id, id):
-        pass
+        service_id = db_service.service_id
+        environment_id = db_service.environment_id
+        tenant = db_service.tenant
+        user, passwd, keystone = self._check_auth(req, tenant)
+        # Once we get here we were authorized by keystone
+        token = keystone.auth_token
+        m_cli = muranoclient(token)
+
+        session_id = create_session(m_cli, environment_id)
+        env = m_cli.environments.get(environment_id, session_id)
+        LOG.debug('Got environment %s' % env)
+        service = self._get_service(env, service_id)
+        LOG.debug('Got service %s' % service)
+        credentials = {}
+        for k, v in six.iteritems(service):
+            if k not in filtered:
+                credentials[k] = v
+
+        return {'credentials': credentials}
+
+    def unbind(self, req, instance_id, app_id):
+        """Unsupported functionality
+
+        murano doesn't support this kind of functionality, so we just need
+        to create a stub where the call will come. We can't raise something
+        like NotImplementedError because we will have problems on Cloud Foundry
+        side. The best way now it to return empty dict which will be correct
+        answer for Cloud Foundry.
+        """
+
+        return {}
 
     def get_last_operation(self):
         """Not implemented functionality
