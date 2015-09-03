@@ -21,6 +21,7 @@ import six
 from stevedore import dispatch
 
 from murano.common.i18n import _LE, _LI, _LW
+from murano.dsl import murano_package
 
 
 CONF = cfg.CONF
@@ -92,18 +93,10 @@ class PluginLoader(object):
                         "from package '%(dist)s': %(err)s")
                     % dict(ep=ep.name, dist=ep.dist, err=exc))
 
-    def register_in_loader(self, class_loader):
+    def register_in_loader(self, package_loader):
         for package in six.itervalues(self.packages):
-            for class_name, clazz in six.iteritems(package.classes):
-                if hasattr(clazz, "_murano_class_name"):
-                    LOG.warning(_LW("Class '%(class_name)s' has a MuranoPL "
-                                    "name '%(name)s' defined which will be "
-                                    "ignored") %
-                                dict(class_name=class_name,
-                                name=getattr(clazz, "_murano_class_name")))
-                LOG.debug("Registering '%s' from '%s' in class loader"
-                          % (class_name, package.name))
-                class_loader.import_class(clazz, name=class_name)
+            package_loader.register_package(
+                MuranoPackage(package_loader, package))
 
 
 def initialize_plugin(plugin):
@@ -126,3 +119,22 @@ class PackageDefinition(object):
         else:
             self.info = None
         self.classes = {}
+
+
+class MuranoPackage(murano_package.MuranoPackage):
+    def __init__(self, pkg_loader, package_definition):
+        super(MuranoPackage, self).__init__(
+            pkg_loader, package_definition.name, runtime_version='1.0')
+        for class_name, clazz in six.iteritems(package_definition.classes):
+            if hasattr(clazz, "_murano_class_name"):
+                LOG.warning(_LW("Class '%(class_name)s' has a MuranoPL "
+                                "name '%(name)s' defined which will be "
+                                "ignored") %
+                            dict(class_name=class_name,
+                            name=getattr(clazz, "_murano_class_name")))
+            LOG.debug("Registering '%s' from '%s' in class loader"
+                      % (class_name, package_definition.name))
+            self.register_class(clazz, class_name)
+
+    def get_resource(self, name):
+        raise NotImplementedError()

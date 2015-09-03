@@ -147,7 +147,7 @@ class TaskExecutor(object):
         return result
 
     def _execute(self, pkg_loader):
-        # get_plugin_loader().register_in_loader(class_loader)
+        get_plugin_loader().register_in_loader(pkg_loader)
 
         executor = engine_executor.Executor(
             pkg_loader, self.environment)
