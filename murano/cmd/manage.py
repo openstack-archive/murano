@@ -73,7 +73,7 @@ def _do_import_package(_dir, categories, update=False):
         'tags': pkg.tags,
         'logo': pkg.logo,
         'supplier_logo': pkg.supplier_logo,
-        'ui_definition': pkg.raw_ui,
+        'ui_definition': pkg.ui,
         'class_definitions': pkg.classes,
         'archive': pkg.blob,
         'categories': categories or []

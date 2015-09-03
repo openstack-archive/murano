@@ -25,10 +25,12 @@ from murano.dsl import yaql_integration
 
 
 class YaqlExpression(dsl_types.YaqlExpression):
-    def __init__(self, expression):
+    def __init__(self, expression, version):
+        self._version = version
         if isinstance(expression, types.StringTypes):
             self._expression = encodeutils.safe_encode(expression)
-            self._parsed_expression = yaql_integration.parse(self._expression)
+            self._parsed_expression = yaql_integration.parse(
+                self._expression, version)
             self._file_position = None
         elif isinstance(expression, YaqlExpression):
             self._expression = expression._expression
@@ -46,6 +48,10 @@ class YaqlExpression(dsl_types.YaqlExpression):
         return self._expression
 
     @property
+    def version(self):
+        return self._version
+
+    @property
     def source_file_position(self):
         return self._file_position
 
@@ -60,13 +66,13 @@ class YaqlExpression(dsl_types.YaqlExpression):
         return self._expression
 
     @staticmethod
-    def match(expr):
-        if not isinstance(expr, types.StringTypes):
+    def is_expression(expression, version):
+        if not isinstance(expression, types.StringTypes):
             return False
-        if re.match('^[\s\w\d.:]*$', expr):
+        if re.match('^[\s\w\d.:]*$', expression):
             return False
         try:
-            yaql_integration.parse(expr)
+            yaql_integration.parse(expression, version)
             return True
         except yaql_exceptions.YaqlParsingException:
             return False

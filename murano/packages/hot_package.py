@@ -17,17 +17,19 @@ import shutil
 import sys
 import types
 
-import semantic_version
 import yaml
 
-from murano.dsl import yaql_expression
-from murano.packages import application_package
 from murano.packages import exceptions
+from murano.packages import package_base
 
-YAQL = yaql_expression.YaqlExpression
 RESOURCES_DIR_NAME = 'Resources/'
 HOT_FILES_DIR_NAME = 'HotFiles/'
 HOT_ENV_DIR_NAME = 'HotEnvironments/'
+
+
+class YAQL(object):
+    def __init__(self, expr):
+        self.expr = expr
 
 
 class Dumper(yaml.Dumper):
@@ -35,40 +37,29 @@ class Dumper(yaml.Dumper):
 
 
 def yaql_representer(dumper, data):
-    return dumper.represent_scalar(u'!yaql', str(data))
+    return dumper.represent_scalar(u'!yaql', data.expr)
 
 
 Dumper.add_representer(YAQL, yaql_representer)
 
 
-class HotPackage(application_package.ApplicationPackage):
-    def __init__(self, source_directory, manifest, loader, runtime_version):
-        super(HotPackage, self).__init__(source_directory, manifest, loader)
+class HotPackage(package_base.PackageBase):
+    def __init__(self, source_directory, manifest,
+                 package_format, runtime_version):
+        super(HotPackage, self).__init__(
+            source_directory, manifest, package_format, runtime_version)
+
         self._translated_class = None
         self._source_directory = source_directory
         self._translated_ui = None
 
-        self._full_name = manifest.get('FullName')
-        if not self._full_name:
-            raise exceptions.PackageFormatError(
-                'FullName not specified')
-        self._check_full_name(self._full_name)
-        self._package_type = manifest.get('Type')
-        if self._package_type not in application_package.PackageTypes.ALL:
-            raise exceptions.PackageFormatError('Invalid Package Type')
-        self._display_name = manifest.get('Name', self._full_name)
-        self._description = manifest.get('Description')
-        self._author = manifest.get('Author')
-        self._supplier = manifest.get('Supplier') or {}
-        self._logo = manifest.get('Logo')
-        self._tags = manifest.get('Tags')
-        self._version = semantic_version.Version.coerce(str(manifest.get(
-            'Version', '0.0.0')))
-        self._runtime_version = runtime_version
-
     @property
     def classes(self):
         return self.full_name,
+
+    @property
+    def requirements(self):
+        return {}
 
     @property
     def ui(self):
@@ -76,25 +67,13 @@ class HotPackage(application_package.ApplicationPackage):
             self._translated_ui = self._translate_ui()
         return self._translated_ui
 
-    @property
-    def raw_ui(self):
-        ui_obj = self.ui
-        result = yaml.dump(ui_obj, Dumper=Dumper, default_style='"')
-        return result
-
     def get_class(self, name):
         if name != self.full_name:
             raise exceptions.PackageClassLoadError(
                 name, 'Class not defined in this package')
         if not self._translated_class:
             self._translate_class()
-        return self._translated_class
-
-    def load(self):
-        self.get_class(self.full_name)
-        if not self._translated_ui:
-            self._translated_ui = self._translate_ui()
-        super(HotPackage, self).load()
+        return self._translated_class, '<generated code>'
 
     def _translate_class(self):
         template_file = os.path.join(self._source_directory, 'template.yaml')
@@ -128,7 +107,7 @@ class HotPackage(application_package.ApplicationPackage):
 
         files = HotPackage._translate_files(self._source_directory)
         translated.update(HotPackage._generate_workflow(hot, files))
-        self._translated_class = translated
+        self._translated_class = yaml.dump(translated, Dumper=Dumper)
 
     @staticmethod
     def _build_properties(hot, validate_hot_parameters):
@@ -546,4 +525,4 @@ class HotPackage(application_package.ApplicationPackage):
                 groups, self.full_name),
             'Forms': forms
         }
-        return translated
+        return yaml.dump(translated, Dumper=Dumper)

@@ -95,10 +95,7 @@ class ContinueMacro(expressions.DslExpression):
 class ParallelMacro(CodeBlock):
     def __init__(self, Parallel, Limit=None):
         super(ParallelMacro, self).__init__(Parallel)
-        if Limit:
-            self._limit = yaql_expression.YaqlExpression(str(Limit))
-        else:
-            self._limit = len(self.code_block)
+        self._limit = Limit or len(self.code_block)
 
     def execute(self, context):
         if not self.code_block:

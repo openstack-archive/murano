@@ -227,8 +227,8 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             'tags': pkg.tags,
             'logo': pkg.logo,
             'supplier_logo': pkg.supplier_logo,
-            'ui_definition': pkg.raw_ui,
-            'class_definitions': pkg.classes,
+            'ui_definition': pkg.ui,
+            'class_definitions': tuple(pkg.classes),
             'archive': pkg.blob,
             'categories': [],
         }
@@ -390,7 +390,10 @@ This is a fake zip archive
 --BOUNDARY--'''
 
         with mock.patch('murano.packages.load_utils.load_from_file') as lff:
-            lff.return_value = package_from_dir
+            ctxmgr = mock.Mock()
+            ctxmgr.__enter__ = mock.Mock(return_value=package_from_dir)
+            ctxmgr.__exit__ = mock.Mock(return_value=False)
+            lff.return_value = ctxmgr
 
             # Uploading a non-public package
             req = self._post(

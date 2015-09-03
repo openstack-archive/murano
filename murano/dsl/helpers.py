@@ -244,6 +244,14 @@ def parse_version_spec(version_spec):
     return version_spec
 
 
+def parse_version(version):
+    if isinstance(version, semantic_version.Version):
+        return version
+    if not version:
+        version = '0'
+    return semantic_version.Version.coerce(str(version))
+
+
 def traverse(seed, producer=None, track_visited=True):
     if not yaqlutils.is_iterable(seed):
         seed = [seed]

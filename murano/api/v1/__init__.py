@@ -24,7 +24,7 @@ LIST_PARAMS = ('category', 'tag', 'class', 'order_by')
 ORDER_VALUES = ('fqn', 'name', 'created')
 PKG_PARAMS_MAP = {'display_name': 'name',
                   'full_name': 'fully_qualified_name',
-                  'raw_ui': 'ui_definition',
+                  'ui': 'ui_definition',
                   'logo': 'logo',
                   'package_type': 'type',
                   'description': 'description',
