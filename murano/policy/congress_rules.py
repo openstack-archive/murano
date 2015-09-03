@@ -13,6 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import semantic_version
+
+from murano.dsl import helpers
+
 
 class CongressRulesManager(object):
     """Converts murano model to list of congress rules:
@@ -25,11 +29,11 @@ class CongressRulesManager(object):
 
     _rules = []
     _env_id = ''
-    _class_loader = None
+    _package_loader = None
 
-    def convert(self, model, class_loader=None, tenant_id=None):
+    def convert(self, model, package_loader=None, tenant_id=None):
         self._rules = []
-        self._class_loader = class_loader
+        self._package_loader = package_loader
 
         if model is None:
             return self._rules
@@ -115,7 +119,13 @@ class CongressRulesManager(object):
                 self._create_propety_rules(obj_rule.obj_id, obj))
 
             cls = obj['?']['type']
-            types = self._get_parent_types(cls, self._class_loader)
+            if 'classVersion' in obj['?']:
+                version_spec = helpers.parse_version_spec(
+                    semantic_version.Version(obj['?']['classVersion']))
+            else:
+                version_spec = semantic_version.Spec('*')
+            types = self._get_parent_types(
+                cls, self._package_loader, version_spec)
             self._rules.extend(self._create_parent_type_rules(obj['?']['id'],
                                                               types))
             # current object will be the owner for its subtree
@@ -176,17 +186,15 @@ class CongressRulesManager(object):
         else:
             return rule
 
-    def _get_parent_types(self, type_name, class_loader):
-        types = set()
-        types.add(type_name)
-        if class_loader is not None:
-            cls = class_loader.get_class(type_name)
-            if cls is not None:
-                for parent in cls.parents:
-                    types.add(parent.name)
-                    types = types.union(
-                        self._get_parent_types(parent.name, class_loader))
-        return types
+    @staticmethod
+    def _get_parent_types(type_name, package_loader, version_spec):
+        result = {type_name}
+        if package_loader:
+            pkg = package_loader.load_class_package(type_name, version_spec)
+            cls = pkg.find_class(type_name, False)
+            if cls:
+                result.update(t.name for t in cls.ancestors())
+        return result
 
     @staticmethod
     def _create_parent_type_rules(app_id, types):

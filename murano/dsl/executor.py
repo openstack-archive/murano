@@ -38,20 +38,19 @@ LOG = logging.getLogger(__name__)
 
 
 class MuranoDslExecutor(object):
-    def __init__(self, class_loader, environment=None):
-        self._class_loader = class_loader
+    def __init__(self, package_loader, environment=None):
+        self._package_loader = package_loader
         self._attribute_store = attribute_store.AttributeStore()
         self._root_context = \
-            class_loader.create_root_context().create_child_context()
+            self.create_root_context().create_child_context()
         self._root_context[constants.CTX_EXECUTOR] = weakref.proxy(self)
         self._root_context[
-            constants.CTX_CLASS_LOADER] = weakref.proxy(self._class_loader)
+            constants.CTX_PACKAGE_LOADER] = weakref.proxy(self._package_loader)
         self._root_context[constants.CTX_ENVIRONMENT] = environment
         self._root_context[constants.CTX_ATTRIBUTE_STORE] = weakref.proxy(
             self._attribute_store)
         self._object_store = object_store.ObjectStore(self._root_context)
         self._locks = {}
-        yaql_functions.register(self._root_context)
 
     @property
     def object_store(self):
@@ -62,8 +61,8 @@ class MuranoDslExecutor(object):
         return self._attribute_store
 
     @property
-    def class_loader(self):
-        return self._class_loader
+    def package_loader(self):
+        return self._package_loader
 
     def invoke_method(self, method, this, context, args, kwargs,
                       skip_stub=False):
@@ -180,7 +179,7 @@ class MuranoDslExecutor(object):
 
     def _create_method_context(self, this, method, context=None,
                                actions_only=False, skip_frame=False):
-        new_context = self._class_loader.create_local_context(
+        new_context = self.create_local_context(
             parent_context=this.context,
             murano_class=this.type)
         caller = context
@@ -220,7 +219,7 @@ class MuranoDslExecutor(object):
                 objects_to_clean.append(obj)
         if objects_to_clean:
             for obj in objects_to_clean:
-                methods = obj.type.find_all_methods('.destroy')
+                methods = obj.type.find_methods(lambda m: m.name == '.destroy')
                 for method in methods:
                     try:
                         method.invoke(self, obj, (), {}, None)
@@ -244,3 +243,13 @@ class MuranoDslExecutor(object):
             for val in data:
                 for res in self._list_potential_object_ids(val):
                     yield res
+
+    # noinspection PyMethodMayBeStatic
+    def create_local_context(self, parent_context, murano_class):
+        return parent_context.create_child_context()
+
+    # noinspection PyMethodMayBeStatic
+    def create_root_context(self):
+        context = yaql_integration.create_context()
+        yaql_functions.register(context)
+        return context

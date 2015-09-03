@@ -13,20 +13,20 @@
 #    under the License.
 
 EXPRESSION_MEMORY_QUOTA = 512 * 1024
-ITERATORS_LIMIT = 200
+ITERATORS_LIMIT = 2000
 
 CTX_ACTIONS_ONLY = '?actionsOnly'
 CTX_ALLOW_PROPERTY_WRITES = '$?allowPropertyWrites'
 CTX_ARGUMENT_OWNER = '$?argumentOwner'
 CTX_ATTRIBUTE_STORE = '$?attributeStore'
 CTX_CALLER_CONTEXT = '$?callerContext'
-CTX_CLASS_LOADER = '$?classLoader'
 CTX_CURRENT_INSTRUCTION = '$?currentInstruction'
 CTX_CURRENT_EXCEPTION = '$?currentException'
 CTX_CURRENT_METHOD = '$?currentMethod'
 CTX_ENVIRONMENT = '$?environment'
 CTX_EXECUTOR = '$?executor'
 CTX_OBJECT_STORE = '$?objectStore'
+CTX_PACKAGE_LOADER = '$?packageLoader'
 CTX_SKIP_FRAME = '$?skipFrame'
 CTX_THIS = '$?this'
 CTX_TYPE = '$?type'
@@ -36,3 +36,6 @@ DM_OBJECTS_COPY = 'ObjectsCopy'
 DM_ATTRIBUTES = 'Attributes'
 
 META_NO_TRACE = '?noTrace'
+
+CORE_LIBRARY = 'io.murano'
+CORE_LIBRARY_OBJECT = 'io.murano.Object'

@@ -16,6 +16,7 @@ from mock import ANY
 from mock import MagicMock
 from mock.mock import call
 
+from murano.dsl import helpers
 from murano.engine.system import logger
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -35,13 +36,13 @@ class TestLogger(test_case.DslTestCase):
     def setUp(self):
         super(TestLogger, self).setUp()
         self._runner = self.new_runner(om.Object('TestLogger'))
-        self.class_loader.import_class(logger.Logger)
+        self.package_loader.load_package('io.murano', None).register_class(
+            logger.Logger)
 
     def test_create(self):
-        cls = self.class_loader.get_class('io.murano.system.Logger')
         logger_instance = self._runner.testCreate()
         self.assertTrue(
-            cls.is_compatible(logger_instance),
+            helpers.is_instance_of(logger_instance, 'io.murano.system.Logger'),
             'Function should return io.murano.system.Logger instance')
 
     def _create_logger_mock(self):

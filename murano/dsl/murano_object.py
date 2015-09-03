@@ -37,12 +37,12 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__extension = None
         self.__context = self.__setup_context(context)
         object_store = helpers.get_object_store(context)
-        self.__config = object_store.class_loader.get_class_config(
+        self.__config = murano_class.package.get_class_config(
             murano_class.name)
         if not isinstance(self.__config, dict):
             self.__config = {}
         known_classes[murano_class.name] = self
-        for parent_class in murano_class.parents:
+        for parent_class in murano_class.parents(self.real_this.type):
             name = parent_class.name
             if name not in known_classes:
                 obj = parent_class.new(
@@ -182,11 +182,9 @@ class MuranoObject(dsl_types.MuranoObject):
         if name in start_type.properties:
             return self.cast(start_type)._get_property_value(name)
         else:
-            declared_properties = start_type.find_property(name)
-            if len(declared_properties) == 1:
-                return self.cast(declared_properties[0]).__properties[name]
-            elif len(declared_properties) > 1:
-                raise exceptions.AmbiguousPropertyNameError(name)
+            declared_properties = start_type.find_single_property(name)
+            if declared_properties:
+                return self.cast(declared_properties).__properties[name]
             elif derived:
                 return self.cast(caller_class)._get_property_value(name)
             else:
@@ -232,19 +230,15 @@ class MuranoObject(dsl_types.MuranoObject):
         else:
             raise exceptions.PropertyWriteError(name, start_type)
 
-    def cast(self, type):
-        if self.type is type:
-            return self
-        for parent in self.__parents.values():
-            try:
-                return parent.cast(type)
-            except TypeError:
-                continue
-        raise TypeError('Cannot cast {0} to {1}'.format(self, type))
+    def cast(self, cls):
+        for p in helpers.traverse(self, lambda t: t.__parents.values()):
+            if p.type is cls:
+                return p
+        raise TypeError('Cannot cast {0} to {1}'.format(self.type, cls))
 
     def __repr__(self):
-        return '<{0} {1} ({2})>'.format(
-            self.type.name, self.object_id, id(self))
+        return '<{0}/{1} {2} ({3})>'.format(
+            self.type.name, self.type.version, self.object_id, id(self))
 
     def to_dictionary(self, include_hidden=False):
         result = {}
@@ -253,7 +247,9 @@ class MuranoObject(dsl_types.MuranoObject):
         result.update({'?': {
             'type': self.type.name,
             'id': self.object_id,
-            'name': self.name
+            'name': self.name,
+            'classVersion': str(self.type.version),
+            'package': self.type.package.name
         }})
         if include_hidden:
             result.update(self.__properties)

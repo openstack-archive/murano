@@ -43,14 +43,14 @@ class ModelPolicyEnforcer(object):
         self._environment = environment
         self._client_manager = environment.clients
 
-    def validate(self, model, class_loader=None):
+    def validate(self, model, package_loader=None):
         """Validate model using Congress rule engine.
 
         @type model: dict
         @param model: Dictionary representation of model starting on
                       environment level (['Objects'])
-        @type class_loader: murano.dsl.class_loader.MuranoClassLoader
-        @param class_loader: Optional. Used for evaluating parent class types
+        @type package_loader: murano.dsl.package_loader.MuranoPackageLoader
+        @param package_loader: Optional. Used for evaluating parent class types
         @raises ValidationError in case validation was not successful
         """
 
@@ -65,7 +65,7 @@ class ModelPolicyEnforcer(object):
         LOG.debug(model)
 
         rules = congress_rules.CongressRulesManager().convert(
-            model, class_loader, self._environment.tenant_id)
+            model, package_loader, self._environment.tenant_id)
 
         rules_str = map(str, rules)
         env_id = model['?']['id']

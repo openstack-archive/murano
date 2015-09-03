@@ -29,13 +29,11 @@ from murano.common.helpers import token_sanitizer
 from murano.common import plugin_loader
 from murano.common import rpc
 from murano.dsl import dsl_exception
-from murano.dsl import executor as dsl_executor
 from murano.dsl import serializer
 from murano.engine import environment
-from murano.engine import package_class_loader
+from murano.engine import executor as engine_executor
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
-import murano.engine.system.system_objects as system_objects
 from murano.common.i18n import _LI, _LE, _LW
 from murano.policy import model_policy_enforcer as enforcer
 
@@ -149,12 +147,10 @@ class TaskExecutor(object):
         return result
 
     def _execute(self, pkg_loader):
-        class_loader = package_class_loader.PackageClassLoader(pkg_loader)
-        system_objects.register(class_loader, pkg_loader)
-        get_plugin_loader().register_in_loader(class_loader)
+        # get_plugin_loader().register_in_loader(class_loader)
 
-        executor = dsl_executor.MuranoDslExecutor(
-            class_loader, self.environment)
+        executor = engine_executor.Executor(
+            pkg_loader, self.environment)
         try:
             obj = executor.load(self.model)
         except Exception as e:
@@ -162,7 +158,7 @@ class TaskExecutor(object):
 
         if obj is not None:
             try:
-                self._validate_model(obj.object, self.action, class_loader)
+                self._validate_model(obj.object, self.action, pkg_loader)
             except Exception as e:
                 return self.exception_result(e, obj, '<validate>')
 
@@ -229,11 +225,11 @@ class TaskExecutor(object):
             }
         }
 
-    def _validate_model(self, obj, action, class_loader):
+    def _validate_model(self, obj, action, package_loader):
         if CONF.engine.enable_model_policy_enforcer:
             if action is not None and action['method'] == 'deploy':
-                self._model_policy_enforcer.validate(obj.to_dictionary(),
-                                                     class_loader)
+                self._model_policy_enforcer.validate(
+                    obj.to_dictionary(), package_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])

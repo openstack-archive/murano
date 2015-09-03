@@ -62,8 +62,8 @@ class HotPackage(application_package.ApplicationPackage):
         self._supplier = manifest.get('Supplier') or {}
         self._logo = manifest.get('Logo')
         self._tags = manifest.get('Tags')
-        self._version = semantic_version.Version(manifest.get(
-            'Version', '0.0.0'))
+        self._version = semantic_version.Version.coerce(str(manifest.get(
+            'Version', '0.0.0')))
         self._runtime_version = runtime_version
 
     @property

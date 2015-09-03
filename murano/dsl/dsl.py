@@ -35,14 +35,15 @@ def name(dsl_name):
     return wrapper
 
 
-class MuranoObjectType(yaqltypes.PythonType):
-    def __init__(self, murano_class, nullable=False):
+class MuranoType(yaqltypes.PythonType):
+    def __init__(self, murano_class, nullable=False, version_spec=None):
         self.murano_class = murano_class
-        super(MuranoObjectType, self).__init__(
+        self.version_spec = version_spec
+        super(MuranoType, self).__init__(
             (dsl_types.MuranoObject, MuranoObjectInterface), nullable)
 
     def check(self, value, context, *args, **kwargs):
-        if not super(MuranoObjectType, self).check(
+        if not super(MuranoType, self).check(
                 value, context, *args, **kwargs):
             return False
         if isinstance(value, MuranoObjectInterface):
@@ -51,13 +52,16 @@ class MuranoObjectType(yaqltypes.PythonType):
             return True
         murano_class = self.murano_class
         if isinstance(murano_class, types.StringTypes):
-            class_loader = helpers.get_class_loader(context)
-            murano_class = class_loader.get_class(self.murano_class)
-        return murano_class.is_compatible(value)
+            murano_class_name = murano_class
+        else:
+            murano_class_name = murano_class.name
+        return helpers.is_instance_of(
+            value, murano_class_name,
+            self.version_spec or helpers.get_type(context))
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
-        result = super(MuranoObjectType, self).convert(
+        result = super(MuranoType, self).convert(
             value, sender, context, function_spec, engine, *args, **kwargs)
         if isinstance(result, dsl_types.MuranoObject):
             return MuranoObjectInterface(result, engine)
@@ -100,11 +104,11 @@ class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
         value = super(MuranoTypeName, self).convert(
             value, sender, context, function_spec, engine)
         if isinstance(value, types.StringTypes):
-            class_loader = helpers.get_class_loader(context)
             murano_type = helpers.get_type(context)
             value = dsl_types.MuranoClassReference(
-                class_loader.get_class(
-                    murano_type.namespace_resolver.resolve_name(value)))
+                helpers.get_class(
+                    murano_type.namespace_resolver.resolve_name(
+                        value), context))
         return value
 
 
@@ -168,6 +172,10 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def type(self):
         return self.__object.type
 
+    @property
+    def package(self):
+        return self.type.package
+
     def data(self):
         return MuranoObjectInterface.DataInterface(self)
 
@@ -175,9 +183,20 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def extension(self):
         return self.__object.extension
 
-    def cast(self, murano_class):
+    def cast(self, murano_class, version_spec=None):
         return MuranoObjectInterface(
-            self.__object.cast(murano_class), self.__engine, self.__executor)
+            helpers.cast(
+                self.__object, murano_class,
+                version_spec or helpers.get_type()),
+            self.__engine, self.__executor)
+
+    def is_instance_of(self, murano_class, version_spec=None):
+        return helpers.is_instance_of(
+            self.__object, murano_class,
+            version_spec or helpers.get_type())
+
+    def ancestors(self):
+        return self.type.ancestors()
 
     def __getitem__(self, item):
         context = helpers.get_context()
@@ -282,11 +301,12 @@ class Interfaces(object):
 
     @property
     def class_config(self):
-        return self.class_loader.get_class_config(self.__object.type.name)
+        return self.__object.type.package.get_class_config(
+            self.__object.type.name)
 
     @property
-    def class_loader(self):
-        return helpers.get_class_loader()
+    def package_loader(self):
+        return helpers.get_package_loader()
 
 
 class NativeInstruction(object):

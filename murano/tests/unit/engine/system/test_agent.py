@@ -35,7 +35,7 @@ class TestExecutionPlan(base.MuranoTestCase):
 
         self.mock_murano_class = mock.Mock(spec=murano_class.MuranoClass)
         self.mock_murano_class.name = 'io.murano.system.Agent'
-        self.mock_murano_class.parents = []
+        self.mock_murano_class.declared_parents = []
         self.mock_object_store = mock.Mock(spec=object_store.ObjectStore)
 
         object_interface = mock.Mock(spec=murano_object.MuranoObject)

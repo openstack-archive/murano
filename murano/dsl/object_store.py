@@ -20,7 +20,7 @@ from murano.dsl import helpers
 class ObjectStore(object):
     def __init__(self, context, parent_store=None):
         self._context = context.create_child_context()
-        self._class_loader = helpers.get_class_loader(context)
+        self._package_loader = helpers.get_package_loader(context)
         self._context[constants.CTX_OBJECT_STORE] = self
         self._parent_store = parent_store
         self._store = {}
@@ -30,10 +30,6 @@ class ObjectStore(object):
     @property
     def initializing(self):
         return self._initializing
-
-    @property
-    def class_loader(self):
-        return self._class_loader
 
     @property
     def context(self):
@@ -63,9 +59,16 @@ class ObjectStore(object):
         system_key = value['?']
         object_id = system_key['id']
         obj_type = system_key['type']
-        class_obj = self._class_loader.get_class(obj_type)
-        if not class_obj:
-            raise ValueError()
+        version_spec = helpers.parse_version_spec(
+            system_key.get('classVersion'))
+
+        if 'package' not in system_key:
+            package = self._package_loader.load_class_package(
+                obj_type, version_spec)
+        else:
+            package = self._package_loader.load_package(
+                system_key['package'], version_spec)
+        class_obj = package.find_class(obj_type, False)
 
         try:
             if owner is None:

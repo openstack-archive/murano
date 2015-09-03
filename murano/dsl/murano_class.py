@@ -13,37 +13,37 @@
 #    under the License.
 
 import collections
+import weakref
 
+import semantic_version
+
+from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import murano_method
 from murano.dsl import murano_object
 from murano.dsl import typespec
 from murano.dsl import yaql_integration
 
 
-class GeneratedNativeTypeMetaClass(type):
-    def __str__(cls):
-        return cls.__name__
-
-
 class MuranoClass(dsl_types.MuranoClass):
-    def __init__(self, class_loader, namespace_resolver, name, package,
+    def __init__(self, namespace_resolver, name, package,
                  parents=None):
-        self._package = package
-        self._class_loader = class_loader
+        self._package = weakref.ref(package)
         self._methods = {}
         self._namespace_resolver = namespace_resolver
-        self._name = namespace_resolver.resolve_name(name)
+        self._name = name
         self._properties = {}
         self._config = {}
-        if self._name == 'io.murano.Object':
+        if self._name == constants.CORE_LIBRARY_OBJECT:
             self._parents = []
         else:
             self._parents = parents or [
-                class_loader.get_class('io.murano.Object')]
+                package.find_class(constants.CORE_LIBRARY_OBJECT)]
         self._unique_methods = None
+        self._parent_mappings = self._build_parent_remappings()
 
     @property
     def name(self):
@@ -51,19 +51,23 @@ class MuranoClass(dsl_types.MuranoClass):
 
     @property
     def package(self):
-        return self._package
+        return self._package()
 
     @property
     def namespace_resolver(self):
         return self._namespace_resolver
 
     @property
-    def parents(self):
+    def declared_parents(self):
         return self._parents
 
     @property
     def methods(self):
         return self._methods
+
+    @property
+    def parent_mappings(self):
+        return self._parent_mappings
 
     def extend_with_class(self, cls):
         ctor = yaql_integration.get_class_factory_definition(cls)
@@ -102,29 +106,24 @@ class MuranoClass(dsl_types.MuranoClass):
     def get_property(self, name):
         return self._properties[name]
 
-    def _find_method_chains(self, name):
-        initial = [self.methods[name]] if name in self.methods else []
-        yielded = False
-        for parent in self.parents:
-            for seq in parent._find_method_chains(name):
-                yield initial + list(seq)
-                yielded = True
-        if initial and not yielded:
-            yield initial
-
-    def find_method(self, name):
-        if name in self._methods:
-            return [(self, name)]
-        if not self._parents:
-            return []
-        return list(set(reduce(
-            lambda x, y: x + y,
-            [p.find_method(name) for p in self._parents])))
+    def _find_method_chains(self, name, origin):
+        queue = collections.deque([(self, ())])
+        while queue:
+            cls, path = queue.popleft()
+            segment = (cls.methods[name],) if name in cls.methods else ()
+            leaf = True
+            for p in cls.parents(origin):
+                leaf = False
+                queue.append((p, path + segment))
+            if leaf:
+                path = path + segment
+                if path:
+                    yield path
 
     def find_single_method(self, name):
-        chains = sorted(self._find_method_chains(name), key=lambda t: len(t))
+        chains = sorted(self._find_method_chains(name, self),
+                        key=lambda t: len(t))
         result = []
-
         for i in range(len(chains)):
             if chains[i][0] in result:
                 continue
@@ -149,37 +148,44 @@ class MuranoClass(dsl_types.MuranoClass):
             raise exceptions.AmbiguousMethodName(name)
         return result[0]
 
-    def find_all_methods(self, name):
+    def find_methods(self, predicate):
         result = []
-        queue = collections.deque([self])
-        while queue:
-            c = queue.popleft()
-            if name in c.methods:
-                method = c.methods[name]
-                if method not in result:
+        for c in self.ancestors():
+            for method in c.methods.itervalues():
+                if predicate(method) and method not in result:
                     result.append(method)
-            queue.extend(c.parents)
         return result
 
     def _iterate_unique_methods(self):
         names = set()
-        queue = collections.deque([self])
-        while queue:
-            c = queue.popleft()
+        for c in self.ancestors():
             names.update(c.methods.keys())
-            queue.extend(c.parents)
         for name in names:
             yield self.find_single_method(name)
 
     def find_property(self, name):
         result = []
-        types = collections.deque([self])
-        while len(types) > 0:
-            mc = types.popleft()
+        for mc in self.ancestors():
             if name in mc.properties and mc not in result:
                 result.append(mc)
-            types.extend(mc.parents)
         return result
+
+    def find_single_property(self, name):
+        result = None
+        parents = None
+        gen = helpers.traverse(self)
+        while True:
+            try:
+                mc = gen.send(parents)
+                if name in mc.properties:
+                    if result and result != mc:
+                        raise exceptions.AmbiguousPropertyNameError(name)
+                    result = mc
+                    parents = []
+                else:
+                    parents = mc.parents(self)
+            except StopIteration:
+                return result
 
     def invoke(self, name, executor, this, args, kwargs, context=None):
         method = self.find_single_method(name)
@@ -188,13 +194,8 @@ class MuranoClass(dsl_types.MuranoClass):
     def is_compatible(self, obj):
         if isinstance(obj, (murano_object.MuranoObject,
                             dsl.MuranoObjectInterface)):
-            return self.is_compatible(obj.type)
-        if obj is self:
-            return True
-        for parent in obj.parents:
-            if self.is_compatible(parent):
-                return True
-        return False
+            obj = obj.type
+        return any(cls is self for cls in obj.ancestors())
 
     def new(self, owner, object_store, context=None, **kwargs):
         if context is None:
@@ -204,12 +205,102 @@ class MuranoClass(dsl_types.MuranoClass):
 
         def initializer(**params):
             init_context = context.create_child_context()
-            init_context['?allowPropertyWrites'] = True
+            init_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
             obj.initialize(init_context, object_store, params)
             return obj
 
         initializer.object = obj
         return initializer
 
-    def __str__(self):
-        return 'MuranoClass({0})'.format(self.name)
+    def __repr__(self):
+        return 'MuranoClass({0}/{1})'.format(self.name, self.version)
+
+    @property
+    def version(self):
+        return self.package.version
+
+    def _build_parent_remappings(self):
+        """Remaps class parents.
+
+        In case of multiple inheritance class may indirectly get several
+        versions of the same class. It is reasonable to try to replace them
+        with single version to avoid conflicts. We can do that when within
+        versions that satisfy our class package requirements.
+        But in order to merge several classes that are not our parents but
+        grand parents we will need to modify classes that may be used
+        somewhere else (with another set of requirements). We cannot do this.
+        So instead we build translation table that will tell which ancestor
+        class need to be replaced with which so that we minimize number of
+        versions used for single class (or technically packages since version
+        is a package attribute). For translation table to work there should
+        be a method that returns all class virtual ancestors so that everybody
+        will see them instead of accessing class parents directly and getting
+        declared ancestors.
+        """
+        result = {}
+
+        aggregation = {
+            self.package.name: {(
+                self.package,
+                semantic_version.Spec('==' + str(self.package.version))
+            )}
+        }
+        for cls, parent in helpers.traverse(
+                ((self, parent) for parent in self._parents),
+                lambda (c, p): ((p, anc) for anc in p.declared_parents)):
+            if cls.package != parent.package:
+                requirement = cls.package.requirements[parent.package.name]
+                aggregation.setdefault(parent.package.name, set()).add(
+                    (parent.package, requirement))
+
+        package_bindings = {}
+        for versions in aggregation.itervalues():
+            mappings = self._remap_package(versions)
+            package_bindings.update(mappings)
+
+        for cls in helpers.traverse(
+                self.declared_parents, lambda c: c.declared_parents):
+            if cls.package in package_bindings:
+                package2 = package_bindings[cls.package]
+                cls2 = package2.classes[cls.name]
+                result[cls] = cls2
+        return result
+
+    @staticmethod
+    def _remap_package(versions):
+        result = {}
+        reverse_mappings = {}
+        versions_list = sorted(versions, key=lambda x: x[0].version)
+        i = 0
+        while i < len(versions_list):
+            package1, requirement1 = versions_list[i]
+            dst_package = None
+            for j, (package2, requirement2) in enumerate(versions_list):
+                if i == j:
+                    continue
+                if package2.version in requirement1 and (
+                        dst_package is None or
+                        dst_package.version < package2.version):
+                    dst_package = package2
+            if dst_package:
+                result[package1] = dst_package
+                reverse_mappings.setdefault(dst_package, []).append(package1)
+                for package in reverse_mappings.get(package1, []):
+                    result[package] = dst_package
+                del versions_list[i]
+            else:
+                i += 1
+        return result
+
+    def parents(self, origin):
+        mappings = origin.parent_mappings
+        yielded = set()
+        for p in self._parents:
+            parent = mappings.get(p, p)
+            if parent not in yielded:
+                yielded.add(parent)
+                yield parent
+
+    def ancestors(self):
+        for c in helpers.traverse(self, lambda t: t.parents(self)):
+            yield c

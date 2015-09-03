@@ -22,7 +22,21 @@ from murano.dsl import murano_object
 from murano.dsl import serializer
 from murano.dsl import yaql_integration
 from murano.engine import environment
+from murano.engine.system import yaql_functions
 from murano.tests.unit.dsl.foundation import object_model
+
+
+class TestExecutor(executor.MuranoDslExecutor):
+    def __init__(self, package_loader, env, functions):
+        self.__functions = functions
+        super(TestExecutor, self).__init__(package_loader, env)
+
+    def create_root_context(self):
+        context = super(TestExecutor, self).create_root_context()
+        yaql_functions.register(context)
+        for name, func in self.__functions.iteritems():
+            context.register_function(func, name)
+        return context
 
 
 class Runner(object):
@@ -48,15 +62,15 @@ class Runner(object):
             if item.startswith('test'):
                 return call
 
-    def __init__(self, model, class_loader):
+    def __init__(self, model, package_loader, functions):
         if isinstance(model, types.StringTypes):
             model = object_model.Object(model)
         model = object_model.build_model(model)
         if 'Objects' not in model:
             model = {'Objects': model}
 
-        self.executor = executor.MuranoDslExecutor(
-            class_loader, environment.Environment())
+        self.executor = TestExecutor(
+            package_loader, environment.Environment(), functions)
         self._root = self.executor.load(model).object
 
     def _execute(self, name, object_id, *args, **kwargs):

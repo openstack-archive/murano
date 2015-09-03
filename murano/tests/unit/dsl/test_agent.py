@@ -31,7 +31,8 @@ class TestAgentListener(test_case.DslTestCase):
         super(TestAgentListener, self).setUp()
 
         # Register Agent class
-        self.class_loader.import_class(agent_listener.AgentListener)
+        self.package_loader.load_package('io.murano', None).register_class(
+            agent_listener.AgentListener)
         model = om.Object(
             'AgentListenerTests')
         self.runner = self.new_runner(model)
@@ -62,7 +63,8 @@ class TestAgent(test_case.DslTestCase):
         super(TestAgent, self).setUp()
 
         # Register Agent class
-        self.class_loader.import_class(agent.Agent)
+        self.package_loader.load_package('io.murano', None).register_class(
+            agent.Agent)
         model = om.Object(
             'AgentTests')
         self.runner = self.new_runner(model)

@@ -16,7 +16,6 @@
 from heatclient.v1 import stacks
 import mock
 
-from murano.dsl import class_loader
 from murano.dsl import constants
 from murano.dsl import helpers
 from murano.dsl import murano_class
@@ -34,12 +33,10 @@ class TestHeatStack(base.MuranoTestCase):
         super(TestHeatStack, self).setUp()
         self.mock_murano_class = mock.Mock(spec=murano_class.MuranoClass)
         self.mock_murano_class.name = 'io.murano.system.HeatStack'
-        self.mock_murano_class.parents = []
+        self.mock_murano_class.declared_parents = []
         self.heat_client_mock = mock.MagicMock()
         self.heat_client_mock.stacks = mock.MagicMock(spec=stacks.StackManager)
         self.mock_object_store = mock.Mock(spec=object_store.ObjectStore)
-        self.mock_object_store.class_loader = mock.Mock(
-            spec=class_loader.MuranoClassLoader)
         self.environment_mock = mock.Mock(
             spec=environment.Environment)
         client_manager_mock = mock.Mock(spec=client_manager.ClientManager)

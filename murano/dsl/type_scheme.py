@@ -148,15 +148,13 @@ class TypeScheme(object):
         @specs.parameter('default_name', dsl.MuranoTypeName(
             True, root_context))
         @specs.parameter('value', nullable=True)
+        @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
-        def class_(value, name, default_name=None):
+        def class_(value, name, default_name=None, version_spec=None):
             object_store = helpers.get_object_store(root_context)
             if not default_name:
                 default_name = name
             murano_class = name.murano_class
-            if not murano_class:
-                raise exceptions.NoClassFound(
-                    'Class {0} cannot be found'.format(name))
             if value is None:
                 return None
             if isinstance(value, dsl_types.MuranoObject):
@@ -167,7 +165,8 @@ class TypeScheme(object):
                 if '?' not in value:
                     new_value = {'?': {
                         'id': uuid.uuid4().hex,
-                        'type': default_name.murano_class.name
+                        'type': default_name.murano_class.name,
+                        'classVersion': str(default_name.murano_class.version)
                     }}
                     new_value.update(value)
                     value = new_value
@@ -184,7 +183,9 @@ class TypeScheme(object):
                 raise exceptions.ContractViolationException(
                     'Value {0} cannot be represented as class {1}'.format(
                         value, name))
-            if not murano_class.is_compatible(obj):
+            if not helpers.is_instance_of(
+                    obj, murano_class.name,
+                    version_spec or helpers.get_type(root_context)):
                 raise exceptions.ContractViolationException(
                     'Object of type {0} is not compatible with '
                     'requested type {1}'.format(obj.type.name, name))

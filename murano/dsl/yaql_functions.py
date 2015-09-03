@@ -32,10 +32,13 @@ def id_(value):
 
 
 @specs.parameter('value', dsl_types.MuranoObject)
-@specs.parameter('type', dsl.MuranoTypeName())
+@specs.parameter('type__', dsl.MuranoTypeName())
+@specs.parameter('version_spec', yaqltypes.String(True))
 @specs.extension_method
-def cast(value, type):
-    return value.cast(type.murano_class)
+def cast(context, value, type__, version_spec=None):
+    return helpers.cast(
+        value, type__.murano_class.name,
+        version_spec or helpers.get_type(context))
 
 
 @specs.parameter('__type_name', dsl.MuranoTypeName())
@@ -65,14 +68,15 @@ def new_from_dict(type_name, context, parameters,
                **yaql_integration.filter_parameters_dict(parameters))
 
 
-@specs.parameter('value', dsl_types.MuranoObject)
+@specs.parameter('sender', dsl_types.MuranoObject)
 @specs.parameter('func', yaqltypes.Lambda())
 @specs.extension_method
-def super_(context, value, func=None):
+def super_(context, sender, func=None):
     cast_type = helpers.get_type(context)
     if func is None:
-        return [value.cast(type) for type in cast_type.parents]
-    return itertools.imap(func, super_(context, value))
+        return [sender.cast(type) for type in cast_type.parents(
+            sender.real_this.type)]
+    return itertools.imap(func, super_(context, sender))
 
 
 @specs.parameter('value', dsl_types.MuranoObject)
@@ -141,11 +145,10 @@ def op_dot(context, sender, expr, operator):
 @specs.name('#operator_:')
 def ns_resolve(context, prefix, name):
     murano_type = helpers.get_type(context)
-    class_loader = helpers.get_class_loader(context)
     return dsl_types.MuranoClassReference(
-        class_loader.get_class(
+        helpers.get_class(
             murano_type.namespace_resolver.resolve_name(
-                prefix + ':' + name)))
+                prefix + ':' + name), context))
 
 
 @specs.parameter('obj1', dsl_types.MuranoObject, nullable=True)
