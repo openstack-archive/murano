@@ -87,16 +87,22 @@ function create_murano_accounts() {
 
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
         MURANO_SERVICE=$(openstack service create \
-            murano \
-            --type=application_catalog \
+            application_catalog \
+            --name=murano \
             --description="Application Catalog" \
             | grep " id " | get_field 2)
         openstack endpoint create \
             $MURANO_SERVICE \
-            --region RegionOne \
-            --publicurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-            --adminurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-            --internalurl "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+            public "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+            --region RegionOne
+        openstack endpoint create \
+            $MURANO_SERVICE \
+            admin "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+            --region RegionOne
+        openstack endpoint create \
+            $MURANO_SERVICE \
+            internal "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+            --region RegionOne
     fi
 }
 
