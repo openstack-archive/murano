@@ -77,7 +77,7 @@ Manual neutron network configuration
 
  * First, you need to check for existence of external networks. Login as admin and go to
    *Project -> Network -> Network Topology*. And check network type in network details at *Admin -> Networks -> Network name* page.
-   The same action can be done via CLI by running `neutron net-external-list`. To create new external network examine `OpenStack documentation <http://docs.openstack.org/trunk/install-guide/install/apt/content/neutron_initial-external-network.html>`_.
+   The same action can be done via CLI by running `neutron net-external-list`. To create new external network examine `OpenStack documentation <http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-external-network.html>`_.
 
   .. image:: 1.png
      :align: left

@@ -26,3 +26,5 @@ Useful links
 * How to add rally-gates: https://rally.readthedocs.org/en/latest/gates.html
 
 * About plugins:  https://rally.readthedocs.org/en/latest/plugins.html
+
+* Plugin samples: https://github.com/openstack/rally/tree/master/samples/plugins
