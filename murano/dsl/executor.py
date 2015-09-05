@@ -209,7 +209,7 @@ class MuranoDslExecutor(object):
                     except Exception as e:
                         LOG.warn(_LW(
                             'Muted exception during execution of .destroy '
-                            'on {1}: {2}').format(obj, e), exc_info=True)
+                            'on {0}: {1}').format(obj, e), exc_info=True)
 
     def _list_potential_object_ids(self, data):
         if isinstance(data, types.DictionaryType):
