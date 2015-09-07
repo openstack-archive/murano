@@ -130,12 +130,14 @@ Install the API service and Engine
 
     .. code-block:: console
 
+	$ cd ~/murano/murano
         $ tox -e genconfig
     ..
 
     And make a copy of it for further modifications
 
     .. code-block:: console
+
         $ cd ~/murano/murano/etc/murano
         $ ln -s murano.conf.sample murano.conf
     ..
