@@ -22,7 +22,7 @@ requests>=2.5.2
 
 # Some of the tests use real MySQL and Postgres databases
 PyMySQL>=0.6.2 # MIT License
-psycopg2
+psycopg2>=2.5
 
 # doc build requirements
 oslosphinx>=2.5.0 # Apache-2.0
