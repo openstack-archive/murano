@@ -131,6 +131,7 @@ Install the API service and Engine
 
     .. code-block:: console
 
+        cd ~/murano/murano
         tox -e genconfig
     ..
 
