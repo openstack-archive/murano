@@ -295,7 +295,7 @@ Floppy image with answer file for unattended installation is needed to automate 
       sudo mount -o loop ~/floppy.img ~/flp/mnt
   ..
 
-* Download **autounattend.xml.template** file from https://github.com/openstack/murano-deployment/tree/master/contrib/windows/image-builder/share/files
+* Download **autounattend.xml.template** file from https://github.com/openstack/murano-deployment/tree/master/contrib/windows/image-builder/lib/windowssetup/unattend/
 
   This folder contains unattended files for several Windows versions, choose one that matches your Windows version.
 
@@ -394,7 +394,7 @@ Get post-install scripts
 
 There are a few scripts which perform all the required post-installation tasks.
 
-They all are located in http://git.openstack.org/cgit/openstack/murano-deployment/tree/contrib/windows/image-builder/share/scripts
+They all are located in http://git.openstack.org/cgit/openstack/murano-deployment/tree/contrib/windows/image-builder/lib/windowssetup/scripts/
 
 
 .. note::
