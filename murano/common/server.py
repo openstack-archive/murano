@@ -64,7 +64,6 @@ class ResultEndpoint(object):
         if environment.description['Objects'] is not None:
             environment.description['Objects']['services'] = \
                 environment.description['Objects'].pop('applications', [])
-            # environment.networking = result.get('networking', {})
             action_name = 'Deployment'
             deleted = False
         else:
