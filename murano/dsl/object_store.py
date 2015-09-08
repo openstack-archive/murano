@@ -39,7 +39,7 @@ class ObjectStore(object):
         if object_id in self._store:
             result = self._store[object_id]
             if not isinstance(result, dsl_types.MuranoObject):
-                result = None
+                result = result.object
             return result
         if self._parent_store:
             return self._parent_store.get(object_id)
