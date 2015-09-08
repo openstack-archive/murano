@@ -93,7 +93,7 @@ class Controller(object):
         return None
 
     def list(self, req):
-        user, passwd, keystone = self._check_auth(req)
+        user, _, keystone = self._check_auth(req)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
 
@@ -144,7 +144,7 @@ class Controller(object):
         # Now as we have all parameters we can try to auth user in actual
         # tenant
 
-        user, passwd, keystone = self._check_auth(req, tenant)
+        user, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
         m_cli = muranoclient(token)
@@ -198,7 +198,7 @@ class Controller(object):
         service_id = service.service_id
         environment_id = service.environment_id
         tenant = service.tenant
-        user, passwd, keystone = self._check_auth(req, tenant)
+        _, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
         m_cli = muranoclient(token)
@@ -227,7 +227,7 @@ class Controller(object):
         service_id = db_service.service_id
         environment_id = db_service.environment_id
         tenant = db_service.tenant
-        user, passwd, keystone = self._check_auth(req, tenant)
+        _, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
         m_cli = muranoclient(token)

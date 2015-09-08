@@ -305,7 +305,7 @@ class MuranoClass(dsl_types.MuranoClass):
         while i < len(versions_list):
             package1, requirement1 = versions_list[i]
             dst_package = None
-            for j, (package2, requirement2) in enumerate(versions_list):
+            for j, (package2, _) in enumerate(versions_list):
                 if i == j:
                     continue
                 if package2.version in requirement1 and (

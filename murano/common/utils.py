@@ -200,7 +200,7 @@ def build_entity_map(value):
         if isinstance(value, types.DictionaryType):
             if '?' in value and 'id' in value['?']:
                 id_map[value['?']['id']] = value
-            for k, v in value.iteritems():
+            for v in value.itervalues():
                 build_entity_map_recursive(v, id_map)
         if isinstance(value, types.ListType):
             for item in value:

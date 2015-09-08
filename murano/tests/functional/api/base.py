@@ -106,8 +106,7 @@ class MuranoClient(rest_client.RestClient):
     def deploy_session(self, environment_id, session_id):
         post_body = None
         url = 'v1/environments/{0}/sessions/{1}/deploy'
-        resp, body = self.post(url.format(environment_id, session_id),
-                               post_body)
+        resp, _ = self.post(url.format(environment_id, session_id), post_body)
 
         return resp
 
@@ -283,13 +282,13 @@ class MuranoClient(rest_client.RestClient):
 
     def delete_app_in_env_template(self, env_template_name):
         """Delete an application in an environment template."""
-        resp, body = self.delete('v1/templates/{0}/services/{1}'.
-                                 format(env_template_name, 'ID'))
+        resp, _ = self.delete('v1/templates/{0}/services/{1}'.
+                              format(env_template_name, 'ID'))
         return resp
 
     def delete_env_template(self, env_template_id):
         """Check the deletion of an environment template."""
-        resp, body = self.delete('v1/templates/{0}'.format(env_template_id))
+        resp, _ = self.delete('v1/templates/{0}'.format(env_template_id))
         return resp
 
     def get_env_template(self, env_template_id):

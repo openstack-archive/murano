@@ -111,7 +111,7 @@ class Package(object):
 
 
 def _zip_dir(path, zip_file):
-    for root, dirs, files in os.walk(path):
+    for root, _, files in os.walk(path):
         for f in files:
             abs_path = os.path.join(root, f)
             relative_path = os.path.relpath(abs_path, path)

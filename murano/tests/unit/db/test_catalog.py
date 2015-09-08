@@ -64,7 +64,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
     def test_order_by(self):
         pkgs = []
-        for i in range(10):
+        for dummy in range(10):
             package = api.package_upload(self._stub_package(
                 name=str(uuid.uuid4()),
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
@@ -86,12 +86,12 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
     def test_order_by_compound(self):
         pkgs_a, pkgs_z = [], []
-        for i in range(5):
+        for _ in range(5):
             package = api.package_upload(self._stub_package(
                 name='z',
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
             pkgs_z.append(package)
-        for i in range(5):
+        for _ in range(5):
             package = api.package_upload(self._stub_package(
                 name='a',
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
@@ -113,7 +113,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         checking that package order is correct.
         """
         pkgs = []
-        for i in range(10):
+        for dummy in range(10):
             package = api.package_upload(self._stub_package(
                 name=str(uuid.uuid4()),
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
@@ -154,7 +154,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         """
 
         pkgs = []
-        for i in range(10):
+        for dummy in range(10):
             package = api.package_upload(self._stub_package(
                 name=str(uuid.uuid4()),
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
@@ -188,7 +188,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         """
 
         # TODO(kzaitsev): fix https://bugs.launchpad.net/murano/+bug/1448782
-        for i in range(10):
+        for dummy in range(10):
             api.package_upload(self._stub_package(
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
         res = api.package_search({}, self.context, limit=4)
