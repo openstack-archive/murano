@@ -21,7 +21,7 @@ This page describes automated tests for a Murano project:
 * where tests are located
 * how they are run
 * how execute tests on a local machine
-* how to find the the root of problems with FAILed tests
+* how to find the root of problems with FAILed tests
 
 Murano continuous integration service
 =====================================
@@ -37,7 +37,7 @@ There you can find each job for each repository: one for the **murano** and anot
 * "gate-murano-integration\*" verifies each commit to murano repository
 
 Other jobs allow to build and test Murano documentation and perform another usefull work to support Murano CI infrastructure.
-All jobs are run on fresh installation of operation system and all components are installed on each run.
+All jobs are run on fresh installation of operating system and all components are installed on each run.
 
 Murano automated tests: UI tests
 ================================
@@ -124,7 +124,7 @@ All Murano services have tempest-based automated tests, which allow to verify AP
 
 Tempest tests for Murano are located at the: https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional
 
-The following Python files are contain basic tests suites for different Murano components.
+The following Python files contains basic tests suites for different Murano components.
 
 API Tests
 +++++++++
