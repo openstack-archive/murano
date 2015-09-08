@@ -63,6 +63,12 @@ class Controller(object):
     def create(self, request, body):
         LOG.debug(u'Environments:Create <Body {0}>'.format(body))
         policy.check('create_environment', request.context)
+
+        if not body.get('name'):
+            msg = _('Please, specify a name of the environment to create')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
+
         name = unicode(body['name'])
         if len(name) > 255:
             msg = _('Environment name should be 255 characters maximum')
