@@ -42,7 +42,6 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             id='12345',
             name='my-env',
             version=0,
-            networking={},
             created=fake_now,
             updated=fake_now,
             tenant_id=self.tenant,

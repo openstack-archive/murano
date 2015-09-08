@@ -60,7 +60,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected = {'tenant_id': self.tenant,
                     'id': 'env_template_id',
                     'name': 'mytemp',
-                    'networking': {},
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1]}
@@ -161,7 +160,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
             id='12345',
             name='my-temp',
             version=0,
-            networking={},
             created=fake_now,
             updated=fake_now,
             tenant_id=self.tenant,
@@ -213,7 +211,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
             id='12345',
             name='my-temp',
             version=0,
-            networking={},
             created=fake_now,
             updated=fake_now,
             tenant_id=self.tenant,
@@ -246,7 +243,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected = {'tenant_id': self.tenant,
                     'id': self.uuids[0],
                     'name': 'env_template_name',
-                    'networking': {},
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1]}
