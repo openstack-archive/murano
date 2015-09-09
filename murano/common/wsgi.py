@@ -41,7 +41,7 @@ import webob.exc
 
 from murano.api.v1 import schemas
 from murano.common import exceptions
-from murano.common.i18n import _
+from murano.common.i18n import _, _LE, _LW
 from murano.common import xmlutils
 
 wsgi_opts = [
@@ -711,8 +711,8 @@ class RequestDeserializer(object):
         try:
             content_type = request.get_content_type()
         except exceptions.UnsupportedContentType as e:
-            msg = "Unrecognized Content-Type provided in request: {0}"
-            LOG.debug(unicode(msg).format(str(e)))
+            LOG.error(_LE("Unrecognized Content-Type provided in request: "
+                          "{error}").format(error=str(e)))
             raise
 
         if content_type is None:
@@ -856,7 +856,8 @@ class JSONPatchDeserializer(TextDeserializer):
         try:
             jsonschema.validate(property_to_update, schemas.PKG_UPDATE_SCHEMA)
         except jsonschema.ValidationError as e:
-            LOG.exception(e)
+            LOG.error(_LE("Schema validation error occured: {error}")
+                      .format(error=e))
             raise webob.exc.HTTPBadRequest(explanation=e.message)
 
     def _decode_json_pointer(self, pointer):
@@ -986,10 +987,11 @@ class FormDataDeserializer(TextDeserializer):
     def _from_json(self, datastring):
         value = datastring
         try:
-            LOG.debug("Trying deserialize '{0}' to json".format(datastring))
+            LOG.debug("Trying deserialize '{data}' to json".format(
+                data=datastring))
             value = jsonutils.loads(datastring)
         except ValueError:
-            LOG.debug("Unable deserialize to json, using raw text")
+            LOG.warning(_LW("Unable deserialize to json, using raw text"))
         return value
 
     def default(self, request):

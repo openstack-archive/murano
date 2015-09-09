@@ -18,7 +18,7 @@ from webob import exc
 
 from murano.api.v1 import environments as envs_api
 from murano.api.v1 import request_statistics
-from murano.common.i18n import _
+from murano.common.i18n import _, _LE
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
@@ -58,14 +58,15 @@ class Controller(object):
         :param body: the env template description
         :return: the description of the created template.
         """
-        LOG.debug('EnvTemplates:Create <Body {0}>'.format(body))
+        LOG.debug('EnvTemplates:Create <Body {body}>'.format(body=body))
         policy.check('create_env_template', request.context)
         try:
-            LOG.debug('ENV TEMP NAME: {0}>'.format(body['name']))
+            LOG.debug('ENV TEMP NAME: {templ_name}>'.format(
+                templ_name=body['name']))
             if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
                 msg = _('Environment Template must contain only alphanumeric '
                         'or "_-." characters, must start with alpha')
-                LOG.exception(msg)
+                LOG.error(msg)
                 raise exc.HTTPBadRequest(msg)
         except Exception:
                 msg = _('Env template body is incorrect')
@@ -92,7 +93,8 @@ class Controller(object):
         :param env_template_id: the env template ID.
         :return: the description of the env template.
         """
-        LOG.debug('Templates:Show <Id: {0}>'.format(env_template_id))
+        LOG.debug('Templates:Show <Id: {templ_id}>'.format(
+            templ_id=env_template_id))
         target = {"env_template_id": env_template_id}
         policy.check('show_env_template', request.context, target)
 
@@ -114,14 +116,15 @@ class Controller(object):
         :param body: the description to be updated
         :return: the updated template description.
         """
-        LOG.debug('Templates:Update <Id: {0}, '
-                  'Body: {1}>'.format(env_template_id, body))
+        LOG.debug('Templates:Update <Id: {templ_id}, '
+                  'Body: {body}>'.format(templ_id=env_template_id, body=body))
         target = {"env_template_id": env_template_id}
         policy.check('update_env_template', request.context, target)
 
         self._validate_request(request, env_template_id)
         try:
-            LOG.debug('ENV TEMP NAME: {0}>'.format(body['name']))
+            LOG.debug('ENV TEMP NAME: {temp_name}>'.format(
+                temp_name=body['name']))
             if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
                 msg = _('Env Template must contain only alphanumeric '
                         'or "_-." characters, must start with alpha')
@@ -141,7 +144,8 @@ class Controller(object):
         :param request: the operation request.
         :param env_template_id: the template ID.
         """
-        LOG.debug('EnvTemplates:Delete <Id: {0}>'.format(env_template_id))
+        LOG.debug('EnvTemplates:Delete <Id: {templ_id}>'.format(
+            templ_id=env_template_id))
         target = {"env_template_id": env_template_id}
         policy.check('delete_env_template', request.context, target)
         self._validate_request(request, env_template_id)
@@ -169,8 +173,8 @@ class Controller(object):
         :param body: the environment name
         :return: session_id and environment_id
         """
-        LOG.debug('Templates:Create environment <Id: {0}>'.
-                  format(env_template_id))
+        LOG.debug('Templates:Create environment <Id: {templ_id}>'.
+                  format(templ_id=env_template_id))
         target = {"env_template_id": env_template_id}
         policy.check('create_environment', request.context, target)
 
@@ -184,7 +188,8 @@ class Controller(object):
                     'or "_-." characters, must start with alpha')
             LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
-        LOG.debug('ENVIRONMENT NAME: {0}>'.format(body['name']))
+        LOG.debug('ENVIRONMENT NAME: {env_name}>'.format(
+            env_name=body['name']))
 
         try:
             environment = envs.EnvironmentServices.create(
@@ -214,15 +219,15 @@ class Controller(object):
     def _validate_request(self, request, env_template_id):
         env_template_exists = env_temps.EnvTemplateServices.env_template_exist
         if not env_template_exists(env_template_id):
-            mng = _('EnvTemplate <TempId {0}> is not found').format(
-                env_template_id)
-            LOG.exception(mng)
-            raise exc.HTTPNotFound(explanation=mng)
+            msg = _('EnvTemplate <TempId {temp_id}> is not found').format(
+                temp_id=env_template_id)
+            LOG.exception(msg)
+            raise exc.HTTPNotFound(explanation=msg)
         get_env_template = env_temps.EnvTemplateServices.get_env_template
         env_template = get_env_template(env_template_id)
         if env_template.tenant_id != request.context.tenant:
-            LOG.exception(_('User is not authorized to access '
-                            'this tenant resources.'))
+            LOG.exception(_LE('User is not authorized to access this tenant '
+                              'resources.'))
             raise exc.HTTPUnauthorized
 
 

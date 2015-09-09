@@ -42,8 +42,7 @@ def _package_get(package_id, session):
     # UUID before trying to treat it as one
     package = session.query(models.Package).get(package_id)
     if not package:
-        msg = _("Package id '{0}' not found").\
-            format(package_id)
+        msg = _("Package id '{pkg_id}' not found").format(pkg_id=package_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(explanation=msg)
 
@@ -54,13 +53,15 @@ def _authorize_package(package, context, allow_public=False):
 
     if package.owner_id != context.tenant:
         if not allow_public:
-            msg = _("Package '{0}' is not owned by "
-                    "tenant '{1}'").format(package.id, context.tenant)
+            msg = _("Package '{pkg_id}' is not owned by tenant "
+                    "'{tenant}'").format(pkg_id=package.id,
+                                         tenant=context.tenant)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
         if not package.is_public:
-            msg = _("Package '{0}' is not public and not owned by "
-                    "tenant '{1}' ").format(package.id, context.tenant)
+            msg = _("Package '{pkg_id}' is not public and not owned by "
+                    "tenant '{tenant}' ").format(pkg_id=package.id,
+                                                 tenant=context.tenant)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
@@ -164,9 +165,9 @@ def _do_add(package, change):
         try:
             getattr(package, path).append(item)
         except AssertionError:
-            msg = _LW('One of the specified {0} is already '
-                      'associated with a package. Doing nothing.')
-            LOG.warning(msg.format(path))
+            LOG.warning(_LW('One of the specified {path} is already associated'
+                            ' with a package. Doing nothing.').format(
+                                path=path))
     return package
 
 
@@ -183,8 +184,8 @@ def _do_remove(package, change):
     current_values = getattr(package, path)
     for value in values:
         if value not in [i.name for i in current_values]:
-            msg = _("Value '{0}' of property '{1}' "
-                    "does not exist.").format(value, path)
+            msg = _("Value '{value}' of property '{path}' "
+                    "does not exist.").format(value=value, path=path)
             LOG.error(msg)
             raise exc.HTTPNotFound(explanation=msg)
         item_to_remove = find(current_values, lambda i: i.name == value)
@@ -405,7 +406,7 @@ def category_get(category_id, session=None, packages=False):
 
     category = session.query(models.Category).get(category_id)
     if not category:
-        msg = _("Category id '{0}' not found").format(category_id)
+        msg = _("Category id '{id}' not found").format(id=category_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
     if packages:
@@ -459,7 +460,7 @@ def category_delete(category_id):
     with session.begin():
         category = session.query(models.Category).get(category_id)
         if not category:
-            msg = _("Category id '{0}' not found").format(category_id)
+            msg = _("Category id '{id}' not found").format(id=category_id)
             LOG.error(msg)
             raise exc.HTTPNotFound(msg)
         session.delete(category)

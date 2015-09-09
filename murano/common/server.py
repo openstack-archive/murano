@@ -27,7 +27,7 @@ from murano.db import models
 from murano.db.services import environments
 from murano.db.services import instances
 from murano.db import session
-from murano.common.i18n import _, _LI, _LW
+from murano.common.i18n import _LI, _LW
 from murano.services import states
 
 CONF = cfg.CONF
@@ -43,7 +43,7 @@ class ResultEndpoint(object):
     def process_result(context, result, environment_id):
         secure_result = token_sanitizer.TokenSanitizer().sanitize(result)
         LOG.debug('Got result from orchestration '
-                  'engine:\n{0}'.format(secure_result))
+                  'engine:\n{result}'.format(result=secure_result))
 
         model = result['model']
         action_result = result.get('action', {})
@@ -114,13 +114,18 @@ class ResultEndpoint(object):
         objects = model['Objects']
         if objects:
             services = objects.get('services')
-        message = _LI('EnvId: {0} TenantId: {1} Status: {2} Apps: {3}').format(
-            environment.id,
-            environment.tenant_id,
-            _('Failed') if num_errors + num_warnings > 0 else _('Successful'),
-            ', '.join(map(lambda a: a['?']['type'], services))
-        )
-        LOG.info(message)
+        if num_errors + num_warnings > 0:
+            LOG.warning(_LW('EnvId: {env_id} TenantId: {tenant_id} Status: '
+                            'Failed Apps: {services}')
+                        .format(env_id=environment.id,
+                                tenant_id=environment.tenant_id,
+                                services=services))
+        else:
+            LOG.info(_LI('EnvId: {env_id} TenantId: {tenant_id} Status: '
+                         'Successful Apps: {services}')
+                     .format(env_id=environment.id,
+                             tenant_id=environment.tenant_id,
+                             services=services))
 
 
 def notification_endpoint_wrapper(priority='info'):
@@ -143,7 +148,7 @@ def notification_endpoint_wrapper(priority='info'):
 @notification_endpoint_wrapper()
 def track_instance(payload):
     LOG.debug('Got track instance request from orchestration '
-              'engine:\n{0}'.format(payload))
+              'engine:\n{payload}'.format(payload=payload))
     instance_id = payload['instance']
     instance_type = payload.get('instance_type', 0)
     environment_id = payload['environment']
@@ -159,7 +164,7 @@ def track_instance(payload):
 @notification_endpoint_wrapper()
 def untrack_instance(payload):
     LOG.debug('Got untrack instance request from orchestration '
-              'engine:\n{0}'.format(payload))
+              'engine:\n{payload}'.format(payload=payload))
     instance_id = payload['instance']
     environment_id = payload['environment']
     instances.InstanceStatsServices.destroy_instance(
@@ -169,7 +174,7 @@ def untrack_instance(payload):
 @notification_endpoint_wrapper()
 def report_notification(report):
     LOG.debug('Got report from orchestration '
-              'engine:\n{0}'.format(report))
+              'engine:\n{report}'.format(report=report))
 
     report['entity_id'] = report['id']
     del report['id']

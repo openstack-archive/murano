@@ -58,14 +58,15 @@ class Controller(object):
            contains the services
            :param path: The operation path
         """
-        LOG.debug('Applications:Get <EnvTemplateId: {0}, '
-                  'Path: {1}>'.format(env_template_id, path))
+        LOG.debug('Applications:Get <EnvTemplateId: {templ_id}, '
+                  'Path: {path}>'.format(templ_id=env_template_id, path=path))
 
         try:
             get_data = core_services.CoreServices.get_template_data
             result = get_data(env_template_id, path)
         except (KeyError, ValueError, AttributeError):
-            msg = 'The environment template does not exist' + env_template_id
+            msg = _('The environment template {templ_id} does not '
+                    'exist').format(templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
         return result
@@ -81,14 +82,15 @@ class Controller(object):
         :param path: The path include the service id
         :return: the service description.
         """
-        LOG.debug('Applications:Get <EnvTemplateId: {0}, '
-                  'Path: {1}>'.format(env_template_id, path))
+        LOG.debug('Applications:Get <EnvTemplateId: {templ_id}, '
+                  'Path: {path}>'.format(templ_id=env_template_id, path=path))
 
         try:
             get_data = core_services.CoreServices.get_template_data
             result = get_data(env_template_id, path)
         except (KeyError, ValueError, AttributeError):
-            msg = 'The template does not exist' + env_template_id
+            msg = _('The template does not exist {templ_id}').format(
+                templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
         return result
@@ -106,14 +108,17 @@ class Controller(object):
         :return: the service description.
         """
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
-        LOG.debug('Applications:Post <EnvTempId: {0}, Path: {2}, '
-                  'Body: {1}>'.format(env_template_id, secure_data, path))
+        LOG.debug('Applications:Post <EnvTempId: {env_id}, Path: {path}, '
+                  'Body: {body}>'.format(env_id=env_template_id,
+                                         body=secure_data,
+                                         path=path))
 
         post_data = core_services.CoreServices.post_application_data
         try:
             result = post_data(env_template_id, body, path)
         except (KeyError, ValueError):
-            msg = 'The template does not exist ' + env_template_id
+            msg = _('The template does not exist {templ_id}').format(
+                templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
         return result
@@ -131,8 +136,10 @@ class Controller(object):
         :param body: the information about the service
         :return: the service description updated.
         """
-        LOG.debug('Applications:Put <EnvTempId: {0}, Path: {2}, '
-                  'Body: {1}>'.format(env_template_id, body, path))
+        LOG.debug('Applications:Put <EnvTempId: {templ_id}, Path: {path}, '
+                  'Body: {body}>'.format(templ_id=env_template_id,
+                                         body=body,
+                                         path=path))
 
         put_data = core_services.CoreServices.put_data
         session_id = request.context.session
@@ -140,7 +147,8 @@ class Controller(object):
         try:
             result = put_data(env_template_id, session_id, body, path)
         except (KeyError, ValueError):
-            msg = 'The template does not exist' + env_template_id
+            msg = _('The template does not exist {templ_id}').format(
+                templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
         return result
@@ -155,13 +163,15 @@ class Controller(object):
         the service belongs to.
         :param path: The path contains the service id
         """
-        LOG.debug('Applications:Put <EnvTempId: {0}, '
-                  'Path: {1}>'.format(env_template_id, path))
+        LOG.debug('Applications:Put <EnvTempId: {templ_id}, '
+                  'Path: {path}>'.format(templ_id=env_template_id,
+                                         path=path))
         delete_data = core_services.CoreServices.delete_env_template_data
         try:
             delete_data(env_template_id, path)
         except (KeyError, ValueError):
-            msg = 'The template does not exist' + env_template_id
+            msg = _('The template does not exist {templ_id}').format(
+                templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
 

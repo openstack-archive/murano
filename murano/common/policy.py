@@ -19,8 +19,6 @@ from oslo_log import log as logging
 from oslo_policy import policy
 from webob import exc as exceptions
 
-from murano.common.i18n import _
-
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
@@ -44,8 +42,9 @@ def set_rules(data, default_rule=None, overwrite=True):
     if default_rule:
         _ENFORCER.default_rule = default_rule
 
-    msg = "Loading rules %s, default: %s, overwrite: %s"
-    LOG.debug(msg, data, default_rule, overwrite)
+    LOG.debug("Loading rules {rules}, default: {def_rule}, overwrite: "
+              "{overwrite}".format(rules=data, def_rule=default_rule,
+                                   overwrite=overwrite))
 
     if isinstance(data, dict):
         rules = policy.Rules.from_dict(data, default_rule)
@@ -77,13 +76,13 @@ def check(rule, ctxt, target={}, do_raise=True, exc=exceptions.HTTPForbidden):
         extra = {'policy': {'rule': rule, 'target': target}}
 
         if result:
-            LOG.info(_("Policy check succeeded for rule "
-                       "'%(rule)s' on target %(target)s"),
-                     {'rule': rule, 'target': repr(target)}, extra=extra)
+            LOG.debug("Policy check succeeded for rule {rule} on target "
+                      "{target}".format(rule=rule, target=repr(target),
+                                        extra=extra))
         else:
-            LOG.info(_("Policy check failed for rule "
-                       "'%(rule)s' on target: %(target)s"),
-                     {'rule': rule, 'target': repr(target)}, extra=extra)
+            LOG.debug("Policy check failed for rule {rule} on target: "
+                      "{target}".format(rule=rule, target=repr(target),
+                                        extra=extra))
 
 
 def check_is_admin(context):

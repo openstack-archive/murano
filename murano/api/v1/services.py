@@ -48,8 +48,8 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def get(self, request, environment_id, path):
-        LOG.debug('Services:Get <EnvId: {0}, '
-                  'Path: {1}>'.format(environment_id, path))
+        LOG.debug('Services:Get <EnvId: {env_id}, '
+                  'Path: {path}>'.format(env_id=environment_id, path=path))
 
         session_id = None
         if hasattr(request, 'context') and request.context.session:
@@ -74,8 +74,9 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPBadRequest(msg)
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
-        LOG.debug('Services:Post <EnvId: {0}, Path: {2}, '
-                  'Body: {1}>'.format(environment_id, secure_data, path))
+        LOG.debug('Services:Post <EnvId: {env_id}, Path: {path}, '
+                  'Body: {body}>'.format(env_id=environment_id,
+                                         body=secure_data, path=path))
 
         post_data = core_services.CoreServices.post_data
         session_id = request.context.session

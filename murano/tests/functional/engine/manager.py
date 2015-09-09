@@ -72,7 +72,8 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
                 self.fail('Environment has incorrect status {0}'.
                           format(status))
             time.sleep(5)
-        LOG.debug('Environment {0} is ready'.format(environment.name))
+        LOG.debug('Environment {env_name} is ready'.format(
+            env_name=environment.name))
         return environment.manager.get(environment.id)
 
     def status_check(self, environment, configurations, kubernetes=False):
@@ -88,11 +89,13 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
         for configuration in configurations:
             if kubernetes:
                 service_name = configuration[0]
-                LOG.debug('Service: {0}'.format(service_name))
+                LOG.debug('Service: {service_name}'.format(
+                    service_name=service_name))
                 inst_name = configuration[1]
-                LOG.debug('Instance: {0}'.format(inst_name))
+                LOG.debug('Instance: {instance_name}'.format(
+                    instance_name=inst_name))
                 ports = configuration[2:]
-                LOG.debug('Acquired ports: {0}'.format(ports))
+                LOG.debug('Acquired ports: {ports}'.format(ports=ports))
                 ip = self.get_k8s_ip_by_instance_name(environment, inst_name,
                                                       service_name)
                 if ip and ports:
@@ -153,7 +156,7 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
         start_time = time.time()
         while time.time() - start_time < 600:
             try:
-                LOG.debug('Checking: {0}:{1}'.format(ip, port))
+                LOG.debug('Checking: {ip}:{port}'.format(ip=ip, port=port))
                 self.verify_connection(ip, port)
                 return
             except RuntimeError as e:

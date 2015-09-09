@@ -217,8 +217,8 @@ class EnvironmentServices(object):
                 })
 
         network_type = DEFAULT_NETWORK_TYPES[network_driver]
-        LOG.debug("Setting '{0}' as environment's "
-                  "default network".format(network_type))
+        LOG.debug("Setting '{net_type}' as environment's "
+                  "default network".format(net_type=network_type))
         return {
             'environment': {
                 '?': {

@@ -20,6 +20,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import uuidutils
 
+from murano.common.i18n import _LI
 from murano.dsl import dsl
 from murano.dsl import helpers
 
@@ -43,10 +44,10 @@ class NetworkExplorer(object):
         routers = client.list_routers(
             tenant_id=self._tenant_id, name=router_name).get('routers')
         if len(routers) == 0:
-            LOG.debug('Router {0} not found'.format(router_name))
+            LOG.debug('Router {name} not found'.format(name=router_name))
             if self._settings.create_router:
-                LOG.debug('Attempting to create Router {0}'.
-                          format(router_name))
+                LOG.debug('Attempting to create Router {router}'.
+                          format(router=router_name))
                 external_network = self._settings.external_network
                 kwargs = {'id': external_network} \
                     if uuidutils.is_uuid_like(external_network) \
@@ -68,7 +69,7 @@ class NetworkExplorer(object):
                     }
                 }
                 router = client.create_router(body=body_data).get('router')
-                LOG.debug('Created router: {0}'.format(router))
+                LOG.info(_LI('Created router: {id}').format(id=router['id']))
                 return router['id']
             else:
                 raise KeyError('Router %s was not found' % router_name)

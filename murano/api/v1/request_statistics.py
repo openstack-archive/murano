@@ -63,10 +63,8 @@ def stats_count(api, method):
             except Exception:
                 te = time.time()
                 tenant = args[1].context.tenant
-                LOG.exception(
-                    _LE('API {0} method {1} raised an exception').format(
-                        api, method)
-                )
+                LOG.exception(_LE('API {api} method {method} raised an '
+                                  'exception').format(api=api, method=method))
                 update_error_count(api, method, te - te, tenant)
                 raise
         return wrap
@@ -75,17 +73,15 @@ def stats_count(api, method):
 
 
 def update_count(api, method, ex_time, tenant=None):
-    LOG.debug("Updating count stats for %s, %s on object %s" % (api,
-                                                                method,
-                                                                v1.stats))
+    LOG.debug("Updating count stats for {api}, {method} on object {object}"
+              .format(api=api, method=method, object=v1.stats))
     v1.stats.add_api_request(tenant, ex_time)
     v1.stats.request_count += 1
 
 
 def update_error_count(api, method, ex_time, tenant=None):
-    LOG.debug("Updating count stats for %s, %s on object %s" % (api,
-                                                                method,
-                                                                v1.stats))
+    LOG.debug("Updating count stats for {api}, {method} on object "
+              "{object}".format(api=api, method=method, object=v1.stats))
     v1.stats.add_api_error(tenant, ex_time)
     v1.stats.error_count += 1
     v1.stats.request_count += 1

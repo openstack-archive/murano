@@ -48,7 +48,7 @@ def _check_content_type(req, content_type):
     try:
         req.get_content_type((content_type,))
     except exceptions.UnsupportedContentType:
-        msg = _("Content-Type must be '{0}'").format(content_type)
+        msg = _("Content-Type must be '{type}'").format(type=content_type)
         LOG.error(msg)
         raise exc.HTTPBadRequest(explanation=msg)
 
@@ -70,10 +70,9 @@ def _get_filters(query_params):
         for i in order_by[:]:
             if ORDER_VALUES and i not in ORDER_VALUES:
                 filters['order_by'].remove(i)
-                LOG.warning(_LW(
-                    "Value of 'order_by' parameter is not valid. "
-                    "Allowed values are: {0}. Skipping it.").format(
-                    ", ".join(ORDER_VALUES)))
+                LOG.warning(_LW("Value of 'order_by' parameter is not valid. "
+                                "Allowed values are: {values}. Skipping it.")
+                            .format(values=", ".join(ORDER_VALUES)))
     return filters
 
 
@@ -96,9 +95,9 @@ def _validate_body(body):
                 ' The limit is {0} Mb').format(mb_limit))
 
     if len(body.keys()) > 2:
-        msg = _("'multipart/form-data' request body should contain "
-                "1 or 2 parts: json string and zip archive. Current body "
-                "consists of {0} part(s)").format(len(body.keys()))
+        msg = _("'multipart/form-data' request body should contain 1 or 2 "
+                "parts: json string and zip archive. Current body consists "
+                "of {amount} part(s)").format(amount=len(body.keys()))
         LOG.error(msg)
         raise exc.HTTPBadRequest(explanation=msg)
 
@@ -127,12 +126,12 @@ class Controller(object):
             try:
                 value = int(value)
             except ValueError:
-                msg = _("limit param must be an integer")
+                msg = _("Limit param must be an integer")
                 LOG.error(msg)
                 raise exc.HTTPBadRequest(explanation=msg)
 
             if value <= 0:
-                msg = _("limit param must be positive")
+                msg = _("Limit param must be positive")
                 LOG.error(msg)
                 raise exc.HTTPBadRequest(explanation=msg)
 
@@ -207,7 +206,8 @@ class Controller(object):
             try:
                 jsonschema.validate(package_meta, schemas.PKG_UPLOAD_SCHEMA)
             except jsonschema.ValidationError as e:
-                msg = _("Package schema is not valid: {0}").format(e)
+                msg = _("Package schema is not valid: {reason}").format(
+                    reason=e)
                 LOG.exception(msg)
                 raise exc.HTTPBadRequest(explanation=msg)
         else:
@@ -243,7 +243,8 @@ class Controller(object):
                     raise exc.HTTPConflict(msg)
                 return package.to_dict()
         except pkg_exc.PackageLoadError as e:
-            msg = _("Couldn't load package from file: {0}").format(e)
+            msg = _("Couldn't load package from file: {reason}").format(
+                reason=e)
             LOG.exception(msg)
             raise exc.HTTPBadRequest(explanation=msg)
         finally:

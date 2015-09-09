@@ -44,7 +44,8 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         all_tenants = request.GET.get('all_tenants', 'false').lower() == 'true'
-        LOG.debug('Environments:List <all_tenants: {0}>'.format(all_tenants))
+        LOG.debug('Environments:List <all_tenants: {tenants}>'.format(
+                  tenants=all_tenants))
 
         if all_tenants:
             policy.check('list_environments_all_tenants', request.context)
@@ -61,7 +62,7 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        LOG.debug(u'Environments:Create <Body {0}>'.format(body))
+        LOG.debug('Environments:Create <Body {body}>'.format(body=body))
         policy.check('create_environment', request.context)
 
         if not body.get('name'):
@@ -84,8 +85,8 @@ class Controller(object):
                 LOG.exception(msg)
                 raise exc.HTTPConflict(explanation=msg)
         else:
-            msg = _('Environment name must contain only alphanumeric '
-                    'or "_-." characters, must start with alpha')
+            msg = _('Environment name must contain only alphanumericor "_-." '
+                    'characters, must start with alpha')
             LOG.exception(msg)
             raise exc.HTTPClientError(explanation=msg)
 
@@ -94,7 +95,7 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Show')
     @verify_env
     def show(self, request, environment_id):
-        LOG.debug('Environments:Show <Id: {0}>'.format(environment_id))
+        LOG.debug('Environments:Show <Id: {id}>'.format(id=environment_id))
         target = {"environment_id": environment_id}
         policy.check('show_environment', request.context, target)
 
@@ -119,21 +120,20 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Update')
     @verify_env
     def update(self, request, environment_id, body):
-        LOG.debug('Environments:Update <Id: {0}, '
-                  'Body: {1}>'.format(environment_id, body))
+        LOG.debug('Environments:Update <Id: {id}, '
+                  'Body: {body}>'.format(id=environment_id, body=body))
         target = {"environment_id": environment_id}
         policy.check('update_environment', request.context, target)
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
-        LOG.debug('ENV NAME: {0}>'.format(body['name']))
         if VALID_NAME_REGEX.match(str(body['name'])):
             try:
                 environment.update(body)
                 environment.save(session)
             except db_exc.DBDuplicateEntry:
                 msg = _('Environment with specified name already exists')
-                LOG.exception(msg)
+                LOG.error(msg)
                 raise exc.HTTPConflict(explanation=msg)
         else:
             msg = _('Environment name must contain only alphanumeric '
@@ -149,10 +149,12 @@ class Controller(object):
         policy.check('delete_environment', request.context, target)
         if request.GET.get('abandon', '').lower() == 'true':
             check_env(request, environment_id)
-            LOG.debug('Environments:Abandon  <Id: {0}>'.format(environment_id))
+            LOG.debug('Environments:Abandon  <Id: {id}>'
+                      .format(id=environment_id))
             envs.EnvironmentServices.remove(environment_id)
         else:
-            LOG.debug('Environments:Delete <Id: {0}>'.format(environment_id))
+            LOG.debug('Environments:Delete <Id: {id}>'
+                      .format(id=environment_id))
             sessions_controller = sessions.Controller()
             session = sessions_controller.configure(request, environment_id)
             session_id = session['id']

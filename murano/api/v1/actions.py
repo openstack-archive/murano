@@ -20,7 +20,7 @@ from murano.common import wsgi
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.common.i18n import _LI, _LE, _
+from murano.common.i18n import _LE, _, _LW
 from murano.services import actions
 from murano.services import states
 from murano.utils import verify_env
@@ -43,17 +43,17 @@ class Controller(object):
         env_status = envs.EnvironmentServices.get_status(environment_id)
         if env_status in (states.EnvironmentStatus.DEPLOYING,
                           states.EnvironmentStatus.DELETING):
-            LOG.info(_LI('Could not open session for environment <EnvId: {0}>,'
-                         'environment has deploying '
-                         'status.').format(environment_id))
+            LOG.warning(_LW('Could not open session for environment '
+                            '<EnvId: {id}>, environment has deploying '
+                            'status.').format(id=environment_id))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
         session = sessions.SessionServices.create(environment_id, user_id)
 
         if not sessions.SessionServices.validate(session):
-            LOG.error(_LE('Session <SessionId {0}> '
-                          'is invalid').format(session.id))
+            LOG.error(_LE('Session <SessionId {id}> '
+                          'is invalid').format(id=session.id))
             raise exc.HTTPForbidden()
 
         task_id = actions.ActionServices.execute(
@@ -64,7 +64,7 @@ class Controller(object):
     def get_result(self, request, environment_id, task_id):
         policy.check("execute_action", request.context, {})
 
-        LOG.debug('Action:GetResult <TaskId: {0}>'.format(task_id))
+        LOG.debug('Action:GetResult <TaskId: {id}>'.format(id=task_id))
 
         unit = db_session.get_session()
         result = actions.ActionServices.get_result(environment_id, task_id,
@@ -72,10 +72,9 @@ class Controller(object):
 
         if result is not None:
             return result
-        msg = (_('Result for task with environment_id: {} and '
-                 'task_id: {} was not found.')
-               .format(environment_id, task_id))
-
+        msg = _('Result for task with environment_id: {env_id} and task_id:'
+                '{task_id} was not found.').format(env_id=environment_id,
+                                                   task_id=task_id)
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
 

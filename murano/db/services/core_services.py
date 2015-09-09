@@ -90,8 +90,8 @@ class CoreServices(object):
 
         result = utils.TraverseHelper.get(path, temp_description)
         if result is None:
-            msg = _('Environment Template <EnvId {0}> is not found').format(
-                env_template_id)
+            msg = _('Environment Template <EnvId {id}> is not found').format(
+                id=env_template_id)
             LOG.error(msg)
             raise exc.HTTPNotFound(explanation=msg)
         return result
@@ -110,8 +110,8 @@ class CoreServices(object):
 
         temp_description = get_description(env_template_id)
         if temp_description is None:
-            msg = _('Environment Template <EnvId {0}> is not found').format(
-                env_template_id)
+            msg = _('Environment Template <EnvId {id}> is not found').format(
+                id=env_template_id)
             LOG.error(msg)
             raise exc.HTTPNotFound(explanation=msg)
 
