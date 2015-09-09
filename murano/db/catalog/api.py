@@ -324,7 +324,7 @@ def package_search(filters, context, limit=None, catalog=False):
 
     sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
                  filters.get('order_by', ['name'])]
-
+    sort_keys.append('id')
     marker = filters.get('marker')
     sort_dir = filters.get('sort_dir')
 
