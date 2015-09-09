@@ -57,7 +57,7 @@ class TestSessions(base.TestCase):
 
         sess = self.client.create_session(env['id'])[1]
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(exceptions.BadRequest,
                           self.client.delete_session,
                           None,
                           sess['id'])
@@ -81,7 +81,7 @@ class TestSessions(base.TestCase):
 
         sess = self.client.create_session(env['id'])[1]
 
-        self.assertRaises(exceptions.NotFound,
+        self.assertRaises(exceptions.BadRequest,
                           self.client.get_session,
                           None,
                           sess['id'])

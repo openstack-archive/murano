@@ -69,7 +69,9 @@ class Controller(object):
             raise exc.HTTPUnauthorized(explanation=msg)
 
         if not sessions.SessionServices.validate(session):
-            msg = _('Session <SessionId {0}> is invalid').format(session_id)
+            msg = _('Session <SessionId {0}> is invalid: environment has been'
+                    ' updated or updating right now with other session'
+                    ).format(session_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
@@ -112,7 +114,9 @@ class Controller(object):
         check_session(request, environment_id, session, session_id)
 
         if not sessions.SessionServices.validate(session):
-            msg = _('Session <SessionId {0}> is invalid').format(session_id)
+            msg = _('Session <SessionId {0}> is invalid: environment has been '
+                    'updated or updating right now with other session'
+                    ).format(session_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 

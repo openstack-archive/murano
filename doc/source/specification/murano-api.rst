@@ -414,6 +414,8 @@ With this request all local changes made within the environment start to deploy 
 +----------------+-----------------------------------------------------------+
 | 403            | Session is already deployed or deployment is in progress  |
 +----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified session doesn`t exist                |
++----------------+-----------------------------------------------------------+
 
 Get session details
 -------------------
@@ -451,6 +453,8 @@ Get session details
 +----------------+-----------------------------------------------------------+
 | 403            | Session is invalid                                        |
 +----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified session doesn`t exist                |
++----------------+-----------------------------------------------------------+
 
 Delete session
 --------------
@@ -474,6 +478,8 @@ Delete session
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
 | 403            | Session is in deploying state and could not be deleted    |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified session doesn`t exist                |
 +----------------+-----------------------------------------------------------+
 
 Environment deployments API
@@ -691,6 +697,20 @@ Created application returned
             "id": "190c8705-5784-4782-83d7-0ab55a1449a1"
         }
     }
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | Session is deleted successfully                           |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 403            | Session is in deploying state and could not be deleted    |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified session doesn`t exist                |
++----------------+-----------------------------------------------------------+
+| 400            | Required header or body are not provided                  |
++----------------+-----------------------------------------------------------+
 
 Delete application from environment
 -----------------------------------

@@ -19,6 +19,7 @@ from webob import exc
 
 from murano.api.v1 import request_statistics
 from murano.common.helpers import token_sanitizer
+from murano.common.i18n import _
 from murano.common import wsgi
 from murano.db.services import core_services
 from murano import utils
@@ -66,7 +67,12 @@ class Controller(object):
     @utils.verify_session
     @utils.verify_env
     @normalize_path
-    def post(self, request, environment_id, path, body):
+    def post(self, request, environment_id, path, body=None):
+        if not body:
+            msg = _('Request body is empty: please, provide'
+                    ' application object model')
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(msg)
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
         LOG.debug('Services:Post <EnvId: {0}, Path: {2}, '
                   'Body: {1}>'.format(environment_id, secure_data, path))
@@ -83,7 +89,12 @@ class Controller(object):
     @utils.verify_session
     @utils.verify_env
     @normalize_path
-    def put(self, request, environment_id, path, body):
+    def put(self, request, environment_id, path, body=None):
+        if not body:
+            msg = _('Request body is empty: please, provide'
+                    ' application object model')
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(msg)
         LOG.debug('Services:Put <EnvId: {0}, Path: {2}, '
                   'Body: {1}>'.format(environment_id, body, path))
 
@@ -101,7 +112,7 @@ class Controller(object):
     @utils.verify_env
     @normalize_path
     def delete(self, request, environment_id, path):
-        LOG.debug('Services:Put <EnvId: {0}, '
+        LOG.debug('Services:Delete <EnvId: {0}, '
                   'Path: {1}>'.format(environment_id, path))
 
         delete_data = core_services.CoreServices.delete_data
