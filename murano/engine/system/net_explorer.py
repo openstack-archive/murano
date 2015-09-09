@@ -19,7 +19,9 @@ from netaddr.strategy import ipv4
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import uuidutils
+import retrying
 
+from murano.common import exceptions as exc
 from murano.common.i18n import _LI
 from murano.dsl import dsl
 from murano.dsl import helpers
@@ -37,6 +39,12 @@ class NetworkExplorer(object):
         self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
 
+    # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
+    # decorator with random delay 1-10 seconds between attempts and maximum
+    # delay time 30 seconds.
+    @retrying.retry(retry_on_exception=exc.RouterInfoException,
+                    wait_random_min=1000, wait_random_max=10000,
+                    stop_max_delay=30000)
     def get_default_router(self):
         client = self._clients.get_neutron_client()
         router_name = self._settings.router_name
@@ -75,8 +83,8 @@ class NetworkExplorer(object):
                 raise KeyError('Router %s was not found' % router_name)
         else:
             if routers[0]['external_gateway_info'] is None:
-                raise Exception('Please set external gateway '
-                                'for the router %s ' % router_name)
+                raise exc.RouterInfoException('Please set external gateway for'
+                                              ' the router %s ' % router_name)
             router_id = routers[0]['id']
         return router_id
 

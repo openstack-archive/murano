@@ -62,3 +62,7 @@ class TimeoutException(Exception):
 
 class PolicyViolationException(Exception):
     pass
+
+
+class RouterInfoException(Exception):
+    pass
