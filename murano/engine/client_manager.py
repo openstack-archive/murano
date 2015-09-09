@@ -23,7 +23,7 @@ import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 
 from murano.common import auth_utils
-
+from muranoclient.glance import client as art_client
 
 try:
     # integration with congress is optional
@@ -162,14 +162,33 @@ class ClientManager(object):
                     service_type='application_catalog',
                     endpoint_type=murano_settings.endpoint_type)
 
+            if CONF.packages_opts.packages_service == 'glance':
+                glance_settings = CONF.glance
+                glance_url = (glance_settings.url or
+                              keystone_client.service_catalog.url_for(
+                                  service_type='image',
+                                  endpoint_type=glance_settings.endpoint_type))
+
+                arts = art_client.Client(
+                    endpoint=glance_url, token=auth_token,
+                    insecure=glance_settings.insecure,
+                    key_file=glance_settings.key_file or None,
+                    ca_file=glance_settings.ca_file or None,
+                    cert_file=glance_settings.cert_file or None,
+                    type_name='murano',
+                    type_version=1)
+            else:
+                arts = None
+
             return muranoclient.Client(
                 endpoint=murano_url,
                 key_file=murano_settings.key_file or None,
-                cacert=murano_settings.cacert or None,
+                ca_file=murano_settings.cacert or None,
                 cert_file=murano_settings.cert_file or None,
                 insecure=murano_settings.insecure,
                 auth_url=keystone_client.auth_url,
-                token=auth_token)
+                token=auth_token,
+                artifacts_client=arts)
 
         return self.get_client('murano', use_trusts, factory)
 
@@ -198,3 +217,25 @@ class ClientManager(object):
                                         user_id=keystone_client.user_id)
 
         return self.get_client('mistral', use_trusts, factory)
+
+    def get_artifacts_client(self, use_trusts=True):
+        if not CONF.engine.use_trusts:
+            use_trusts = False
+
+        def factory(keystone_client, auth_token):
+            glance_settings = CONF.glance
+
+            glance_url = (glance_settings.url or
+                          keystone_client.service_catalog.url_for(
+                              service_type='image',
+                              endpoint_type=glance_settings.endpoint_type))
+
+            return art_client.Client(endpoint=glance_url, token=auth_token,
+                                     insecure=glance_settings.insecure,
+                                     key_file=glance_settings.key_file or None,
+                                     cacert=glance_settings.cacert or None,
+                                     cert_file=(glance_settings.cert_file or
+                                                None),
+                                     type_name='murano',
+                                     type_version=1)
+        return self.get_client('artifacts', use_trusts, factory)

@@ -241,16 +241,17 @@ def contextual(ctx):
 
 def parse_version_spec(version_spec):
     if isinstance(version_spec, semantic_version.Spec):
-        return version_spec
+        return normalize_version_spec(version_spec)
     if isinstance(version_spec, semantic_version.Version):
-        return semantic_version.Spec('==' + str(version_spec))
+        return normalize_version_spec(
+            semantic_version.Spec('==' + str(version_spec)))
     if not version_spec:
         version_spec = '0'
     version_spec = str(version_spec).translate(None, string.whitespace)
     if version_spec[0].isdigit():
         version_spec = '==' + str(version_spec)
     version_spec = semantic_version.Spec(version_spec)
-    return version_spec
+    return normalize_version_spec(version_spec)
 
 
 def parse_version(version):
@@ -347,3 +348,70 @@ def memoize(func):
         else:
             return cache[args]
     return wrap
+
+
+def normalize_version_spec(version_spec):
+    def coerce(v):
+        return semantic_version.Version('{0}.{1}.{2}'.format(
+            v.major, v.minor or 0, v.patch or 0
+        ))
+
+    def increment(v):
+        # NOTE(ativelkov): replace these implementations with next_minor() and
+        # next_major() calls when the semantic_version is updated in global
+        # requirements.
+        if v.minor is None:
+            return semantic_version.Version(
+                '.'.join(str(x) for x in [v.major + 1, 0, 0]))
+        else:
+            return semantic_version.Version(
+                '.'.join(str(x) for x in [v.major, v.minor + 1, 0]))
+
+    def extend(v):
+        return semantic_version.Version(str(v) + '-0')
+
+    transformations = {
+        '>': [('>=', (increment, extend))],
+        '>=': [('>=', (coerce,))],
+        '<': [('<', (coerce, extend))],
+        '<=': [('<', (increment, extend))],
+        '!=': [('>=', (increment, extend))],
+        '==': [('>=', (coerce,)), ('<', (increment, coerce, extend))]
+    }
+
+    new_parts = []
+    for item in version_spec.specs:
+        if item.kind == '*':
+            continue
+        elif item.spec.patch is not None:
+            new_parts.append(str(item))
+        else:
+            for op, funcs in transformations[item.kind]:
+                new_parts.append('{0}{1}'.format(
+                    op,
+                    reduce(lambda v, f: f(v), funcs, item.spec)
+                ))
+    if not new_parts:
+        return semantic_version.Spec('*')
+    return semantic_version.Spec(*new_parts)
+
+
+semver_to_api_map = {
+    '>': 'gt',
+    '>=': 'ge',
+    '<': 'lt',
+    '<=': 'le',
+    '!=': 'ne',
+    '==': 'eq'
+}
+
+
+def breakdown_spec_to_query(normalized_spec):
+    res = []
+    for item in normalized_spec.specs:
+        if item.kind == '*':
+            continue
+        else:
+            res.append("%s:%s" % (semver_to_api_map[item.kind],
+                                  item.spec))
+    return res
