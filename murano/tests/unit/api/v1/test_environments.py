@@ -191,6 +191,17 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertIn('Environment name should be 255 characters maximum',
                       result_msg)
 
+    def test_create_environment_with_empty_body(self):
+        """Check that empty request body results in an HTTPBadResquest."""
+        body = ''
+        req = self._post('/environments', body)
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        self.assertIn('The server could not comply with the request since it '
+                      'is either malformed or otherwise incorrect.',
+                      result_msg)
+
     def test_missing_environment(self):
         """Check that a missing environment results in an HTTPNotFound.
 
