@@ -169,7 +169,7 @@ class TaskExecutor(object):
 
         if obj is not None:
             try:
-                self._validate_model(obj.object, self.action, pkg_loader)
+                self._validate_model(obj.object, pkg_loader)
             except Exception as e:
                 return self.exception_result(e, obj, '<validate>')
 
@@ -236,11 +236,12 @@ class TaskExecutor(object):
             }
         }
 
-    def _validate_model(self, obj, action, package_loader):
+    def _validate_model(self, obj, pkg_loader):
         if CONF.engine.enable_model_policy_enforcer:
-            if action is not None and action['method'] == 'deploy':
-                self._model_policy_enforcer.validate(
-                    obj.to_dictionary(), package_loader)
+            if obj is not None:
+                self._model_policy_enforcer.modify(obj, pkg_loader)
+                self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                     pkg_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])

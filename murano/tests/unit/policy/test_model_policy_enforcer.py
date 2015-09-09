@@ -26,22 +26,23 @@ CONF = cfg.CONF
 
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
-    obj = mock.Mock()
-    package_loader = mock.Mock()
-
-    model_dict = mock.Mock()
-    obj.to_dictionary = mock.Mock(return_value=model_dict)
-
-    task = {
-        'action': {'method': 'deploy'},
-        'model': {'Objects': None},
-        'token': 'token',
-        'tenant_id': 'environment.tenant_id',
-        'id': 'environment.id'
-    }
-
     def setUp(self):
         super(TestModelPolicyEnforcer, self).setUp()
+
+        self.obj = mock.Mock()
+        self.package_loader = mock.Mock()
+
+        self.model_dict = mock.Mock()
+        self.obj.to_dictionary = mock.Mock(return_value=self.model_dict)
+
+        self.task = {
+            'action': {'method': 'deploy'},
+            'model': {'Objects': None},
+            'token': 'token',
+            'tenant_id': 'environment.tenant_id',
+            'id': 'environment.id'
+        }
+
         self.congress_client_mock = \
             mock.Mock(spec=congressclient.v1.client.Client)
 
@@ -58,8 +59,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = False
-        executor._validate_model(self.obj, self.task['action'],
-                                 self.package_loader)
+        executor._validate_model(self.obj, self.package_loader)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
@@ -68,12 +68,17 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = True
-        executor._validate_model(self.obj, self.task['action'],
-                                 self.package_loader)
+        executor._validate_model(self.obj, self.package_loader)
 
         executor._model_policy_enforcer \
             .validate.assert_called_once_with(self.model_dict,
                                               self.package_loader)
+
+    def test_enforcer_no_client(self):
+        self.client_manager_mock.get_congress_client.return_value = None
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        model = {'?': {'id': '123', 'type': 'class'}}
+        self.assertRaises(ValueError, enforcer.validate, model)
 
     def test_validation_pass(self):
         self.congress_client_mock.execute_policy_action.return_value = \
@@ -91,6 +96,22 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         self.assertRaises(model_policy_enforcer.ValidationError,
                           enforcer.validate, model)
 
+    def test_modify(self):
+        model = {'?': {'id': '123', 'type': 'class'}}
+        obj = mock.MagicMock()
+        obj.to_dictionary = mock.Mock(return_value=model)
+        self.congress_client_mock.execute_policy_action.return_value = \
+            {"result": [
+                'predeploy_modify("123","instance1",'
+                '"remove-object: {object_id: "12"}")']}
+
+        action_manager = mock.MagicMock()
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(
+            self.environment, action_manager)
+
+        enforcer.modify(obj)
+        self.assertTrue(action_manager.apply_action.called)
+
     def test_parse_result(self):
         congress_response = [
             'unexpected response',
@@ -100,20 +121,26 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         ]
 
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        result = enforcer._parse_messages('env1', congress_response)
-        print result
+        result = enforcer._parse_simulation_result(
+            'predeploy_errors', 'env1', congress_response)
 
         self.assertFalse("unexpected response" in result)
         self.assertTrue("Instance 1 has problem" in result)
         self.assertTrue("Instance 2 has problem" in result)
         self.assertFalse("Instance 3 has problem" in result)
 
-    def test_action_not_deploy(self):
+    def test_none_model(self):
         executor = engine.TaskExecutor(self.task)
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = True
-        executor._validate_model(self.obj, {'method': 'not_deploy'},
-                                 self.package_loader)
 
+        executor._validate_model(None, self.package_loader)
+
+        self.assertFalse(executor._model_policy_enforcer.modify.called)
         self.assertFalse(executor._model_policy_enforcer.validate.called)
+
+        executor._validate_model(self.obj, self.package_loader)
+
+        self.assertTrue(executor._model_policy_enforcer.modify.called)
+        self.assertTrue(executor._model_policy_enforcer.validate.called)
