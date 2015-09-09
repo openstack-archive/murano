@@ -108,10 +108,15 @@ class MuranoPackage(dsl_types.MuranoPackage):
             method = getattr(cls, method_name)
             if not inspect.ismethod(method):
                 continue
-            m_class.add_method(
+            # TODO(slagun): update the code below to use yaql native
+            # method for this when https://review.openstack.org/#/c/220748/
+            # will get merged and Murano requirements bump to corresponding
+            # yaql version
+            method_name_alias = (getattr(
+                method, '__murano_name', None) or
                 yaql_integration.CONVENTION.convert_function_name(
-                    method_name),
-                method)
+                    method_name.rstrip('_')))
+            m_class.add_method(method_name_alias, method)
         self._imported_types.add(cls)
         return m_class
 
