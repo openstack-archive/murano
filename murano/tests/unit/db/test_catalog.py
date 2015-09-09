@@ -11,7 +11,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import unittest
 import uuid
 
 from oslo_db import exception as db_exception
@@ -181,16 +180,16 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         res = api.package_search({'marker': marker}, self.context, limit=4)
         self.assertEqual(len(res), 0)
 
-    @unittest.expectedFailure
     def test_pagination_loops_through_names(self):
-        """Creates 10 packages with the same name and iterates through them,
+        """Creates 10 packages with the same display name and iterates through them,
         checking that package are not skipped.
         """
 
-        # TODO(kzaitsev): fix https://bugs.launchpad.net/murano/+bug/1448782
         for dummy in range(10):
-            api.package_upload(self._stub_package(
-                fully_qualified_name=str(uuid.uuid4())), self.tenant_id)
+            api.package_upload(
+                self._stub_package(name='test',
+                                   fully_qualified_name=str(uuid.uuid4())),
+                self.tenant_id)
         res = api.package_search({}, self.context, limit=4)
         self.assertEqual(len(res), 4)
         marker = res[-1].id
