@@ -77,7 +77,11 @@ following command.
 
    .. code-block:: console
 
+      # create murano_system policy
       openstack congress policy create murano_system
+
+      # resolves objects within environment
+      openstack congress policy rule create murano_system 'murano_env_of_object(oid,eid):-murano:connected(eid,oid), murano:objects(eid,tid,"io.murano.Environment")'
    ..
 
    - **murano_action** policy with internal management rules
