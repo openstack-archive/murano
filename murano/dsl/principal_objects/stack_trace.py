@@ -66,7 +66,7 @@ def compose_stack_frame(context):
     method = helpers.get_current_method(context)
     return {
         'instruction': None if instruction is None
-        else str(instruction),
+        else unicode(instruction),
 
         'location': None if instruction is None
         else instruction.source_file_position,
@@ -94,10 +94,10 @@ def format_frame(frame, prefix=''):
             instruction,
             prefix
         )
-        return ('{5}File "{0}", line {1}{2} in method {3}\n'
-                '{5}    {4}').format(*args)
+        return (u'{5}File "{0}", line {1}{2} in method {3}\n'
+                u'{5}    {4}').format(*args)
     else:
-        return '{2}File <unknown> in method {0}\n{2}    {1}'.format(
+        return u'{2}File <unknown> in method {0}\n{2}    {1}'.format(
             method, instruction, prefix)
 
 

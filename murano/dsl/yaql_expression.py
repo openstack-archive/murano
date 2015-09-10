@@ -15,7 +15,6 @@
 import re
 import types
 
-from oslo_utils import encodeutils
 from yaql.language import exceptions as yaql_exceptions
 from yaql.language import expressions
 
@@ -28,7 +27,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
     def __init__(self, expression, version):
         self._version = version
         if isinstance(expression, types.StringTypes):
-            self._expression = encodeutils.safe_encode(expression)
+            self._expression = unicode(expression)
             self._parsed_expression = yaql_integration.parse(
                 self._expression, version)
             self._file_position = None

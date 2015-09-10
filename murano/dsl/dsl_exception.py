@@ -20,7 +20,7 @@ from murano.dsl.principal_objects import stack_trace
 class MuranoPlException(Exception):
     def __init__(self, names, message, stacktrace, extra=None, cause=None):
         super(MuranoPlException, self).__init__(
-            '[{0}]: {1}'.format(', '.join(names), message))
+            u'[{0}]: {1}'.format(', '.join(names), message))
         if not isinstance(names, list):
             names = [names]
         self._names = names

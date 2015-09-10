@@ -149,21 +149,6 @@ class TestYaqlExpression(base.MuranoTestCase):
 
         self.assertEqual('string', yaql_expr.expression)
 
-    def test_unicode_expression(self):
-        yaql_expr = yaql_expression.YaqlExpression(u"'yaql ♥ unicode'",
-                                                   self._version)
-
-        self.assertEqual(u"'yaql ♥ unicode'".encode('utf-8'),
-                         yaql_expr.expression)
-
-    def test_unicode_expression_expression(self):
-        yaql_expr = yaql_expression.YaqlExpression(u"'yaql ♥ unicode'",
-                                                   self._version)
-        yaql_expr2 = yaql_expression.YaqlExpression(yaql_expr, self._version)
-
-        self.assertEqual(u"'yaql ♥ unicode'".encode('utf-8'),
-                         yaql_expr2.expression)
-
     def test_evaluate_calls(self):
         string = 'string'
         expected_calls = [mock.call(string, self._version),

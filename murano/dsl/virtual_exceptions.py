@@ -50,10 +50,10 @@ class ThrowMacro(expressions.DslExpression):
             helpers.evaluate(self._message, context),
             stacktrace, self._extra, cause)
 
-    def __str__(self):
+    def __unicode__(self):
         if self._message:
-            return 'Throw {0}: {1}'.format(self._names, self._message)
-        return 'Throw ' + str(self._names)
+            return u'Throw {0}: {1}'.format(self._names, self._message)
+        return u'Throw ' + unicode(self._names)
 
 
 class CatchBlock(expressions.DslExpression):

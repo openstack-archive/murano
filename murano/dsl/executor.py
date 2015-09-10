@@ -145,10 +145,10 @@ class MuranoDslExecutor(object):
     def _log_method(self, context, args, kwargs):
         method = helpers.get_current_method(context)
         param_gen = itertools.chain(
-            (str(arg) for arg in args),
-            ('{0} => {1}'.format(name, value)
+            (unicode(arg) for arg in args),
+            (u'{0} => {1}'.format(name, value)
              for name, value in kwargs.iteritems()))
-        params_str = ', '.join(param_gen)
+        params_str = u', '.join(param_gen)
         method_name = '{0}::{1}'.format(method.murano_class.name, method.name)
         thread_id = helpers.get_current_thread_id()
         caller_str = ''
@@ -158,18 +158,20 @@ class MuranoDslExecutor(object):
             if frame['location']:
                 caller_str = ' called from ' + stack_trace.format_frame(frame)
 
-        LOG.trace('{thread}: Begin execution {method}({params}){caller}'
+        LOG.trace(u'{thread}: Begin execution {method}({params}){caller}'
                   .format(thread=thread_id, method=method_name,
                           params=params_str, caller=caller_str))
         try:
             def log_result(result):
-                LOG.trace('{thread}: End execution {method} with result '
-                          '{result}'.format(thread=thread_id,
-                                            method=method_name, result=result))
+                LOG.trace(
+                    u'{thread}: End execution {method} with result '
+                    u'{result}'.format(
+                        thread=thread_id, method=method_name, result=result))
             yield log_result
         except Exception as e:
-            LOG.trace('{thread}: End execution {method} with exception {exc}'
-                      .format(thread=thread_id, method=method_name, exc=e))
+            LOG.trace(
+                u'{thread}: End execution {method} with exception '
+                u'{exc}'.format(thread=thread_id, method=method_name, exc=e))
             raise
 
     @staticmethod

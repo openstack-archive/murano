@@ -21,7 +21,7 @@ from yaql.language import yaqltypes
 
 from murano.dsl import dsl
 
-NAME_TEMPLATE = 'applications.{0}'
+NAME_TEMPLATE = u'applications.{0}'
 
 inject_format = specs.inject(
     '_Logger__yaql_format_function',
@@ -39,42 +39,49 @@ class Logger(object):
         self._underlying_logger = logging.getLogger(
             NAME_TEMPLATE.format(logger_name))
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def trace(__self, __yaql_format_function, __message, *args, **kwargs):
         __self._log(__self._underlying_logger.trace,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def debug(__self, __yaql_format_function, __message, *args, **kwargs):
         __self._log(__self._underlying_logger.debug,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def info(__self, __yaql_format_function, __message, *args, **kwargs):
         __self._log(__self._underlying_logger.info,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def warning(__self, __yaql_format_function, __message, *args, **kwargs):
         __self._log(__self._underlying_logger.warning,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def error(__self, __yaql_format_function, __message, *args, **kwargs):
         __self._log(__self._underlying_logger.error,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def critical(__self, __yaql_format_function,
                  __message, *args, **kwargs):
         __self._log(__self._underlying_logger.critical,
                     __yaql_format_function, __message, args, kwargs)
 
+    @specs.parameter('_Logger__message', yaqltypes.String())
     @inject_format
     def exception(__self, __yaql_format_function,
                   __exc, __message, *args, **kwargs):
         """Print error message and stacktrace"""
-        stack_trace_message = '\n'.join([
+        stack_trace_message = u'\n'.join([
             __self._format_without_exceptions(
                 __yaql_format_function, __message, args, kwargs),
             __exc['stackTrace']().toString()
@@ -95,7 +102,7 @@ class Logger(object):
             # NOTE(akhivin): we do not want break program workflow
             # even formatting parameters are incorrect
             self._underlying_logger.warning(
-                'Can not format string: {0}'.format(message))
+                u'Can not format string: {0}'.format(message))
         return message
 
     def _log(self, log_function, yaql_format_function, message, args, kwargs):

@@ -1,0 +1,29 @@
+Name: TestUnicode
+
+Methods:
+  testLiteral:
+    Body:
+      Return: солнце ♥ φεγγάρι
+
+  testExpression:
+    Body:
+      - Return:  ('солнце ♥' + ' φεγγάρι').toUpper()
+
+
+  testParameter:
+    Body:
+      - Return:  $.foo('солнце ♥ φεγγάρι')
+
+
+  testException:
+    Body:
+      - Throw: Exception
+        Message: солнце ♥ φεγγάρι
+
+
+  foo:
+    Arguments:
+      arg:
+        Contract: $.string().notNull()
+    Body:
+      Return: $arg.toUpper()

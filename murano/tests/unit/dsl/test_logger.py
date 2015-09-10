@@ -1,3 +1,4 @@
+# coding: utf-8
 # Copyright (c) 2015 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
@@ -26,6 +27,7 @@ class TestLogger(test_case.DslTestCase):
 
     FORMAT_CALLS = [
         call(ANY, 'str', (), {}),
+        call(ANY, u'тест', (), {}),
         call(ANY, 'str', (1,), {}),
         call(ANY, 'str {0}', ('message',), {}),
         call(ANY, 'str {message}', (), {'message': 'message'}),

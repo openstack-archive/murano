@@ -15,6 +15,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.debug('str')
+      - $log.debug('тест')
       - $log.debug('str', 1)
       - $log.debug('str {0}', message)
       - $log.debug('str {message}', message=>message)
@@ -26,6 +27,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.trace('str')
+      - $log.trace('тест')
       - $log.trace('str', 1)
       - $log.trace('str {0}', message)
       - $log.trace('str {message}', message=>message)
@@ -37,6 +39,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.info('str')
+      - $log.info('тест')
       - $log.info('str', 1)
       - $log.info('str {0}', message)
       - $log.info('str {message}', message=>message)
@@ -48,6 +51,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.warning('str')
+      - $log.warning('тест')
       - $log.warning('str', 1)
       - $log.warning('str {0}', message)
       - $log.warning('str {message}', message=>message)
@@ -59,6 +63,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.error('str')
+      - $log.error('тест')
       - $log.error('str', 1)
       - $log.error('str {0}', message)
       - $log.error('str {message}', message=>message)
@@ -70,6 +75,7 @@ Methods:
           Contract: $.class(sys:Logger).notNull()
     Body:
       - $log.critical('str')
+      - $log.critical('тест')
       - $log.critical('str', 1)
       - $log.critical('str {0}', message)
       - $log.critical('str {message}', message=>message)
@@ -87,6 +93,7 @@ Methods:
         As: e
         Do:
           - $log.exception($e, 'str')
+          - $log.exception($e, 'тест')
           - $log.exception($e, 'str', 1)
           - $log.exception($e, 'str {0}', message)
           - $log.exception($e, 'str {message}', message=>message)
@@ -98,4 +105,3 @@ Methods:
     Body:
       - Throw: exceptionName
         Message: exception message
-
