@@ -132,8 +132,6 @@ Create environment template
         "tenant_id": "0849006f7ce94961b3aab4e46d6f229a",
     }
 
-*Error code*
-
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
@@ -180,8 +178,6 @@ environment template.
        "id": "aa9033ca7ce245fca10e38e1c8c4bbf7",
     }
 
-*Error code*
-
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
@@ -207,8 +203,6 @@ Delete environment template
 *Parameters:*
 
 * `env-temp_id` - environment template ID, required
-
-*Error code*
 
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
@@ -289,8 +283,6 @@ Adding application to environment template
        "port": "8080"
     }
 
-*Error code*
-
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
@@ -357,8 +349,6 @@ Get applications information from an environment template
        }
     ]
 
-*Error code*
-
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
@@ -412,8 +402,6 @@ Create an environment from an environment template
         "version": 0,
         "session_id": "adf4dadfaa9033ca7ce245fca10e38e1c8c4bbf7",
     }
-
-*Error code*
 
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |

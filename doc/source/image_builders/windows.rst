@@ -260,7 +260,7 @@ Tools from this section are not necessary to build an image.
 However, they may be helpful if you want to create an image with a different configuration.
 
 
-Windows assessment and deployment kit (ADK)
+Windows Assessment and Deployment Kit (ADK)
 -------------------------------------------
 
 *Windows ADK* is required if you want to build your own answer files for auto unattended Windows installation.

@@ -240,8 +240,8 @@ Install the API service and Engine
           package-import --is-public io.murano.zip
     ..
 
-#. Open a new console and launch Murano Engine. A separate terminal is
-   required because the console will be locked by a running process.
+#.  Open a new console and launch Murano Engine. A separate terminal is
+    required because the console will be locked by a running process.
 
     .. code-block:: console
 

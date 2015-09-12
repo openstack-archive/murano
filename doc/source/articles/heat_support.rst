@@ -26,9 +26,9 @@ Before uploading an application into the catalog, it should be prepared and arch
 Murano command line will do all preparation for you.
 Just choose the desired Heat Orchestration Template and perform the following command:
 
-   ::
+::
 
-    murano package-create  --template wordpress/template.yaml
+ murano package-create  --template wordpress/template.yaml
 
 Note, that optional parameters could be specified:
 

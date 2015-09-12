@@ -29,7 +29,3 @@ Content
    development
    manual
    ssl
-
-.. include:: prepare.rst
-.. include:: development.rst
-.. include:: manual.rst
