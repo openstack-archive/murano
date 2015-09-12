@@ -16,14 +16,12 @@
 import types
 
 from oslo_config import cfg
-from oslo_log import log as logging
 import oslo_messaging as messaging
 
 from murano.common import uuidutils
 from murano.dsl import dsl
 
 CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
 
 
 @dsl.name('io.murano.system.StatusReporter')

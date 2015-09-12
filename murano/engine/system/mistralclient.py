@@ -17,12 +17,9 @@
 import json
 
 import eventlet
-from oslo_log import log as logging
 
 from murano.dsl import dsl
 from murano.dsl import helpers
-
-LOG = logging.getLogger(__name__)
 
 
 class MistralError(Exception):

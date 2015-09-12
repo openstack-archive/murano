@@ -14,7 +14,6 @@
 # limitations under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 
 import testtools
 
@@ -23,7 +22,6 @@ from murano.dsl import helpers
 
 
 CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
 
 
 @dsl.name('io.murano.test.TestFixture')

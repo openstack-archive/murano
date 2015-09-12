@@ -19,12 +19,10 @@ from oslo_config import cfg
 from oslo_db import exception
 from oslo_db import options
 from oslo_db.sqlalchemy import session as db_session
-from oslo_log import log as logging
 from oslo_utils import timeutils
 
 from murano.db.models import Lock
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 options.set_defaults(CONF)
