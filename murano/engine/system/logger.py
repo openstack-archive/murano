@@ -21,7 +21,6 @@ from yaql.language import yaqltypes
 
 from murano.dsl import dsl
 
-LOG = logging.getLogger(__name__)
 NAME_TEMPLATE = 'applications.{0}'
 
 inject_format = specs.inject(

@@ -14,9 +14,7 @@
 
 from keystoneclient.v3 import client
 from oslo_config import cfg
-from oslo_log import log as logging
 
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 

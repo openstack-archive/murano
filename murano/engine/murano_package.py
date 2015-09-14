@@ -17,13 +17,11 @@ import json
 import os
 
 from oslo_config import cfg
-from oslo_log import log as logging
 import yaml
 
 from murano.dsl import murano_package
 
 CONF = cfg.CONF
-LOG = logging.getLogger(__name__)
 
 
 class MuranoPackage(murano_package.MuranoPackage):

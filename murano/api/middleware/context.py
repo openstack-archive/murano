@@ -13,7 +13,6 @@
 #    under the License.
 
 from oslo_config import cfg
-from oslo_log import log as logging
 from oslo_middleware import request_id as oslo_request_id
 
 from murano.common.i18n import _
@@ -27,7 +26,6 @@ context_opts = [
 
 CONF = cfg.CONF
 CONF.register_opts(context_opts)
-LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
 
 
