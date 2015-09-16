@@ -176,6 +176,11 @@ class Controller(object):
 
     def search(self, req):
         policy.check("get_package", req.context)
+        manage_public = True
+        try:
+            policy.check("manage_public_package", req.context)
+        except exc.HTTPForbidden:
+            manage_public = False
 
         filters = _get_filters(req.GET.items())
 
@@ -188,7 +193,7 @@ class Controller(object):
 
         catalog = req.GET.pop('catalog', '').lower() == 'true'
         packages = db_api.package_search(
-            filters, req.context, limit, catalog=catalog)
+            filters, req.context, manage_public, limit, catalog=catalog)
         if len(packages) == limit:
             result['next_marker'] = packages[-1].id
         result['packages'] = [package.to_dict() for package in packages]
