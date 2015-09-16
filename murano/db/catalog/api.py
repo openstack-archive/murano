@@ -313,7 +313,7 @@ def package_search(filters, context, limit=None, catalog=False):
                 for delim in ',;':
                     search_str = search_str.replace(delim, ' ')
                 for key_word in search_str.split():
-                    _word = '%{value}%'.format(value=key_word)
+                    _word = u'%{value}%'.format(value=key_word)
                     if attr in fk_fields.keys():
                         condition = getattr(pkg, attr).any(
                             getattr(models, fk_fields[attr]).name.like(_word))
