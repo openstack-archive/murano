@@ -42,7 +42,8 @@ class NetworkExplorer(object):
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
     # decorator with random delay 1-10 seconds between attempts and maximum
     # delay time 30 seconds.
-    @retrying.retry(retry_on_exception=exc.RouterInfoException,
+    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
+                    exc.RouterInfoException),
                     wait_random_min=1000, wait_random_max=10000,
                     stop_max_delay=30000)
     def get_default_router(self):
