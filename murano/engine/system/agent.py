@@ -105,7 +105,7 @@ class Agent(object):
             except eventlet.Timeout:
                 listener().unsubscribe(msg_id)
                 raise exceptions.TimeoutException(
-                    'The Agent does not respond'
+                    'The murano-agent did not respond '
                     'within {0} seconds'.format(timeout))
 
             if not result:
