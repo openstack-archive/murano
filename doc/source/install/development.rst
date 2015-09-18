@@ -13,9 +13,9 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-================================================
- Installing and Running the Development Version
-================================================
+==============================================
+Installing and Running the Development Version
+==============================================
 
 The `contrib/devstack`_ directory contains the files necessary to integrate
 Murano with `Devstack`_.
@@ -25,5 +25,5 @@ Murano with `Devstack`_.
 
 
 
-.. _Devstack: http://www.devstack.org/
+.. _Devstack: http://docs.openstack.org/developer/devstack/
 .. _contrib/devstack: https://git.openstack.org/cgit/openstack/murano/tree/contrib/devstack
