@@ -246,15 +246,17 @@ def package_update(pkg_id_or_name, changes, context):
     return pkg
 
 
-def package_search(filters, context, limit=None, catalog=False):
+def package_search(filters, context, manage_public=False,
+                   limit=None, catalog=False):
     """Search packages with different filters
       Catalog param controls the base query creation. Catalog queries
       only search packages a user can deploy. Non-catalog queries searches
       packages a user can edit.
       * Admin is allowed to browse all the packages
       * Regular user is allowed to browse all packages belongs to user tenant
-        and all other packages marked is_public.
-        Also all packages should be enabled.
+        and all other packages marked is_public in catalog mode.
+        In edit-mode non-admins are able to get own packages and public
+        packages if corresponding policy is passed.
       * Use marker (inside filters param) and limit for pagination:
         The typical pattern of limit and marker is to make an initial limited
         request and then to use the ID of the last package from the response
@@ -268,13 +270,16 @@ def package_search(filters, context, limit=None, catalog=False):
 
     if catalog:
         # Only show packages one can deploy, i.e. own + public
-        query = query.filter(or_(
-            pkg.owner_id == context.tenant, pkg.is_public)
-        )
+        query = query.filter(or_(pkg.owner_id == context.tenant,
+                                 pkg.is_public))
     else:
         # Show packages one can edit.
         if not context.is_admin:
-            query = query.filter(pkg.owner_id == context.tenant)
+            if manage_public:
+                query = query.filter(or_(pkg.owner_id == context.tenant,
+                                         pkg.is_public))
+            else:
+                query = query.filter(pkg.owner_id == context.tenant)
         # No else here admin can edit everything.
 
     if not filters.get('include_disabled', '').lower() == 'true':
