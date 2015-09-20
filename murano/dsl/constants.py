@@ -31,6 +31,7 @@ CTX_PACKAGE_LOADER = '$?packageLoader'
 CTX_SKIP_FRAME = '$?skipFrame'
 CTX_THIS = '$?this'
 CTX_TYPE = '$?type'
+CTX_VARIABLE_SCOPE = '$?variableScope'
 CTX_YAQL_ENGINE = '$?yaqlEngine'
 
 DM_OBJECTS = 'Objects'

@@ -15,14 +15,13 @@
 import itertools
 import types
 
-from yaql.language import expressions
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
 
+from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
-from murano.dsl import yaql_expression
 from murano.dsl import yaql_integration
 
 
@@ -39,24 +38,22 @@ class LhsExpression(object):
             self._setter(value)
 
     def __init__(self, expression):
-        if isinstance(expression, (yaql_expression.YaqlExpression,
-                                   expressions.Statement)):
-            self._expression = expression
-        else:
-            self._expression = yaql_integration.parse(str(expression))
+        self._expression = expression
 
     def _create_context(self, root_context):
-        @specs.parameter('path', yaqltypes.Lambda(with_context=True))
-        def get_context_data(path):
-            path = path(root_context)
+        @specs.parameter('name', yaqltypes.StringConstant())
+        def get_context_data(name):
 
             def set_data(value):
-                if not path or path == '$' or path == '$this':
-                    raise ValueError()
-                root_context[path] = value
+                if not name or name == '$' or name == '$this':
+                    raise ValueError('Cannot assign to {0}'.format(name))
+                ctx = root_context
+                while constants.CTX_VARIABLE_SCOPE not in ctx:
+                    ctx = ctx.parent
+                ctx[name] = value
 
             return LhsExpression.Property(
-                lambda: root_context[path], set_data)
+                lambda: root_context[name], set_data)
 
         @specs.parameter('this', LhsExpression.Property)
         @specs.parameter('key', yaqltypes.Keyword())

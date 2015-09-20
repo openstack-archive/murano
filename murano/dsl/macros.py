@@ -51,6 +51,7 @@ class MethodBlock(CodeBlock):
 
     def execute(self, context):
         new_context = context.create_child_context()
+        new_context[constants.CTX_VARIABLE_SCOPE] = True
         try:
             super(MethodBlock, self).execute(new_context)
         except exceptions.ReturnException as e:
@@ -102,7 +103,9 @@ class ParallelMacro(CodeBlock):
             return
         limit = helpers.evaluate(self._limit, context)
         helpers.parallel_select(
-            self.code_block, lambda expr: expr.execute(context), limit)
+            self.code_block,
+            lambda expr: expr.execute(context.create_child_context()),
+            limit)
 
 
 class IfMacro(expressions.DslExpression):
