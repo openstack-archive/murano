@@ -592,7 +592,7 @@ should use next endpoint: */environments/<env_id>/services/<application_id>/name
 +----------------+-----------------------------------------------------------+------------------------------------+
 | Method         | URI                                                       | Header                             |
 +================+===========================================================+====================================+
-| GET            | /environments/<env_id>/services<app_id>                   | X-Configuration-Session (optional) |
+| GET            | /environments/<env_id>/services/<app_id>                  | X-Configuration-Session (optional) |
 +----------------+-----------------------------------------------------------+------------------------------------+
 
 **Parameters:**
