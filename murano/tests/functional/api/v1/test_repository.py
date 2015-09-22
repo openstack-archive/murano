@@ -82,12 +82,12 @@ class TestRepositorySanity(TestCaseRepository):
         for package in packages_list['packages']:
             if 'Dummy' in package['fully_qualified_name']:
                 self.client.delete_package(package['id'])
-        categorie = self.client.list_categories()[1]['categories'][0]
+
         packages_list = self.client.get_list_packages()[1]['packages']
 
         resp = self.client.upload_package(
             'testpackage',
-            {"categories": [categorie], "tags": ["windows"]})
+            {"categories": [], "tags": []})
         self.packages.append(resp.json())
 
         _packages_list = self.client.get_list_packages()[1]['packages']
