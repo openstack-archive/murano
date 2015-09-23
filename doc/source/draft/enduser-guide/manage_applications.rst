@@ -350,8 +350,48 @@ automatically created ``quick-env-1`` environment.
       :alt: Configure Application dialog: Add more applications
       :width: 630 px
 
-Deploy an application
+Deploy an environment
 ~~~~~~~~~~~~~~~~~~~~~
+
+Make sure to add necessary applications to your environment, then deploy it
+following one of the options below:
+
+* Deploy an environment from the Environments page
+
+  #. In OpenStack dashboard, navigate to :menuselection:`Murano >
+     Application Catalog > Environments`.
+
+  #. Select :guilabel:`Deploy Environment` from the Actions drop-down list
+     next to the environment you want to deploy.
+
+     .. image:: figures/deploy_env_2.png
+        :width: 630 px
+        :alt: Environments page
+
+     It may take some time for the environment to deploy. Wait for the status to
+     change from `Deploying` to `Ready`.
+
+* Deploy an environment from the Environment Components page
+
+  #. In OpenStack dashboard, navigate to :menuselection:`Murano >
+     Application Catalog > Environments`.
+
+  #. Click the name of the environment you want to deploy.
+
+     .. image:: figures/environments.png
+        :width: 630 px
+        :alt: Environments page
+
+  #. On the Environment Components page, click :guilabel:`Deploy This Environment`
+     to start the deployment.
+
+     .. image:: figures/deploy_env.png
+        :width: 630 px
+        :alt: Environment Components page
+
+     It may take some time for the environment to deploy. Wait for the status to
+     change from `Deploying` to `Ready`. You can check the status either on the
+     Environments page or on the Environment Components page.
 
 Show an application topology
 ----------------------------
