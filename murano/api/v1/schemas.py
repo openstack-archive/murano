@@ -31,7 +31,7 @@ PKG_UPLOAD_SCHEMA = {
     "properties": {
         "tags": {
             "type": "array",
-            "minItems": 1,
+            "minItems": 0,
             "items": {"type": "string"},
             "uniqueItems": True
         },
