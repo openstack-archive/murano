@@ -23,6 +23,8 @@ Methods:
       - $fipName: null
       - $template: null
       - $instanceFipOutput: null
+      - $instanceResources: []
+      - $instanceOutputs: []
       - If: $assignFloatingIp
         Then:
           - $instanceFipOutput: $instance.name + '-floatingIPaddress'
@@ -43,11 +45,15 @@ Methods:
                   value:
                     get_attr: [$fipName, ip]
                   description: format('Floating IP of {0}', $instance.name)
+          - $instanceResources: [$fipName, $fipName + 'Assignment']
+          - $instanceOutputs: [$instanceFipOutput]
       - Return:
           template: $template
           secGroupName:
             get_resource: $securityGroupName
           instanceFipOutput: $instanceFipOutput
+          instanceResources: $instanceResources
+          instanceOutputs: $instanceOutputs
 
 
   generateSecurityGroupManager:
