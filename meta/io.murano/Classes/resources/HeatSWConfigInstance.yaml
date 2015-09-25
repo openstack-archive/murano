@@ -103,6 +103,8 @@ Methods:
               value: {get_attr: [$deployment_name, deploy_stderr]}
 
       - $.softwareConfigs: $.softwareConfigs + list($fragment)
+      - $.setAttr(scResources, $.getAttr(scResources, []).concat([$full_config_name, $deployment_name]))
+      - $.setAttr(scOutputs, $.getAttr(scOutputs, []).concat([$deployment_stdout, $deployment_stderr]))
 
   # Adds to the stack any heat SW config elements
   prepareStackTemplate:
@@ -122,3 +124,14 @@ Methods:
       - Return:
           data:
           format: SOFTWARE_CONFIG
+
+  releaseResources:
+    Body:
+      - $environment: $.find(std:Environment)
+      - $template: $environment.stack.current()
+      - $template.resources: $template.resources.deleteAll($.getAttr(scResources, []))
+      - $template.outputs: $template.outputs.deleteAll($.getAttr(scOutputs, []))
+      - $environment.stack.setTemplate($template)
+      - $.super($.releaseResources())
+      - $.setAttr(scResources, [])
+      - $.setAttr(scOutputs, [])

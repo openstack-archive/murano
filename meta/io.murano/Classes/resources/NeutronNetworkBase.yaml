@@ -47,6 +47,9 @@ Methods:
                       - get_resource: $securityGroupName
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
+      - $instanceResources: [$portName]
+      - $instanceOutputs: []
+
       - For: sip
         In: $sharedIps
         Do:
@@ -75,12 +78,16 @@ Methods:
                   value:
                     get_attr: [$floatingIpResourceName, floating_ip_address]
                   description: format('Floating IP of {0}', $instance.name)
+          - $instanceResources: $instanceResources.append($floatingIpResourceName)
+          - $instanceOutputs: $instanceOutputs.append($instanceFipOutput)
           - $patchTemplate: $patchTemplate.mergeWith($template)
       - Return:
           template: $patchTemplate
           portRef:
             get_resource: $portName
           instanceFipOutput: $instanceFipOutput
+          instanceResources: $instanceResources
+          instanceOutputs: $instanceOutputs
 
 
   generateSecurityGroupManager:
