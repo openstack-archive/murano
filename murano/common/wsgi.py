@@ -206,16 +206,16 @@ class Debug(Middleware):
 
     @webob.dec.wsgify
     def __call__(self, req):
-        print ("*" * 40) + " REQUEST ENVIRON"
+        print(("*" * 40) + " REQUEST ENVIRON")
         for key, value in req.environ.items():
             print(key, "=", value)
-        print
+        print("")
         resp = req.get_response(self.application)
 
-        print ("*" * 40) + " RESPONSE HEADERS"
+        print(("*" * 40) + " RESPONSE HEADERS")
         for (key, value) in resp.headers.iteritems():
             print(key, "=", value)
-        print
+        print("")
 
         resp.app_iter = self.print_generator(resp.app_iter)
 
@@ -226,12 +226,12 @@ class Debug(Middleware):
         """Iterator that prints the contents of a wrapper string iterator
         when iterated.
         """
-        print ("*" * 40) + " BODY"
+        print(("*" * 40) + " BODY")
         for part in app_iter:
             sys.stdout.write(part)
             sys.stdout.flush()
             yield part
-        print
+        print("")
 
 
 class Router(object):
