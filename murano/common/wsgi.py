@@ -25,7 +25,6 @@ from xml.dom import minidom
 from xml.parsers import expat
 
 import eventlet
-eventlet.patcher.monkey_patch(all=False, socket=True)
 import eventlet.wsgi
 import jsonschema
 from oslo_config import cfg
@@ -43,6 +42,8 @@ from murano.api.v1 import schemas
 from murano.common import exceptions
 from murano.common.i18n import _, _LE, _LW
 from murano.common import xmlutils
+
+eventlet.patcher.monkey_patch(all=False, socket=True)
 
 wsgi_opts = [
     cfg.IntOpt('backlog',

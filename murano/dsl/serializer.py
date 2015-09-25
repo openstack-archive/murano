@@ -93,8 +93,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         if value.owner is not parent or value.object_id in serialized_objects:
             return ObjRef(value), True
     elif isinstance(value, ObjRef):
-        if (value.ref_obj.object_id not in serialized_objects
-                and is_nested_in(value.ref_obj.owner, parent)):
+        if (value.ref_obj.object_id not in serialized_objects and
+                is_nested_in(value.ref_obj.owner, parent)):
             value = value.ref_obj
         else:
             return value, False
@@ -139,8 +139,8 @@ def _pass3_serialize(value, serialized_objects, allow_refs=False):
     if isinstance(value, dict):
         for d_key, d_value in value.items():
             if isinstance(d_value, ObjRef):
-                if (d_value.ref_obj.object_id in serialized_objects
-                        or allow_refs):
+                if (d_value.ref_obj.object_id in serialized_objects or
+                        allow_refs):
                     value[d_key] = d_value.ref_obj.object_id
                 else:
                     del value[d_key]

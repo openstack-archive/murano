@@ -19,6 +19,14 @@ import sys
 
 import eventlet
 
+from oslo_log import log as logging
+from oslo_service import service
+
+from murano.common import config
+from murano.common import engine
+
+CONF = config.CONF
+
 
 if os.name == 'nt':
     # eventlet monkey patching causes subprocess.Popen to fail on Windows
@@ -32,14 +40,6 @@ else:
 root = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir, os.pardir)
 if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
     sys.path.insert(0, root)
-
-from oslo_log import log as logging
-from oslo_service import service
-
-from murano.common import config
-from murano.common import engine
-
-CONF = config.CONF
 
 
 def main():

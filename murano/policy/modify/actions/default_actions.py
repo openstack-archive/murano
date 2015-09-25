@@ -91,8 +91,8 @@ class RemoveObjectAction(base.ModifyActionBase, ActionUtils):
                 # remove object from dict
                 elif isinstance(val, utils.FrozenDict):
                     filtered_dict = {k: v for k, v in val.items() if not
-                                     self._match_object_id(self._object_id, k)
-                                     and not
+                                     self._match_object_id(self._object_id,
+                                                           k) and not
                                      self._match_object_id(self._object_id, v)}
                     if len(filtered_dict) < len(val):
                         _obj.set_property(prop_name,
