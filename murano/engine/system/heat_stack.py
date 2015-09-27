@@ -134,12 +134,15 @@ class HeatStack(murano_object.MuranoObject):
                     eventlet.sleep(delay)
                     break
 
+                if 'IN_PROGRESS' in status:
+                    eventlet.sleep(2)
+                    continue
+
                 last_stack_timestamps = self._last_stack_timestamps
                 self._last_stack_timestamps = (None, None) if not stack_info \
                     else(stack_info.creation_time, stack_info.updated_time)
 
-                if 'IN_PROGRESS' in status or status == '_' or (
-                        wait_progress and last_stack_timestamps ==
+                if (wait_progress and last_stack_timestamps ==
                         self._last_stack_timestamps):
                     eventlet.sleep(2)
                     continue
