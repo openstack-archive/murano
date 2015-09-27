@@ -206,6 +206,25 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
             }
         }
 
+    def get_test_app(self):
+        return {
+            "instance": {
+                "flavor": self.flavor,
+                "image": self.linux,
+                "assignFloatingIp": True,
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": str(uuid.uuid4())
+                },
+                "name": self.rand_name('mrntest')
+            },
+            "name": self.rand_name('dummy'),
+            "?": {
+                "type": "io.murano.apps.test.UpdateExecutor",
+                "id": str(uuid.uuid4())
+            }
+        }
+
     @classmethod
     def upload_app(cls, app_dir, name, tags):
         """Zip and upload application to Murano
