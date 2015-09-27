@@ -47,7 +47,8 @@ class TypeScheme(object):
                 return int(value)
             except Exception:
                 raise exceptions.ContractViolationException(
-                    'Value {0} violates int() contract'.format(value))
+                    'Value {0} violates int() contract'.format(
+                        format_scalar(value)))
 
         @specs.parameter('value', nullable=True)
         @specs.method
@@ -60,7 +61,8 @@ class TypeScheme(object):
                 return unicode(value)
             except Exception:
                 raise exceptions.ContractViolationException(
-                    'Value {0} violates string() contract'.format(value))
+                    'Value {0} violates string() contract'.format(
+                        format_scalar(value)))
 
         @specs.parameter('value', nullable=True)
         @specs.method
@@ -89,14 +91,17 @@ class TypeScheme(object):
 
         @specs.parameter('value', nullable=True)
         @specs.parameter('predicate', yaqltypes.Lambda(with_context=True))
+        @specs.parameter('msg', yaqltypes.String(nullable=True))
         @specs.method
-        def check(value, predicate):
+        def check(value, predicate, msg=None):
             if isinstance(value, TypeScheme.ObjRef) or predicate(
                     root_context.create_child_context(), value):
                 return value
             else:
-                raise exceptions.ContractViolationException(
-                    "Value {0} doesn't match predicate".format(value))
+                if not msg:
+                    msg = "Value {0} doesn't match predicate".format(
+                        format_scalar(value))
+                raise exceptions.ContractViolationException(msg)
 
         @specs.parameter('obj', TypeScheme.ObjRef, nullable=True)
         @specs.name('owned')
@@ -117,8 +122,7 @@ class TypeScheme(object):
                 p = p.owner
 
             raise exceptions.ContractViolationException(
-                'Object {0} violates owned() contract'.format(
-                    obj.object_id))
+                'Object {0} violates owned() contract'.format(obj))
 
         @specs.parameter('obj', TypeScheme.ObjRef, nullable=True)
         @specs.name('not_owned')
@@ -139,8 +143,7 @@ class TypeScheme(object):
                 return obj
             else:
                 raise exceptions.ContractViolationException(
-                    'Object {0} violates notOwned() contract'.format(
-                        obj.object_id))
+                    'Object {0} violates notOwned() contract'.format(obj))
 
         @specs.parameter('name', dsl.MuranoTypeName(
             False, root_context))
@@ -182,7 +185,7 @@ class TypeScheme(object):
             else:
                 raise exceptions.ContractViolationException(
                     'Value {0} cannot be represented as class {1}'.format(
-                        value, name))
+                        format_scalar(value), name))
             if not helpers.is_instance_of(
                     obj, murano_class.name,
                     version_spec or helpers.get_type(root_context)):
@@ -205,12 +208,13 @@ class TypeScheme(object):
         context.register_function(not_owned)
         return context
 
-    def _map_dict(self, data, spec, context):
+    def _map_dict(self, data, spec, context, path):
         if data is None or data is dsl.NO_VALUE:
             data = {}
         if not isinstance(data, utils.MappingType):
             raise exceptions.ContractViolationException(
-                'Supplied is not of a dictionary type')
+                'Value {0} is not of a dictionary type'.format(
+                    format_scalar(data)))
         if not spec:
             return data
         result = {}
@@ -220,23 +224,27 @@ class TypeScheme(object):
                 if yaql_key is not None:
                     raise exceptions.DslContractSyntaxError(
                         'Dictionary contract '
-                        'cannot have more than one expression keys')
+                        'cannot have more than one expression key')
                 else:
                     yaql_key = key
             else:
-                result[key] = self._map(data.get(key), value, context)
+                result[key] = self._map(
+                    data.get(key), value, context, '{0}[{1}]'.format(
+                        path, format_scalar(key)))
 
         if yaql_key is not None:
             yaql_value = spec[yaql_key]
             for key, value in data.iteritems():
                 if key in result:
                     continue
-                result[self._map(key, yaql_key, context)] = self._map(
-                    value, yaql_value, context)
+                key = self._map(key, yaql_key, context, path)
+                result[key] = self._map(
+                    value, yaql_value, context, '{0}[{1}]'.format(
+                        path, format_scalar(key)))
 
         return utils.FrozenDict(result)
 
-    def _map_list(self, data, spec, context):
+    def _map_list(self, data, spec, context, path):
         if not utils.is_sequence(data):
             if data is None or data is dsl.NO_VALUE:
                 data = []
@@ -267,26 +275,32 @@ class TypeScheme(object):
                     if index >= len(spec) - shift
                     else spec[index]
                 )
-                yield self._map(item, spec_item, context)
+                yield self._map(
+                    item, spec_item, context, '{0}[{1}]'.format(path, index))
 
         return tuple(map_func())
 
     def _map_scalar(self, data, spec):
         if data != spec:
             raise exceptions.ContractViolationException(
-                'Value {0} is not equal to {1}'.format(data, spec))
+                'Value {0} is not equal to {1}'.format(
+                    format_scalar(data), spec))
         else:
             return data
 
-    def _map(self, data, spec, context):
+    def _map(self, data, spec, context, path):
         child_context = context.create_child_context()
         if isinstance(spec, dsl_types.YaqlExpression):
             child_context[''] = data
-            return spec(context=child_context)
+            try:
+                return spec(context=child_context)
+            except exceptions.ContractViolationException as e:
+                e.path = path
+                raise
         elif isinstance(spec, utils.MappingType):
-            return self._map_dict(data, spec, child_context)
+            return self._map_dict(data, spec, child_context, path)
         elif utils.is_sequence(spec):
-            return self._map_list(data, spec, child_context)
+            return self._map_list(data, spec, child_context, path)
         else:
             return self._map_scalar(data, spec)
 
@@ -299,4 +313,10 @@ class TypeScheme(object):
             data = helpers.evaluate(default, context)
 
         context = self.prepare_context(context, this, owner, default)
-        return self._map(data, self._spec, context)
+        return self._map(data, self._spec, context, '')
+
+
+def format_scalar(value):
+    if isinstance(value, types.StringTypes):
+        return "'{0}'".format(value)
+    return unicode(value)
