@@ -83,7 +83,17 @@ class DslContractSyntaxError(Exception):
 
 
 class ContractViolationException(Exception):
-    pass
+    def __init__(self, *args, **kwargs):
+        super(ContractViolationException, self).__init__(*args, **kwargs)
+        self._path = ''
+
+    @property
+    def path(self):
+        return self._path
+
+    @path.setter
+    def path(self, value):
+        self._path = value
 
 
 class ValueIsMissingError(Exception):
