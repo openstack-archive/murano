@@ -34,7 +34,7 @@ from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 
-KEYWORD_REGEX = re.compile(r'(?!__)\b[^\W\d]\w*\b')
+KEYWORD_REGEX = re.compile(r'^(?!__)\b[^\W\d]\w*\b$')
 
 _threads_sequencer = 0
 
