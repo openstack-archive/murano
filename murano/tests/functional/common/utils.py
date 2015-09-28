@@ -209,16 +209,26 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
             return service
 
     @classmethod
-    def get_service_as_json(cls, environment, service_name):
-        """Get a service with specific name from environment in JSON format.
+    def services_list(cls, environment):
+        """Get a list of environment services.
 
         :param environment: Murano environment
-        :param service_name: Service name
-        :return:
+        :return: List of <Service> objects
         """
-        for service in cls.murano_client().services.list(environment.id):
+        return cls.murano_client().services.list(environment.id)
+
+    @classmethod
+    def get_service(cls, environment, service_name, to_dict=True):
+        """Get a service with specific name from environment.
+
+        :param to_dict: Convert service to JSON or not to convert
+        :param environment: Murano environment
+        :param service_name: Service name
+        :return: JSON or <Service> object
+        """
+        for service in cls.services_list(environment):
             if service.name == service_name:
-                return cls._convert_service(service)
+                return cls._convert_service(service) if to_dict else service
 
     @classmethod
     def _convert_service(cls, service):
@@ -230,6 +240,35 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         component = service.to_dict()
         component = json.dumps(component)
         return yaml.load(component)
+
+    @classmethod
+    def get_service_id(cls, service):
+        """Gets id on <Service> object.
+
+        :param service: <Service> object
+        :return: ID of the Service
+        """
+        serv = cls._convert_service(service)
+        serv_id = serv['?']['id']
+        return serv_id
+
+    @classmethod
+    def delete_service(cls, environment, session, service):
+        """This function removes a specific service from environment.
+
+        :param environment: Murano environment
+        :param session: Session fir urano environment
+        :param service: <Service> object
+        :return: Updated murano environment
+        """
+        cls.murano_client().services.delete(
+            environment.id, path='/{0}'.format(cls.get_service_id(service)),
+            session_id=session.id)
+        LOG.debug('Service with name {0} from environment {1} successfully '
+                  'removed'.format(environment.name, service.name))
+        updated_env = cls.get_environment(environment)
+        return updated_env
+
 
 # -----------------------------Packages methods--------------------------------
 
@@ -472,3 +511,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         for stack in cls.heat_client().stacks.list():
             if environment_id in stack.description:
                 return stack
+
+    @classmethod
+    def get_stack_template(cls, stack):
+        return cls.heat_client().stacks.template(stack.stack_name)
