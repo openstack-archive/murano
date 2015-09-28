@@ -22,10 +22,10 @@ set -o xtrace
 
 # Set up default repos
 MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/openstack/murano.git}
-MURANO_BRANCH=${MURANO_BRANCH:-master}
+MURANO_BRANCH=${MURANO_BRANCH:-stable/liberty}
 
 GITREPO["python-muranoclient"]=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/openstack/python-muranoclient.git}
-GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-master}
+GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-stable/liberty}
 GITDIR["python-muranoclient"]=$DEST/python-muranoclient
 
 # Set up default directories

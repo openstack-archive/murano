@@ -16,12 +16,12 @@ set -o xtrace
 
 # Set up default repos
 MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/openstack/murano.git}
-MURANO_BRANCH=${MURANO_BRANCH:-master}
+MURANO_BRANCH=${MURANO_BRANCH:-stable/liberty}
 
 # Variables, which used in this function
 # https://github.com/openstack-dev/devstack/blob/master/functions-common#L500-L506
 GITREPO["python-muranoclient"]=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/openstack/python-muranoclient.git}
-GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-master}
+GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-stable/liberty}
 GITDIR["python-muranoclient"]=$DEST/python-muranoclient
 
 # Set up default directories
@@ -270,7 +270,7 @@ HORIZON_LOCAL_CONFIG=${HORIZON_LOCAL_CONFIG:-$HORIZON_DIR/openstack_dashboard/lo
 
 # Set up default repos
 MURANO_DASHBOARD_REPO=${MURANO_DASHBOARD_REPO:-${GIT_BASE}/openstack/murano-dashboard.git}
-MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-master}
+MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-stable/liberty}
 
 # Set up default directories
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard

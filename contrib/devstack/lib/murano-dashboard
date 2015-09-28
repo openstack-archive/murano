@@ -28,7 +28,7 @@ HORIZON_LOCAL_CONFIG=${HORIZON_LOCAL_CONFIG:-$HORIZON_DIR/openstack_dashboard/lo
 
 # Set up default repos
 MURANO_DASHBOARD_REPO=${MURANO_DASHBOARD_REPO:-${GIT_BASE}/openstack/murano-dashboard.git}
-MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-master}
+MURANO_DASHBOARD_BRANCH=${MURANO_DASHBOARD_BRANCH:-stable/liberty}
 
 # Set up default directories
 MURANO_DASHBOARD_DIR=$DEST/murano-dashboard
