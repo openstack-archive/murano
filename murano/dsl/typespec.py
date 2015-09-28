@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import sys
 import weakref
 
 from murano.dsl import exceptions
@@ -63,8 +64,32 @@ class Spec(object):
 
 
 class PropertySpec(Spec):
-    pass
+    def __init__(self, property_name, declaration, container_class):
+        super(PropertySpec, self).__init__(declaration, container_class)
+        self.property_name = property_name
+        self.class_name = container_class.name
+
+    def validate(self, *args, **kwargs):
+        try:
+            return super(PropertySpec, self).validate(*args, **kwargs)
+        except exceptions.ContractViolationException as e:
+            msg = u'[{0}.{1}{2}] {3}'.format(
+                self.class_name, self.property_name, e.path, unicode(e))
+            raise exceptions.ContractViolationException, msg, sys.exc_info()[2]
 
 
 class ArgumentSpec(Spec):
-    pass
+    def __init__(self, method_name, arg_name, declaration, container_class):
+        super(ArgumentSpec, self).__init__(declaration, container_class)
+        self.method_name = method_name
+        self.arg_name = arg_name
+        self.class_name = container_class.name
+
+    def validate(self, *args, **kwargs):
+        try:
+            return super(ArgumentSpec, self).validate(*args, **kwargs)
+        except exceptions.ContractViolationException as e:
+            msg = u'[{0}::{1}({2}{3})] {4}'.format(
+                self.class_name, self.method_name, self.arg_name,
+                e.path, unicode(e))
+            raise exceptions.ContractViolationException, msg, sys.exc_info()[2]

@@ -69,7 +69,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
                     raise ValueError()
                 name = record.keys()[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
-                    record[name], self.murano_class)
+                    self.name, name, record[name], self.murano_class)
         self._yaql_function_definition = \
             yaql_integration.build_wrapper_function_definition(self)
 
