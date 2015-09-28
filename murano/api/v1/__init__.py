@@ -62,9 +62,9 @@ def get_service_status(environment_id, session_id, service):
 
     entities = [u['id'] for u in service['units']]
     reports_count = unit.query(models.Status).filter(
-        models.Status.environment_id == environment_id
-        and models.Status.session_id == session_id
-        and models.Status.entity_id.in_(entities)
+        models.Status.environment_id == environment_id and
+        models.Status.session_id == session_id and
+        models.Status.entity_id.in_(entities)
     ).count()
 
     if session_state == 'deployed':

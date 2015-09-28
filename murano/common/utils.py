@@ -166,8 +166,8 @@ def is_different(obj1, obj2):
 
         if o1 is o2:
             return
-        elif (isinstance(o1, basestring)
-              and isinstance(o2, basestring)) and o1 == o2:
+        elif (isinstance(o1, basestring) and
+                isinstance(o2, basestring)) and o1 == o2:
             return
         elif type(o1) != type(o2):
             raise Difference()

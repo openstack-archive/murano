@@ -20,19 +20,6 @@ import sys
 
 import eventlet
 
-if os.name == 'nt':
-    # eventlet monkey patching causes subprocess.Popen to fail on Windows
-    # when using pipes due to missing non blocking I/O support
-    eventlet.monkey_patch(os=False)
-else:
-    eventlet.monkey_patch()
-
-# If ../murano/__init__.py exists, add ../ to Python search path, so that
-# it will override what happens to be installed in /usr/(local/)lib/python...
-root = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir, os.pardir)
-if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
-    sys.path.insert(0, root)
-
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import service
@@ -45,6 +32,20 @@ from murano.common import server
 from murano.common import wsgi
 
 CONF = cfg.CONF
+
+
+if os.name == 'nt':
+    # eventlet monkey patching causes subprocess.Popen to fail on Windows
+    # when using pipes due to missing non blocking I/O support
+    eventlet.monkey_patch(os=False)
+else:
+    eventlet.monkey_patch()
+
+# If ../murano/__init__.py exists, add ../ to Python search path, so that
+# it will override what happens to be installed in /usr/(local/)lib/python...
+root = os.path.join(os.path.abspath(__file__), os.pardir, os.pardir, os.pardir)
+if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
+    sys.path.insert(0, root)
 
 
 def main():

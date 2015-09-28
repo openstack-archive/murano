@@ -107,8 +107,8 @@ class MuranoDslExecutor(object):
                     return (None if method.body is None
                             else method.body.execute(context))
 
-            if (not isinstance(method.body, specs.FunctionDefinition)
-                    or not method.body.meta.get(constants.META_NO_TRACE)):
+            if (not isinstance(method.body, specs.FunctionDefinition) or
+                    not method.body.meta.get(constants.META_NO_TRACE)):
                 with self._log_method(context, args, kwargs) as log:
                     result = call()
                     log(result)

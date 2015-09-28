@@ -16,9 +16,10 @@
 import ssl as ssl_module
 
 from eventlet import patcher
-kombu = patcher.import_patched('kombu')
 from oslo_serialization import jsonutils
 from subscription import Subscription
+
+kombu = patcher.import_patched('kombu')
 
 
 class MqClient(object):

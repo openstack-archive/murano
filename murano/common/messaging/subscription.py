@@ -18,8 +18,9 @@ import socket
 import time
 
 from eventlet import patcher
-kombu = patcher.import_patched('kombu')
 from murano.common.messaging import message
+
+kombu = patcher.import_patched('kombu')
 
 
 class Subscription(object):

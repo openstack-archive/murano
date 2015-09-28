@@ -201,10 +201,10 @@ class MuranoObject(dsl_types.MuranoObject):
             values_to_assign = []
             for mc in declared_properties:
                 spec = mc.get_property(name)
-                if (caller_class is not None and
-                        not helpers.are_property_modifications_allowed(context)
-                        and (spec.usage not in typespec.PropertyUsages.Writable
-                             or not derived)):
+                if (caller_class is not None and not
+                        helpers.are_property_modifications_allowed(context) and
+                        (spec.usage not in typespec.PropertyUsages.Writable or
+                            not derived)):
                     raise exceptions.NoWriteAccessError(name)
 
                 default = self.__config.get(name, spec.default)

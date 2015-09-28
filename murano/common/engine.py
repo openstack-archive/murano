@@ -148,8 +148,8 @@ class TaskExecutor(object):
         self._model['SystemData'] = self._environment.system_attributes
         result['model'] = self._model
 
-        if (not self._model.get('Objects')
-                and not self._model.get('ObjectsCopy')):
+        if (not self._model.get('Objects') and
+                not self._model.get('ObjectsCopy')):
             try:
                 self._delete_trust()
             except Exception:

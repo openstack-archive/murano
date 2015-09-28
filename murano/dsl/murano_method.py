@@ -50,8 +50,8 @@ class MuranoMethod(dsl_types.MuranoMethod):
             self._usage = (self._body.meta.get('usage') or
                            self._body.meta.get('Usage') or
                            MethodUsages.Runtime)
-            if (self._body.name.startswith('#')
-                    or self._body.name.startswith('*')):
+            if (self._body.name.startswith('#') or
+                    self._body.name.startswith('*')):
                 raise ValueError(
                     'Import of special yaql functions is forbidden')
         else:
@@ -64,8 +64,8 @@ class MuranoMethod(dsl_types.MuranoMethod):
                                     arguments_scheme.iteritems()]
             self._arguments_scheme = collections.OrderedDict()
             for record in arguments_scheme:
-                if (not isinstance(record, types.DictionaryType)
-                        or len(record) > 1):
+                if (not isinstance(record, types.DictionaryType) or
+                        len(record) > 1):
                     raise ValueError()
                 name = record.keys()[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
