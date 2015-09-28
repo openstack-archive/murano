@@ -96,7 +96,6 @@ class TestCongressRules(unittest.TestCase):
         rules = congress_rules.convert(model, package_loader,
                                        tenant_id=TENANT_ID)
         rules_str = ", \n".join(map(str, rules))
-        print rules_str
 
         return rules_str
 
@@ -224,7 +223,6 @@ class TestCongressRules(unittest.TestCase):
         tenant_id = uuidutils.generate_uuid()
         rules = congress_rules.convert(model, tenant_id=tenant_id)
         rules_str = ", \n".join(map(str, rules))
-        print rules_str
 
         self.assertTrue('murano:objects+("1", "{0}", "t1")'.format(tenant_id)
                         in rules_str)
