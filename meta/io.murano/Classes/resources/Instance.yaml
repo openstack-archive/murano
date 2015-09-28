@@ -192,6 +192,9 @@ Methods:
             assignFloatingIp => $assignFip,
             sharedIps => $sharedIps
           )
+      - $.setAttr(instanceResources, $.getAttr(instanceResources, []).concat($joinResult.get(instanceResources, [])))
+      - $.setAttr(instanceOutputs, $.getAttr(instanceOutputs, []).concat($joinResult.get(instanceOutputs, [])))
+
       - If: $joinResult.template != null
         Then:
           - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
@@ -218,17 +221,27 @@ Methods:
 
       - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
 
-  destroy:
-    # FIXME(smelikyan): All allocated resources should be cleaned-up on destroy
-    # Now no clean-up happens here cause we don't track all native resources
-    # that are allocated at the moment in descendants of Instance or other
-    # classes that may allocate resource dependent on OS::Nova:Server used
-    # as underlying implementation for Instance. This can cause
-    # resource leak when environment is updated. Resources are cleaned-up only
-    # when whole Environment is deleted (alongside with Heat stack deletion).
-    # https://bugs.launchpad.net/murano/+bug/1359998
+  releaseResources:
     Body:
       - $.environment.instanceNotifier.untrackCloudInstance($this)
+      - $template: $.environment.stack.current()
+      - $resourcesToDelete: list($.name).concat($.getAttr(instanceResources, []))
+      - $template.resources: $template.resources.deleteAll($resourcesToDelete)
+
+      - $outputsToDelete: list(
+          '{0}-assigned-ips'.format($.name),
+          '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
+      - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
+
+      - $.environment.stack.setTemplate($template)
+      - $.environment.stack.push()
+      - $.setAttr(instanceResources, [])
+      - $.setAttr(instanceOutputs, [])
+
+  destroy:
+    Body:
+      - $.releaseResources()
+
 
   createDefaultInstanceSecurityGroupRules:
     Arguments:

@@ -200,8 +200,8 @@ class MuranoDslExecutor(object):
         gc_object_store.load(objects_copy, None)
         objects_to_clean = []
         for object_id in self._list_potential_object_ids(objects_copy):
-            if (gc_object_store.has(object_id)
-                    and not self._object_store.has(object_id)):
+            if (gc_object_store.has(object_id) and
+                    not self._object_store.has(object_id)):
                 obj = gc_object_store.get(object_id)
                 objects_to_clean.append(obj)
         if objects_to_clean:
@@ -217,14 +217,13 @@ class MuranoDslExecutor(object):
 
     def _list_potential_object_ids(self, data):
         if isinstance(data, types.DictionaryType):
-            for val in data.values():
+            sys_dict = data.get('?')
+            if (isinstance(sys_dict, types.DictionaryType) and
+                    sys_dict.get('id') and sys_dict.get('type')):
+                yield sys_dict['id']
+            for val in data.itervalues():
                 for res in self._list_potential_object_ids(val):
                     yield res
-            sys_dict = data.get('?')
-            if (isinstance(sys_dict, types.DictionaryType)
-                    and sys_dict.get('id')
-                    and sys_dict.get('type')):
-                yield sys_dict['id']
         elif isinstance(data, collections.Iterable) and not isinstance(
                 data, types.StringTypes):
             for val in data:
