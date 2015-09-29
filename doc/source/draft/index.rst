@@ -50,6 +50,7 @@ Using Murano
    enduser-guide/quickstart
    enduser-guide/manage_environments
    enduser-guide/manage_applications
+   enduser-guide/log_into_murano_instance
    enduser-guide/troubleshooting
 
 Deploying Murano
