@@ -30,17 +30,17 @@ class TraverseHelperTests(base.MuranoTestCase):
     def test_root_get_with_value_type(self):
         source = 'source'
         value = utils.TraverseHelper.get('/', source)
-        self.assertEqual(value, source)
+        self.assertEqual(source, value)
 
     def test_attribute_get(self):
         source = {'attr': True}
         value = utils.TraverseHelper.get('/attr', source)
-        self.assertEqual(value, True)
+        self.assertEqual(True, value)
 
     def test_nested_attribute_get(self):
         source = {'obj': {'attr': True}}
         value = utils.TraverseHelper.get('/obj/attr', source)
-        self.assertEqual(value, True)
+        self.assertEqual(True, value)
 
     def test_list_item_attribute_get(self):
         source = {'obj': [
@@ -48,7 +48,7 @@ class TraverseHelperTests(base.MuranoTestCase):
             {'?': {'id': '2s'}, 'value': 2},
         ]}
         value = utils.TraverseHelper.get('/obj/2s/value', source)
-        self.assertEqual(value, 2)
+        self.assertEqual(2, value)
 
     def test_list_item_attribute_get_by_index(self):
         source = {'obj': [
@@ -56,25 +56,25 @@ class TraverseHelperTests(base.MuranoTestCase):
             {'?': {'id': 'guid2'}, 'value': 2}
         ]}
         value = utils.TraverseHelper.get('/obj/1/value', source)
-        self.assertEqual(value, 2)
+        self.assertEqual(2, value)
 
     def test_attribute_set(self):
         source = {'attr': True}
         utils.TraverseHelper.update('/newAttr', False, source)
         value = utils.TraverseHelper.get('/newAttr', source)
-        self.assertEqual(value, False)
+        self.assertEqual(False, value)
 
     def test_attribute_update(self):
         source = {'attr': True}
         utils.TraverseHelper.update('/attr', False, source)
         value = utils.TraverseHelper.get('/attr', source)
-        self.assertEqual(value, False)
+        self.assertEqual(False, value)
 
     def test_nested_attribute_update(self):
         source = {'obj': {'attr': True}}
         utils.TraverseHelper.update('/obj/attr', False, source)
         value = utils.TraverseHelper.get('/obj/attr', source)
-        self.assertEqual(value, False)
+        self.assertEqual(False, value)
 
     def test_adding_item_to_list(self):
         source = {'attr': [1, 2, 3]}

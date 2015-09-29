@@ -126,8 +126,8 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         response = request.get_response(self.api)
 
-        self.assertEqual(response.status_code, 200)
-        self.assertEqual(response.json, expected_result)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(expected_result, response.json)
 
     def test_get_result_not_found(self, _):
         """If task does not exists, it should be handled correctly
@@ -150,4 +150,4 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         response = request.get_response(self.api)
 
-        self.assertEqual(response.status_code, 404)
+        self.assertEqual(404, response.status_code)

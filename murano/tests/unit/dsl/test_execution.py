@@ -36,13 +36,13 @@ class TestExecution(test_case.DslTestCase):
 
     def test_trace(self):
         runner = self._load()
-        self.assertEqual(self.traces, [])
+        self.assertEqual([], self.traces)
         runner.testTrace(123)
-        self.assertEqual(self.traces, [123, 'STRING', 'ANOTHER_STRING'])
+        self.assertEqual([123, 'STRING', 'ANOTHER_STRING'], self.traces)
         runner.testTrace(321)
-        self.assertEqual(self.traces, [
-            123, 'STRING', 'ANOTHER_STRING',
-            321, 'STRING', 'ANOTHER_STRING'])
+        self.assertEqual([123, 'STRING', 'ANOTHER_STRING',
+                          321, 'STRING', 'ANOTHER_STRING'],
+                         self.traces)
 
     def test_exception(self):
         class CustomException(Exception):

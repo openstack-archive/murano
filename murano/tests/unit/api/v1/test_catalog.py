@@ -67,41 +67,41 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'False',
                                              'owned': 'False'}))
-        self.assertEqual(len(result['packages']), 4)
+        self.assertEqual(4, len(result['packages']))
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'False',
                                              'owned': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True',
                                              'owned': 'False'}))
-        self.assertEqual(len(result['packages']), 3)
+        self.assertEqual(3, len(result['packages']))
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True',
                                              'owned': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'owned': 'True',
                 'fqn': pkg.fully_qualified_name}))
-        self.assertEqual(len(result['packages']), 1)
-        self.assertEqual(result['packages'][0]['fully_qualified_name'],
-                         pkg.fully_qualified_name)
+        self.assertEqual(1, len(result['packages']))
+        self.assertEqual(pkg.fully_qualified_name,
+                         result['packages'][0]['fully_qualified_name'])
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'owned': 'True',
                 'type': 'Library'}))
-        self.assertEqual(len(result['packages']), 1)
-        self.assertEqual(result['packages'][0]['fully_qualified_name'],
-                         pkg.fully_qualified_name)
+        self.assertEqual(1, len(result['packages']))
+        self.assertEqual(pkg.fully_qualified_name,
+                         result['packages'][0]['fully_qualified_name'])
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'type': 'Library'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
     def test_packages_filtering_non_admin(self):
         self.is_admin = False
@@ -121,46 +121,46 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'False',
                                              'owned': 'False'}))
-        self.assertEqual(len(result['packages']), 3)
+        self.assertEqual(3, len(result['packages']))
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'False',
                                              'owned': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True',
                                              'owned': 'False'}))
-        self.assertEqual(len(result['packages']), 3)
+        self.assertEqual(3, len(result['packages']))
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True',
                                              'owned': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'owned': 'True',
                 'fqn': pkg.fully_qualified_name}))
-        self.assertEqual(len(result['packages']), 1)
-        self.assertEqual(result['packages'][0]['fully_qualified_name'],
-                         pkg.fully_qualified_name)
+        self.assertEqual(1, len(result['packages']))
+        self.assertEqual(pkg.fully_qualified_name,
+                         result['packages'][0]['fully_qualified_name'])
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'owned': 'True',
                 'type': 'Library'}))
-        self.assertEqual(len(result['packages']), 1)
-        self.assertEqual(result['packages'][0]['fully_qualified_name'],
-                         pkg.fully_qualified_name)
+        self.assertEqual(1, len(result['packages']))
+        self.assertEqual(pkg.fully_qualified_name,
+                         result['packages'][0]['fully_qualified_name'])
 
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={
                 'type': 'Library'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         self._set_policy_rules({'get_package': '',
                                 'manage_public_package': '!'})
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'False'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
     def test_packages(self):
         self._set_policy_rules(
@@ -171,7 +171,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             self.expect_policy_check('get_package')
             self.expect_policy_check('manage_public_package')
         result = self.controller.search(self._get('/v1/catalog/packages/'))
-        self.assertEqual(len(result['packages']), 0)
+        self.assertEqual(0, len(result['packages']))
 
         self._add_pkg('test_tenant')
         self._add_pkg('test_tenant')
@@ -181,20 +181,20 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         # non-admin should only see 2 pkgs he can edit.
         self.is_admin = False
         result = self.controller.search(self._get('/v1/catalog/packages/'))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
         # can only deploy his + public
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         # admin can edit anything
         self.is_admin = True
         result = self.controller.search(self._get('/v1/catalog/packages/'))
-        self.assertEqual(len(result['packages']), 4)
+        self.assertEqual(4, len(result['packages']))
         # admin can only deploy his + public
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True'}))
-        self.assertEqual(len(result['packages']), 2)
+        self.assertEqual(2, len(result['packages']))
 
         self._add_pkg('test_tenant', public=True)
         self._add_pkg('other_tenant', public=True)
@@ -202,20 +202,20 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         # non-admin are allowed to edit public packages by policy
         self.is_admin = False
         result = self.controller.search(self._get('/v1/catalog/packages/'))
-        self.assertEqual(len(result['packages']), 4)
+        self.assertEqual(4, len(result['packages']))
         # can deploy mine + other public
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True'}))
-        self.assertEqual(len(result['packages']), 4)
+        self.assertEqual(4, len(result['packages']))
 
         # admin can edit anything
         self.is_admin = True
         result = self.controller.search(self._get('/v1/catalog/packages/'))
-        self.assertEqual(len(result['packages']), 6)
+        self.assertEqual(6, len(result['packages']))
         # can deploy mine + public
         result = self.controller.search(self._get(
             '/v1/catalog/packages/', params={'catalog': 'True'}))
-        self.assertEqual(len(result['packages']), 4)
+        self.assertEqual(4, len(result['packages']))
 
     def _test_package(self):
         package_dir = os.path.abspath(
@@ -266,7 +266,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         )
         result = self.controller.get_supplier_logo(req, saved_package.id)
 
-        self.assertEqual(imghdr.what('', result), 'png')
+        self.assertEqual('png', imghdr.what('', result))
 
     def test_download_package(self):
         self._set_policy_rules(

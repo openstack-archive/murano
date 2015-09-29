@@ -39,8 +39,8 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
             "name": "my_template"
         }
         template_des = self.template_services.create(body, 'tenant_id')
-        self.assertEqual(template_des.description,
-                         fixture.environment_template_desc)
+        self.assertEqual(fixture.environment_template_desc,
+                         template_des.description)
 
     def test_get_empty_template(self):
         """Check obtaining information about a template without services."""
@@ -48,17 +48,17 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
         self.test_create_template()
         template = \
             self.template_services.get_description("template_id")
-        self.assertEqual(template, fixture.environment_template_desc)
+        self.assertEqual(fixture.environment_template_desc, template)
 
     def test_get_template_services(self):
         """Check obtaining information about a template with services."""
         fixture = self.useFixture(et.AppEnvTemplateFixture())
         template = self.template_services.create(fixture.env_template_desc,
                                                  'tenant_id')
-        self.assertEqual(template.description, fixture.env_template_desc)
+        self.assertEqual(fixture.env_template_desc, template.description)
         template_des = \
             self.template_services.get_description("template_id")
-        self.assertEqual(template_des, fixture.env_template_desc)
+        self.assertEqual(fixture.env_template_desc, template_des)
 
     def test_get_template_no_exists(self):
         """Check obtaining information about a template which

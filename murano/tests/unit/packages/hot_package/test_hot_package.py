@@ -48,4 +48,4 @@ class TestHotPackage(test_base.MuranoTestCase):
         files = murano.packages.hot_package.HotPackage \
             ._translate_files(package_dir)
         msg = "heat files were not generated correctly. Expected empty dict"
-        self.assertEqual(files, [], msg)
+        self.assertEqual([], files, msg)

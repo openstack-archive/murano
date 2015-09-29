@@ -37,12 +37,12 @@ class TestContracts(test_case.DslTestCase):
     def test_string_contract(self):
         result = self._runner.testStringContract('qwerty')
         self.assertIsInstance(result, types.StringTypes)
-        self.assertEqual(result, 'qwerty')
+        self.assertEqual('qwerty', result)
 
     def test_string_from_number_contract(self):
         result = self._runner.testStringContract(123)
         self.assertIsInstance(result, types.StringTypes)
-        self.assertEqual(result, '123')
+        self.assertEqual('123', result)
 
     def test_string_null_contract(self):
         self.assertIsNone(self._runner.testStringContract(None))
@@ -50,12 +50,12 @@ class TestContracts(test_case.DslTestCase):
     def test_int_contract(self):
         result = self._runner.testIntContract(123)
         self.assertIsInstance(result, int)
-        self.assertEqual(result, 123)
+        self.assertEqual(123, result)
 
     def test_int_from_string_contract(self):
         result = self._runner.testIntContract('456')
         self.assertIsInstance(result, int)
-        self.assertEqual(result, 456)
+        self.assertEqual(456, result)
 
     def test_int_from_string_contract_failure(self):
         self.assertRaises(exceptions.ContractViolationException,
@@ -102,7 +102,7 @@ class TestContracts(test_case.DslTestCase):
     def test_class_contract_by_ref(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
         result = self._runner.testClassContract(arg)
-        self.assertEqual(result.id, arg.id)
+        self.assertEqual(arg.id, result.id)
 
     def test_class_contract_failure(self):
         self.assertRaises(
@@ -124,7 +124,7 @@ class TestContracts(test_case.DslTestCase):
         object_id = self._runner.root.get_property('sampleClass').object_id
         result = self._runner.testClassFromIdContract(object_id)
         self.assertIsInstance(result, dsl.MuranoObjectInterface)
-        self.assertEqual(result.id, object_id)
+        self.assertEqual(object_id, result.id)
 
     def test_check_contract(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')

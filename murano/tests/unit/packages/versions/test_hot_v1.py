@@ -28,19 +28,18 @@ class TestHotV1(test_base.MuranoTestCase):
         package = load_utils.load_from_dir(package_dir)
 
         self.assertNotEqual(package.supplier, None)
-        self.assertEqual(package.supplier['Name'], 'Supplier Name')
-        self.assertEqual(package.supplier['CompanyUrl'], {
-            'Link': 'http://example.com',
-            'Text': 'Example Company'
-        })
+        self.assertEqual('Supplier Name', package.supplier['Name'])
+        self.assertEqual({'Link': 'http://example.com',
+                          'Text': 'Example Company'},
+                         package.supplier['CompanyUrl'])
         self.assertEqual(
-            package.supplier['Summary'],
-            'Company summary goes here'
+            'Company summary goes here',
+            package.supplier['Summary']
         )
         self.assertEqual(
-            package.supplier['Description'],
-            'Marked up company description goes here'
+            'Marked up company description goes here',
+            package.supplier['Description']
         )
-        self.assertEqual(package.supplier['Logo'], 'test_supplier_logo.png')
+        self.assertEqual('test_supplier_logo.png', package.supplier['Logo'])
 
-        self.assertEqual(imghdr.what('', package.supplier_logo), 'png')
+        self.assertEqual('png', imghdr.what('', package.supplier_logo))

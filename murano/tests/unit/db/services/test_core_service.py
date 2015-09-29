@@ -34,7 +34,7 @@ class TestCoreServices(base.MuranoTestCase):
         template_services_mock.get_description.return_value = \
             fixture.environment_template_desc
         template_des = self.core_services.get_template_data('any', '/services')
-        self.assertEqual(template_des, [])
+        self.assertEqual([], template_des)
         template_services_mock.get_description.assert_called_with('any')
 
     @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
@@ -45,7 +45,7 @@ class TestCoreServices(base.MuranoTestCase):
         template_services_mock.get_description.return_value = \
             fixture_env_apps.env_template_desc
         template_des = self.core_services.get_template_data('any', '/services')
-        self.assertEqual(template_des, fixture_apps.applications_desc)
+        self.assertEqual(fixture_apps.applications_desc, template_des)
         template_services_mock.get_description.assert_called_with('any')
 
     @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
@@ -58,7 +58,7 @@ class TestCoreServices(base.MuranoTestCase):
         template_des = \
             self.core_services.get_template_data('any',
                                                  '/services/tomcat_id')
-        self.assertEqual(template_des, fixture2.application_tomcat_desc)
+        self.assertEqual(fixture2.application_tomcat_desc, template_des)
         template_services_mock.get_description.assert_called_with('any')
 
     @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
@@ -72,7 +72,7 @@ class TestCoreServices(base.MuranoTestCase):
             post_env_template_data('any',
                                    fixture2.env_template_desc,
                                    '/services')
-        self.assertEqual(template_des, fixture2.env_template_desc)
+        self.assertEqual(fixture2.env_template_desc, template_des)
         template_services_mock.get_description.assert_called_with('any')
 
     @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
@@ -86,7 +86,7 @@ class TestCoreServices(base.MuranoTestCase):
             delete_env_template_data('any',
                                      '/services/54aaa43d-5970')
         template_des = self.core_services.get_template_data('any', '/services')
-        self.assertEqual(template_des, [fixture.application_tomcat_desc])
+        self.assertEqual([fixture.application_tomcat_desc], template_des)
         template_services_mock.get_description.assert_called_with('any')
 
     @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
@@ -120,5 +120,5 @@ class TestCoreServices(base.MuranoTestCase):
                                    '/services')
         template_des = \
             self.core_services.get_template_data('any', '/services')
-        self.assertEqual(template_des, fservices.applications_desc)
+        self.assertEqual(fservices.applications_desc, template_des)
         template_services_mock.get_description.assert_called_with('any')

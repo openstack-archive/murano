@@ -80,7 +80,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
                                   [pkg_created, pkg_name, pkg_fqn]):
             res = api.package_search(
                 {'order_by': [order]}, self.context, limit=10)
-            self.assertEqual(len(res), 10)
+            self.assertEqual(10, len(res))
             self.assertEqual(pkg_ids, [r.id for r in res])
 
     def test_order_by_compound(self):
@@ -104,7 +104,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         res = api.package_search(
             {'order_by': ['name', 'created']}, self.context, limit=10)
-        self.assertEqual(len(res), 10)
+        self.assertEqual(10, len(res))
         self.assertEqual(pkg_a_id + pkg_z_id, [r.id for r in res])
 
     def test_pagination_backwards(self):
@@ -122,14 +122,14 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         pkg_ids = [pkg.id for pkg in sorted(pkgs, key=lambda _pkg: _pkg.name)]
 
         res = api.package_search({}, self.context, limit=10)
-        self.assertEqual(len(res), 10)
+        self.assertEqual(10, len(res))
         self.assertEqual(pkg_ids, [r.id for r in res])
         marker = res[-1].id
 
         res = api.package_search(
             {'marker': marker,
              'sort_dir': 'desc'}, self.context, limit=5)
-        self.assertEqual(len(res), 5)
+        self.assertEqual(5, len(res))
         self.assertEqual(list(reversed(pkg_ids[4:9])),
                          [r.id for r in res])
         marker = res[-1].id
@@ -137,7 +137,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         res = api.package_search(
             {'marker': marker,
              'sort_dir': 'desc'}, self.context, limit=5)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
         self.assertEqual(list(reversed(pkg_ids[0:4])),
                          [r.id for r in res])
         marker = res[-1].id
@@ -145,7 +145,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         res = api.package_search(
             {'marker': marker,
              'sort_dir': 'desc'}, self.context, limit=5)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
     def test_pagination(self):
         """Creates 10 packages with unique names and iterates through them,
@@ -163,22 +163,22 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         pkg_ids = [pkg.id for pkg in sorted(pkgs, key=lambda _pkg: _pkg.name)]
 
         res = api.package_search({}, self.context, limit=4)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
         self.assertEqual(pkg_ids[0:4], [r.id for r in res])
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
         self.assertEqual(pkg_ids[4:8], [r.id for r in res])
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
         self.assertEqual(pkg_ids[8:10], [r.id for r in res])
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
     def test_pagination_loops_through_names(self):
         """Creates 10 packages with the same display name and iterates through them,
@@ -191,19 +191,19 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
                                    fully_qualified_name=str(uuid.uuid4())),
                 self.tenant_id)
         res = api.package_search({}, self.context, limit=4)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
         marker = res[-1].id
 
         res = api.package_search({'marker': marker}, self.context, limit=4)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
     def test_package_search_search(self):
         pkg1 = api.package_upload(
@@ -216,20 +216,20 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         res = api.package_search(
             {'search': 'tag1'}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'search': pkg1.fully_qualified_name}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'search': pkg2.fully_qualified_name}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'search': 'not_a_valid_uuid'}, self.context)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
         res = api.package_search(
             {'search': 'some text'}, self.context)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
 
     def test_package_search_tags(self):
         api.package_upload(
@@ -242,13 +242,13 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         res = api.package_search(
             {'tag': ['tag1']}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'tag': ['tag2']}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'tag': ['tag3']}, self.context)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
     def test_package_search_type(self):
         api.package_upload(
@@ -262,10 +262,10 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         res = api.package_search(
             {'type': 'Library'}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'type': 'Application'}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
 
     def test_package_search_disabled(self):
         api.package_upload(
@@ -281,10 +281,10 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         res = api.package_search(
             {'include_disabled': 'false'}, self.context)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search(
             {'include_disabled': 'true'}, self.context)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
 
     def test_package_search_owned(self):
         api.package_upload(
@@ -297,13 +297,13 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
                 fully_qualified_name=str(uuid.uuid4())), self.tenant_id_2)
 
         res = api.package_search({'owned': 'true'}, self.context_admin)
-        self.assertEqual(len(res), 1)
+        self.assertEqual(1, len(res))
         res = api.package_search({'owned': 'false'}, self.context_admin)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
 
     def test_package_search_no_filters_catalog(self):
         res = api.package_search({}, self.context, catalog=True)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
         api.package_upload(
             self._stub_package(
@@ -325,14 +325,14 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         # catalog=True should show public + mine
         res = api.package_search({}, self.context, catalog=True)
-        self.assertEqual(len(res), 3)
+        self.assertEqual(3, len(res))
 
         res = api.package_search({}, self.context_admin, catalog=True)
-        self.assertEqual(len(res), 3)
+        self.assertEqual(3, len(res))
 
     def test_package_search_no_filters(self):
         res = api.package_search({}, self.context)
-        self.assertEqual(len(res), 0)
+        self.assertEqual(0, len(res))
 
         api.package_upload(
             self._stub_package(
@@ -354,13 +354,13 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
         # I can only edit mine pkgs
         res = api.package_search({}, self.context)
-        self.assertEqual(len(res), 2)
+        self.assertEqual(2, len(res))
         for pkg in res:
-            self.assertEqual(pkg.owner_id, self.tenant_id)
+            self.assertEqual(self.tenant_id, pkg.owner_id)
 
         # Admin can see everything
         res = api.package_search({}, self.context_admin)
-        self.assertEqual(len(res), 4)
+        self.assertEqual(4, len(res))
 
     def test_list_empty_categories(self):
         res = api.category_get_names()

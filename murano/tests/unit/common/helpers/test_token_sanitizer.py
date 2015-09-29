@@ -22,27 +22,27 @@ class TokenSanitizerTests(base.MuranoTestCase):
     def test_dict_with_one_value(self):
         source = {'token': 'value'}
         value = self.sanitizer.sanitize(source)
-        self.assertEqual(value['token'], self.sanitizer.message)
+        self.assertEqual(self.sanitizer.message, value['token'])
 
     def test_dict_with_few_value(self):
         source = {'token': 'value', 'pass': 'value', 'TrustId': 'value'}
         value = self.sanitizer.sanitize(source)
 
-        self.assertEqual(value['token'], self.sanitizer.message)
-        self.assertEqual(value['pass'], self.sanitizer.message)
-        self.assertEqual(value['TrustId'], self.sanitizer.message)
+        self.assertEqual(self.sanitizer.message, value['token'])
+        self.assertEqual(self.sanitizer.message, value['pass'])
+        self.assertEqual(self.sanitizer.message, value['TrustId'])
 
     def test_dict_with_nested_dict(self):
         source = {'obj': {'pass': 'value'}}
         value = self.sanitizer.sanitize(source)
-        self.assertEqual(value['obj']['pass'], self.sanitizer.message)
+        self.assertEqual(self.sanitizer.message, value['obj']['pass'])
 
     def test_dict_with_nested_list(self):
         source = {'obj': [{'pass': 'value'}]}
         value = self.sanitizer.sanitize(source)
-        self.assertEqual(value['obj'][0]['pass'], self.sanitizer.message)
+        self.assertEqual(self.sanitizer.message, value['obj'][0]['pass'])
 
     def test_leave_out_other_values(self):
         source = {'obj': ['value']}
         value = self.sanitizer.sanitize(source)
-        self.assertEqual(value['obj'][0], 'value')
+        self.assertEqual('value', value['obj'][0])

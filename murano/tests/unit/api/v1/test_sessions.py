@@ -85,4 +85,4 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         response = request.get_response(self.api)
 
         # Should be forbidden!
-        self.assertEqual(response.status_code, 403)
+        self.assertEqual(403, response.status_code)
