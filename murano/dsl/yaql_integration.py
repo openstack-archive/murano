@@ -99,8 +99,7 @@ def create_context(runtime_version):
     else:
         context = ROOT_CONTEXT_20.create_child_context()
     context[constants.CTX_YAQL_ENGINE] = choose_yaql_engine(runtime_version)
-    yaql_functions.register(context, runtime_version)
-    return context
+    return yaql_functions.register(context, runtime_version)
 
 
 def choose_yaql_engine(runtime_version):
