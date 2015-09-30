@@ -270,3 +270,11 @@ Methods:
           Contract: $.int()
     Body:
       - Return: $list.aggregate($1 + $2, $initializer)
+
+  testId:
+    Body:
+      Return: id($) + $.id()
+
+  testType:
+    Body:
+      Return: type($) + $.type()

@@ -53,3 +53,17 @@ class TestMultipleInheritance(test_case.DslTestCase):
              'CommonParent::virtualMethod', '-',
              'ParentClass2::virtualMethod'],
             self.traces)
+
+    def test_super(self):
+        self._runner.on(self._multi_derived).testSuper()
+        self.assertItemsEqual(
+            ['CommonParent::virtualMethod', 'ParentClass2::virtualMethod',
+             'CommonParent::virtualMethod', 'ParentClass2::virtualMethod'],
+            self.traces)
+
+    def test_psuper(self):
+        self._runner.on(self._multi_derived).testPsuper()
+        self.assertItemsEqual(
+            ['CommonParent::virtualMethod', 'ParentClass2::virtualMethod',
+             'CommonParent::virtualMethod', 'ParentClass2::virtualMethod'],
+            self.traces)
