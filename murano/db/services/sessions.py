@@ -40,7 +40,7 @@ class SessionServices(object):
 
         if state:
             # in this state, if state is not specified return in all states
-            query = query.filter(models.Session.state == state),
+            query = query.filter(models.Session.state == state)
 
         return query.order_by(models.Session.version.desc(),
                               models.Session.updated.desc()).all()
