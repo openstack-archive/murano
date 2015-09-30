@@ -249,6 +249,29 @@ Install the API service and Engine
         tox -e venv -- murano-engine --config-file ./etc/murano/murano.conf
     ..
 
+Register in Keystone
+--------------------
+
+To make murano API available to all OpenStack users, you need to register the
+Application Catalog service within the Identity service.
+
+#. Add ``application_catalog`` service:
+
+   .. code-block:: console
+
+     keystone service-create --name murano --type application_catalog --description "Application Catalog for OpenStack"
+
+#. Provide an endpoint for that service:
+
+   .. code-block:: console
+
+      keystone endpoint-create --region RegionOne --service-id <MURANO-SERVICE-ID> --publicurl http://<murano-ip>:8082 --internalurl http://<murano-ip>:8082 --adminurl http://<murano-ip>:8082
+
+   where ``MURANO-SERVICE-ID`` is the unique service number that you can find
+   in the :command:`keystone service-create` output.
+
+.. note:: URLs (publicurl, internalurl and adminurl) may be different
+          depending on your environment.
 
 Install Murano Dashboard
 ========================
