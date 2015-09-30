@@ -21,6 +21,7 @@ from oslo_utils import timeutils
 
 from murano.api.v1 import environments
 from murano.db import models
+from murano.services import states
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 
@@ -98,9 +99,9 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'id': 'environment_id',
                     'name': 'my_env',
                     'version': 0,
-                    # TODO(sjmc7) - bug 1347298
                     'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1]}
+                    'updated': timeutils.isotime(fake_now)[:-1],
+                    }
 
         body = {'name': 'my_env'}
         req = self._post('/environments', json.dumps(body))
@@ -118,6 +119,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual({'environments': [expected]}, json.loads(result.body))
 
         expected['services'] = []
+        expected['acquired_by'] = None
 
         # Reset the policy expectation
         self.expect_policy_check('show_environment',
@@ -265,6 +267,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         expected['created'] = timeutils.isotime(expected['created'])[:-1]
         expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
+        expected['acquired_by'] = None
 
         self.assertEqual(expected, json.loads(result.body))
 
@@ -313,6 +316,80 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(403, result.status_code)
         self.assertTrue(('User is not authorized to access these'
                          ' tenant resources') in result.body)
+
+    def test_get_environment(self):
+        """Test GET request of an environment in ready status"""
+        self._set_policy_rules(
+            {'show_environment': '@'}
+        )
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '123'})
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        env_id = '123'
+        self._create_fake_environment(env_id=env_id)
+        req = self._get('/environments/{0}'.format(env_id))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+
+        expected = {'tenant_id': self.tenant,
+                    'id': env_id,
+                    'name': 'my-env',
+                    'version': 0,
+                    'created': timeutils.isotime(fake_now)[:-1],
+                    'updated': timeutils.isotime(fake_now)[:-1],
+                    'acquired_by': None,
+                    'services': [],
+                    'status': 'ready',
+                    }
+        self.assertEqual(expected, json.loads(result.body))
+
+    def test_get_environment_acquired(self):
+        """Test GET request of an environment in deploying status"""
+        self._set_policy_rules(
+            {'show_environment': '@'}
+        )
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '1234'})
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        env_id = '1234'
+        self._create_fake_environment(env_id=env_id)
+
+        sess_id = '321'
+        expected = dict(
+            id=sess_id,
+            environment_id=env_id,
+            version=0,
+            state=states.SessionState.DEPLOYING,
+            user_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '{0}'.format(env_id)}
+                },
+                'Attributes': {}
+            }
+        )
+        s = models.Session(**expected)
+        test_utils.save_models(s)
+
+        req = self._get('/environments/{0}'.format(env_id))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+
+        expected = {'tenant_id': self.tenant,
+                    'id': env_id,
+                    'name': 'my-env',
+                    'version': 0,
+                    'created': timeutils.isotime(fake_now)[:-1],
+                    'updated': timeutils.isotime(fake_now)[:-1],
+                    'acquired_by': sess_id,
+                    'services': [],
+                    'status': states.EnvironmentStatus.DEPLOYING,
+                    }
+        self.assertEqual(expected, json.loads(result.body))
 
     def _create_fake_environment(self, env_name='my-env', env_id='123'):
         fake_now = timeutils.utcnow()
