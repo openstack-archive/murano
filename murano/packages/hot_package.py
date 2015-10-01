@@ -185,10 +185,10 @@ class HotPackage(package_base.PackageBase):
                                       RESOURCES_DIR_NAME,
                                       HOT_FILES_DIR_NAME)
 
-        return HotPackage._build_hot_resources_dict(hot_files_path)
+        return HotPackage._build_hot_resources(hot_files_path)
 
     @staticmethod
-    def _build_hot_resources_dict(basedir):
+    def _build_hot_resources(basedir):
         result = []
         if os.path.isdir(basedir):
             for root, _, files in os.walk(os.path.abspath(basedir)):
