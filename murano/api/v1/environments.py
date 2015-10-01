@@ -85,7 +85,7 @@ class Controller(object):
                 LOG.exception(msg)
                 raise exc.HTTPConflict(explanation=msg)
         else:
-            msg = _('Environment name must contain only alphanumericor "_-." '
+            msg = _('Environment name must contain only alphanumeric or "_-." '
                     'characters, must start with alpha')
             LOG.exception(msg)
             raise exc.HTTPClientError(explanation=msg)
