@@ -29,14 +29,14 @@ class TestHotPackage(test_base.MuranoTestCase):
 
         files = murano.packages.hot_package.HotPackage._translate_files(
             package_dir)
-        expected_result = [
+        expected_result = {
             "testHeatFile",
             "middle_file/testHeatFile",
             "middle_file/inner_file/testHeatFile",
             "middle_file/inner_file2/testHeatFile"
-        ]
+        }
         msg = "hot files were not generated correctly"
-        self.assertEqual(expected_result, files, msg)
+        self.assertSetEqual(expected_result, set(files), msg)
 
     def test_heat_files_generated_empty(self):
         package_dir = os.path.abspath(
@@ -47,5 +47,5 @@ class TestHotPackage(test_base.MuranoTestCase):
 
         files = murano.packages.hot_package.HotPackage \
             ._translate_files(package_dir)
-        msg = "heat files were not generated correctly. Expected empty dict"
+        msg = "heat files were not generated correctly. Expected empty list"
         self.assertEqual([], files, msg)
