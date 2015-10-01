@@ -236,3 +236,10 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
             21,
             self._runner.testAggregateWithInitializer([1, 2, 3, 4], 11)
         )
+
+    def test_id(self):
+        obj_id = self._runner.root.object_id
+        self.assertEqual(obj_id * 2, self._runner.testId())
+
+    def test_type(self):
+        self.assertEqual('TestEngineFunctions' * 2, self._runner.testType())
