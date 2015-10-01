@@ -92,8 +92,19 @@ Methods:
     Body:
         - $.virtualMethod()
         - trace('-')
-        - $.cast(CommonParent).virtualMethod()
+        - cast($, CommonParent).virtualMethod()
         - trace('-')
         - $.cast(ParentClass1).virtualMethod()
         - trace('-')
         - $.cast(ParentClass2).virtualMethod()
+
+  testSuper:
+    Body:
+      - super($, $.virtualMethod())
+      - $.super($.virtualMethod())
+
+  testPsuper:
+    Body:
+      - psuper($, $.virtualMethod())
+      - $.psuper($.virtualMethod())
+

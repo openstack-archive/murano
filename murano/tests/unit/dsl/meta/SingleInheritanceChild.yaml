@@ -10,7 +10,7 @@ Methods:
   method1:
     Body:
       - trace('SingleInheritanceChild::method1')
-      - $.super($.method1())
+      - super($, $.method1())
 
   method2:
     Body:
