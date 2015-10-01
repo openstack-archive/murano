@@ -21,9 +21,10 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import six
 from webob import exc
+from webob import response
 
 from murano.api.v1.cloudfoundry import auth as keystone_auth
-from murano.common.i18n import _LI, _LW
+from murano.common.i18n import _LI
 from murano.common import wsgi
 from murano import context
 from murano.db.catalog import api as db_api
@@ -188,7 +189,7 @@ class Controller(object):
                             session_id=session_id)
         m_cli.sessions.deploy(environment_id, session_id)
         self.current_session = session_id
-        return {}
+        return response.Response(status=202, json_body={})
 
     def deprovision(self, req, instance_id):
         service = db_cf.get_service_for_instance(instance_id)
@@ -203,20 +204,10 @@ class Controller(object):
         token = keystone.auth_token
         m_cli = muranoclient(token)
 
-        try:
-            session_id = create_session(m_cli, environment_id)
-        except exc.HTTPForbidden:
-            # FIXME(Kezar): this is a temporary solution, should be replaced
-            # with 'incomplete' response for Cloud Foudry as soon as we will
-            # know which is right format for it.
-            LOG.warning(_LW("Can't create new session. Please remove service "
-                            "manually in environment {0}")
-                        .format(environment_id))
-            return {}
-
+        session_id = create_session(m_cli, environment_id)
         m_cli.services.delete(environment_id, '/' + service_id, session_id)
         m_cli.sessions.deploy(environment_id, session_id)
-        return {}
+        return response.Response(status=202, json_body={})
 
     def bind(self, req, body, instance_id, app_id):
         filtered = [u'?', u'instance']
@@ -256,15 +247,32 @@ class Controller(object):
 
         return {}
 
-    def get_last_operation(self):
-        """Not implemented functionality
+    def get_last_operation(self, req, instance_id):
+        service = db_cf.get_service_for_instance(instance_id)
+        env_id = service.environment_id
+        tenant = service.tenant
+        _, _, keystone = self._check_auth(req, tenant)
+        # Once we get here we were authorized by keystone
+        token = keystone.auth_token
+        m_cli = muranoclient(token)
 
-        For some reason it's difficult to provide a valid JSON with the
-        response code which is needed for our broker to be true asynchronous.
-        In that case last_operation API call is not supported.
-        """
-
-        raise NotImplementedError
+        # NOTE(starodubcevna): we can track only environment status. it's
+        # murano API limitation.
+        m_environment = m_cli.environments.get(env_id)
+        if m_environment.status == 'ready':
+            body = {'state': 'succeeded',
+                    'description': 'operation succeed'}
+            resp = response.Response(status=200, json_body=body)
+        elif m_environment.status in ['pending', 'deleting', 'deploying']:
+            body = {'state': 'in progress',
+                    'description': 'operation in progress'}
+            resp = response.Response(status=202, json_body=body)
+        elif m_environment.status in ['deploy failure', 'delete failure']:
+            body = {'state': 'failed',
+                    'description': '{0}. Please correct it manually'.format(
+                        m_environment.status)}
+            resp = response.Response(status=200, json_body=body)
+        return resp
 
 
 def muranoclient(token_id):
@@ -285,4 +293,5 @@ def create_session(client, environment_id):
 
 
 def create_resource():
-    return wsgi.Resource(Controller())
+    return wsgi.Resource(Controller(),
+                         serializer=wsgi.ServiceBrokerResponseSerializer())
