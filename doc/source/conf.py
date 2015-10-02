@@ -78,9 +78,10 @@ show_authors = False
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 
-if on_rtd:
-    html_theme_path = ['.']
-    html_theme = 'sphinx_rtd_theme'
+if not on_rtd:
+    #TODO(efedorova): Change local theme to corresponds with the theme on rtd
+    pass
+
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
