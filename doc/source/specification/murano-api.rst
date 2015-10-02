@@ -68,6 +68,9 @@ Environment API
 +----------------------+------------+-------------------------------------------+
 | networking           | string     | Network settings                          |
 +----------------------+------------+-------------------------------------------+
+| acquired_by          | string     | Id of a session that acquired this        |
+|                      |            | environment (for example is deploying it) |
++----------------------+------------+-------------------------------------------+
 | status               | string     | Deployment status: ready, pending,        |
 |                      |            | deploying                                 |
 +----------------------+------------+-------------------------------------------+
@@ -238,8 +241,8 @@ Return information about the environment itself and about applications, includin
 | Method   | URI                              | Header                            | Description                      |
 +==========+==================================+===================================+==================================+
 | GET      | /environments/{id}               | X-Configuration-Session (optional)| Response detailed information    |
-|          |                                  |                                   | about Environment including      |    
-|          |                                  |                                   | child entities                   |   
+|          |                                  |                                   | about Environment including      |
+|          |                                  |                                   | child entities                   |
 +----------+----------------------------------+-----------------------------------+----------------------------------+
 
 *Response*
