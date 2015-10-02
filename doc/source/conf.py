@@ -80,7 +80,7 @@ show_authors = False
 
 if on_rtd:
     html_theme_path = ['.']
-    html_theme = 'sphinx_rtd_theme'
+    html_theme = '_theme_rtd'
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
