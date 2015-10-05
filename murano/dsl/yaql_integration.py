@@ -185,8 +185,8 @@ def _build_native_wrapper_function_definition(murano_method):
         executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
-        return murano_method.invoke(
-            executor, __sender, args, kwargs, __context, True)
+        return helpers.evaluate(murano_method.invoke(
+            executor, __sender, args, kwargs, __context, True), __context)
 
     return specs.get_function_definition(payload)
 
@@ -225,7 +225,7 @@ def get_class_factory_definition(cls, murano_class):
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):
-            return cls(*args, **kwargs)
+            return helpers.evaluate(cls(*args, **kwargs), __context)
 
     if hasattr(cls.__init__, 'im_func'):
         fd = specs.get_function_definition(
