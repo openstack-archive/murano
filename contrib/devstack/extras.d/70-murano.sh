@@ -28,6 +28,9 @@ if is_service_enabled murano; then
         if is_service_enabled horizon; then
             configure_murano_dashboard
         fi
+        if is_service_enabled murano-cfapi; then
+            configure_service_broker
+        fi
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Murano"
         init_murano
@@ -35,10 +38,16 @@ if is_service_enabled murano; then
             init_murano_dashboard
         fi
         start_murano
+        if is_service_enabled murano-cfapi; then
+            start_service_broker
+        fi
     fi
 
     if [[ "$1" == "unstack" ]]; then
         stop_murano
+        if is_service_enabled murano-cfapi; then
+            stop_service_broker
+        fi
         cleanup_murano
         if is_service_enabled horizon; then
             cleanup_murano_dashboard
