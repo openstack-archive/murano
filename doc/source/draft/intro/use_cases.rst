@@ -7,27 +7,33 @@
 Use cases
 =========
 
-* *IT as a Service*
+**IT-as-a-Service**
 
-An IT organization wants to control applications, available to cloud users.
-Application management should be simple and not time-consuming. Users should be
-able to easily find and create the desired applications.
+ An *IT organization* manages applications and controls the applications
+ availability to different OpenStack cloud users in a simple and timesaving
+ manner.
 
-* *Self-service portal*
+ A *cloud end user* can easily find and deploy any available application
+ from the catalog.
 
-You may want to create compound combinations of applications dynamically from
-simple app blocks. And you can create an environment that satisfies your
-requirements in a matter of minutes. Examples of such an environment may be
-“Jenkins+Java+Tomcat” or “Jenkins+Gerrit+Java+JBoss”. So testing application in
-different environment combinations becomes easier.
+**Self-service portal**
 
-* *Glue layer use case*
+ An *application developer* and *quality assurance engineer* reduces efforts
+ on testing an application for compatibility with other applications,
+ databases, platforms, and other components it depends on, by configuring
+ compound combinations of applications dynamically and deploying
+ environments that satisfy all requirements within minutes.
 
-Any external service or technology may be linked to the application in the
-cloud. It can be done using the powerful Murano architecture. For example,
-Murano supports Docker and OracleDB applications, and to enable this support
-no single change was made to Murano itself. So, users can integrate with new
-external services with a minimum cost. Currently, murano applications have been
-integrated with the following technologies: Docker, Legacy apps VMs or bare
-metal, apps outside of OpenStack, and the following ones are planned for the
-future: cloudify and TOSCA, apache brooklin, APS.
+**Glue layer use case**
+
+ A *cloud end user* is able to link an ever growing number of technologies
+ to any application in an OpenStack cloud with a minimum cost due to
+ the powerful Murano architecture.
+
+ Currently, Murano applications have been integrated with the following
+ technologies: Docker, Legacy apps VMs or bare metal, apps outside of
+ OpenStack, and others.
+
+ The following technologies are to become available in the future:
+ Cloudify and TOSCA, Apache Brooklyn, and APS.
+
