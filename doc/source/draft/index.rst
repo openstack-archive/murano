@@ -65,6 +65,7 @@ Deploying Murano
    admin-guide/manage_categories
    admin-guide/murano_repository
    admin-guide/use_cli
+   admin-guide/configure_cloud_foundry_service_broker
    admin-guide/admin_troubleshooting
 
 Developing Applications
