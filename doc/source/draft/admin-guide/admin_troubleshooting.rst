@@ -98,6 +98,41 @@ Verify that murano core package is uploaded.
 If not, the content of `meta/io.murano` folder should be zipped and
 uploaded to Murano.
 
+**[keystoneclient.exceptions.AuthorizationFailure]:**
+**Authorization failed: You are not authorized to perform the requested action. (HTTP 403)**
+
+Token expires during the deployment. Usually the default standard token lifetime
+is one hour. The error occurs frequently as, in most cases, a deployment takes
+longer than that or does not start right after token is generated.
+
+Workarounds:
+
+* Use trusts. Only possible in the v3 version. Read more in the
+  `official documentation <https://wiki.openstack.org/wiki/Keystone/Trusts>`_
+  or `here <http://docs.openstack.org/admin-guide-cloud/orchestration-auth-model.html>`_.
+  Do not forget to check corresponding heat and murano settings. Trusts are
+  enabled by default in murano and heat since Kilo release.
+
+  In murano the corresponding configuration option is located in *engine*
+  section:
+
+  .. code-block:: console
+
+     [engine]
+
+     ...
+
+     # Create resources using trust token rather than user's token (boolean
+     # value)
+     use_trusts = true
+
+  If your Keystone runs v2 version, check out the solutions below.
+
+* Make logout/login to compose a new token and start the deployment again.
+  Would not help for long deployment or if token lifetime is too small.
+
+* Increase the token lifetime in the keystone configuration file.
+
 **The murano-agent did not respond within 3600 seconds**
 
 * Need to check transport access to the virtual machine (verify that the
