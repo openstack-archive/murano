@@ -42,6 +42,7 @@ MURANO_KEYSTONE_SIGNING_DIR=${MURANO_KEYSTONE_SIGNING_DIR:-/tmp/keystone-signing
 
 MURANO_DEFAULT_ROUTER=${MURANO_DEFAULT_ROUTER:-''}
 MURANO_EXTERNAL_NETWORK=${MURANO_EXTERNAL_NETWORK:-''}
+MURANO_DEFAULT_DNS=${MURANO_DEFAULT_DNS:-''}
 
 # MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
 # This is not required if all OpenStack services are deployed by devstack scripts
@@ -133,6 +134,10 @@ function configure_murano_networking {
 
     if [[ -n "$MURANO_DEFAULT_ROUTER" ]]; then
         iniset $MURANO_CONF_FILE networking router_name $MURANO_DEFAULT_ROUTER
+    fi
+
+    if [[ -n "$MURANO_DEFAULT_DNS" ]]; then
+        iniset $MURANO_CONF_FILE networking default_dns $MURANO_DEFAULT_DNS
     fi
 }
 
@@ -442,4 +447,3 @@ fi
 
 # Restore xtrace
 $XTRACE
-
