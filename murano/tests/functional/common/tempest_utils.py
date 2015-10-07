@@ -28,9 +28,9 @@ class TempestDeployTestMixin(common_utils.DeployTestMixin):
     @staticmethod
     @common_utils.memoize
     def keystone_client():
-        return ksclient.Client(username=CONF.identity.admin_username,
-                               password=CONF.identity.admin_password,
-                               tenant_name=CONF.identity.admin_tenant_name,
+        return ksclient.Client(username=CONF.auth.admin_username,
+                               password=CONF.auth.admin_password,
+                               tenant_name=CONF.auth.admin_tenant_name,
                                auth_url=CONF.identity.uri)
 
     @staticmethod
@@ -38,9 +38,9 @@ class TempestDeployTestMixin(common_utils.DeployTestMixin):
     def congress_client():
         auth = keystoneclient.auth.identity.v2.Password(
             auth_url=CONF.identity.uri,
-            username=CONF.identity.admin_username,
-            password=CONF.identity.admin_password,
-            tenant_name=CONF.identity.admin_tenant_name)
+            username=CONF.auth.admin_username,
+            password=CONF.auth.admin_password,
+            tenant_name=CONF.auth.admin_tenant_name)
         session = keystoneclient.session.Session(auth=auth)
         return cclient.Client(session=session,
                               service_type='policy')
