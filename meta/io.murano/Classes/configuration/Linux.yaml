@@ -15,6 +15,16 @@ Methods:
       - helpText:
           Contract: $.string()
           Default: null
+      - captureStderr:
+          Contract: $.bool().notNull()
+          Default: true
+      - captureStdout:
+          Contract: $.bool().notNull()
+          Default: true
+      - ignoreErrors:
+          Contract: $.bool().notNull()
+          Default: false
+
     Body:
       - $resources: new(sys:Resources)
       - If: $helpText != null
@@ -24,9 +34,12 @@ Methods:
           - $planName: format('Execute {0}', $command)
       - $template: $resources.yaml('RunCommand.template').bind(dict(
             command => $command,
-            planName => $planName
+            planName => $planName,
+            captureStderr => $captureStderr,
+            captureStdout => $captureStdout,
+            verifyExitcode => not $ignoreErrors
           ))
-      - $agent.call($template, $resources)
+      - Return: $agent.call($template, $resources)
 
   putFile:
     Arguments:
@@ -39,6 +52,10 @@ Methods:
       - helpText:
           Contract: $.string()
           Default: null
+      - ignoreErrors:
+          Contract: $.bool().notNull()
+          Default: false
+
     Body:
       - $data: base64encode($fileContent)
       - $resources: new(sys:Resources)
@@ -50,6 +67,7 @@ Methods:
       - $template: $resources.yaml('PutFile.template').bind(dict(
             path => $path,
             fileContent => $data,
-            planName => $planName
+            planName => $planName,
+            verifyExitcode => not $ignoreErrors
           ))
-      - $agent.call($template, $resources)
+      - Return: $agent.call($template, $resources)
