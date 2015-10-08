@@ -13,6 +13,7 @@
 #    under the License.
 
 from oslo_config import cfg
+from oslo_db import api as oslo_db_api
 from oslo_db.sqlalchemy import utils
 from oslo_log import log as logging
 import sqlalchemy as sa
@@ -214,6 +215,7 @@ def _get_packages_for_category(session, category_id):
     return result_packages
 
 
+@oslo_db_api.wrap_db_retry(max_retries=5, retry_on_deadlock=True)
 def package_update(pkg_id_or_name, changes, context):
     """Update package information
        :param changes: parameters to update
@@ -343,6 +345,7 @@ def package_search(filters, context, manage_public=False,
     return query.all()
 
 
+@oslo_db_api.wrap_db_retry(max_retries=5, retry_on_deadlock=True)
 def package_upload(values, tenant_id):
     """Upload a package with new application
        :param values: parameters describing the new package
@@ -388,6 +391,7 @@ def package_upload(values, tenant_id):
     return package
 
 
+@oslo_db_api.wrap_db_retry(max_retries=5, retry_on_deadlock=True)
 def package_delete(package_id, context):
     """Delete a package by ID."""
     session = db_session.get_session()
