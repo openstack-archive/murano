@@ -22,6 +22,7 @@ from murano.engine.system import mistralclient
 from murano.engine.system import net_explorer
 from murano.engine.system import resource_manager
 from murano.engine.system import status_reporter
+from murano.engine.system import test_fixture
 
 
 def register(package):
@@ -34,3 +35,4 @@ def register(package):
     package.register_class(status_reporter.StatusReporter)
     package.register_class(net_explorer.NetworkExplorer)
     package.register_class(logger.Logger)
+    package.register_class(test_fixture.TestFixture)

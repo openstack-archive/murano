@@ -35,7 +35,6 @@ from murano.engine import client_manager
 from murano.engine import environment
 from murano.engine import package_loader
 
-
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 LOG.logger.setLevel(logging.DEBUG)
