@@ -103,7 +103,7 @@ def create_context(runtime_version):
 
 
 def choose_yaql_engine(runtime_version):
-    return (ENGINE_10 if runtime_version < constants.RUNTIME_VERSION_1_0
+    return (ENGINE_10 if runtime_version <= constants.RUNTIME_VERSION_1_0
             else ENGINE_20)
 
 
