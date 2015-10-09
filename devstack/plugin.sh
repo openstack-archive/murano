@@ -44,6 +44,11 @@ MURANO_DEFAULT_ROUTER=${MURANO_DEFAULT_ROUTER:-''}
 MURANO_EXTERNAL_NETWORK=${MURANO_EXTERNAL_NETWORK:-''}
 MURANO_DEFAULT_DNS=${MURANO_DEFAULT_DNS:-''}
 
+MURANO_APPS=${MURANO_APPS:-''}
+MURANO_APPS_DIR=$DEST/murano-apps
+MURANO_APPS_REPO=${MURANO_APPS_REPO:-${GIT_BASE}/openstack/murano-apps.git}
+MURANO_APPS_BRANCH=${MURANO_APPS_BRANCH:-master}
+
 # MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
 # This is not required if all OpenStack services are deployed by devstack scripts
 #   on a single node. In this case '/' virtual host (which is the default) is enough.
@@ -193,6 +198,37 @@ function configure_murano {
 
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
+}
+
+# install_murano_apps() - Install Murano apps from repository murano-apps, if required
+function install_murano_apps() {
+    if [[ -z $MURANO_APPS ]]; then
+        return
+    fi
+
+    # clone murano-apps only if app installation is required
+    git_clone $MURANO_APPS_REPO $MURANO_APPS_DIR $MURANO_APPS_BRANCH
+
+    # install Murano apps defined in the comma-separated list $MURANO_APPS
+    for murano_app in ${MURANO_APPS//,/ }; do
+        find $MURANO_APPS_DIR -type d -name "package" | while read package; do
+            full_name=$(grep "FullName" "$package/manifest.yaml" | awk -F ':' '{print $2}' | tr -d ' ')
+            if [[ $full_name = $murano_app ]]; then
+                pushd $package
+                zip -r app.zip .
+                murano --os-username $OS_USERNAME \
+                       --os-password $OS_PASSWORD \
+                       --os-tenant-name $OS_PROJECT_NAME \
+                       --os-auth-url http://$KEYSTONE_AUTH_HOST:5000/v2.0 \
+                       --murano-url http://127.0.0.1:8082 \
+                       package-import \
+                       --is-public \
+                       --exists-action u \
+                       app.zip
+                popd
+            fi
+      done
+    done
 }
 
 
@@ -444,6 +480,12 @@ if is_service_enabled murano; then
         if is_service_enabled murano-cfapi; then
             start_service_broker
         fi
+
+        # Give Murano some time to Start
+        sleep 3
+
+        # Install Murano apps, if needed
+        install_murano_apps
     fi
 
     if [[ "$1" == "unstack" ]]; then

@@ -6,6 +6,8 @@
    environment variable::
 
       export DEVSTACK_DIR=<complete path to devstack directory(clonned)>
+      cp files/apts/murano ${DEVSTACK_DIR}/files/debs
+      cp files/rpms/murano ${DEVSTACK_DIR}/files/rpms
       cp lib/murano ${DEVSTACK_DIR}/lib
       cp lib/murano-dashboard ${DEVSTACK_DIR}/lib
       cp extras.d/70-murano.sh ${DEVSTACK_DIR}/extras.d
@@ -25,6 +27,19 @@
       # Enable Murano
       enable_service murano murano-api murano-engine
 
-5. Deploy your OpenStack Cloud with Murano::
+5. (Optional) To import Murano packages when DevStack is up, define an ordered
+   list of packages FQDNs in ``localrc``. Make sure to list all package
+   dependencies. These packages will by default be imported from the murano-apps
+   git repository.
+
+   Example::
+
+      MURANO_APPS=io.murano.apps.apache.Tomcat,io.murano.apps.Guacamole
+
+   You can also use the variables ``MURANO_APPS_REPO`` and ``MURANO_APPS_BRANCH``
+   to configure the git repository which will be used as the source for the
+   imported packages.
+
+6. Deploy your OpenStack Cloud with Murano::
 
       ./stack.sh
