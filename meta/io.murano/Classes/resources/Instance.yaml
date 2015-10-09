@@ -223,18 +223,23 @@ Methods:
 
   releaseResources:
     Body:
-      - $.environment.instanceNotifier.untrackCloudInstance($this)
       - $template: $.environment.stack.current()
-      - $resourcesToDelete: list($.name).concat($.getAttr(instanceResources, []))
-      - $template.resources: $template.resources.deleteAll($resourcesToDelete)
+      - If: bool($template.resources) and bool($template.outputs)
+        Then:
+          - $resourcesToDelete: list($.name).concat($.getAttr(instanceResources, []))
+          - $lenBefore: len($template.resources)
+          - $template.resources: $template.resources.deleteAll($resourcesToDelete)
+          - If: $lenBefore > len($template.resources)
+            Then:
+              - $.environment.instanceNotifier.untrackCloudInstance($this)
 
-      - $outputsToDelete: list(
-          '{0}-assigned-ips'.format($.name),
-          '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
-      - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
+          - $outputsToDelete: list(
+              '{0}-assigned-ips'.format($.name),
+              '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
+          - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
 
-      - $.environment.stack.setTemplate($template)
-      - $.environment.stack.push()
+          - $.environment.stack.setTemplate($template)
+          - $.environment.stack.push()
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
 
@@ -254,3 +259,8 @@ Methods:
         data: null
         # Valid values are HEAT_CFNTOOLS, RAW and SOFTWARE_CONFIG
         format: HEAT_CFNTOOLS
+
+  isDeployed:
+    Body:
+      - $template: $.environment.stack.current()
+      - Return: $template.resources != null and $.name in $template.resources
