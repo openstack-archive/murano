@@ -23,6 +23,23 @@ Methods:
           Return: lt
       - Return: def
 
+  testIfNonBoolean:
+    Body:
+      - $res: 0
+      - If: null
+        Then:
+          $res: $res + 1
+      - If: list()
+        Then:
+          $res: $res + 10
+      - If: qwerty
+        Then:
+          $res: $res + 100
+      - If: 123
+        Then:
+          $res: $res + 1000
+      - Return: $res
+
   testWhile:
     Arguments:
       arg:
@@ -33,6 +50,14 @@ Methods:
           - trace($arg)
           - $arg: $arg - 1
       - Return: $arg
+
+  testWhileNonBoolean:
+    Body:
+      - $lst: list(1, 2, 3)
+      - While: $lst
+        Do:
+          - $lst: $lst.delete(0)
+      - Return: $lst
 
   testFor:
     Body:
@@ -123,6 +148,25 @@ Methods:
           $arg > 100:
             trace(gt100)
 
+  testSwitchNonBoolean:
+    Body:
+      - $res: 0
+      - Switch:
+          0:
+            $res: $res + 1
+          null:
+            $res: $res + 10
+          list():
+            $res: $res + 100
+          '':
+            $res: $res + 1000
+          qwerty:
+            $res: $res + 10000
+          list(1):
+            $res: $res + 100000
+          12:
+            $res: $res + 1000000
+      - Return: $res
 
   testSwitchDefault:
     Arguments:

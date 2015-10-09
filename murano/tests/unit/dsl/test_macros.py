@@ -31,9 +31,15 @@ class TestMacros(test_case.DslTestCase):
         self.assertEqual('gt', self._runner.testIfElse(6))
         self.assertEqual('lt', self._runner.testIfElse(4))
 
+    def test_if_non_boolean(self):
+        self.assertEqual(1100, self._runner.testIfNonBoolean())
+
     def test_while(self):
         self.assertEqual(0, self._runner.testWhile(3))
         self.assertEqual([3, 2, 1], self.traces)
+
+    def test_while_non_boolean(self):
+        self.assertEqual([], self._runner.testWhileNonBoolean())
 
     def test_for(self):
         self.assertIsNone(self._runner.testFor())
@@ -91,6 +97,9 @@ class TestMacros(test_case.DslTestCase):
         del self.traces
         self.assertIsNone(self._runner.testSwitchDefault(5))
         self.assertEqual(['def'], self.traces)
+
+    def test_switch_non_boolean(self):
+        self.assertEqual(1110000, self._runner.testSwitchNonBoolean())
 
     def test_code_block(self):
         self.assertEqual(123, self._runner.testCodeBlock())
