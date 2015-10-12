@@ -110,19 +110,12 @@ class ParallelMacro(CodeBlock):
 
 class IfMacro(expressions.DslExpression):
     def __init__(self, If, Then, Else=None):
-        if not isinstance(If, yaql_expression.YaqlExpression):
-            raise exceptions.DslSyntaxError(
-                'Condition must be of expression type')
         self._code1 = CodeBlock(Then)
         self._code2 = None if Else is None else CodeBlock(Else)
         self._condition = If
 
     def execute(self, context):
-        res = self._condition(context)
-        if not isinstance(res, types.BooleanType):
-            raise exceptions.DslInvalidOperationError(
-                'Condition must be evaluated to boolean type')
-        if res:
+        if helpers.evaluate(self._condition, context):
             self._code1.execute(context)
         elif self._code2 is not None:
             self._code2.execute(context)
@@ -136,16 +129,9 @@ class WhileDoMacro(expressions.DslExpression):
         self._condition = While
 
     def execute(self, context):
-        while True:
-            res = self._condition(context)
-            if not isinstance(res, types.BooleanType):
-                raise exceptions.DslSyntaxError(
-                    'Condition must be of expression type')
+        while self._condition(context):
             try:
-                if res:
-                    self._code.execute(context)
-                else:
-                    break
+                self._code.execute(context)
             except exceptions.BreakException:
                 break
             except exceptions.ContinueException:
@@ -217,22 +203,12 @@ class SwitchMacro(expressions.DslExpression):
             raise exceptions.DslSyntaxError(
                 'Switch value must be of dictionary type')
         self._switch = Switch
-        for key in self._switch.iterkeys():
-            if not isinstance(key, (yaql_expression.YaqlExpression,
-                                    types.BooleanType)):
-                raise exceptions.DslSyntaxError(
-                    'Switch cases must be must be either '
-                    'boolean or expression')
         self._default = None if Default is None else CodeBlock(Default)
 
     def execute(self, context):
         matched = False
         for key, value in self._switch.iteritems():
-            res = helpers.evaluate(key, context)
-            if not isinstance(res, types.BooleanType):
-                raise exceptions.DslInvalidOperationError(
-                    'Switch case must be evaluated to boolean type')
-            if res:
+            if helpers.evaluate(key, context):
                 matched = True
                 CodeBlock(value).execute(context)
 
