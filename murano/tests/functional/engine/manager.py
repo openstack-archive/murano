@@ -180,7 +180,7 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
             ip = environment.services[0]['instance']['floatingIpAddress']
         resp = requests.get('http://{0}/{1}'.format(ip, path))
         if resp.status_code == 200:
-            pass
+            return resp
         else:
             self.fail("Service path unavailable")
 

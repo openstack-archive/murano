@@ -36,6 +36,10 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
                        'Lighttpd',
                        {"categories": ["Web"], "tags": ["tag"]})
 
+        cls.upload_app('io.murano.apps.test.ApacheHttpServerCustom',
+                       'Apache HTTP Server Custom',
+                       {"categories": ["Web"], "tags": ["test"]})
+
     @classmethod
     def tearDownClass(cls):
         super(MuranoDeploymentTest, cls).tearDownClass()
@@ -100,3 +104,36 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
         self.deploy_environment(environment, session)
         self.status_check(environment,
                           [[updater['instance']['name'], 22, 80]])
+
+    @tag('gate', 'all', 'coverage')
+    def test_simple_software_configuration(self):
+        post_body = {
+            "instance": {
+                "flavor": self.flavor,
+                "image": self.linux,
+                "assignFloatingIp": True,
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": str(uuid.uuid4())
+                },
+                "name": self.rand_name("mrn-test"),
+            },
+            "name": self.rand_name("ssc-test"),
+            "enablePHP": True,
+            "userName": self.rand_name("user"),
+            "?": {
+                "type": "io.murano.apps.test.ApacheHttpServerCustom",
+                "id": str(uuid.uuid4())
+            }
+        }
+        username = post_body["userName"]
+        environment_name = self.rand_name('SSC-murano')
+        environment = self.create_environment(name=environment_name)
+        session = self.create_session(environment)
+        self.add_service(environment, post_body, session, to_dict=True)
+        self.deploy_environment(environment, session)
+        self.status_check(environment,
+                          [[post_body['instance']['name'], 22, 80]])
+        resp = self.check_path(environment, '', post_body['instance']['name'])
+        self.assertIn(username, resp.text, "Required information not found in "
+                                           "response from server")
