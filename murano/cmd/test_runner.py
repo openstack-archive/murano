@@ -282,7 +282,7 @@ def main():
 
     try:
         if args.config_file:
-            default_config_files = [CONF.config_file]
+            default_config_files = [args.config_file]
         else:
             default_config_files = cfg.find_config_files('murano')
             if not default_config_files:
