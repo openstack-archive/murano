@@ -652,6 +652,20 @@ class ResponseSerializer(object):
             raise exceptions.UnsupportedContentType(content_type=content_type)
 
 
+class ServiceBrokerResponseSerializer(ResponseSerializer):
+    def __init__(self):
+        super(ServiceBrokerResponseSerializer, self).__init__()
+
+    def serialize(self, response_data, content_type, action='default'):
+        if isinstance(response_data, webob.Response):
+            response = response_data
+            self.serialize_body(response, response.data, content_type, action)
+        else:
+            response = super(ServiceBrokerResponseSerializer, self).serialize(
+                response_data, content_type, action='default')
+        return response
+
+
 class RequestHeadersDeserializer(ActionDispatcher):
     """Default request headers deserializer."""
 
