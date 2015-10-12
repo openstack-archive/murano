@@ -12,6 +12,8 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+import uuid
+
 from nose.plugins.attrib import attr as tag
 
 import murano.tests.functional.engine.manager as core
@@ -28,6 +30,10 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
 
         cls.upload_app('io.murano.apps.test.UpdateExecutor',
                        'UpdateExecutor',
+                       {"categories": ["Web"], "tags": ["tag"]})
+
+        cls.upload_app('io.murano.apps.test.Lighttpd',
+                       'Lighttpd',
                        {"categories": ["Web"], "tags": ["tag"]})
 
     @classmethod
@@ -73,3 +79,24 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
         self.assertNotIn(ip_addresses, template['outputs'])
         self.assertNotIn(floating_ip, template['outputs'])
         self.assertNotIn(instance_name, template['resources'])
+
+    @tag('gate', 'all', 'coverage')
+    def test_dependent_apps(self):
+        post_body = self.get_test_app()
+        environment_name = self.rand_name('dummyMurano')
+        environment = self.create_environment(name=environment_name)
+        session = self.create_session(environment)
+        updater = self.add_service(environment, post_body, session,
+                                   to_dict=True)
+        post_body = {
+            "name": self.rand_name("lighttest"),
+            "updater": updater,
+            "?": {
+                "type": "io.murano.apps.test.Lighttpd",
+                "id": str(uuid.uuid4())
+            }
+        }
+        self.add_service(environment, post_body, session)
+        self.deploy_environment(environment, session)
+        self.status_check(environment,
+                          [[updater['instance']['name'], 22, 80]])
