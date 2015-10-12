@@ -288,19 +288,6 @@ MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://storage.apps.openstack.or
 # Functions
 # ---------
 
-function insert_config_block() {
-    local target_file="$1"
-    local insert_file="$2"
-    local pattern="$3"
-
-    if [[ -z "$pattern" ]]; then
-        cat "$insert_file" >> "$target_file"
-    else
-        sed -ne "/$pattern/r  $insert_file" -e 1x  -e '2,${x;p}' -e '${x;p}' -i "$target_file"
-    fi
-}
-
-
 function remove_config_block() {
     local config_file="$1"
     local label="$2"
@@ -318,14 +305,13 @@ function remove_config_block() {
 function configure_murano_dashboard() {
     remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
 
-    configure_settings_py
     configure_local_settings_py
 
     restart_apache_server
 }
 
 
-function configure_settings_py() {
+function configure_local_settings_py() {
     local horizon_config_part=$(mktemp)
 
     mkdir_chown_stack "$MURANO_DASHBOARD_CACHE_DIR"
@@ -343,27 +329,21 @@ DATABASES = {
     }
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-MIDDLEWARE_CLASSES += ('muranodashboard.middleware.ExceptionMiddleware',)
 MURANO_REPO_URL = '$MURANO_REPOSITORY_URL'
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
 
 EOF
 
-    # Insert changes into dashboard config before the line matching the pattern
-    insert_config_block "$HORIZON_CONFIG" "$horizon_config_part" "from openstack_dashboard import policy"
+    cat "$horizon_config_part" >> "$HORIZON_LOCAL_CONFIG"
+
+    if [[ -f "$HORIZON_LOCAL_CONFIG" ]]; then
+        sed -e "s/\(^\s*OPENSTACK_HOST\s*=\).*$/\1 '$HOST_IP'/" -i "$HORIZON_LOCAL_CONFIG"
+    fi
 
     # Install Murano as plugin for Horizon
     ln -s $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 }
-
-
-function configure_local_settings_py() {
-    if [[ -f "$HORIZON_LOCAL_CONFIG" ]]; then
-        sed -e "s/\(^\s*OPENSTACK_HOST\s*=\).*$/\1 '$HOST_IP'/" -i "$HORIZON_LOCAL_CONFIG"
-    fi
-}
-
 
 # init_murano_dashboard() - Initialize databases, etc.
 function init_murano_dashboard() {
