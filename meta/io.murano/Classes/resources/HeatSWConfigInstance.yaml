@@ -129,9 +129,11 @@ Methods:
     Body:
       - $environment: $.find(std:Environment)
       - $template: $environment.stack.current()
-      - $template.resources: $template.resources.deleteAll($.getAttr(scResources, []))
-      - $template.outputs: $template.outputs.deleteAll($.getAttr(scOutputs, []))
-      - $environment.stack.setTemplate($template)
+      - If: bool($template.resources) and bool($template.outputs)
+        Then:
+          - $template.resources: $template.resources.deleteAll($.getAttr(scResources, []))
+          - $template.outputs: $template.outputs.deleteAll($.getAttr(scOutputs, []))
+          - $environment.stack.setTemplate($template)
       - $.super($.releaseResources())
       - $.setAttr(scResources, [])
       - $.setAttr(scOutputs, [])
