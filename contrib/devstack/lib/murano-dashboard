@@ -127,7 +127,7 @@ function init_murano_dashboard() {
 
     python "$horizon_manage_py" collectstatic --noinput
     python "$horizon_manage_py" compress --force
-    python "$horizon_manage_py" syncdb --noinput
+    python "$horizon_manage_py" migrate --noinput
 
     restart_apache_server
 }

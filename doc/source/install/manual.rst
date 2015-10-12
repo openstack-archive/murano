@@ -349,7 +349,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        tox -e venv -- python manage.py syncdb
+        tox -e venv -- python manage.py migrate --noinput
     ..
 
     You can reply 'no' since for development purpose separate user is not needed.
