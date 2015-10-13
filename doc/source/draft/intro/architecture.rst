@@ -23,13 +23,13 @@ and configuration, are carried out through an AMQP queue to the murano-agent.
 Such communication can easily be configured on a separate instance of AMQP
 to ensure that the infrastructure and servers are isolated.
 
-Besides, Murano uses other OpenStack services to prevent the reimplemention
+Besides, Murano uses other OpenStack services to prevent the reimplementation
 of the existing functionality. Murano interacts with these services using
 their REST API through their python clients.
 
 The external services used by Murano are:
 
-* the **Orshestration service** (Heat) to orchestrate infrastructural
+* the **Orchestration service** (Heat) to orchestrate infrastructural
   resources such as servers, volumes, and networks. Murano dynamically
   creates heat templates based on application definitions.
 
