@@ -463,8 +463,8 @@ There are two ways to specify references:
    (direct or indirect) be of a specified type, like all applications
    require to have ``Environment`` somewhere in a parent chain.
 
-#. Refering to an object by specifying other object ID. That object must
-   be defined elsewhre in an object tree. Object references distinguished
+#. Referring to an object by specifying other object ID. That object must
+   be defined elsewhere in an object tree. Object references distinguished
    from strings having the same value by evaluating property contracts.
    The former case would have ``$.class(Name)`` while the later - the
    ``$.string()`` contract.
