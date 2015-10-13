@@ -57,7 +57,7 @@ To upload an application to the catalog:
       :alt: Import Package dialog 3
 
 #. Now your application is available from :menuselection:`Murano >
-   Applcation Catalog > Applications` page.
+   Application Catalog > Applications` page.
 
 
 Deploy an application
