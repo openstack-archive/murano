@@ -114,8 +114,6 @@ Methods:
       - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
 
       - $preparedUserData: $.prepareUserData()
-      - $userData: $preparedUserData.data
-      - $userDataFormat: $preparedUserData.format
       # Create MQ queue to communicate with the VM
       - $.agent.prepare()
       - $template:
@@ -126,8 +124,8 @@ Methods:
                 flavor: $.flavor
                 image: $.image
                 availability_zone: $.availabilityZone
-                user_data: $userData
-                user_data_format: $userDataFormat
+                user_data: $preparedUserData.data
+                user_data_format: $preparedUserData.format
                 key_name: $.keyname
           outputs:
             format('{0}-assigned-ips', $.name):
