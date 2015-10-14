@@ -21,4 +21,4 @@ def init_config(conf):
         cfg.StrOpt('endpoint_type', default='publicURL')
     ]
     conf.register_opts(opts, group="images")
-    return conf.glance
+    return conf.images
