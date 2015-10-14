@@ -206,7 +206,7 @@ def get_context(runtime_version):
     context.register_function(config_default)
     context.register_function(logger)
 
-    if runtime_version < constants.RUNTIME_VERSION_2_0:
+    if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context.register_function(substr)
         context.register_function(first_or_default)
 
