@@ -156,7 +156,7 @@ murano_opts = [
 ]
 
 networking_opts = [
-    cfg.IntOpt('max_environments', default=20,
+    cfg.IntOpt('max_environments', default=250,
                help='Maximum number of environments that use a single router '
                'per tenant'),
 
