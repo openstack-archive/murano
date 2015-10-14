@@ -44,4 +44,5 @@ CORE_LIBRARY = 'io.murano'
 CORE_LIBRARY_OBJECT = 'io.murano.Object'
 
 RUNTIME_VERSION_1_0 = semantic_version.Version('1.0.0')
-RUNTIME_VERSION_2_0 = semantic_version.Version('2.0.0')
+RUNTIME_VERSION_1_1 = semantic_version.Version('1.1.0')
+RUNTIME_VERSION_1_2 = semantic_version.Version('1.2.0')

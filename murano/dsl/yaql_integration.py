@@ -37,7 +37,7 @@ ENGINE_10_OPTIONS = {
     'yaql.iterableDicts': True
 }
 
-ENGINE_20_OPTIONS = {
+ENGINE_12_OPTIONS = {
     'yaql.limitIterators': constants.ITERATORS_LIMIT,
     'yaql.memoryQuota': constants.EXPRESSION_MEMORY_QUOTA,
     'yaql.convertSetsToLists': True,
@@ -50,8 +50,8 @@ def _create_engine(runtime_version):
     engine_factory.insert_operator(
         '.', True, ':', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, True)
     options = (ENGINE_10_OPTIONS
-               if runtime_version < constants.RUNTIME_VERSION_2_0
-               else ENGINE_20_OPTIONS)
+               if runtime_version <= constants.RUNTIME_VERSION_1_1
+               else ENGINE_12_OPTIONS)
     return engine_factory.create(options=options)
 
 
@@ -61,10 +61,10 @@ def _finalize(obj, context):
 
 CONVENTION = conventions.CamelCaseConvention()
 ENGINE_10 = _create_engine(constants.RUNTIME_VERSION_1_0)
-ENGINE_20 = _create_engine(constants.RUNTIME_VERSION_2_0)
+ENGINE_12 = _create_engine(constants.RUNTIME_VERSION_1_2)
 ROOT_CONTEXT_10 = legacy.create_context(
     convention=CONVENTION, finalizer=_finalize)
-ROOT_CONTEXT_20 = yaql.create_context(
+ROOT_CONTEXT_12 = yaql.create_context(
     convention=CONVENTION, finalizer=_finalize)
 
 
@@ -94,17 +94,17 @@ def create_empty_context():
 
 @helpers.memoize
 def create_context(runtime_version):
-    if runtime_version < constants.RUNTIME_VERSION_2_0:
+    if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context = ROOT_CONTEXT_10.create_child_context()
     else:
-        context = ROOT_CONTEXT_20.create_child_context()
+        context = ROOT_CONTEXT_12.create_child_context()
     context[constants.CTX_YAQL_ENGINE] = choose_yaql_engine(runtime_version)
     return yaql_functions.register(context, runtime_version)
 
 
 def choose_yaql_engine(runtime_version):
-    return (ENGINE_10 if runtime_version <= constants.RUNTIME_VERSION_1_0
-            else ENGINE_20)
+    return (ENGINE_10 if runtime_version <= constants.RUNTIME_VERSION_1_1
+            else ENGINE_12)
 
 
 def parse(expression, runtime_version):

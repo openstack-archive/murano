@@ -183,7 +183,7 @@ def register(context, runtime_version):
     context.register_function(equal)
     context.register_function(not_equal)
 
-    if runtime_version < constants.RUNTIME_VERSION_2_0:
+    if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context2 = context.create_child_context()
         for t in ('id', 'cast', 'super', 'psuper', 'type'):
             for spec in utils.to_extension_method(t, context):
