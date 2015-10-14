@@ -65,7 +65,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
 def load_from_dir(source_directory, filename='manifest.yaml'):
     formats = {
         'MuranoPL': {
-            ('1.0.0', '1.0.0'): murano.packages.mpl_package.MuranoPlPackage,
+            ('1.0.0', '1.2.0'): murano.packages.mpl_package.MuranoPlPackage,
         },
         'Heat.HOT': {
             ('1.0.0', '1.0.0'): murano.packages.hot_package.HotPackage
