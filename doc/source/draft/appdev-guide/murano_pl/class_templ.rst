@@ -410,6 +410,9 @@ need to insert dashes before each construct. For example::
         - code
         - block
 
+
+.. _object-model:
+
 Object model
 ------------
 
