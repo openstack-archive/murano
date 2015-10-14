@@ -19,10 +19,10 @@ from murano.packages import package_base
 
 
 class MuranoPlPackage(package_base.PackageBase):
-    def __init__(self, source_directory, manifest,
-                 package_format, runtime_version):
+    def __init__(self, format_name, runtime_version, source_directory,
+                 manifest):
         super(MuranoPlPackage, self).__init__(
-            source_directory, manifest, package_format, runtime_version)
+            format_name, runtime_version, source_directory, manifest)
         self._classes = manifest.get('Classes')
         self._ui_file = manifest.get('UI', 'ui.yaml')
         self._requirements = manifest.get('Require') or {}

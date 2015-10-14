@@ -15,17 +15,33 @@
 import contextlib
 import os
 import shutil
-import string
 import sys
 import tempfile
 import zipfile
 
-import semantic_version
 import yaml
 
+from murano.common.plugins import package_types_loader
 import murano.packages.exceptions as e
 import murano.packages.hot_package
 import murano.packages.mpl_package
+
+
+PLUGIN_LOADER = None
+
+
+def get_plugin_loader():
+    global PLUGIN_LOADER
+
+    if PLUGIN_LOADER is None:
+        PLUGIN_LOADER = package_types_loader.PluginLoader()
+        for runtime_version in ('1.0', '1.1', '1.2'):
+            format_string = 'MuranoPL/' + runtime_version
+            PLUGIN_LOADER.register_format(
+                format_string, murano.packages.mpl_package.MuranoPlPackage)
+        PLUGIN_LOADER.register_format(
+            'Heat.HOT/1.0', murano.packages.hot_package.HotPackage)
+    return PLUGIN_LOADER
 
 
 @contextlib.contextmanager
@@ -63,15 +79,6 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
 
 
 def load_from_dir(source_directory, filename='manifest.yaml'):
-    formats = {
-        'MuranoPL': {
-            ('1.0.0', '1.2.0'): murano.packages.mpl_package.MuranoPlPackage,
-        },
-        'Heat.HOT': {
-            ('1.0.0', '1.0.0'): murano.packages.hot_package.HotPackage
-        }
-    }
-
     if not os.path.isdir(source_directory) or not os.path.exists(
             source_directory):
         raise e.PackageLoadError('Invalid package directory')
@@ -87,21 +94,12 @@ def load_from_dir(source_directory, filename='manifest.yaml'):
         raise e.PackageLoadError(
             "Unable to load due to '{0}'".format(str(ex))), None, trace
     if content:
-        p_format_spec = str(content.get('Format') or 'MuranoPL/1.0')
-        if p_format_spec[0] in string.digits:
-            p_format_spec = 'MuranoPL/' + p_format_spec
-        parts = p_format_spec.split('/', 1)
-        if parts[0] not in formats:
+        format_spec = str(content.get('Format') or 'MuranoPL/1.0')
+        if format_spec[0].isdigit():
+            format_spec = 'MuranoPL/' + format_spec
+        plugin_loader = get_plugin_loader()
+        handler = plugin_loader.get_package_handler(format_spec)
+        if handler is None:
             raise e.PackageFormatError(
-                'Unknown or missing format version')
-        format_set = formats[parts[0]]
-        version = semantic_version.Version('0.0.0')
-        if len(parts) > 1:
-            version = semantic_version.Version.coerce(parts[1])
-        for key, value in format_set.iteritems():
-            min_version = semantic_version.Version(key[0])
-            max_version = semantic_version.Version(key[1])
-            if min_version <= version <= max_version:
-                return value(source_directory, content, parts[0], version)
-        raise e.PackageFormatError(
-            'Unsupported {0} format version {1}'.format(parts[0], version))
+                'Unsupported format {0}'.format(format_spec))
+        return handler(source_directory, content)

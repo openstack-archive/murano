@@ -32,7 +32,7 @@ class YAQL(object):
         self.expr = expr
 
 
-class Dumper(yaml.Dumper):
+class Dumper(yaml.SafeDumper):
     pass
 
 
@@ -44,10 +44,10 @@ Dumper.add_representer(YAQL, yaql_representer)
 
 
 class HotPackage(package_base.PackageBase):
-    def __init__(self, source_directory, manifest,
-                 package_format, runtime_version):
+    def __init__(self, format_name, runtime_version, source_directory,
+                 manifest):
         super(HotPackage, self).__init__(
-            source_directory, manifest, package_format, runtime_version)
+            format_name, runtime_version, source_directory, manifest)
 
         self._translated_class = None
         self._source_directory = source_directory
@@ -107,7 +107,12 @@ class HotPackage(package_base.PackageBase):
 
         files = HotPackage._translate_files(self._source_directory)
         translated.update(HotPackage._generate_workflow(hot, files))
-        self._translated_class = yaml.dump(translated, Dumper=Dumper)
+
+        # use default_style with double quote mark because by default PyYAML
+        # doesn't put any quote marks ans as a result strings with e.g. dashes
+        # may be interpreted as YAQL expressions upon load
+        self._translated_class = yaml.dump(
+            translated, Dumper=Dumper, default_style='"')
 
     @staticmethod
     def _build_properties(hot, validate_hot_parameters):
@@ -525,4 +530,6 @@ class HotPackage(package_base.PackageBase):
                 groups, self.full_name),
             'Forms': forms
         }
-        return yaml.dump(translated, Dumper=Dumper)
+
+        # see comment above about default_style
+        return yaml.dump(translated, Dumper=Dumper, default_style='"')

@@ -29,15 +29,15 @@ class PackageType(object):
 
 @six.add_metaclass(abc.ABCMeta)
 class Package(object):
-    def __init__(self, source_directory, package_format, runtime_version):
+    def __init__(self, format_name, runtime_version, source_directory):
         self._source_directory = source_directory
-        self._format = package_format
+        self._format_name = format_name
         self._runtime_version = runtime_version
         self._blob_cache = None
 
     @property
-    def format(self):
-        return self._format
+    def format_name(self):
+        return self._format_name
 
     @abc.abstractproperty
     def full_name(self):

@@ -34,7 +34,7 @@ NAME_RE = re.compile(r'^[a-zA-Z]\w*(\.[a-zA-Z]\w*)*$')
 
 class PluginLoader(object):
     def __init__(self, namespace="io.murano.extensions"):
-        LOG.debug('Loading plugins')
+        LOG.info('Loading extension plugins')
         self.namespace = namespace
         extension_manager = dispatch.EnabledExtensionManager(
             self.namespace,
@@ -85,6 +85,7 @@ class PluginLoader(object):
     @staticmethod
     def is_plugin_enabled(extension):
         if CONF.murano.enabled_plugins is None:
+            # assume all plugins are enabled until manually specified otherwise
             return True
         else:
             return (extension.entry_point.dist.project_name in

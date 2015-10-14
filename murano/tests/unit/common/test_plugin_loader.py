@@ -13,7 +13,7 @@
 import mock
 from oslo_config import cfg
 
-from murano.common import plugin_loader
+from murano.common.plugins import extensions_loader
 from murano.tests.unit import base
 
 CONF = cfg.CONF
@@ -35,12 +35,12 @@ class PluginLoaderTest(base.MuranoTestCase):
         ext.entry_point.name = 'Test'
 
         name_map = {}
-        test_obj = plugin_loader.PluginLoader('test.namespace')
+        test_obj = extensions_loader.PluginLoader('test.namespace')
         test_obj.load_extension(ext, name_map)
         self.assertEqual(1, len(test_obj.packages))
         loaded_pkg = test_obj.packages.values()[0]
         self.assertTrue(isinstance(loaded_pkg,
-                                   plugin_loader.PackageDefinition))
+                                   extensions_loader.PackageDefinition))
         self.assertEqual('test.namespace.Test', loaded_pkg.classes.keys()[0])
         self.assertEqual({'test.namespace.Test': test_obj.packages.keys()},
                          name_map)
@@ -56,7 +56,7 @@ class PluginLoaderTest(base.MuranoTestCase):
         ext2 = mock.MagicMock(name='ext2')
         ext2.entry_point.name = 'Test1'
 
-        test_obj = plugin_loader.PluginLoader()
+        test_obj = extensions_loader.PluginLoader()
         test_obj.load_extension(ext1, name_map)
         test_obj.load_extension(ext2, name_map)
 
@@ -78,7 +78,7 @@ class PluginLoaderTest(base.MuranoTestCase):
         ext = mock.MagicMock(name='ext')
         ext.entry_point.name = 'murano-pl-class'
 
-        test_obj = plugin_loader.PluginLoader()
+        test_obj = extensions_loader.PluginLoader()
         test_obj.load_extension(ext, name_map)
         # No packages are loaded
         self.assertEqual(0, len(test_obj.packages))
@@ -92,7 +92,7 @@ class PluginLoaderTest(base.MuranoTestCase):
                              'plugin1, plugin2',
                              group='murano')
         ext.entry_point.dist.project_name = 'test'
-        test_method = plugin_loader.PluginLoader.is_plugin_enabled
+        test_method = extensions_loader.PluginLoader.is_plugin_enabled
         self.assertFalse(test_method(ext))
         ext.entry_point.dist.project_name = 'plugin1'
         self.assertTrue(test_method(ext))

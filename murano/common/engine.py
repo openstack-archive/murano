@@ -26,7 +26,7 @@ from oslo_serialization import jsonutils
 
 from murano.common import auth_utils
 from murano.common.helpers import token_sanitizer
-from murano.common import plugin_loader
+from murano.common.plugins import extensions_loader
 from murano.common import rpc
 from murano.dsl import context_manager
 from murano.dsl import dsl_exception
@@ -70,7 +70,7 @@ def get_plugin_loader():
     global PLUGIN_LOADER
 
     if PLUGIN_LOADER is None:
-        PLUGIN_LOADER = plugin_loader.PluginLoader()
+        PLUGIN_LOADER = extensions_loader.PluginLoader()
     return PLUGIN_LOADER
 
 
