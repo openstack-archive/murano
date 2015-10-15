@@ -10,3 +10,6 @@ Classes:
  io.murano.apps.example.plugin.ImageValidatorMixin: ImageValidatorMixin.yaml
  io.murano.apps.example.plugin.DemoInstance: DemoInstance.yaml
  io.murano.apps.example.plugin.DemoApp: DemoApp.yaml
+
+Require:
+  murano.plugins.example: 0
