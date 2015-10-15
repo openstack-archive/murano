@@ -198,7 +198,7 @@ def _get_packages_for_category(session, category_id):
     """Return detailed list of packages, belonging to the provided category
     :param session:
     :param category_id:
-    :return: list of dictionaries, containing id, name and package frn
+    :return: list of dictionaries, containing id, name and package fqn
     """
     pkg = models.Package
     packages = (session.query(pkg.id, pkg.name, pkg.fully_qualified_name)
