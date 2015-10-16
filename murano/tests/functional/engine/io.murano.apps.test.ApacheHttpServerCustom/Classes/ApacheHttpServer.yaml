@@ -26,10 +26,6 @@ Properties:
   name:
     Contract: $.string().notNull()
 
-  enablePHP:
-    Contract: $.bool()
-    Default: false
-
   instance:
     Contract: $.class(res:Instance).notNull()
 
@@ -57,15 +53,18 @@ Methods:
               External: true
           - $._environment.securityGroupManager.addGroupIngress($securityGroupIngress)
           - $.instance.deploy()
-          - $resources: new(sys:Resources)
-          - $template: $resources.yaml('DeployApache.template').bind(dict(enablePHP => $.enablePHP))
           - $._environment.reporter.report($this, 'Instance is created. Deploying Apache')
-          - $.instance.agent.call($template, $resources)
+
+          - $resources: new(sys:Resources)
+          - $linux: new(conf:Linux)
+
+          - $linux.runCommand($.instance.agent, 'apt-get -y install apache2')
+          - $linux.runCommand($.instance.agent, 'iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT')
+          - $linux.runCommand($.instance.agent, 'iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT')
           - $._environment.reporter.report($this, 'Apache is installed.')
 
           - If: $.userName != ''
             Then:
-              - $linux: new(conf:Linux)
               - $linux.runCommand($.instance.agent, 'service apache2 stop')
               - $fileReplacements:
                   "%USER_NAME%": $.userName
