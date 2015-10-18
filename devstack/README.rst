@@ -9,6 +9,5 @@ Enabling in Devstack
      > cat local.conf
      [[local|localrc]]
      enable_plugin murano https://github.com/openstack/murano
-     enable_service murano murano-api murano-engine
 
 3. run ``stack.sh``
