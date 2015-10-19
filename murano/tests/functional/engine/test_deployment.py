@@ -119,7 +119,6 @@ class MuranoDeploymentTest(core.MuranoTestsCore):
                 "name": self.rand_name("mrn-test"),
             },
             "name": self.rand_name("ssc-test"),
-            "enablePHP": True,
             "userName": self.rand_name("user"),
             "?": {
                 "type": "io.murano.apps.test.ApacheHttpServerCustom",
