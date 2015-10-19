@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import re
-
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
 from sqlalchemy import desc
@@ -38,8 +36,6 @@ from murano.utils import verify_env
 LOG = logging.getLogger(__name__)
 
 API_NAME = 'Environments'
-
-VALID_NAME_REGEX = re.compile('^[a-zA-Z]+[\w.-]*$')
 
 
 class Controller(object):
@@ -67,7 +63,7 @@ class Controller(object):
         LOG.debug('Environments:Create <Body {body}>'.format(body=body))
         policy.check('create_environment', request.context)
 
-        if not body.get('name'):
+        if not('name' in body and body['name'].strip()):
             msg = _('Please, specify a name of the environment to create')
             LOG.exception(msg)
             raise exc.HTTPBadRequest(explanation=msg)
@@ -77,20 +73,14 @@ class Controller(object):
             msg = _('Environment name should be 255 characters maximum')
             LOG.exception(msg)
             raise exc.HTTPBadRequest(explanation=msg)
-        if VALID_NAME_REGEX.match(name):
-            try:
-                environment = envs.EnvironmentServices.create(
-                    body.copy(),
-                    request.context)
-            except db_exc.DBDuplicateEntry:
-                msg = _('Environment with specified name already exists')
-                LOG.exception(msg)
-                raise exc.HTTPConflict(explanation=msg)
-        else:
-            msg = _('Environment name must contain only alphanumeric or "_-." '
-                    'characters, must start with alpha')
+        try:
+            environment = envs.EnvironmentServices.create(
+                body.copy(),
+                request.context)
+        except db_exc.DBDuplicateEntry:
+            msg = _('Environment with specified name already exists')
             LOG.exception(msg)
-            raise exc.HTTPClientError(explanation=msg)
+            raise exc.HTTPConflict(explanation=msg)
 
         return environment.to_dict()
 
@@ -138,7 +128,7 @@ class Controller(object):
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
-        if VALID_NAME_REGEX.match(str(body['name'])):
+        if str(body['name']).strip():
             try:
                 environment.update(body)
                 environment.save(session)
@@ -147,8 +137,8 @@ class Controller(object):
                 LOG.error(msg)
                 raise exc.HTTPConflict(explanation=msg)
         else:
-            msg = _('Environment name must contain only alphanumeric '
-                    'or "_-." characters, must start with alpha')
+            msg = _('Environment name must contain at least one '
+                    'non-white space symbol')
             LOG.error(msg)
             raise exc.HTTPClientError(explanation=msg)
 

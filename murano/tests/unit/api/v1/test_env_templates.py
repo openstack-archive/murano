@@ -95,7 +95,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         )
         self.expect_policy_check('create_env_template')
 
-        body = {'name': 'my+#temp'}
+        body = {'name': '  '}
         req = self._post('/templates', json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)

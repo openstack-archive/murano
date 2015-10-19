@@ -147,7 +147,7 @@ class TestEnvTemplate(base.TestCase):
         """Check the deletion of an wrong environment template request."""
         self.assertRaises(exceptions.BadRequest,
                           self.client.create_env_template,
-                          '-+3')
+                          '  ')
 
     @tag('all', 'coverage')
     @attr(type='negative')
