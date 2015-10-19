@@ -143,8 +143,8 @@ class MuranoPackage(dsl_types.MuranoPackage):
         result = self._classes.get(name)
         if result:
             return result
-
         if search_requirements:
+            pkgs_for_search = []
             for package_name, version_spec in self._requirements.iteritems():
                 if package_name == self.name:
                     continue
@@ -153,8 +153,11 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 try:
                     return referenced_package.find_class(name, False)
                 except exceptions.NoClassFound:
+                    pkgs_for_search.append(referenced_package)
                     continue
-        raise exceptions.NoClassFound(name)
+            raise exceptions.NoClassFound(name, packages=pkgs_for_search)
+
+        raise exceptions.NoClassFound(name, packages=[self])
 
     @property
     def context(self):
