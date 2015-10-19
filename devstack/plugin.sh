@@ -196,6 +196,16 @@ function configure_murano {
 }
 
 
+# configure_service_broker() - set service broker specific options to config
+function configure_service_broker {
+    #Add needed options to murano.conf
+    iniset $MURANO_CONF_FILE cfapi tenant "admin"
+    iniset $MURANO_CONF_FILE cfapi bind_host $HOST_IP
+    iniset $MURANO_CONF_FILE cfapi bind_port "8083"
+    iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
+}
+
+
 # init_murano() - Initialize databases, etc.
 function init_murano() {
     configure_murano_networking
@@ -244,6 +254,20 @@ function stop_murano() {
     screen -S $SCREEN_NAME -p murano-api -X kill
     screen -S $SCREEN_NAME -p murano-engine -X kill
 }
+
+
+# start_service_broker() - start murano CF service broker
+function start_service_broker() {
+    screen_it murano-cfapi "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-cfapi --config-file $MURANO_CONF_DIR/murano.conf"
+}
+
+
+# stop_service_broker() - stop murano CF service broker
+function stop_service_broker() {
+    # Kill the Murano screen windows
+    screen -S $SCREEN_NAME -p murano-cfapi -X kill
+}
+
 
 function cleanup_murano() {
 
@@ -407,6 +431,9 @@ if is_service_enabled murano; then
         if is_service_enabled horizon; then
             configure_murano_dashboard
         fi
+        if is_service_enabled murano-cfapi; then
+            configure_service_broker
+        fi
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Murano"
         init_murano
@@ -414,10 +441,16 @@ if is_service_enabled murano; then
             init_murano_dashboard
         fi
         start_murano
+        if is_service_enabled murano-cfapi; then
+            start_service_broker
+        fi
     fi
 
     if [[ "$1" == "unstack" ]]; then
         stop_murano
+        if is_service_enabled murano-cfapi; then
+            stop_service_broker
+        fi
         cleanup_murano
         if is_service_enabled horizon; then
             cleanup_murano_dashboard
