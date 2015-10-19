@@ -400,8 +400,8 @@ def package_delete(package_id, context):
         package = _package_get(package_id, session)
         if not context.is_admin and package.owner_id != context.tenant:
             raise exc.HTTPForbidden(
-                explanation='Package is not owned by the'
-                            ' tenant "{0}"'.format(context.tenant))
+                explanation="Package is not owned by the"
+                            " tenant '{0}'".format(context.tenant))
         session.delete(package)
 
 
