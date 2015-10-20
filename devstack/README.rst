@@ -2,12 +2,25 @@
 Enabling in Devstack
 ====================
 
-1. Download DevStack
+#. Download DevStack_::
 
-2. Add this repo as an external repository and enable needed services::
+    git clone https://git.openstack.org/openstack-dev/devstack
+    cd devstack
+
+#. Edit local.conf to enable murano devstack plugin::
 
      > cat local.conf
      [[local|localrc]]
-     enable_plugin murano https://github.com/openstack/murano
+     enable_plugin murano git://git.openstack.org/openstack/murano
 
-3. run ``stack.sh``
+#. If you want Murano Cloud Foundry Broker API service enabled, add the
+   following line to local.conf::
+
+     enable_service murano-cfapi
+
+#. Install DevStack::
+
+    ./stack.sh
+
+
+.. _DevStack: http://docs.openstack.org/developer/devstack/
