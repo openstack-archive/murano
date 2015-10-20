@@ -366,7 +366,7 @@ EOF
     fi
 
     # Install Murano as plugin for Horizon
-    ln -s $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 }
 
 # init_murano_dashboard() - Initialize databases, etc.
