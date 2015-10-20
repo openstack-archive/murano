@@ -349,7 +349,7 @@ EOF
     insert_config_block "$HORIZON_CONFIG" "$horizon_config_part" "from openstack_dashboard import policy"
 
     # Install Murano as plugin for Horizon
-    ln -s $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 }
 
 
