@@ -17,11 +17,11 @@
 Installing and Running the Development Version
 ==============================================
 
-The `contrib/devstack`_ directory contains the files necessary to integrate
+The `devstack`_ directory contains the files necessary to integrate
 Murano with `Devstack`_.
 
 
-.. include:: ../../../contrib/devstack/README.rst
+.. include:: ../../../devstack/README.rst
 
 
 
