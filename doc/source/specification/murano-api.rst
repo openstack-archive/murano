@@ -82,7 +82,7 @@ Environment API
 +================+===========================================================+
 | 200            | Operation completed successfully                          |
 +----------------+-----------------------------------------------------------+
-| 401            | User is not authorized to perform the operation           |
+| 403            | User is not authorized to perform the operation           |
 +----------------+-----------------------------------------------------------+
 
 List environments
@@ -223,7 +223,7 @@ Update environment
 | 400            | Environment name must contain only alphanumeric or '_-.'  |
 |                | characters, must start with alpha                         |
 +----------------+-----------------------------------------------------------+
-| 401            | User is not authorized to access environment              |
+| 403            | User is not authorized to access environment              |
 +----------------+-----------------------------------------------------------+
 | 404            | Environment not found                                     |
 +----------------+-----------------------------------------------------------+

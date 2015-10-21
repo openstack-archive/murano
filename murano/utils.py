@@ -17,7 +17,7 @@ import functools
 from oslo_log import log as logging
 from webob import exc
 
-from murano.common.i18n import _, _LE
+from murano.common.i18n import _
 from murano.db import models
 from murano.db.services import sessions
 from murano.db import session as db_session
@@ -76,15 +76,17 @@ def verify_env_template(func):
         unit = db_session.get_session()
         template = unit.query(models.EnvironmentTemplate).get(env_template_id)
         if template is None:
-            LOG.error(_LE("Environment Template with id '{id}' not found").
-                      format(id=env_template_id))
-            raise exc.HTTPNotFound()
+            msg = _('Environment Template with id {id} not found'
+                    ).format(id=env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
 
         if hasattr(request, 'context'):
             if template.tenant_id != request.context.tenant:
-                LOG.error(_LE('User is not authorized to access '
-                              'this tenant resources'))
-                raise exc.HTTPUnauthorized()
+                msg = _('User is not authorized to access'
+                        ' this tenant resources')
+                LOG.error(msg)
+                raise exc.HTTPForbidden(explanation=msg)
 
         return func(self, request, env_template_id, *args, **kwargs)
     return __inner
