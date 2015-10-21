@@ -26,10 +26,10 @@ from murano.packages import package
 
 
 class PackageBase(package.Package):
-    def __init__(self, source_directory, manifest,
-                 package_format, runtime_version):
+    def __init__(self, format_name, runtime_version,
+                 source_directory, manifest):
         super(PackageBase, self).__init__(
-            source_directory, package_format, runtime_version)
+            format_name, runtime_version, source_directory)
         self._full_name = manifest.get('FullName')
         if not self._full_name:
             raise exceptions.PackageFormatError('FullName is not specified')
@@ -49,6 +49,7 @@ class PackageBase(package.Package):
 
         self._logo_cache = None
         self._supplier_logo_cache = None
+        self._source_directory = source_directory
 
     @abc.abstractproperty
     def requirements(self):
@@ -69,6 +70,10 @@ class PackageBase(package.Package):
     @property
     def full_name(self):
         return self._full_name
+
+    @property
+    def source_directory(self):
+        return self._source_directory
 
     @property
     def version(self):
