@@ -59,8 +59,8 @@ You need simply update your :file:`local.conf` with the following:
     .. code-block:: ini
 
        [[local|localrc]]
-       enable_plugin murano https://github.com/openstack/murano
-       enable_service murano murano-api murano-engine murano-cfapi
+       enable_plugin murano git://git.openstack.org/openstack/murano
+       enable_service murano-cfapi
 
 How to use service broker
 -------------------------
