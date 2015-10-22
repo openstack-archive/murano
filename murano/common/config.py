@@ -14,13 +14,10 @@
 #    under the License.
 
 from oslo_config import cfg
-from oslo_config import types
 from oslo_log import log as logging
 
 from murano.common.i18n import _
 from murano import version
-
-portType = types.Integer(1, 65535)
 
 paste_deploy_opts = [
     cfg.StrOpt('flavor', help='Paste flavor'),
@@ -30,10 +27,9 @@ paste_deploy_opts = [
 bind_opts = [
     cfg.StrOpt('bind-host', default='0.0.0.0',
                help='Address to bind the Murano API server to.'),
-    cfg.Opt('bind-port',
-            type=portType,
-            default=8082,
-            help='Port the bind the Murano API server to.'),
+    cfg.PortOpt('bind-port',
+                default=8082,
+                help='Port the bind the Murano API server to.'),
 ]
 
 rabbit_opts = [
@@ -41,10 +37,9 @@ rabbit_opts = [
                help='The RabbitMQ broker address which used for communication '
                'with Murano guest agents.'),
 
-    cfg.Opt('port',
-            type=portType,
-            default=5672,
-            help='The RabbitMQ broker port.'),
+    cfg.PortOpt('port',
+                default=5672,
+                help='The RabbitMQ broker port.'),
 
     cfg.StrOpt('login', default='guest',
                help='The RabbitMQ login.'),
@@ -261,7 +256,8 @@ glance_opts = [
 ]
 
 file_server = [
-    cfg.StrOpt('file_server', default='')
+    cfg.StrOpt('file_server', default='',
+               help='Set a file server.')
 ]
 
 CONF = cfg.CONF
