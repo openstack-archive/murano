@@ -16,6 +16,8 @@
 Glossary
 ========
 
+.. _environment:
+
 * **Environment**
 
     The environment is a set of applications managed by a single tenant. They could be related logically with each other or not.
