@@ -254,6 +254,7 @@ Methods:
           - $.environment.stack.push()
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
+      - $.setAttr(fipAssigned, false)
 
   destroy:
     Body:
