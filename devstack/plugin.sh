@@ -85,6 +85,15 @@ function create_murano_accounts() {
             "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
             "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
             "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+
+        if is_service_enabled murano-cfapi; then
+        get_or_create_service "murano-cfapi" "service_broker" "Murano CloudFoundry Service Broker"
+        get_or_create_endpoint "service_broker" \
+            "$REGION_NAME" \
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083" \
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083" \
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083"
+        fi
     fi
 }
 
