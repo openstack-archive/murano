@@ -184,7 +184,7 @@ class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
         """
         env_template = self.create_env_template('test_env_temp')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_env_template, env_template['id'])
 
         self.client.delete_env_template(env_template['id'])
@@ -197,7 +197,7 @@ class TestEnvTemplatesTenantIsolation(base.NegativeTestCase):
         """
         env_template = self.create_env_template('test_env_temp')
 
-        self.assertRaises(exceptions.Unauthorized,
+        self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_env_template,
                           env_template['id'])
         self.client.delete_env_template(env_template['id'])

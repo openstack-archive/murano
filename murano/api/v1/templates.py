@@ -18,7 +18,7 @@ from webob import exc
 
 from murano.api.v1 import environments as envs_api
 from murano.api.v1 import request_statistics
-from murano.common.i18n import _, _LE
+from murano.common.i18n import _
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
@@ -226,9 +226,9 @@ class Controller(object):
         get_env_template = env_temps.EnvTemplateServices.get_env_template
         env_template = get_env_template(env_template_id)
         if env_template.tenant_id != request.context.tenant:
-            LOG.exception(_LE('User is not authorized to access this tenant '
-                              'resources.'))
-            raise exc.HTTPUnauthorized
+            msg = _('User is not authorized to access this tenant resources')
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
 
 
 def create_resource():
