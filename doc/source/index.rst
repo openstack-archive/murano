@@ -13,53 +13,80 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-==================
-Welcome to Murano!
-==================
+===============================
+Welcome to Murano Documentation
+===============================
 
-|
+**Murano** is an open source OpenStack project that
+combines an application catalog with versatile
+tooling to simplify and accelerate packaging and
+deployment. It can be used with almost any application
+and service in OpenStack, and is extensible to
+other clouds.
+
+Murano project consists of several source code repositories:
+
+* `murano`_ - is the main repository. It contains code for Murano API server,
+  Murano engine and MuranoPL.
+* `murano-agent`_ - agent which runs on guest VMs and executes deployment
+  plan.
+* `murano-dashboard`_ - Murano UI implemented as a plugin for OpenStack
+  Dashboard.
+* `python-muranoclient`_ - Client library and CLI client for Murano.
+
+This documentation guides application developers
+through the process of composing an application
+package to get it ready for uploading to Murano.
+
+Besides the deployment rules and requirements,
+it contains information on how to manage images,
+categories, and repositories using the murano client that
+will surely be helpful for cloud administrators.
+
+It also explains to end users how they can use the catalog
+directly from the dashboard. These include guidance on how
+to manage applications and environments.
+
+And it provides information on how to contribute to the project.
 
 .. note::
-   The latest version of this documentation is under development at the moment.
-   The most recently updated information is published as the :ref:`BETA version of
-   the Murano documentation <content>`.
+   `Deploying Murano` and `Contibuting` guides are under development
+   at the moment. The most recently updated information is published
+   as the :ref:`BETA version of the Murano documentation <content>`.
 
-   We are restructuring and updating the information to make your user experience awesome,
-   and apologize for any inconvenience this may cause.
 
-|
-
-Introduction
-~~~~~~~~~~~~
-
-Murano Project introduces an application catalog, which allows application
-developers and cloud administrators to publish various cloud-ready applications
-in a browsable categorised catalog. It may be used by the cloud users
-(including the unexperienced ones) to pick-up the needed applications and
-services and composes the reliable environments out of them in a
-"push-the-button" manner.
-
-Key goal is to provide UI and API which allows to compose and deploy composite
-environments on the Application abstraction level and then manage their
-lifecycle.
-
-Murano consists of several source code repositories:
-    * `murano`_ - is the main repository. It contains code for Murano API
-      server, Murano engine and MuranoPL
-    * `murano-agent`_ - agent which runs on guest VMs and executes deployment
-      plan
-    * `murano-dashboard`_ - Murano UI implemented as a plugin for OpenStack
-      Dashboard
-    * `python-muranoclient`_ - Client library and CLI client for Murano
-
+.. Links
 
 .. _murano: https://git.openstack.org/cgit/openstack/murano/
 .. _murano-agent: https://git.openstack.org/cgit/openstack/murano-agent/
 .. _murano-dashboard: https://git.openstack.org/cgit/openstack/murano-dashboard/
 .. _python-muranoclient: https://git.openstack.org/cgit/openstack/python-muranoclient/
 
-This documentation offers information on how Murano works and how to
-contribute to the project.
+
+Introduction to Murano
+~~~~~~~~~~~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   draft/intro/key_features
+   draft/intro/target_users
+   draft/intro/architecture
+   draft/intro/use_cases
+
+
+Using Murano
+~~~~~~~~~~~~
+
+.. toctree::
+   :maxdepth: 2
+
+   draft/enduser-guide/quickstart
+   draft/enduser-guide/manage_environments
+   draft/enduser-guide/manage_applications
+   draft/enduser-guide/log_into_murano_instance
+   draft/enduser-guide/deploying_using_cli
+
 
 Developing Applications
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -76,6 +103,9 @@ Developing Applications
    draft/appdev-guide/use_cases
    draft/appdev-guide/faq
 
+
+Miscellaneous
+~~~~~~~~~~~~~
 
 **Installation**
 
