@@ -18,6 +18,19 @@ Enabling in Devstack
 
      enable_service murano-cfapi
 
+#. (Optional) To import Murano packages when DevStack is up, define an ordered
+   list of packages FQDNs in ``local.conf``. Make sure to list all package
+   dependencies. These packages will by default be imported from the murano-apps
+   git repository.
+
+   Example::
+
+     MURANO_APPS=io.murano.apps.apache.Tomcat,io.murano.apps.Guacamole
+
+   You can also use the variables ``MURANO_APPS_REPO`` and ``MURANO_APPS_BRANCH``
+   to configure the git repository which will be used as the source for the
+   imported packages.
+
 #. Install DevStack::
 
     ./stack.sh
