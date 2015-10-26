@@ -36,6 +36,9 @@ MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
 MURANO_SERVICE_PORT=${MURANO_SERVICE_PORT:-8082}
 MURANO_SERVICE_PROTOCOL=${MURANO_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
 
+MURANO_CFAPI_SERVICE_PORT=${MURANO_CFAPI_SERVICE_PORT:-8083}
+MURANO_CFAPI_DEFAULT_TENANT=${MURANO_CFAPI_DEFAULT_TENANT:-admin}
+
 MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
 
 MURANO_KEYSTONE_SIGNING_DIR=${MURANO_KEYSTONE_SIGNING_DIR:-/tmp/keystone-signing-muranoapi}
@@ -90,9 +93,9 @@ function create_murano_accounts() {
         get_or_create_service "murano-cfapi" "service_broker" "Murano CloudFoundry Service Broker"
         get_or_create_endpoint "service_broker" \
             "$REGION_NAME" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:8083"
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
+            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT"
         fi
     fi
 }
@@ -244,9 +247,9 @@ function install_murano_apps() {
 # configure_service_broker() - set service broker specific options to config
 function configure_service_broker {
     #Add needed options to murano.conf
-    iniset $MURANO_CONF_FILE cfapi tenant "admin"
+    iniset $MURANO_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
     iniset $MURANO_CONF_FILE cfapi bind_host $HOST_IP
-    iniset $MURANO_CONF_FILE cfapi bind_port "8083"
+    iniset $MURANO_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
     iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
 }
 
