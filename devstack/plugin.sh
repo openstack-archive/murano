@@ -11,56 +11,6 @@ XTRACE=$(set +o | grep xtrace)
 set -o xtrace
 
 
-# Defaults
-# --------
-
-# Set up default repos
-MURANO_REPO=${MURANO_REPO:-${GIT_BASE}/openstack/murano.git}
-MURANO_BRANCH=${MURANO_BRANCH:-master}
-
-# Variables, which used in this function
-# https://github.com/openstack-dev/devstack/blob/master/functions-common#L500-L506
-GITREPO["python-muranoclient"]=${MURANO_PYTHONCLIENT_REPO:-${GIT_BASE}/openstack/python-muranoclient.git}
-GITBRANCH["python-muranoclient"]=${MURANO_PYTHONCLIENT_BRANCH:-master}
-GITDIR["python-muranoclient"]=$DEST/python-muranoclient
-
-# Set up default directories
-MURANO_DIR=$DEST/murano
-MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
-MURANO_CONF_FILE=${MURANO_CONF_DIR}/murano.conf
-MURANO_POLICY_FILE=${MURANO_CONF_DIR}/policy.json
-MURANO_DEBUG=${MURANO_DEBUG:-True}
-MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT=${MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT:-False}
-
-MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
-MURANO_SERVICE_PORT=${MURANO_SERVICE_PORT:-8082}
-MURANO_SERVICE_PROTOCOL=${MURANO_SERVICE_PROTOCOL:-$SERVICE_PROTOCOL}
-
-MURANO_CFAPI_SERVICE_PORT=${MURANO_CFAPI_SERVICE_PORT:-8083}
-MURANO_CFAPI_DEFAULT_TENANT=${MURANO_CFAPI_DEFAULT_TENANT:-admin}
-
-MURANO_ADMIN_USER=${MURANO_ADMIN_USER:-murano}
-
-MURANO_KEYSTONE_SIGNING_DIR=${MURANO_KEYSTONE_SIGNING_DIR:-/tmp/keystone-signing-muranoapi}
-
-MURANO_DEFAULT_ROUTER=${MURANO_DEFAULT_ROUTER:-''}
-MURANO_EXTERNAL_NETWORK=${MURANO_EXTERNAL_NETWORK:-''}
-MURANO_DEFAULT_DNS=${MURANO_DEFAULT_DNS:-''}
-
-MURANO_APPS=${MURANO_APPS:-''}
-MURANO_APPS_DIR=$DEST/murano-apps
-MURANO_APPS_REPO=${MURANO_APPS_REPO:-${GIT_BASE}/openstack/murano-apps.git}
-MURANO_APPS_BRANCH=${MURANO_APPS_BRANCH:-master}
-
-# MURANO_RABBIT_VHOST allows to specify a separate virtual host for Murano services.
-# This is not required if all OpenStack services are deployed by devstack scripts
-#   on a single node. In this case '/' virtual host (which is the default) is enough.
-# The problem arise when Murano installed in 'devbox' mode, allowing two or more
-#   devboxes to use one common OpenStack host. In this case it's better devboxes
-#   use separated virtual hosts, to avoid conflicts between Murano services.
-# This couldn't be done using exitsting variables, so that's why this variable was added.
-MURANO_RABBIT_VHOST=${MURANO_RABBIT_VHOST:-''}
-
 # Support entry points installation of console scripts
 if [[ -d $MURANO_DIR/bin ]]; then
     MURANO_BIN_DIR=$MURANO_DIR/bin
