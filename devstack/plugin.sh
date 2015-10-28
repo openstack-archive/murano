@@ -198,7 +198,7 @@ function install_murano_apps() {
 function configure_service_broker {
     #Add needed options to murano.conf
     iniset $MURANO_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
-    iniset $MURANO_CONF_FILE cfapi bind_host $HOST_IP
+    iniset $MURANO_CONF_FILE cfapi bind_host "$MURANO_SERVICE_HOST"
     iniset $MURANO_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
     iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
 }
@@ -271,6 +271,19 @@ function cleanup_murano() {
 
     # Cleanup keystone signing dir
     sudo rm -rf $MURANO_KEYSTONE_SIGNING_DIR
+}
+
+function configure_murano_tempest_plugin() {
+
+    # Check tempest for enabling
+    if is_service_enabled tempest; then
+        # Set murano service availability flag
+        iniset $TEMPEST_CONFIG service_available murano "True"
+        if is_service_enabled murano-cfapi; then
+            # Enable Service Broker tests if cfapi enabled
+            iniset $TEMPEST_CONFIG service_broker run_service_broker_tests "True"
+        fi
+    fi
 }
 
 #### lib/murano-dashboard
@@ -429,6 +442,9 @@ if is_service_enabled murano; then
         if is_service_enabled murano-cfapi; then
             start_service_broker
         fi
+
+        echo_summary "Configuring Murano Tempest plugin"
+        configure_murano_tempest_plugin
 
         # Give Murano some time to Start
         sleep 3
