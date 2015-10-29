@@ -355,7 +355,7 @@ MURANO_PYTHONCLIENT_DIR=$DEST/python-muranoclient
 
 MURANO_DASHBOARD_CACHE_DIR=${MURANO_DASHBOARD_CACHE_DIR:-/tmp/murano}
 
-MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://storage.apps.openstack.org/'}
+MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://apps.openstack.org/api/v1/murano_repo/liberty/'}
 
 # Functions
 # ---------
