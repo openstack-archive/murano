@@ -181,6 +181,7 @@ def _validate_keystone_opts(args):
 
 
 def run_tests(args):
+    exit_code = 0
     provided_pkg_name = args.package
     load_packages_from = args.load_packages_from
     tests_to_run = args.tests
@@ -236,8 +237,10 @@ def run_tests(args):
                 except Exception:
                     LOG.exception('\n.....{0}.{1}.....FAILURE\n'
                                   ''.format(obj.type.name, m))
+                    exit_code = 1
                 finally:
                     test_env.finish()
+    return exit_code
 
 
 def get_parser():
@@ -300,8 +303,8 @@ def main():
         sys.exit("ERROR: %s" % e)
 
     try:
-        run_tests(args)
-        sys.exit(0)
+        exit_code = run_tests(args)
+        sys.exit(exit_code)
     except Exception as e:
         tb = traceback.format_exc()
         err_msg = _LE("Command failed: {0}\n{1}").format(e, tb)
