@@ -15,7 +15,6 @@
 import os
 import shutil
 import sys
-import types
 
 import yaml
 
@@ -249,7 +248,7 @@ class HotPackage(package_base.PackageBase):
 
     @staticmethod
     def _format_value(value):
-        if isinstance(value, types.StringTypes):
+        if isinstance(value, basestring):
             return str("'" + value + "'")
         return str(value)
 

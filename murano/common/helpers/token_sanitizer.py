@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import types
-
 
 class TokenSanitizer(object):
     """Helper class for cleaning some object from different passwords/tokens.
@@ -48,16 +46,16 @@ class TokenSanitizer(object):
 
     def sanitize(self, obj):
         """Replaces each token found in object by message.
-        :param obj: types.DictType, types.ListType, types.Tuple, object
+        :param obj: dict, list, tuple, object
         :return: Sanitized object
         """
-        if isinstance(obj, types.DictType):
+        if isinstance(obj, dict):
             return dict([self.sanitize(item) for item in obj.iteritems()])
-        elif isinstance(obj, types.ListType):
+        elif isinstance(obj, list):
             return [self.sanitize(item) for item in obj]
-        elif isinstance(obj, types.TupleType):
+        elif isinstance(obj, tuple):
             k, v = obj
-            if self._contains_token(k) and isinstance(v, types.StringTypes):
+            if self._contains_token(k) and isinstance(v, basestring):
                 return k, self.message
             return k, self.sanitize(v)
         else:

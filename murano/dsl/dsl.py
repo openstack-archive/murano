@@ -14,7 +14,6 @@
 
 import inspect
 import os.path
-import types
 
 from yaql.language import expressions as yaql_expressions
 from yaql.language import utils
@@ -51,7 +50,7 @@ class MuranoType(yaqltypes.PythonType):
         if value is None or isinstance(value, yaql_expressions.Expression):
             return True
         murano_class = self.murano_class
-        if isinstance(murano_class, types.StringTypes):
+        if isinstance(murano_class, basestring):
             murano_class_name = murano_class
         else:
             murano_class_name = murano_class.name
@@ -94,7 +93,7 @@ class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
     def __init__(self, nullable=False, context=None):
         self._context = context
         super(MuranoTypeName, self).__init__(
-            (dsl_types.MuranoClassReference,) + types.StringTypes, nullable)
+            (dsl_types.MuranoClassReference, basestring), nullable)
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
@@ -103,7 +102,7 @@ class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
             value = value(utils.NO_VALUE, context, engine)
         value = super(MuranoTypeName, self).convert(
             value, sender, context, function_spec, engine)
-        if isinstance(value, types.StringTypes):
+        if isinstance(value, basestring):
             murano_type = helpers.get_type(context)
             value = dsl_types.MuranoClassReference(
                 helpers.get_class(

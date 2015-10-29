@@ -14,7 +14,6 @@
 
 
 import sys
-import types
 
 from murano.dsl import context_manager
 from murano.dsl import dsl
@@ -48,7 +47,7 @@ class Runner(object):
     class DslObjectWrapper(object):
         def __init__(self, obj, runner):
             self._runner = runner
-            if isinstance(obj, types.StringTypes):
+            if isinstance(obj, basestring):
                 self._object_id = obj
             elif isinstance(obj, (object_model.Object, object_model.Ref)):
                 self._object_id = obj.id
@@ -68,7 +67,7 @@ class Runner(object):
                 return call
 
     def __init__(self, model, package_loader, functions):
-        if isinstance(model, types.StringTypes):
+        if isinstance(model, basestring):
             model = object_model.Object(model)
         model = object_model.build_model(model)
         if 'Objects' not in model:

@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
-
 from murano.dsl import dsl
 from murano.dsl import exceptions
 from murano.tests.unit.dsl.foundation import object_model as om
@@ -36,12 +34,12 @@ class TestContracts(test_case.DslTestCase):
 
     def test_string_contract(self):
         result = self._runner.testStringContract('qwerty')
-        self.assertIsInstance(result, types.StringTypes)
+        self.assertIsInstance(result, basestring)
         self.assertEqual('qwerty', result)
 
     def test_string_from_number_contract(self):
         result = self._runner.testStringContract(123)
-        self.assertIsInstance(result, types.StringTypes)
+        self.assertIsInstance(result, basestring)
         self.assertEqual('123', result)
 
     def test_string_null_contract(self):
