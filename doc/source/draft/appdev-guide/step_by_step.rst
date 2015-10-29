@@ -275,7 +275,7 @@ The ApacheHTTPServer's DeployApache.template:
 As it can be viewed from the source code, besides specifying versions of different items,
 ApacheHTTPServer execution plan accepts the ``enablePHP`` parameter. This parameter is
 an input parameter to the ``apacheDeploy.sh`` script. This script initiates ``runApacheDeploy.sh``
-execution, witch is also located at the ``Resources`` directory and installs apache app and php
+execution, which is also located at the ``Resources`` directory and installs apache app and php
 if selected.
 
 For the detailed information regarding the execution plan template, its sections and syntax,

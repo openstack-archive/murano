@@ -101,7 +101,7 @@ provide the resources argument:
    ..instance.agent.callRaw($plan)
 
 Also, there are ``instance.agent.call($template, $resources)`` and
-``..instance.agent.sendRaw($plan)`` methods witch have the same meaning but
+``..instance.agent.sendRaw($plan)`` methods which have the same meaning but
 indicate the engine not to wait for the script execution result. The default
 agent call response time (with the corresponding method call) is set in
 murano configuration file and equals to one hour. Take a look at the ``engine``
