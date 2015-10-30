@@ -29,4 +29,4 @@ class TestModels(base.MuranoWithDBTestCase):
                     "'2014-07-15 00:00:00', '2014-07-15 00:00:00', "
                     "'Application', NULL)")
         loaded_e = session.get_session().query(models.Package).get(1)
-        self.assertEqual(None, loaded_e.supplier)
+        self.assertIsNone(loaded_e.supplier)
