@@ -404,7 +404,7 @@ class Resource(object):
             action, action_args, accept = self.deserialize_request(request)
         except exceptions.UnsupportedContentType:
             msg = _("Unsupported Content-Type")
-            return webob.exc.HTTPUnsupportedMediaType(explanation=msg)
+            return webob.exc.HTTPUnsupportedMediaType(detail=msg)
         except exceptions.MalformedRequestBody:
             msg = _("Malformed request body")
             return webob.exc.HTTPBadRequest(explanation=msg)
