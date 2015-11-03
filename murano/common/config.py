@@ -141,7 +141,7 @@ murano_opts = [
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Murano endpoint type used by Murano engine.'),
 
-    cfg.ListOpt('enabled_plugins', default=None,
+    cfg.ListOpt('enabled_plugins',
                 help="List of enabled Extension Plugins. "
                      "Remove or leave commented to enable all installed "
                      "plugins."),
@@ -213,7 +213,7 @@ metadata_dir = [
 ]
 
 packages_opts = [
-    cfg.StrOpt('packages_cache', default=None,
+    cfg.StrOpt('packages_cache',
                help='Location (directory) for Murano package cache.'),
 
     cfg.IntOpt('package_size_limit', default=5,
