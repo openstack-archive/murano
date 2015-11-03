@@ -15,7 +15,6 @@
 import collections
 import contextlib
 import itertools
-import types
 import weakref
 
 import eventlet
@@ -184,7 +183,7 @@ class MuranoDslExecutor(object):
         return tuple(), parameter_values
 
     def load(self, data):
-        if not isinstance(data, types.DictionaryType):
+        if not isinstance(data, dict):
             raise TypeError()
         self._attribute_store.load(data.get(constants.DM_ATTRIBUTES) or [])
         result = self._object_store.load(data.get(constants.DM_OBJECTS), None)
@@ -216,16 +215,16 @@ class MuranoDslExecutor(object):
                             'on {0}: {1}').format(obj, e), exc_info=True)
 
     def _list_potential_object_ids(self, data):
-        if isinstance(data, types.DictionaryType):
+        if isinstance(data, dict):
             sys_dict = data.get('?')
-            if (isinstance(sys_dict, types.DictionaryType) and
+            if (isinstance(sys_dict, dict) and
                     sys_dict.get('id') and sys_dict.get('type')):
                 yield sys_dict['id']
             for val in data.itervalues():
                 for res in self._list_potential_object_ids(val):
                     yield res
         elif isinstance(data, collections.Iterable) and not isinstance(
-                data, types.StringTypes):
+                data, basestring):
             for val in data:
                 for res in self._list_potential_object_ids(val):
                     yield res

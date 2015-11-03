@@ -12,9 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import types
-
 from testtools import matchers
 
 from murano.dsl import serializer
@@ -89,7 +86,7 @@ class TestResultsSerializer(test_case.DslTestCase):
             serialized['Objects']['?'].get('_actions'), dict)
         for action in serialized['Objects']['?']['_actions'].values():
             self.assertIsInstance(action.get('enabled'), bool)
-            self.assertIsInstance(action.get('name'), types.StringTypes)
+            self.assertIsInstance(action.get('name'), basestring)
             self.assertThat(
                 action['name'],
                 matchers.StartsWith('test'))

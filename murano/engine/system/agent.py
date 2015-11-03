@@ -16,7 +16,6 @@
 import copy
 import datetime
 import os
-import types
 import urlparse
 import uuid
 
@@ -207,7 +206,7 @@ class Agent(object):
 
     def build_execution_plan(self, template, resources):
         template = copy.deepcopy(template)
-        if not isinstance(template, types.DictionaryType):
+        if not isinstance(template, dict):
             raise ValueError('Incorrect execution plan ')
         format_version = template.get('FormatVersion')
         if not format_version or format_version.startswith('1.'):

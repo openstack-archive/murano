@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
 
 from murano.dsl import dsl_exception
 from murano.dsl import helpers
@@ -45,7 +44,7 @@ class Statement(DslExpression):
         if isinstance(statement, yaql_expression.YaqlExpression):
             key = None
             value = statement
-        elif isinstance(statement, types.DictionaryType):
+        elif isinstance(statement, dict):
             if len(statement) != 1:
                 raise SyntaxError()
             key = statement.keys()[0]
@@ -81,7 +80,7 @@ def parse_expression(expr):
     result = None
     if isinstance(expr, yaql_expression.YaqlExpression):
         result = Statement(expr)
-    elif isinstance(expr, types.DictionaryType):
+    elif isinstance(expr, dict):
         kwds = {}
         for key, value in expr.iteritems():
             if isinstance(key, yaql_expression.YaqlExpression):

@@ -13,7 +13,6 @@
 #    under the License.
 
 import collections
-import types
 import weakref
 
 from yaql.language import specs
@@ -59,12 +58,12 @@ class MuranoMethod(dsl_types.MuranoMethod):
             self._body = macros.MethodBlock(payload.get('Body') or [], name)
             self._usage = payload.get('Usage') or MethodUsages.Runtime
             arguments_scheme = payload.get('Arguments') or []
-            if isinstance(arguments_scheme, types.DictionaryType):
+            if isinstance(arguments_scheme, dict):
                 arguments_scheme = [{key: value} for key, value in
                                     arguments_scheme.iteritems()]
             self._arguments_scheme = collections.OrderedDict()
             for record in arguments_scheme:
-                if (not isinstance(record, types.DictionaryType) or
+                if (not isinstance(record, dict) or
                         len(record) > 1):
                     raise ValueError()
                 name = record.keys()[0]

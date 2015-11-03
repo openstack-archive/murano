@@ -18,7 +18,6 @@ import functools
 import re
 import string
 import sys
-import types
 import uuid
 
 import eventlet.greenpool
@@ -83,15 +82,15 @@ def merge_dicts(dict1, dict2, max_levels=0):
         if key in dict2:
             value2 = dict2[key]
             if type(value2) != type(value1):
-                if (isinstance(value1, types.StringTypes) and
-                        isinstance(value2, types.StringTypes)):
+                if (isinstance(value1, basestring) and
+                        isinstance(value2, basestring)):
                     continue
                 raise TypeError()
-            if max_levels != 1 and isinstance(value2, types.DictionaryType):
+            if max_levels != 1 and isinstance(value2, dict):
                 result[key] = merge_dicts(
                     value1, value2,
                     0 if max_levels == 0 else max_levels - 1)
-            elif max_levels != 1 and isinstance(value2, types.ListType):
+            elif max_levels != 1 and isinstance(value2, list):
                 result[key] = merge_lists(value1, value2)
             else:
                 result[key] = value2
@@ -285,7 +284,7 @@ def cast(obj, murano_class, pov_or_version_spec=None):
         obj = obj.object
     if isinstance(pov_or_version_spec, dsl_types.MuranoClass):
         pov_or_version_spec = pov_or_version_spec.package
-    elif isinstance(pov_or_version_spec, types.StringTypes):
+    elif isinstance(pov_or_version_spec, basestring):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
     if isinstance(murano_class, dsl_types.MuranoClass):
         if pov_or_version_spec is None:

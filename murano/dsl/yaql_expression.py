@@ -13,7 +13,6 @@
 #    under the License.
 
 import re
-import types
 
 from yaql.language import exceptions as yaql_exceptions
 from yaql.language import expressions
@@ -26,7 +25,7 @@ from murano.dsl import yaql_integration
 class YaqlExpression(dsl_types.YaqlExpression):
     def __init__(self, expression, version):
         self._version = version
-        if isinstance(expression, types.StringTypes):
+        if isinstance(expression, basestring):
             self._expression = unicode(expression)
             self._parsed_expression = yaql_integration.parse(
                 self._expression, version)
@@ -66,7 +65,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
 
     @staticmethod
     def is_expression(expression, version):
-        if not isinstance(expression, types.StringTypes):
+        if not isinstance(expression, basestring):
             return False
         if re.match('^[\s\w\d.:]*$', expression):
             return False

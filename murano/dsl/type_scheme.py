@@ -13,7 +13,6 @@
 #    under the License.
 
 import sys
-import types
 import uuid
 
 from yaql.language import specs
@@ -175,7 +174,7 @@ class TypeScheme(object):
 
                 obj = object_store.load(
                     value, owner, root_context, defaults=default)
-            elif isinstance(value, types.StringTypes):
+            elif isinstance(value, basestring):
                 obj = object_store.get(value)
                 if obj is None:
                     if not object_store.initializing:
@@ -255,10 +254,10 @@ class TypeScheme(object):
         shift = 0
         max_length = sys.maxint
         min_length = 0
-        if isinstance(spec[-1], types.IntType):
+        if isinstance(spec[-1], int):
             min_length = spec[-1]
             shift += 1
-        if len(spec) >= 2 and isinstance(spec[-2], types.IntType):
+        if len(spec) >= 2 and isinstance(spec[-2], int):
             max_length = min_length
             min_length = spec[-2]
             shift += 1
@@ -317,6 +316,6 @@ class TypeScheme(object):
 
 
 def format_scalar(value):
-    if isinstance(value, types.StringTypes):
+    if isinstance(value, basestring):
         return "'{0}'".format(value)
     return unicode(value)

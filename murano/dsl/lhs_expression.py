@@ -13,7 +13,6 @@
 #    under the License.
 
 import itertools
-import types
 
 from yaql.language import specs
 from yaql.language import utils
@@ -109,7 +108,7 @@ class LhsExpression(object):
                 if utils.is_sequence(src):
                     src_property.set(src[:index] + (value,) + src[index + 1:])
 
-            if isinstance(index, types.IntType):
+            if isinstance(index, int):
                 return LhsExpression.Property(
                     lambda: getter(this.get()),
                     lambda value: setter(this, value))

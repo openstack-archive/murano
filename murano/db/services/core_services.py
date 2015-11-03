@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
-
 from oslo_log import log as logging
 from oslo_utils import timeutils
 from webob import exc
@@ -119,7 +117,7 @@ class CoreServices(object):
             temp_description['services'] = []
 
         if path == '/services':
-            if isinstance(data, types.ListType):
+            if isinstance(data, list):
                 utils.TraverseHelper.extend(path, data, temp_description)
             else:
                 utils.TraverseHelper.insert(path, data, temp_description)
@@ -149,7 +147,7 @@ class CoreServices(object):
             temp_description['services'] = []
 
         if path == '/services':
-            if isinstance(data, types.ListType):
+            if isinstance(data, list):
                 utils.TraverseHelper.extend(path, data, temp_description)
             else:
                 utils.TraverseHelper.insert(path, data, temp_description)
@@ -175,7 +173,7 @@ class CoreServices(object):
             env_description['services'] = []
 
         if path == '/services':
-            if isinstance(data, types.ListType):
+            if isinstance(data, list):
                 utils.TraverseHelper.extend(path, data, env_description)
             else:
                 utils.TraverseHelper.insert(path, data, env_description)

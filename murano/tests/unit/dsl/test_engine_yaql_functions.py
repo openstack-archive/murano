@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
-
 from testtools import matchers
 from yaql.language import exceptions as yaql_exceptions
 
@@ -161,8 +159,8 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
         name1 = self._runner.testRandomName()
         name2 = self._runner.testRandomName()
 
-        self.assertIsInstance(name1, types.StringTypes)
-        self.assertIsInstance(name2, types.StringTypes)
+        self.assertIsInstance(name1, basestring)
+        self.assertIsInstance(name2, basestring)
         self.assertThat(len(name1), matchers.GreaterThan(12))
         self.assertThat(len(name2), matchers.GreaterThan(12))
         self.assertThat(name1, matchers.NotEquals(name2))

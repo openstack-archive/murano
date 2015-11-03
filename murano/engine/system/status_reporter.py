@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import types
 
 from oslo_config import cfg
 import oslo_messaging as messaging
@@ -35,7 +34,7 @@ class StatusReporter(object):
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),
             topic='murano')
-        if isinstance(environment, types.StringTypes):
+        if isinstance(environment, basestring):
             self._environment_id = environment
         else:
             self._environment_id = environment.id

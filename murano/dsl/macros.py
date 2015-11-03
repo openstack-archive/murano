@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import types
 
 from murano.dsl import constants
 from murano.dsl import dsl_exception
@@ -24,7 +23,7 @@ from murano.dsl import yaql_expression
 
 class CodeBlock(expressions.DslExpression):
     def __init__(self, body):
-        if not isinstance(body, types.ListType):
+        if not isinstance(body, list):
             body = [body]
         self.code_block = map(expressions.parse_expression, body)
 
@@ -140,7 +139,7 @@ class WhileDoMacro(expressions.DslExpression):
 
 class ForMacro(expressions.DslExpression):
     def __init__(self, For, In, Do):
-        if not isinstance(For, types.StringTypes):
+        if not isinstance(For, basestring):
             raise exceptions.DslSyntaxError(
                 'For value must be of string type')
         self._code = CodeBlock(Do)
@@ -180,7 +179,7 @@ class RepeatMacro(expressions.DslExpression):
 
 class MatchMacro(expressions.DslExpression):
     def __init__(self, Match, Value, Default=None):
-        if not isinstance(Match, types.DictionaryType):
+        if not isinstance(Match, dict):
             raise exceptions.DslSyntaxError(
                 'Match value must be of dictionary type')
         self._switch = Match
@@ -199,7 +198,7 @@ class MatchMacro(expressions.DslExpression):
 
 class SwitchMacro(expressions.DslExpression):
     def __init__(self, Switch, Default=None):
-        if not isinstance(Switch, types.DictionaryType):
+        if not isinstance(Switch, dict):
             raise exceptions.DslSyntaxError(
                 'Switch value must be of dictionary type')
         self._switch = Switch

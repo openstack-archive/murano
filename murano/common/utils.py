@@ -14,7 +14,6 @@
 
 import collections
 import functools as func
-import types
 
 import eventlet
 import jsonschema
@@ -27,8 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TraverseHelper(object):
-    value_type = (types.StringTypes, types.IntType, types.FloatType,
-                  types.BooleanType)
+    value_type = (basestring, int, float, bool)
 
     @staticmethod
     def get(path, source):
@@ -60,7 +58,7 @@ class TraverseHelper(object):
         while len(queue):
             path = queue.popleft()
 
-            if isinstance(source, types.ListType):
+            if isinstance(source, list):
                 idx_source = source
                 iterator = (
                     i for i in source
@@ -69,7 +67,7 @@ class TraverseHelper(object):
                 source = next(iterator, None)
                 if source is None and path.isdigit():
                     source = idx_source[int(path)]
-            elif isinstance(source, types.DictionaryType):
+            elif isinstance(source, dict):
                 source = source[path]
             elif isinstance(source, TraverseHelper.value_type):
                 break
@@ -126,14 +124,14 @@ class TraverseHelper(object):
         node = TraverseHelper.get(parent_path, source)
         key = path[1:].split('/')[-1]
 
-        if isinstance(node, types.ListType):
+        if isinstance(node, list):
             iterator = (i for i in node if i.get('?', {}).get('id') == key)
             item = next(iterator, None)
             if item is None and key.isdigit():
                 del node[int(key)]
             else:
                 node.remove(item)
-        elif isinstance(node, types.DictionaryType):
+        elif isinstance(node, dict):
             del node[key]
         else:
             raise ValueError(_('Source object or path is malformed'))
@@ -197,12 +195,12 @@ def is_different(obj1, obj2):
 
 def build_entity_map(value):
     def build_entity_map_recursive(value, id_map):
-        if isinstance(value, types.DictionaryType):
+        if isinstance(value, dict):
             if '?' in value and 'id' in value['?']:
                 id_map[value['?']['id']] = value
             for v in value.itervalues():
                 build_entity_map_recursive(v, id_map)
-        if isinstance(value, types.ListType):
+        if isinstance(value, list):
             for item in value:
                 build_entity_map_recursive(item, id_map)
 
