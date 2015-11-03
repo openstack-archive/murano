@@ -1,0 +1,1 @@
+cloudify-rest-client>=3.1
