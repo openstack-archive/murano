@@ -1,0 +1,73 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  =: org.getcloudify.murano
+  std: io.murano
+  csys: io.murano.extensions.cloudify
+
+Name: CloudifyApplication
+
+Extends: std:Application
+
+Methods:
+  .init:
+    Body:
+      - $._client: new(csys:CloudifyClient, app => $this)
+      - $._environment: $.find(std:Environment).require()
+
+  describe:
+
+  updateOutputs:
+    Arguments:
+      - outputs:
+          Contract:
+            $.string().notNull(): $
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+        - $info: $.describe()
+        - $._environment.reporter.report($this, 'Checking for TOSCA package')
+        - $._client.publishBlueprint($info.entryPoint)
+        - $._client.createDeployment($info.inputs)
+        - $._environment.reporter.report($this, 'Waiting for deployment initialization')
+        - $._client.waitDeploymentReady()
+        - $._environment.reporter.report($this, 'Installing {0}'.format(name($this)))
+        - $._client.executeWorkflow(install)
+        - $outputs: $._client.waitDeploymentReady()
+        - For: outputName
+          In: $outputs.keys()
+          Do:
+            - $output: $outputs[$outputName]
+            - $._environment.reporter.report($this, $output)
+            - $label: $output.get(description, $outputName)
+            - $value: $output.value
+            - $msg: '{0}: {1}'
+            - $._environment.reporter.report($this, $msg.format($label, $value))
+        - $.updateOutputs($outputs)
+        - $._environment.reporter.report($this, 'Installation complete')
+        - $.setAttr(deployed, true)
+
+  .destroy:
+    Body:
+      - If: $.getAttr(deployed, false)
+        Then:
+        - $info: $.describe()
+        - $._client.waitDeploymentReady()
+        - $._environment.reporter.report($this, 'Uninstalling {0}'.format(name($this)))
+        - $._client.executeWorkflow(uninstall)
+        - $._client.waitDeploymentReady()
+        - $._client.deleteDeployment()
+        - $._environment.reporter.report($this, 'Uninstallation complete')
+        - $.setAttr(deployed, false)
