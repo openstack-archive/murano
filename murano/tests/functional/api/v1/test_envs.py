@@ -56,6 +56,32 @@ class TestEnvironments(base.TestCase):
 
     @tag('all', 'coverage')
     @attr(type='smoke')
+    def test_create_and_delete_environment_with_unicode_name(self):
+        environments_list_start = self.client.get_environments_list()[1]
+
+        unicode_name = u'$yaql \u2665 unicode'
+        resp, env = self.client.create_environment(unicode_name)
+        self.environments.append(env)
+
+        self.assertEqual(resp.status, 200)
+        self.assertEqual(unicode_name, env['name'])
+
+        environments_list = self.client.get_environments_list()[1]
+
+        self.assertEqual(len(environments_list_start['environments']) + 1,
+                         len(environments_list['environments']))
+
+        self.client.delete_environment(env['id'])
+
+        environments_list = self.client.get_environments_list()[1]
+
+        self.assertEqual(len(environments_list_start['environments']),
+                         len(environments_list['environments']))
+
+        self.environments.pop(self.environments.index(env))
+
+    @tag('all', 'coverage')
+    @attr(type='smoke')
     def test_get_environment(self):
         env = self.create_environment('test')
 

@@ -140,13 +140,14 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         )
         self.expect_policy_check('create_environment')
 
-        body = {'name': 'my+#env'}
+        body = {'name': '   '}
         req = self._post('/environments', json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
 
     def test_unicode_environment_name_create(self):
-        """Check that an unicode env name results in an HTTPClientError."""
+        """Check that an unicode env name doesn't raise an HTTPClientError."""
+        self._configure_opts()
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
@@ -154,10 +155,10 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         )
         self.expect_policy_check('create_environment')
 
-        body = {'name': u'yaql ♥ unicode'.encode('utf-8')}
+        body = {'name': u'$yaql \u2665 unicode'}
         req = self._post('/environments', json.dumps(body))
         result = req.get_response(self.api)
-        self.assertEqual(400, result.status_code)
+        self.assertEqual(200, result.status_code)
 
     def test_no_environment_name_create(self):
         """Check that no env name provided results in an HTTPBadResquest."""

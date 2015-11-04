@@ -16,7 +16,6 @@ from oslo_db import exception as db_exc
 from oslo_log import log as logging
 from webob import exc
 
-from murano.api.v1 import environments as envs_api
 from murano.api.v1 import request_statistics
 from murano.common.i18n import _
 from murano.common import policy
@@ -63,9 +62,9 @@ class Controller(object):
         try:
             LOG.debug('ENV TEMP NAME: {templ_name}>'.format(
                 templ_name=body['name']))
-            if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
-                msg = _('Environment Template must contain only alphanumeric '
-                        'or "_-." characters, must start with alpha')
+            if not str(body['name']).strip():
+                msg = _('Environment Template must contain at least one '
+                        'non-white space symbol')
                 LOG.error(msg)
                 raise exc.HTTPBadRequest(msg)
         except Exception:
@@ -125,9 +124,9 @@ class Controller(object):
         try:
             LOG.debug('ENV TEMP NAME: {temp_name}>'.format(
                 temp_name=body['name']))
-            if not envs_api.VALID_NAME_REGEX.match(str(body['name'])):
-                msg = _('Env Template must contain only alphanumeric '
-                        'or "_-." characters, must start with alpha')
+            if not str(body['name']).strip():
+                msg = _('Environment Template must contain at least one '
+                        'non-white space symbol')
                 LOG.exception(msg)
                 raise exc.HTTPBadRequest(msg)
         except Exception:
@@ -182,10 +181,9 @@ class Controller(object):
         template = env_temps.EnvTemplateServices.\
             get_env_template(env_template_id)
 
-        if ('name' not in body or
-                not envs_api.VALID_NAME_REGEX.match(str(body['name']))):
-            msg = _('Environment must contain only alphanumeric '
-                    'or "_-." characters, must start with alpha')
+        if ('name' not in body or not str(body['name']).strip()):
+            msg = _('Environment Template must contain at least one '
+                    'non-white space symbol')
             LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
         LOG.debug('ENVIRONMENT NAME: {env_name}>'.format(
