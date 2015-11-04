@@ -128,8 +128,6 @@ Miscellaneous
 .. toctree::
    :maxdepth: 1
 
-   articles/app_pkg
-   articles/heat_support
    image_builders/index
    articles/test_docs
 

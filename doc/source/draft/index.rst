@@ -51,7 +51,6 @@ Using Murano
    enduser-guide/manage_environments
    enduser-guide/manage_applications
    enduser-guide/log_into_murano_instance
-   enduser-guide/troubleshooting
    enduser-guide/deploying_using_cli
 
 Deploying Murano
