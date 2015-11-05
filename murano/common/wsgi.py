@@ -109,7 +109,8 @@ class Service(service.Service):
                 eventlet.sleep(0.1)
         if not sock:
             raise RuntimeError(_("Could not bind to %(host)s:%(port)s "
-                                 "after trying for 30 seconds") %
+                                 "after trying for 30 seconds: Address"
+                                 " already in use.") %
                                {'host': host, 'port': port})
         sock.setsockopt(socket.SOL_SOCKET, socket.SO_REUSEADDR, 1)
         # sockets can hang around forever without keepalive
