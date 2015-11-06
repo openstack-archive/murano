@@ -17,8 +17,10 @@ import math
 import netaddr
 from netaddr.strategy import ipv4
 from oslo.utils import uuidutils
+import retrying
 
 import murano.common.config as config
+from murano.common import exceptions as exc
 import murano.dsl.helpers as helpers
 import murano.dsl.murano_class as murano_class
 import murano.dsl.murano_object as murano_object
@@ -40,6 +42,16 @@ class NetworkExplorer(murano_object.MuranoObject):
 
     # noinspection PyPep8Naming
     def getDefaultRouter(self, _context):
+        return self._get_default_router(_context)
+
+    # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
+    # decorator with random delay 1-10 seconds between attempts and maximum
+    # delay time 30 seconds.
+    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
+                    exc.RouterInfoException),
+                    wait_random_min=1000, wait_random_max=10000,
+                    stop_max_delay=30000)
+    def _get_default_router(self, _context):
         client = self._clients.get_neutron_client(_context)
         router_name = self._settings.router_name
 
@@ -77,8 +89,8 @@ class NetworkExplorer(murano_object.MuranoObject):
                 raise KeyError('Router %s was not found' % router_name)
         else:
             if routers[0]['external_gateway_info'] is None:
-                raise Exception('Please set external gateway '
-                                'for the router %s ' % router_name)
+                raise exc.RouterInfoException('Please set external gateway for'
+                                              ' the router %s ' % router_name)
             router_id = routers[0]['id']
         return router_id
 
