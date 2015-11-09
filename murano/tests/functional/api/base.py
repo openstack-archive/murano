@@ -26,8 +26,15 @@ from tempest import test
 from tempest_lib.common import rest_client
 from tempest_lib import exceptions
 
+import murano.tests.functional.common.zip_utils_mixin as zip_utils
 
 CONF = config.CONF
+
+
+def generate_name(prefix):
+    """Generate name for objects."""
+    suffix = uuid.uuid4().hex[:8]
+    return "{0}_{1}".format(prefix, suffix)
 
 
 class MuranoClient(rest_client.RestClient):
@@ -176,14 +183,16 @@ class MuranoClient(rest_client.RestClient):
 
         return resp, json.loads(body)
 
-    def upload_package(self, package_name, body):
-        __location__ = os.path.realpath(os.path.join(
-            os.getcwd(), os.path.dirname(__file__)))
-
+    def upload_package(self, package_name, body, path=None):
         headers = {'X-Auth-Token': self.auth_provider.get_token()}
 
-        files = {'%s' % package_name: open(
-            os.path.join(__location__, 'v1/DummyTestApp.zip'), 'rb')}
+        if not path:
+            __location__ = os.path.realpath(os.path.join(
+                os.getcwd(), os.path.dirname(__file__)))
+
+            path = os.path.join(__location__, 'v1/DummyTestApp.zip')
+
+        files = {'%s' % package_name: open(path, 'rb')}
 
         post_body = {'JsonString': json.dumps(body)}
         request_url = '{endpoint}{url}'.format(endpoint=self.base_url,
@@ -231,11 +240,6 @@ class MuranoClient(rest_client.RestClient):
         }
         return self.get('v1/catalog/packages/{0}/logo'.format(id),
                         headers=headers)
-
-    def list_categories(self):
-        resp, body = self.get('v1/catalog/packages/categories')
-
-        return resp, json.loads(body)
 
     def get_env_templates_list(self):
         """Check the environment templates deployed by the user."""
@@ -325,8 +329,64 @@ class MuranoClient(rest_client.RestClient):
             }
         }
 
+    def list_categories(self):
+        resp, body = self.get('v1/catalog/packages/categories')
+        return resp, json.loads(body)
 
-class TestCase(test.BaseTestCase):
+    def create_category(self, name):
+        body = {'name': name}
+        resp, body = self.post('v1/catalog/categories', json.dumps(body))
+
+        return resp, json.loads(body)
+
+    def delete_category(self, id):
+        return self.delete('v1/catalog/categories/{0}'.format(id))
+
+    def get_category(self, id):
+        resp, body = self.get('v1/catalog/categories/{0}'.format(id))
+        return resp, json.loads(body)
+
+
+class TestAuth(test.BaseTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super(TestAuth, cls).setUpClass()
+
+        # If no credentials are provided, the Manager will use those
+        # in CONF.identity and generate an auth_provider from them
+        cls.creds = cred_provider.get_configured_credentials(
+            credential_type='identity_admin')
+        mgr = clients.Manager(cls.creds)
+        cls.client = MuranoClient(mgr.auth_provider)
+
+
+class TestObjectCreation(TestAuth):
+
+    def create_app_zip_archive(self, name, relative_path="v1/"):
+        location = os.path.realpath(
+            os.path.join(os.getcwd(), os.path.dirname(__file__)))
+
+        path_to_source = os.path.join(location, relative_path)
+
+        path = zip_utils.ZipUtilsMixin.zip_dir(path_to_source, name)
+        self.addCleanup(os.remove, path)
+
+        return path
+
+    def upload_package(self, name, body, path):
+        resp = self.client.upload_package(name, body, path)
+        self.addCleanup(self.client.delete_package, resp.json()['id'])
+
+        return resp
+
+    def create_category(self, name):
+        resp, body = self.client.create_category(name)
+        self.addCleanup(self.client.delete_category, body['id'])
+
+        return resp, body
+
+
+class TestCase(TestAuth):
 
     @classmethod
     def setUpClass(cls):
