@@ -21,8 +21,7 @@ Welcome to Murano Documentation
 combines an application catalog with versatile
 tooling to simplify and accelerate packaging and
 deployment. It can be used with almost any application
-and service in OpenStack, and is extensible to
-other clouds.
+and service in OpenStack.
 
 Murano project consists of several source code repositories:
 
