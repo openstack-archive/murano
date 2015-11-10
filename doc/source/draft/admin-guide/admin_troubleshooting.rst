@@ -71,7 +71,7 @@ If any problems occur, first of all verify that:
 **Murano panel can be browsed, but 'Unable to communicate to murano-api server.' appears**
 
 If you have murano registered in keystone, verify the endpoint URL is valid
-and service has *application_catalog* name. If you don't want to register
+and service has *application-catalog* name. If you don't want to register
 murano service in keystone, just add ``MURANO_API_URL`` option to the horizon
 local setting.
 

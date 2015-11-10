@@ -159,7 +159,7 @@ class ClientManager(object):
 
             murano_url = \
                 murano_settings.url or keystone_client.service_catalog.url_for(
-                    service_type='application_catalog',
+                    service_type='application-catalog',
                     endpoint_type=murano_settings.endpoint_type)
 
             if CONF.packages_opts.packages_service == 'glance':

@@ -41,7 +41,7 @@ class MuranoClient(rest_client.RestClient):
     def __init__(self, auth_provider):
         super(MuranoClient, self).__init__(
             auth_provider,
-            'application_catalog',
+            'application-catalog',
             CONF.identity.region
         )
 

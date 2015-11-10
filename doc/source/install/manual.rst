@@ -255,11 +255,11 @@ Register in Keystone
 To make murano API available to all OpenStack users, you need to register the
 Application Catalog service within the Identity service.
 
-#. Add ``application_catalog`` service:
+#. Add ``application-catalog`` service:
 
    .. code-block:: console
 
-     keystone service-create --name murano --type application_catalog --description "Application Catalog for OpenStack"
+     keystone service-create --name murano --type application-catalog --description "Application Catalog for OpenStack"
 
 #. Provide an endpoint for that service:
 

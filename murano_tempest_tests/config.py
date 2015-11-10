@@ -45,7 +45,7 @@ ApplicationCatalogGroup = [
                     "REST client authentication."),
 
     cfg.StrOpt("catalog_type",
-               default="application_catalog",
+               default="application-catalog",
                help="Catalog type of Application Catalog."),
 
     cfg.StrOpt("endpoint_type",
@@ -76,7 +76,7 @@ ServiceBrokerGroup = [
                     "REST client authentication."),
 
     cfg.StrOpt("catalog_type",
-               default="service_broker",
+               default="service-broker",
                help="Catalog type of Service Broker API"),
 
     cfg.StrOpt("endpoint_type",
