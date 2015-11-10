@@ -11,8 +11,7 @@ Welcome to Murano Documentation (BETA)
 combines an application catalog with versatile
 tooling to simplify and accelerate packaging and
 deployment. It can be used with almost any application
-and service in OpenStack, and is extensible to
-other clouds.
+and service in OpenStack.
 
 This documentation guides application developers
 through the process of composing an application
