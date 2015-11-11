@@ -29,12 +29,12 @@ class TestController(base.MuranoTestCase):
 
         self.request = mock.MagicMock()
         self.request.headers = {'Authorization': 'Basic {encoded}'.format(
-            encoded=base64.b64encode('test:test'))}
+            encoded=base64.b64encode('test:test')), 'X-Auth-Token': 'foo-bar',
+            'X-Project-Id': 'bar-baz'}
 
     @mock.patch('murano.common.policy.check_is_admin')
     @mock.patch('murano.db.catalog.api.package_search')
-    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
-    def test_list(self, mock_auth, mock_db_search, mock_policy):
+    def test_list(self, mock_db_search, mock_policy):
 
         pkg0 = mock.MagicMock()
         pkg0.id = 'xxx'
@@ -64,8 +64,7 @@ class TestController(base.MuranoTestCase):
     @mock.patch('murano.db.services.cf_connections.set_instance_for_service')
     @mock.patch('murano.db.services.cf_connections.get_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.get_tenant_for_org')
-    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
-    def test_provision_from_scratch(self, mock_auth, mock_get_tenant,
+    def test_provision_from_scratch(self, mock_get_tenant,
                                     mock_get_environment, mock_is, mock_client,
                                     mock_package, mock_policy):
 
@@ -93,8 +92,7 @@ class TestController(base.MuranoTestCase):
     @mock.patch('murano.db.services.cf_connections.set_tenant_for_org')
     @mock.patch('murano.db.services.cf_connections.get_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.get_tenant_for_org')
-    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
-    def test_provision_existent(self, mock_auth, mock_get_tenant,
+    def test_provision_existent(self, mock_get_tenant,
                                 mock_get_environment, mock_set_tenant,
                                 mock_set_environment, mock_is, mock_client,
                                 mock_package, mock_policy):
@@ -116,9 +114,8 @@ class TestController(base.MuranoTestCase):
         self.assertIsInstance(resp, response.Response)
 
     @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
-    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
-    def test_deprovision(self, mock_get_si, mock_auth, mock_client):
+    def test_deprovision(self, mock_get_si, mock_client):
         service = mock.MagicMock()
         service.service_id = '111-111'
         service.tenant_id = '222-222'
@@ -131,8 +128,7 @@ class TestController(base.MuranoTestCase):
 
     @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
-    @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
-    def test_bind(self, mock_auth, mock_get_si, mock_client):
+    def test_bind(self, mock_get_si, mock_client):
         service = mock.MagicMock()
         service.service_id = '111-111'
         service.tenant_id = '222-222'
