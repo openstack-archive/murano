@@ -82,8 +82,8 @@ def merge_dicts(dict1, dict2, max_levels=0):
         if key in dict2:
             value2 = dict2[key]
             if type(value2) != type(value1):
-                if (isinstance(value1, basestring) and
-                        isinstance(value2, basestring)):
+                if ((isinstance(value1, basestring) or value1 is None) and
+                        (isinstance(value2, basestring) or value2 is None)):
                     continue
                 raise TypeError()
             if max_levels != 1 and isinstance(value2, dict):
