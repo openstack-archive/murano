@@ -1,0 +1,12 @@
+Author: OASIS TOSCA TC
+Description: 'TOSCA simple profile with wordpress, web server and mysql on the same
+  server.
+
+  '
+Format: TOSCA.CSAR/1.1
+FullName: io.murano.apps.generated.CsarWordpress
+Name: csar_wordpress
+Tags:
+- TOSCA-CSAR-generated
+Template: Definitions/tosca_single_instance_wordpress.yaml
+Type: Application

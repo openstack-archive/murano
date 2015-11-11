@@ -1,0 +1,9 @@
+Author: OASIS TOSCA TC
+Description: Template for deploying a single server with predefined properties.
+Format: TOSCA.CSAR/1.1.0
+FullName: io.murano.apps.generated.CsarHelloWorld
+Name: csar_hello_world
+Tags:
+- TOSCA-CSAR-generated
+Template: tosca_helloworld.yaml
+Type: Application
