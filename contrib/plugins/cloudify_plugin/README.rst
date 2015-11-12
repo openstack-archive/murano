@@ -1,26 +1,49 @@
-This is a Murano Plugin for Cloudify.
+Murano Plugin for Cloudify
+~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-You need to install this plugin in your Murano environment using pip (pip install -e .).
+Cloudify is a TOSCA-based open-source cloud orchestration engine by GigaSpaces
+Technologies.
 
-You also need to upload the Cloudify Application (cloudify_application folder) to your Murano Packages:
+This plugin extends Murano with support of Cloudify TOSCA package format.
+TOSCA packages can be deployed on Cloudify Manager deployed at configurable
+location.
 
-cd cloudify_application
-zip -r cloudify_application.zip .
+Plugin registers `Cloudify.TOSCA/1.0` format identifier.
 
-Then you will be able to deploy TOSCA applications using Cloudify.
+Installation
+------------
 
-To test this plugin you will need the cloudify-nodecellar-application.
+Installation of the plugin is done using any of Python package management
+tools. The most simple way is by saying `pip install .` from the plugin's
+directory (or `pip install -e .` for development)
 
-Read "nodecellar_example_application/README.rst".
+Also location of Cloudify Manager (engine server) must be configured
+in murano config file. This is done in `[cloudify]` section of murano.conf
+via cloudify_manager setting. For example:
 
-Download the Nodecellar Example to the nodecellar_example_application/Resources folder.
+.. code-block:: ini
 
-You will also need a manager. Follow these instructions to create a manager (http://getcloudify.org/guide/3.2/quickstart.html).
+    [cloudify]
+    cloudify_manager = 10.10.1.10
 
-Then take Cloudify Manager IP and update your murano.conf file in ./murano/etc:
 
-[cloudify]
-cloudify_manager = 10.10.1.10 # Change this.
+Murano engine must be restarted after installation of the plugin.
 
-Restart the Murano Engine and API.
+
+Requirements
+------------
+
+All Cloudify TOSCA application require `org.getcloudify.murano` library package
+to be present in Murano catalog. The package can be found in
+`cloudify_applications_library` subfolder.
+
+
+Demo application
+----------------
+
+There is a demo application that can be used to test the plugin.
+It is located in `nodecellar_example_application` subfolder. Follow
+instructions at `nodecellar_example_application/README.rst` to build
+the demo package.
+
 
