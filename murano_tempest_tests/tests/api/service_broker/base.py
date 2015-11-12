@@ -13,9 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
+import time
+
 from tempest.common import dynamic_creds
 from tempest import config
 from tempest import test
+from tempest_lib import exceptions
 
 from murano_tempest_tests import clients
 
@@ -67,6 +71,7 @@ class BaseServiceBrokerTest(test.BaseTestCase):
             cls.verify_nonempty(cls.username, cls.password, cls.tenant_name)
             cls.os = clients.Manager()
         cls.service_broker_client = cls.os.service_broker_client
+        cls.application_catalog_client = cls.os.application_catalog_client
 
     def setUp(self):
         super(BaseServiceBrokerTest, self).setUp()
@@ -81,6 +86,32 @@ class BaseServiceBrokerTest(test.BaseTestCase):
     def clear_isolated_creds(cls):
         if hasattr(cls, "dynamic_cred"):
             cls.dynamic_cred.clear_creds()
+
+    def wait_for_result(self, instance_id, timeout):
+        start_time = time.time()
+        start_status = self.service_broker_client.get_last_status(instance_id)
+        while start_status:
+            status = self.service_broker_client.get_last_status(instance_id)
+            if status == start_status and time.time() - start_time > timeout:
+                    raise exceptions.TimeoutException
+            elif status != start_status:
+                try:
+                    parced_stat = status['state']
+                    self.assertIn(str(parced_stat), ['succeeded', 'failed'])
+                    result = str(parced_stat)
+                    return result
+                except KeyError:
+                    parced_stat = json.loads(status)
+                    self.assertIsInstance(parced_stat, dict)
+                    result = parced_stat
+                    return result
+            else:
+                time.sleep(2)
+
+    def perform_deprovision(self, instance_id):
+        self.service_broker_client.deprovision(instance_id)
+        status = self.wait_for_result(instance_id, 30)
+        self.assertEqual('succeeded', status)
 
 
 class BaseServiceBrokerAdminTest(BaseServiceBrokerTest):

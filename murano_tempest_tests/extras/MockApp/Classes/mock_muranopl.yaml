@@ -1,0 +1,16 @@
+Namespaces:
+  =: io.murano.apps
+  std: io.murano
+
+Name: MockApp
+
+Extends: std:Application
+
+Methods:
+  testAction:
+    Usage: Action
+    Body:
+      - $this.find(std:Environment).reporter.report($this, 'Completed')
+  deploy:
+     Body:
+      - $this.find(std:Environment).reporter.report($this, 'Follow the white rabbit')

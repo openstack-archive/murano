@@ -16,6 +16,8 @@
 from tempest import clients
 from tempest.common import credentials_factory as common_creds
 
+from murano_tempest_tests.services.application_catalog \
+    import application_catalog_client
 from murano_tempest_tests.services.service_broker import service_broker_client
 
 
@@ -24,6 +26,9 @@ class Manager(clients.Manager):
         super(Manager, self).__init__(credentials, service)
         self.service_broker_client = service_broker_client.ServiceBrokerClient(
             self.auth_provider)
+        self.application_catalog_client = \
+            application_catalog_client.ApplicationCatalogClient(
+                self.auth_provider)
 
 
 class AltManager(Manager):

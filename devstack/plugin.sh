@@ -277,8 +277,13 @@ function configure_murano_tempest_plugin() {
 
     # Check tempest for enabling
     if is_service_enabled tempest; then
+        echo_summary "Configuring Murano Tempest plugin"
         # Set murano service availability flag
         iniset $TEMPEST_CONFIG service_available murano "True"
+        # Running tempest in isolation will using tempest user.
+        if sudo id -u tempest >/dev/null 2>&1; then
+            sudo chown -R tempest:stack $MURANO_DIR/murano_tempest_tests
+        fi
         if is_service_enabled murano-cfapi; then
             # Enable Service Broker tests if cfapi enabled
             iniset $TEMPEST_CONFIG service_broker run_service_broker_tests "True"
@@ -443,7 +448,6 @@ if is_service_enabled murano; then
             start_service_broker
         fi
 
-        echo_summary "Configuring Murano Tempest plugin"
         configure_murano_tempest_plugin
 
         # Give Murano some time to Start

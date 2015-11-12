@@ -14,9 +14,13 @@
 #    under the License.
 
 import base64
+import json
 
 from tempest import config
 from tempest_lib.common import rest_client
+from tempest_lib import exceptions
+
+from murano_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -45,7 +49,8 @@ class ServiceBrokerClient(rest_client.RestClient):
         pwd = auth_provider.credentials.password
 
         encoded_auth = base64.b64encode('{0}:{1}'.format(uname, pwd))
-        headers = {"Authorization": "Basic " + encoded_auth}
+        headers = {"Authorization": "Basic " + encoded_auth,
+                   'content-type': 'application/json'}
         return headers
 
     def get_applications_list(self):
@@ -54,3 +59,42 @@ class ServiceBrokerClient(rest_client.RestClient):
         resp, body = self.get(uri, headers=self.headers)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+    def provision(self, instance_id, service_id, plan_id, post_json):
+        """Create new service resources for developer"""
+        uri = '/v2/service_instances/{0}?accepts_incomplete=true'.\
+            format(instance_id)
+        body = {
+            'service_id': service_id,
+            'plan_id': plan_id,
+            'organization_guid': self.tenant_id,
+            'space_guid': utils.generate_uuid(),
+            'parameters': post_json
+        }
+        body = json.dumps(body)
+        resp, body = self.put(uri, body, headers=self.headers)
+        self.expected_success([200, 202], resp.status)
+        return body
+
+    def deprovision(self, instance_id):
+        uri = '/v2/service_instances/{0}?accepts_incomplete=true'.\
+            format(instance_id)
+        resp, body = self.delete(uri, headers=self.headers)
+        self.expected_success(202, resp.status)
+        return body
+
+    def get_last_status(self, instance_id):
+        uri = '/v2/service_instances/{0}/last_operation'.format(instance_id)
+        try:
+            resp, body = self.get(uri, headers=self.headers)
+        except exceptions.UnexpectedResponseCode as e:
+            # Tempest REST client can't catch this code.
+            if int(e.resp['status']) == 410:
+                return '{}'
+        self.expected_success([200, 202], resp.status)
+        return self._parse_resp(body)
+
+    def get_application(self, name, app_list):
+        for app in app_list:
+            if app['name'] == name:
+                return app
