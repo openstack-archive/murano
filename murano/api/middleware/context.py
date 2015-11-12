@@ -31,6 +31,7 @@ CONF = cfg.CONF
 
 class ContextMiddleware(wsgi.Middleware):
     def process_request(self, req):
+
         """Convert authentication information into a request context
 
         Generate a murano.context.RequestContext object from the available
@@ -39,7 +40,6 @@ class ContextMiddleware(wsgi.Middleware):
 
         :param req: wsgi request object that will be given the context object
         """
-
         roles = [r.strip() for r in req.headers.get('X-Roles').split(',')]
         kwargs = {
             'user': req.headers.get('X-User-Id'),
