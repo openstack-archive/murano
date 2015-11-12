@@ -263,7 +263,7 @@ class MuranoTestRunner(object):
 
         parser.add_argument('--os-auth-url',
                             default=utils.env('OS_AUTH_URL'),
-                            help='Authentication URL (Env: OS_AUTH_URL)')
+                            help='Defaults to env[OS_AUTH_URL]')
         parser.add_argument('--os-username',
                             default=utils.env('OS_USERNAME'),
                             help='Defaults to env[OS_USERNAME]')
