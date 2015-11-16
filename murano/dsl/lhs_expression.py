@@ -107,6 +107,8 @@ class LhsExpression(object):
                 src = src_property.get()
                 if utils.is_sequence(src):
                     src_property.set(src[:index] + (value,) + src[index + 1:])
+                elif isinstance(src, utils.MappingType):
+                    attribution(src_property, index).set(value)
 
             if isinstance(index, int):
                 return LhsExpression.Property(
