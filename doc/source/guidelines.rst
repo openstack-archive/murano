@@ -39,12 +39,6 @@ Murano repo on Python 2.7:
 
     tox -e py27
 
-For Python 2.6:
-
-::
-
-    tox -e py26
-
 
 Documentation Guidelines
 ------------------------
