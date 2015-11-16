@@ -38,7 +38,6 @@ from murano.engine import package_loader
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
-LOG.logger.setLevel(logging.DEBUG)
 options.set_defaults(CONF)
 
 BASE_CLASS = 'io.murano.test.TestFixture'
@@ -56,6 +55,9 @@ class MuranoTestRunner(object):
     def __init__(self):
         self.parser = self.get_parser()
         self.args = self.parser.parse_args()
+
+        if self.args.verbose:
+            LOG.logger.setLevel(logging.DEBUG)
 
     def _load_package(self, pkg_loader, name):
         try:
@@ -255,8 +257,7 @@ class MuranoTestRunner(object):
         return exit_code
 
     def get_parser(self):
-        parser = argparse.ArgumentParser(version=version.version_string,
-                                         prog='murano-test-runner')
+        parser = argparse.ArgumentParser(prog='murano-test-runner')
         parser.set_defaults(func=self.run_tests)
         parser.add_argument('--config-file',
                             help='Path to the murano config')
@@ -284,6 +285,10 @@ class MuranoTestRunner(object):
                             help='Directory to search packages from. '
                                  'We be added to the list of current directory'
                                  ' list, provided in a config file.')
+        parser.add_argument("-v", "--verbose", action="store_true",
+                            help="increase output verbosity")
+        parser.add_argument('--version', action='version',
+                            version=version.version_string)
         parser.add_argument('tests', nargs='*',
                             metavar='<testMethod1, className.testMethod2>',
                             help='List of method names to be tested')

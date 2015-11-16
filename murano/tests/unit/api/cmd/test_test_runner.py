@@ -22,6 +22,7 @@ import six
 import testtools
 
 from murano.cmd import test_runner
+from murano import version
 
 CONF = cfg.CONF
 logging.register_options(CONF)
@@ -81,14 +82,24 @@ class TestCaseShell(testtools.TestCase):
 
     def test_help(self):
         stdout, _ = self.shell('--help')
-        usage = """usage: murano-test-runner [-h] [-v] [--config-file CONFIG_FILE]
+        usage = """usage: murano-test-runner [-h] [--config-file CONFIG_FILE]
                           [--os-auth-url OS_AUTH_URL]
                           [--os-username OS_USERNAME]
                           [--os-password OS_PASSWORD]
                           [--os-project-name OS_PROJECT_NAME] [-p PACKAGE]
-                          [-l [</path1, /path2> [</path1, /path2> ...]]]
+                          [-l [</path1, /path2> [</path1, /path2> ...]]] [-v]
+                          [--version]
                           [<testMethod1, className.testMethod2> [<testMethod1, className.testMethod2"""  # noqa
-        self. assertIn(usage, stdout)
+        self.assertIn(usage, stdout)
+
+    def test_version(self):
+        _, stderr = self.shell('--version')
+        self.assertIn(version.version_string, stderr)
+
+    @mock.patch.object(test_runner, 'LOG')
+    def test_increase_verbosity(self, mock_log):
+        self.shell('-v -p io.murano.test.MyTest1')
+        mock_log.logger.setLevel.assert_called_with(logging.DEBUG)
 
     @mock.patch('keystoneclient.v3.client.Client')
     def test_os_params_replaces_config(self, mock_client):
@@ -101,7 +112,7 @@ class TestCaseShell(testtools.TestCase):
         mock_client.assert_has_calls([mock.call(**self.auth_params)])
 
     def test_package_all_tests(self):
-        _, stderr = self.shell('-p io.murano.test.MyTest1')
+        _, stderr = self.shell('-v -p io.murano.test.MyTest1')
         # NOTE(efedorova): May be, there is a problem with test-runner, since
         # all logs are passed to stderr
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -112,7 +123,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_class(self):
         _, stderr = self.shell(
-            '-p io.murano.test.MyTest1 io.murano.test.MyTest2')
+            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest2')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -121,7 +132,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_test_name(self):
         _, stderr = self.shell(
-            '-p io.murano.test.MyTest1 testSimple1')
+            '-v -p io.murano.test.MyTest1 testSimple1')
 
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -130,7 +141,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_test_and_class_name(self):
         _, stderr = self.shell(
-            '-p io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1')
+            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -139,7 +150,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_service_methods(self):
         _, stderr = self.shell(
-            '-p io.murano.test.MyTest1 io.murano.test.MyTest1.testSimple1')
+            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest1.testSimple1')
         self.assertIn('Executing: io.murano.test.MyTest1.setUp', stderr)
         self.assertIn('Executing: io.murano.test.MyTest1.tearDown', stderr)
 
@@ -149,7 +160,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_wrong_parent(self):
         _, stderr = self.shell(
-            '-p io.murano.test.MyTest1 io.murano.test.MyTest3', exitcode=1)
+            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest3', exitcode=1)
         self.assertIn('Class io.murano.test.MyTest3 is not inherited from'
                       ' io.murano.test.TestFixture. Skipping it.', stderr)
         self.assertIn('No tests found for execution.', stderr)
