@@ -21,7 +21,7 @@ from oslo_log import log as logging
 import six
 from webob import response
 
-from murano.common.i18n import _LI
+from murano.common.i18n import _LI, _LW
 from murano.common import wsgi
 from murano.db.catalog import api as db_api
 from murano.db.services import cf_connections as db_cf
@@ -210,6 +210,13 @@ class Controller(object):
 
     def get_last_operation(self, req, instance_id):
         service = db_cf.get_service_for_instance(instance_id)
+        # NOTE(freerunner): Prevent code 500 if requested environment
+        # already doesn't exist.
+        if not service:
+            LOG.warning(_LW('Requested service for instance {} is not found'))
+            body = {}
+            resp = response.Response(status=410, json_body=body)
+            return resp
         env_id = service.environment_id
         token = req.headers["X-Auth-Token"]
         m_cli = muranoclient(token)
