@@ -14,7 +14,7 @@
 #    under the License.
 
 from tempest import clients
-from tempest.common import cred_provider
+from tempest.common import credentials_factory as common_creds
 
 from murano_tempest_tests.services.service_broker import service_broker_client
 
@@ -29,11 +29,11 @@ class Manager(clients.Manager):
 class AltManager(Manager):
     def __init__(self, service=None):
         super(AltManager, self).__init__(
-            cred_provider.get_configured_credentials('alt_user'), service)
+            common_creds.get_configured_credentials('alt_user'), service)
 
 
 class AdminManager(Manager):
     def __init__(self, service=None):
         super(AdminManager, self).__init__(
-            cred_provider.get_configured_credentials('identity_admin'),
+            common_creds.get_configured_credentials('identity_admin'),
             service)
