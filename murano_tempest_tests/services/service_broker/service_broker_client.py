@@ -18,7 +18,6 @@ import json
 
 from tempest import config
 from tempest_lib.common import rest_client
-from tempest_lib import exceptions
 
 from murano_tempest_tests import utils
 
@@ -85,12 +84,7 @@ class ServiceBrokerClient(rest_client.RestClient):
 
     def get_last_status(self, instance_id):
         uri = '/v2/service_instances/{0}/last_operation'.format(instance_id)
-        try:
-            resp, body = self.get(uri, headers=self.headers)
-        except exceptions.UnexpectedResponseCode as e:
-            # Tempest REST client can't catch this code.
-            if int(e.resp['status']) == 410:
-                return '{}'
+        resp, body = self.get(uri, headers=self.headers)
         self.expected_success([200, 202], resp.status)
         return self._parse_resp(body)
 
