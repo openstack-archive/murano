@@ -92,3 +92,17 @@ class ServiceBrokerClient(rest_client.RestClient):
         for app in app_list:
             if app['name'] == name:
                 return app
+
+    def create_binding(self, instance_id):
+        binding_id = utils.generate_uuid()
+        uri = "/v2/service_instances/{0}/service_bindings/{1}".format(
+            instance_id, binding_id)
+        post_body = {
+            "plan_id": utils.generate_uuid(),
+            "service_id": utils.generate_uuid(),
+            "app_guid": utils.generate_uuid()
+        }
+        body = json.dumps(post_body)
+        resp, body = self.put(uri, body, headers=self.headers)
+        self.expected_success([200, 201], resp.status)
+        return self._parse_resp(body)
