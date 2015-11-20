@@ -307,6 +307,7 @@ def main():
                     default_config_files = [murano_conf]
         sys.argv = [sys.argv[0]]
         config.parse_args(default_config_files=default_config_files)
+        logging.setup(CONF, 'murano')
     except RuntimeError as e:
         LOG.exception(_LE("Failed to initialize murano-test-runner: %s") % e)
         sys.exit("ERROR: %s" % e)

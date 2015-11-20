@@ -280,7 +280,6 @@ CONF.register_opts(glance_opts, group='glance')
 
 def parse_args(args=None, usage=None, default_config_files=None):
     logging.register_options(CONF)
-    logging.setup(CONF, 'murano')
     CONF(args=args,
          project='murano',
          version=version.version_string,
