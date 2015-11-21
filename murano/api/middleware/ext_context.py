@@ -29,8 +29,13 @@ LOG = log.getLogger(__name__)
 
 class ExternalContextMiddleware(wsgi.Middleware):
     def get_keystone_token(self, user, password):
+        # TODO(starodubcevna): picking up project_name and auth_url from
+        # section related to Cloud Foundry service broker is probably a duct
+        # tape and should be rewritten as soon as we get more non-OpenStack
+        # services as murano recipients.
         keystone = client.Client(username=user,
                                  password=password,
+                                 project_name=CONF.cfapi.tenant,
                                  auth_url=CONF.cfapi.auth_url.replace(
                                      'v2.0', 'v3'))
         return keystone.auth_token
