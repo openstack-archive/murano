@@ -33,12 +33,23 @@ To create an environment, perform the following steps:
 #. Click the rightmost :guilabel:`Create` button. You will be redirected to
    the page with the environment components.
 
-Altetnatively, you can create an environment automatically using the
+Alternatively, you can create an environment automatically using the
 :guilabel:`Quick Deploy` button below any application in the Application
 Catalog. For more information, see: :ref:`Quick deploy <from_cat>`.
 
 Edit an environment
 ~~~~~~~~~~~~~~~~~~~
+
+You can edit the name of an environment. For this, perform the following steps:
+
+#. In OpenStack Dashboard, navigate to Murano > Application Catalog > Environments.
+
+#. Position your mouse pointer over the environment name and click the
+   appeared pencil icon.
+
+#. Edit the name of the environment.
+
+#. Click the tick icon to apply the change.
 
 Review an environment
 ~~~~~~~~~~~~~~~~~~~~~
