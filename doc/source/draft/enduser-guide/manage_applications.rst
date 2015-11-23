@@ -396,8 +396,74 @@ following one of the options below:
 Show an application topology
 ----------------------------
 
-Show a deployment log location
-------------------------------
+Deployment logs
+---------------
+
+To get detailed information on a deployment, use:
+
+* :ref:`Deployment history <depl-history>`, which contains logs and deployment
+  structure of an environment.
+
+* :ref:`Latest deployment log <latest-log>`, which contains information on the
+  latest deployment of an environment.
+
+* :ref:`Component logs <component-logs>`, which contain logs on a particular
+  component in an environment.
+
+.. _depl-history:
+
+**Deployment history**
+
+To see the log of a particular deployment, proceed with the steps
+below:
+
+#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+   Catalog > Environments`.
+
+#. Click the name of the required environment.
+
+#. Click the :guilabel:`Deployment History` tab.
+
+#. Find the required deployment and click :guilabel:`Show Details`.
+
+#. Click the :guilabel:`Logs` tab to see the logs.
+
+   .. image:: figures/logs.png
+      :alt: Deployment Logs page
+      :width: 630 px
+
+.. _latest-log:
+
+**Latest deployment log**
+
+To see the latest deployment log, proceed with the steps below:
+
+#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+   Catalog > Environments`.
+
+#. Click the name of the required environment.
+
+#. Click the :guilabel:`Latest Deployment Log` tab to see the logs.
+
+.. _component-logs:
+
+**Component logs**
+
+To see the logs of a particular component of an environment, proceed with the
+steps below:
+
+#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+   Catalog > Environments`.
+
+#. Click the name of the required environment.
+
+#. In the :guilabel:`Component List` section, click the required component.
+
+#. Click the :guilabel:`Logs` tab to see the component logs.
+
+   .. image:: figures/env-component-logs.png
+      :alt: Component Logs page
+      :width: 630 px
 
 Delete an application
 ~~~~~~~~~~~~~~~~~~~~~
