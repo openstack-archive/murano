@@ -393,6 +393,8 @@ following one of the options below:
      change from `Deploying` to `Ready`. You can check the status either on the
      Environments page or on the Environment Components page.
 
+.. _application-topology:
+
 Application topology
 --------------------
 

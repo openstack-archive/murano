@@ -54,5 +54,52 @@ You can edit the name of an environment. For this, perform the following steps:
 Review an environment
 ~~~~~~~~~~~~~~~~~~~~~
 
+This section provides a general overview of an environment, its structure,
+possible statuses, and actions. An environment groups applications together.
+An application that is added to an environment is called a component.
+
+To see an environment status, navigate to :menuselection:`Murano > Application Catalog > Environments`.
+Environments may have one of the following statuses:
+
+* **Ready to configure**. When the environment is new and contains no
+  components.
+* **Ready to deploy**. When the environment contains a component or multiple
+  components and is ready for deployment.
+* **Ready**. When the environment has been successfully deployed.
+* **Deploying**. When the deploying is in progress.
+* **Deploy FAILURE**. When the deployment finished with errors.
+* **Deleting**. When deleting of an environment is in progress.
+* **Delete FAILURE**. You can abandon the environment in this case.
+
+Currently, the component status corresponds to the environment status.
+
+To review an environment and its components, or reconfigure the environment,
+click the name of an environment or simply click the rightmost
+:guilabel:`Manage Components` button.
+
+* On the :guilabel:`Components` tab you can:
+
+  * Add or delete a component from an environment
+  * Send an environment to deploy
+  * Track a component status
+  * Call murano actions of a particular application in a deployed environment:
+
+    .. figure:: figures/murano_actions.png
+       :width: 100%
+
+    For more information on murano actions, see:
+    :ref:`Murano actions <actions>`.
+
+* On the :guilabel:`Topology`, :guilabel:`Deployment History`, and
+  :guilabel:`Latest Deployment Log` tabs of the environment page you can view
+  the following:
+
+  * The application topology of an environment. For more information, see:
+    :ref:`Application topology <application-topology>`.
+  * The log of a particular deployment. For more information, see:
+    :ref:`Deployment history <depl-history>`.
+  * The information on the latest deployment of an environment. For more
+    information, see: :ref:`Latest deployment log <latest-log>`.
+
 Analyze logs
 ~~~~~~~~~~~~
