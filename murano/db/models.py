@@ -87,7 +87,7 @@ class Environment(Base, TimestampMixin):
 
 
 class EnvironmentTemplate(Base, TimestampMixin):
-    """Represents a Environment emplate in the metadata-store."""
+    """Represents a Environment Template in the metadata-store."""
     __tablename__ = 'environment-template'
 
     id = sa.Column(sa.String(36),
