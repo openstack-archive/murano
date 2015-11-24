@@ -245,13 +245,38 @@ class MuranoClient(rest_client.RestClient):
         """Check the environment templates deployed by the user."""
         resp, body = self.get('v1/templates')
 
+        return resp, json.loads(body)['templates']
+
+    def get_public_env_templates_list(self):
+        """Check the public environment templates deployed by the user."""
+        resp, body = self.get('v1/templates?is_public=true')
+        return resp, json.loads(body)
+
+    def get_private_env_templates_list(self):
+        """Check the public environment templates deployed by the user."""
+        resp, body = self.get('v1/templates?is_public=false')
         return resp, json.loads(body)
 
     def create_env_template(self, env_template_name):
         """Check the creation of an environment template."""
-        body = {'name': env_template_name}
+        body = {'name': env_template_name, "is_public": False}
         resp, body = self.post('v1/templates', json.dumps(body))
 
+        return resp, json.loads(body)
+
+    def create_clone_env_template(self, env_template_id,
+                                  cloned_env_template_name):
+        """Clone an environment template."""
+        body = {'name': cloned_env_template_name}
+        resp, body = self.post('v1/templates/{0}/clone'.
+                               format(env_template_id), json.dumps(body))
+
+        return resp, json.loads(body)
+
+    def create_public_env_template(self, env_template_name):
+        """Check the creation of an environment template."""
+        body = {'name': env_template_name, "is_public": True}
+        resp, body = self.post('v1/templates', json.dumps(body))
         return resp, json.loads(body)
 
     def create_env_template_with_apps(self, env_template_name):
@@ -427,10 +452,34 @@ class TestCase(TestAuth):
         return environment
 
     def create_env_template(self, name):
-        env_template = self.client.create_env_template(name)[1]
+        resp, env_template = self.client.create_env_template(name)
         self.env_templates.append(env_template)
+        return resp, env_template
 
-        return env_template
+    def create_public_env_template(self, name):
+        resp, env_template = self.client.create_public_env_template(name)
+        self.env_templates.append(env_template)
+        return resp, env_template
+
+    def create_env_template_with_apps(self, name):
+        resp, env_template = self.client.create_env_template_with_apps(name)
+        self.env_templates.append(env_template)
+        return resp, env_template
+
+    def clone_env_template(self, env_template_id, cloned_env_template_name):
+        create_clone_env_temp = self.client.create_clone_env_template
+        resp, env_template = create_clone_env_temp(env_template_id,
+                                                   cloned_env_template_name)
+        self.env_templates.append(env_template)
+        return resp, env_template
+
+    def create_env_from_template(self, env_template_id, env_name):
+        resp, env_id = self.client.create_env_from_template(env_template_id,
+                                                            env_name)
+        resp, env = self.client.get_environment(env_id['environment_id'])
+
+        self.environments.append(env)
+        return resp, env
 
     def create_demo_service(self, environment_id, session_id, client=None):
         if not client:

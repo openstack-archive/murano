@@ -17,10 +17,11 @@ from oslo_log import log as logging
 from webob import exc
 
 from murano.api.v1 import request_statistics
-from murano.common.i18n import _
+from murano.common.i18n import _, _LE
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
+from murano.db.models import EnvironmentTemplate
 from murano.db.services import core_services
 from murano.db.services import environment_templates as env_temps
 from murano.db.services import environments as envs
@@ -40,12 +41,27 @@ class Controller(object):
         """
         LOG.debug('EnvTemplates:List')
         policy.check('list_env_templates', request.context)
+        tenant_id = request.context.tenant
+        filters = {}
+        if request.GET.get('is_public'):
+            is_public = request.GET.get('is_public', 'false').lower() == 'true'
+            if not is_public:
 
-        filters = {'tenant_id': request.context.tenant}
-        list_templates = env_temps.EnvTemplateServices.\
-            get_env_templates_by(filters)
+                filters['is_public'] = False
+                filters = {'tenant_id': tenant_id}
+            elif is_public:
+                filters['is_public'] = True
+
+            list_templates = env_temps.EnvTemplateServices.\
+                get_env_templates_by(filters)
+
+        else:
+            filters = (EnvironmentTemplate.is_public is True,
+                       EnvironmentTemplate.tenant_id == tenant_id)
+            list_templates = env_temps.EnvTemplateServices.\
+                get_env_templates_or_by(filters)
+
         list_templates = [temp.to_dict() for temp in list_templates]
-
         return {"templates": list_templates}
 
     @request_statistics.stats_count(API_NAME, 'Create')
@@ -59,24 +75,11 @@ class Controller(object):
         """
         LOG.debug('EnvTemplates:Create <Body {body}>'.format(body=body))
         policy.check('create_env_template', request.context)
+
+        self._validate_body_name(body)
         try:
-            LOG.debug('ENV TEMP NAME: {templ_name}>'.format(
-                templ_name=body['name']))
-            if not str(body['name']).strip():
-                msg = _('Environment Template must contain at least one '
-                        'non-white space symbol')
-                LOG.error(msg)
-                raise exc.HTTPBadRequest(msg)
-        except Exception:
-                msg = _('Env template body is incorrect')
-                LOG.exception(msg)
-                raise exc.HTTPClientError(msg)
-        if len(body['name']) > 255:
-            msg = _('Environment Template name should be 255 characters '
-                    'maximum')
-            LOG.exception(msg)
-            raise exc.HTTPBadRequest(explanation=msg)
-        try:
+            LOG.debug('ENV TEMP NAME: {templ_name}>'.
+                      format(templ_name=body['name']))
             template = env_temps.EnvTemplateServices.create(
                 body.copy(), request.context.tenant)
             return template.to_dict()
@@ -172,23 +175,15 @@ class Controller(object):
         :param body: the environment name
         :return: session_id and environment_id
         """
-        LOG.debug('Templates:Create environment <Id: {templ_id}>'.
-                  format(templ_id=env_template_id))
         target = {"env_template_id": env_template_id}
         policy.check('create_environment', request.context, target)
 
         self._validate_request(request, env_template_id)
+        LOG.debug('Templates:Create environment <Id: {templ_id}>'.
+                  format(templ_id=env_template_id))
         template = env_temps.EnvTemplateServices.\
             get_env_template(env_template_id)
-
-        if ('name' not in body or not str(body['name']).strip()):
-            msg = _('Environment Template must contain at least one '
-                    'non-white space symbol')
-            LOG.error(msg)
-            raise exc.HTTPBadRequest(explanation=msg)
-        LOG.debug('ENVIRONMENT NAME: {env_name}>'.format(
-            env_name=body['name']))
-
+        self._validate_body_name(body)
         try:
             environment = envs.EnvironmentServices.create(
                 body.copy(), request.context)
@@ -214,19 +209,75 @@ class Controller(object):
         )
         return {"session_id": session.id, "environment_id": environment.id}
 
+    @request_statistics.stats_count(API_NAME, 'Clone')
+    def clone(self, request, env_template_id, body):
+        """It clones the env template from another env template
+        from other tenant.
+        :param request: the operation request.
+        :param env_template_id: the env template ID.
+        :param body: the request body.
+        :return: the description of the created template.
+        """
+
+        LOG.debug('EnvTemplates:Clone <Env Template {0} for body {1}>'.
+                  format(body, env_template_id))
+        policy.check('clone_env_template', request.context)
+
+        old_env_template = self._validate_exists(env_template_id)
+
+        if not old_env_template.get('is_public'):
+            msg = _LE('User has no access to these resources.')
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
+        self._validate_body_name(body)
+        LOG.debug('ENV TEMP NAME: {0}'.format(body['name']))
+
+        try:
+            is_public = body.get('is_public', False)
+            template = env_temps.EnvTemplateServices.clone(
+                env_template_id, request.context.tenant, body['name'],
+                is_public)
+        except db_exc.DBDuplicateEntry:
+            msg = _('Environment with specified name already exists')
+            LOG.error(msg)
+            raise exc.HTTPConflict(explanation=msg)
+
+        return template.to_dict()
+
     def _validate_request(self, request, env_template_id):
+        self._validate_exists(env_template_id)
+        get_env_template = env_temps.EnvTemplateServices.get_env_template
+        env_template = get_env_template(env_template_id)
+        if env_template.is_public or request.context.is_admin:
+            return
+        if env_template.tenant_id != request.context.tenant:
+            msg = _LE('User has no access to these resources.')
+            LOG.error(msg)
+            raise exc.HTTPForbidden(explanation=msg)
+
+    def _validate_exists(self, env_template_id):
         env_template_exists = env_temps.EnvTemplateServices.env_template_exist
         if not env_template_exists(env_template_id):
             msg = _('EnvTemplate <TempId {temp_id}> is not found').format(
                 temp_id=env_template_id)
-            LOG.exception(msg)
+            LOG.error(msg)
             raise exc.HTTPNotFound(explanation=msg)
         get_env_template = env_temps.EnvTemplateServices.get_env_template
-        env_template = get_env_template(env_template_id)
-        if env_template.tenant_id != request.context.tenant:
-            msg = _('User is not authorized to access this tenant resources')
-            LOG.error(msg)
-            raise exc.HTTPForbidden(explanation=msg)
+        return get_env_template(env_template_id)
+
+    def _validate_body_name(self, body):
+
+        if not('name' in body and body['name'].strip()):
+            msg = _('Please, specify a name of the environment template.')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
+
+        name = unicode(body['name'])
+        if len(name) > 255:
+            msg = _('Environment template name should be 255 characters '
+                    'maximum')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
 
 
 def create_resource():

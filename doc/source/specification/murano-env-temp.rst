@@ -65,6 +65,13 @@ List Environments Templates
 |          |                                  | environment templates            |
 +----------+----------------------------------+----------------------------------+
 
+*Parameters:*
+
+* `is_public` - boolean, indicates whether public environment templates are listed or not.
+  *True* public environments templates from all tenants are listed.
+  *False* private environments templates from current tenant are listed
+  *empty* all tenant templates plus public templates from all tenants are listed
+
 *Response*
 
 This call returns a list of environment templates. Only the basic properties are
@@ -81,6 +88,7 @@ returned.
                 "created": "2014-05-14T13:02:46",
                 "tenant_id": "726ed856965f43cc8e565bc991fa76c3",
                 "version": 0,
+                "is_public": false,
                 "id": "2fa5ab704749444bbeafe7991b412c33"
             },
             {
@@ -88,8 +96,9 @@ returned.
                 "networking": {},
                 "name": "test2",
                 "created": "2014-05-14T13:02:51",
-                "tenant_id": "726ed856965f43cc8e565bc991fa76c3",
+                "tenant_id": "123452452345346345634563456345346",
                 "version": 0,
+                "is_public": true,
                 "id": "744e44812da84e858946f5d817de4f72"
             }
         ]
@@ -414,3 +423,58 @@ Create an environment from an environment template
 +----------------+-----------------------------------------------------------+
 | 409            | The environment already exists                            |
 +----------------+-----------------------------------------------------------+
+
+
+**POST /templates/{env-temp-id}/clone**
+
+*Request*
+
++----------+--------------------------------+-------------------------------------------------+
+| Method   | URI                            | Description                                     |
++==========+================================+=================================================+
+| POST     | /templates/{env-temp-id}/clone | It clones a public template from one tenant     |
+|          |                                | to another                                      |
++----------+--------------------------------+-------------------------------------------------+
+
+*Parameters:*
+
+* `env-temp-id` - environment template ID, required
+
+*Example Payload*
+::
+
+    {
+        'name': 'cloned_env_template_name'
+    }
+
+*Content-Type*
+  application/json
+
+*Response*
+
+::
+
+    {
+       "updated": "2015-01-26T09:12:51",
+       "name": "cloned_env_template_name",
+       "created": "2015-01-26T09:12:51",
+       "tenant_id": "00000000000000000000000000000001",
+       "version": 0,
+       "is_public": False,
+       "id": "aa9033ca7ce245fca10e38e1c8c4bbf7",
+    }
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Environment Template cloned successfully              |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 403            | User has no access to these resources                     |
++----------------+-----------------------------------------------------------+
+| 404            | The environment template does not exist                   |
++----------------+-----------------------------------------------------------+
+| 409            | Conflict. The environment template name already exists    |
++----------------+-----------------------------------------------------------+
+

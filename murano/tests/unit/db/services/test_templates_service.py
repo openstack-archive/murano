@@ -27,7 +27,7 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
     def setUp(self):
         super(TestTemplateServices, self).setUp()
         self.template_services = env_temp.EnvTemplateServices
-        self.uuids = ['template_id']
+        self.uuids = ['template_id', 'template_id2']
         self.mock_uuid = self._stub_uuid(self.uuids)
         self.addCleanup(mock.patch.stopall)
 
@@ -41,6 +41,18 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
         template_des = self.template_services.create(body, 'tenant_id')
         self.assertEqual(fixture.environment_template_desc,
                          template_des.description)
+
+    def test_clone_template(self):
+        """Check the clonation of a template."""
+        body = {
+            "name": "my_template"
+        }
+        template = self.template_services.create(body, 'tenant_id')
+        cloned_template = self.template_services.clone(template['id'],
+                                                       'id2',
+                                                       "my_template2", False)
+        self.assertEqual(cloned_template.description['name'], 'my_template2')
+        self.assertEqual(cloned_template.description['tenant_id'], 'id2')
 
     def test_get_empty_template(self):
         """Check obtaining information about a template without services."""
