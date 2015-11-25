@@ -137,8 +137,16 @@ class Controller(object):
         service = self._make_service(space_guid, package, plan_id)
         db_cf.set_instance_for_service(instance_id, service['?']['id'],
                                        environment_id, tenant)
+
         # NOTE(Kezar): Here we are going through JSON and add ids where
-        # it's necessary
+        # it's necessary. Before that we need to drop '?' key from parameters
+        # dictionary as far it contains murano package related info which is
+        # necessary in our scenario
+        if '?' in parameters.keys():
+            parameters.pop('?', None)
+            LOG.warning(_LW("Incorrect input parameters. Package related "
+                            "parameters shouldn't be passed through Cloud "
+                            "Foundry"))
         params = [parameters]
         while params:
             a = params.pop()
