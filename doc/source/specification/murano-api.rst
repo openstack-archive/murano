@@ -147,7 +147,7 @@ Create environment
 +----------------------+------------+--------------------------------------------------------+
 | Attribute            | Type       | Description                                            |
 +======================+============+========================================================+
-| name                 | string     | Environment name; only alphanumeric characters and '-' |
+| name                 | string     | Environment name; at least one non-white space symbol  |
 +----------------------+------------+--------------------------------------------------------+
 
 *Request*
@@ -184,7 +184,7 @@ Update environment
 +----------------------+------------+--------------------------------------------------------+
 | Attribute            | Type       | Description                                            |
 +======================+============+========================================================+
-| name                 | string     | Environment name; only alphanumeric characters and '-' |
+| name                 | string     | Environment name; at least one non-white space symbol  |
 +----------------------+------------+--------------------------------------------------------+
 
 *Request*
@@ -222,8 +222,8 @@ Update environment
 +================+===========================================================+
 | 200            | Edited environment                                        |
 +----------------+-----------------------------------------------------------+
-| 400            | Environment name must contain only alphanumeric or '_-.'  |
-|                | characters, must start with alpha                         |
+| 400            | Environment name must contain at least one non-white space|
+|                | symbol                                                    |
 +----------------+-----------------------------------------------------------+
 | 403            | User is not authorized to access environment              |
 +----------------+-----------------------------------------------------------+
