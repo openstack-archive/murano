@@ -393,8 +393,47 @@ following one of the options below:
      change from `Deploying` to `Ready`. You can check the status either on the
      Environments page or on the Environment Components page.
 
-Show an application topology
-----------------------------
+Application topology
+--------------------
+
+Once you add an application to your environment, the application topology of
+this environment becomes available in a separate tab. The topology represents
+an elastic diagram showing the relationship between a component and the
+infrastructure it runs on. To view the topology:
+
+#. In OpenStack Dashboard, navigate to
+   :menuselection:`Murano > Application Catalog > Environments`.
+
+#. Click the name of the necessary environment.
+
+#. Click the :guilabel:`Topology` tab.
+
+The topology is helpful to visually display complex components, for example
+Kubernetes. The red icons reflect errors during the deployment while the green
+ones show success.
+
+.. image:: figures/topology_kubernetes.png
+   :alt: Topology tab: Deployment failed
+   :width: 630 px
+
+The following elements of the topology are virtual machine and an instance of
+dependent MuranoPL class:
+
++------------------------------------------+----------------------------+
+| Element                                  | Meaning                    |
++==========================================+============================+
+| .. image:: figures/topology_element_1.png| Virtual machine            |
++------------------------------------------+----------------------------+
+| .. image:: figures/topology_element_2.png| Instance                   |
++------------------------------------------+----------------------------+
+
+Position your mouse pointer over an element to see its name, ID, and other
+details.
+
+.. image:: figures/topology_wordpress.png
+   :alt: Topology tab: Deployment successful
+   :width: 630 px
+
 
 Deployment logs
 ---------------
