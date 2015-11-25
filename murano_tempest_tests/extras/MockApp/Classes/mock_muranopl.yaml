@@ -6,6 +6,11 @@ Name: MockApp
 
 Extends: std:Application
 
+Properties:
+
+  userName:
+    Contract: $.string()
+
 Methods:
   testAction:
     Usage: Action
