@@ -393,6 +393,37 @@ following one of the options below:
      change from `Deploying` to `Ready`. You can check the status either on the
      Environments page or on the Environment Components page.
 
+.. _component-details:
+
+Browse component details
+------------------------
+
+You can browse component details to find the following information about
+a component:
+
+* Name
+* ID
+* Type
+* Instance name (available only after deployment)
+* Heat orchestration stack name (available only after deployment)
+
+To browse a component details, perform the following steps:
+
+#. In OpenStack Dashboard, navigate to
+   :menuselection:`Murano > Application Catalog > Environments`.
+
+#. Click the name of the required environment.
+
+#. In the :guilabel:`Component List` section, click the name of the required
+   component.
+
+   .. image:: figures/component-details.png
+      :width: 630 px
+      :alt: Components details
+
+   The links redirect to corresponding horizon pages with the detailed
+   information on instance and heat stack.
+
 .. _application-topology:
 
 Application topology
