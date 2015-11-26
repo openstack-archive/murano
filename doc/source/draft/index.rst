@@ -60,6 +60,7 @@ Deploying Murano
 
    admin-guide/prepare_lab
    admin-guide/installation
+   admin-guide/policy_enf
    admin-guide/manage_images
    admin-guide/manage_categories
    admin-guide/murano_repository
