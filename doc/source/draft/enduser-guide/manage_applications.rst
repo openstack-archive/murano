@@ -368,8 +368,9 @@ following one of the options below:
         :width: 630 px
         :alt: Environments page
 
-     It may take some time for the environment to deploy. Wait for the status to
-     change from `Deploying` to `Ready`.
+     It may take some time for the environment to deploy. Wait for the status
+     to change from `Deploying` to `Ready`. You cannot add applications to
+     your environment during deployment.
 
 * Deploy an environment from the Environment Components page
 
@@ -389,9 +390,10 @@ following one of the options below:
         :width: 630 px
         :alt: Environment Components page
 
-     It may take some time for the environment to deploy. Wait for the status to
-     change from `Deploying` to `Ready`. You can check the status either on the
-     Environments page or on the Environment Components page.
+     It may take some time for the environment to deploy. You cannot add
+     applications to your environment during deployment. Wait for the status
+     to change from `Deploying` to `Ready`. You can check the status either on
+     the Environments page or on the Environment Components page.
 
 Application topology
 --------------------
