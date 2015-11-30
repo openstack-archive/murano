@@ -14,7 +14,6 @@
 
 import types
 
-import eventlet.greenpool as greenpool
 import yaql.context
 
 import murano.dsl.dsl_exception as dsl_exception
@@ -101,19 +100,16 @@ class ContinueMacro(expressions.DslExpression):
 class ParallelMacro(CodeBlock):
     def __init__(self, Parallel, Limit=None):
         super(ParallelMacro, self).__init__(Parallel)
-        if Limit:
-            self._limit = yaql_expression.YaqlExpression(str(Limit))
-        else:
-            self._limit = len(self.code_block)
+        self._limit = Limit or len(self.code_block)
 
     def execute(self, context, murano_class):
         if not self.code_block:
             return
         limit = helpers.evaluate(self._limit, context)
-        gpool = greenpool.GreenPool(helpers.evaluate(limit, context))
-        for expr in self.code_block:
-            gpool.spawn_n(expr.execute, context, murano_class)
-        gpool.waitall()
+        helpers.parallel_select(
+            self.code_block,
+            lambda expr: expr.execute(context, murano_class),
+            limit)
 
 
 class IfMacro(expressions.DslExpression):
