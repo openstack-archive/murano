@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.conflang.puppet.ExamplePuppet
+Name: ExamplePuppet
+Description: |
+  Example Chef
+Author: 'TID'
+Tags: [Test, Puppet]
+Classes:
+ io.murano.conflang.puppet.ExamplePuppet: ExamplePuppet.yaml

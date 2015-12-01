@@ -1,0 +1,10 @@
+Format: 1.0
+Type: Application
+FullName: io.murano.conflang.chef.ExampleChef
+Name: ExampleChef
+Description: |
+  Example Chef.
+Author: 'TID'
+Tags: [Test, Chef]
+Classes:
+ io.murano.conflang.chef.ExampleChef: ExampleChef.yaml
