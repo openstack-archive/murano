@@ -59,7 +59,7 @@ class ServiceBrokerClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
-    def provision(self, instance_id, service_id, plan_id, post_json):
+    def provision(self, instance_id, service_id, plan_id, space_id, post_json):
         """Create new service resources for developer"""
         uri = '/v2/service_instances/{0}?accepts_incomplete=true'.\
             format(instance_id)
@@ -67,7 +67,7 @@ class ServiceBrokerClient(rest_client.RestClient):
             'service_id': service_id,
             'plan_id': plan_id,
             'organization_guid': self.tenant_id,
-            'space_guid': utils.generate_uuid(),
+            'space_guid': space_id,
             'parameters': post_json
         }
         body = json.dumps(body)
