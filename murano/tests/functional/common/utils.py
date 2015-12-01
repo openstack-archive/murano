@@ -311,7 +311,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
     def get_murano_url(cls):
         try:
             url = cls.keystone_client().service_catalog.url_for(
-                service_type='application_catalog', endpoint_type='publicURL')
+                service_type='application-catalog', endpoint_type='publicURL')
         except ks_exceptions.EndpointNotFound:
             url = CONF.murano.murano_url
             LOG.warning("Murano endpoint not found in Keystone. Using CONF.")

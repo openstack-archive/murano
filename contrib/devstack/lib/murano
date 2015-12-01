@@ -83,8 +83,8 @@ function create_murano_accounts() {
     create_service_user "murano"
 
     if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
-        get_or_create_service "murano" "application_catalog" "Application Catalog Service"
-        get_or_create_endpoint "application_catalog" \
+        get_or_create_service "murano" "application-catalog" "Application Catalog Service"
+        get_or_create_endpoint "application-catalog" \
             "$REGION_NAME" \
             "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
             "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \

@@ -1,0 +1,7 @@
+---
+fixes:
+  - Murano is now able to work with keystone configured to use a templated catalog.
+upgrade:
+  - When updating to Mitaka, the operator should update service name and type
+    for endpoint in keystone from "application_catalog" to "application-catalog"
+    if SQL is used for catalog back-end driver.
