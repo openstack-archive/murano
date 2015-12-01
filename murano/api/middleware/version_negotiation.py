@@ -42,7 +42,7 @@ class VersionNegotiationFilter(wsgi.Middleware):
 
     def process_request(self, req):
         """Try to find a version first in the accept header, then the URL."""
-        LOG.debug(("Determining version of request:{method} {path}"
+        LOG.debug(("Determining version of request:{method} {path} "
                    "Accept: {accept}").format(method=req.method,
                                               path=req.path,
                                               accept=req.accept))
