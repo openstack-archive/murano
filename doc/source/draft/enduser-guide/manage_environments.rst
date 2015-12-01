@@ -100,6 +100,3 @@ click the name of an environment or simply click the rightmost
     :ref:`Deployment history <depl-history>`.
   * The information on the latest deployment of an environment. For more
     information, see: :ref:`Latest deployment log <latest-log>`.
-
-Analyze logs
-~~~~~~~~~~~~
