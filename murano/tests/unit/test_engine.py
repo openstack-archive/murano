@@ -106,13 +106,6 @@ class TestNamespaceResolving(base.MuranoTestCase):
         self.assertEqual('Resource', resolved_name)
 
 
-class Bunch(object):
-    def __init__(self, **kwargs):
-        super(Bunch, self).__init__()
-        for key, value in kwargs.iteritems():
-            setattr(self, key, value)
-
-
 class TestHelperFunctions(base.MuranoTestCase):
     def setUp(self):
         super(TestHelperFunctions, self).setUp()
