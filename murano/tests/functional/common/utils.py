@@ -76,10 +76,12 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
     @staticmethod
     @memoize
     def keystone_client():
+        region = CONF.murano.region_name
         return ksclient.Client(username=CONF.murano.user,
                                password=CONF.murano.password,
                                tenant_name=CONF.murano.tenant,
-                               auth_url=CONF.murano.auth_url)
+                               auth_url=CONF.murano.auth_url,
+                               region_name=region)
 
     @classmethod
     @memoize

@@ -37,3 +37,6 @@
 
 # image for hdp sandbox
 # hdp_image = hdp-sandbox
+
+# region name for services
+# region_name = None
