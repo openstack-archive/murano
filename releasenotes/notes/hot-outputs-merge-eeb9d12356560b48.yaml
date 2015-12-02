@@ -1,0 +1,5 @@
+---
+features:
+  - All HOT template outputs are put into a single dictionary property
+    'templateOutputs' rather than in a generated property per each output.
+    As a result there are no more constraints on output names.
