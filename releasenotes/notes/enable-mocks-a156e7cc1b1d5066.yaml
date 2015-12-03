@@ -1,0 +1,24 @@
+---
+features:
+  - Enable mocks in MuranoPL tests cases.
+    Those test cases are run with murano-test-tunner.
+    To enable mocks use the one of the *inject* YAQL functions
+    * `def inject(target, target_method, mock_object, mock_name)`
+    * `def inject(target, target_method, yaql_expr)`
+
+    Description
+    -----------
+
+     * *target* MuranoPL class name (namespaces can be used or full class name
+       in quotes) or MuranoPL object
+
+     * *target_method* Method name to mock in target
+
+     * *mock_object* Object, where mock definition is contained
+
+     * *mock_name* Name of method, where mock definition is contained
+
+     * *yaql_expr* YAQL expression, parameters are allowed
+     For more information, please follow the corresponding article in the
+     Murano developing applications guide.
+

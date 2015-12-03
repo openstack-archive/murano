@@ -1,0 +1,11 @@
+Name: TestMocksFixture
+
+Properties:
+  someProperty:
+    Contract: $.string().notNull()
+    Default: DEFAULT
+
+Methods:
+  simpleMethod1:
+    Body:
+      - Return: 'method1'
