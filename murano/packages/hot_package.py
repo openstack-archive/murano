@@ -175,13 +175,16 @@ class HotPackage(package_base.PackageBase):
 
     @staticmethod
     def _translate_outputs(hot):
-        result = {}
-        for key in (hot.get('outputs') or {}).keys():
-            result[key] = {
-                "Contract": YAQL("$.string()"),
-                "Usage": "Out"
+        contract = {}
+        for key in (hot.get('outputs') or {}).iterkeys():
+            contract[key] = YAQL("$.string()")
+        return {
+            'templateOutputs': {
+                'Contract': contract,
+                'Default': {},
+                'Usage': 'Out'
             }
-        return result
+        }
 
     @staticmethod
     def _translate_files(source_directory):
@@ -262,10 +265,6 @@ class HotPackage(package_base.PackageBase):
 
         hot_env = YAQL("$.hotEnvironment")
 
-        copy_outputs = []
-        for key in (hot.get('outputs') or {}).keys():
-            copy_outputs.append({YAQL('$.' + key): YAQL('$outputs.' + key)})
-
         deploy = [
             {YAQL('$environment'): YAQL(
                 "$.find('io.murano.Environment').require()"
@@ -320,8 +319,7 @@ class HotPackage(package_base.PackageBase):
                     }
                 ],
                 'Else': [
-                    {YAQL('$outputs'): YAQL('$stack.output()')},
-                    {'Do': copy_outputs},
+                    {YAQL('$.templateOutputs'): YAQL('$stack.output()')},
                     YAQL("$reporter.report($this, "
                          "'Stack was successfully created')"),
 
@@ -340,7 +338,7 @@ class HotPackage(package_base.PackageBase):
         ]
 
         return {
-            'Workflow': {
+            'Methods': {
                 'deploy': {
                     'Body': deploy
                 },
