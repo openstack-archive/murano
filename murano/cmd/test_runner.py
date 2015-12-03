@@ -34,7 +34,9 @@ from murano.dsl import executor
 from murano.dsl import helpers
 from murano.engine import client_manager
 from murano.engine import environment
+from murano.engine import mock_context_manager
 from murano.engine import package_loader
+
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -220,12 +222,13 @@ class MuranoTestRunner(object):
                 murano_client_factory, client.tenant_id) as pkg_loader:
             engine.get_plugin_loader().register_in_loader(pkg_loader)
             exc = executor.MuranoDslExecutor(
-                pkg_loader, engine.ContextManager(), test_env)
+                pkg_loader,
+                mock_context_manager.MockContextManager(),
+                test_env)
 
             package = self._load_package(pkg_loader, provided_pkg_name)
             class_to_methods, class_to_obj = self._get_all_test_methods(
                 exc, package)
-
             run_set = self._get_methods_to_run(package,
                                                tests_to_run,
                                                class_to_methods)
