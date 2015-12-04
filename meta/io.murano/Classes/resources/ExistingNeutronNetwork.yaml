@@ -113,10 +113,10 @@ Workflow:
     Body:
       - $.deploy()
       - $fipName: null
-      - $floatingIpNeRef: null
+      - $floatingIpNetRef: null
       - If: $assignFloatingIp
         Then:
-          - $floatingIpNeRef: $._externalNetworkId
+          - $floatingIpNetRef: $._externalNetworkId
           - $fipName: format('fip-{0}-{1}', $.id(), $instance.name)
 
       - Return: $.joinInstanceToNetwork(
@@ -126,15 +126,21 @@ Workflow:
             netRef => $._internalNetworkId,
             subnetRef => $._internalSubnetworkId,
             floatingIpResourceName => $fipName,
-            floatingIpNeRef => $floatingIpNeRef
+            floatingIpNetRef => $floatingIpNetRef
           )
 
 
   describe:
     Body:
       - $.deploy()
+      - $subnet: $._netExplorer.listSubnetworks().where(
+            $.network_id = $this._internalNetworkId).first()
       - Return:
           provider: Neutron
-          netRef: $._internalNetworkId
-          subnetRef: $._internalSubnetworkId
-          floatingIpNeRef: $._externalNetworkId
+          netId: $._internalNetworkId
+          netName: $.internalNetworkName
+          subnetId: $._internalSubnetworkId
+          cidr: $subnet.cidr
+          dns: $._netExplorer.getDefaultDns()
+          gateway: $subnet.gateway_ip
+          floatingIpNetId: $._externalNetworkId
