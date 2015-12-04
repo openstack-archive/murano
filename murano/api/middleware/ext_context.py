@@ -49,13 +49,16 @@ class ExternalContextMiddleware(wsgi.Middleware):
 
         :param req: wsgi request object that will be given the context object
         """
-
-        credentials = base64.b64decode(
-            req.headers['Authorization'].split(' ')[1])
-        user, password = credentials.split(':', 2)
         try:
+            credentials = base64.b64decode(
+                req.headers['Authorization'].split(' ')[1])
+            user, password = credentials.split(':', 2)
             req.headers['X-Auth-Token'] = self.get_keystone_token(user,
                                                                   password)
+        except KeyError:
+            msg = _("Authorization required")
+            LOG.warning(msg)
+            raise exc.HTTPUnauthorized(explanation=msg)
         except exceptions.Unauthorized:
             msg = _("Your credentials are wrong. Please try again")
             LOG.warning(msg)
