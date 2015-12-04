@@ -144,7 +144,7 @@ Methods:
             netRef => $netRef,
             subnetRef => $subnetRef,
             floatingIpResourceName => $fipName,
-            floatingIpNeRef => $extNetId
+            floatingIpNetRef => $extNetId
           )
 
       # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
@@ -163,13 +163,17 @@ Methods:
   describe:
     Body:
       - $.deploy()
+      - $subnet: $._netExplorer.listSubnetworks().where(
+            $.network_id = $this.openstackId).first()
       - Return:
           provider: Neutron
-          netRef:
-            get_resource: $._getNetworkName()
-          subnetRef:
-            get_resource: $._getSubnetName()
-          floatingIpNeRef: $._getExternalNetId()
+          netName: $.name
+          netId: $.openstackId
+          subnetId: $subnet.id
+          cidr: $subnet.cidr
+          dns: $.dnsNameserver
+          gateway: $subnet.gateway_ip
+          floatingIpNetId: $._getExternalNetId()
 
 
   _getRouterInterfaceName:
