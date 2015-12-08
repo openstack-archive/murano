@@ -175,3 +175,7 @@ class NetworkExplorer(object):
     def list_subnetworks(self):
         client = self._clients.get_neutron_client()
         return client.list_subnets()['subnets']
+
+    def list_ports(self):
+        client = self._clients.get_neutron_client()
+        return client.list_ports()['ports']
