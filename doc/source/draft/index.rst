@@ -86,6 +86,7 @@ Developing Applications
    appdev-guide/murano_pl
    appdev-guide/murano_packages
    appdev-guide/app_migrating
+   appdev-guide/app_unit_tests
    appdev-guide/examples
    appdev-guide/use_cases
    appdev-guide/faq
