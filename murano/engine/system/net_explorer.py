@@ -187,3 +187,8 @@ class NetworkExplorer(murano_object.MuranoObject):
     def listSubnetworks(self, _context):
         client = self._clients.get_neutron_client(_context)
         return client.list_subnets()['subnets']
+
+    # noinspection PyPep8Naming
+    def listPorts(self, _context):
+        client = self._clients.get_neutron_client(_context)
+        return client.list_ports()['ports']
