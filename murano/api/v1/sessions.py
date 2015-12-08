@@ -66,15 +66,15 @@ class Controller(object):
         user_id = request.context.user
 
         if session.user_id != user_id:
-            msg = _('User <UserId {usr_id}> is not authorized to access'
+            msg = _('User <UserId {usr_id}> is not authorized to access '
                     'session <SessionId {s_id}>.').format(usr_id=user_id,
                                                           s_id=session_id)
             LOG.error(msg)
             raise exc.HTTPUnauthorized(explanation=msg)
 
         if not sessions.SessionServices.validate(session):
-            msg = _('Session <SessionId {0}> is invalid: environment has been'
-                    ' updated or updating right now with other session'
+            msg = _('Session <SessionId {0}> is invalid: environment has been '
+                    'updated or updating right now with other session'
                     ).format(session_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)

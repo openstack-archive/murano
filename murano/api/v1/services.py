@@ -69,8 +69,8 @@ class Controller(object):
     @normalize_path
     def post(self, request, environment_id, path, body=None):
         if not body:
-            msg = _('Request body is empty: please, provide'
-                    ' application object model')
+            msg = _('Request body is empty: please, provide '
+                    'application object model')
             LOG.error(msg)
             raise exc.HTTPBadRequest(msg)
         secure_data = token_sanitizer.TokenSanitizer().sanitize(body)
@@ -92,8 +92,8 @@ class Controller(object):
     @normalize_path
     def put(self, request, environment_id, path, body=None):
         if not body:
-            msg = _('Request body is empty: please, provide'
-                    ' application object model')
+            msg = _('Request body is empty: please, provide '
+                    'application object model')
             LOG.error(msg)
             raise exc.HTTPBadRequest(msg)
         LOG.debug('Services:Put <EnvId: {0}, Path: {2}, '
