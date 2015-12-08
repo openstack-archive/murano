@@ -1,3 +1,3 @@
 #!/bin/bash
 
-$1
+eval ${*}

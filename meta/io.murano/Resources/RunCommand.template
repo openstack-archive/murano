@@ -6,7 +6,7 @@ Parameters:
   command: $command
 
 Body: |
-  return runCommand("'{0}'".format(args.command))
+  return runCommand("{0}".format(args.command))
 
 Scripts:
   runCommand:
