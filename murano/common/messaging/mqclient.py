@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import logging
+import socket
 import ssl as ssl_module
 
 from eventlet import patcher
@@ -49,7 +50,12 @@ class MqClient(object):
         self._connected = False
 
     def __enter__(self):
-        self.connect()
+        for num in range(1,3):
+            try:
+                self.connect()
+                break
+            except socket.error:
+                continue
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
