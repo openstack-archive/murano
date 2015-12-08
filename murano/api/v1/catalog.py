@@ -91,8 +91,8 @@ def _validate_body(body):
         f.seek(0)
         if size > pkg_size_limit:
             raise exc.HTTPBadRequest(explanation=_(
-                'Uploading file is too large.'
-                ' The limit is {0} Mb').format(mb_limit))
+                'Uploading file is too large. '
+                'The limit is {0} Mb').format(mb_limit))
 
     if len(body.keys()) > 2:
         msg = _("'multipart/form-data' request body should contain 1 or 2 "
@@ -316,8 +316,8 @@ class Controller(object):
             for key, value in req.GET.items():
                 if key not in valid_query_params:
                     raise exc.HTTPBadRequest(
-                        _('Bad value passed to filter.'
-                          ' Got {key}, exected:{valid}').format(
+                        _('Bad value passed to filter. '
+                          'Got {key}, exected:{valid}').format(
                             key=key, valid=', '.join(valid_query_params)))
                 if key == 'sort_keys':
                     available_sort_keys = ['name', 'created',
@@ -326,9 +326,9 @@ class Controller(object):
                     for sort_key in value:
                         if sort_key not in available_sort_keys:
                             raise exc.HTTPBadRequest(
-                                explanation=_('Invalid sort key: {sort_key}.'
-                                              ' Must be one of the following:'
-                                              ' {available}').format(
+                                explanation=_('Invalid sort key: {sort_key}. '
+                                              'Must be one of the following: '
+                                              '{available}').format(
                                     sort_key=sort_key,
                                     available=', '.join(available_sort_keys)))
                 if key == 'sort_dir':
@@ -378,8 +378,8 @@ class Controller(object):
         policy.check("delete_category", req.context, target)
         category = db_api.category_get(category_id, packages=True)
         if category.packages:
-            msg = _("It's impossible to delete categories assigned"
-                    " to the package, uploaded to the catalog")
+            msg = _("It's impossible to delete categories assigned "
+                    "to the package, uploaded to the catalog")
             raise exc.HTTPForbidden(explanation=msg)
         db_api.category_delete(category_id)
 
