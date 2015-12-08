@@ -7,8 +7,17 @@
 Managing environments
 =====================
 
-This section is under development at the moment and
-will be available soon.
+An environment is a set of logically connected applications that are grouped
+together for an easy management. By default, each environment has a single
+network for all its applications, and the deployment of the environment is
+defined in a single heat stack. Applications in different environments are
+always independent from one another.
+
+An environment is a single unit of deployment. This means that you deploy not
+an application but an environment that contains one or multiple applications.
+
+Using OpenStack Dashboard you can easily perform such actions with an
+environment as creating, editing, reviewing, deploying, and others.
 
 Create an environment
 ~~~~~~~~~~~~~~~~~~~~~
