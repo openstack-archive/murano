@@ -16,7 +16,7 @@ testresources>=0.2.4
 testscenarios>=0.4
 testtools>=1.4.0
 unittest2
-pylint==1.4.4 # GNU GPL v2
+pylint==1.4.5 # GNU GPL v2
 requests>=2.8.1
 
 # Some of the tests use real MySQL and Postgres databases
