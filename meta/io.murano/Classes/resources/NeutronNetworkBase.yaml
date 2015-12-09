@@ -35,7 +35,7 @@ Methods:
             Contract: $
       - floatingIpResourceName:
           Contract: $.string()
-      - floatingIpNeRef:
+      - floatingIpNetRef:
           Contract: $
     Body:
       - $portName: format('port-{0}-{1}', $.id(), $instance.name)
@@ -74,7 +74,7 @@ Methods:
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - $instanceFipOutput: null
-      - If: $floatingIpResourceName != null and $floatingIpNeRef != null
+      - If: $floatingIpResourceName != null and $floatingIpNetRef != null
         Then:
           - $instanceFipOutput: $instance.name + '-floatingIPaddress'
           - $template:
@@ -82,7 +82,7 @@ Methods:
                 $floatingIpResourceName:
                   type: 'OS::Neutron::FloatingIP'
                   properties:
-                    floating_network: $floatingIpNeRef
+                    floating_network: $floatingIpNetRef
                     port_id:
                       get_resource: $portName
               outputs:

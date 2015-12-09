@@ -39,17 +39,17 @@ Workflow:
         Then:
           - $reporter: $.environment.reporter
           - $.network.deploy()
+          - $networkData: $.network.describe()
           - $aapPortName: format('AllowedAddressPairsPort-{0}', $.id())
           - $template:
-              heat_template_version: '2013-05-23'
               resources:
                 $aapPortName:
                   type: 'OS::Neutron::Port'
                   properties:
-                    network_id: $.network.describe().netRef
+                    network_id: $networkData.netId
                     replacement_policy: AUTO
                     fixed_ips:
-                      - subnet_id: $.network.describe().subnetRef
+                      - subnet_id: $networkData.subnetId
               outputs:
                 $aapPortName+'-virtualIp':
                   value:
@@ -58,7 +58,7 @@ Workflow:
           - $.environment.stack.updateTemplate($template)
           - If: $.assignFloatingIp
             Then:
-              - $extNetId: $.network.describe().floatingIpNeRef
+              - $extNetId: $networkData.floatingIpNetId
               - $fip_name: format('Shared-Floating-ip-{0}', $.id())
 
               - $template:
