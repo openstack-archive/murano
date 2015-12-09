@@ -198,10 +198,6 @@ class MuranoTestRunner(object):
         load_packages_from = self.args.load_packages_from
         tests_to_run = self.args.tests
 
-        if not provided_pkg_name:
-            msg = _('Package name is required parameter.')
-            self.error(msg)
-
         ks_opts = self._validate_keystone_opts(self.args)
 
         client = ks_client.Client(**ks_opts)
@@ -276,10 +272,6 @@ class MuranoTestRunner(object):
         parser.add_argument('--os-project-name',
                             default=utils.env('OS_PROJECT_NAME'),
                             help='Defaults to env[OS_PROJECT_NAME]')
-
-        parser.add_argument('-p', '--package',
-                            help='Full name of application package that is '
-                                 'going to be tested')
         parser.add_argument('-l', '--load_packages_from',
                             nargs='*', metavar='</path1, /path2>',
                             help='Directory to search packages from. '
@@ -289,6 +281,10 @@ class MuranoTestRunner(object):
                             help="increase output verbosity")
         parser.add_argument('--version', action='version',
                             version=version.version_string)
+        parser.add_argument('package',
+                            metavar='<PACKAGE_FQN>',
+                            help='Full name of application package that is '
+                                 'going to be tested')
         parser.add_argument('tests', nargs='*',
                             metavar='<testMethod1, className.testMethod2>',
                             help='List of method names to be tested')

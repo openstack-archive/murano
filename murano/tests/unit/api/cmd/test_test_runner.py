@@ -86,9 +86,10 @@ class TestCaseShell(testtools.TestCase):
                           [--os-auth-url OS_AUTH_URL]
                           [--os-username OS_USERNAME]
                           [--os-password OS_PASSWORD]
-                          [--os-project-name OS_PROJECT_NAME] [-p PACKAGE]
+                          [--os-project-name OS_PROJECT_NAME]
                           [-l [</path1, /path2> [</path1, /path2> ...]]] [-v]
                           [--version]
+                          <PACKAGE_FQN>
                           [<testMethod1, className.testMethod2> [<testMethod1, className.testMethod2"""  # noqa
         self.assertIn(usage, stdout)
 
@@ -98,7 +99,7 @@ class TestCaseShell(testtools.TestCase):
 
     @mock.patch.object(test_runner, 'LOG')
     def test_increase_verbosity(self, mock_log):
-        self.shell('-v -p io.murano.test.MyTest1')
+        self.shell('io.murano.test.MyTest1 -v')
         mock_log.logger.setLevel.assert_called_with(logging.DEBUG)
 
     @mock.patch('keystoneclient.v3.client.Client')
@@ -107,12 +108,12 @@ class TestCaseShell(testtools.TestCase):
         importutils.import_module('keystonemiddleware.auth_token')
         self.override_config('admin_user', 'new_value', 'keystone_authtoken')
 
-        self.shell('-p io.murano.test.MyTest1 io.murano.test.MyTest2')
+        self.shell('io.murano.test.MyTest1 io.murano.test.MyTest2')
 
         mock_client.assert_has_calls([mock.call(**self.auth_params)])
 
     def test_package_all_tests(self):
-        _, stderr = self.shell('-v -p io.murano.test.MyTest1')
+        _, stderr = self.shell('io.murano.test.MyTest1 -v')
         # NOTE(efedorova): May be, there is a problem with test-runner, since
         # all logs are passed to stderr
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
@@ -123,7 +124,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_class(self):
         _, stderr = self.shell(
-            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest2')
+            'io.murano.test.MyTest1 io.murano.test.MyTest2 -v')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -132,7 +133,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_test_name(self):
         _, stderr = self.shell(
-            '-v -p io.murano.test.MyTest1 testSimple1')
+            'io.murano.test.MyTest1 testSimple1 -v')
 
         self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -141,7 +142,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_by_test_and_class_name(self):
         _, stderr = self.shell(
-            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1')
+            'io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1 -v')
 
         self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
         self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
@@ -150,17 +151,17 @@ class TestCaseShell(testtools.TestCase):
 
     def test_service_methods(self):
         _, stderr = self.shell(
-            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest1.testSimple1')
+            'io.murano.test.MyTest1 io.murano.test.MyTest1.testSimple1 -v')
         self.assertIn('Executing: io.murano.test.MyTest1.setUp', stderr)
         self.assertIn('Executing: io.murano.test.MyTest1.tearDown', stderr)
 
     def test_package_is_not_provided(self):
-        _, stderr = self.shell(exitcode=1)
-        self.assertIn('ERROR: Package name is required parameter.', stderr)
+        _, stderr = self.shell(exitcode=2)
+        self.assertIn('murano-test-runner: error: too few arguments', stderr)
 
     def test_wrong_parent(self):
         _, stderr = self.shell(
-            '-v -p io.murano.test.MyTest1 io.murano.test.MyTest3', exitcode=1)
+            'io.murano.test.MyTest1 io.murano.test.MyTest3 -v', exitcode=1)
         self.assertIn('Class io.murano.test.MyTest3 is not inherited from'
                       ' io.murano.test.TestFixture. Skipping it.', stderr)
         self.assertIn('No tests found for execution.', stderr)
