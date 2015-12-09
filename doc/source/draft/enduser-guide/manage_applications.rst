@@ -7,6 +7,16 @@
 Managing applications
 =====================
 
+In murano, each application, as well as the form of application data entry,
+is defined by its package. The murano dashboard allows you to import and
+manage packages as well as search, filter, and add applications from catalog
+to environments.
+
+This section provides detailed instructions on how to import application
+packages into murano and then add applications to an environment and deploy
+it. This section also shows you how to find component details, application
+topology, and deployment logs.
+
 Import an application package
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
