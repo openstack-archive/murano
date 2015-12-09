@@ -48,7 +48,7 @@ def main():
 
         logging.setup(CONF, 'murano')
         launcher = service.ServiceLauncher(CONF)
-        launcher.launch_service(engine.get_rpc_service())
+        launcher.launch_service(engine.EngineService())
 
         launcher.wait()
     except RuntimeError as e:
