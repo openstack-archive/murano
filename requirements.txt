@@ -8,8 +8,8 @@ stevedore>=1.5.0 # Apache-2.0
 alembic>=0.8.0
 eventlet>=0.17.4
 PasteDeploy>=1.5.0
-Routes>=1.12.3,!=2.0,!=2.1;python_version=='2.7'
-Routes>=1.12.3,!=2.0;python_version!='2.7'
+Routes!=2.0,!=2.1,>=1.12.3;python_version=='2.7'
+Routes!=2.0,>=1.12.3;python_version!='2.7'
 retrying!=1.3.0,>=1.2.3 # Apache-2.0
 WebOb>=1.2.3
 kombu>=3.0.7
