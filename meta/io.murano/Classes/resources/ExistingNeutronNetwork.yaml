@@ -41,6 +41,7 @@ Workflow:
       - $._netExplorer: new(sys:NetworkExplorer)
       - $._networks: null
       - $._subnetworks: null
+      - $._ports: null
       - $._internalNetworkId: null
       - $._internalSubnetworkId: null
       - $._externalNetworkId: null
@@ -68,6 +69,23 @@ Workflow:
             ($.name = $this.internalSubnetworkName or
               $.id = $this.internalSubnetworkName) and
                 $.network_id = $this._internalNetworkId).first().id
+
+      - If: $.externalNetworkName = null and $._internalNetworkId != null
+        Then:
+          - $ports: $._netExplorer.listPorts()
+          - $routerCandidates: $ports.where(
+              $.network_id = $this._internalNetworkId and $.device_owner = 'network:router_interface').
+              select($.device_id)
+          - $networkCandidates: $ports.where(
+              $.device_id in $routerCandidates and $.network_id != $this._internalNetworkId).
+              select($.network_id)
+          - $externalNetwork: $._getNetworks().where(
+              $.get('router:external') = true and $.id in $networkCandidates).
+              firstOrDefault()
+          - If: $externalNetwork != null
+            Then:
+              - $.externalNetworkName: $externalNetwork.name
+              - $._externalNetworkId: $externalNetwork.id
 
       - If: $.externalNetworkName = null
         Then:
@@ -123,11 +141,10 @@ Workflow:
             floatingIpNetRef => $floatingIpNetRef
           )
 
-
   describe:
     Body:
       - $.deploy()
-      - $subnet: $._netExplorer.listSubnetworks().where(
+      - $subnet: $._getSubnetworks.where(
             $.network_id = $this._internalNetworkId).first()
       - Return:
           provider: Neutron
