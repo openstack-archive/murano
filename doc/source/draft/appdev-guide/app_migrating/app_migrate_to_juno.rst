@@ -13,13 +13,15 @@
       License for the specific language governing permissions and limitations
       under the License.
 
-======================================================
-Migrating applications from Murano v0.5 to Stable/Juno
-======================================================
+.. _app_migrate_to_juno:
 
-Applications created for Murano v0.5, unfortunately, are not supported in Murano
+
+Migrate applications from Murano v0.5 to Stable/Juno
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Applications created for murano v0.5, unfortunately, are not supported in Murano
 stable/juno. This document provides the application code changes required for
-compatibility with the stable/juno Murano version.
+compatibility with the stable/juno murano version.
 
 Rename *'Workflow'* to *'Methods'*
 ----------------------------------

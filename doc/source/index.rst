@@ -98,6 +98,7 @@ Developing Applications
    draft/appdev-guide/hot_packages
    draft/appdev-guide/murano_pl
    draft/appdev-guide/murano_packages
+   draft/appdev-guide/app_migrating
    draft/appdev-guide/examples
    draft/appdev-guide/use_cases
    draft/appdev-guide/faq
@@ -145,7 +146,6 @@ Miscellaneous
    contributing
    guidelines
    articles/debug_tips
-   articles/app_migrating
 
 
 **API specification**
