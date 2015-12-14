@@ -100,7 +100,14 @@ Contract
 ++++++++
 
 Contract is a YAQL expression that says what type of the value is expected for
-the property as well as additional constraints imposed on a property.
+the property as well as additional constraints imposed on a property. Using
+contracts you can define what value can be assigned to a property or argument.
+In case of invalid input data it may be automatically transformed to confirm
+to the contract. For example, if bool value is expected and user passes any
+not null value it will be converted to ``True``. If converting is impossible
+exception ``ContractViolationException`` will be raised.
+
+The following contracts are available:
 
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 |  Operation                                                |  Definition                                                                                     |
@@ -121,6 +128,10 @@ the property as well as additional constraints imposed on a property.
 | | $.class(ns:ClassName, ns:DefaultClassName)              | | create instance of the ``ns:DefaultClassName`` class if no instance provided                  |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 | | $.class(ns:Name).check($.p = 12)                        | |  the value must be of the ``ns:Name`` type and have the ``p`` property equal to 12            |
++-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| | $.class(ns:Name).owned()                                | |  a current object must be direct or indirect owner of the value                               |
++-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| | $.class(ns:Name).notOwned()                             | |  the value must be owned by any object except current one                                     |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 | | [$.int()]                                               | | an array of integers. Similar to other types.                                                 |
 | | [$.int().notNull()]                                     |                                                                                                 |
@@ -143,6 +154,40 @@ the property as well as additional constraints imposed on a property.
 | | A: StringMap                                            | | the dictionary with the ``A`` key that must be equal to ``StringMap``, and other keys be      |
 | | $.string().notNull(): $                                 | | any scalar or data structure                                                                  |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+
+In the example above property ``port`` must be int value greater than 0 and
+less than 65536; ``scope`` must be a string value and one of 'public', 'cloud',
+'host' or 'internal', and ``protocol`` must be a string value and either
+'TCP' or 'UDP'. When user passes some values to these properties it will be checked
+that values confirm to the contracts.
+
+.. code-block:: yaml
+
+    Namespaces:
+      =: io.murano.apps.docker
+      std: io.murano
+
+    Name: ApplicationPort
+
+    Properties:
+      port:
+        Contract: $.int().notNull().check($ > 0 and $ < 65536)
+
+      scope:
+        Contract: $.string().notNull().check($ in list(public, cloud, host, internal))
+        Default: private
+
+      protocol:
+        Contract: $.string().notNull().check($ in list(TCP, UDP))
+        Default: TCP
+
+    Methods:
+      getRepresentation:
+        Body:
+          Return:
+            port: $.port
+            scope: $.scope
+            protocol: $.protocol
 
 Usage
 +++++
@@ -246,7 +291,14 @@ by direct triggering after deployment.
 Arguments are optional too, and are declared using the same syntax
 as class properties, except for the Usage attribute that is meaningless
 for method parameters. For example, arguments also have a contract and
-optional default.
+optional default::
+
+  scaleRc:
+    Arguments:
+      - rcName:
+          Contract: $.string().notNull()
+      - newSize:
+          Contract: $.int().notNull()
 
 The Method body is an array of instructions that get executed sequentially.
 There are 3 types of instructions that can be found in a workflow body:
