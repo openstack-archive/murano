@@ -113,7 +113,7 @@ would inspect images already present in the image database. Unless image with
 the specific name and hash is present client would attempt to download it.
 
 For more info about specifying images and requirements for the package see
-package creation docs: :ref:`app_pkg`.
+package creation docs: :ref:`step-by-step`.
 
 If any of the packages, being installed is already registered in Murano, client
 would ask you what do do with it. You can specify the default action with
@@ -175,7 +175,7 @@ files/directories. To find out more about this command run::
 This command is useful, when application package files are spread across
 several directories, and for auto-generating packages from heat templates
 For more info about package composition please see package creation docs:
-:ref:`app_pkg`.
+:ref:`step-by-step`.
 
 
 Managing Environments
