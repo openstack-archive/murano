@@ -19,6 +19,7 @@ from murano.dsl import executor
 from murano.dsl import murano_class
 from murano.engine import environment
 from murano.engine import mock_context_manager
+from murano.engine.system import test_fixture
 from murano.tests.unit import base
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import runner
@@ -54,7 +55,6 @@ class MockRunner(runner.Runner):
         model = om.build_model(model)
         if 'Objects' not in model:
             model = {'Objects': model}
-
         self.executor = executor.MuranoDslExecutor(
             package_loader, TestMockContextManager(functions),
             environment.Environment())
@@ -105,6 +105,8 @@ class TestMockYaqlFunctions(test_case.DslTestCase):
 
     def setUp(self):
         super(TestMockYaqlFunctions, self).setUp()
+        self.package_loader.load_package('io.murano', None).register_class(
+            test_fixture.TestFixture)
         self.runner = MockRunner(om.Object('TestMocks'),
                                  self.package_loader, self._functions)
 
@@ -119,6 +121,9 @@ class TestMockYaqlFunctions(test_case.DslTestCase):
     def test_inject_method_with_yaql_expr(self):
         self.runner.testInjectMethodWithYaqlExpr()
         self.assertEqual(['method1', 'I am mock'], self.traces)
+
+    def test_inject_method_with_yaql_expr2(self):
+        self.runner.testInjectMethodWithYaqlExpr2()
 
     def test_inject_object_with_yaql_expr(self):
         self.runner.testInjectObjectWithYaqlExpr()
