@@ -13,7 +13,14 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from yaql.language import specs
+from yaql.language import yaqltypes
+
 from murano.common import engine
+from murano.dsl import constants
+from murano.dsl import dsl
+from murano.dsl import dsl_types
+from murano.dsl import helpers
 from murano.dsl import linked_context
 from murano.dsl import yaql_integration
 
@@ -68,3 +75,80 @@ class MockContextManager(engine.ContextManager):
         else:
             result_context = original_context
         return result_context
+
+    def create_root_context(self, runtime_version):
+        root_context = super(MockContextManager, self).create_root_context(
+            runtime_version)
+        constext = root_context.create_child_context()
+        constext.register_function(inject_method_with_str, name='inject')
+        constext.register_function(inject_method_with_yaql_expr,
+                                   name='inject')
+        constext.register_function(with_original)
+        return constext
+
+
+@specs.parameter('kwargs', yaqltypes.Lambda(with_context=True))
+def with_original(context, **kwargs):
+    new_context = context.create_child_context()
+
+    original_context = context[constants.CTX_ORIGINAL_CONTEXT]
+    for k, v in kwargs.iteritems():
+        new_context['$' + k] = v(original_context)
+    return new_context
+
+
+@specs.parameter('target',
+                 dsl.OneOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+@specs.parameter('target_method', yaqltypes.String())
+@specs.parameter('mock_object', dsl_types.MuranoObject)
+@specs.parameter('mock_name', yaqltypes.String())
+def inject_method_with_str(context, target, target_method,
+                           mock_object, mock_name):
+    ctx_manager = helpers.get_executor(context).context_manager
+
+    current_class = helpers.get_type(context)
+    mock_func = current_class.find_single_method(mock_name)
+
+    if isinstance(target, dsl_types.MuranoClassReference):
+        original_class = target.murano_class
+    else:
+        original_class = target.type
+
+    original_function = original_class.find_single_method(target_method)
+    result_fd = original_function.yaql_function_definition.clone()
+
+    def payload_adapter(__context, __sender, *args, **kwargs):
+        executor = helpers.get_executor(__context)
+        return mock_func.invoke(
+            executor, mock_object, args, kwargs, __context, True)
+
+    result_fd.payload = payload_adapter
+    existing_mocks = ctx_manager.class_mock_ctx.setdefault(
+        original_class.name, [])
+    existing_mocks.append(result_fd)
+
+
+@specs.parameter('target',
+                 dsl.OneOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+@specs.parameter('target_method', yaqltypes.String())
+@specs.parameter('expr', yaqltypes.Lambda(with_context=True))
+def inject_method_with_yaql_expr(context, target, target_method, expr):
+    ctx_manager = helpers.get_executor(context).context_manager
+    if isinstance(target, dsl_types.MuranoClassReference):
+        original_class = target.murano_class
+    else:
+        original_class = target.type
+
+    original_function = original_class.find_single_method(target_method)
+    result_fd = original_function.yaql_function_definition.clone()
+
+    def payload_adapter(__super, __context, __sender, *args, **kwargs):
+        new_context = context.create_child_context()
+        new_context[constants.CTX_ORIGINAL_CONTEXT] = __context
+        return expr(new_context, __sender, *args, **kwargs)
+
+    result_fd.payload = payload_adapter
+    result_fd.insert_parameter('__super', yaqltypes.Super())
+    existing_mocks = ctx_manager.class_mock_ctx.setdefault(
+        original_class.name, [])
+    existing_mocks.append(result_fd)

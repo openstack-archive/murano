@@ -33,6 +33,7 @@ CTX_THIS = '$?this'
 CTX_TYPE = '$?type'
 CTX_VARIABLE_SCOPE = '$?variableScope'
 CTX_YAQL_ENGINE = '$?yaqlEngine'
+CTX_ORIGINAL_CONTEXT = '$?originalContext'
 
 DM_OBJECTS = 'Objects'
 DM_OBJECTS_COPY = 'ObjectsCopy'

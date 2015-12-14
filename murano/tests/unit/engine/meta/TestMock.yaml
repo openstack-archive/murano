@@ -1,0 +1,59 @@
+Name: TestMocks
+
+Methods:
+
+  mock1:
+    Body:
+      - Return: 'This is mock1'
+
+  testInjectMethodWithString:
+    Body:
+      - inject(TestMocksFixture, simpleMethod1, $this, mock1)
+
+      - $originalClass: new(TestMocksFixture)
+      - $returnValue: $originalClass.simpleMethod1()
+      - trace($returnValue)
+
+  testInjectObjectWithString:
+    Body:
+      - $originalClass: new(TestMocksFixture)
+      - inject($originalClass, simpleMethod1, $this, mock1)
+
+      - $returnValue: $originalClass.simpleMethod1()
+      - trace($returnValue)
+
+  testInjectMethodWithYaqlExpr:
+    Body:
+      - $originalClass: new(TestMocksFixture)
+      # Calling original method without mocking
+      - trace($originalClass.simpleMethod1())
+
+      - $mockText: 'I am mock'
+      - inject(TestMocksFixture, simpleMethod1, trace($mockText))
+
+      # Calling original method after mocking
+      - $originalClass.simpleMethod1()
+
+  testInjectObjectWithYaqlExpr:
+    Body:
+      - $originalClass: new(TestMocksFixture)
+      # Calling original method without mocking
+      - trace($originalClass.simpleMethod1())
+
+      - $mockText: 'I am mock'
+      - inject($originalClass, simpleMethod1, trace($mockText))
+
+      # Calling original method after mocking
+      - $originalClass.simpleMethod1()
+
+  testWithoriginal:
+    Body:
+      - $originalClass: new(TestMocksFixture)
+      - inject(TestMocksFixture, simpleMethod1, withOriginal(t => $originalClass.someProperty) -> trace($t))
+      - $originalClass.simpleMethod1()
+
+  testOriginalMethod:
+    Body:
+      - $originalClass: new(TestMocksFixture)
+      - inject(TestMocksFixture, simpleMethod1, originalMethod())
+      - trace($originalClass.simpleMethod1())
