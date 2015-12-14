@@ -65,6 +65,9 @@ Properties:
     Contract:
       - $.class(std:SharedIp)
     Usage: InOut  # as it is set in setSharedIps
+  volumes:
+    Contract:
+      $.string().notNull(): $.class(Volume).notNull()
 
 Methods:
   initialize:
@@ -137,6 +140,14 @@ Methods:
                 get_resource: $.name
 
       - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
+      - $.volumes.items().select(
+          $.unpack(path, volume) -> $this.attachVolume($path, $volume))
+
+      - For: path
+        In: $.volumes
+        Do:
+          - $volume: $.volumes.get($path)
+          - $this.attachVolume($path, $volume)
 
       # Any additional template preparation
       - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
@@ -233,6 +244,18 @@ Methods:
 
       - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
 
+  attachVolume:
+    Arguments:
+      - path:
+          Contract: $.string().notNull()
+      - volume:
+          Contract: $.class(Volume).notNull()
+    Body:
+      - $attachment: $volume.attachTo($this, $path)
+      - $.instanceTemplate: $.instanceTemplate.mergeWith($attachment.template)
+      - $.setAttr(instanceResources, $.getAttr(instanceResources, []).concat($attachment.get(instanceResources, [])))
+      - $.setAttr(instanceOutputs, $.getAttr(instanceOutputs, []).concat($attachment.get(instanceOutputs, [])))
+
   releaseResources:
     Body:
       - $template: $.environment.stack.current()
@@ -277,3 +300,8 @@ Methods:
     Body:
       - $template: $.environment.stack.current()
       - Return: $template.resources != null and $.name in $template.resources
+
+  getRef:
+    Body:
+      Return:
+        get_resource: $.name
