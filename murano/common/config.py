@@ -261,7 +261,8 @@ glance_opts = [
 ]
 
 file_server = [
-    cfg.StrOpt('file_server', default='')
+    cfg.StrOpt('file_server', default='',
+               help='Set a file server.')
 ]
 
 CONF = cfg.CONF
