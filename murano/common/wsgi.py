@@ -29,7 +29,6 @@ import eventlet.wsgi
 import jsonschema
 from oslo_config import cfg
 from oslo_log import log as logging
-from oslo_log import loggers
 from oslo_serialization import jsonutils
 from oslo_service import service
 from oslo_service import sslutils
@@ -80,6 +79,7 @@ class Service(service.Service):
         self._port = port
         self._host = host
         self._backlog = backlog if backlog else CONF.backlog
+        self._logger = logging.getLogger('eventlet.wsgi')
         super(Service, self).__init__(threads)
 
     def _get_socket(self, host, port, backlog):
@@ -160,12 +160,11 @@ class Service(service.Service):
 
     def _run(self, application, socket):
         """Start a WSGI server in a new green thread."""
-        logger = logging.getLogger('eventlet.wsgi')
         eventlet.wsgi.MAX_HEADER_LINE = CONF.max_header_line
         eventlet.wsgi.server(socket,
                              application,
                              custom_pool=self.tg.pool,
-                             log=loggers.WritableLogger(logger))
+                             log=self._logger)
 
 
 class Middleware(object):
