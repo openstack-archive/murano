@@ -1,0 +1,3 @@
+fixes:
+  - race condition during parallel packages upload, if packages has the same
+    tags.
