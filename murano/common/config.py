@@ -74,7 +74,11 @@ heat_opts = [
                                 'communicate with Heat API.'),
 
     cfg.StrOpt('endpoint_type', default='publicURL',
-               help='Heat endpoint type.')
+               help='Heat endpoint type.'),
+
+    cfg.ListOpt('stack_tags', default=['murano'],
+                help='List of tags to be assigned to heat stacks created '
+                     'during environment deployment.')
 ]
 
 mistral_opts = [

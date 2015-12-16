@@ -17,6 +17,7 @@ import copy
 
 import eventlet
 import heatclient.exc as heat_exc
+from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common.i18n import _LW
@@ -25,6 +26,7 @@ from murano.dsl import dsl
 from murano.dsl import helpers
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 HEAT_TEMPLATE_VERSION = '2013-05-23'
 
@@ -45,6 +47,7 @@ class HeatStack(object):
         self._description = description
         self._clients = helpers.get_environment().clients
         self._last_stack_timestamps = (None, None)
+        self._tags = ''
 
     def current(self):
         client = self._clients.get_heat_client()
@@ -175,6 +178,7 @@ class HeatStack(object):
         if self._applied or self._template is None:
             return
 
+        self._tags = ','.join(CONF.heat.stack_tags)
         if 'heat_template_version' not in self._template:
             self._template['heat_template_version'] = HEAT_TEMPLATE_VERSION
 
@@ -195,7 +199,8 @@ class HeatStack(object):
                     template=template,
                     files=self._files,
                     environment=self._hot_environment,
-                    disable_rollback=True)
+                    disable_rollback=True,
+                    tags=self._tags)
 
                 self._wait_state(lambda status: status == 'CREATE_COMPLETE')
         else:
@@ -208,7 +213,8 @@ class HeatStack(object):
                     files=self._files,
                     environment=self._hot_environment,
                     template=template,
-                    disable_rollback=True)
+                    disable_rollback=True,
+                    tags=self._tags)
                 self._wait_state(
                     lambda status: status == 'UPDATE_COMPLETE', True)
             else:

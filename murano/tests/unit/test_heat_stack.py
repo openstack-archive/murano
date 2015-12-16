@@ -15,6 +15,7 @@
 
 from heatclient.v1 import stacks
 import mock
+from oslo_config import cfg
 
 from murano.dsl import constants
 from murano.dsl import helpers
@@ -26,6 +27,7 @@ from murano.engine.system import heat_stack
 from murano.tests.unit import base
 
 MOD_NAME = 'murano.engine.system.heat_stack'
+CONF = cfg.CONF
 
 
 class TestHeatStack(base.MuranoTestCase):
@@ -43,6 +45,8 @@ class TestHeatStack(base.MuranoTestCase):
         client_manager_mock.get_heat_client.return_value = \
             self.heat_client_mock
         self.environment_mock.clients = client_manager_mock
+        CONF.set_override('stack_tags', ['test-murano'], 'heat')
+        self.mock_tag = ','.join(CONF.heat.stack_tags)
 
     @mock.patch(MOD_NAME + '.HeatStack._wait_state')
     @mock.patch(MOD_NAME + '.HeatStack._get_status')
@@ -51,7 +55,6 @@ class TestHeatStack(base.MuranoTestCase):
 
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-
         context = {constants.CTX_ENVIRONMENT: self.environment_mock}
 
         with helpers.contextual(context):
@@ -84,7 +87,8 @@ class TestHeatStack(base.MuranoTestCase):
             parameters={},
             template=expected_template,
             files={},
-            environment=''
+            environment='',
+            tags=self.mock_tag
         )
         self.assertTrue(hs._applied)
 
@@ -116,7 +120,8 @@ class TestHeatStack(base.MuranoTestCase):
             parameters={},
             template=expected_template,
             files={},
-            environment=''
+            environment='',
+            tags=self.mock_tag
         )
         self.assertTrue(hs._applied)
 
@@ -149,7 +154,8 @@ class TestHeatStack(base.MuranoTestCase):
             parameters={},
             template=expected_template,
             files={"heatFile": "file"},
-            environment=''
+            environment='',
+            tags=self.mock_tag
         )
         self.assertTrue(hs._applied)
 
@@ -183,6 +189,7 @@ class TestHeatStack(base.MuranoTestCase):
             template=expected_template,
             files={"heatFile": "file"},
             environment='environments',
+            tags=self.mock_tag
         )
         self.assertTrue(hs._applied)
 
@@ -218,3 +225,41 @@ class TestHeatStack(base.MuranoTestCase):
         hs.update_template({'heat_template_version': '2013-05-23'})
         expected['heat_template_version'] = '2013-05-23'
         self.assertEqual(expected, hs._template)
+
+    @mock.patch(MOD_NAME + '.HeatStack._wait_state')
+    @mock.patch(MOD_NAME + '.HeatStack._get_status')
+    def test_heat_stack_tags_are_sent(self, status_get, wait_st):
+        """Assert that heat_stack `tags` parameter get push & with
+        value from config parameter `stack_tags`.
+        """
+
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat')
+        context = {constants.CTX_ENVIRONMENT: self.environment_mock}
+
+        with helpers.contextual(context):
+            hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+        self.assertTrue(hs._applied)
