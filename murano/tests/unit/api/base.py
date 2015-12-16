@@ -89,11 +89,13 @@ class MuranoApiTestCase(base.MuranoWithDBTestCase, FakeLogMixin):
         super(MuranoApiTestCase, self).tearDown()
         timeutils.utcnow.override_time = None
 
-    def _stub_uuid(self, values=[]):
+    def _stub_uuid(self, values=None):
         class FakeUUID(object):
             def __init__(self, v):
                 self.hex = v
 
+        if values is None:
+            values = []
         mock_uuid4 = mock.patch('uuid.uuid4').start()
         mock_uuid4.side_effect = [FakeUUID(v) for v in values]
         return mock_uuid4
@@ -128,7 +130,9 @@ class ControllerTest(object):
         self._policy_check_expectations = []
         self._actual_policy_checks = []
 
-        def wrap_policy_check(rule, ctxt, target={}, **kwargs):
+        def wrap_policy_check(rule, ctxt, target=None, **kwargs):
+            if target is None:
+                target = {}
             self._actual_policy_checks.append((rule, target))
             return real_policy_check(rule, ctxt, target=target, **kwargs)
 
@@ -184,13 +188,16 @@ class ControllerTest(object):
 
     def _delete(self, path, params=None, user=DEFAULT_USER,
                 tenant=DEFAULT_TENANT):
-        params = params or {}
+        if params is None:
+            params = {}
         return self._simple_request(path, params=params, method='DELETE',
                                     user=user, tenant=tenant)
 
     def _data_request(self, path, data, content_type='application/json',
-                      method='POST', params={},
+                      method='POST', params=None,
                       user=DEFAULT_USER, tenant=DEFAULT_TENANT):
+        if params is None:
+            params = {}
         environ = self._environ(path)
         environ['REQUEST_METHOD'] = method
 
@@ -207,20 +214,26 @@ class ControllerTest(object):
 
         return req
 
-    def _post(self, path, data, content_type='application/json', params={},
+    def _post(self, path, data, content_type='application/json', params=None,
               user=DEFAULT_USER, tenant=DEFAULT_TENANT):
+        if params is None:
+            params = {}
         return self._data_request(path, data, content_type, params=params,
                                   user=user, tenant=tenant)
 
-    def _put(self, path, data, content_type='application/json', params={},
+    def _put(self, path, data, content_type='application/json', params=None,
              user=DEFAULT_USER, tenant=DEFAULT_TENANT):
+        if params is None:
+            params = {}
         return self._data_request(path, data, content_type, method='PUT',
                                   params=params, user=user, tenant=tenant)
 
     def _set_policy_rules(self, rules):
         policy.set_rules(rules, default_rule='default')
 
-    def expect_policy_check(self, action, target={}):
+    def expect_policy_check(self, action, target=None):
+        if target is None:
+            target = {}
         self._policy_check_expectations.append((action, target))
 
     def _assert_policy_checks(self):

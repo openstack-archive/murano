@@ -62,7 +62,10 @@ def init(default_rule=None, use_conf=True):
     _ENFORCER.load_rules()
 
 
-def check(rule, ctxt, target={}, do_raise=True, exc=exceptions.HTTPForbidden):
+def check(rule, ctxt, target=None, do_raise=True,
+          exc=exceptions.HTTPForbidden):
+    if target is None:
+        target = {}
     creds = ctxt.to_dict()
 
     try:

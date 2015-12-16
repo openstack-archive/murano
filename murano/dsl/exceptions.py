@@ -44,7 +44,9 @@ class NoMethodFound(Exception):
 
 
 class NoClassFound(Exception):
-    def __init__(self, name, packages=[]):
+    def __init__(self, name, packages=None):
+        if packages is None:
+            packages = []
         packages = ', '.join("{0}/{1}".format(p.name, p.version)
                              for p in packages)
         super(NoClassFound, self).__init__(
