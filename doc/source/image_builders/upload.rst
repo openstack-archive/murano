@@ -100,6 +100,6 @@ Murano image types
   * - linux
     - Generic Linux images, Ubuntu / Debian, RedHat / Centos, etc
 
-  * - cirrus.demo
+  * - cirros.demo
     - Murano demo image, based on CirrOS
 ..
