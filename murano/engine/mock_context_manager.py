@@ -145,6 +145,8 @@ def inject_method_with_yaql_expr(context, target, target_method, expr):
     def payload_adapter(__super, __context, __sender, *args, **kwargs):
         new_context = context.create_child_context()
         new_context[constants.CTX_ORIGINAL_CONTEXT] = __context
+        new_context.register_function(lambda: __super(*args, **kwargs),
+                                      name='originalMethod')
         return expr(new_context, __sender, *args, **kwargs)
 
     result_fd.payload = payload_adapter

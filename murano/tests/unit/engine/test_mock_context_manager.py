@@ -127,3 +127,7 @@ class TestMockYaqlFunctions(test_case.DslTestCase):
     def test_with_original(self):
         self.runner.testWithoriginal()
         self.assertEqual(['DEFAULT'], self.traces)
+
+    def test_original_method(self):
+        self.runner.testOriginalMethod()
+        self.assertEqual(['method1'], self.traces)
