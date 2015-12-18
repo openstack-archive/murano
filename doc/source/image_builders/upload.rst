@@ -21,22 +21,22 @@ Upload image into glance
 
 To deploy applications with murano, virtual machine images should be uploaded into glance in a special way - *murano_image_info* property should be set.
 
-1. Use the glance image-create command to import your disk image to glance:
+1. Use the openstack client image create command to import your disk image to glance:
 
 .. code-block:: console
 
-  glance image-create --name <NAME>  --is-public true \
+  openstack image create --public \
   > --disk-format qcow2 --container-format bare \
-  > --file <IMAGE_FILE> --property <IMAGE_METADATA>
+  > --file <IMAGE_FILE> --property <IMAGE_METADATA> <NAME>
 ..
 
-Replace the command line arguments to glance image-create with the appropriate values for your environment and disk image:
-
-*  Replace **<NAME>** with the name that users will refer to the disk image by. E.g. **ws-2012-std**
+Replace the command line arguments to openstack image create with the appropriate values for your environment and disk image:
 
 *  Replace **<IMAGE_FILE>** with the local path to the image file to upload. E.g. **ws-2012-std.qcow2**.
 
 *  Replace **<IMAGE_METADATA>** with the following property string
+
+*  Replace **<NAME>** with the name that users will refer to the disk image by. E.g. **ws-2012-std**
 
 .. code-block:: text
 
@@ -52,12 +52,12 @@ where:
 
 .. code-block:: console
 
-  glance image-update <IMAGE_ID> --property <IMAGE_MATADATA>
+  openstack image set --property <IMAGE_MATADATA> <IMAGE_ID> 
 ..
 
-*  Replace **<IMAGE_ID>** with image id from the previous command output.
-
 *  Replace **<IMAGE_METADATA>** with murano_image_info property, e.g.
+
+*  Replace **<IMAGE_ID>** with image id from the previous command output.
 
 .. code-block:: text
 
