@@ -63,7 +63,7 @@ of the model goes. So murano understands that instead of simple value
 MuranoPL object is used. You can pick parameters you got from a user
 (they should be described in the Forms section) and pick the right place
 where they should be set. To do this `YAQL
-<https://github.com/ativelkov/yaql/blob/master/README.md>`_ is
+<https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`_ is
 used. Two yaql functions are used for object model generation:
 
 * **generateHostname** is used for machine hostname generation; it accepts 2 arguments: name pattern (string) and index (integer). If '#' symbol is present in name pattern, it will be replaced with the index provided. If pattern is not given, a random name will be generated.
@@ -160,7 +160,7 @@ attributes are the following:
   Note that hidden field's description will still be visible in the descriptions area (if given).
   Hidden fields are used storing some data to be used by other, visible fields.
 * **minLength**, **maxLength** (for string fields) and **minValue**, **maxValue** (for integer fields) are transparently translated into django validation properties.
-* **validators** is a list of dictionaries, each dictionary should at least have *expr* key, under that key either some `YAQL <https://github.com/stackforge/yaql/blob/master/README.rst>`_ expression is stored, either one-element dictionary with *regexpValidator* key (and some regexp string as value). Another possible key of a validator dictionary is *message*, and although it is not required, it is highly desirable to specify it - otherwise, when validator fails (i.e. regexp doesn't match or YAQL expression evaluates to false) no message will be shown. Note that field-level validators use YAQL context different from all other attributes and section: here *$* root object is set to the value of field being validated (to make expressions shorter).
+* **validators** is a list of dictionaries, each dictionary should at least have *expr* key, under that key either some `YAQL <https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`_ expression is stored, either one-element dictionary with *regexpValidator* key (and some regexp string as value). Another possible key of a validator dictionary is *message*, and although it is not required, it is highly desirable to specify it - otherwise, when validator fails (i.e. regexp doesn't match or YAQL expression evaluates to false) no message will be shown. Note that field-level validators use YAQL context different from all other attributes and section: here *$* root object is set to the value of field being validated (to make expressions shorter).
 * **widgetMedia** sets some custom *CSS* and *JavaScript* used for the field's widget rendering. Note, that files should be placed to Django static folder in advance.
   Mostly they are used to do some client-side field enabling/disabling, hiding/unhiding etc.
   This is a temporary field which will be dropped once Version 3 of Dynamic UI is implemented (since it will transparently translate YAQL expressions into the appropriate *JavaScript*).

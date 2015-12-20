@@ -7,7 +7,7 @@ Some objects and actions can be used in several application deployments.
 All common parts are grouped into MuranoPL libraries.
 Murano core library is a set of classes needed in each deployment.
 Class names from core library can be used in the application definitions.
-This library is located under the `meta <https://github.com/stackforge/murano/tree/master/meta/io.murano>`_
+This library is located under the `meta <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano>`_
 directory.
 
 Classes included in the Murano core library are as follows:
@@ -41,7 +41,7 @@ All MuranoPL classes are implicitly inherited from this class.
 .. seealso::
 
    Source `Object.yaml
-   <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/Object.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/Object.yaml>`_
    file.
 
 
@@ -57,7 +57,7 @@ this class.
 .. seealso::
 
    Source `Application.yaml
-   <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/Application.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/Application.yaml>`_
    file.
 
 
@@ -71,7 +71,7 @@ Manages security groups during an application deployment.
 .. seealso::
 
    Source `SecurityGroupManager.yaml
-   <https://github.com/openstack/murano/blob/46d993702fa952bcc25acf97ebbb24d0ac108a65/meta/io.murano/Classes/system/SecurityGroupManager.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/system/SecurityGroupManager.yaml>`_
    file.
 
 
@@ -124,7 +124,7 @@ Environments is intent to group applications to manage them easily.
 .. seealso::
 
    Source `Environment.yaml
-   <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/Environment.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/Environment.yaml>`_
    file.
 
 
@@ -183,7 +183,7 @@ deploying, joining to the network, applying security group, and deleting.
 .. seealso::
 
    Source `Instance.yaml
-   <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/resources/Instance.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/resources/Instance.yaml>`_
    file.
 
 
@@ -223,7 +223,7 @@ The basic abstract class for all MuranoPL classes representing networks.
 .. seealso::
 
    Source `Network.yaml
-   <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/resources/Network.yaml>`_
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/resources/Network.yaml>`_
    file.
 
 .. _logger:
@@ -304,7 +304,7 @@ This method uses the ERROR level:
 .. seealso::
 
   * Source `Logger.yaml
-    <https://github.com/openstack/murano/blob/master/meta/io.murano/Classes/system/Logger.yaml>`_
+    <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/system/Logger.yaml>`_
     file.
 
   * `OpenStack networking logging
