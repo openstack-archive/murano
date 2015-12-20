@@ -129,8 +129,8 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         cls.murano_client().sessions.deploy(environment.id, session.id)
         return environment
 
-    @staticmethod
-    def wait_for_final_status(environment, timeout=300):
+    @classmethod
+    def wait_for_final_status(cls, environment, timeout=300):
         """Function for wait final status of environment.
 
         :param environment: Murano environment.
@@ -147,9 +147,9 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
                 raise RuntimeError(err_msg)
             time.sleep(5)
             status = environment.manager.get(environment.id).status
-        dep = environment.manager.api.deployments.list(environment.id)
-        reports = environment.manager.api.deployments.reports(environment.id,
-                                                              dep[0].id)
+        dep = cls.murano_client().deployments.list(environment.id)
+        reports = cls.murano_client().deployments.reports(environment.id,
+                                                          dep[0].id)
         return status, ", ".join([r.text for r in reports])
 
 # -----------------------------Reports methods---------------------------------
