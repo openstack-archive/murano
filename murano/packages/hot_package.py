@@ -32,7 +32,7 @@ class YAQL(object):
         self.expr = expr
 
 
-class Dumper(yaml.Dumper):
+class Dumper(yaml.SafeDumper):
     pass
 
 
@@ -107,7 +107,8 @@ class HotPackage(package_base.PackageBase):
 
         files = HotPackage._translate_files(self._source_directory)
         translated.update(HotPackage._generate_workflow(hot, files))
-        self._translated_class = yaml.dump(translated, Dumper=Dumper)
+        self._translated_class = yaml.dump(
+            translated, Dumper=Dumper, default_style='"')
 
     @staticmethod
     def _build_properties(hot, validate_hot_parameters):
@@ -523,4 +524,4 @@ class HotPackage(package_base.PackageBase):
                 groups, self.full_name),
             'Forms': forms
         }
-        return yaml.dump(translated, Dumper=Dumper)
+        return yaml.dump(translated, Dumper=Dumper, default_style='"')
