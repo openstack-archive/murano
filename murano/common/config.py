@@ -220,6 +220,12 @@ packages_opts = [
     cfg.StrOpt('packages_cache',
                help='Location (directory) for Murano package cache.'),
 
+    cfg.BoolOpt('enable_package_cache', default=True,
+                help=_('Enables murano-engine to persist on disk '
+                       'packages downloaded during deployments. '
+                       'The packages would be re-used for consequent '
+                       'deployments.')),
+
     cfg.IntOpt('package_size_limit', default=5,
                help='Maximum application package size, Mb'),
 

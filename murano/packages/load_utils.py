@@ -53,7 +53,7 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
         target_dir = tempfile.mkdtemp()
         created = True
     elif not os.path.exists(target_dir):
-        os.mkdir(target_dir)
+        os.makedirs(target_dir)
         created = True
     else:
         if os.listdir(target_dir):

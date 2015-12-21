@@ -13,6 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import collections
+import errno
 import os
 import os.path
 import shutil
@@ -20,7 +22,9 @@ import sys
 import tempfile
 import uuid
 
+import eventlet
 from muranoclient.common import exceptions as muranoclient_exc
+from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
@@ -38,6 +42,8 @@ from murano.packages import load_utils
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
+
+download_greenlocks = collections.defaultdict(lockutils.ReaderWriterLock)
 
 
 class ApiPackageLoader(package_loader.MuranoPackageLoader):
@@ -99,9 +105,22 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             CONF.packages_opts.packages_cache or
             os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
         )
-        directory = os.path.abspath(os.path.join(base_directory,
-                                                 uuid.uuid4().hex))
-        os.makedirs(directory)
+
+        if CONF.packages_opts.enable_package_cache:
+            directory = os.path.abspath(base_directory)
+        else:
+            directory = os.path.abspath(os.path.join(base_directory,
+                                                     uuid.uuid4().hex))
+
+        if not os.path.isdir(directory):
+            # NOTE(kzaitsev): in case we want packages to persist on
+            # disk and subsequent call to makedirs might fail if 2+ loaders
+            # from different processes would attempt to call it simultaneously
+            try:
+                os.makedirs(directory)
+            except OSError as e:
+                if e.errno != errno.EEXIST:
+                    raise
 
         LOG.debug('Cache for package loader is located at: {dir}'.format(
             dir=directory))
@@ -141,43 +160,73 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
 
     def _get_package_by_definition(self, package_def):
         package_id = package_def.id
-        package_directory = os.path.join(self._cache_directory, package_id)
+        package_directory = os.path.join(
+            self._cache_directory,
+            package_def.fully_qualified_name,
+            package_id)
 
-        if os.path.exists(package_directory):
+        if os.path.isdir(package_directory):
             try:
                 return load_utils.load_from_dir(package_directory)
             except pkg_exc.PackageLoadError:
                 LOG.error(_LE('Unable to load package from cache. Clean-up.'))
                 shutil.rmtree(package_directory, ignore_errors=True)
-        try:
-            package_data = self._murano_client_factory().packages.download(
-                package_id)
-        except muranoclient_exc.HTTPException as e:
-            msg = 'Error loading package id {0}: {1}'.format(
-                package_id, str(e)
-            )
-            exc_info = sys.exc_info()
-            six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
-        package_file = None
-        try:
-            with tempfile.NamedTemporaryFile(delete=False) as package_file:
-                package_file.write(package_data)
 
-            with load_utils.load_from_file(
-                    package_file.name,
-                    target_dir=package_directory,
-                    drop_dir=False) as app_package:
-                return app_package
-        except IOError:
-            msg = 'Unable to extract package data for %s' % package_id
-            exc_info = sys.exc_info()
-            six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
-        finally:
+        # the package is not yet in cache, let's try and download it.
+        download_flock_path = os.path.join(
+            self._cache_directory, '{}_download.lock'.format(package_id))
+        download_flock = lockutils.InterProcessLock(
+            path=download_flock_path, sleep_func=eventlet.sleep)
+
+        with download_greenlocks[package_id].write_lock(),\
+                download_flock:
+
+            # NOTE(kzaitsev):
+            # in case there were 2 concurrent threads/processes one might have
+            # already downloaded this package. Check before trying to download
+            if os.path.isdir(package_directory):
+                try:
+                    return load_utils.load_from_dir(package_directory)
+                except pkg_exc.PackageLoadError:
+                    LOG.error(
+                        _LE('Unable to load package from cache. Clean-up.'))
+                    shutil.rmtree(package_directory, ignore_errors=True)
+
+            # attempt the download itself
             try:
-                if package_file:
-                    os.remove(package_file.name)
-            except OSError:
-                pass
+                LOG.debug("Attempting to download package {} {}".format(
+                    package_def.fully_qualified_name, package_id))
+                package_data = self._murano_client_factory().packages.download(
+                    package_id)
+            except muranoclient_exc.HTTPException as e:
+                msg = 'Error loading package id {0}: {1}'.format(
+                    package_id, str(e)
+                )
+                exc_info = sys.exc_info()
+                six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
+            package_file = None
+            try:
+                with tempfile.NamedTemporaryFile(delete=False) as package_file:
+                    package_file.write(package_data)
+
+                with load_utils.load_from_file(
+                        package_file.name,
+                        target_dir=package_directory,
+                        drop_dir=False) as app_package:
+                    LOG.info(_LI(
+                        "Successfully downloaded and unpacked package {} {}")
+                        .format(package_def.fully_qualified_name, package_id))
+                    return app_package
+            except IOError:
+                msg = 'Unable to extract package data for %s' % package_id
+                exc_info = sys.exc_info()
+                raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
+            finally:
+                try:
+                    if package_file:
+                        os.remove(package_file.name)
+                except OSError:
+                    pass
 
     def _get_best_package_match(self, packages):
         public = None
@@ -195,7 +244,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             return other[0]
 
     def cleanup(self):
-        shutil.rmtree(self._cache_directory, ignore_errors=True)
+        if not CONF.packages_opts.enable_package_cache:
+            shutil.rmtree(self._cache_directory, ignore_errors=True)
 
     def __enter__(self):
         return self
