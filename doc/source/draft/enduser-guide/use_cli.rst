@@ -7,8 +7,7 @@
 Using CLI
 =========
 
-Install murano client
-~~~~~~~~~~~~~~~~~~~~~
+This section is under development at the moment and will be available soon.
 
 Manage applications
 ~~~~~~~~~~~~~~~~~~~
@@ -366,11 +365,7 @@ catalog.
 The :command:`package-create` command is also useful for autogenerating
 packages from heat templates. In this case you do not need to manually
 specify so many parameters. For more information on automatic package
-composition, please see :ref:`Automatic package composing <compose_package>`
-
+composition, please see :ref:`Automatic package composing <compose_package>`.
 
 Manage categories
 ~~~~~~~~~~~~~~~~~
-
-Use Murano repository
-~~~~~~~~~~~~~~~~~~~~~
