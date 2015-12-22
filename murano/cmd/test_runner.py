@@ -134,13 +134,12 @@ class MuranoTestRunner(object):
         class_to_methods = {}
         for pkg_class_name in package.classes:
             class_obj = package.find_class(pkg_class_name, False)
-
-            obj = class_obj.new(None, exc.object_store)(None)
-            if not helpers.is_instance_of(obj, BASE_CLASS, '*'):
+            base_class = package.find_class(BASE_CLASS)
+            if not base_class.is_compatible(class_obj):
                 LOG.debug('Class {0} is not inherited from {1}. '
                           'Skipping it.'.format(pkg_class_name, BASE_CLASS))
                 continue
-
+            obj = class_obj.new(None, exc.object_store)(None)
             class_to_obj[pkg_class_name] = obj
             # Exclude methods, that are not test cases.
             tests = []
