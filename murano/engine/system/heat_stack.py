@@ -143,7 +143,8 @@ class HeatStack(murano_object.MuranoObject):
                     else(stack_info.creation_time, stack_info.updated_time)
 
                 if (wait_progress and last_stack_timestamps ==
-                        self._last_stack_timestamps):
+                        self._last_stack_timestamps and
+                        last_stack_timestamps != (None, None)):
                     eventlet.sleep(2)
                     continue
 
@@ -214,8 +215,8 @@ class HeatStack(murano_object.MuranoObject):
                 return
             client.stacks.delete(stack_id=self._name)
             self._wait_state(
-                _context,
-                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
+                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
+                wait_progress=True)
         except heat_exc.NotFound:
             LOG.warn(_LW('Stack {0} already deleted?').format(self._name))
 
