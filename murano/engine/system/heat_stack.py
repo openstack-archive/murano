@@ -43,6 +43,7 @@ class HeatStack(murano_object.MuranoObject):
         self._applied = True
         self._description = description
         self._clients = helpers.get_environment(_context).clients
+        self._last_stack_timestamps = (None, None)
 
     def current(self, _context):
         client = self._clients.get_heat_client(_context)
@@ -110,7 +111,7 @@ class HeatStack(murano_object.MuranoObject):
         self._wait_state(context, status_func)
         return status[0]
 
-    def _wait_state(self, context, status_func):
+    def _wait_state(self, context, status_func, wait_progress=False):
         tries = 4
         delay = 1
         while tries > 0:
@@ -133,9 +134,16 @@ class HeatStack(murano_object.MuranoObject):
                     eventlet.sleep(delay)
                     break
 
-                if 'IN_PROGRESS' in status or status == '_':
+                last_stack_timestamps = self._last_stack_timestamps
+                self._last_stack_timestamps = (None, None) if not stack_info \
+                    else(stack_info.creation_time, stack_info.updated_time)
+
+                if 'IN_PROGRESS' in status or status == '_' or (
+                        wait_progress and last_stack_timestamps ==
+                        self._last_stack_timestamps):
                     eventlet.sleep(2)
                     continue
+
                 if not status_func(status):
                     reason = ': {0}'.format(
                         stack_info.stack_status_reason) if stack_info else ''
@@ -190,7 +198,7 @@ class HeatStack(murano_object.MuranoObject):
                     disable_rollback=True)
                 self._wait_state(
                     _context,
-                    lambda status: status == 'UPDATE_COMPLETE')
+                    lambda status: status == 'UPDATE_COMPLETE', True)
             else:
                 self.delete(_context)
 
