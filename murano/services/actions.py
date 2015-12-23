@@ -67,7 +67,9 @@ class ActionServices(object):
         return task_id
 
     @staticmethod
-    def execute(action_id, session, unit, token, args={}):
+    def execute(action_id, session, unit, token, args=None):
+        if args is None:
+            args = {}
         environment = actions_db.get_environment(session, unit)
         action = ActionServices.find_action(session.description, action_id)
         if action is None:
