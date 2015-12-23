@@ -151,7 +151,8 @@ class HeatStack(object):
                     else(stack_info.creation_time, stack_info.updated_time)
 
                 if (wait_progress and last_stack_timestamps ==
-                        self._last_stack_timestamps):
+                        self._last_stack_timestamps and
+                        last_stack_timestamps != (None, None)):
                     eventlet.sleep(2)
                     continue
 
@@ -223,7 +224,8 @@ class HeatStack(object):
                 return
             client.stacks.delete(stack_id=self._name)
             self._wait_state(
-                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'))
+                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
+                wait_progress=True)
         except heat_exc.NotFound:
             LOG.warning(_LW('Stack {stack_name} already deleted?')
                         .format(stack_name=self._name))
