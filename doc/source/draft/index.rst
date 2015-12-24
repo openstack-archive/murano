@@ -43,6 +43,11 @@ Introduction to Murano
 Using Murano
 ~~~~~~~~~~~~
 
+This guide provides murano end users with information on how they can use the
+Application Catalog directly from the Dashboard and through the command-line
+interface (CLI). The screenshots provided in this guide are of the Liberty
+release.
+
 .. toctree::
    :maxdepth: 2
 
