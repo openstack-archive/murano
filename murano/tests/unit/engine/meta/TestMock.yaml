@@ -11,6 +11,10 @@ Properties:
     Default: 'Mock from property'
 
 Methods:
+  initialize:
+    Body:
+      - $.originalClass: new(TestMocksFixture)
+
   mock1:
     Body:
       - Return: 'This is mock1'
@@ -19,63 +23,62 @@ Methods:
     Body:
       - inject(TestMocksFixture, simpleMethod1, $this, mock1)
 
-      - $originalClass: new(TestMocksFixture)
-      - $returnValue: $originalClass.simpleMethod1()
-      - trace($returnValue)
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('This is mock1', $output)
 
   testInjectObjectWithString:
     Body:
-      - $originalClass: new(TestMocksFixture)
-      - inject($originalClass, simpleMethod1, $this, mock1)
+      - inject($.originalClass, simpleMethod1, $this, mock1)
 
-      - $returnValue: $originalClass.simpleMethod1()
-      - trace($returnValue)
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('This is mock1', $output)
 
   testInjectMethodWithYaqlExpr:
     Body:
-      - $originalClass: new(TestMocksFixture)
       # Calling original method without mocking
-      - trace($originalClass.simpleMethod1())
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('method1', $output)
 
       - $mockText: 'I am mock'
-      - inject(TestMocksFixture, simpleMethod1, trace($mockText))
+      - inject(TestMocksFixture, simpleMethod1, $mockText)
 
       # Calling original method after mocking
-      - $originalClass.simpleMethod1()
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('I am mock', $output)
 
   testInjectMethodWithYaqlExpr2:
     Body:
-      - $originalClass: new(TestMocksFixture)
       # Calling original method without mocking
-      - $output: $originalClass.simpleMethod1()
+      - $output: $.originalClass.simpleMethod1()
       - $.assertEqual('method1', $output)
 
       - inject(TestMocksFixture, simpleMethod1, $.logMessage)
 
       # Calling mocked method
-      - $output: $originalClass.simpleMethod1()
+      - $output: $.originalClass.simpleMethod1()
       - $.assertEqual('Mock from property', $output)
 
   testInjectObjectWithYaqlExpr:
     Body:
-      - $originalClass: new(TestMocksFixture)
       # Calling original method without mocking
-      - trace($originalClass.simpleMethod1())
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('method1', $output)
 
       - $mockText: 'I am mock'
-      - inject($originalClass, simpleMethod1, trace($mockText))
+      - inject($.originalClass, simpleMethod1, $mockText)
 
       # Calling original method after mocking
-      - $originalClass.simpleMethod1()
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('I am mock', $output)
 
   testWithoriginal:
     Body:
-      - $originalClass: new(TestMocksFixture)
-      - inject(TestMocksFixture, simpleMethod1, withOriginal(t => $originalClass.someProperty) -> trace($t))
-      - $originalClass.simpleMethod1()
+      - inject(TestMocksFixture, simpleMethod1, withOriginal(t => $.originalClass.someProperty) -> $t)
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual(DEFAULT, $output)
 
   testOriginalMethod:
     Body:
-      - $originalClass: new(TestMocksFixture)
       - inject(TestMocksFixture, simpleMethod1, originalMethod())
-      - trace($originalClass.simpleMethod1())
+      - $output: $.originalClass.simpleMethod1()
+      - $.assertEqual('method1', $output)

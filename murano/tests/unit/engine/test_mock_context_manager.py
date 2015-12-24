@@ -112,27 +112,21 @@ class TestMockYaqlFunctions(test_case.DslTestCase):
 
     def test_inject_method_with_str(self):
         self.runner.testInjectMethodWithString()
-        self.assertEqual(['This is mock1'], self.traces)
 
     def test_inject_object_with_str(self):
         self.runner.testInjectObjectWithString()
-        self.assertEqual(['This is mock1'], self.traces)
 
     def test_inject_method_with_yaql_expr(self):
         self.runner.testInjectMethodWithYaqlExpr()
-        self.assertEqual(['method1', 'I am mock'], self.traces)
 
     def test_inject_method_with_yaql_expr2(self):
         self.runner.testInjectMethodWithYaqlExpr2()
 
     def test_inject_object_with_yaql_expr(self):
         self.runner.testInjectObjectWithYaqlExpr()
-        self.assertEqual(['method1', 'I am mock'], self.traces)
 
     def test_with_original(self):
         self.runner.testWithoriginal()
-        self.assertEqual(['DEFAULT'], self.traces)
 
     def test_original_method(self):
         self.runner.testOriginalMethod()
-        self.assertEqual(['method1'], self.traces)
