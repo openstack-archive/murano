@@ -145,9 +145,10 @@ def inject_method_with_yaql_expr(context, target, target_method, expr):
     def payload_adapter(__super, __context, __sender, *args, **kwargs):
         new_context = context.create_child_context()
         new_context[constants.CTX_ORIGINAL_CONTEXT] = __context
+        mock_obj = context[constants.CTX_THIS]
         new_context.register_function(lambda: __super(*args, **kwargs),
                                       name='originalMethod')
-        return expr(new_context, __sender, *args, **kwargs)
+        return expr(new_context, mock_obj, *args, **kwargs)
 
     result_fd.payload = payload_adapter
     result_fd.insert_parameter('__super', yaqltypes.Super())
