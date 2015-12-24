@@ -58,8 +58,8 @@ class StatsCollectingService(service.Service):
     def update_stats(self):
         LOG.debug("Updating statistic information.")
         LOG.debug("Stats object: {stats}".format(stats=v1.stats))
-        LOG.debug("Stats: Requests:{amount}  Errors: {error}"
-                  "Ave.Res.Time {time:2.4f}\n Per tenant: {req_count}".format(
+        LOG.debug("Stats: (Requests: {amount}  Errors: {error}  "
+                  "Ave.Res.Time {time:2.4f}\n Per tenant: {req_count})".format(
                       amount=v1.stats.request_count,
                       error=v1.stats.error_count,
                       time=v1.stats.average_time,
