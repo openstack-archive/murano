@@ -67,7 +67,7 @@ Export paths where additional dib elements are located:
 
     export ELEMENTS_PATH=$GITDIR/murano/contrib/elements:$GITDIR/murano-agent/contrib/elements
 
-
+Add passenv = ELEMENTS_PATH at testenv:venv section in tox.ini.
 And build Ubuntu-based image with the murano agent:
 
 .. code-block:: console
