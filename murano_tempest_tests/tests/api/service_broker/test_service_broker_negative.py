@@ -13,6 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import unittest
+
 from tempest import test
 from tempest_lib import exceptions
 
@@ -22,12 +24,15 @@ from murano_tempest_tests import utils
 
 class ServiceBrokerNegativeTest(base.BaseServiceBrokerAdminTest):
 
+    # NOTE(freerunner): Tempest will fail with this test, because its
+    # _parse_resp function trying to parse a nullable JSON.
+    # https://review.openstack.org/#/c/260659/
+    # XFail until this one merged and tempest-lib released.
+    @unittest.expectedFailure
     @test.attr(type=['gate', 'negative'])
     def test_get_status_with_not_present_instance_id(self):
         not_present_instance_id = utils.generate_uuid()
-        # TODO(freerunner) Tempest REST client can't catch code 410 yet.
-        # Need to update the test, when tempest-lib will have this code.
         self.assertRaises(
-            exceptions.UnexpectedResponseCode,
+            exceptions.Gone,
             self.service_broker_client.get_last_status,
             not_present_instance_id)
