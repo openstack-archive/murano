@@ -80,6 +80,7 @@ Developing Applications
    appdev-guide/hot_packages
    appdev-guide/murano_pl
    appdev-guide/murano_packages
+   appdev-guide/app_migrating
    appdev-guide/examples
    appdev-guide/use_cases
    appdev-guide/faq
