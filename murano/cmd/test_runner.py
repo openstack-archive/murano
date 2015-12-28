@@ -124,13 +124,12 @@ class MuranoTestRunner(object):
                   '\n{1}'.format(methods_count, '\n'.join(methods)))
         return methods_to_run
 
-    def _get_all_test_methods(self, exc, package):
-        """Initiate objects of package classes and get test methods.
+    def _get_test_cases_by_classes(self, package):
+        """Build valid test cases list for each class in the provided package.
 
            Check, if test class and test case name are valid.
-           Return class mappings to objects and test methods.
+           Return class mappings to test cases.
         """
-        class_to_obj = {}
         class_to_methods = {}
         for pkg_class_name in package.classes:
             class_obj = package.find_class(pkg_class_name, False)
@@ -139,8 +138,7 @@ class MuranoTestRunner(object):
                 LOG.debug('Class {0} is not inherited from {1}. '
                           'Skipping it.'.format(pkg_class_name, BASE_CLASS))
                 continue
-            obj = class_obj.new(None, exc.object_store)(None)
-            class_to_obj[pkg_class_name] = obj
+
             # Exclude methods, that are not test cases.
             tests = []
             valid_test_name = TEST_CASE_NAME
@@ -149,7 +147,7 @@ class MuranoTestRunner(object):
                 if valid_test_name.match(m):
                     tests.append(m)
             class_to_methods[pkg_class_name] = tests
-        return class_to_methods, class_to_obj
+        return class_to_methods
 
     def _call_service_method(self, name, exc, obj):
         if name in obj.type.methods:
@@ -216,14 +214,9 @@ class MuranoTestRunner(object):
         with package_loader.CombinedPackageLoader(
                 murano_client_factory, client.tenant_id) as pkg_loader:
             engine.get_plugin_loader().register_in_loader(pkg_loader)
-            exc = executor.MuranoDslExecutor(
-                pkg_loader,
-                mock_context_manager.MockContextManager(),
-                test_env)
 
             package = self._load_package(pkg_loader, provided_pkg_name)
-            class_to_methods, class_to_obj = self._get_all_test_methods(
-                exc, package)
+            class_to_methods = self._get_test_cases_by_classes(package)
             run_set = self._get_methods_to_run(package,
                                                tests_to_run,
                                                class_to_methods)
@@ -234,18 +227,25 @@ class MuranoTestRunner(object):
                 LOG.error(msg)
                 self.error(msg)
 
-            for pkg_class, methods in run_set.iteritems():
-                obj = class_to_obj[pkg_class]
-                for m in methods:
-                    self._call_service_method('setUp', exc, obj)
+            for pkg_class, test_cases in run_set.iteritems():
+                for m in test_cases:
+                    # Create new executor for each test case to provide
+                    # pure test environment
+                    executer = executor.MuranoDslExecutor(
+                        pkg_loader,
+                        mock_context_manager.MockContextManager(),
+                        test_env)
+                    obj = package.find_class(pkg_class, False).new(
+                        None, executer.object_store)(None)
+                    self._call_service_method('setUp', executer, obj)
                     obj.type.methods[m].usage = 'Action'
 
                     test_env.start()
                     try:
-                        obj.type.invoke(m, exc, obj, (), {})
+                        obj.type.invoke(m, executer, obj, (), {})
                         LOG.debug('\n.....{0}.{1}.....OK'.format(obj.type.name,
                                                                  m))
-                        self._call_service_method('tearDown', exc, obj)
+                        self._call_service_method('tearDown', executer, obj)
                     except Exception:
                         LOG.exception('\n.....{0}.{1}.....FAILURE\n'
                                       ''.format(obj.type.name, m))
