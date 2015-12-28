@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import itertools
+import six
 import weakref
 
 import eventlet
@@ -144,7 +145,7 @@ class MuranoDslExecutor(object):
     def _log_method(self, context, args, kwargs):
         method = helpers.get_current_method(context)
         param_gen = itertools.chain(
-            (unicode(arg) for arg in args),
+            (six.text_type(arg) for arg in args),
             (u'{0} => {1}'.format(name, value)
              for name, value in kwargs.iteritems()))
         params_str = u', '.join(param_gen)

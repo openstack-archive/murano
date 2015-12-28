@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from keystoneclient import exceptions as ks_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -254,7 +256,7 @@ class EnvironmentServices(object):
         elif isinstance(data, list):
             return [EnvironmentServices._objectify(v, replacements)
                     for v in data]
-        elif isinstance(data, (str, unicode)):
+        elif isinstance(data, six.string_types):
             for key, value in replacements.iteritems():
                 data = data.replace('%' + key + '%', value)
         return data

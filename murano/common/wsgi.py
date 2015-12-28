@@ -18,6 +18,7 @@
 import datetime
 import errno
 import re
+import six
 import socket
 import sys
 import time
@@ -515,7 +516,7 @@ class JSONDictSerializer(DictSerializer):
             if isinstance(obj, datetime.datetime):
                 _dtime = obj - datetime.timedelta(microseconds=obj.microsecond)
                 return _dtime.isoformat()
-            return unicode(obj)
+            return six.text_type(obj)
         if result:
             data.body = jsonutils.dumps(result)
         return jsonutils.dumps(data, default=sanitizer)
@@ -882,7 +883,7 @@ class JSONPatchDeserializer(TextDeserializer):
 
         if not allowed_methods:
             msg = _("Attribute '{0}' is invalid").format(change_path)
-            raise webob.exc.HTTPForbidden(explanation=unicode(msg))
+            raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
 
         if change_op not in allowed_methods:
             msg = _("Method '{method}' is not allowed for a path with name "
@@ -891,7 +892,7 @@ class JSONPatchDeserializer(TextDeserializer):
                                       name=change_path,
                                       ops=', '.join(allowed_methods))
 
-            raise webob.exc.HTTPForbidden(explanation=unicode(msg))
+            raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
 
         property_to_update = {change_path: change['value']}
 

@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 import sys
 import uuid
 
@@ -57,7 +58,7 @@ class TypeScheme(object):
             if value is None:
                 return None
             try:
-                return unicode(value)
+                return six.text_type(value)
             except Exception:
                 raise exceptions.ContractViolationException(
                     'Value {0} violates string() contract'.format(
@@ -318,4 +319,4 @@ class TypeScheme(object):
 def format_scalar(value):
     if isinstance(value, basestring):
         return "'{0}'".format(value)
-    return unicode(value)
+    return six.text_type(value)

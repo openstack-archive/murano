@@ -17,6 +17,7 @@ import base64
 import collections
 import random
 import re
+import six
 import string
 import time
 
@@ -81,7 +82,7 @@ def _convert_macro_parameter(macro, mappings):
 
     def replace(match):
         replaced[0] = True
-        return unicode(mappings.get(match.group(1)))
+        return six.text_type(mappings.get(match.group(1)))
 
     result = re.sub('{(\\w+?)}', replace, macro)
     if replaced[0]:
