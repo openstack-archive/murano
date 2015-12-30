@@ -1,850 +1,440 @@
-# Translations template for murano-api.
-# Copyright (C) 2014 ORGANIZATION
-# This file is distributed under the same license as the murano-api project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2014.
+# Translations template for murano.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the murano project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: murano-api 0.4.1.dev1.gf4e754d\n"
+"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2014-01-20 13:17+0400\n"
+"POT-Creation-Date: 2015-12-30 06:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 1.3\n"
+"Generated-By: Babel 2.1.1\n"
 
-#: murano/api/v1/environments.py:33
-msgid "Environments:List"
+#: murano/utils.py:33
+msgid "Environment with id {env_id} not found"
 msgstr ""
 
-#: murano/api/v1/environments.py:43
-msgid "Environments:Create <Body {0}>"
+#: murano/utils.py:40
+msgid "User is not authorized to access these tenant resources"
 msgstr ""
 
-#: murano/api/v1/environments.py:51
-msgid "Environments:Show <Id: {0}>"
+#: murano/utils.py:50
+msgid "Session <SessionId {id}> is not found"
 msgstr ""
 
-#: murano/api/v1/environments.py:80
-msgid "Environments:Update <Id: {0}, Body: {1}>"
+#: murano/utils.py:55
+msgid ""
+"Session <SessionId {session_id}> is not tied with Environment <EnvId "
+"{environment_id}>"
 msgstr ""
 
-#: murano/api/v1/environments.py:100
-msgid "Environments:Delete <Id: {0}>"
+#: murano/utils.py:79
+msgid "Environment Template with id {id} not found"
 msgstr ""
 
-#: murano/api/v1/services.py:44
-msgid "Services:Get <EnvId: {0}, Path: {1}>"
+#: murano/utils.py:86
+msgid "User is not authorized to access this tenant resources"
 msgstr ""
 
-#: murano/api/v1/services.py:61
-msgid "Services:Post <EnvId: {0}, Path: {2}, Body: {1}>"
+#: murano/utils.py:99
+msgid "X-Configuration-Session header which indicates to the session is missed"
 msgstr ""
 
-#: murano/api/v1/services.py:75
-msgid "Services:Put <EnvId: {0}, Path: {2}, Body: {1}>"
+#: murano/utils.py:110
+msgid "Session <SessionId {0}> is not found"
 msgstr ""
 
-#: murano/api/v1/services.py:90
-msgid "Services:Put <EnvId: {0}, Path: {1}>"
+#: murano/utils.py:115 murano/api/v1/sessions.py:76
+#: murano/api/v1/sessions.py:122
+msgid ""
+"Session <SessionId {0}> is invalid: environment has been updated or "
+"updating right now with other session"
 msgstr ""
 
-#: murano/api/v1/sessions.py:30
-msgid "Session:Configure <EnvId: {0}>"
+#: murano/utils.py:122
+msgid "Session <SessionId {0}> is already in deployment state"
 msgstr ""
 
-#: murano/api/v1/sessions.py:58
-msgid "Session:Show <SessionId: {0}>"
+#: murano/api/middleware/context.py:24
+msgid "Role used to identify an authenticated user as administrator."
 msgstr ""
 
-#: murano/api/v1/sessions.py:86
-msgid "Session:Delete <SessionId: {0}>"
+#: murano/api/middleware/ext_context.py:59
+msgid "Authorization required"
 msgstr ""
 
-#: murano/api/v1/sessions.py:118
-msgid "Session:Deploy <SessionId: {0}>"
+#: murano/api/middleware/ext_context.py:63
+msgid "Your credentials are wrong. Please try again"
 msgstr ""
 
-#: murano/common/config.py:64
-msgid "A boolean that determines if the database will be automatically created."
+#: murano/api/v1/actions.py:75
+msgid ""
+"Result for task with environment_id: {env_id} and task_id:{task_id} was "
+"not found."
 msgstr ""
 
-#: murano/common/config.py:131
-msgid "Invalid syslog facility"
+#: murano/api/v1/catalog.py:51
+msgid "Content-Type must be '{type}'"
 msgstr ""
 
-#: murano/common/config.py:205
+#: murano/api/v1/catalog.py:93
+msgid "Uploading file is too large. The limit is {0} Mb"
+msgstr ""
+
+#: murano/api/v1/catalog.py:98
+msgid ""
+"'multipart/form-data' request body should contain 1 or 2 parts: json "
+"string and zip archive. Current body consists of {amount} part(s)"
+msgstr ""
+
+#: murano/api/v1/catalog.py:114
+msgid "There is no file package with application description"
+msgstr ""
+
+#: murano/api/v1/catalog.py:129
+msgid "Limit param must be an integer"
+msgstr ""
+
+#: murano/api/v1/catalog.py:134
+msgid "Limit param must be positive"
+msgstr ""
+
+#: murano/api/v1/catalog.py:160
+msgid "Request body must be a JSON array of operation objects."
+msgstr ""
+
+#: murano/api/v1/catalog.py:214
+msgid "Package schema is not valid: {reason}"
+msgstr ""
+
+#: murano/api/v1/catalog.py:228
+msgid "Uploading file can't be empty"
+msgstr ""
+
+#: murano/api/v1/catalog.py:245
+msgid "Package with specified full name is already registered"
+msgstr ""
+
+#: murano/api/v1/catalog.py:251
+msgid "Couldn't load package from file: {reason}"
+msgstr ""
+
+#: murano/api/v1/catalog.py:319
+msgid "Bad value passed to filter. Got {key}, exected:{valid}"
+msgstr ""
+
+#: murano/api/v1/catalog.py:329
+msgid "Invalid sort key: {sort_key}. Must be one of the following: {available}"
+msgstr ""
+
+#: murano/api/v1/catalog.py:336
+msgid "Invalid sort direction: {0}"
+msgstr ""
+
+#: murano/api/v1/catalog.py:365
+msgid "Category name should be 80 characters maximum"
+msgstr ""
+
+#: murano/api/v1/catalog.py:371
+msgid "Category with specified name is already exist"
+msgstr ""
+
+#: murano/api/v1/catalog.py:381
+msgid ""
+"It's impossible to delete categories assigned to the package, uploaded to"
+" the catalog"
+msgstr ""
+
+#: murano/api/v1/environments.py:67
+msgid "Please, specify a name of the environment to create"
+msgstr ""
+
+#: murano/api/v1/environments.py:73
+msgid "Environment name should be 255 characters maximum"
+msgstr ""
+
+#: murano/api/v1/environments.py:81 murano/api/v1/environments.py:136
+#: murano/api/v1/templates.py:191 murano/api/v1/templates.py:241
+msgid "Environment with specified name already exists"
+msgstr ""
+
+#: murano/api/v1/environments.py:140
+msgid "Environment name must contain at least one non-white space symbol"
+msgstr ""
+
+#: murano/api/v1/services.py:72 murano/api/v1/services.py:95
+msgid "Request body is empty: please, provide application object model"
+msgstr ""
+
+#: murano/api/v1/sessions.py:46
+msgid ""
+"Could not open session for environment <EnvId: {env_id}>, environment has"
+" deploying status."
+msgstr ""
+
+#: murano/api/v1/sessions.py:69 murano/api/v1/sessions.py:95
+msgid ""
+"User <UserId {usr_id}> is not authorized to access session <SessionId "
+"{s_id}>."
+msgstr ""
+
+#: murano/api/v1/sessions.py:102
+msgid "Session <SessionId: {s_id}> is in deploying state and could not be deleted"
+msgstr ""
+
+#: murano/api/v1/sessions.py:129
+msgid ""
+"Session <SessionId {s_id}> is already deployed or deployment is in "
+"progress"
+msgstr ""
+
+#: murano/api/v1/template_applications.py:69
+msgid "The environment template {templ_id} does not exist"
+msgstr ""
+
+#: murano/api/v1/template_applications.py:93
+#: murano/api/v1/template_applications.py:121
+#: murano/api/v1/template_applications.py:151
+#: murano/api/v1/template_applications.py:174
+msgid "The template does not exist {templ_id}"
+msgstr ""
+
+#: murano/api/v1/templates.py:87
+msgid "Env Template with specified name already exists"
+msgstr ""
+
+#: murano/api/v1/templates.py:131
+msgid "Environment Template must contain at least one non-white space symbol"
+msgstr ""
+
+#: murano/api/v1/templates.py:136
+msgid "EnvTemplate body is incorrect"
+msgstr ""
+
+#: murano/api/v1/templates.py:261
+msgid "EnvTemplate <TempId {temp_id}> is not found"
+msgstr ""
+
+#: murano/api/v1/templates.py:271
+msgid "Please, specify a name of the environment template."
+msgstr ""
+
+#: murano/api/v1/templates.py:277
+msgid "Environment template name should be 255 characters maximum"
+msgstr ""
+
+#: murano/cmd/test_runner.py:75
+msgid ""
+"Local package is not found since \"load-packages-from\" engine parameter "
+"is not provided and specified packages is not loaded to murano-api"
+msgstr ""
+
+#: murano/cmd/test_runner.py:79
+msgid ""
+"Specified package is not found: {0} were scanned together with murano "
+"database"
+msgstr ""
+
+#: murano/cmd/test_runner.py:226
+msgid "No tests found for execution."
+msgstr ""
+
+#: murano/common/app_loader.py:55
 #, python-format
-msgid "Loading %(app_name)s from %(conf_file)s"
+msgid "Unable to locate paste config file for %s."
 msgstr ""
 
-#: murano/common/config.py:216
+#: murano/common/app_loader.py:89
 #, python-format
 msgid ""
-"Unable to load %(app_name)s from configuration file %(conf_file)s.\n"
+"Unable to load %(app_name)s from configuration file %(conf_file)s. \n"
 "Got: %(e)r"
 msgstr ""
 
-#: murano/common/service.py:101
+#: murano/common/config.py:187
+msgid "Statistics collection interval in minutes.Default value is 5 minutes."
+msgstr ""
+
+#: murano/common/config.py:193
+msgid "Disallow the use of murano-agent"
+msgstr ""
+
+#: murano/common/config.py:195
+msgid "Path to class configuration files"
+msgstr ""
+
+#: murano/common/config.py:197
+msgid "Create resources using trust token rather than user's token"
+msgstr ""
+
+#: murano/common/config.py:200
+msgid "Enable model policy enforcer using Congress"
+msgstr ""
+
+#: murano/common/config.py:202
+msgid "Time for waiting for a response from murano agent during the deployment"
+msgstr ""
+
+#: murano/common/config.py:205
 msgid ""
-"Got result message from orchestration engine:\n"
-"{0}"
+"List of directories to load local packages from. If not provided, "
+"packages will be loaded by API"
 msgstr ""
 
-#: murano/common/service.py:105
-msgid "Result for environment {0} is dropped. Environment is deleted"
-msgstr ""
-
-#: murano/common/service.py:112
+#: murano/common/config.py:230
 msgid ""
-"Environment result could not be handled, specified environment does not "
-"found in database"
+"The service to store murano packages: murano (stands for legacy behavior "
+"using murano-api) or glance (stands for Glance V3 artifact repository)"
 msgstr ""
 
-#: murano/common/service.py:162
+#: murano/common/utils.py:75 murano/common/utils.py:137
+msgid "Source object or path is malformed"
+msgstr ""
+
+#: murano/common/wsgi.py:111
+#, python-format
 msgid ""
-"Got report message from orchestration engine:\n"
-"{0}"
+"Could not bind to %(host)s:%(port)s after trying for 30 seconds: Address "
+"already in use."
 msgstr ""
 
-#: murano/db/session.py:38
-msgid "auto-creating DB"
+#: murano/common/wsgi.py:363
+msgid "Exception handling resource: {0}"
 msgstr ""
 
-#: murano/db/session.py:41
-msgid "not auto-creating DB"
-msgstr ""
-
-#: murano/openstack/common/eventlet_backdoor.py:141
-#, python-format
-msgid "Eventlet backdoor listening on %(port)s for process %(pid)d"
-msgstr ""
-
-#: murano/openstack/common/exception.py:103
-msgid "Uncaught exception"
-msgstr ""
-
-#: murano/openstack/common/excutils.py:62
-#, python-format
-msgid "Original exception being dropped: %s"
-msgstr ""
-
-#: murano/openstack/common/excutils.py:90
-#, python-format
-msgid "Unexpected exception occurred %d time(s)... retrying."
-msgstr ""
-
-#: murano/openstack/common/fileutils.py:64
-#, python-format
-msgid "Reloading cached file %s"
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:100
-#, python-format
-msgid "Could not release the acquired lock `%s`"
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:166
-#, python-format
-msgid "Got semaphore \"%(lock)s\""
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:175
-#, python-format
-msgid "Attempting to grab file lock \"%(lock)s\""
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:185
-#, python-format
-msgid "Created lock path: %s"
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:203
-#, python-format
-msgid "Got file lock \"%(lock)s\" at %(path)s"
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:207
-#, python-format
-msgid "Released file lock \"%(lock)s\" at %(path)s"
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:244
-#, python-format
-msgid "Got semaphore / lock \"%(function)s\""
-msgstr ""
-
-#: murano/openstack/common/lockutils.py:248
-#, python-format
-msgid "Semaphore / lock released \"%(function)s\""
-msgstr ""
-
-#: murano/openstack/common/log.py:244
-#, python-format
-msgid "Deprecated: %s"
-msgstr ""
-
-#: murano/openstack/common/log.py:336
-#, python-format
-msgid "Error loading logging config %(log_config)s: %(err_msg)s"
-msgstr ""
-
-#: murano/openstack/common/log.py:386
-#, python-format
-msgid "syslog facility must be one of: %s"
-msgstr ""
-
-#: murano/openstack/common/log.py:556
-#, python-format
-msgid "Fatal call to deprecated config: %(msg)s"
-msgstr ""
-
-#: murano/openstack/common/loopingcall.py:84
-#, python-format
-msgid "task run outlasted interval by %s sec"
-msgstr ""
-
-#: murano/openstack/common/loopingcall.py:91
-msgid "in fixed duration looping call"
-msgstr ""
-
-#: murano/openstack/common/loopingcall.py:131
-#, python-format
-msgid "Dynamic looping call sleeping for %.02f seconds"
-msgstr ""
-
-#: murano/openstack/common/loopingcall.py:138
-msgid "in dynamic looping call"
-msgstr ""
-
-#: murano/openstack/common/service.py:103
-#: murano/openstack/common/service.py:271
-msgid "Full set of CONF:"
-msgstr ""
-
-#: murano/openstack/common/service.py:112
-#: murano/openstack/common/service.py:214
-#, python-format
-msgid "Caught %s, exiting"
-msgstr ""
-
-#: murano/openstack/common/service.py:123
-msgid "Exception during rpc cleanup."
-msgstr ""
-
-#: murano/openstack/common/service.py:159
-msgid "Parent process has died unexpectedly, exiting"
-msgstr ""
-
-#: murano/openstack/common/service.py:196
-msgid "Forking too fast, sleeping"
-msgstr ""
-
-#: murano/openstack/common/service.py:219
-msgid "Unhandled exception"
-msgstr ""
-
-#: murano/openstack/common/service.py:226
-#, python-format
-msgid "Started child %d"
-msgstr ""
-
-#: murano/openstack/common/service.py:236
-#, python-format
-msgid "Starting %d workers"
-msgstr ""
-
-#: murano/openstack/common/service.py:253
-#, python-format
-msgid "Child %(pid)d killed by signal %(sig)d"
-msgstr ""
-
-#: murano/openstack/common/service.py:257
-#, python-format
-msgid "Child %(pid)s exited with status %(code)d"
-msgstr ""
-
-#: murano/openstack/common/service.py:261
-#, python-format
-msgid "pid %d not in child list"
-msgstr ""
-
-#: murano/openstack/common/service.py:289
-#, python-format
-msgid "Caught %s, stopping children"
-msgstr ""
-
-#: murano/openstack/common/service.py:300
-#, python-format
-msgid "Waiting on %d children to exit"
-msgstr ""
-
-#: murano/openstack/common/sslutils.py:52
-#, python-format
-msgid "Unable to find cert_file : %s"
-msgstr ""
-
-#: murano/openstack/common/sslutils.py:55
-#, python-format
-msgid "Unable to find ca_file : %s"
-msgstr ""
-
-#: murano/openstack/common/sslutils.py:58
-#, python-format
-msgid "Unable to find key_file : %s"
-msgstr ""
-
-#: murano/openstack/common/sslutils.py:61
-msgid ""
-"When running server in SSL mode, you must specify both a cert_file and "
-"key_file option value in your configuration file"
-msgstr ""
-
-#: murano/openstack/common/sslutils.py:100
-#, python-format
-msgid "Invalid SSL version : %s"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:110
-#, python-format
-msgid "Could not bind to %(host)s:%(port)s after trying for 30 seconds"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:372
+#: murano/common/wsgi.py:412
 msgid "Unsupported Content-Type"
 msgstr ""
 
-#: murano/openstack/common/wsgi.py:375
+#: murano/common/wsgi.py:415
 msgid "Malformed request body"
 msgstr ""
 
-#: murano/openstack/common/wsgi.py:660
-msgid "Empty body provided in request"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:666
-msgid "Unrecognized Content-Type provided in request"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:670
-msgid "No Content-Type provided in request"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:676
-msgid "Unable to deserialize body as provided Content-Type"
-msgstr ""
-
-#: murano/openstack/common/wsgi.py:726
+#: murano/common/wsgi.py:818 murano/common/wsgi.py:838
 msgid "cannot understand JSON"
 msgstr ""
 
-#: murano/openstack/common/wsgi.py:750
+#: murano/common/wsgi.py:844
+msgid "Operations must be JSON objects."
+msgstr ""
+
+#: murano/common/wsgi.py:860
+#, python-format
+msgid "Operation \"%s\" requires a member named \"value\"."
+msgstr ""
+
+#: murano/common/wsgi.py:868 murano/common/wsgi.py:875
+#, python-format
+msgid "Unable to find '%s' in JSON Schema change"
+msgstr ""
+
+#: murano/common/wsgi.py:884
+msgid "Attribute '{0}' is invalid"
+msgstr ""
+
+#: murano/common/wsgi.py:888
+msgid ""
+"Method '{method}' is not allowed for a path with name '{name}'. Allowed "
+"operations are: '{ops}'"
+msgstr ""
+
+#: murano/common/wsgi.py:929
+#, python-format
+msgid "Pointer `%s` does not start with \"/\"."
+msgstr ""
+
+#: murano/common/wsgi.py:932
+#, python-format
+msgid "Pointer `%s` contains adjacent \"/\"."
+msgstr ""
+
+#: murano/common/wsgi.py:935
+#, python-format
+msgid "Pointer `%s` end with \"/\"."
+msgstr ""
+
+#: murano/common/wsgi.py:938
+#, python-format
+msgid "Pointer `%s` does not contains valid token."
+msgstr ""
+
+#: murano/common/wsgi.py:941
+#, python-format
+msgid "Pointer `%s` contains \"~\" not part of a recognized escape sequence."
+msgstr ""
+
+#: murano/common/wsgi.py:954
+msgid "Nested paths are not allowed"
+msgstr ""
+
+#: murano/common/wsgi.py:978
 msgid "cannot understand XML"
 msgstr ""
 
-#: murano/openstack/common/db/exception.py:44
-msgid "Invalid Parameter: Unicode is not supported by the current database."
+#: murano/db/catalog/api.py:46
+msgid "Package id '{pkg_id}' not found"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/session.py:508
-msgid "DB exception wrapped."
+#: murano/db/catalog/api.py:57
+msgid "Package '{pkg_id}' is not owned by tenant '{tenant}'"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/session.py:570
-#, python-format
-msgid "Got mysql server has gone away: %s"
+#: murano/db/catalog/api.py:63
+msgid "Package '{pkg_id}' is not public and not owned by tenant '{tenant}' "
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/session.py:650
-#, python-format
-msgid "SQL connection failed. %s attempts left."
+#: murano/db/catalog/api.py:96
+msgid "Category '{name}' doesn't exist"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:49
-msgid "Sort key supplied was not valid."
+#: murano/db/catalog/api.py:188
+msgid "Value '{value}' of property '{path}' does not exist."
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:88
-msgid "Id not in sort_keys; is sort_keys unique?"
+#: murano/db/catalog/api.py:422 murano/db/catalog/api.py:476
+msgid "Category id '{id}' not found"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:110
-msgid "Unknown sort direction, must be 'desc' or 'asc'"
-msgstr ""
-
-#: murano/openstack/common/db/sqlalchemy/utils.py:181
-#, python-format
+#: murano/db/catalog/api.py:509
 msgid ""
-"Please specify column %s in col_name_col_instance param. It is required "
-"because column has unsupported type by sqlite)."
+"Class with the same full name is already registered in the visibility "
+"scope"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:187
-#, python-format
-msgid ""
-"col_name_col_instance param has wrong type of column instance for column "
-"%s It should be instance of sqlalchemy.Column."
+#: murano/db/catalog/api.py:523
+msgid "Package with the same Name is already made public"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:230
-#, python-format
-msgid "Deleting duplicated row with id: %(id)s from table: %(table)s"
+#: murano/db/services/core_services.py:91
+#: murano/db/services/core_services.py:111
+msgid "Environment Template <EnvId {id}> is not found"
 msgstr ""
 
-#: murano/openstack/common/db/sqlalchemy/utils.py:252
-msgid "Unsupported id columns type"
+#: murano/db/services/core_services.py:141
+#: murano/db/services/core_services.py:222
+msgid "Environment Template <EnvId {0}> is not found"
 msgstr ""
 
-#: murano/openstack/common/notifier/api.py:129
-#, python-format
-msgid "%s not in valid priorities"
+#: murano/db/services/core_services.py:167
+msgid "Environment <EnvId {0}> is not found"
 msgstr ""
 
-#: murano/openstack/common/notifier/api.py:145
-#, python-format
-msgid ""
-"Problem '%(e)s' attempting to send to notification system. "
-"Payload=%(payload)s"
+#: murano/db/services/environment_templates.py:74
+msgid "Environment template specified name already exists"
 msgstr ""
 
-#: murano/openstack/common/notifier/api.py:164
-#, python-format
-msgid "Failed to load notifier %s. These notifications will not be sent."
+#: murano/policy/model_policy_enforcer.py:104
+msgid "Murano object model validation failed: {0}"
 msgstr ""
 
-#: murano/openstack/common/notifier/rpc_notifier.py:45
-#: murano/openstack/common/notifier/rpc_notifier2.py:51
-#, python-format
-msgid "Could not send notification to %(topic)s. Payload=%(message)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/__init__.py:106
-#, python-format
-msgid ""
-"A RPC is being made while holding a lock. The locks currently held are "
-"%(locks)s. This is probably a bug. Please report it. Include the "
-"following: [%(stack)s]."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:75
-msgid "Pool creating new connection"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:202
-#, python-format
-msgid "No calling threads waiting for msg_id : %(msg_id)s, message : %(data)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:205
-#, python-format
-msgid "_call_waiters: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:212
-#, python-format
-msgid ""
-"Number of call waiters is greater than warning threshhold: %d. There "
-"could be a MulticallProxyWaiter leak."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:290
-#, python-format
-msgid "unpacked context: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:336
-#, python-format
-msgid "UNIQUE_ID is %s."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:408
-#, python-format
-msgid "received %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:416
-#, python-format
-msgid "no method for message: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:417
-#, python-format
-msgid "No method for message: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:445
-#: murano/openstack/common/rpc/impl_zmq.py:280
-#, python-format
-msgid "Expected exception during message handling (%s)"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:453
-#: murano/openstack/common/rpc/impl_zmq.py:286
-msgid "Exception during message handling"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:527
-#, python-format
-msgid "Making synchronous call on %s ..."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:530
-#, python-format
-msgid "MSG_ID is %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:556
-#, python-format
-msgid "Making asynchronous cast on %s..."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:565
-msgid "Making asynchronous fanout cast..."
-msgstr ""
-
-#: murano/openstack/common/rpc/amqp.py:593
-#, python-format
-msgid "Sending %(event_type)s on %(topic)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:77
-msgid "An unknown RPC related exception occurred."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:89
-msgid "Exception in string format operation"
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:107
-#, python-format
-msgid ""
-"Remote error: %(exc_type)s %(value)s\n"
-"%(traceback)s."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:124
-#, python-format
-msgid ""
-"Timeout while waiting on RPC response - topic: \"%(topic)s\", RPC method:"
-" \"%(method)s\" info: \"%(info)s\""
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:141
-#: murano/openstack/common/rpc/common.py:142
-#: murano/openstack/common/rpc/common.py:143
-msgid "<unknown>"
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:147
-#, python-format
-msgid "Found duplicate message(%(msg_id)s). Skipping it."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:151
-msgid "Invalid reuse of an RPC connection."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:155
-#, python-format
-msgid "Specified RPC version, %(version)s, not supported by this endpoint."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:160
-#, python-format
-msgid ""
-"Specified RPC envelope version, %(version)s, not supported by this "
-"endpoint."
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:165
-#, python-format
-msgid "Specified RPC version cap, %(version_cap)s, is too low"
-msgstr ""
-
-#: murano/openstack/common/rpc/common.py:289
-#, python-format
-msgid "Returning exception %s to caller"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:162
-msgid "Failed to process message ... skipping it."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:165
-msgid "Failed to process message ... will requeue."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:506
-#, python-format
-msgid "Reconnecting to AMQP server on %(hostname)s:%(port)d"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:528
-#, python-format
-msgid "Connected to AMQP server on %(hostname)s:%(port)d"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:565
-#, python-format
-msgid ""
-"Unable to connect to AMQP server on %(hostname)s:%(port)d after "
-"%(max_retries)d tries: %(err_str)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:579
-#, python-format
-msgid ""
-"AMQP server on %(hostname)s:%(port)d is unreachable: %(err_str)s. Trying "
-"again in %(sleep_time)d seconds."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:633
-#: murano/openstack/common/rpc/impl_qpid.py:492
-#, python-format
-msgid "Failed to declare consumer for topic '%(topic)s': %(err_str)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:651
-#: murano/openstack/common/rpc/impl_qpid.py:507
-#, python-format
-msgid "Timed out waiting for RPC response: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:655
-#: murano/openstack/common/rpc/impl_qpid.py:511
-#, python-format
-msgid "Failed to consume message from queue: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_kombu.py:694
-#: murano/openstack/common/rpc/impl_qpid.py:546
-#, python-format
-msgid "Failed to publish message to topic '%(topic)s': %(err_str)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_qpid.py:161
-msgid "Failed to process message... skipping it."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_qpid.py:434
-#, python-format
-msgid "Unable to connect to AMQP server: %(e)s. Sleeping %(delay)s seconds"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_qpid.py:440
-#, python-format
-msgid "Connected to AMQP server on %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_qpid.py:453
-msgid "Re-established AMQP queues"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_qpid.py:519
-msgid "Error processing message.  Skipping it."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:96
-msgid "JSON serialization failed."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:101
-#, python-format
-msgid "Deserializing: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:136
-#, python-format
-msgid "Connecting to %(addr)s with %(type)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:137
-#, python-format
-msgid "-> Subscribed to %(subscribe)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:138
-#, python-format
-msgid "-> bind: %(bind)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:146
-msgid "Could not open socket."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:158
-#, python-format
-msgid "Subscribing to %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:200
-msgid "You cannot recv on this socket."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:205
-msgid "You cannot send on this socket."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:267
-#, python-format
-msgid "Running func with context: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:305
-msgid "Sending reply"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:339
-msgid "RPC message did not include method."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:371
-msgid "Registering reactor"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:383
-msgid "In reactor registered"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:387
-msgid "Consuming socket"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:437
-#, python-format
-msgid "Creating proxy for topic: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:443
-msgid "Topic contained dangerous characters."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:475
-msgid "Topic socket file creation failed."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:481
-#, python-format
-msgid "Local per-topic backlog buffer full for topic %(topic)s. Dropping message."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:497
-#, python-format
-msgid "Required IPC directory does not exist at %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:506
-#, python-format
-msgid "Permission denied to IPC directory at %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:509
-msgid "Could not create ZeroMQ receiver daemon. Socket may already be in use."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:543
-#, python-format
-msgid "CONSUMER RECEIVED DATA: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:562
-msgid "ZMQ Envelope version unsupported or unknown."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:590
-msgid "Skipping topic registration. Already registered."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:597
-#, python-format
-msgid "Consumer is a zmq.%s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:649
-msgid "Creating payload"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:662
-msgid "Creating queue socket for reply waiter"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:675
-msgid "Sending cast"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:678
-msgid "Cast sent; Waiting reply"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:681
-#, python-format
-msgid "Received message: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:682
-msgid "Unpacking response"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:691
-msgid "Unsupported or unknown ZMQ envelope returned."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:698
-msgid "RPC Message Invalid."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:721
-#, python-format
-msgid "%(msg)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:724
-#, python-format
-msgid "Sending message(s) to: %s"
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:728
-msgid "No matchmaker results. Not casting."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:731
-msgid "No match from matchmaker."
-msgstr ""
-
-#: murano/openstack/common/rpc/impl_zmq.py:813
-#, python-format
-msgid "rpc_zmq_matchmaker = %(orig)s is deprecated; use %(new)s instead"
-msgstr ""
-
-#: murano/openstack/common/rpc/matchmaker.py:47
-msgid "Match not found by MatchMaker."
-msgstr ""
-
-#: murano/openstack/common/rpc/matchmaker.py:81
-msgid "Matchmaker does not implement registration or heartbeat."
-msgstr ""
-
-#: murano/openstack/common/rpc/matchmaker.py:217
-#, python-format
-msgid "Matchmaker unregistered: %(key)s, %(host)s"
-msgstr ""
-
-#: murano/openstack/common/rpc/matchmaker.py:229
-msgid "Register before starting heartbeat."
-msgstr ""
-
-#: murano/openstack/common/rpc/matchmaker_ring.py:79
-#: murano/openstack/common/rpc/matchmaker_ring.py:97
-#, python-format
-msgid "No key defining hosts for topic '%s', see ringfile"
-msgstr ""
-
-#: murano/openstack/common/rpc/service.py:49
-#, python-format
-msgid "Creating Consumer connection for Service %s"
+#: murano/policy/model_policy_enforcer.py:136
+msgid "Congress client is not configured!"
 msgstr ""
 

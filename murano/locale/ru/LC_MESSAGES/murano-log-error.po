@@ -1,0 +1,93 @@
+# Filatov Sergey <filatecs@gmail.com>, 2015. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-12-30 06:30+0000\n"
+"PO-Revision-Date: 2015-12-27 04:10+0000\n"
+"Last-Translator: Filatov Sergey <filatecs@gmail.com>\n"
+"Language-Team: Russian\n"
+"Language: ru\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Generator: Zanata 3.7.3\n"
+"Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
+"%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
+
+msgid "API {api} method {method} raised an exception"
+msgstr "API {api} метод {method} вызвал исключение"
+
+msgid "An exception occured {exc}. Retrying in{time} seconds"
+msgstr "Возникло исключение {exc}. Следующая попытка через {time} секунд"
+
+msgid ""
+"Command failed: {0}\n"
+"{1}"
+msgstr ""
+"Не удалось выполнить команду: {0}\n"
+"{1}"
+
+msgid "Deployment with id {d_id} not found in environment{env_id}"
+msgstr "Деплой с id {d_id} не найден в окружении{env_id}"
+
+msgid "Deployment with id {id} not found"
+msgstr "Деплой с id {id} не найден"
+
+#, python-format
+msgid "Exception %(exc)s occurred during invocation of %(method)s"
+msgstr "Исключение %(exc)s во время вызова %(method)s"
+
+msgid "Failed to get statistics object from a database. {error_code}"
+msgstr "Не удалось получить объект статистики из базы данных. {error_code}"
+
+#, python-format
+msgid "Failed to initialize murano-test-runner: %s"
+msgstr "Не удалось инициализировать murano-test-runner: %s"
+
+msgid "Incorrect format name {name}"
+msgstr "Неправильный формат имени {name}"
+
+msgid "Package '{name}' exists ({pkg_id}). Use --update."
+msgstr "Пакет '{name}' существует ({pkg_id}). Используйте --update."
+
+msgid "Please provide murano config file or credentials for authorization: {0}"
+msgstr ""
+"Укажите конфигурационный файл murano или параметры доступа для авторизации: "
+"{0}"
+
+msgid "Session <SessionId {id}> is invalid"
+msgstr "Сессия <SessionId {id}> недействительна"
+
+msgid "Unable to initialize plugin for {name}"
+msgstr "Не удалось инициализировать плагин для {name}"
+
+#, fuzzy
+msgid "Unable to load package from cache. Clean-up."
+msgstr "Не удалось загрузить пакет из кэша. Очистка."
+
+msgid "Unhandled exception on invocation of post-execution hook"
+msgstr "Необработанное исключение при вызове post-execution hook"
+
+#, fuzzy
+msgid "Unhandled exception on invocation of pre-execution hook"
+msgstr "Необработанное исключение при вызове pre-execution hook"
+
+msgid "Unrecognized Content-Type provided in request: {error}"
+msgstr "Недопустимый Content-Type в запросе: {error}"
+
+msgid "Use of murano-agent is disallowed by the server configuration"
+msgstr "Использование murano агента не разрешено конфигурацией сервера"
+
+msgid "User has no access to these resources."
+msgstr "У пользователя нет прав на доступ к этим ресурсам"
+
+msgid "failed to initialize murano-manage: {error}"
+msgstr "Не удалось инициализировать murano-manage: {error}"
+
+msgid ""
+"murano-manage command failed: {error}\n"
+"{traceback}"
+msgstr ""
+"Не удалось выполнить команду murano-manage:{error}\n"
+"{traceback}"
