@@ -114,7 +114,7 @@ class Session(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     environment_id = sa.Column(sa.String(255), sa.ForeignKey('environment.id'))
 
-    user_id = sa.Column(sa.String(36), nullable=False)
+    user_id = sa.Column(sa.String(64), nullable=False)
     state = sa.Column(sa.String(36), nullable=False)
     description = sa.Column(st.JsonBlob(), nullable=False)
     version = sa.Column(sa.BigInteger, nullable=False, default=0)
@@ -251,7 +251,7 @@ class Package(Base, TimestampMixin):
                                cascade='save-update, merge',
                                lazy='joined')
     logo = sa.Column(st.LargeBinary(), nullable=True)
-    owner_id = sa.Column(sa.String(36), nullable=False)
+    owner_id = sa.Column(sa.String(64), nullable=False)
     ui_definition = sa.Column(sa.Text)
     supplier_logo = sa.Column(sa.LargeBinary, nullable=True)
     categories = sa_orm.relationship("Category",
