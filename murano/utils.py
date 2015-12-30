@@ -12,8 +12,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import contextlib
+import errno
+import fcntl
 import functools
+import os
 
+from oslo_concurrency import lockutils
 from oslo_log import log as logging
 from webob import exc
 
@@ -124,3 +129,103 @@ def verify_session(func):
             raise exc.HTTPForbidden(explanation=msg)
         return func(self, request, *args, **kwargs)
     return __inner
+
+
+def ensure_tree(path):
+    """Create a directory (and any ancestor directories required).
+
+    :param path: Directory to create
+    :return: bool, whether the directory has actually been created
+    """
+    try:
+        os.makedirs(path)
+    except OSError as e:
+        if e.errno == errno.EEXIST:
+            if not os.path.isdir(path):
+                raise
+            else:
+                return False
+        elif e.errno == errno.EISDIR:
+            return False
+        else:
+            raise
+    else:
+        return True
+
+
+ExclusiveInterProcessLock = lockutils.InterProcessLock
+if os.name == 'nt':
+    # no shared locks on windows
+    SharedInterProcessLock = lockutils.InterProcessLock
+else:
+
+    class SharedInterProcessLock(lockutils.InterProcessLock):
+        def trylock(self):
+            # LOCK_EX instead of LOCK_EX
+            fcntl.lockf(self.lockfile, fcntl.LOCK_SH | fcntl.LOCK_NB)
+
+        def _do_open(self):
+            # the file has to be open in read mode, therefore this method has
+            # to be overriden
+            basedir = os.path.dirname(self.path)
+            if basedir:
+                made_basedir = ensure_tree(basedir)
+                if made_basedir:
+                    self.logger.debug(
+                        'Created lock base path `%s`', basedir)
+            # The code here is mostly copy-pasted from oslo_concurrency and
+            # fasteners. The file has to be open with read permissions to be
+            # suitable for shared locking
+            if self.lockfile is None or self.lockfile.closed:
+                try:
+                    # ensure the file is there, but do not obtain an extra file
+                    # descriptor, as closing it would release fcntl lock
+                    fd = os.open(self.path, os.O_CREAT | os.O_EXCL)
+                    os.close(fd)
+                except OSError:
+                    pass
+                self.lockfile = open(self.path, 'r')
+
+
+class ReaderWriterLock(lockutils.ReaderWriterLock):
+
+    @contextlib.contextmanager
+    def write_lock(self, blocking=True):
+        """Context manager that grants a write lock.
+        Will wait until no active readers. Blocks readers after acquiring.
+        Raises a ``RuntimeError`` if an active reader attempts to acquire
+        a lock.
+        """
+        timeout = None if blocking else 0.00001
+        me = self._current_thread()
+        i_am_writer = self.is_writer(check_pending=False)
+        if self.is_reader() and not i_am_writer:
+            raise RuntimeError("Reader %s to writer privilege"
+                               " escalation not allowed" % me)
+        if i_am_writer:
+            # Already the writer; this allows for basic reentrancy.
+            yield self
+        else:
+            with self._cond:
+                self._pending_writers.append(me)
+                while True:
+                    # No readers, and no active writer, am I next??
+                    if len(self._readers) == 0 and self._writer is None:
+                        if self._pending_writers[0] == me:
+                            self._writer = self._pending_writers.popleft()
+                            break
+
+                    # NOTE(kzaitsev): this actually means, that we can wait
+                    # more than timeout times, since if we get True value we
+                    # would get another spin inside of the while loop
+                    # Should we do anything about it?
+                    acquired = self._cond.wait(timeout)
+                    if not acquired:
+                        yield False
+                        return
+            try:
+                yield True
+            finally:
+                with self._cond:
+                    self._writer = None
+                    self._cond.notify_all()

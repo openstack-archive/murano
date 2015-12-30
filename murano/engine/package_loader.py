@@ -14,7 +14,7 @@
 # limitations under the License.
 
 import collections
-import errno
+import itertools
 import os
 import os.path
 import shutil
@@ -24,7 +24,6 @@ import uuid
 
 import eventlet
 from muranoclient.common import exceptions as muranoclient_exc
-from oslo_concurrency import lockutils
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
@@ -39,11 +38,13 @@ from murano.engine.system import system_objects
 from murano.engine import yaql_yaml_loader
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
+from murano import utils as m_utils
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
-download_greenlocks = collections.defaultdict(lockutils.ReaderWriterLock)
+download_mem_locks = collections.defaultdict(m_utils.ReaderWriterLock)
+usage_mem_locks = collections.defaultdict(m_utils.ReaderWriterLock)
 
 
 class ApiPackageLoader(package_loader.MuranoPackageLoader):
@@ -54,6 +55,10 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         self._class_cache = {}
         self._package_cache = {}
         self._root_loader = root_loader or self
+
+        self._mem_locks = []
+        self._ipc_locks = []
+        self._downloaded = []
 
     def load_class_package(self, class_name, version_spec):
         packages = self._class_cache.get(class_name)
@@ -67,6 +72,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                            version_spec)}
         try:
             package_definition = self._get_definition(filter_opts)
+            self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
             raise (exceptions.NoPackageForClassFound(class_name),
@@ -86,6 +92,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                            version_spec)}
         try:
             package_definition = self._get_definition(filter_opts)
+            self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
             six.reraise(exceptions.NoPackageFound(package_name),
@@ -106,21 +113,14 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
         )
 
-        if CONF.packages_opts.enable_package_cache:
+        if CONF.packages_opts.enable_packages_cache:
             directory = os.path.abspath(base_directory)
         else:
             directory = os.path.abspath(os.path.join(base_directory,
                                                      uuid.uuid4().hex))
 
         if not os.path.isdir(directory):
-            # NOTE(kzaitsev): in case we want packages to persist on
-            # disk and subsequent call to makedirs might fail if 2+ loaders
-            # from different processes would attempt to call it simultaneously
-            try:
-                os.makedirs(directory)
-            except OSError as e:
-                if e.errno != errno.EEXIST:
-                    raise
+            m_utils.ensure_tree(directory)
 
         LOG.debug('Cache for package loader is located at: {dir}'.format(
             dir=directory))
@@ -163,23 +163,25 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         package_directory = os.path.join(
             self._cache_directory,
             package_def.fully_qualified_name,
+            getattr(package_def, 'version', '0.0.0'),
             package_id)
 
         if os.path.isdir(package_directory):
             try:
                 return load_utils.load_from_dir(package_directory)
             except pkg_exc.PackageLoadError:
-                LOG.error(_LE('Unable to load package from cache. Clean-up.'))
+                LOG.exception(
+                    _LE('Unable to load package from cache. Clean-up.'))
                 shutil.rmtree(package_directory, ignore_errors=True)
 
         # the package is not yet in cache, let's try and download it.
-        download_flock_path = os.path.join(
+        download_lock_path = os.path.join(
             self._cache_directory, '{}_download.lock'.format(package_id))
-        download_flock = lockutils.InterProcessLock(
-            path=download_flock_path, sleep_func=eventlet.sleep)
+        download_ipc_lock = m_utils.ExclusiveInterProcessLock(
+            path=download_lock_path, sleep_func=eventlet.sleep)
 
-        with download_greenlocks[package_id].write_lock(),\
-                download_flock:
+        with download_mem_locks[package_id].write_lock(),\
+                download_ipc_lock:
 
             # NOTE(kzaitsev):
             # in case there were 2 concurrent threads/processes one might have
@@ -216,6 +218,11 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     LOG.info(_LI(
                         "Successfully downloaded and unpacked package {} {}")
                         .format(package_def.fully_qualified_name, package_id))
+                    self._downloaded.append(app_package)
+
+                    self.try_cleanup_cache(
+                        os.path.split(package_directory)[0],
+                        current_id=package_id)
                     return app_package
             except IOError:
                 msg = 'Unable to extract package data for %s' % package_id
@@ -227,6 +234,42 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                         os.remove(package_file.name)
                 except OSError:
                     pass
+
+    def try_cleanup_cache(self, package_directory=None, current_id=None):
+        if not package_directory:
+            return
+
+        pkg_ids_listed = set()
+        try:
+            pkg_ids_listed = set(os.listdir(package_directory))
+        except OSError:
+            # No directory for this package, probably someone
+            # already deleted everything. Anyway nothing to delete
+            return
+
+        # if current_id was given: ensure it's not checked for removal
+        pkg_ids_listed -= {current_id}
+
+        for pkg_id in pkg_ids_listed:
+            stale_directory = os.path.join(
+                package_directory,
+                pkg_id)
+            if os.path.isdir(package_directory):
+
+                usage_lock_path = os.path.join(
+                    self._cache_directory,
+                    '{}_usage.lock'.format(current_id))
+                ipc_lock = m_utils.ExclusiveInterProcessLock(
+                    path=usage_lock_path, sleep_func=eventlet.sleep)
+
+                with usage_mem_locks[pkg_id].write_lock(False) as acquired:
+                    if not acquired:
+                        continue
+                    acquired_ipc_lock = ipc_lock.acquire(blocking=False)
+                    if acquired_ipc_lock:
+                        shutil.rmtree(stale_directory,
+                                      ignore_errors=True)
+                        ipc_lock.release()
 
     def _get_best_package_match(self, packages):
         public = None
@@ -243,9 +286,43 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         elif other:
             return other[0]
 
+    def _lock_usage(self, package_definition):
+        """Locks package for usage"""
+
+        # do not lock anything if we do not persist packages on disk
+        if not CONF.packages_opts.enable_packages_cache:
+            return
+
+        # A work around the fact that read_lock only supports `with` syntax.
+        mem_lock = _with_to_generator(
+            usage_mem_locks[package_definition].read_lock())
+
+        package_id = package_definition.id
+        usage_lock_path = os.path.join(self._cache_directory,
+                                       '{}_usage.lock'.format(package_id))
+        ipc_lock = m_utils.SharedInterProcessLock(
+            path=usage_lock_path,
+            sleep_func=eventlet.sleep
+        )
+        ipc_lock = _with_to_generator(ipc_lock)
+
+        next(mem_lock)
+        next(ipc_lock)
+        self._mem_locks.append(mem_lock)
+        self._ipc_locks.append(ipc_lock)
+
     def cleanup(self):
-        if not CONF.packages_opts.enable_package_cache:
+        """Cleans up any lock we had acquired and removes any stale packages"""
+
+        if not CONF.packages_opts.enable_packages_cache:
             shutil.rmtree(self._cache_directory, ignore_errors=True)
+            return
+
+        for lock in itertools.chain(self._mem_locks, self._ipc_locks):
+            try:
+                next(lock)
+            except StopIteration:
+                continue
 
     def __enter__(self):
         return self
@@ -338,6 +415,10 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
                     packages.add(folder)
                     yield folder
 
+    def cleanup(self):
+        """A stub for possible cleanup"""
+        pass
+
 
 class CombinedPackageLoader(package_loader.MuranoPackageLoader):
     def __init__(self, murano_client_factory, tenant_id, root_loader=None):
@@ -376,8 +457,14 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
         return self
 
     def __exit__(self, exc_type, exc_val, exc_tb):
-        self.api_loader.cleanup()
+        self.cleanup()
         return False
+
+    def cleanup(self):
+        """Calls cleanup method of all loaders we combine"""
+        self.api_loader.cleanup()
+        for d_loader in self.directory_loaders:
+            d_loader.cleanup()
 
 
 def get_class(package, name):
@@ -385,3 +472,9 @@ def get_class(package, name):
     loader = yaql_yaml_loader.get_loader(version)
     contents, file_id = package.get_class(name)
     return loader(contents, file_id)
+
+
+def _with_to_generator(context_obj):
+    with context_obj as obj:
+        yield obj
+    yield
