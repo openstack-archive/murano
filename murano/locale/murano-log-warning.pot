@@ -1,0 +1,105 @@
+# Translations template for murano.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the murano project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-12-30 06:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.1.1\n"
+
+#: murano/api/middleware/version_negotiation.py:56
+msgid "Unknown version. Returning version choices."
+msgstr ""
+
+#: murano/api/v1/actions.py:46
+msgid ""
+"Could not open session for environment <EnvId: {id}>, environment has "
+"deploying status."
+msgstr ""
+
+#: murano/api/v1/catalog.py:61
+msgid "Search by parameter '{name}' is not supported. Skipping it."
+msgstr ""
+
+#: murano/api/v1/catalog.py:73
+msgid ""
+"Value of 'order_by' parameter is not valid. Allowed values are: {values}."
+" Skipping it."
+msgstr ""
+
+#: murano/api/v1/cloudfoundry/cfapi.py:147
+msgid ""
+"Incorrect input parameters. Package related parameters shouldn't be "
+"passed through Cloud Foundry"
+msgstr ""
+
+#: murano/api/v1/cloudfoundry/cfapi.py:224
+msgid "Requested service for instance {} is not found"
+msgstr ""
+
+#: murano/common/engine.py:169
+msgid "Cannot delete trust"
+msgstr ""
+
+#: murano/common/server.py:55
+msgid ""
+"Environment result could not be handled, specified environment not found "
+"in database"
+msgstr ""
+
+#: murano/common/server.py:118
+msgid "EnvId: {env_id} TenantId: {tenant_id} Status: Failed Apps: {services}"
+msgstr ""
+
+#: murano/common/wsgi.py:1036
+msgid "Unable deserialize to json, using raw text"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:53
+msgid "Entry-point 'name' {name} is invalid"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:77
+msgid "Class is defined in multiple packages!"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:79
+msgid "Disabling class {class_name} in {dist} due to conflict"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:96
+#: murano/common/plugins/package_types_loader.py:55
+msgid "Error loading entry-point {ep} from package {dist}: {err}"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:133
+#, python-format
+msgid ""
+"Class '%(class_name)s' has a MuranoPL name '%(name)s' defined which will "
+"be ignored"
+msgstr ""
+
+#: murano/db/catalog/api.py:169
+msgid ""
+"One of the specified {path} is already associated with a package. Doing "
+"nothing."
+msgstr ""
+
+#: murano/dsl/executor.py:213
+msgid "Muted exception during execution of .destroy on {0}: {1}"
+msgstr ""
+
+#: murano/engine/system/heat_stack.py:230
+msgid "Stack {stack_name} already deleted?"
+msgstr ""
+

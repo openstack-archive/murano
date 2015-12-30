@@ -1,0 +1,63 @@
+# Translations template for murano.
+# Copyright (C) 2015 ORGANIZATION
+# This file is distributed under the same license as the murano project.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
+"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
+"POT-Creation-Date: 2015-12-30 06:30+0000\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Generated-By: Babel 2.1.1\n"
+
+#: murano/api/v1/cloudfoundry/cfapi.py:117
+msgid "Cloud Foundry {org_id} mapped to tenant {tenant_name}"
+msgstr ""
+
+#: murano/api/v1/cloudfoundry/cfapi.py:130
+msgid "Cloud Foundry {space_id} mapped to {environment_id}"
+msgstr ""
+
+#: murano/cmd/manage.py:86
+msgid "Finished import of package {res_id}"
+msgstr ""
+
+#: murano/common/engine.py:107
+msgid "Starting processing task: {task_desc}"
+msgstr ""
+
+#: murano/common/engine.py:118
+msgid "Finished processing task: {task_desc}"
+msgstr ""
+
+#: murano/common/server.py:124
+msgid "EnvId: {env_id} TenantId: {tenant_id} Status: Successful Apps: {services}"
+msgstr ""
+
+#: murano/common/plugins/extensions_loader.py:71
+msgid "Loaded class {class_name} from {dist}"
+msgstr ""
+
+#: murano/engine/package_loader.py:231
+msgid "Unable to load package from path: {0}"
+msgstr ""
+
+#: murano/engine/package_loader.py:234
+msgid "Loaded package from path {0}"
+msgstr ""
+
+#: murano/engine/system/net_explorer.py:81
+msgid "Created router: {id}"
+msgstr ""
+
+#: murano/policy/model_policy_enforcer.py:109
+msgid "Model valid"
+msgstr ""
+
