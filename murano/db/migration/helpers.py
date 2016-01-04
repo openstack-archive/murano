@@ -12,13 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from alembic import op
 import sqlalchemy as sa
 
 
 def transform_table(name, renames, defaults, *columns, **kw):
     def escape(val):
-        if isinstance(val, (str, unicode)):
+        if isinstance(val, six.string_types):
             return "'{0}'".format(val)
         elif val is None:
             return 'NULL'

@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
 from sqlalchemy import desc
@@ -68,7 +70,7 @@ class Controller(object):
             LOG.exception(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
-        name = unicode(body['name'])
+        name = six.text_type(body['name'])
         if len(name) > 255:
             msg = _('Environment name should be 255 characters maximum')
             LOG.exception(msg)

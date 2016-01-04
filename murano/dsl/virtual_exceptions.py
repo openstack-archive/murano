@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from murano.dsl import constants
 from murano.dsl import dsl_exception
 from murano.dsl import expressions
@@ -53,7 +55,7 @@ class ThrowMacro(expressions.DslExpression):
     def __unicode__(self):
         if self._message:
             return u'Throw {0}: {1}'.format(self._names, self._message)
-        return u'Throw ' + unicode(self._names)
+        return u'Throw ' + six.text_type(self._names)
 
 
 class CatchBlock(expressions.DslExpression):

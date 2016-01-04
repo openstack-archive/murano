@@ -14,6 +14,7 @@
 Cinder's faultwrapper
 """
 
+import six
 import sys
 import traceback
 
@@ -93,7 +94,7 @@ class FaultWrapper(wsgi.Middleware):
 
         ex_type = ex.__class__.__name__
 
-        full_message = unicode(ex)
+        full_message = six.text_type(ex)
         if full_message.find('\n') > -1:
             message, msg_trace = full_message.split('\n', 1)
         else:

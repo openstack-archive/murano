@@ -14,6 +14,7 @@
 
 import inspect
 import os.path
+import six
 
 from yaql import specs
 
@@ -66,7 +67,7 @@ def compose_stack_frame(context):
     method = helpers.get_current_method(context)
     return {
         'instruction': None if instruction is None
-        else unicode(instruction),
+        else six.text_type(instruction),
 
         'location': None if instruction is None
         else instruction.source_file_position,

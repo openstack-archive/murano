@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 import sys
 import weakref
 
@@ -74,7 +75,7 @@ class PropertySpec(Spec):
             return super(PropertySpec, self).validate(*args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}.{1}{2}] {3}'.format(
-                self.class_name, self.property_name, e.path, unicode(e))
+                self.class_name, self.property_name, e.path, six.text_type(e))
             raise exceptions.ContractViolationException, msg, sys.exc_info()[2]
 
 
@@ -91,5 +92,5 @@ class ArgumentSpec(Spec):
         except exceptions.ContractViolationException as e:
             msg = u'[{0}::{1}({2}{3})] {4}'.format(
                 self.class_name, self.method_name, self.arg_name,
-                e.path, unicode(e))
+                e.path, six.text_type(e))
             raise exceptions.ContractViolationException, msg, sys.exc_info()[2]
