@@ -211,7 +211,7 @@ class MuranoDslExecutor(object):
                     try:
                         method.invoke(self, obj, (), {}, None)
                     except Exception as e:
-                        LOG.warn(_LW(
+                        LOG.warning(_LW(
                             'Muted exception during execution of .destroy '
                             'on {0}: {1}').format(obj, e), exc_info=True)
 
