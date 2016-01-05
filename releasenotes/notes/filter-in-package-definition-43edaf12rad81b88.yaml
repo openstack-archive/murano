@@ -1,0 +1,3 @@
+---
+features:
+  - Added filter by 'Name' which only matches package name.

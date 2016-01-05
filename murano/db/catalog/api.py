@@ -308,6 +308,8 @@ def package_search(filters, context, manage_public=False,
             models.Class.name == filters['class_name']))
     if 'fqn' in filters.keys():
         query = query.filter(pkg.fully_qualified_name == filters['fqn'])
+    if 'name' in filters.keys():
+        query = query.filter(pkg.name == filters['name'])
 
     if 'search' in filters.keys():
         fk_fields = {'categories': 'Category',
