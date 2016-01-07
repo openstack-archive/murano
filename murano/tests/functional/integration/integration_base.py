@@ -15,8 +15,7 @@
 import os
 import uuid
 
-import keystoneclient.openstack.common.apiclient.exceptions \
-    as keystone_exceptions
+from keystoneclient import exceptions as keystone_exceptions
 import mistralclient.api.client as mistralclient
 import testresources
 import testtools
