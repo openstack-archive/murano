@@ -65,7 +65,7 @@ class TestRepositorySanity(TestCaseRepository):
         resp, body = self.client.get_list_packages()
 
         self.assertEqual(200, resp.status)
-        self.assertTrue(isinstance(body['packages'], list))
+        self.assertIsInstance(body['packages'], list)
 
     @tag('all', 'coverage')
     @attr(type='smoke')
@@ -73,7 +73,7 @@ class TestRepositorySanity(TestCaseRepository):
         resp, body = self.client.list_categories()
 
         self.assertEqual(200, resp.status)
-        self.assertTrue(isinstance(body['categories'], list))
+        self.assertIsInstance(body['categories'], list)
 
     @tag('all', 'coverage')
     @attr(type='smoke')
@@ -389,4 +389,4 @@ class TestRepository(TestCaseRepository):
         resp, body = self.client.get_logo(self.package['id'])
 
         self.assertEqual(200, resp.status)
-        self.assertTrue(isinstance(body, str))
+        self.assertIsInstance(body, str)

@@ -32,7 +32,7 @@ class TestServices(base.TestCase):
                                                             sess['id'])
 
         self.assertEqual(resp.status, 200)
-        self.assertTrue(isinstance(services_list, list))
+        self.assertIsInstance(services_list, list)
 
     @tag('all', 'coverage')
     @attr(type='negative')
