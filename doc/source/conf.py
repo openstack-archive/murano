@@ -13,6 +13,7 @@
 #    under the License.
 
 import os
+import subprocess
 import sys
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
@@ -85,8 +86,10 @@ if not on_rtd:
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
 # using the given strftime format.
 #html_last_updated_fmt = '%b %d, %Y'
-git_cmd = "git log --pretty=format:'%ad, commit %h' --date=local -n1"
-html_last_updated_fmt = os.popen(git_cmd).read()
+git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
+           "-n1"]
+html_last_updated_fmt = subprocess.Popen(
+    git_cmd, stdout=subprocess.PIPE).communicate()[0]
 
 
 # The name for this set of Sphinx documents. If None, it defaults to
