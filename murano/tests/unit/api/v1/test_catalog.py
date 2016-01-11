@@ -197,6 +197,85 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         self.assertEqual(found_package['id'], expected_package.id)
 
+    def test_packages_filter_by_name(self):
+        """GET /catalog/packages with parameter "name" returns packages
+        filtered by name.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+
+        expected_pkg1 = self._add_pkg("test_tenant", name="test_pkgname_1")
+        expected_pkg2 = self._add_pkg("test_tenant", name="test_pkgname_2")
+
+        req_pkgname1 = self._get('/catalog/packages',
+                                 params={'name': expected_pkg1.name})
+        req_pkgname2 = self._get('/catalog/packages',
+                                 params={'name': expected_pkg2.name})
+
+        for dummy in range(2):
+            self.expect_policy_check('get_package')
+            self.expect_policy_check('manage_public_package')
+
+        res_pkgname1 = req_pkgname1.get_response(self.api)
+        self.assertEqual(200, res_pkgname1.status_code)
+        self.assertEqual(len(res_pkgname1.json['packages']), 1)
+        self.assertEqual(res_pkgname1.json['packages'][0]['name'],
+                         expected_pkg1.name)
+
+        res_pkgname2 = req_pkgname2.get_response(self.api)
+        self.assertEqual(200, res_pkgname2.status_code)
+        self.assertEqual(len(res_pkgname2.json['packages']), 1)
+        self.assertEqual(res_pkgname2.json['packages'][0]['name'],
+                         expected_pkg2.name)
+
+    def test_packages_filter_by_type(self):
+        """GET /catalog/packages with parameter "type" returns packages
+        filtered by type.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        excepted_pkg1 = self._add_pkg("test_tenant", type='Library')
+        excepted_pkg2 = self._add_pkg("test_tenant", type='Library')
+        excepted_pkg3 = self._add_pkg("test_tenant", type='Application')
+
+        # filter by type=Library can see 2 pkgs
+        req_lib = self._get('/catalog/packages',
+                            params={'type': 'Library'})
+
+        # filter by type=Application only see 1 pkgs
+        req_app = self._get('/catalog/packages',
+                            params={'type': 'Application'})
+
+        for dummy in range(2):
+            self.expect_policy_check('get_package')
+            self.expect_policy_check('manage_public_package')
+
+        res_lib = req_lib.get_response(self.api)
+
+        self.assertEqual(200, res_lib.status_code)
+        self.assertEqual(len(res_lib.json['packages']), 2)
+
+        self.assertEqual(res_lib.json['packages'][0]['type'], 'Library')
+        self.assertEqual(res_lib.json['packages'][0]['name'],
+                         excepted_pkg1.name)
+
+        self.assertEqual(res_lib.json['packages'][1]['type'], 'Library')
+        self.assertEqual(res_lib.json['packages'][1]['name'],
+                         excepted_pkg2.name)
+
+        res_app = req_app.get_response(self.api)
+
+        self.assertEqual(200, res_app.status_code)
+        self.assertEqual(len(res_app.json['packages']), 1)
+
+        self.assertEqual(res_app.json['packages'][0]['type'], 'Application')
+        self.assertEqual(res_app.json['packages'][0]['name'],
+                         excepted_pkg3.name)
+
     def test_packages(self):
         self._set_policy_rules(
             {'get_package': '',
