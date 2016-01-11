@@ -27,7 +27,7 @@ class TestCategories(base.TestObjectCreation):
         resp, body = self.client.list_categories()
 
         self.assertEqual(200, resp.status)
-        self.assertTrue(isinstance(body['categories'], list))
+        self.assertIsInstance(body['categories'], list)
 
     @tag('all', 'coverage')
     @attr(type='smoke')
