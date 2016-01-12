@@ -31,7 +31,7 @@ class TestServices(base.TestCase):
         resp, services_list = self.client.get_services_list(env['id'],
                                                             sess['id'])
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertIsInstance(services_list, list)
 
     @tag('all', 'coverage')
@@ -88,7 +88,7 @@ class TestServices(base.TestCase):
         services_list_ = self.client.get_services_list(env['id'],
                                                        sess['id'])[1]
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(len(services_list) + 1, len(services_list_))
 
         resp = self.client.delete_service(env['id'],
@@ -98,7 +98,7 @@ class TestServices(base.TestCase):
         services_list_ = self.client.get_services_list(env['id'],
                                                        sess['id'])[1]
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(len(services_list), len(services_list_))
 
     @tag('all', 'coverage')
@@ -185,7 +185,7 @@ class TestServices(base.TestCase):
                                                  sess['id'],
                                                  service['?']['id'])
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(service, service_)
 
     @tag('all', 'coverage')
@@ -208,7 +208,7 @@ class TestServices(base.TestCase):
     def test_get_services_without_sess_id(self):
         env = self.create_environment('test')
         resp, body = self.client.get_services_list(env['id'], None)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual([], body)
 
 

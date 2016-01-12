@@ -35,12 +35,12 @@ class TraverseHelperTests(base.MuranoTestCase):
     def test_attribute_get(self):
         source = {'attr': True}
         value = utils.TraverseHelper.get('/attr', source)
-        self.assertEqual(True, value)
+        self.assertTrue(value)
 
     def test_nested_attribute_get(self):
         source = {'obj': {'attr': True}}
         value = utils.TraverseHelper.get('/obj/attr', source)
-        self.assertEqual(True, value)
+        self.assertTrue(value)
 
     def test_list_item_attribute_get(self):
         source = {'obj': [
@@ -62,19 +62,19 @@ class TraverseHelperTests(base.MuranoTestCase):
         source = {'attr': True}
         utils.TraverseHelper.update('/newAttr', False, source)
         value = utils.TraverseHelper.get('/newAttr', source)
-        self.assertEqual(False, value)
+        self.assertFalse(value)
 
     def test_attribute_update(self):
         source = {'attr': True}
         utils.TraverseHelper.update('/attr', False, source)
         value = utils.TraverseHelper.get('/attr', source)
-        self.assertEqual(False, value)
+        self.assertFalse(value)
 
     def test_nested_attribute_update(self):
         source = {'obj': {'attr': True}}
         utils.TraverseHelper.update('/obj/attr', False, source)
         value = utils.TraverseHelper.get('/obj/attr', source)
-        self.assertEqual(False, value)
+        self.assertFalse(value)
 
     def test_adding_item_to_list(self):
         source = {'attr': [1, 2, 3]}

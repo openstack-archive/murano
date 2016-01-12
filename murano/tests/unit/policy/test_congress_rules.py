@@ -108,7 +108,7 @@ class TestCongressRules(unittest.TestCase):
     def test_empty_model(self):
         congress_rules = congress.CongressRulesManager()
         rules = congress_rules.convert(None)
-        self.assertTrue(len(rules) == 0)
+        self.assertEqual(0, len(rules))
 
     def test_convert_simple_app(self):
         rules_str = self._create_and_check_rules_str('model')

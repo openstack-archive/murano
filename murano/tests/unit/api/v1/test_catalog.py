@@ -191,11 +191,11 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         res = req.get_response(self.api)
         self.assertEqual(200, res.status_code)
 
-        self.assertEqual(len(res.json['packages']), 1)
+        self.assertEqual(1, len(res.json['packages']))
 
         found_package = res.json['packages'][0]
 
-        self.assertEqual(found_package['id'], expected_package.id)
+        self.assertEqual(expected_package.id, found_package['id'])
 
     def test_packages_filter_by_name(self):
         """GET /catalog/packages with parameter "name" returns packages
@@ -220,15 +220,15 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         res_pkgname1 = req_pkgname1.get_response(self.api)
         self.assertEqual(200, res_pkgname1.status_code)
-        self.assertEqual(len(res_pkgname1.json['packages']), 1)
-        self.assertEqual(res_pkgname1.json['packages'][0]['name'],
-                         expected_pkg1.name)
+        self.assertEqual(1, len(res_pkgname1.json['packages']))
+        self.assertEqual(expected_pkg1.name,
+                         res_pkgname1.json['packages'][0]['name'])
 
         res_pkgname2 = req_pkgname2.get_response(self.api)
         self.assertEqual(200, res_pkgname2.status_code)
-        self.assertEqual(len(res_pkgname2.json['packages']), 1)
-        self.assertEqual(res_pkgname2.json['packages'][0]['name'],
-                         expected_pkg2.name)
+        self.assertEqual(1, len(res_pkgname2.json['packages']))
+        self.assertEqual(expected_pkg2.name,
+                         res_pkgname2.json['packages'][0]['name'])
 
     def test_packages_filter_by_type(self):
         """GET /catalog/packages with parameter "type" returns packages
@@ -257,24 +257,24 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         res_lib = req_lib.get_response(self.api)
 
         self.assertEqual(200, res_lib.status_code)
-        self.assertEqual(len(res_lib.json['packages']), 2)
+        self.assertEqual(2, len(res_lib.json['packages']))
 
-        self.assertEqual(res_lib.json['packages'][0]['type'], 'Library')
-        self.assertEqual(res_lib.json['packages'][0]['name'],
-                         excepted_pkg1.name)
+        self.assertEqual('Library', res_lib.json['packages'][0]['type'])
+        self.assertEqual(excepted_pkg1.name,
+                         res_lib.json['packages'][0]['name'])
 
-        self.assertEqual(res_lib.json['packages'][1]['type'], 'Library')
-        self.assertEqual(res_lib.json['packages'][1]['name'],
-                         excepted_pkg2.name)
+        self.assertEqual('Library', res_lib.json['packages'][1]['type'])
+        self.assertEqual(excepted_pkg2.name,
+                         res_lib.json['packages'][1]['name'])
 
         res_app = req_app.get_response(self.api)
 
         self.assertEqual(200, res_app.status_code)
-        self.assertEqual(len(res_app.json['packages']), 1)
+        self.assertEqual(1, len(res_app.json['packages']))
 
-        self.assertEqual(res_app.json['packages'][0]['type'], 'Application')
-        self.assertEqual(res_app.json['packages'][0]['name'],
-                         excepted_pkg3.name)
+        self.assertEqual('Application', res_app.json['packages'][0]['type'])
+        self.assertEqual(excepted_pkg3.name,
+                         res_app.json['packages'][0]['name'])
 
     def test_packages(self):
         self._set_policy_rules(

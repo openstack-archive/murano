@@ -27,7 +27,7 @@ class TestEnvironments(base.TestCase):
         resp, body = self.client.get_environments_list()
 
         self.assertIn('environments', body)
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
 
     @tag('all', 'coverage')
     @attr(type='smoke')
@@ -37,7 +37,7 @@ class TestEnvironments(base.TestCase):
         resp, env = self.client.create_environment('test')
         self.environments.append(env)
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual('test', env['name'])
 
         environments_list = self.client.get_environments_list()[1]
@@ -63,7 +63,7 @@ class TestEnvironments(base.TestCase):
         resp, env = self.client.create_environment(unicode_name)
         self.environments.append(env)
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(unicode_name, env['name'])
 
         environments_list = self.client.get_environments_list()[1]
@@ -87,8 +87,8 @@ class TestEnvironments(base.TestCase):
 
         resp, environment = self.client.get_environment(env['id'])
 
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(environment['name'], 'test')
+        self.assertEqual(200, resp.status)
+        self.assertEqual('test', environment['name'])
 
     @tag('all', 'coverage')
     @attr(type='smoke')
@@ -97,8 +97,8 @@ class TestEnvironments(base.TestCase):
 
         resp, environment = self.client.update_environment(env['id'])
 
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(environment['name'], 'changed-environment-name')
+        self.assertEqual(200, resp.status)
+        self.assertEqual('changed-environment-name', environment['name'])
 
     @tag('all', 'coverage')
     @attr(type='negative')

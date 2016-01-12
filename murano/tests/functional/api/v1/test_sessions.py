@@ -29,7 +29,7 @@ class TestSessions(base.TestCase):
 
         resp, sess = self.client.create_session(env['id'])
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
         self.assertEqual(env['id'], sess['environment_id'])
 
     @tag('all', 'coverage')
@@ -48,7 +48,7 @@ class TestSessions(base.TestCase):
 
         resp = self.client.delete_session(env['id'], sess['id'])[0]
 
-        self.assertEqual(resp.status, 200)
+        self.assertEqual(200, resp.status)
 
     @tag('all', 'coverage')
     @attr(type='negative')
@@ -71,8 +71,8 @@ class TestSessions(base.TestCase):
 
         resp, session = self.client.get_session(env['id'], sess['id'])
 
-        self.assertEqual(resp.status, 200)
-        self.assertEqual(session, sess)
+        self.assertEqual(200, resp.status)
+        self.assertEqual(sess, session)
 
     @tag('all', 'coverage')
     @attr(type='negative')
