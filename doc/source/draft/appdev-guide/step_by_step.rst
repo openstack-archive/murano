@@ -158,7 +158,7 @@ when you upload ApacheHTTPServer package to Murano:
 Description
 -----------
 
-Contains the application decription rendered under the application title:
+Contains the application description rendered under the application title:
 
 .. code-block:: yaml
    :linenos:
@@ -172,14 +172,14 @@ Contains the application decription rendered under the application title:
      Apache httpd has been the most popular web server on the Internet since
      April 1996, and celebrated its 17th birthday as a project this February.
 
-Lets's take a closer look at the syntax:
+Let's take a closer look at the syntax:
 
 The vertical line ``|`` symbol comes from YAML syntax.
 The ``>`` symbol can be used interchangeably.
 These are the `YAML block style indicators <http://yaml.org/spec/current.html#id2537921>`_,
 which mean that all the leading indents and new line symbols should be preserved.
 This is very useful for long, multi-line descriptions, because this affects how
-they are desplayed on the UI.
+they are displayed on the UI.
 
 .. warning::
    Avoid tab symbols inside YAML files. If YAML contains the tab symbol, it will not
@@ -229,7 +229,7 @@ Classes
 -------
 
 Is a mapping between all classes present in ApacheHttpServer application
-and the file names where these classes are defined in. This is one-to-one relatioonship,
+and the file names where these classes are defined in. This is one-to-one relationship,
 which means that there is one and the only class per a single file.
 
 The line ``io.murano.apps.apache.ApacheHttpServer: ApacheHttpServer.yaml`` says that the class ``io.murano.apps.apache.ApacheHttpServer`` is defined in the file ``ApacheHttpServer.yaml``:
