@@ -45,7 +45,8 @@ class TestHeatStack(base.MuranoTestCase):
         client_manager_mock.get_heat_client.return_value = \
             self.heat_client_mock
         self.environment_mock.clients = client_manager_mock
-        CONF.set_override('stack_tags', ['test-murano'], 'heat')
+        CONF.set_override('stack_tags', ['test-murano'], 'heat',
+                          enforce_type=True)
         self.mock_tag = ','.join(CONF.heat.stack_tags)
 
     @mock.patch(MOD_NAME + '.HeatStack._wait_state')
@@ -235,7 +236,8 @@ class TestHeatStack(base.MuranoTestCase):
 
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat')
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
         context = {constants.CTX_ENVIRONMENT: self.environment_mock}
 
         with helpers.contextual(context):
