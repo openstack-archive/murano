@@ -56,7 +56,7 @@ class LanguageSupportTest(core.MuranoTestsCore):
                 "assignFloatingIp": True,
                 'name': environment_name,
                 "?": {
-                    "type": self.instance_type,
+                    "type": "io.murano.resources.ConfLangInstance",
                     "id": str(uuid.uuid4())
                 },
             },
