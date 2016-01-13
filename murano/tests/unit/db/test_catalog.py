@@ -476,7 +476,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         patch = self.get_change('replace', ['is_public'], True)
         api.package_update(id, [patch], self.context)
         package = api.package_get(id, self.context)
-        self.assertEqual(True, package.is_public)
+        self.assertTrue(package.is_public)
 
     def test_package_update_public_public_fqn_violation(self):
         id1 = api.package_upload(self._stub_package(), self.tenant_id).id
