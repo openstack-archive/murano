@@ -1,0 +1,136 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  std: io.murano
+  =: io.murano.resources
+
+Name: CinderVolume
+
+Extends: Volume
+
+Properties:
+  name:
+    Contract: $.string()
+
+  size:
+    Contract: $.int().notNull().check($ >= 1)
+
+  availabilityZone:
+    Contract: $.string()
+
+  readOnly:
+    Contract: $.bool().notNull()
+    Default: false
+
+  multiattach:
+    Contract: $.bool().notNull()
+    Default: false
+
+  sourceImage:
+    Contract: $.string()
+
+  sourceVolume:
+    Contract: $.class(Volume)
+
+  sourceSnapshot:
+    Contract: $.class(CinderVolumeSnapshot)
+
+  sourceVolumeBackup:
+    Contract: $.class(CinderVolumeBackup)
+
+Methods:
+  .init:
+    Body:
+    - $._environment: $.find(std:Environment).require()
+
+  buildResourceDefinition:
+    Body:
+    - $properties:
+        size: $.size
+
+    - If: $.availabilityZone != null
+      Then:
+        $properties.availability_zone: $.availabilityZone
+    - If: $.name != null
+      Then:
+        $properties.name: $.name
+    - If: $.sourceVolumeBackup != null
+      Then:
+        $properties.backup_id: $.sourceVolumeBackup.openstackId
+    - If: $.sourceImage != null
+      Then:
+        $properties.image: $.sourceImage
+    - If: $.sourceSnapshot != null
+      Then:
+        $properties.snapshot_id: $.sourceSnapshot.openstackId
+    - If: $.sourceVolume != null
+      Then:
+        $properties.source_volid: $.sourceVolume.openstackId
+
+    # Available only since Heat 6.0.0 (Mitaka)
+    - If: $.multiattach
+      Then:
+        $properties.multiattach: $.multiattach
+
+    # Available only since Heat 5.0.0 (Liberty)
+    - If: $.readOnly
+      Then:
+        $properties.read_only: $.readOnly
+
+    - Return:
+        resources:
+          format('vol-{0}', id($)):
+            type: 'OS::Cinder::Volume'
+            properties: $properties
+        outputs:
+          format('vol-{0}-id', id($)):
+            value: $.getRef()
+
+  deploy:
+    Body:
+    - If: $.sourceSnapshot != null
+      Then:
+        $.sourceSnapshot.validate()
+    - If: $.sourceVolumeBackup != null
+      Then:
+        $.sourceVolumeBackup.validate()
+    - If: $.sourceVolume != null
+      Then:
+        $.sourceVolume.deploy()
+
+    - $snippet: $.buildResourceDefinition()
+    - If: $.getAttr(lastTemplate) != $snippet
+      Then:
+      - $template: $._environment.stack.current()
+      - $template: $template.mergeWith($snippet, maxLevels => 2)
+      - $._environment.stack.setTemplate($template)
+      - $._environment.stack.push()
+      - $outputs: $._environment.stack.output()
+      - $.openstackId: $outputs.get(format('vol-{0}-id', id($)))
+      - $.setAttr(lastTemplate, $snippet)
+
+  releaseResources:
+    Body:
+    - If: $.getAttr(lastTemplate) != null
+      Then:
+      - $template: $._environment.stack.current()
+      - $template.resources: $template.resources.delete(format('vol-{0}', id($)))
+      - $template.outputs: $template.outputs.delete(format('vol-{0}-id', id($)))
+      - $._environment.stack.setTemplate($template)
+      - $._environment.stack.push()
+      - $.setAttr(lastTemplate, null)
+
+  getRef:
+    Body:
+      Return:
+        get_resource: format('vol-{0}', id($))
