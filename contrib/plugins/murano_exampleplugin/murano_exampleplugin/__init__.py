@@ -31,7 +31,7 @@ LOG = logging.getLogger(__name__)
 class GlanceClient(object):
     def __init__(self, context):
         client_manager = helpers.get_environment(context).clients
-        self.client = client_manager.get_client(context, "glance", True,
+        self.client = client_manager.get_client("glance", True,
                                                 self.create_glance_client)
 
     def list(self):
