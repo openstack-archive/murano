@@ -56,7 +56,7 @@ class TestCaseShell(testtools.TestCase):
         CONF.clear()
 
     def override_config(self, name, override, group=None):
-        CONF.set_override(name, override, group)
+        CONF.set_override(name, override, group, enforce_type=True)
         self.addCleanup(CONF.clear_override, name, group)
 
     def shell(self, cmd_args=None, exitcode=0):
