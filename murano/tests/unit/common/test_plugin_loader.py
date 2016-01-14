@@ -38,10 +38,11 @@ class PluginLoaderTest(base.MuranoTestCase):
         test_obj = extensions_loader.PluginLoader('test.namespace')
         test_obj.load_extension(ext, name_map)
         self.assertEqual(1, len(test_obj.packages))
-        loaded_pkg = test_obj.packages.values()[0]
+        loaded_pkg = list(test_obj.packages.values())[0]
         self.assertIsInstance(loaded_pkg,
                               extensions_loader.PackageDefinition)
-        self.assertEqual('test.namespace.Test', loaded_pkg.classes.keys()[0])
+        self.assertEqual('test.namespace.Test',
+                         list(loaded_pkg.classes.keys())[0])
         self.assertEqual({'test.namespace.Test': test_obj.packages.keys()},
                          name_map)
 

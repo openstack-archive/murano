@@ -47,7 +47,7 @@ class Statement(DslExpression):
         elif isinstance(statement, dict):
             if len(statement) != 1:
                 raise SyntaxError()
-            key = statement.keys()[0]
+            key = list(statement.keys())[0]
             value = statement[key]
         else:
             raise SyntaxError()

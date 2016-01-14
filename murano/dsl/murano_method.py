@@ -66,7 +66,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
                 if (not isinstance(record, dict) or
                         len(record) > 1):
                     raise ValueError()
-                name = record.keys()[0]
+                name = list(record.keys())[0]
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
                     self.name, name, record[name], self.murano_class)
         self._yaql_function_definition = \
