@@ -18,6 +18,7 @@ import re
 
 import mock
 import semantic_version
+import six
 import yaql
 from yaql.language import exceptions
 from yaql.language import utils
@@ -119,7 +120,7 @@ class TestHelperFunctions(base.MuranoTestCase):
         yaql_value = mock.Mock(yaql_expression.YaqlExpression,
                                return_value='atom')
         complex_value = {yaql_value: ['some', (1, yaql_value), 'hi!'],
-                         'sample': [yaql_value, xrange(5)]}
+                         'sample': [yaql_value, six.moves.range(5)]}
         complex_literal = utils.FrozenDict({
             'atom': ('some', (1, 'atom'), 'hi!'),
             'sample': ('atom', (0, 1, 2, 3, 4))
