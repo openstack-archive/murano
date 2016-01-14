@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
 import yaml
 
 from oslo_log import log as logging
@@ -84,7 +85,7 @@ class ModifyActionManager(object):
                              '"action-name: {{p1: v1, ...}}" '
                              'but got "{action_spec}"'
                              .format(action_spec=action_spec))
-        for name, kwargs in actions.iteritems():
+        for name, kwargs in six.iteritems(actions):
             LOG.debug('Executing action {name}, params {params}'
                       .format(name=name, params=kwargs))
             # loads action class

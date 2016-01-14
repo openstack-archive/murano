@@ -13,6 +13,8 @@
 import os
 import yaml
 
+import six
+
 from murano.packages import exceptions
 from murano.packages import package_base
 
@@ -85,7 +87,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     @staticmethod
     def _generate_properties(inputs, outputs):
         contracts = {}
-        for name, value in inputs.iteritems():
+        for name, value in six.iteritems(inputs):
             prop = {
                 'Contract': YAQL('$.string().notNull()'),
                 'Usage': 'In'
@@ -161,7 +163,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
                 'type': 'string',
                 'required': True,
                 'description': value.get('description', key)
-            } for key, value in inputs.iteritems()
+            } for key, value in six.iteritems(inputs)
         ]
         return [{
             'appConfiguration': {

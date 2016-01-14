@@ -19,6 +19,7 @@ import eventlet
 import heatclient.exc as heat_exc
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 
 from murano.common.i18n import _LW
 from murano.common import utils
@@ -109,7 +110,7 @@ class HeatStack(object):
 
     @staticmethod
     def _remove_system_params(parameters):
-        return dict((k, v) for k, v in parameters.iteritems() if
+        return dict((k, v) for k, v in six.iteritems(parameters) if
                     not k.startswith('OS::'))
 
     def _get_status(self):

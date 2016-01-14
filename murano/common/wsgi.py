@@ -214,7 +214,7 @@ class Debug(Middleware):
         resp = req.get_response(self.application)
 
         print(("*" * 40) + " RESPONSE HEADERS")
-        for (key, value) in resp.headers.iteritems():
+        for (key, value) in six.iteritems(resp.headers):
             print(key, "=", value)
         print("")
 
@@ -477,7 +477,7 @@ class Resource(object):
                           "X-User-Id",
                           "X-Tenant-Id")
 
-        for header, value in headers.iteritems():
+        for header, value in six.iteritems(headers):
             if header.startswith("X-") and header not in useful_headers:
                 continue
             string_parts.append("{0}: {1}".format(header, value))
@@ -1039,7 +1039,7 @@ class FormDataDeserializer(TextDeserializer):
 
     def default(self, request):
         form_data_parts = request.POST
-        for key, value in form_data_parts.iteritems():
+        for key, value in six.iteritems(form_data_parts):
             if isinstance(value, basestring):
                 form_data_parts[key] = self._from_json(value)
         return {'body': form_data_parts}

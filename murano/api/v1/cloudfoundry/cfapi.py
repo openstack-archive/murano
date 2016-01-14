@@ -150,7 +150,7 @@ class Controller(object):
         params = [parameters]
         while params:
             a = params.pop()
-            for k, v in a.iteritems():
+            for k, v in six.iteritems(a):
                 if isinstance(v, dict):
                     params.append(v)
                     if k == '?':

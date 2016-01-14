@@ -219,7 +219,7 @@ class TypeScheme(object):
             return data
         result = {}
         yaql_key = None
-        for key, value in spec.iteritems():
+        for key, value in six.iteritems(spec):
             if isinstance(key, dsl_types.YaqlExpression):
                 if yaql_key is not None:
                     raise exceptions.DslContractSyntaxError(
@@ -234,7 +234,7 @@ class TypeScheme(object):
 
         if yaql_key is not None:
             yaql_value = spec[yaql_key]
-            for key, value in data.iteritems():
+            for key, value in six.iteritems(data):
                 if key in result:
                     continue
                 key = self._map(key, yaql_key, context, path)

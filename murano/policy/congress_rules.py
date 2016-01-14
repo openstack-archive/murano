@@ -14,6 +14,7 @@
 #    under the License.
 
 import semantic_version
+import six
 
 from murano.dsl import helpers
 
@@ -99,7 +100,7 @@ class CongressRulesManager(object):
             for v in obj:
                 self._walk(v, new_owner, path)
         elif isinstance(obj, dict):
-            for key, value in obj.iteritems():
+            for key, value in six.iteritems(obj):
                 self._walk(value, new_owner, path + (key, ))
 
     def _process_item(self, obj, owner_id, path):
@@ -151,7 +152,7 @@ class CongressRulesManager(object):
                                           prefix.split('.')[0]))
             return rules
 
-        for key, value in obj.iteritems():
+        for key, value in six.iteritems(obj):
             if key == '?':
                 continue
 

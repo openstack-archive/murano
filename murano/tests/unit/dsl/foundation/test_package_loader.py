@@ -15,6 +15,8 @@
 import fnmatch
 import os.path
 
+import six
+
 from murano.dsl import murano_package
 from murano.dsl import namespace_resolver
 from murano.dsl import package_loader
@@ -53,7 +55,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         self._configs = {}
         self._package = TestPackage(
             self, package_name, None, '1.0', None, self._configs)
-        for name, payload in self._classes.iteritems():
+        for name, payload in six.iteritems(self._classes):
             self._package.register_class(payload, name)
         super(TestPackageLoader, self).__init__()
 
@@ -87,8 +89,8 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         if 'Name' not in data:
             return
 
-        for name, method in (data.get('Methods') or data.get(
-                'Workflow') or {}).iteritems():
+        for name, method in six.iteritems(data.get('Methods') or data.get(
+                'Workflow') or {}):
             if name.startswith('test'):
                 method['Usage'] = 'Action'
 

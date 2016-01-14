@@ -37,5 +37,12 @@ def no_mutable_default_args(logical_line):
         yield (0, msg)
 
 
+def check_python3_no_iteritems(logical_line):
+    if re.search(r".*\.iteritems\(\)", logical_line):
+        msg = ("M322: Use six.iteritems() instead of dict.iteritems().")
+        yield(0, msg)
+
+
 def factory(register):
     register(no_mutable_default_args)
+    register(check_python3_no_iteritems)

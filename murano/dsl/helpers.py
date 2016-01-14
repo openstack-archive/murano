@@ -23,6 +23,7 @@ import uuid
 import eventlet.greenpool
 import eventlet.greenthread
 import semantic_version
+import six
 import yaql.language.exceptions
 import yaql.language.expressions
 from yaql.language import utils as yaqlutils
@@ -46,7 +47,7 @@ def evaluate(value, context):
         return yaqlutils.FrozenDict(
             (evaluate(d_key, context),
              evaluate(d_value, context))
-            for d_key, d_value in value.iteritems())
+            for d_key, d_value in six.iteritems(value))
     elif yaqlutils.is_sequence(value):
         return tuple(evaluate(t, context) for t in value)
     elif isinstance(value, yaqlutils.SetType):

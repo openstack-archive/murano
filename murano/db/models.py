@@ -17,6 +17,7 @@ SQLAlchemy models for murano data
 """
 from oslo_db.sqlalchemy import models
 from oslo_utils import timeutils
+import six
 import sqlalchemy as sa
 from sqlalchemy.ext import declarative
 from sqlalchemy import orm as sa_orm
@@ -46,7 +47,7 @@ class TimestampMixin(object):
 class _MuranoBase(models.ModelBase):
     def to_dict(self):
         dictionary = self.__dict__.copy()
-        return dict((k, v) for k, v in dictionary.iteritems()
+        return dict((k, v) for k, v in six.iteritems(dictionary)
                     if k != '_sa_instance_state')
 
 

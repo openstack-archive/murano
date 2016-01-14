@@ -67,7 +67,7 @@ def bind(obj, mappings):
         return [bind(t, mappings) for t in obj]
     elif isinstance(obj, collections.Mapping):
         result = {}
-        for key, value in obj.iteritems():
+        for key, value in six.iteritems(obj):
             result[bind(key, mappings)] = bind(value, mappings)
         return result
     elif isinstance(obj, basestring) and obj.startswith('$'):

@@ -16,6 +16,7 @@ import os
 import shutil
 import sys
 
+import six
 import yaml
 
 from murano.packages import exceptions
@@ -387,7 +388,7 @@ class HotPackage(package_base.PackageBase):
 
         rest_group = []
         properties = []
-        for key, value in hot_parameters.iteritems():
+        for key, value in six.iteritems(hot_parameters):
             if key not in used_parameters:
                 rest_group.append(HotPackage._translate_ui_parameter(
                     key, value))

@@ -16,6 +16,7 @@ import inspect
 import weakref
 
 import semantic_version
+import six
 
 from murano.dsl import constants
 from murano.dsl import dsl_types
@@ -43,7 +44,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 semantic_version.Spec('==0')
         self._classes = {}
         self._imported_types = {object, murano_object.MuranoObject}
-        for key, value in (requirements or {}).iteritems():
+        for key, value in six.iteritems(requirements or {}):
             self._requirements[key] = helpers.parse_version_spec(value)
 
         self._load_queue = {}
@@ -145,7 +146,8 @@ class MuranoPackage(dsl_types.MuranoPackage):
             return result
         if search_requirements:
             pkgs_for_search = []
-            for package_name, version_spec in self._requirements.iteritems():
+            for package_name, version_spec in six.iteritems(
+                    self._requirements):
                 if package_name == self.name:
                     continue
                 referenced_package = self._package_loader.load_package(

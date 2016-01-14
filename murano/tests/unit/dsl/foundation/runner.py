@@ -15,6 +15,8 @@
 
 import sys
 
+import six
+
 from murano.dsl import context_manager
 from murano.dsl import dsl
 from murano.dsl import dsl_exception
@@ -38,7 +40,7 @@ class TestContextManager(context_manager.ContextManager):
         context = linked_context.link(
             root_context, yaql_functions.get_context(runtime_version))
         context = context.create_child_context()
-        for name, func in self.__functions.iteritems():
+        for name, func in six.iteritems(self.__functions):
             context.register_function(func, name)
         return context
 
@@ -87,7 +89,7 @@ class Runner(object):
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_args.append(arg)
-            for name, arg in kwargs.iteritems():
+            for name, arg in six.iteritems(kwargs):
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_kwargs[name] = arg

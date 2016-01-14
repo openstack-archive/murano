@@ -16,6 +16,7 @@ import collections
 import weakref
 
 import semantic_version
+import six
 from yaql.language import utils
 
 from murano.dsl import constants
@@ -66,7 +67,7 @@ class MuranoClass(dsl_types.MuranoClass):
         type_obj = cls(ns_resolver, name, package, parent_classes)
 
         properties = data.get('Properties') or {}
-        for property_name, property_spec in properties.iteritems():
+        for property_name, property_spec in six.iteritems(properties):
             spec = typespec.PropertySpec(
                 property_name, property_spec, type_obj)
             type_obj.add_property(property_name, spec)
@@ -78,7 +79,7 @@ class MuranoClass(dsl_types.MuranoClass):
             'destroy': '.destroy'
         }
 
-        for method_name, payload in methods.iteritems():
+        for method_name, payload in six.iteritems(methods):
             type_obj.add_method(
                 method_mappings.get(method_name, method_name), payload)
 
