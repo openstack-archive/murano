@@ -28,6 +28,7 @@ from murano.dsl import yaql_integration
 
 
 class MuranoPackage(dsl_types.MuranoPackage):
+
     def __init__(self, package_loader, name, version=None,
                  runtime_version=None, requirements=None):
         super(MuranoPackage, self).__init__()
@@ -73,9 +74,8 @@ class MuranoPackage(dsl_types.MuranoPackage):
 
     @property
     def classes(self):
-        return set(self._classes.keys() +
-                   self._load_queue.keys() +
-                   self._native_load_queue.keys())
+        return set(self._classes.keys()).union(
+            self._load_queue.keys()).union(self._native_load_queue.keys())
 
     def get_resource(self, name):
         raise NotImplementedError('resource API is not implemented')

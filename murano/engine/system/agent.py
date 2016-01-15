@@ -266,13 +266,13 @@ class Agent(object):
 
     def _get_url(self, file):
         if isinstance(file, dict):
-            return file.values()[0]
+            return list(file.values())[0]
         else:
             return file
 
     def _get_name(self, file):
         if isinstance(file, dict):
-            name = file.keys()[0]
+            name = list(file.keys())[0]
         else:
             name = file
 
@@ -284,7 +284,7 @@ class Agent(object):
 
     def _get_file_value(self, file):
         if isinstance(file, dict):
-            file = file.values()[0]
+            file = list(file.values())[0]
         return file
 
     def _get_body(self, file, resources, folder):
