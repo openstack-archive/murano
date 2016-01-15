@@ -64,7 +64,7 @@ The package structure of ApacheHTTPServer package is::
    |_  manifest.yaml
 
 The detailed information regarding the package structure can be found
-in the `Murano packages structure <package_structure>`_ section.
+in the :ref:`Murano packages <murano-packages>` section.
 
 
 Step 2. Create the manifest file
