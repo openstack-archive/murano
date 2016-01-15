@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from murano.dsl import dsl_types
 
 
@@ -37,7 +39,7 @@ class AttributeStore(object):
         return [
             [key[0], key[1], key[2], value]
             for key, value
-            in self._attributes.iteritems()
+            in six.iteritems(self._attributes)
             if key[0] in known_objects
         ]
 

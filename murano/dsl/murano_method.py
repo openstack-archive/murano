@@ -15,6 +15,7 @@
 import collections
 import weakref
 
+import six
 from yaql.language import specs
 
 from murano.dsl import dsl
@@ -60,7 +61,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
             arguments_scheme = payload.get('Arguments') or []
             if isinstance(arguments_scheme, dict):
                 arguments_scheme = [{key: value} for key, value in
-                                    arguments_scheme.iteritems()]
+                                    six.iteritems(arguments_scheme)]
             self._arguments_scheme = collections.OrderedDict()
             for record in arguments_scheme:
                 if (not isinstance(record, dict) or

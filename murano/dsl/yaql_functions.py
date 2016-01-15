@@ -15,6 +15,7 @@
 import itertools
 
 import eventlet
+import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -48,7 +49,7 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         **parameters):
     object_store = helpers.get_object_store(__context)
     new_context = __context.create_child_context()
-    for key, value in parameters.iteritems():
+    for key, value in six.iteritems(parameters):
         if helpers.is_keyword(key):
             new_context[key] = value
     return __type_name.murano_class.new(

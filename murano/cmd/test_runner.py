@@ -24,6 +24,7 @@ from oslo_config import cfg
 from oslo_db import options
 from oslo_log import log as logging
 from oslo_utils import importutils
+import six
 
 from murano import version
 from murano.common.i18n import _, _LE
@@ -98,7 +99,7 @@ class MuranoTestRunner(object):
             # Check for method name occurrence in all methods.
             # if there is no dot in provided item - it is a method name
             if '.' not in item:
-                for class_name, methods in class_to_methods.iteritems():
+                for class_name, methods in six.iteritems(class_to_methods):
                     methods_to_run[class_name] = []
                     if item in methods:
                         methods_to_run[class_name].append(item)
@@ -119,7 +120,7 @@ class MuranoTestRunner(object):
                 continue
         methods_count = sum(len(v) for v in methods_to_run.itervalues())
         methods = [k + '.' + method
-                   for k, v in methods_to_run.iteritems() for method in v]
+                   for k, v in six.iteritems(methods_to_run) for method in v]
         LOG.debug('{0} method(s) is(are) going to be executed: '
                   '\n{1}'.format(methods_count, '\n'.join(methods)))
         return methods_to_run
@@ -177,7 +178,7 @@ class MuranoTestRunner(object):
         # Load keystone configuration parameters from config
         importutils.import_module('keystonemiddleware.auth_token')
 
-        for param, value in ks_opts.iteritems():
+        for param, value in six.iteritems(ks_opts):
             if not value:
                 ks_opts[param] = getattr(CONF.keystone_authtoken,
                                          ks_opts_to_config[param])
@@ -227,7 +228,7 @@ class MuranoTestRunner(object):
                 LOG.error(msg)
                 self.error(msg)
 
-            for pkg_class, test_cases in run_set.iteritems():
+            for pkg_class, test_cases in six.iteritems(run_set):
                 for m in test_cases:
                     # Create new executor for each test case to provide
                     # pure test environment

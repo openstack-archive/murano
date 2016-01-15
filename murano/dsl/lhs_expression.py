@@ -14,6 +14,7 @@
 
 import itertools
 
+import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -63,7 +64,7 @@ class LhsExpression(object):
                     src_property.set(
                         utils.FrozenDict(
                             itertools.chain(
-                                src.iteritems(),
+                                six.iteritems(src),
                                 ((key, value),))))
                 elif isinstance(src, dsl_types.MuranoObject):
                     src.set_property(key, value, root_context)

@@ -11,6 +11,7 @@
 #  under the License.
 
 import mock
+import six
 from yaql import contexts
 from yaql import specs
 
@@ -43,7 +44,7 @@ class TestMockContextManager(mock_context_manager.MockContextManager):
         root_context = super(TestMockContextManager, self).create_root_context(
             runtime_version)
         context = root_context.create_child_context()
-        for name, func in self.__functions.iteritems():
+        for name, func in six.iteritems(self.__functions):
             context.register_function(func, name)
         return context
 

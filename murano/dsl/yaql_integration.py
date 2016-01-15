@@ -14,6 +14,7 @@
 
 import inspect
 
+import six
 import yaql
 from yaql.language import contexts
 from yaql.language import conventions
@@ -116,7 +117,7 @@ def call_func(__context, __name, *args, **kwargs):
     return __context(__name, engine)(
         *args,
         **{CONVENTION.convert_parameter_name(key): value
-           for key, value in kwargs.iteritems()})
+           for key, value in six.iteritems(kwargs)})
 
 
 def _infer_parameter_type(name, class_name):
@@ -201,7 +202,7 @@ def _build_mpl_wrapper_function_definition(murano_method):
         murano_method.name, payload, is_function=False, is_method=True)
 
     for i, (name, arg_spec) in enumerate(
-            murano_method.arguments_scheme.iteritems(), 2):
+            six.iteritems(murano_method.arguments_scheme), 2):
         p = specs.ParameterDefinition(
             name, ContractedValue(arg_spec),
             position=i, default=dsl.NO_VALUE)

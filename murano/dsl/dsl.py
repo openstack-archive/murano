@@ -15,6 +15,7 @@
 import inspect
 import os.path
 
+import six
 from yaql.language import exceptions as yaql_exc
 from yaql.language import expressions as yaql_expressions
 from yaql.language import utils
@@ -240,7 +241,7 @@ class YaqlInterface(object):
             context = self.context
             args = tuple(helpers.evaluate(arg, context) for arg in args)
             kwargs = dict((key, helpers.evaluate(value, context))
-                          for key, value in kwargs.iteritems())
+                          for key, value in six.iteritems(kwargs))
             return to_mutable(
                 context(item, self.engine, self.sender)(*args, **kwargs),
                 self.engine)
@@ -250,7 +251,7 @@ class YaqlInterface(object):
         context = helpers.get_context().create_child_context()
         for i, param in enumerate(args):
             context['$' + str(i + 1)] = helpers.evaluate(param, context)
-        for arg_name, arg_value in kwargs.iteritems():
+        for arg_name, arg_value in six.iteritems(kwargs):
             context['$' + arg_name] = helpers.evaluate(arg_value, context)
         parsed = self.engine(__expression)
         res = parsed.evaluate(context=context)

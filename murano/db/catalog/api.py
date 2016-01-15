@@ -16,6 +16,7 @@ from oslo_config import cfg
 from oslo_db import api as oslo_db_api
 from oslo_db.sqlalchemy import utils
 from oslo_log import log as logging
+import six
 import sqlalchemy as sa
 from sqlalchemy import or_
 from sqlalchemy.orm import attributes
@@ -377,7 +378,7 @@ def package_upload(values, tenant_id):
             _check_for_public_packages_with_fqn(
                 session,
                 values.get('fully_qualified_name'))
-        for attr, func in composite_attr_to_func.iteritems():
+        for attr, func in six.iteritems(composite_attr_to_func):
             if values.get(attr):
                 result = func(values[attr], session)
                 setattr(package, attr, result)

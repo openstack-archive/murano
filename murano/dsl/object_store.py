@@ -14,6 +14,7 @@
 
 import weakref
 
+import six
 
 from murano.dsl import dsl_types
 from murano.dsl import helpers
@@ -103,7 +104,7 @@ class ObjectStore(object):
 
     @staticmethod
     def _get_designer_attributes(header):
-        return dict((k, v) for k, v in header.iteritems()
+        return dict((k, v) for k, v in six.iteritems(header)
                     if str(k).startswith('_'))
 
     def designer_attributes(self, object_id):

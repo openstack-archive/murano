@@ -37,7 +37,7 @@ class TestCaseShell(testtools.TestCase):
                             'project_name': 'test',
                             'auth_url': 'http://localhost:5000'}
         self.args = ['test-runner.py']
-        for k, v in self.auth_params.iteritems():
+        for k, v in six.iteritems(self.auth_params):
             k = '--os-' + k.replace('_', '-')
             self.args.extend([k, v])
 
