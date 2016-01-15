@@ -44,7 +44,8 @@ class MuranoMethod(dsl_types.MuranoMethod):
             if isinstance(payload, specs.FunctionDefinition):
                 self._body = payload
             else:
-                self._body = yaql_integration.get_function_definition(payload)
+                self._body = yaql_integration.get_function_definition(
+                    payload, weakref.proxy(self))
             self._arguments_scheme = None
             self._usage = (self._body.meta.get('usage') or
                            self._body.meta.get('Usage') or
@@ -70,7 +71,8 @@ class MuranoMethod(dsl_types.MuranoMethod):
                 self._arguments_scheme[name] = typespec.ArgumentSpec(
                     self.name, name, record[name], self.murano_class)
         self._yaql_function_definition = \
-            yaql_integration.build_wrapper_function_definition(self)
+            yaql_integration.build_wrapper_function_definition(
+                weakref.proxy(self))
 
     @property
     def name(self):

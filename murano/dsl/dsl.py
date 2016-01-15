@@ -104,6 +104,8 @@ class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
         value = super(MuranoTypeName, self).convert(
             value, sender, context, function_spec, engine)
         if isinstance(value, basestring):
+            if function_spec.meta.get(constants.META_MURANO_METHOD):
+                context = helpers.get_caller_context(context)
             murano_type = helpers.get_type(context)
             value = dsl_types.MuranoClassReference(
                 helpers.get_class(
