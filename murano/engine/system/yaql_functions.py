@@ -179,7 +179,7 @@ def random_name():
 @specs.extension_method
 def first_or_default(collection, default=None):
     try:
-        return iter(collection).next()
+        return next(iter(collection))
     except StopIteration:
         return default
 

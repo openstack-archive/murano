@@ -38,7 +38,7 @@ class GlanceClient(object):
         images = self.client.images.list()
         while True:
             try:
-                image = images.next()
+                image = next(images)
                 yield GlanceClient._format(image)
             except StopIteration:
                 break
