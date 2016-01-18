@@ -205,6 +205,8 @@ engine_opts = [
     cfg.IntOpt('agent_timeout', default=3600,
                help=_('Time for waiting for a response from murano agent '
                       'during the deployment')),
+    cfg.IntOpt('workers',
+               help=_('Number of workers'))
 ]
 
 # TODO(sjmc7): move into engine opts?
