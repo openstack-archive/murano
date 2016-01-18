@@ -19,19 +19,28 @@ class AttributeStore(object):
     def __init__(self):
         self._attributes = {}
 
-    def set(self, tagged_object, owner_type, name, value):
-        if isinstance(value, dsl_types.MuranoObject):
-            value = value.object_id
+    @staticmethod
+    def _get_attribute_key(tagged_object, owner_type, name):
+        if isinstance(owner_type, dsl_types.MuranoClassReference):
+            owner_type = owner_type.murano_class
+        if isinstance(tagged_object, dsl_types.MuranoObjectInterface):
+            tagged_object = tagged_object.object
+        return tagged_object.object_id, owner_type.name, name
 
-        key = (tagged_object.object_id, owner_type.name, name)
+    def get(self, tagged_object, owner_type, name):
+        return self._attributes.get(self._get_attribute_key(
+            tagged_object, owner_type, name))
+
+    def set(self, tagged_object, owner_type, name, value):
+        if isinstance(value, dsl_types.MuranoObjectInterface):
+            value = value.id
+        elif isinstance(value, dsl_types.MuranoObject):
+            value = value.object_id
+        key = self._get_attribute_key(tagged_object, owner_type, name)
         if value is None:
             self._attributes.pop(key, None)
         else:
             self._attributes[key] = value
-
-    def get(self, tagged_object, owner_type, name):
-        return self._attributes.get(
-            (tagged_object.object_id, owner_type.name, name))
 
     def serialize(self, known_objects):
         return [
