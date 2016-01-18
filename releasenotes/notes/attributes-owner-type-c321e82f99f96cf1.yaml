@@ -1,0 +1,9 @@
+---
+features:
+  - Now all native MuranoPL methods (those that are written in Python)
+    have "?muranoMethod" metadata key referring to MuranoMethod instance for
+    the method.
+fixes:
+  - It was impossible to explicitly provide attribute owner class to
+    getAttr/setAttr methods without using namespace prefix or if the type was
+    not from the core library.

@@ -136,7 +136,7 @@ def _infer_parameter_type(name, class_name):
         return _infer_parameter_type(name[3 + len(class_name):], class_name)
 
 
-def get_function_definition(func):
+def get_function_definition(func, murano_method):
     body = func
     param_type_func = lambda name: _infer_parameter_type(name, None)
     is_method = False
@@ -166,6 +166,7 @@ def get_function_definition(func):
             return body(*args, **kwargs)
 
     fd.payload = payload
+    fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd
 
 
@@ -182,6 +183,7 @@ def _build_native_wrapper_function_definition(murano_method):
 
     @specs.method
     @specs.name(murano_method.name)
+    @specs.meta(constants.META_MURANO_METHOD, murano_method)
     def payload(__context, __sender, *args, **kwargs):
         executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
@@ -214,6 +216,7 @@ def _build_mpl_wrapper_function_definition(murano_method):
     fd.set_parameter(specs.ParameterDefinition(
         '__sender', yaqltypes.PythonType(dsl_types.MuranoObject, False), 1))
 
+    fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd
 
 
