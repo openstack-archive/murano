@@ -14,12 +14,12 @@
 # limitations under the License.
 
 import logging
-import urllib
 
 import fixtures
 import mock
 from oslo_utils import timeutils
 import routes
+from six.moves import urllib
 import webob
 
 from murano.api.v1 import request_statistics
@@ -164,7 +164,7 @@ class ControllerTest(object):
         environ['REQUEST_METHOD'] = method
 
         if params:
-            qs = urllib.urlencode(params)
+            qs = urllib.parse.urlencode(params)
             environ['QUERY_STRING'] = qs
 
         req = wsgi.Request(environ)
@@ -209,7 +209,7 @@ class ControllerTest(object):
         req.body = data
 
         if params:
-            qs = urllib.urlencode(params)
+            qs = urllib.parse.urlencode(params)
             environ['QUERY_STRING'] = qs
 
         return req
