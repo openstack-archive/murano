@@ -261,8 +261,8 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
 
     @property
     def packages(self):
-        for package_versions in self._packages_by_name.itervalues():
-            for package in package_versions.itervalues():
+        for package_versions in six.itervalues(self._packages_by_name):
+            for package in six.itervalues(package_versions):
                 yield package
 
     @staticmethod

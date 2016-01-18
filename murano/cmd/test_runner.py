@@ -118,7 +118,7 @@ class MuranoTestRunner(object):
                     m for m in class_to_methods[class_to_test]
                     if m == test_method]
                 continue
-        methods_count = sum(len(v) for v in methods_to_run.itervalues())
+        methods_count = sum(len(v) for v in six.itervalues(methods_to_run))
         methods = [k + '.' + method
                    for k, v in six.iteritems(methods_to_run) for method in v]
         LOG.debug('{0} method(s) is(are) going to be executed: '

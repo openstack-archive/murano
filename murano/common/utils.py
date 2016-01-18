@@ -18,6 +18,7 @@ import functools as func
 import eventlet
 import jsonschema
 from oslo_log import log as logging
+import six
 
 from murano.common.i18n import _, _LE
 
@@ -198,7 +199,7 @@ def build_entity_map(value):
         if isinstance(value, dict):
             if '?' in value and 'id' in value['?']:
                 id_map[value['?']['id']] = value
-            for v in value.itervalues():
+            for v in six.itervalues(value):
                 build_entity_map_recursive(v, id_map)
         if isinstance(value, list):
             for item in value:

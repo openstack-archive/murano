@@ -179,7 +179,7 @@ class MuranoClass(dsl_types.MuranoClass):
     def find_methods(self, predicate):
         result = []
         for c in self.ancestors():
-            for method in c.methods.itervalues():
+            for method in six.itervalues(c.methods):
                 if predicate(method) and method not in result:
                     result.append(method)
         return result
@@ -286,7 +286,7 @@ class MuranoClass(dsl_types.MuranoClass):
                     (parent.package, requirement))
 
         package_bindings = {}
-        for versions in aggregation.itervalues():
+        for versions in six.itervalues(aggregation):
             mappings = self._remap_package(versions)
             package_bindings.update(mappings)
 

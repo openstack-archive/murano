@@ -252,7 +252,7 @@ def get_class_factory_definition(cls, murano_class):
 def filter_parameters(__fd, *args, **kwargs):
     if '*' not in __fd.parameters:
         position_args = 0
-        for p in __fd.parameters.itervalues():
+        for p in six.itervalues(__fd.parameters):
             if p.position is not None:
                 position_args += 1
         args = args[:position_args]
@@ -261,7 +261,7 @@ def filter_parameters(__fd, *args, **kwargs):
         if not helpers.is_keyword(name):
             del kwargs[name]
     if '**' not in __fd.parameters:
-        names = {p.alias or p.name for p in __fd.parameters.itervalues()}
+        names = {p.alias or p.name for p in six.itervalues(__fd.parameters)}
         for name in kwargs.keys():
             if name not in names:
                 del kwargs[name]

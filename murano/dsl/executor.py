@@ -221,7 +221,7 @@ class MuranoDslExecutor(object):
             if (isinstance(sys_dict, dict) and
                     sys_dict.get('id') and sys_dict.get('type')):
                 yield sys_dict['id']
-            for val in data.itervalues():
+            for val in six.itervalues(data):
                 for res in self._list_potential_object_ids(val):
                     yield res
         elif isinstance(data, collections.Iterable) and not isinstance(
