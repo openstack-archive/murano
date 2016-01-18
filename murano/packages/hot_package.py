@@ -177,7 +177,7 @@ class HotPackage(package_base.PackageBase):
     @staticmethod
     def _translate_outputs(hot):
         contract = {}
-        for key in (hot.get('outputs') or {}).iterkeys():
+        for key in six.iterkeys(hot.get('outputs') or {}):
             contract[key] = YAQL("$.string()")
         return {
             'templateOutputs': {

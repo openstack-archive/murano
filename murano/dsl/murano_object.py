@@ -14,6 +14,8 @@
 
 import weakref
 
+import six
+
 from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
@@ -88,7 +90,7 @@ class MuranoObject(dsl_types.MuranoObject):
         used_names = set()
         names = set(self.__type.properties)
         if init:
-            names.update(init.arguments_scheme.iterkeys())
+            names.update(six.iterkeys(init.arguments_scheme))
         last_errors = len(names)
         init_args = {}
         while True:

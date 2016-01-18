@@ -96,7 +96,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
                 prop['Default'] = value['default']
             contracts[name] = prop
 
-        for name in outputs.iterkeys():
+        for name in six.iterkeys(outputs):
             contracts[name] = {
                 'Contract': YAQL('$.string()'),
                 'Usage': 'Out'
@@ -107,7 +107,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     def _generate_describe_method(self, inputs):
         input_values = {
             name: YAQL('$.' + name)
-            for name in inputs.iterkeys()
+            for name in six.iterkeys(inputs)
         }
 
         return {
@@ -123,7 +123,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     def _generate_update_outputs_method(outputs):
         assignments = [
             {YAQL('$.' + name): YAQL('$outputs.get({0})'.format(name))}
-            for name in outputs.iterkeys()
+            for name in six.iterkeys(outputs)
         ]
         return {
             'Arguments': [{
@@ -145,7 +145,8 @@ class CloudifyToscaPackage(package_base.PackageBase):
 
     def _generate_application_ui_section(self, inputs):
         section = {
-            key: YAQL('$.appConfiguration.' + key) for key in inputs.iterkeys()
+            key: YAQL(
+                '$.appConfiguration.' + key) for key in six.iterkeys(inputs)
         }
         section.update({
             '?': {

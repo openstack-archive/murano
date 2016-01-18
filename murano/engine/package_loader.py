@@ -23,6 +23,7 @@ import uuid
 from muranoclient.common import exceptions as muranoclient_exc
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 
 from murano.common.i18n import _LE, _LI
 from murano.dsl import constants
@@ -51,7 +52,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def load_class_package(self, class_name, version_spec):
         packages = self._class_cache.get(class_name)
         if packages:
-            version = version_spec.select(packages.iterkeys())
+            version = version_spec.select(six.iterkeys(packages))
             if version:
                 return packages[version]
 
@@ -70,7 +71,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def load_package(self, package_name, version_spec):
         packages = self._package_cache.get(package_name)
         if packages:
-            version = version_spec.select(packages.iterkeys())
+            version = version_spec.select(six.iterkeys(packages))
             if version:
                 return packages[version]
 
@@ -237,7 +238,7 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         packages = self._packages_by_class.get(class_name)
         if not packages:
             raise exceptions.NoPackageForClassFound(class_name)
-        version = version_spec.select(packages.iterkeys())
+        version = version_spec.select(six.iterkeys(packages))
         if not version:
             raise exceptions.NoPackageForClassFound(class_name)
         return packages[version]
@@ -246,7 +247,7 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         packages = self._packages_by_name.get(package_name)
         if not packages:
             raise exceptions.NoPackageFound(package_name)
-        version = version_spec.select(packages.iterkeys())
+        version = version_spec.select(six.iterkeys(packages))
         if not version:
             raise exceptions.NoPackageFound(package_name)
         return packages[version]
