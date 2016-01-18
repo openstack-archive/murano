@@ -1,0 +1,83 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  =: io.murano.apps.magnum.plugin
+  std: io.murano
+
+Name: MagnumBayApp
+
+Extends: std:Application
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  baymodel:
+    Contract: $.class(MagnumBaymodel).notNull()
+
+  nodeCount:
+    Contract: $.int().check($ > 0)
+
+  masterCount:
+    Contract: $.int().check($ > 0)
+
+  discoveryUrl:
+    Contract: $.string()
+
+  timeout:
+    Contract: $.int().check($ >= 0)
+
+
+Methods:
+  .init:
+    Body:
+      - $._environment: $.find(std:Environment).require()
+      - Try:
+        - $._magnum: new('io.murano.extensions.mirantis.magnum.Magnum', $._environment)
+        Catch:
+          With: 'murano.dsl.exceptions.NoPackageForClassFound'
+          Do:
+            Throw: PluginNotFoundException
+            Message: 'Plugin for interaction with Magnum is not installed'
+
+  .destroy:
+    Body:
+      - $bayId: $.getAttr(bayId, null)
+      - $._magnum.deleteBay($bayId)
+      - $msg: format('Magnum bay {0} is deleted', $.name)
+      - $._environment.reporter.report($this, $msg)
+      - $.baymodel.delete()
+
+  deploy:
+    Body:
+      - $baymodelId: $.baymodel.create()
+      - $msg: format('Creating Magnum bay {0}', $.name)
+      - $._environment.reporter.report($this, $msg)
+      - $params:
+          name: $.name
+          baymodel_id: $baymodelId
+          node_count: $.nodeCount
+          master_count: $.masterCount
+          discovery_url: $.discoveryUrl
+          bay_create_timeout: $.timeout
+      - Try:
+        - $bayId: $._magnum.createBay($params)
+        Catch:
+          - As: e
+            Do:
+              - $formatString: 'Error: {0}'
+              - $._environment.reporter.report_error($, $formatString.format($e.message))
+              - Rethrow:
+      - $.setAttr(bayId, $bayId)
+      - $msg: format('Magnum bay {0} is created', $.name)
+      - $._environment.reporter.report($this, $msg)

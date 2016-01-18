@@ -1,0 +1,212 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Version: 2
+
+Templates:
+  baymodel:
+    ?:
+      type: io.murano.apps.magnum.plugin.MagnumBaymodel
+    name: $.baymodelConfiguration.name
+    imageId: $.baymodelConfiguration.imageId
+    keypairId: $.baymodelConfiguration.keyPair
+    externalNetworkId: $.baymodelConfiguration.externalNetworkId
+    coe: $.baymodelConfiguration.coe
+    flavorId: $.baymodelConfiguration.flavorId.norm()
+    masterFlavorId: $.baymodelConfiguration.masterFlavorId.norm()
+    networkDriver: $.baymodelConfiguration.networkDriver.norm()
+    fixedNetwork: $.baymodelConfiguration.fixedNetwork.norm()
+    dnsNameServer: $.baymodelConfiguration.dnsNameServer.norm()
+    dockerVolumeSize: $.baymodelConfiguration.dockerVolumeSize
+    labels: $.baymodelConfiguration.labels.norm()
+    volumeDriver: $.baymodelConfiguration.volumeDriver.norm()
+    httpProxy: $.baymodelConfiguration.httpProxy.norm()
+    httpsProxy: $.baymodelConfiguration.httpsProxy.norm()
+    noProxy: $.baymodelConfiguration.noProxy.norm()
+    tlsDisabled: $.baymodelConfiguration.tlsDisabled
+    public: $.baymodelConfiguration.public
+    registryEnabled: $.baymodelConfiguration.registryEnabled
+
+Application:
+  ?:
+    type: io.murano.apps.magnum.plugin.MagnumBayApp
+  name: $.appConfiguration.name
+  nodeCount: $.appConfiguration.nodeCount
+  masterCount: $.appConfiguration.masterCount
+  discoveryUrl: $.appConfiguration.discoveryUrl.norm()
+  timeout: $.appConfiguration.timeout
+  baymodel: $baymodel
+
+Forms:
+  - appConfiguration:
+      fields:
+        - name: name
+          type: string
+          label: Bay Name
+          description: >-
+            Enter a desired name for the application. Just A-Z, a-z, 0-9.
+        - name: nodeCount
+          type: integer
+          label: Node Count
+          initial: 1
+          required: false
+          description: >-
+            Enter desired no. of node counts. This node count specifies no. of
+            minion node created in bay.
+        - name: masterCount
+          type: integer
+          label: Master Node Count
+          initial: 1
+          required: false
+          description: >-
+            Enter desired no. of master node counts. This master node count specifies
+            no. of master node created in bay.
+        - name: discoveryUrl
+          type: string
+          label: Discovery URL
+          required: false
+          description: >-
+            Specifies custom discovery url for node discovery.
+        - name: timeout
+          type: integer
+          label: Timeout
+          initial: 0
+          required: false
+          description: >-
+            The timeout for bay creation in minutes. Set to 0 for no timeout.
+            The default is no timeout.
+
+  - baymodelConfiguration:
+      fields:
+        - name: name
+          type: string
+          label: Baymodel Name
+          description: >-
+            Enter a desired name for the application. Just A-Z, a-z, 0-9.
+        - name: imageId
+          type: image
+          imageType: linux
+          label: Instance Image
+          initial: linux
+          description: >-
+            Select a valid image for the application. Image should already be prepared and
+            registered in glance.
+        - name: keyPair
+          type: keypair
+          label: Key Pair
+          description: >-
+            Select a Key Pair to control access to instances. You can login to
+            instances using this KeyPair after the deployment of application.
+        - name: externalNetworkId
+          type: string
+          label: External Network
+          description: >-
+            Select an External Network to assign IPs to bay nodes.
+        - name: coe
+          type: string
+          label: Container Orchestration Engine
+          initial: kubernetes
+          description: >-
+            Select Container Orchestration Engine type to be created.
+        - name: flavorId
+          type: flavor
+          label: Bay Flavor
+          required: false
+          description: >-
+            Specify the nova flavor id to use when launching the bay.
+        - name: masterFlavorId
+          type: flavor
+          label: Master Flavor
+          required: false
+          description: >-
+            Specify the nova flavor id to use when launching the master node of
+            the bay.
+        - name: networkDriver
+          type: string
+          label: Network Driver
+          initial: flannel
+          required: false
+          description: >-
+            Specify the network driver name for instantiating container
+            networks.
+        - name: fixedNetwork
+          type: string
+          label: Fixed Network
+          required: false
+          description: >-
+            Specify the private Neutron network name to connect to this bay.
+        - name: dnsNameServer
+          type: string
+          label: DNS Name Server
+          initial: 8.8.8.8
+          required: false
+          description: >-
+            Specify the DNS nameserver to use for this bay.
+        - name: dockerVolumeSize
+          type: integer
+          label: Docker Volume Size
+          required: false
+          description: >-
+            Specify the number of size in GB for the docker volume to use.
+        - name: labels
+          type: string
+          label: Labels
+          required: false
+          description: >-
+            Arbitrary labels in the form of key=value pairs to associate
+            with a bay. Specify in format <KEY1=VALUE1,KEY2=VALUE2...>.
+        - name: volumeDriver
+          type: string
+          label: Volume Driver
+          required: false
+          description: >-
+            Specify the volume driver name for instantiating container
+            volume.
+        - name: httpProxy
+          type: string
+          label: HTTP Proxy
+          required: false
+          description: >-
+            Specify the http_proxy address to use for nodes in bay.
+        - name: httpsProxy
+          type: string
+          label: HTTPS Proxy
+          required: false
+          description: >-
+            Specify the https_proxy address to use for nodes in bay.
+        - name: noProxy
+          type: string
+          label: No Proxy
+          required: false
+          description: >-
+            Specify the no_proxy address to use for nodes in bay.
+        - name: tlsDisabled
+          type: boolean
+          label: TLS Disabled
+          required: false
+          initial: false
+          description: >-
+            Specify true to disable TLS in the bay.
+        - name: public
+          type: boolean
+          label: Public
+          required: false
+          initial: false
+          description: >-
+            Specify true to make bay public.
+        - name: registryEnabled
+          type: boolean
+          label: Registry Enabled
+          required: false
+          initial: false
+          description: >-
+            Specify true to enable docker registry in the bay.
