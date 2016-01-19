@@ -245,7 +245,7 @@ Step 3. Create the execution plan template
 
 The execution plan template contains the instructions understandable to the murano
 agent on what should be executed to deploy an application. It is the file with the
-``.template`` extension located in the ``/APP_NAME/resources`` directory.
+``.template`` extension located in the ``/APP_NAME/Resources`` directory.
 
 The ApacheHTTPServer's DeployApache.template:
 
