@@ -15,9 +15,41 @@ Methods:
               ToPort: $.int().notNull()
               IpProtocol: $.string().notNull()
               External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
       - groupName:
           Contract: $.string().notNull()
           Default: $this.defaultGroupName
+    Body:
+      - $._addGroup(ingress, $rules, $groupName)
+
+  addGroupEgress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+    Body:
+      - $._addGroup(egress, $rules, $groupName)
+
+  _addGroup:
+    Arguments:
+      - direction:
+          Contract: $.string().notNull().check($ in list(ingress, egress))
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+      - groupName:
+          Contract: $.string().notNull()
     Body:
       - $ext_keys:
           true:
@@ -41,11 +73,13 @@ Methods:
                     remote_ip_prefix: '0.0.0.0/0'
       - $.environment.stack.updateTemplate($template)
 
-      - $ingress: $rules.select(dict(
+      - $rulesList: $rules.select(dict(
             port_range_min => $.FromPort,
             port_range_max => $.ToPort,
             protocol => $.IpProtocol,
-            $ext_keys.get($.External).ext_key => $ext_keys.get($.External).ext_val
+            ethertype => $.get(Ethertype, IPv4),
+            $ext_keys.get($.External).ext_key => $ext_keys.get($.External).ext_val,
+            direction => $direction
           ))
 
       - $template:
@@ -53,5 +87,5 @@ Methods:
             $groupName:
               type: 'OS::Neutron::SecurityGroup'
               properties:
-                rules: $ingress
+                rules: $rulesList
       - $.environment.stack.updateTemplate($template)

@@ -15,6 +15,37 @@ Methods:
               ToPort: $.int().notNull()
               IpProtocol: $.string().notNull()
               External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+    Body:
+      - $._addGroup(ingress, $rules, $groupName)
+
+  addGroupEgress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+    Body:
+      - $._addGroup(egress, $rules, $groupName)
+
+  _addGroup:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
       - groupName:
           Contract: $.string().notNull()
           Default: $this.defaultGroupName
@@ -27,6 +58,15 @@ Methods:
             ext_key: remote_mode
             ext_val: remote_group_id
 
+      - $ethertype: $rules.where($.get(Ethertype) = IPv6)
+      - If: len($ethertype) > 0
+        Then:
+          - $msg: 'Unable to add security group. IPv6 is not supported.'
+          - $._environment.reporter.report_error($this, $msg)
+          - Throw: UnsupportedPropertyValue
+            Message: $msg
+      - $groupDirection: dict(egress => SecurityGroupEgress).get($direction, SecurityGroupIngress)
+
       - $stack: $.environment.stack
       - $template:
           resources:
@@ -34,14 +74,14 @@ Methods:
               type: 'AWS::EC2::SecurityGroup'
               properties:
                 GroupDescription: format('Composite security group of Murano environment {0}', $.environment.name)
-                SecurityGroupIngress:
+                $groupDirection:
                   - FromPort: '-1'
                     ToPort: '-1'
                     IpProtocol: icmp
                     CidrIp: '0.0.0.0/0'
       - $.environment.stack.updateTemplate($template)
 
-      - $ingress: $rules.select(dict(
+      - $rulesList: $rules.select(dict(
             FromPort => str($.FromPort),
             ToPort => str($.ToPort),
             IpProtocol => $.IpProtocol,
@@ -53,5 +93,5 @@ Methods:
             $groupName:
               type: 'AWS::EC2::SecurityGroup'
               properties:
-                SecurityGroupIngress: $ingress
+                $groupDirection: $rulesList
       - $.environment.stack.updateTemplate($template)
