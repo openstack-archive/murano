@@ -31,8 +31,10 @@ MYSQL_CHARSET = 'utf8'
 
 
 def upgrade():
-    op.drop_column('environment', 'networking')
-    op.drop_column('environment-template', 'networking')
+    with op.batch_alter_table("environment") as batch_op:
+        batch_op.drop_column('networking')
+    with op.batch_alter_table("environment-template") as batch_op2:
+        batch_op2.drop_column('networking')
 
 
 def downgrade():
