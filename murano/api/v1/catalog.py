@@ -165,7 +165,11 @@ class Controller(object):
             if 'is_public' in change['path']:
                 if change['value'] is True and not pkg_to_update.is_public:
                     policy.check('publicize_package', req.context)
-                break
+            if 'name' in change['path']:
+                if len(change['value']) > 80:
+                    msg = _('Package name should be 80 characters maximum')
+                    LOG.error(msg)
+                    raise exc.HTTPBadRequest(explanation=msg)
         package = db_api.package_update(package_id, body, req.context)
         return package.to_dict()
 
@@ -239,6 +243,10 @@ class Controller(object):
                 for k, v in six.iteritems(PKG_PARAMS_MAP):
                     if hasattr(pkg_to_upload, k):
                         package_meta[v] = getattr(pkg_to_upload, k)
+                if len(package_meta['name']) > 80:
+                    msg = _('Package name should be 80 characters maximum')
+                    LOG.error(msg)
+                    raise exc.HTTPBadRequest(explanation=msg)
                 try:
                     package = db_api.package_upload(
                         package_meta, req.context.tenant)
