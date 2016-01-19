@@ -18,6 +18,7 @@ import collections
 import random
 import re
 import six
+from six.moves import range
 import string
 import time
 

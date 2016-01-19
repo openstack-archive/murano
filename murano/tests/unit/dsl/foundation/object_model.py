@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from six.moves import range
+
 from murano.dsl import helpers
 
 

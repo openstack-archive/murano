@@ -24,6 +24,7 @@ import eventlet.greenpool
 import eventlet.greenthread
 import semantic_version
 import six
+from six.moves import reduce
 import yaql.language.exceptions
 import yaql.language.expressions
 from yaql.language import utils as yaqlutils

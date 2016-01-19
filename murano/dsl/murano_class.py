@@ -17,6 +17,7 @@ import weakref
 
 import semantic_version
 import six
+from six.moves import range
 from yaql.language import utils
 
 from murano.dsl import constants
