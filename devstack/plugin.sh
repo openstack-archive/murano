@@ -150,7 +150,7 @@ function configure_murano {
     configure_murano_rpc_backend
 
     # Configure notifications for status information during provisioning
-    iniset $MURANO_CONF_FILE DEFAULT notification_driver messagingv2
+    iniset $MURANO_CONF_FILE oslo_messaging_notifications driver messagingv2
 
     # configure the database.
     iniset $MURANO_CONF_FILE database connection `database_connection_url murano`
