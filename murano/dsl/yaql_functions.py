@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import itertools
-
 import eventlet
 import six
 from yaql.language import specs
@@ -75,7 +73,7 @@ def super_(context, sender, func=None):
     if func is None:
         return [sender.cast(type) for type in cast_type.parents(
             sender.real_this.type)]
-    return itertools.imap(func, super_(context, sender))
+    return six.moves.map(func, super_(context, sender))
 
 
 @specs.parameter('value', dsl_types.MuranoObject)

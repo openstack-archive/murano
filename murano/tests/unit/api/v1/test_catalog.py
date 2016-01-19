@@ -14,7 +14,6 @@
 # limitations under the License.
 
 import cgi
-import cStringIO
 import imghdr
 import json
 import os
@@ -22,6 +21,8 @@ import uuid
 
 import mock
 from oslo_utils import timeutils
+from six.moves import cStringIO
+from six.moves import range
 
 from murano.api.v1 import catalog
 from murano.db.catalog import api as db_catalog_api
@@ -497,7 +498,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.expect_policy_check('upload_package')
         self.expect_policy_check('publicize_package')
 
-        file_obj_str = cStringIO.StringIO("This is some dummy data")
+        file_obj_str = cStringIO("This is some dummy data")
         file_obj = mock.MagicMock(cgi.FieldStorage)
         file_obj.file = file_obj_str
         package_from_dir, _ = self._test_package()

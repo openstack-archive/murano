@@ -14,6 +14,7 @@
 
 
 import six
+from six.moves import range
 
 from murano.dsl import constants
 from murano.dsl import dsl_exception
