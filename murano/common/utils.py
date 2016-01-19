@@ -27,7 +27,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TraverseHelper(object):
-    value_type = (basestring, int, float, bool)
+    value_type = (six.string_types, int, float, bool)
 
     @staticmethod
     def get(path, source):
@@ -165,8 +165,8 @@ def is_different(obj1, obj2):
 
         if o1 is o2:
             return
-        elif (isinstance(o1, basestring) and
-                isinstance(o2, basestring)) and o1 == o2:
+        elif (isinstance(o1, six.string_types) and
+                isinstance(o2, six.string_types)) and o1 == o2:
             return
         elif type(o1) != type(o2):
             raise Difference()

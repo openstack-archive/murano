@@ -141,7 +141,7 @@ class WhileDoMacro(expressions.DslExpression):
 
 class ForMacro(expressions.DslExpression):
     def __init__(self, For, In, Do):
-        if not isinstance(For, basestring):
+        if not isinstance(For, six.string_types):
             raise exceptions.DslSyntaxError(
                 'For value must be of string type')
         self._code = CodeBlock(Do)

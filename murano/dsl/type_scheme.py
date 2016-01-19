@@ -175,7 +175,7 @@ class TypeScheme(object):
 
                 obj = object_store.load(
                     value, owner, root_context, defaults=default)
-            elif isinstance(value, basestring):
+            elif isinstance(value, six.string_types):
                 obj = object_store.get(value)
                 if obj is None:
                     if not object_store.initializing:
@@ -317,6 +317,6 @@ class TypeScheme(object):
 
 
 def format_scalar(value):
-    if isinstance(value, basestring):
+    if isinstance(value, six.string_types):
         return "'{0}'".format(value)
     return six.text_type(value)

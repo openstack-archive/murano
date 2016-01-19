@@ -55,8 +55,16 @@ def check_python3_no_itervalues(logical_line):
         yield(0, msg)
 
 
+def check_no_basestring(logical_line):
+    if re.search(r"\bbasestring\b", logical_line):
+        msg = ("M326: basestring is not Python3-compatible, use "
+               "six.string_types instead.")
+        yield(0, msg)
+
+
 def factory(register):
     register(no_mutable_default_args)
     register(check_python3_no_iteritems)
     register(check_python3_no_iterkeys)
     register(check_python3_no_itervalues)
+    register(check_no_basestring)

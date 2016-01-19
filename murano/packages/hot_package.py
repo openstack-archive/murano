@@ -252,7 +252,7 @@ class HotPackage(package_base.PackageBase):
 
     @staticmethod
     def _format_value(value):
-        if isinstance(value, basestring):
+        if isinstance(value, six.string_types):
             return str("'" + value + "'")
         return str(value)
 

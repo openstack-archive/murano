@@ -1040,6 +1040,6 @@ class FormDataDeserializer(TextDeserializer):
     def default(self, request):
         form_data_parts = request.POST
         for key, value in six.iteritems(form_data_parts):
-            if isinstance(value, basestring):
+            if isinstance(value, six.string_types):
                 form_data_parts[key] = self._from_json(value)
         return {'body': form_data_parts}

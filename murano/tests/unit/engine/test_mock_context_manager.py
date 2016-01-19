@@ -51,7 +51,7 @@ class TestMockContextManager(mock_context_manager.MockContextManager):
 
 class MockRunner(runner.Runner):
     def __init__(self, model, package_loader, functions):
-        if isinstance(model, basestring):
+        if isinstance(model, six.string_types):
             model = om.Object(model)
         model = om.build_model(model)
         if 'Objects' not in model:

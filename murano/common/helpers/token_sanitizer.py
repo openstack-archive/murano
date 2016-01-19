@@ -57,7 +57,7 @@ class TokenSanitizer(object):
             return [self.sanitize(item) for item in obj]
         elif isinstance(obj, tuple):
             k, v = obj
-            if self._contains_token(k) and isinstance(v, basestring):
+            if self._contains_token(k) and isinstance(v, six.string_types):
                 return k, self.message
             return k, self.sanitize(v)
         else:

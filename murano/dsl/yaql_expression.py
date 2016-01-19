@@ -26,7 +26,7 @@ from murano.dsl import yaql_integration
 class YaqlExpression(dsl_types.YaqlExpression):
     def __init__(self, expression, version):
         self._version = version
-        if isinstance(expression, basestring):
+        if isinstance(expression, six.string_types):
             self._expression = six.text_type(expression)
             self._parsed_expression = yaql_integration.parse(
                 self._expression, version)
@@ -66,7 +66,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
 
     @staticmethod
     def is_expression(expression, version):
-        if not isinstance(expression, basestring):
+        if not isinstance(expression, six.string_types):
             return False
         if re.match('^[\s\w\d.:]*$', expression):
             return False

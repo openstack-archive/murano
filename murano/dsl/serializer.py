@@ -86,7 +86,8 @@ def _pass12_serialize(value, parent, serialized_objects,
                       designer_attributes_getter):
     if isinstance(value, dsl.MuranoObjectInterface):
         value = value.object
-    if isinstance(value, (basestring, int, float, bool)) or value is None:
+    if isinstance(value, (six.string_types,
+                          int, float, bool)) or value is None:
         return value, False
     if isinstance(value, dsl_types.MuranoObject):
         if value.owner is not parent or value.object_id in serialized_objects:

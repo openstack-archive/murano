@@ -59,7 +59,7 @@ def pselect(collection, composer):
 @specs.parameter('mappings', collections.Mapping)
 @specs.extension_method
 def bind(obj, mappings):
-    if isinstance(obj, basestring) and obj.startswith('$'):
+    if isinstance(obj, six.string_types) and obj.startswith('$'):
         value = _convert_macro_parameter(obj[1:], mappings)
         if value is not None:
             return value
@@ -70,7 +70,7 @@ def bind(obj, mappings):
         for key, value in six.iteritems(obj):
             result[bind(key, mappings)] = bind(value, mappings)
         return result
-    elif isinstance(obj, basestring) and obj.startswith('$'):
+    elif isinstance(obj, six.string_types) and obj.startswith('$'):
         value = _convert_macro_parameter(obj[1:], mappings)
         if value is not None:
             return value

@@ -16,6 +16,7 @@
 
 from oslo_config import cfg
 import oslo_messaging as messaging
+import six
 
 from murano.common import uuidutils
 from murano.dsl import dsl
@@ -34,7 +35,7 @@ class StatusReporter(object):
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),
             topic='murano')
-        if isinstance(environment, basestring):
+        if isinstance(environment, six.string_types):
             self._environment_id = environment
         else:
             self._environment_id = environment.id

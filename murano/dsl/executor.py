@@ -225,7 +225,7 @@ class MuranoDslExecutor(object):
                 for res in self._list_potential_object_ids(val):
                     yield res
         elif isinstance(data, collections.Iterable) and not isinstance(
-                data, basestring):
+                data, six.string_types):
             for val in data:
                 for res in self._list_potential_object_ids(val):
                     yield res

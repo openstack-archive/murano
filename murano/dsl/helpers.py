@@ -83,8 +83,10 @@ def merge_dicts(dict1, dict2, max_levels=0):
         if key in dict2:
             value2 = dict2[key]
             if type(value2) != type(value1):
-                if ((isinstance(value1, basestring) or value1 is None) and
-                        (isinstance(value2, basestring) or value2 is None)):
+                if ((isinstance(value1,
+                                six.string_types) or value1 is None) and
+                        (isinstance(value2,
+                                    six.string_types) or value2 is None)):
                     continue
                 raise TypeError()
             if max_levels != 1 and isinstance(value2, dict):
@@ -285,7 +287,7 @@ def cast(obj, murano_class, pov_or_version_spec=None):
         obj = obj.object
     if isinstance(pov_or_version_spec, dsl_types.MuranoClass):
         pov_or_version_spec = pov_or_version_spec.package
-    elif isinstance(pov_or_version_spec, basestring):
+    elif isinstance(pov_or_version_spec, six.string_types):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
     if isinstance(murano_class, dsl_types.MuranoClass):
         if pov_or_version_spec is None:
