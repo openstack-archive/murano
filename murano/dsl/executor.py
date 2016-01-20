@@ -15,12 +15,12 @@
 import collections
 import contextlib
 import itertools
-import six
 import weakref
 
 import eventlet
 import eventlet.event
 from oslo_log import log as logging
+import six
 from yaql.language import specs
 
 from murano.common.i18n import _LW

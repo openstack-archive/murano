@@ -12,11 +12,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 
 from keystoneclient import exceptions as ks_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
+import six
 import yaml
 
 from murano.common import auth_utils

@@ -14,8 +14,8 @@
 
 import inspect
 import os.path
-import six
 
+import six
 from yaql import specs
 
 from murano.dsl import constants

@@ -11,9 +11,9 @@
 #    under the License.
 
 import os
-import yaml
 
 import six
+import yaml
 
 from murano.packages import exceptions
 from murano.packages import package_base

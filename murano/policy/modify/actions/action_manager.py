@@ -13,12 +13,11 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-import yaml
-
 from oslo_log import log as logging
 from oslo_utils import importutils
+import six
 from stevedore import extension
+import yaml
 
 LOG = logging.getLogger(__name__)
 
