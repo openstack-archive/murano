@@ -5,7 +5,7 @@ YAQL
 
 YAQL (Yet Another Query Language) is a query language that was also
 designed as a part of the murano project. MuranoPL makes an extensive
-use of YAQL. A description of YAQL can be found `here <https://github.com/ativelkov/yaql>`_.
+use of YAQL. A description of YAQL can be found `here <https://yaql.readthedocs.org>`_.
 
 Simply speaking, YAQL is the language for expression evaluation.
 The following examples are all valid YAQL expressions:
