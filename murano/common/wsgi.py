@@ -81,6 +81,7 @@ class Service(service.Service):
         self._host = host
         self._backlog = backlog if backlog else CONF.backlog
         self._logger = logging.getLogger('eventlet.wsgi')
+        self.greenthread = None
         super(Service, self).__init__(threads)
 
     def _get_socket(self, host, port, backlog):
@@ -133,7 +134,8 @@ class Service(service.Service):
         """
         super(Service, self).start()
         self._socket = self._get_socket(self._host, self._port, self._backlog)
-        self.tg.add_thread(self._run, self.application, self._socket)
+        self.greenthread = eventlet.spawn(
+            self._run, self.application, self._socket)
 
     @property
     def backlog(self):
@@ -154,6 +156,8 @@ class Service(service.Service):
 
         """
         super(Service, self).stop()
+        if self.greenthread is not None:
+            self.greenthread.kill()
 
     def reset(self):
         super(Service, self).reset()
