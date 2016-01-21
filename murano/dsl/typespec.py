@@ -76,7 +76,8 @@ class PropertySpec(Spec):
         except exceptions.ContractViolationException as e:
             msg = u'[{0}.{1}{2}] {3}'.format(
                 self.class_name, self.property_name, e.path, six.text_type(e))
-            raise exceptions.ContractViolationException, msg, sys.exc_info()[2]
+            six.reraise(exceptions.ContractViolationException,
+                        msg, sys.exc_info()[2])
 
 
 class ArgumentSpec(Spec):
@@ -93,4 +94,5 @@ class ArgumentSpec(Spec):
             msg = u'[{0}::{1}({2}{3})] {4}'.format(
                 self.class_name, self.method_name, self.arg_name,
                 e.path, six.text_type(e))
-            raise exceptions.ContractViolationException, msg, sys.exc_info()[2]
+            six.reraise(exceptions.ContractViolationException,
+                        msg, sys.exc_info()[2])

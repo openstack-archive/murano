@@ -125,7 +125,7 @@ def parallel_select(collection, func, limit=1000):
     except StopIteration:
         return map(lambda t: t[0], result)
     else:
-        raise exception[0], None, exception[2]
+        six.reraise(exception[0], None, exception[2])
 
 
 def enum(**enums):
