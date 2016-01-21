@@ -58,8 +58,8 @@ def main(argv):
     pip_requires = os.path.join(root, 'requirements.txt')
     test_requires = os.path.join(root, 'test-requirements.txt')
     py_version = "python%s.%s" % (sys.version_info[0], sys.version_info[1])
-    setup_cfg = configparser.configparser()
-    setup_cfg.read('setup.cfg')
+    setup_cfg = configparser.ConfigParser()
+    setup_cfg.read(os.path.join(root, 'setup.cfg'))
     project = setup_cfg.get('metadata', 'name')
 
     install = install_venv.InstallVenv(
