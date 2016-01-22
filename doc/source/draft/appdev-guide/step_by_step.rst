@@ -418,6 +418,9 @@ Here is how the second dialog looks like:
 .. image:: step_2.png
 
 
+For more information about Dynamic UI, please refer to
+:ref:`the main reference <DynamicUISpec>`.
+
 .. _step_5_class_definition:
 
 Step 5: Define MuranoPL class definitions
