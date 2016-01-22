@@ -16,12 +16,12 @@
 import copy
 import datetime
 import os
-import urlparse
 import uuid
 
 import eventlet.event
 from oslo_config import cfg
 from oslo_log import log as logging
+from six.moves import urllib
 from yaql import specs
 
 import murano.common.exceptions as exceptions
@@ -258,7 +258,7 @@ class Agent(object):
 
     def _is_url(self, file):
         file = self._get_url(file)
-        parts = urlparse.urlsplit(file)
+        parts = urllib.parse.urlsplit(file)
         if not parts.scheme or not parts.netloc:
             return False
         else:

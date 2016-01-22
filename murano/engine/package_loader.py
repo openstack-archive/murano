@@ -82,7 +82,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             package_definition = self._get_definition(filter_opts)
         except LookupError:
             exc_info = sys.exc_info()
-            raise exceptions.NoPackageFound(package_name), None, exc_info[2]
+            six.reraise(exceptions.NoPackageFound(package_name),
+                        None, exc_info[2])
         return self._to_dsl_package(
             self._get_package_by_definition(package_definition))
 
@@ -156,7 +157,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                 package_id, str(e)
             )
             exc_info = sys.exc_info()
-            raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
+            six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
         package_file = None
         try:
             with tempfile.NamedTemporaryFile(delete=False) as package_file:
@@ -170,7 +171,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         except IOError:
             msg = 'Unable to extract package data for %s' % package_id
             exc_info = sys.exc_info()
-            raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
+            six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
         finally:
             try:
                 if package_file:
