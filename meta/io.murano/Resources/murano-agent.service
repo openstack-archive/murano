@@ -1,0 +1,10 @@
+[Unit]
+Description=OpenStack Murano Agent
+
+[Service]
+Type=simple
+ExecStart=/usr/local/bin/muranoagent --config-dir /etc/murano
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
