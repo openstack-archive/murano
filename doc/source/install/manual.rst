@@ -161,7 +161,7 @@ Install the API service and Engine
         rabbit_userid = %RABBITMQ_USER%
         rabbit_password = %RABBITMQ_PASSWORD%
         rabbit_virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
-        notification_driver = messagingv2
+        driver = messagingv2
 
         ...
 

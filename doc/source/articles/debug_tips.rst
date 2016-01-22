@@ -60,7 +60,7 @@ You can see steps of the deployments and the one that failed would have red colo
     Go to the spawned virtual machine and open */etc/murano/agent.conf* or *C:\Murano\Agent\agent.conf* on Windows-based machine.
     Also, you can examine agent logs, located by default at */var/log/murano-agent.log*
     The first part of the log file will contain reconnection attempts to the rabbit - since the valid rabbit address and queue have not been obtained yet.
-  * Check that *notification_driver* option is set to `messagingv2`
+  * Check that *driver* option is set to `messagingv2`
   * Check that linux image name is not starts with 'w' letter
 
 *  ``[exceptions.EnvironmentError]: Unexpected stack state NOT_FOUND`` - problem with heat stack creation, need to examine Heat log file.

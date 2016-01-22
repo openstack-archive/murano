@@ -145,7 +145,7 @@ Workarounds:
   :file:`/var/log/murano-agent.log` The first part of the log file contains
   reconnection attempts to the RabbitMQ since the valid RabbitMQ address
   and queue have not been obtained yet.
-* Verify that the ``notification_driver`` option is set to ``messagingv2``
+* Verify that the ``driver`` option is set to ``messagingv2``
 
 **murano.engine.system.agent.AgentException**
 
@@ -176,7 +176,7 @@ There are no messages, provided in applications themselves:
   2015-09-21 11:14:58 — Action deploy is scheduled
   2015-09-21 11:16:43 — Deployment finished successfully
 
-To fix the problem, set the ``notification_driver`` option in the :file:`murano.config`
+To fix the problem, set the ``driver`` option in the :file:`murano.config`
 file to ``messagingv2``.
 
 
