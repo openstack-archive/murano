@@ -33,6 +33,20 @@ Methods:
               ToPort: $.int().notNull()
               IpProtocol: $.string().notNull()
               External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+      - groupName:
+          Contract: $.string().notNull()
+          Default: $this.defaultGroupName
+
+  addGroupEgress:
+    Arguments:
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
       - groupName:
           Contract: $.string().notNull()
           Default: $this.defaultGroupName
