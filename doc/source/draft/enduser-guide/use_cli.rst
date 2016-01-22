@@ -430,3 +430,51 @@ composition, please see :ref:`Automatic package composing <compose_package>`.
 
 Manage categories
 ~~~~~~~~~~~~~~~~~
+
+In murano, applications can belong to a category or multiple categories.
+Administrative users can create and delete a category as well as list
+available categories and view details for a particular category.
+
+Create a category
+-----------------
+
+To create a category, use the following command specifying the category name:
+
+.. code-block:: console
+
+   murano category-create <NAME>
+
+List available categories
+-------------------------
+
+To get a list of all existing categories, run:
+
+.. code-block:: console
+
+   murano category-list
+
+Show category details
+---------------------
+
+To see packages that belong to a particular category, use the following
+command specifying the category ID:
+
+.. code-block:: console
+
+   murano category-show <ID>
+
+Delete a category
+-----------------
+
+To delete a category, use the following command specifying the ID of a
+category or multiple categories to delete:
+
+.. code-block:: console
+
+   murano category-delete <ID> [<ID> ...]
+
+.. note::
+
+   Verify that no packages belong to the category to be deleted, otherwise an
+   error appears. For this, use the :command:`murano category-show <ID>`
+   command.
