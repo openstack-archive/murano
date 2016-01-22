@@ -1,11 +1,11 @@
 .. _murano-pl:
 
-.. toctree::
-   :maxdepth: 2
-
 ==================
 MuranoPL Reference
 ==================
+
+.. toctree::
+   :maxdepth: 2
 
 To develop applications, murano project refers to Murano Programming
 Language (MuranoPL). It is represented by easily readable YAML and

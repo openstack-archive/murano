@@ -99,6 +99,7 @@ Developing Applications
    draft/appdev-guide/murano_pl
    draft/appdev-guide/murano_packages
    draft/appdev-guide/app_migrating
+   draft/appdev-guide/app_unit_tests
    draft/appdev-guide/examples
    draft/appdev-guide/use_cases
    draft/appdev-guide/faq
