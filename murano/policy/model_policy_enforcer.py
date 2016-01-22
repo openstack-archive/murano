@@ -111,7 +111,7 @@ class ModelPolicyEnforcer(object):
     def _execute_simulation(self, package_loader, env_id, model, query):
         rules = congress_rules.CongressRulesManager().convert(
             model, package_loader, self._environment.tenant_id)
-        rules_str = map(str, rules)
+        rules_str = list(map(str, rules))
         # cleanup of data populated by murano driver
         rules_str.insert(0, 'deleteEnv("{0}")'.format(env_id))
         rules_line = " ".join(rules_str)
