@@ -33,12 +33,16 @@ MYSQL_CHARSET = 'utf8'
 
 
 def upgrade():
-    op.alter_column('session', 'user_id', type_=sa.String(64), nullable=False)
-    op.alter_column('package', 'owner_id', type_=sa.String(64), nullable=False)
+    with op.batch_alter_table("session") as batch_op:
+        batch_op.alter_column('user_id', type_=sa.String(64), nullable=False)
+    with op.batch_alter_table("package") as batch_op2:
+        batch_op2.alter_column('owner_id', type_=sa.String(64), nullable=False)
     # end Alembic commands #
 
 
 def downgrade():
-    op.alter_column('package', 'owner_id', type_=sa.String(36), nullable=False)
-    op.alter_column('session', 'user_id', type_=sa.String(36), nullable=False)
+    with op.batch_alter_table("session") as batch_op:
+        batch_op.alter_column('user_id', type_=sa.String(36), nullable=False)
+    with op.batch_alter_table("package") as batch_op2:
+        batch_op2.alter_column('owner_id', type_=sa.String(36), nullable=False)
     # end Alembic commands #
