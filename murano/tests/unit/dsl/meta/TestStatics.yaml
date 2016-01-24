@@ -1,0 +1,192 @@
+Namespaces:
+  ns: test
+  =: test
+
+Name: TestStatics
+
+Extends: TestStaticsBase
+
+Properties:
+  staticProperty:
+    Contract: $.string()
+    Usage: Static
+    Default: xxx
+
+  conflictingStaticProperty:
+    Contract: $.string()
+    Default: 'conflictingStaticProperty-child'
+    Usage: Static
+
+  instanceProperty:
+    Contract: $.string()
+    Default: instanceProperty
+
+  staticProperty2:
+    Contract: $.string()
+    Default: staticProperty
+    Usage: Static
+
+Methods:
+  testStaticTest:
+    Usage: Static
+    Body:
+      Return: $
+
+  testCallStaticMethodOnObject:
+    Body:
+      Return: $.simpleStaticMethod()
+
+  testCallStaticMethodOnClassName:
+    Body:
+      Return: :TestStatics.simpleStaticMethod()
+
+  testCallStaticMethodOnClassNameWithNs:
+    Body:
+      Return: ns:TestStatics.simpleStaticMethod()
+
+  testCallStaticMethodFromAnotherMethod:
+    Body:
+      Return: ns:TestStatics.simpleStaticMethod2()
+
+  testStaticThis:
+    Body:
+      Return: $.returnStaticThis()
+
+  testNoAccessToInstanceProperties:
+    Body:
+      Return: $.accessInstanceProperty()
+
+  testAccessStaticPropertyFromInstanceMethod:
+    Body:
+      Return: $.staticProperty
+
+  testAccessStaticPropertyFromStaticMethod:
+    Body:
+      Return: $.accessStaticProperty()
+
+  simpleStaticMethod:
+    Usage: Static
+    Body:
+      Return: 123
+
+  simpleStaticMethod2:
+    Usage: Static
+    Body:
+      Return: $.simpleStaticMethod() +
+        $this.simpleStaticMethod() +
+        ns:TestStatics.simpleStaticMethod() +
+        :TestStatics.simpleStaticMethod() +
+        type('test.TestStatics').simpleStaticMethod()
+
+  returnStaticThis:
+    Usage: Static
+    Body:
+      Return: $
+
+  accessInstanceProperty:
+    Usage: Static
+    Body:
+      Return: $.instanceProperty
+
+  accessStaticProperty:
+    Usage: Static
+    Body:
+      Return: $.staticProperty
+
+  testModifyStaticPropertyUsingDollar:
+    Body:
+      Return: $.modifyStaticPropertyUsingDollar()
+
+  modifyStaticPropertyUsingDollar:
+    Usage: Static
+    Body:
+      - $.staticProperty: qq
+      - Return: $.staticProperty
+
+  testModifyStaticPropertyUsingThis:
+    Body:
+      Return: $.modifyStaticPropertyUsingThis()
+
+  modifyStaticPropertyUsingThis:
+    Usage: Static
+    Body:
+      - $this.staticProperty: qq
+      - Return: $this.staticProperty
+
+  testModifyStaticPropertyUsingClassName:
+    Body:
+      Return: $.modifyStaticPropertyUsingClassName()
+
+  modifyStaticPropertyUsingClassName:
+    Usage: Static
+    Body:
+      - :TestStatics.staticProperty: qq
+      - Return: :TestStatics.staticProperty
+
+  testModifyStaticPropertyUsingNsClassName:
+    Body:
+      Return: $.modifyStaticPropertyUsingNsClassName()
+
+  modifyStaticPropertyUsingNsClassName:
+    Usage: Static
+    Body:
+      - ns:TestStatics.staticProperty: qq
+      - Return: ns:TestStatics.staticProperty
+
+  testModifyStaticPropertyUsingTypeFunc:
+    Body:
+      Return: $.modifyStaticPropertyUsingTypeFunc()
+
+  modifyStaticPropertyUsingTypeFunc:
+    Usage: Static
+    Body:
+      - type('test.TestStatics').staticProperty: qq
+      - Return: type('test.TestStatics').staticProperty
+
+  testPropertyIsStatic:
+    Body:
+      Return: $.modifyStaticPropertyOnInstance()
+
+  modifyStaticPropertyOnInstance:
+    Usage: Static
+    Body:
+      - $obj1: new(TestStatics)
+      - $obj2: new(TestStatics)
+      - $obj1.modifyStaticPropertyUsingClassName()
+      - Return: $obj2.staticProperty
+
+  testStaticPropertisNotLoaded:
+    Body:
+      Return: $.staticProperty2
+
+  testTypeIsSingleton:
+    Body:
+      - $t11: :TestStatics
+      - $t12: :TestStatics
+      - $t21: ns:TestStatics
+      - $t22: ns:TestStatics
+      - $t31: type('test.TestStatics')
+      - $t32: type('test.TestStatics')
+      - Return: $t11 = $t12 and $t21 = $t22 and $t31 = $t32
+
+  testStaticPropertyInheritance:
+    Body:
+      Return: $.baseStaticProperty +
+        :TestStaticsBase.baseStaticProperty +
+        :TestStatics.baseStaticProperty
+
+  testStaticPropertyOverride:
+    Body:
+      Return:
+        - $.conflictingStaticProperty
+        - :TestStatics.conflictingStaticProperty
+        - :TestStaticsBase.conflictingStaticProperty
+        - type('test.TestStatics').conflictingStaticProperty
+        - type('test.TestStaticsBase').conflictingStaticProperty
+
+  testTypeinfoOfType:
+    Body:
+      - $typeObj: type('test.TestStatics')
+      - $typeInfoOfType: typeinfo($typeObj)
+      - $obj: new('TestStatics')
+      - Return: typeinfo($obj) = $typeInfoOfType

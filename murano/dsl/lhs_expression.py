@@ -20,8 +20,10 @@ from yaql.language import utils
 from yaql.language import yaqltypes
 
 from murano.dsl import constants
+from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import yaql_functions
 from murano.dsl import yaql_integration
 
 
@@ -68,6 +70,14 @@ class LhsExpression(object):
                                 ((key, value),))))
                 elif isinstance(src, dsl_types.MuranoObject):
                     src.set_property(key, value, root_context)
+                elif isinstance(src, (
+                        dsl_types.MuranoTypeReference,
+                        dsl_types.MuranoClass)):
+                    if not isinstance(src, dsl_types.MuranoClass):
+                        mc = src.murano_class
+                    else:
+                        mc = src
+                    mc.set_property(key, value, root_context)
                 else:
                     raise ValueError(
                         'attribution may only be applied to '
@@ -118,16 +128,51 @@ class LhsExpression(object):
             else:
                 return attribution(this, index)
 
+        def _wrap_type_reference(tr):
+            return LhsExpression.Property(lambda: tr, self._invalid_target)
+
+        @specs.parameter('prefix', yaqltypes.Keyword())
+        @specs.parameter('name', yaqltypes.Keyword())
+        @specs.name('#operator_:')
+        def ns_resolve(prefix, name):
+            return _wrap_type_reference(
+                yaql_functions.ns_resolve(context, prefix, name))
+
+        @specs.parameter('name', yaqltypes.Keyword())
+        @specs.name('#unary_operator_:')
+        def ns_resolve_unary(context, name):
+            return _wrap_type_reference(
+                yaql_functions.ns_resolve_unary(context, name))
+
+        @specs.parameter('object_', dsl_types.MuranoObject)
+        def type_(object_):
+            return _wrap_type_reference(yaql_functions.type_(object_))
+
+        @specs.name('type')
+        @specs.parameter('cls', dsl.MuranoTypeName())
+        def type_from_name(cls):
+            return _wrap_type_reference(cls)
+
         context = yaql_integration.create_empty_context()
         context.register_function(get_context_data, '#get_context_data')
         context.register_function(attribution, '#operator_.')
         context.register_function(indexation, '#indexer')
+        context.register_function(ns_resolve)
+        context.register_function(ns_resolve_unary)
+        context.register_function(type_)
+        context.register_function(type_from_name)
         return context
+
+    def _invalid_target(self, *args, **kwargs):
+        raise exceptions.InvalidLhsTargetError(self._expression)
 
     def __call__(self, value, context):
         new_context = self._create_context(context)
         new_context[''] = context['$']
+        new_context[constants.CTX_TYPE] = context[constants.CTX_TYPE]
         self._current_obj = None
         self._current_obj_name = None
         property = self._expression(context=new_context)
+        if not isinstance(property, LhsExpression.Property):
+            self._invalid_target()
         property.set(value)

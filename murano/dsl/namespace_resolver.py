@@ -12,26 +12,42 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import re
+
+TYPE_NAME_RE = re.compile(r'^([a-zA-Z_]\w*:|:)?[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*$')
+NS_RE = re.compile(r'^([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)?$')
+PREFIX_RE = re.compile(r'^([a-zA-Z_]\w*|=)$')
+
 
 class NamespaceResolver(object):
     def __init__(self, namespaces):
-        self._namespaces = namespaces
+        for prefix, ns in namespaces.items():
+            if PREFIX_RE.match(prefix) is None:
+                raise ValueError(
+                    'Invalid namespace prefix "{0}"'.format(prefix))
+            if NS_RE.match(ns) is None:
+                raise ValueError('Invalid namespace "{0}"'.format(ns))
+        self._namespaces = namespaces.copy()
+        self._namespaces.setdefault('=', '')
         self._namespaces[''] = ''
 
-    def resolve_name(self, name, relative=None):
-        if name is None:
-            raise ValueError()
-        if name and name.startswith(':'):
-            return name[1:]
-        if ':' in name:
+    def resolve_name(self, name):
+        if name is None or TYPE_NAME_RE.match(name) is None:
+            raise ValueError('Invalid type name "{0}"'.format(name))
+        if ':' not in name:
+            if '.' in name:
+                parts = ['', name]
+            else:
+                parts = ['=', name]
+        else:
             parts = name.split(':')
-            if len(parts) != 2 or not parts[1]:
-                raise NameError('Incorrectly formatted name ' + name)
-            if parts[0] not in self._namespaces:
-                raise KeyError('Unknown namespace prefix ' + parts[0])
-            return '.'.join((self._namespaces[parts[0]], parts[1]))
-        if not relative and '=' in self._namespaces and '.' not in name:
-            return '.'.join((self._namespaces['='], name))
-        if relative and '.' not in name:
-            return '.'.join((relative, name))
-        return name
+            if not parts[0]:
+                parts[0] = '='
+
+        if parts[0] not in self._namespaces:
+            raise KeyError('Unknown namespace prefix ' + parts[0])
+
+        ns = self._namespaces[parts[0]]
+        if not ns:
+            return name
+        return '.'.join((ns, parts[1]))

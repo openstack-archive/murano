@@ -26,8 +26,9 @@ from murano.dsl import yaql_integration
 
 
 class MuranoObject(dsl_types.MuranoObject):
-    def __init__(self, murano_class, owner, object_store, object_id=None,
-                 name=None, known_classes=None, defaults=None, this=None):
+    def __init__(self, murano_class, owner, object_store, executor,
+                 object_id=None, name=None, known_classes=None,
+                 defaults=None, this=None):
         if known_classes is None:
             known_classes = {}
         self.__owner = owner.real_this if owner else None
@@ -39,7 +40,9 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__this = this
         self.__name = name
         self.__extension = None
-        self.__object_store = weakref.ref(object_store)
+        self.__object_store = \
+            None if object_store is None else weakref.ref(object_store)
+        self.__executor = weakref.ref(executor)
         self.__config = murano_class.package.get_class_config(
             murano_class.name)
         if not isinstance(self.__config, dict):
@@ -49,7 +52,7 @@ class MuranoObject(dsl_types.MuranoObject):
             name = parent_class.name
             if name not in known_classes:
                 obj = parent_class.new(
-                    owner, object_store, object_id=self.__object_id,
+                    owner, object_store, executor, object_id=self.__object_id,
                     known_classes=known_classes, defaults=defaults,
                     this=self.real_this).object
 
@@ -72,7 +75,11 @@ class MuranoObject(dsl_types.MuranoObject):
 
     @property
     def object_store(self):
-        return self.__object_store()
+        return None if self.__object_store is None else self.__object_store()
+
+    @property
+    def executor(self):
+        return self.__executor()
 
     def initialize(self, context, object_store, params):
         if self.__initialized:
@@ -105,7 +112,8 @@ class MuranoObject(dsl_types.MuranoObject):
 
                 if property_name in used_names:
                     continue
-                if spec.usage == typespec.PropertyUsages.Config:
+                if spec.usage in (typespec.PropertyUsages.Config,
+                                  typespec.PropertyUsages.Static):
                     used_names.add(property_name)
                     continue
                 if spec.usage == typespec.PropertyUsages.Runtime:
@@ -133,7 +141,8 @@ class MuranoObject(dsl_types.MuranoObject):
             last_errors = errors
 
         executor = helpers.get_executor(context)
-        if not object_store.initializing and self.__extension is None:
+        if ((object_store is None or not object_store.initializing) and
+                self.__extension is None):
             method = self.type.methods.get('__init__')
             if method:
                 filtered_params = yaql_integration.filter_parameters(
@@ -146,7 +155,7 @@ class MuranoObject(dsl_types.MuranoObject):
         for parent in self.__parents.values():
             parent.initialize(context, object_store, params)
 
-        if not object_store.initializing and init:
+        if (object_store is None or not object_store.initializing) and init:
             context[constants.CTX_ARGUMENT_OWNER] = self.real_this
             init.invoke(executor, self.real_this, (), init_args, context)
             self.__initialized = True
@@ -173,11 +182,18 @@ class MuranoObject(dsl_types.MuranoObject):
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
         if name in start_type.properties:
-            return self.cast(start_type)._get_property_value(name)
+            spec = start_type.properties[name]
+            if spec.usage == typespec.PropertyUsages.Static:
+                return spec.murano_class.get_property(name, context)
+            else:
+                return self.cast(start_type)._get_property_value(name)
         else:
             try:
                 spec = start_type.find_single_property(name)
-                return self.cast(spec.murano_class).__properties[name]
+                if spec.usage == typespec.PropertyUsages.Static:
+                    return spec.murano_class.get_property(name, context)
+                else:
+                    return self.cast(spec.murano_class).__properties[name]
             except exceptions.NoPropertyFound:
                 if derived:
                     return self.cast(caller_class)._get_property_value(name)
@@ -199,11 +215,12 @@ class MuranoObject(dsl_types.MuranoObject):
         declared_properties = start_type.find_properties(
             lambda p: p.name == name)
         if context is None:
-            context = self.object_store.executor.create_object_context(self)
+            context = self.executor.create_object_context(self)
         if len(declared_properties) > 0:
             declared_properties = self.type.find_properties(
                 lambda p: p.name == name)
             values_to_assign = []
+            classes_for_static_properties = []
             for spec in declared_properties:
                 if (caller_class is not None and not
                         helpers.are_property_modifications_allowed(context) and
@@ -211,16 +228,21 @@ class MuranoObject(dsl_types.MuranoObject):
                             not derived)):
                     raise exceptions.NoWriteAccessError(name)
 
-                default = self.__config.get(name, spec.default)
-                default = self.__defaults.get(name, default)
-                default = helpers.evaluate(default, context)
+                if spec.usage == typespec.PropertyUsages.Static:
+                    classes_for_static_properties.append(spec.murano_class)
+                else:
+                    default = self.__config.get(name, spec.default)
+                    default = self.__defaults.get(name, default)
+                    default = helpers.evaluate(default, context)
 
-                obj = self.cast(spec.murano_class)
-                values_to_assign.append((obj, spec.validate(
-                    value, self.real_this,
-                    self.real_this, default=default)))
+                    obj = self.cast(spec.murano_class)
+                    values_to_assign.append((obj, spec.validate(
+                        value, self.real_this,
+                        self.real_this, context, default=default)))
             for obj, value in values_to_assign:
                 obj.__properties[name] = value
+            for cls in classes_for_static_properties:
+                cls.set_property(name, value, context)
         elif derived:
             obj = self.cast(caller_class)
             obj.__properties[name] = value

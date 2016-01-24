@@ -46,6 +46,7 @@ class MuranoClass(dsl_types.MuranoClass):
                 package.find_class(constants.CORE_LIBRARY_OBJECT)]
         self._context = None
         self._parent_mappings = self._build_parent_remappings()
+        self._property_values = {}
 
     @classmethod
     def create(cls, data, package, name=None):
@@ -53,7 +54,7 @@ class MuranoClass(dsl_types.MuranoClass):
         ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
 
         if not name:
-            name = ns_resolver.resolve_name(data['Name'])
+            name = ns_resolver.resolve_name(str(data['Name']))
 
         parent_class_names = data.get('Extends')
         parent_classes = []
@@ -61,7 +62,7 @@ class MuranoClass(dsl_types.MuranoClass):
             if not utils.is_sequence(parent_class_names):
                 parent_class_names = [parent_class_names]
             for parent_name in parent_class_names:
-                full_name = ns_resolver.resolve_name(parent_name)
+                full_name = ns_resolver.resolve_name(str(parent_name))
                 parent_classes.append(package.find_class(full_name))
 
         type_obj = cls(ns_resolver, name, package, parent_classes)
@@ -189,6 +190,19 @@ class MuranoClass(dsl_types.MuranoClass):
         return self._choose_symbol(
             lambda cls: cls.properties.get(name))
 
+    def find_static_property(self, name):
+        def prop_func(cls):
+            prop = cls.properties.get(name)
+            if prop is not None and prop.usage == 'Static':
+                return prop
+
+        result = self._choose_symbol(prop_func)
+        if len(result) < 1:
+            raise exceptions.NoPropertyFound(name)
+        elif len(result) > 1:
+            raise exceptions.AmbiguousPropertyNameError(name)
+        return result[0]
+
     def find_single_method(self, name):
         result = self.find_method(name)
         if len(result) < 1:
@@ -242,12 +256,13 @@ class MuranoClass(dsl_types.MuranoClass):
             return True
         return any(cls is self for cls in obj.ancestors())
 
-    def new(self, owner, object_store, **kwargs):
-        obj = murano_object.MuranoObject(self, owner, object_store, **kwargs)
+    def new(self, owner, object_store, executor, **kwargs):
+        obj = murano_object.MuranoObject(
+            self, owner, object_store, executor, **kwargs)
 
         def initializer(__context, **params):
             if __context is None:
-                __context = object_store.executor.create_object_context(obj)
+                __context = executor.create_object_context(obj)
             init_context = __context.create_child_context()
             init_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
             obj.initialize(init_context, object_store, params)
@@ -359,3 +374,17 @@ class MuranoClass(dsl_types.MuranoClass):
                     m.yaql_function_definition,
                     name=m.yaql_function_definition.name)
         return self._context
+
+    def get_property(self, name, context):
+        prop = self.find_static_property(name)
+        cls = prop.murano_class
+        value = cls._property_values.get(name, prop.default)
+        return prop.validate(value, cls, None, context)
+
+    def set_property(self, name, value, context):
+        prop = self.find_static_property(name)
+        cls = prop.murano_class
+        cls._property_values[name] = prop.validate(value, cls, None, context)
+
+    def get_reference(self):
+        return dsl_types.MuranoTypeReference(self)

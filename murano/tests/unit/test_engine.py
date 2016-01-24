@@ -50,23 +50,24 @@ class TestNamespaceResolving(base.MuranoTestCase):
         resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         name = 'sys:'
 
-        self.assertRaises(NameError, resolver.resolve_name, name)
+        self.assertRaises(ValueError, resolver.resolve_name, name)
 
     def test_fails_w_excessive_prefix(self):
         ns = {'sys': 'com.example.murano.system'}
         resolver = ns_resolver.NamespaceResolver(ns)
         invalid_name = 'sys:excessive_ns:muranoResource'
 
-        self.assertRaises(NameError, resolver.resolve_name, invalid_name)
+        self.assertRaises(ValueError, resolver.resolve_name, invalid_name)
 
-    def test_cuts_empty_prefix(self):
+    def test_empty_prefix_is_default(self):
         resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
         # name without prefix delimiter
         name = 'some.arbitrary.name'
 
         resolved_name = resolver.resolve_name(':' + name)
 
-        self.assertEqual(name, resolved_name)
+        self.assertEqual(
+            'com.example.murano.some.arbitrary.name', resolved_name)
 
     def test_resolves_specified_ns_prefix(self):
         ns = {'sys': 'com.example.murano.system'}
@@ -84,20 +85,6 @@ class TestNamespaceResolving(base.MuranoTestCase):
         resolved_name = resolver.resolve_name(short_name)
 
         self.assertEqual(full_name, resolved_name)
-
-    def test_resolves_explicit_base(self):
-        resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
-
-        resolved_name = resolver.resolve_name('Resource', relative='com.base')
-
-        self.assertEqual('com.base.Resource', resolved_name)
-
-    def test_resolves_explicit_base_w_empty_namespaces(self):
-        resolver = ns_resolver.NamespaceResolver({})
-
-        resolved_name = resolver.resolve_name('File', 'com.base')
-
-        self.assertEqual('com.base.File', resolved_name)
 
     def test_resolves_w_empty_namespaces(self):
         resolver = ns_resolver.NamespaceResolver({})

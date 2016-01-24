@@ -160,3 +160,9 @@ class UninitializedPropertyAccessError(PropertyAccessError):
 
 class CircularExpressionDependenciesError(Exception):
     pass
+
+
+class InvalidLhsTargetError(Exception):
+    def __init__(self, target):
+        super(InvalidLhsTargetError, self).__init__(
+            'Invalid assignment target "%s"' % target)

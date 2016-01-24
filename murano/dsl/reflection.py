@@ -157,6 +157,12 @@ def argument_owner(method_argument):
     return method_argument.murano_method
 
 
+@specs.yaql_property(dsl_types.MuranoClass)
+@specs.name('type')
+def type_to_type_ref(murano_class):
+    return murano_class.get_reference()
+
+
 def register(context):
     funcs = (
         class_name, methods, properties, ancestors, package, class_version,
@@ -164,7 +170,8 @@ def register(context):
         property_usage,
         method_name, arguments, method_owner,
         types, package_name, package_version,
-        argument_name, argument_has_default, argument_owner
+        argument_name, argument_has_default, argument_owner,
+        type_to_type_ref
     )
     for f in funcs:
         context.register_function(f)

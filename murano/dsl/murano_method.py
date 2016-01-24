@@ -35,7 +35,8 @@ virtual_exceptions.register()
 class MethodUsages(object):
     Action = 'Action'
     Runtime = 'Runtime'
-    All = set([Action, Runtime])
+    Static = 'Static'
+    All = set([Action, Runtime, Static])
 
 
 class MuranoMethod(dsl_types.MuranoMethod):
@@ -111,13 +112,18 @@ class MuranoMethod(dsl_types.MuranoMethod):
 
     def invoke(self, executor, this, args, kwargs, context=None,
                skip_stub=False):
-        if not self.murano_class.is_compatible(this):
+        if self.usage == 'Static':
+            this = None
+        elif not self.murano_class.is_compatible(this):
             raise Exception("'this' must be of compatible type")
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
+        if this is not None:
+            this = this.cast(self.murano_class)
+        else:
+            this = self.murano_class
         return executor.invoke_method(
-            self, this.cast(self.murano_class),
-            context, args, kwargs, skip_stub)
+            self, this, context, args, kwargs, skip_stub)
 
 
 class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec):

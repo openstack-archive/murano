@@ -81,7 +81,7 @@ class ObjectStore(object):
                     return factory
             else:
                 factory = class_obj.new(
-                    owner, self,
+                    owner, self, self.executor,
                     name=system_key.get('name'),
                     object_id=object_id, defaults=defaults)
                 self._store[object_id] = factory
