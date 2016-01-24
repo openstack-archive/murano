@@ -17,7 +17,6 @@ import weakref
 
 import semantic_version
 import six
-from six.moves import range
 from yaql.language import utils
 
 from murano.dsl import constants
@@ -27,8 +26,8 @@ from murano.dsl import exceptions
 from murano.dsl import helpers
 from murano.dsl import murano_method
 from murano.dsl import murano_object
+from murano.dsl import murano_property
 from murano.dsl import namespace_resolver
-from murano.dsl import typespec
 from murano.dsl import yaql_integration
 
 
@@ -69,8 +68,8 @@ class MuranoClass(dsl_types.MuranoClass):
 
         properties = data.get('Properties') or {}
         for property_name, property_spec in six.iteritems(properties):
-            spec = typespec.PropertySpec(
-                property_name, property_spec, type_obj)
+            spec = murano_property.MuranoProperty(
+                type_obj, property_name, property_spec)
             type_obj.add_property(property_name, spec)
 
         methods = data.get('Methods') or data.get('Workflow') or {}
@@ -107,15 +106,19 @@ class MuranoClass(dsl_types.MuranoClass):
         return self._methods
 
     @property
+    def all_method_names(self):
+        names = set(self.methods.keys())
+        for c in self.ancestors():
+            names.update(c.methods.keys())
+        return tuple(names)
+
+    @property
     def parent_mappings(self):
         return self._parent_mappings
 
     def extend_with_class(self, cls):
         ctor = yaql_integration.get_class_factory_definition(cls, self)
         self.add_method('__init__', ctor)
-
-    def get_method(self, name):
-        return self._methods.get(name)
 
     def add_method(self, name, payload):
         method = murano_method.MuranoMethod(self, name, payload)
@@ -125,21 +128,26 @@ class MuranoClass(dsl_types.MuranoClass):
 
     @property
     def properties(self):
-        return self._properties.keys()
+        return self._properties
+
+    @property
+    def all_property_names(self):
+        names = set(self.properties.keys())
+        for c in self.ancestors():
+            names.update(c.properties.keys())
+        return tuple(names)
 
     def add_property(self, name, property_typespec):
-        if not isinstance(property_typespec, typespec.PropertySpec):
+        if not isinstance(property_typespec, murano_property.MuranoProperty):
             raise TypeError('property_typespec')
         self._properties[name] = property_typespec
 
-    def get_property(self, name):
-        return self._properties[name]
-
-    def _find_method_chains(self, name, origin):
+    def _find_symbol_chains(self, func, origin):
         queue = collections.deque([(self, ())])
         while queue:
             cls, path = queue.popleft()
-            segment = (cls.methods[name],) if name in cls.methods else ()
+            symbol = func(cls)
+            segment = (symbol,) if symbol is not None else ()
             leaf = True
             for p in cls.parents(origin):
                 leaf = False
@@ -149,9 +157,10 @@ class MuranoClass(dsl_types.MuranoClass):
                 if path:
                     yield path
 
-    def find_single_method(self, name):
-        chains = sorted(self._find_method_chains(name, self),
-                        key=lambda t: len(t))
+    def _choose_symbol(self, func):
+        chains = sorted(
+            self._find_symbol_chains(func, self),
+            key=lambda t: len(t))
         result = []
         for i in range(len(chains)):
             if chains[i][0] in result:
@@ -171,6 +180,17 @@ class MuranoClass(dsl_types.MuranoClass):
                     break
             if add:
                 result.append(chains[i][0])
+        return result
+
+    def find_method(self, name):
+        return self._choose_symbol(lambda cls: cls.methods.get(name))
+
+    def find_property(self, name):
+        return self._choose_symbol(
+            lambda cls: cls.properties.get(name))
+
+    def find_single_method(self, name):
+        result = self.find_method(name)
         if len(result) < 1:
             raise exceptions.NoMethodFound(name)
         elif len(result) > 1:
@@ -178,18 +198,23 @@ class MuranoClass(dsl_types.MuranoClass):
         return result[0]
 
     def find_methods(self, predicate):
-        result = []
+        result = list(filter(predicate, self.methods.values()))
         for c in self.ancestors():
             for method in six.itervalues(c.methods):
                 if predicate(method) and method not in result:
                     result.append(method)
         return result
 
-    def _iterate_unique_methods(self):
-        names = set()
+    def find_properties(self, predicate):
+        result = list(filter(predicate, self.properties.values()))
         for c in self.ancestors():
-            names.update(c.methods.keys())
-        for name in names:
+            for prop in c.properties.values():
+                if predicate(prop) and prop not in result:
+                    result.append(prop)
+        return result
+
+    def _iterate_unique_methods(self):
+        for name in self.all_method_names:
             try:
                 yield self.find_single_method(name)
             except exceptions.AmbiguousMethodName as e:
@@ -197,29 +222,13 @@ class MuranoClass(dsl_types.MuranoClass):
                     raise e
                 yield murano_method.MuranoMethod(self, name, func)
 
-    def find_property(self, name):
-        result = []
-        for mc in self.ancestors():
-            if name in mc.properties and mc not in result:
-                result.append(mc)
-        return result
-
     def find_single_property(self, name):
-        result = None
-        parents = None
-        gen = helpers.traverse(self)
-        while True:
-            try:
-                mc = gen.send(parents)
-                if name in mc.properties:
-                    if result and result != mc:
-                        raise exceptions.AmbiguousPropertyNameError(name)
-                    result = mc
-                    parents = []
-                else:
-                    parents = mc.parents(self)
-            except StopIteration:
-                return result
+        result = self.find_property(name)
+        if len(result) < 1:
+            raise exceptions.NoPropertyFound(name)
+        elif len(result) > 1:
+            raise exceptions.AmbiguousPropertyNameError(name)
+        return result[0]
 
     def invoke(self, name, executor, this, args, kwargs, context=None):
         method = self.find_single_method(name)
@@ -229,6 +238,8 @@ class MuranoClass(dsl_types.MuranoClass):
         if isinstance(obj, (murano_object.MuranoObject,
                             dsl.MuranoObjectInterface)):
             obj = obj.type
+        if obj is self:
+            return True
         return any(cls is self for cls in obj.ancestors())
 
     def new(self, owner, object_store, **kwargs):
@@ -336,7 +347,8 @@ class MuranoClass(dsl_types.MuranoClass):
 
     def ancestors(self):
         for c in helpers.traverse(self, lambda t: t.parents(self)):
-            yield c
+            if c is not self:
+                yield c
 
     @property
     def context(self):

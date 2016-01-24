@@ -17,6 +17,7 @@ import os.path
 
 import six
 
+from murano.dsl import constants
 from murano.dsl import murano_package
 from murano.dsl import namespace_resolver
 from murano.dsl import package_loader
@@ -54,7 +55,8 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         self._parent = parent_loader
         self._configs = {}
         self._package = TestPackage(
-            self, package_name, None, '1.0', None, self._configs)
+            self, package_name, None, constants.RUNTIME_VERSION_1_0,
+            None, self._configs)
         for name, payload in six.iteritems(self._classes):
             self._package.register_class(payload, name)
         super(TestPackageLoader, self).__init__()

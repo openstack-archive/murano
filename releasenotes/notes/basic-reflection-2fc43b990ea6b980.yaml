@@ -1,0 +1,6 @@
+---
+features:
+  - Basic reflection capabilities were added to MuranoPL. Now it is possible
+    to get type info with typeinfo() function and using it as a starting point
+    obtain information about the class, its methods and properties as well as
+    the package of the class.

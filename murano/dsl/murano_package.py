@@ -164,3 +164,6 @@ class MuranoPackage(dsl_types.MuranoPackage):
     @property
     def context(self):
         return None
+
+    def __repr__(self):
+        return 'MuranoPackage({name})'.format(name=self.name)

@@ -25,11 +25,19 @@ class MuranoMethod(object):
     pass
 
 
+class MuranoMethodArgument(object):
+    pass
+
+
 class MuranoPackage(object):
     pass
 
 
-class MuranoClassReference(object):
+class MuranoProperty(object):
+    pass
+
+
+class MuranoTypeReference(object):
     def __init__(self, murano_class):
         self.__murano_class = murano_class
 

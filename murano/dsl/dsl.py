@@ -95,7 +95,8 @@ class MuranoTypeName(yaqltypes.PythonType):
     def __init__(self, nullable=False, context=None):
         self._context = context
         super(MuranoTypeName, self).__init__(
-            (dsl_types.MuranoClassReference, six.string_types), nullable)
+            (dsl_types.MuranoTypeReference,
+             six.string_types), nullable)
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
@@ -108,10 +109,9 @@ class MuranoTypeName(yaqltypes.PythonType):
             if function_spec.meta.get(constants.META_MURANO_METHOD):
                 context = helpers.get_caller_context(context)
             murano_type = helpers.get_type(context)
-            value = dsl_types.MuranoClassReference(
-                helpers.get_class(
-                    murano_type.namespace_resolver.resolve_name(
-                        value), context))
+            value = dsl_types.MuranoTypeReference(helpers.get_class(
+                murano_type.namespace_resolver.resolve_name(value),
+                context))
         return value
 
 

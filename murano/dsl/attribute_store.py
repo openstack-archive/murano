@@ -23,7 +23,7 @@ class AttributeStore(object):
 
     @staticmethod
     def _get_attribute_key(tagged_object, owner_type, name):
-        if isinstance(owner_type, dsl_types.MuranoClassReference):
+        if isinstance(owner_type, dsl_types.MuranoTypeReference):
             owner_type = owner_type.murano_class
         if isinstance(tagged_object, dsl_types.MuranoObjectInterface):
             tagged_object = tagged_object.object

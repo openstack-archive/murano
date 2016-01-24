@@ -1,0 +1,51 @@
+Name: TestReflection
+
+Properties:
+  prop:
+    Contract: $.string()
+    Default: qwerty
+
+Methods:
+  testTypeInfo:
+    Body:
+      - $typeinfo: typeinfo($)
+      - Return:
+          name: $typeinfo.name
+          versionStr: str($typeinfo.version)
+          versionMajor: $typeinfo.version.major
+          versionMinor: $typeinfo.version.minor
+          versionPatch: $typeinfo.version.patch
+          ancestors: $typeinfo.ancestors.name
+          properties: $typeinfo.properties.name
+          methods: $typeinfo.methods.name.orderBy($)
+          package: $typeinfo.package.name
+
+  testMethodInfo:
+    Body:
+      - $method: typeinfo($).methods.where($.name = foo).single()
+      - $bar: $method.arguments.where($.name = bar).single()
+      - $baz: $method.arguments.where($.name = baz).single()
+      - Return:
+          name: $method.name
+          arguments: $method.arguments.name
+          barHasDefault: $bar.hasDefault
+          bazHasDefault: $baz.hasDefault
+          declaringType: $method.declaringType.name
+          barMethod: $bar.declaringMethod.name
+          bazMethod: $baz.declaringMethod.name
+
+  testPropertyInfo:
+    Body:
+      - $property: typeinfo($).properties.first()
+      - Return:
+          name: $property.name
+          hasDefault: $property.hasDefault
+          usage: $property.usage
+
+  foo:
+    Arguments:
+      - bar:
+          Contract: $.string()
+          Default: null
+      - baz:
+          Contract: $.string()

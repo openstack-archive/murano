@@ -22,6 +22,7 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
+from murano.dsl import reflection
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameterType())
@@ -113,6 +114,11 @@ def type_(object_):
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+def typeinfo(object_):
+    return None if object_ is None else object_.type
+
+
+@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
 def name(object_):
     return None if object_ is None else object_.name
 
@@ -143,10 +149,9 @@ def op_dot(context, receiver, expr, operator):
 @specs.name('#operator_:')
 def ns_resolve(context, prefix, name):
     murano_type = helpers.get_type(context)
-    return dsl_types.MuranoClassReference(
-        helpers.get_class(
-            murano_type.namespace_resolver.resolve_name(
-                prefix + ':' + name), context))
+    return dsl_types.MuranoTypeReference(helpers.get_class(
+        murano_type.namespace_resolver.resolve_name(
+            prefix + ':' + name), context))
 
 
 @specs.parameter('obj', dsl.MuranoObjectParameterType(nullable=True))
@@ -169,10 +174,12 @@ def register(context, runtime_version):
     context.register_function(find)
     context.register_function(sleep_)
     context.register_function(type_)
+    context.register_function(typeinfo)
     context.register_function(name)
     context.register_function(obj_attribution)
     context.register_function(op_dot)
     context.register_function(ns_resolve)
+    reflection.register(context)
     context.register_function(is_instance_of)
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:
@@ -181,4 +188,5 @@ def register(context, runtime_version):
             for spec in utils.to_extension_method(t, context):
                 context2.register_function(spec)
         return context2
+
     return context

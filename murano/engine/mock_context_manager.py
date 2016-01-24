@@ -97,10 +97,11 @@ def with_original(context, **kwargs):
     return new_context
 
 
-@specs.parameter('target',
-                 yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+@specs.parameter(
+    'target',
+    yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl.MuranoObjectParameterType()))
 @specs.parameter('target_method', yaqltypes.String())
-@specs.parameter('mock_object', dsl_types.MuranoObject)
+@specs.parameter('mock_object', dsl.MuranoObjectParameterType())
 @specs.parameter('mock_name', yaqltypes.String())
 def inject_method_with_str(context, target, target_method,
                            mock_object, mock_name):
@@ -109,7 +110,7 @@ def inject_method_with_str(context, target, target_method,
     current_class = helpers.get_type(context)
     mock_func = current_class.find_single_method(mock_name)
 
-    if isinstance(target, dsl_types.MuranoClassReference):
+    if isinstance(target, dsl_types.MuranoTypeReference):
         original_class = target.murano_class
     else:
         original_class = target.type
@@ -128,13 +129,14 @@ def inject_method_with_str(context, target, target_method,
     existing_mocks.append(result_fd)
 
 
-@specs.parameter('target',
-                 yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+@specs.parameter(
+    'target',
+    yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl.MuranoObjectParameterType()))
 @specs.parameter('target_method', yaqltypes.String())
 @specs.parameter('expr', yaqltypes.Lambda(with_context=True))
 def inject_method_with_yaql_expr(context, target, target_method, expr):
     ctx_manager = helpers.get_executor(context).context_manager
-    if isinstance(target, dsl_types.MuranoClassReference):
+    if isinstance(target, dsl_types.MuranoTypeReference):
         original_class = target.murano_class
     else:
         original_class = target.type

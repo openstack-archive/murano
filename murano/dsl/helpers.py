@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import functools
+import itertools
 import string
 import sys
 import uuid
@@ -284,7 +285,7 @@ def cast(obj, murano_class, pov_or_version_spec=None):
     elif isinstance(pov_or_version_spec, six.string_types):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
 
-    if isinstance(murano_class, dsl_types.MuranoClassReference):
+    if isinstance(murano_class, dsl_types.MuranoTypeReference):
         murano_class = murano_class.murano_class
     if isinstance(murano_class, dsl_types.MuranoClass):
         if pov_or_version_spec is None:
@@ -292,7 +293,7 @@ def cast(obj, murano_class, pov_or_version_spec=None):
         murano_class = murano_class.name
 
     candidates = []
-    for cls in obj.type.ancestors():
+    for cls in itertools.chain((obj.type,), obj.type.ancestors()):
         if cls.name != murano_class:
             continue
         elif isinstance(pov_or_version_spec, semantic_version.Version):

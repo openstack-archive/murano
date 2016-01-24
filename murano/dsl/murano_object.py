@@ -78,7 +78,7 @@ class MuranoObject(dsl_types.MuranoObject):
         if self.__initialized:
             return
         for property_name in self.__type.properties:
-            spec = self.__type.get_property(property_name)
+            spec = self.__type.properties[property_name]
             if spec.usage == typespec.PropertyUsages.Config:
                 if property_name in self.__config:
                     property_value = self.__config[property_name]
@@ -100,7 +100,7 @@ class MuranoObject(dsl_types.MuranoObject):
                     spec = init.arguments_scheme[property_name]
                     is_init_arg = True
                 else:
-                    spec = self.__type.get_property(property_name)
+                    spec = self.__type.properties[property_name]
                     is_init_arg = False
 
                 if property_name in used_names:
@@ -175,13 +175,14 @@ class MuranoObject(dsl_types.MuranoObject):
         if name in start_type.properties:
             return self.cast(start_type)._get_property_value(name)
         else:
-            declared_properties = start_type.find_single_property(name)
-            if declared_properties:
-                return self.cast(declared_properties).__properties[name]
-            elif derived:
-                return self.cast(caller_class)._get_property_value(name)
-            else:
-                raise exceptions.PropertyReadError(name, start_type)
+            try:
+                spec = start_type.find_single_property(name)
+                return self.cast(spec.murano_class).__properties[name]
+            except exceptions.NoPropertyFound:
+                if derived:
+                    return self.cast(caller_class)._get_property_value(name)
+                else:
+                    raise exceptions.PropertyReadError(name, start_type)
 
     def _get_property_value(self, name):
         try:
@@ -195,14 +196,15 @@ class MuranoObject(dsl_types.MuranoObject):
         caller_class = None if not context else helpers.get_type(context)
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
-        declared_properties = start_type.find_property(name)
+        declared_properties = start_type.find_properties(
+            lambda p: p.name == name)
         if context is None:
             context = self.object_store.executor.create_object_context(self)
         if len(declared_properties) > 0:
-            declared_properties = self.type.find_property(name)
+            declared_properties = self.type.find_properties(
+                lambda p: p.name == name)
             values_to_assign = []
-            for mc in declared_properties:
-                spec = mc.get_property(name)
+            for spec in declared_properties:
                 if (caller_class is not None and not
                         helpers.are_property_modifications_allowed(context) and
                         (spec.usage not in typespec.PropertyUsages.Writable or
@@ -213,7 +215,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 default = self.__defaults.get(name, default)
                 default = helpers.evaluate(default, context)
 
-                obj = self.cast(mc)
+                obj = self.cast(spec.murano_class)
                 values_to_assign.append((obj, spec.validate(
                     value, self.real_this,
                     self.real_this, default=default)))
@@ -251,7 +253,7 @@ class MuranoObject(dsl_types.MuranoObject):
         else:
             for property_name in self.type.properties:
                 if property_name in self.__properties:
-                    spec = self.type.get_property(property_name)
+                    spec = self.type.properties[property_name]
                     if spec.usage != typespec.PropertyUsages.Runtime:
                         result[property_name] = self.__properties[
                             property_name]
