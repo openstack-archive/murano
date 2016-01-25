@@ -20,12 +20,12 @@ To upload an application to the catalog:
 
 #. Log in to the OpenStack dashboard.
 
-#. Navigate to :menuselection:`Murano > Manage > Package Definitions`.
+#. Navigate to :menuselection:`Murano > Manage > Packages`.
 
 #. Click on the :guilabel:`Import Package` button:
 
    .. image:: figures/qs_package_import.png
-      :alt: Package Definitions page
+      :alt: Packages page
       :width: 600 px
 
 #. In the :guilabel:`Import Package` dialog:
