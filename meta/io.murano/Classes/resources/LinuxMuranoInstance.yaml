@@ -1,15 +1,3 @@
-#  Licensed under the Apache License, Version 2.0 (the "License"); you may
-#  not use this file except in compliance with the License. You may obtain
-#  a copy of the License at
-#
-#       http://www.apache.org/licenses/LICENSE-2.0
-#
-#  Unless required by applicable law or agreed to in writing, software
-#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
-#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
-#  License for the specific language governing permissions and limitations
-#  under the License.
-
 Namespaces:
   =: io.murano.resources
   sys: io.murano.system
@@ -23,35 +11,8 @@ Extends:
 Methods:
   prepareUserData:
     Body:
-    - $environment: $.find(std:Environment).require()
-    - $resources: new(sys:Resources)
-    - $configFile: $resources.string('Agent-v2.template')
-    - $initScript: $resources.string('linux-init.sh')
-    - $muranoScript: $resources.string('murano-init.sh')
-    - $muranoAgentConf: $resources.string('murano-agent.conf')
-    - $muranoAgentService: $resources.string('murano-agent.service')
-    - $muranoAgent: $resources.string('murano-agent')
-    - $configReplacements:
-        "%RABBITMQ_HOST%": config(rabbitmq, host)
-        "%RABBITMQ_PORT%": config(rabbitmq, port)
-        "%RABBITMQ_USER%": config(rabbitmq, login)
-        "%RABBITMQ_PASSWORD%": config(rabbitmq, password)
-        "%RABBITMQ_VHOST%": config(rabbitmq, virtual_host)
-        "%RABBITMQ_SSL%": str(config(rabbitmq, ssl)).toLower()
-        "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
-        "%RESULT_QUEUE%": $environment.agentListener.queueName()
-    - $scriptReplacements:
-        "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
-        "%INTERNAL_HOSTNAME%": $.name
-        "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), config(rabbitmq, host))
-        "%CA_ROOT_CERT_BASE64%": ""
-    - $muranoReplacements:
-        "%MURANO_AGENT_CONF%": base64encode($muranoAgentConf)
-        "%MURANO_AGENT_SERVICE%": base64encode($muranoAgentService)
-        "%MURANO_AGENT%": base64encode($muranoAgent)
-
-    - $userData: $muranoScript.replace($muranoReplacements) + $initScript.replace($scriptReplacements)
-    - Return:
+     - $userData: $.generateUserData()
+     - Return:
         data: $._generateInstanceConfigResources($userData)
         format: RAW
 
@@ -62,10 +23,10 @@ Methods:
     Body:
     - $environment: $.find(std:Environment).require()
     - $resources: new(sys:Resources)
-    - $muranoInitConf: $resources.yaml('murano-init.conf')
-    - $bootConfigResourceName: format('boot_config_{0}', $.name)
+    - $muranoInitConf: $.generateCloudConfig()
     - $bootScriptResourceName: format('boot_script_{0}', $.name)
     - $userDataResourceName: format('user_data-{0}', $.name)
+    - $bootConfigResourceName: format('boot_config-{0}', $.name)
     - $template:
           resources:
             $bootConfigResourceName:
@@ -86,3 +47,45 @@ Methods:
 
     - $environment.stack.updateTemplate($template)
     - Return: {get_resource: $userDataResourceName}
+
+
+  generateCloudConfig:
+    Body:
+        - $resources: new(sys:Resources)
+        - $muranoInitConf: $resources.yaml('murano-init.conf')
+        - Return: $muranoInitConf
+
+  generateUserData:
+    Body:
+        - $environment: $.find(std:Environment).require()
+        - $resources: new(sys:Resources)
+        - $configFile: $resources.string('Agent-v2.template')
+        - $initScript: $resources.string('linux-init.sh')
+        - $muranoScript: $resources.string('murano-init.sh')
+        - $muranoAgentConf: $resources.string('murano-agent.conf')
+        - $muranoAgentService: $resources.string('murano-agent.service')
+        - $muranoAgent: $resources.string('murano-agent')
+        - $configReplacements:
+            "%RABBITMQ_HOST%": config(rabbitmq, host)
+            "%RABBITMQ_PORT%": config(rabbitmq, port)
+            "%RABBITMQ_USER%": config(rabbitmq, login)
+            "%RABBITMQ_PASSWORD%": config(rabbitmq, password)
+            "%RABBITMQ_VHOST%": config(rabbitmq, virtual_host)
+            "%RABBITMQ_SSL%": str(config(rabbitmq, ssl)).toLower()
+            "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
+            "%RESULT_QUEUE%": $environment.agentListener.queueName()
+        - $scriptReplacements:
+            "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
+            "%INTERNAL_HOSTNAME%": $.name
+            "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), config(rabbitmq, host))
+            "%CA_ROOT_CERT_BASE64%": ""
+        - $muranoReplacements:
+            "%MURANO_AGENT_CONF%": base64encode($muranoAgentConf)
+            "%MURANO_AGENT_SERVICE%": base64encode($muranoAgentService)
+            "%MURANO_AGENT%": base64encode($muranoAgent)
+
+        - $userData: $muranoScript.replace($muranoReplacements) + $initScript.replace($scriptReplacements)
+        - Return: $userData
+
+
+

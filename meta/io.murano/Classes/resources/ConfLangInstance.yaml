@@ -1,0 +1,57 @@
+Namespaces:
+  =: io.murano.resources
+  sys: io.murano.system
+  std: io.murano
+
+Name: ConfLangInstance
+
+Extends:
+  -  LinuxMuranoInstance
+
+Methods:
+ prepareUserData:
+    Body:
+      - $userData: $.generateUserData()
+      - Return:
+         data: $._generateInstanceConfigResources($userData)
+         format: RAW
+
+ _generateInstanceConfigResources:
+    Arguments:
+    - userData:
+        Contract: $.string().notNull()
+    Body:
+    - $environment: $.find(std:Environment).require()
+    - $cloudInitConf: $.generateCloudConfig()
+    - $bootConfigResourceName: format('boot_config_{0}', $.name)
+    - $bootScriptResourceName: format('boot_script_{0}', $.name)
+    - $userDataResourceName: format('user_data-{0}', $.name)
+    - $template:
+          resources:
+            $bootConfigResourceName:
+              type: 'OS::Heat::CloudConfig'
+              properties:
+                cloud_config: $cloudInitConf
+            $bootScriptResourceName:
+              type: 'OS::Heat::SoftwareConfig'
+              properties:
+                group: ungrouped
+                config: $userData
+            $userDataResourceName:
+              type: 'OS::Heat::MultipartMime'
+              properties:
+                parts:
+                - config: {get_resource: $bootConfigResourceName}
+                - config: {get_resource: $bootScriptResourceName}
+
+    - $environment.stack.updateTemplate($template)
+    - Return: {get_resource: $userDataResourceName}
+
+
+ generateCloudConfig:
+    Body:
+        - $resources: new(sys:Resources)
+        - $cloudConfigData: $.cast(LinuxMuranoInstance).generateCloudConfig()
+        - $confLang: $resources.yaml('conflang.conf')
+        - $cloudInitConf: $cloudConfigData.mergeWith($confLang)
+        - Return: $cloudInitConf
