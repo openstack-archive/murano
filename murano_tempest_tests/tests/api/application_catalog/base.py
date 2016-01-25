@@ -78,10 +78,6 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
             cls.os = clients.Manager(credentials=creds)
         cls.application_catalog_client = cls.os.application_catalog_client
 
-    def setUp(self):
-        super(BaseApplicationCatalogTest, self).setUp()
-        self.addCleanup(self.clear_isolated_creds)
-
     @classmethod
     def resource_cleanup(cls):
         super(BaseApplicationCatalogTest, cls).resource_cleanup()

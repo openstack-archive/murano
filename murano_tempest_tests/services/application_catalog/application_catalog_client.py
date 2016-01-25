@@ -20,6 +20,8 @@ import requests
 from tempest import config
 from tempest_lib.common import rest_client
 
+from murano_tempest_tests import utils
+
 CONF = config.CONF
 
 
@@ -111,5 +113,44 @@ class ApplicationCatalogClient(rest_client.RestClient):
         }
         uri = 'v1/catalog/packages/{0}/ui'.format(package_id)
         resp, body = self.get(uri, headers=headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+# -----------------------Methods for environment CRUD--------------------------
+    def get_environments_list(self):
+        uri = 'v1/environments'
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+
+        return self._parse_resp(body)
+
+    def create_environment(self, name):
+        uri = 'v1/environments'
+        post_body = {'name': name}
+        resp, body = self.post(uri, json.dumps(post_body))
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_environment(self, environment_id):
+        uri = 'v1/environments/{0}'.format(environment_id)
+        resp, body = self.delete(uri)
+        self.expected_success(200, resp.status)
+
+    def abandon_environment(self, environment_id):
+        uri = 'v1/environments/{0}?abandon=True'.format(environment_id)
+        resp, body = self.delete(uri)
+        self.expected_success(200, resp.status)
+
+    def update_environment(self, environment_id):
+        uri = 'v1/environments/{0}'.format(environment_id)
+        name = utils.generate_name("updated_env")
+        post_body = {"name": name}
+        resp, body = self.put(uri, json.dumps(post_body))
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_environment(self, environment_id):
+        uri = 'v1/environments/{0}'.format(environment_id)
+        resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
