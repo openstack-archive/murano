@@ -17,13 +17,13 @@ import base64
 import collections
 import random
 import re
-import six
-from six.moves import range
 import string
 import time
 
 import jsonpatch
 import jsonpointer
+import six
+from six.moves import range
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes

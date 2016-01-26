@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.common import policy
 from oslo_context import context
+
+from murano.common import policy
 
 
 class RequestContext(context.RequestContext):

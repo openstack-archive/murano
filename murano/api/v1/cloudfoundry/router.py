@@ -14,7 +14,6 @@
 import routes
 
 from murano.api.v1.cloudfoundry import cfapi
-
 from murano.common import wsgi
 
 

@@ -13,8 +13,8 @@
 #    under the License.
 
 import re
-import six
 
+import six
 from yaql.language import exceptions as yaql_exceptions
 from yaql.language import expressions
 

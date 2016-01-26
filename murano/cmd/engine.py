@@ -18,7 +18,6 @@ import os
 import sys
 
 import eventlet
-
 from oslo_log import log as logging
 from oslo_service import service
 

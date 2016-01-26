@@ -16,6 +16,7 @@ import contextlib
 import json
 import os
 import random
+import re
 import socket
 import telnetlib
 import time
@@ -27,7 +28,6 @@ import keystoneclient.v3 as keystoneclientv3
 from muranoclient import client as mclient
 import muranoclient.common.exceptions as exceptions
 from oslo_log import log as logging
-import re
 import yaml
 
 from murano.services import states

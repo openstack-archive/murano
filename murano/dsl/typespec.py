@@ -12,9 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import sys
 import weakref
+
+import six
 
 from murano.dsl import exceptions
 from murano.dsl import type_scheme

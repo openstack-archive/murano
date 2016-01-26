@@ -18,7 +18,6 @@
 import datetime
 import errno
 import re
-import six
 import socket
 import sys
 import time
@@ -35,6 +34,7 @@ from oslo_service import service
 from oslo_service import sslutils
 import routes
 import routes.middleware
+import six
 import webob.dec
 import webob.exc
 

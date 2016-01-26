@@ -12,9 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from alembic import op
+import six
 import sqlalchemy as sa
 
 

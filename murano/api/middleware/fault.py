@@ -14,11 +14,11 @@
 Cinder's faultwrapper
 """
 
-import six
 import sys
 import traceback
 
 from oslo_config import cfg
+import six
 import webob
 
 from murano.common import wsgi

@@ -12,10 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import sys
 import uuid
 
+import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
