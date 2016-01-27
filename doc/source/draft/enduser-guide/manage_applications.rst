@@ -36,12 +36,12 @@ Perform the following steps to import an application package from a
 .zip file:
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Manage > Package Definitions`.
+   :menuselection:`Murano > Manage > Packages`.
 #. Click the :guilabel:`Import Package` button on the top right of the
    page.
 
    .. image:: figures/import_package.png
-      :alt: Package Definitions page: Import Package 1
+      :alt: Packages page: Import Package 1
       :width: 630 px
 
 #. From the :guilabel:`Package source` drop-down list
@@ -88,12 +88,12 @@ murano applications repository:
   package to see its full name.
 
 #. In dashboard, navigate to
-   :menuselection:`Murano > Manage > Package Definitions`.
+   :menuselection:`Murano > Manage > Packages`.
 #. Click the :guilabel:`Import Package` button on the top right of the
    page.
 
    .. image:: figures/import_package.png
-      :alt: Package Definitions page: Import Package 2
+      :alt: Packages page: Import Package 2
       :width: 630 px
 
 #. From the :guilabel:`Package source` drop-down list,
@@ -129,12 +129,12 @@ Perform the following steps to import a bundle of applications:
   desired bundle to see its full name.
 
 #. In dashboard, navigate to
-   :menuselection:`Murano > Manage > Package Definitions`.
+   :menuselection:`Murano > Manage > Packages`.
 #. Click the :guilabel:`Import Bundle` button on the top right of the
    page.
 
    .. image:: figures/import_bundle.png
-      :alt: Package Definitions page: Import Bundle
+      :alt: Packages page: Import Bundle
       :width: 630 px
 
 #. From the :guilabel:`Package Bundle Source` drop-down list, choose
@@ -202,7 +202,7 @@ the following steps:
    :guilabel:`Delete Packages`.
 
    .. image:: figures/select_packages.png
-      :alt: Package Definitions page: Select packages
+      :alt: Packages page: Select packages
       :width: 630 px
 
 #. Confirm the deletion.
