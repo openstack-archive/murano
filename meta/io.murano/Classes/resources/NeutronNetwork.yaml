@@ -168,7 +168,7 @@ Methods:
           netId: $.openstackId
           subnetId: $subnet.id
           cidr: $subnet.cidr
-          dns: $.dnsNameservers
+          dns: $subnet.dns_nameservers
           gateway: $subnet.gateway_ip
           floatingIpNetId: $._getExternalNetId()
 
