@@ -152,6 +152,6 @@ Workflow:
           netName: $.internalNetworkName
           subnetId: $._internalSubnetworkId
           cidr: $subnet.cidr
-          dns: $._netExplorer.getDefaultDns()
+          dns: $subnet.dns_nameservers
           gateway: $subnet.gateway_ip
           floatingIpNetId: $._externalNetworkId
