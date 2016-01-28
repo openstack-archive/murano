@@ -154,3 +154,33 @@ class ApplicationCatalogClient(rest_client.RestClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+# -----------------------Methods for session manage ---------------------------
+    def create_session(self, environment_id):
+        body = None
+        uri = 'v1/environments/{0}/configure'.format(environment_id)
+        resp, body = self.post(uri, body)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_session(self, environment_id, session_id):
+        uri = 'v1/environments/{0}/sessions/{1}'.format(environment_id,
+                                                        session_id)
+        resp, body = self.delete(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_session(self, environment_id, session_id):
+        uri = 'v1/environments/{0}/sessions/{1}'.format(environment_id,
+                                                        session_id)
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def deploy_session(self, environment_id, session_id):
+        body = None
+        url = 'v1/environments/{0}/sessions/{1}/deploy'.format(environment_id,
+                                                               session_id)
+        resp, body = self.post(url, body)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
