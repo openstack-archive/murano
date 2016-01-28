@@ -1,0 +1,7 @@
+---
+features:
+  - Murano engine is now capable of caching packages on disk for reuse.
+    This is controlled by `packages_cache` directory path and boolean parameter
+    `enable_packages_cache` (true by default). The packages are cached in a
+    eventlet/inter-process safe manner and are cleaned up as soon as newer
+    version of tha package available (unless it's used by ongoing deployment)
