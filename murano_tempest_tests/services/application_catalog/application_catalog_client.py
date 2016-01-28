@@ -32,9 +32,10 @@ class ApplicationCatalogClient(rest_client.RestClient):
             CONF.application_catalog.catalog_type,
             CONF.identity.region,
             endpoint_type=CONF.application_catalog.endpoint_type)
-        self.build_interval = CONF.service_broker.build_interval
-        self.build_timeout = CONF.service_broker.build_timeout
+        self.build_interval = CONF.application_catalog.build_interval
+        self.build_timeout = CONF.application_catalog.build_timeout
 
+# -----------------------------Packages methods--------------------------------
     def upload_package(self, package_name, package_path, top_dir, body):
         """Upload a Murano package into Murano repository
 
@@ -45,7 +46,6 @@ class ApplicationCatalogClient(rest_client.RestClient):
         :return:
         """
         headers = {'X-Auth-Token': self.auth_provider.get_token()}
-
         files = open(os.path.join(top_dir, package_path), 'rb')
         uri = "/v1/catalog/packages"
         post_body = {'JsonString': json.dumps(body)}
@@ -62,9 +62,7 @@ class ApplicationCatalogClient(rest_client.RestClient):
         }
 
         uri = 'v1/catalog/packages/{0}'.format(package_id)
-
         resp, body = self.patch(uri, json.dumps(post_body), headers=headers)
-
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -94,6 +92,24 @@ class ApplicationCatalogClient(rest_client.RestClient):
             'content-type': 'application/octet-stream'
         }
         uri = 'v1/catalog/packages/{0}/download'.format(package_id)
+        resp, body = self.get(uri, headers=headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_ui_definition(self, package_id):
+        headers = {
+            'content-type': 'application/octet-stream'
+        }
+        uri = 'v1/catalog/packages/{0}/ui'.format(package_id)
+        resp, body = self.get(uri, headers=headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_logo(self, package_id):
+        headers = {
+            'content-type': 'application/octet-stream'
+        }
+        uri = 'v1/catalog/packages/{0}/ui'.format(package_id)
         resp, body = self.get(uri, headers=headers)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)

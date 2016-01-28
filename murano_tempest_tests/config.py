@@ -22,6 +22,10 @@ ServiceAvailableGroup = [
     cfg.BoolOpt("murano",
                 default=True,
                 help="Whether or not murano is expected to be available"),
+    cfg.BoolOpt("murano_cfapi",
+                default=False,
+                help="Whether or not murano-cfapi is expected to be "
+                     "unavailable by default")
 ]
 
 application_catalog_group = cfg.OptGroup(name="application_catalog",

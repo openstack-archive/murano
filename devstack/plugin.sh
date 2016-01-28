@@ -285,7 +285,8 @@ function configure_murano_tempest_plugin() {
             sudo chown -R tempest:stack $MURANO_DIR/murano_tempest_tests
         fi
         if is_service_enabled murano-cfapi; then
-            # Enable Service Broker tests if cfapi enabled
+            # Enable Service Broker tests if cfapi enabled and set murano-cfapi service availability flag
+            iniset $TEMPEST_CONFIG service_available murano_cfapi "True"
             iniset $TEMPEST_CONFIG service_broker run_service_broker_tests "True"
         fi
     fi

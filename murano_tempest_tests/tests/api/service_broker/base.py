@@ -59,7 +59,10 @@ class BaseServiceBrokerTest(test.BaseTestCase):
     def resource_setup(cls):
         if not CONF.service_broker.run_service_broker_tests:
             skip_msg = "Service Broker API tests are disabled"
-            cls.skipException(skip_msg)
+            raise cls.skipException(skip_msg)
+        if not CONF.service_available.murano_cfapi:
+            skip_msg = "Service Broker API is disabled"
+            raise cls.skipException(skip_msg)
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
@@ -127,5 +130,5 @@ class BaseServiceBrokerAdminTest(BaseServiceBrokerTest):
             cls.password = CONF.auth.admin_password
             cls.tenant_name = CONF.auth.admin_tenant_name
         cls.verify_nonempty(cls.username, cls.password, cls.tenant_name)
-        cls.os = clients.AdminManager()
+        cls.os = clients.Manager()
         super(BaseServiceBrokerAdminTest, cls).resource_setup()
