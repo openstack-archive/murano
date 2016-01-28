@@ -16,6 +16,7 @@ from oslo_db import api as oslo_db_api
 from oslo_db import exception as db_exceptions
 from oslo_db.sqlalchemy import utils
 from oslo_log import log as logging
+import re
 import six
 import sqlalchemy as sa
 from sqlalchemy import or_
@@ -340,26 +341,43 @@ def package_search(filters, context, manage_public=False,
         fk_fields = {'categories': 'Category',
                      'tags': 'Tag',
                      'class_definitions': 'Class'}
-        conditions = []
+        # the default search order
+        fields = ['name',
+                  'fully_qualified_name',
+                  'description',
+                  'categories',
+                  'tags',
+                  'class_definitions',
+                  'author']
+        # split to searching words
+        key_words = re.split(';|,', filters['search'])
 
-        for attr in dir(pkg):
+        conditions = []
+        order_cases = []
+        sorted_fields = fields + list(set(dir(pkg)).difference(set(fields)))
+        for index in range(0, len(sorted_fields)):
+            attr = sorted_fields[index]
             if attr.startswith('_'):
                 continue
-            if isinstance(getattr(pkg, attr),
-                          attributes.InstrumentedAttribute):
-                search_str = filters['search']
-                for delim in ',;':
-                    search_str = search_str.replace(delim, ' ')
-                for key_word in search_str.split():
-                    _word = u'%{value}%'.format(value=key_word)
-                    if attr in fk_fields.keys():
-                        condition = getattr(pkg, attr).any(
-                            getattr(models, fk_fields[attr]).name.like(_word))
-                        conditions.append(condition)
-                    elif isinstance(getattr(pkg, attr)
-                                    .property.columns[0].type, sa.String):
-                        conditions.append(getattr(pkg, attr).like(_word))
-        query = query.filter(or_(*conditions))
+            if not isinstance(getattr(pkg, attr),
+                              attributes.InstrumentedAttribute):
+                continue
+            priority = min(index, len(fields))
+            for key_word in key_words:
+                _word = u'%{value}%'.format(value=key_word)
+                if attr in fk_fields.keys():
+                    condition = getattr(pkg, attr).any(
+                        getattr(models, fk_fields[attr]).name.like(_word))
+                    conditions.append(condition)
+                    order_cases.append((condition, priority))
+                elif isinstance(getattr(pkg, attr)
+                                .property.columns[0].type, sa.String):
+                    condition = getattr(pkg, attr).like(_word)
+                    conditions.append(condition)
+                    order_cases.append((condition, priority))
+
+        order_expression = sa.case(order_cases).label("tmp_weight_uuid")
+        query = query.filter(or_(*conditions)).order_by(order_expression.asc())
 
     sort_keys = [SEARCH_MAPPING[sort_key] for sort_key in
                  filters.get('order_by', ['name'])]

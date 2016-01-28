@@ -212,6 +212,31 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         res = api.package_search({'marker': marker}, self.context, limit=4)
         self.assertEqual(0, len(res))
 
+    def test_package_search_search_order(self):
+        pkg1 = api.package_upload(
+            self._stub_package(
+                fully_qualified_name=str(uuid.uuid4()),
+                name='mysql',
+                description='awcloud'),
+            self.tenant_id)
+        pkg2 = api.package_upload(
+            self._stub_package(
+                fully_qualified_name=str(uuid.uuid4()),
+                name='awcloud',
+                description='mysql'),
+            self.tenant_id)
+        api.package_upload(
+            self._stub_package(
+                tags=[],
+                fully_qualified_name=str(uuid.uuid4())),
+            self.tenant_id)
+
+        res = api.package_search(
+            {'search': 'mysql'}, self.context)
+        self.assertEqual(2, len(res))
+        self.assertEqual(pkg1.name, res[0].name)
+        self.assertEqual(pkg2.description, res[1].description)
+
     def test_package_search_search(self):
         pkg1 = api.package_upload(
             self._stub_package(
