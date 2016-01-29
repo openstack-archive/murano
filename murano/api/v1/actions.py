@@ -72,7 +72,7 @@ class Controller(object):
 
         if result is not None:
             return result
-        msg = _('Result for task with environment_id: {env_id} and task_id:'
+        msg = _('Result for task with environment_id: {env_id} and task_id: '
                 '{task_id} was not found.').format(env_id=environment_id,
                                                    task_id=task_id)
         LOG.error(msg)

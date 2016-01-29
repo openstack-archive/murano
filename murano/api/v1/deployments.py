@@ -91,7 +91,7 @@ def verify_and_get_deployment(db_session, environment_id, deployment_id):
                   .format(id=deployment_id))
         raise exc.HTTPNotFound
     if deployment.environment_id != environment_id:
-        LOG.error(_LE('Deployment with id {d_id} not found in environment'
+        LOG.error(_LE('Deployment with id {d_id} not found in environment '
                       '{env_id}').format(d_id=deployment_id,
                                          env_id=environment_id))
         raise exc.HTTPBadRequest
