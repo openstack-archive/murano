@@ -232,3 +232,29 @@ class ApplicationCatalogClient(rest_client.RestClient):
         resp, body = self.get(uri, headers)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+# -----------------------------Category methods--------------------------------
+    def list_categories(self):
+        uri = 'v1/catalog/packages/categories'
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def create_category(self, name):
+        body = {'name': name}
+        uri = 'v1/catalog/categories'
+        resp, body = self.post(uri, json.dumps(body))
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_category(self, category_id):
+        uri = 'v1/catalog/categories/{0}'.format(category_id)
+        resp, body = self.delete(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_category(self, category_id):
+        uri = 'v1/catalog/categories/{0}'.format(category_id)
+        resp, body = self.get(uri)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)

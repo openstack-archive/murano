@@ -20,7 +20,7 @@ from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
 
 
-class TestRepositorySanity(base.BaseApplicationCatalogIsolatedAdminTest):
+class TestRepositorySanity(base.BaseApplicationCatalogTest):
 
     @attr(type='smoke')
     def test_get_list_packages(self):
@@ -46,7 +46,7 @@ class TestRepositorySanity(base.BaseApplicationCatalogIsolatedAdminTest):
         self.assertEqual(len(packages_list), len(updated_packages_list))
 
 
-class TestRepository(base.BaseApplicationCatalogAdminTest):
+class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
 
     @classmethod
     def resource_setup(cls):
