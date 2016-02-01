@@ -14,7 +14,6 @@
 
 import contextlib
 import errno
-import fcntl
 import functools
 import os
 
@@ -158,6 +157,7 @@ if os.name == 'nt':
     # no shared locks on windows
     SharedInterProcessLock = lockutils.InterProcessLock
 else:
+    import fcntl
 
     class SharedInterProcessLock(lockutils.InterProcessLock):
         def trylock(self):
