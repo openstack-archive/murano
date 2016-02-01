@@ -127,7 +127,7 @@ class TestCombinedPackageLoader(base.MuranoTestCase):
         super(TestCombinedPackageLoader, cls).setUpClass()
 
         location = os.path.dirname(__file__)
-        CONF.set_override('load_packages_from', [location], 'engine',
+        CONF.set_override('load_packages_from', [location], 'packages_opts',
                           enforce_type=True)
         cls.murano_client_factory = mock.MagicMock()
         cls.loader = package_loader.CombinedPackageLoader(

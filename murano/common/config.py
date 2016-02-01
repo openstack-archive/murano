@@ -205,9 +205,6 @@ engine_opts = [
     cfg.IntOpt('agent_timeout', default=3600,
                help=_('Time for waiting for a response from murano agent '
                       'during the deployment')),
-    cfg.ListOpt('load_packages_from', default=[],
-                help=_('List of directories to load local packages from. '
-                       'If not provided, packages will be loaded by API'))
 ]
 
 # TODO(sjmc7): move into engine opts?
@@ -225,6 +222,10 @@ packages_opts = [
                        'packages downloaded during deployments. '
                        'The packages would be re-used for consequent '
                        'deployments.')),
+
+    cfg.ListOpt('load_packages_from', default=[],
+                help=_('List of directories to load local packages from. '
+                       'If not provided, packages will be loaded only API')),
 
     cfg.IntOpt('package_size_limit', default=5,
                help='Maximum application package size, Mb'),

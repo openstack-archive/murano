@@ -72,14 +72,15 @@ class MuranoTestRunner(object):
                 version_spec = helpers.parse_version_spec('*')
             package = pkg_loader.load_package(name, version_spec)
         except exceptions.NoPackageFound:
-            if not CONF.engine.load_packages_from:
+            if not CONF.packages_opts.load_packages_from:
                 msg = _('Local package is not found since "load-packages-from"'
                         ' engine parameter is not provided and specified '
                         'packages is not loaded to murano-api')
             else:
                 msg = _('Specified package is not found: {0} were scanned '
                         'together with murano database'
-                        ).format(','.join(CONF.engine.load_packages_from))
+                        ).format(','.join(
+                            CONF.packages_opts.load_packages_from))
             LOG.error(msg)
             self.error(msg, show_help=False)
         except exc.CommunicationError:
@@ -211,7 +212,7 @@ class MuranoTestRunner(object):
 
         # Replace location of loading packages with provided from command line.
         if load_packages_from:
-            cfg.CONF.engine.load_packages_from = load_packages_from
+            cfg.CONF.packages_opts.load_packages_from = load_packages_from
         with package_loader.CombinedPackageLoader(
                 murano_client_factory, client.tenant_id) as pkg_loader:
             engine.get_plugin_loader().register_in_loader(pkg_loader)

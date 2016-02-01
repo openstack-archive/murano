@@ -427,7 +427,7 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
             murano_client_factory, tenant_id, root_loader)
         self.directory_loaders = []
 
-        for folder in CONF.engine.load_packages_from:
+        for folder in CONF.packages_opts.load_packages_from:
             if os.path.exists(folder):
                 self.directory_loaders.append(DirectoryPackageLoader(
                     folder, root_loader))
