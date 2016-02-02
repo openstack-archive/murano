@@ -39,6 +39,9 @@ Methods:
 
   _addGroup:
     Arguments:
+      - direction:
+          Contract: $.string().notNull().check($ in list(ingress, egress))
+          Default: ingress
       - rules:
           Contract:
             - FromPort: $.int().notNull()
