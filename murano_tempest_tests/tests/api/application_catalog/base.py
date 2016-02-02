@@ -19,6 +19,7 @@ from tempest import config
 from tempest import test
 
 from murano_tempest_tests import clients
+from murano_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -87,6 +88,27 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
     def clear_isolated_creds(cls):
         if hasattr(cls, "dynamic_cred"):
             cls.dynamic_cred.clear_creds()
+
+    @staticmethod
+    def _get_demo_app():
+        return {
+            "instance": {
+                "assignFloatingIp": "true",
+                "keyname": "mykeyname",
+                "image": "cloud-fedora-v3",
+                "flavor": "m1.medium",
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+                }
+            },
+            "name": "orion",
+            "port": "8080",
+            "?": {
+                "type": "io.murano.apps.apache.Tomcat",
+                "id": utils.generate_uuid()
+            }
+        }
 
 
 class BaseApplicationCatalogAdminTest(BaseApplicationCatalogTest):

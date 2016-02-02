@@ -184,3 +184,51 @@ class ApplicationCatalogClient(rest_client.RestClient):
         resp, body = self.post(url, body)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+# -----------------------------Service methods---------------------------------
+    def create_service(self, environment_id, session_id, post_body):
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+        uri = 'v1/environments/{0}/services'.format(environment_id)
+        resp, body = self.post(uri, json.dumps(post_body), headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def delete_service(self, environment_id, session_id, service_id):
+        headers = self.get_headers()
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+        uri = 'v1/environments/{0}/services/{1}'.format(environment_id,
+                                                        service_id)
+        resp, body = self.delete(uri, headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def get_services_list(self, environment_id, session_id=None):
+        headers = self.get_headers()
+        if session_id:
+            headers.update(
+                {'X-Configuration-Session': session_id}
+            )
+        uri = 'v1/environments/{0}/services'.format(environment_id)
+        resp, body = self.get(uri, headers)
+        self.expected_success(200, resp.status)
+        # TODO(freerunner): Need to replace json.loads() to _parse_resp
+        # method, when fix for https://bugs.launchpad.net/tempest/+bug/1539927
+        # will resolved and new version of tempest-lib released.
+        return json.loads(body)
+
+    def get_service(self, environment_id, service_id, session_id=None):
+        headers = self.get_headers()
+        if session_id:
+            headers.update(
+                {'X-Configuration-Session': session_id}
+            )
+        uri = 'v1/environments/{0}/services/{1}'.format(environment_id,
+                                                        service_id)
+        resp, body = self.get(uri, headers)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
