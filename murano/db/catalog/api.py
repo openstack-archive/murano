@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_db import api as oslo_db_api
+from oslo_db import exception as db_exceptions
 from oslo_db.sqlalchemy import utils
 from oslo_log import log as logging
 import six
@@ -103,6 +104,12 @@ def _get_categories(category_names, session=None):
     return categories
 
 
+def _existing_tag(tag_name, session=None):
+    if session is None:
+        session = db_session.get_session()
+    return session.query(models.Tag).filter_by(name=tag_name).first()
+
+
 def _get_tags(tag_names, session=None):
     """Return existing tags object or create new ones
        :param tag_names: name of tags to associate with package, list
@@ -111,13 +118,28 @@ def _get_tags(tag_names, session=None):
     if session is None:
         session = db_session.get_session()
     tags = []
-    for tag_name in tag_names:
-        tag_obj = session.query(models.Tag).filter_by(name=tag_name).first()
-        if tag_obj:
+    # This function can be called inside a transaction and outside it.
+    # In the former case this line is no-op, in the latter
+    # starts a transaction we need to be inside a transaction, to correctly
+    # handle DBDuplicateEntry errors without failing the whole transaction.
+    # For more take a look at SQLAlchemy docs.
+    with session.begin(subtransactions=True):
+        for tag_name in tag_names:
+            tag_obj = _existing_tag(tag_name, session)
+            if not tag_obj:
+                try:
+                    # Start a new SAVEPOINT transaction. If it fails only
+                    # only the savepoint will be roll backed, not the
+                    # whole transaction.
+                    with session.begin(nested=True):
+                        tag_obj = models.Tag(name=tag_name)
+                        session.add(tag_obj)
+                        session.flush(objects=[tag_obj])
+                except db_exceptions.DBDuplicateEntry:
+                    # new session is needed here to get access to the tag
+                    tag_obj = _existing_tag(tag_name)
             tags.append(tag_obj)
-        else:
-            tag_record = models.Tag(name=tag_name)
-            tags.append(tag_record)
+
     return tags
 
 
