@@ -21,7 +21,7 @@ from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
 
 
-class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogAdminTest):
+class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
 
     @attr(type='negative')
     def test_update_package_with_incorrect_id(self):
@@ -69,7 +69,7 @@ class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogAdminTest):
                           utils.generate_uuid())
 
 
-class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogAdminTest):
+class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
 
     # TODO(freerunner): I hope, that we can setup and cleanup resources
     # TODO(freerunner): dramatically better.
