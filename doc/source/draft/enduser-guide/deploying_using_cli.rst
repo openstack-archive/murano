@@ -23,7 +23,7 @@ use to deploy a murano environment, murano CLI client also possesses required
 functionality for the task. This is an advanced scenario, however, that
 requires knowledge of :ref:`internal murano workflow <murano-workflow>`,
 :ref:`murano object model <object-model>`, and
-:ref:`murano environment <environment>` life cycle.
+:ref:`murano environment <environment>` lifecycle.
 This scenario is suitable for deployments without
 horizon or deployment automation.
 
@@ -31,15 +31,15 @@ horizon or deployment automation.
 .. note::
 
     This is an advanced mechanism and you should use it only when you are
-    confident in what you are doing. For everyday use it is recommended to use
+    confident in what you are doing. Otherwise, it is recommended that you use
     murano-dashboard.
 
-Create environment
-~~~~~~~~~~~~~~~~~~
+Create an environment
+~~~~~~~~~~~~~~~~~~~~~
 
-This command creates a new murano environment, ready for configuration.
-For convenience this guide will refer to environment ID as ``$ENV_ID``
-from now on.
+The following command creates a new murano environment that is ready for
+configuration. For convenience, this guide refers to environment ID as
+``$ENV_ID``.
 
 .. code-block:: console
 
@@ -51,14 +51,16 @@ from now on.
   | a66e5ea35e9d4da48c2abc37b5a9753a | deployed_from_cli | 2015-10-06T13:50:45 | 2015-10-06T13:50:45 |
   +----------------------------------+-------------------+---------------------+---------------------+
 
-Create configuration session
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+Create a configuration session
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Murano uses configuration sessions to allow several users to edit and configure
 the same environment concurrently. Most of environment-related commands
-require :option:`--session-id` parameter.
-For convenience this guide will refer to session ID as ``$SESS_ID``
-from now on.
+require the :option:`--session-id` parameter. For convenience, this guide
+refers to session ID as ``$SESS_ID``.
+
+To create a configuration session, use the
+:command:`murano environment-session-create $ENV_ID` command:
 
 .. code-block:: console
 
@@ -71,11 +73,11 @@ from now on.
   +----------+----------------------------------+
 
 
-Add apps to environment
-~~~~~~~~~~~~~~~~~~~~~~~
+Add applications to an environment
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-To manipulate environments object model from CLI you can use
-the :command:`environment-apps-edit` command.
+To manipulate environments object model from CLI, use the
+:command:`environment-apps-edit` command:
 
 .. code-block:: console
 
@@ -83,7 +85,7 @@ the :command:`environment-apps-edit` command.
 
 The :file:`object_model_patch.json` contains the ``jsonpatch`` object. This
 object is applied to the ``/services`` key of the environment in question.
-Here is the example of the :file:`object_model_patch.json` file content:
+Below is an example of the :file:`object_model_patch.json` file content:
 
 .. code-block:: json
 
@@ -112,12 +114,12 @@ Here is the example of the :file:`object_model_patch.json` file content:
         }
     ]
 
-For convenience, the murano client replaces ``"===id1==="``, ``"===id2==="``
-(and so on) strings with UUIDs. This way you can ensure, that object IDs
+For convenience, the murano client replaces the ``"===id1==="``, ``"===id2==="``
+(and so on) strings with UUIDs. This way you can ensure that object IDs
 inside your object model are unique.
-To learn more about jsonpatch consult jsonpatch.com_ and `RFC 6902`_.
+To learn more about jsonpatch, consult jsonpatch.com_ and `RFC 6902`_.
 The :command:`murano-environment-edit` command fully supports jsonpatch.
-This means that you can alter, add, or remove parts of your apps
+This means that you can alter, add, or remove parts of your applications
 object model.
 
 Verify your object model
@@ -125,7 +127,7 @@ Verify your object model
 
 To verify whether your object model is correct, check the environment by
 running the :command:`environment-show` command with the
-:option:`--session-id` parameter
+:option:`--session-id` parameter:
 
 .. code-block:: console
 
@@ -159,16 +161,23 @@ running the :command:`environment-show` command with the
 Deploy your environment
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-To deploy session ``$SESS_ID`` of your environment use
-the :command:`murano environment-deploy` command.
+To deploy a session ``$SESS_ID`` of your environment, use the
+:command:`murano environment-deploy` command:
 
 .. code-block:: console
 
     murano environment-deploy $ENV_ID --session-id $SESS_ID
 
 You can later use the :command:`murano environment-show` command to
-track deployment status.
+track the deployment status.
 
+To view the deployed applications of a particular environment, use the
+:command:`murano environment-show` command with the :option:`--only-apps`
+parameter and specifying the environment ID:
+
+.. code-block:: console
+
+   murano environment-show $ENV_ID --only-apps
 
 .. _jsonpatch.com: http://jsonpatch.com
 .. _RFC 6902: http://tools.ietf.org/html/rfc6902
