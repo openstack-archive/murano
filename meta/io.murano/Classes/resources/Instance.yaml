@@ -141,12 +141,6 @@ Methods:
       - $.volumes.items().select(
           $.unpack(path, volume) -> $this.attachVolume($path, $volume))
 
-      - For: path
-        In: $.volumes
-        Do:
-          - $volume: $.volumes.get($path)
-          - $this.attachVolume($path, $volume)
-
       # Any additional template preparation
       - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
       - $.environment.stack.updateTemplate($.instanceTemplate)
