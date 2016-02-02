@@ -28,7 +28,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
-from murano.common.i18n import _LE, _LI
+from murano.common.i18n import _LE, _LI, _LW
 from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import helpers
@@ -236,6 +236,12 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     pass
 
     def try_cleanup_cache(self, package_directory=None, current_id=None):
+        """Attempts to cleanup cache in a given directory.
+
+        :param package_directory: directory containing cached packages
+        :param current_id: optional id of the package to exclude from the list
+        of deleted packages
+        """
         if not package_directory:
             return
 
@@ -254,22 +260,41 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             stale_directory = os.path.join(
                 package_directory,
                 pkg_id)
-            if os.path.isdir(package_directory):
 
-                usage_lock_path = os.path.join(
-                    self._cache_directory,
-                    '{}_usage.lock'.format(current_id))
-                ipc_lock = m_utils.ExclusiveInterProcessLock(
-                    path=usage_lock_path, sleep_func=eventlet.sleep)
+            if not os.path.isdir(package_directory):
+                continue
 
-                with usage_mem_locks[pkg_id].write_lock(False) as acquired:
-                    if not acquired:
-                        continue
-                    acquired_ipc_lock = ipc_lock.acquire(blocking=False)
-                    if acquired_ipc_lock:
-                        shutil.rmtree(stale_directory,
-                                      ignore_errors=True)
-                        ipc_lock.release()
+            usage_lock_path = os.path.join(
+                self._cache_directory,
+                '{}_usage.lock'.format(pkg_id))
+            ipc_lock = m_utils.ExclusiveInterProcessLock(
+                path=usage_lock_path, sleep_func=eventlet.sleep)
+
+            with usage_mem_locks[pkg_id].write_lock(False) as acquired:
+                if not acquired:
+                    # the package is in use by other deployment in this process
+                    # will do nothing, someone else would delete it
+                    continue
+                acquired_ipc_lock = ipc_lock.acquire(blocking=False)
+                if not acquired_ipc_lock:
+                    # the package is in use by other deployment in another
+                    # process, will do nothing, someone else would delete it
+                    continue
+
+                shutil.rmtree(stale_directory,
+                              ignore_errors=True)
+                ipc_lock.release()
+
+                for lock_type in ('usage', 'download'):
+                    lock_path = os.path.join(
+                        self._cache_directory,
+                        '{}_{}.lock'.format(pkg_id, lock_type))
+                    try:
+                        os.remove(lock_path)
+                    except OSError:
+                        LOG.warning(
+                            _LW("Couldn't delete lock file: "
+                                "{}").format(lock_path))
 
     def _get_best_package_match(self, packages):
         public = None
