@@ -36,7 +36,7 @@ There you can find each job for each repository: one for the **murano** and anot
 * "gate-murano-dashboard-selenium\*" verifies each commit to murano-dashboard repository
 * "gate-murano-integration\*" verifies each commit to murano repository
 
-Other jobs allow to build and test Murano documentation and perform another usefull work to support Murano CI infrastructure.
+Other jobs allow to build and test Murano documentation and perform another useful work to support Murano CI infrastructure.
 All jobs are run on fresh installation of operating system and all components are installed on each run.
 
 Murano automated tests: UI tests

@@ -84,7 +84,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
 
     @test.attr(type=["smoke", "gate"])
     def test_provision_with_incorrect_input(self):
-        """Test provision with resticted items in object model
+        """Test provision with restricted items in object model
 
         Test will fail on deprovision, if parameters from '?' section
         will passed through service-broker.

@@ -35,7 +35,7 @@ service_broker_group = cfg.OptGroup(name="service_broker",
                                          title="Service Broker Options")
 
 ApplicationCatalogGroup = [
-    # Aplication catalog tempest configuration
+    # Application catalog tempest configuration
     cfg.StrOpt("region",
                default="",
                help="The application_catalog region name to use. If empty, "
