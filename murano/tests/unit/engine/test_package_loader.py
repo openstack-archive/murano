@@ -57,10 +57,10 @@ class TestPackageCache(base.MuranoTestCase):
             package_data = f.read()
         spec = semantic_version.Spec('*')
 
-        old_id, new_id = '123', '456'
+        first_id, second_id, third_id = '123', '456', '789'
         package = mock.MagicMock()
         package.fully_qualified_name = fqn
-        package.id = old_id
+        package.id = first_id
         package.version = '0.0.1'
 
         self.murano_client.packages.filter = mock.MagicMock(
@@ -77,9 +77,9 @@ class TestPackageCache(base.MuranoTestCase):
         self.assertTrue(os.path.isdir(os.path.join(
             self.location, fqn, package.version)))
         self.assertTrue(os.path.isdir(os.path.join(
-            self.location, fqn, package.version, old_id)))
+            self.location, fqn, package.version, first_id)))
         self.assertTrue(os.path.isfile(os.path.join(
-            self.location, fqn, package.version, old_id, 'manifest.yaml')))
+            self.location, fqn, package.version, first_id, 'manifest.yaml')))
 
         # assert, that we called download
         self.assertEqual(self.murano_client.packages.download.call_count, 1)
@@ -93,7 +93,7 @@ class TestPackageCache(base.MuranoTestCase):
         self.assertEqual(self.murano_client.packages.download.call_count, 1)
 
         # changing id, new package would be downloaded.
-        package.id = new_id
+        package.id = second_id
         self.loader._package_cache = {}
         self.loader._class_cache = {}
         self.loader.load_class_package(fqn, spec)
@@ -101,9 +101,10 @@ class TestPackageCache(base.MuranoTestCase):
         # check that we didn't download a thing
         self.assertEqual(self.murano_client.packages.download.call_count, 2)
 
-        # check that old directories got deleted
-        self.assertFalse(os.path.isdir(os.path.join(
-            self.location, fqn, package.version, old_id)))
+        # check that old directories were not deleted
+        # we did not call cleanup and did not release the locks
+        self.assertTrue(os.path.isdir(os.path.join(
+            self.location, fqn, package.version, first_id)))
 
         # check that new directories got created correctly
         self.assertTrue(os.path.isdir(os.path.join(
@@ -111,14 +112,38 @@ class TestPackageCache(base.MuranoTestCase):
         self.assertTrue(os.path.isdir(os.path.join(
             self.location, fqn, package.version)))
         self.assertTrue(os.path.isdir(os.path.join(
-            self.location, fqn, package.version, new_id)))
+            self.location, fqn, package.version, second_id)))
         self.assertTrue(os.path.isfile(os.path.join(
-            self.location, fqn, package.version, new_id, 'manifest.yaml')))
+            self.location, fqn, package.version, second_id, 'manifest.yaml')))
 
         self.assertTrue(os.path.isdir(os.path.join(
             self.location, fqn, package.version)))
         self.assertTrue(os.path.isdir(os.path.join(
-            self.location, fqn, package.version, new_id)))
+            self.location, fqn, package.version, second_id)))
+
+        # changing id, new package would be downloaded.
+        package.id = third_id
+        self.loader._package_cache = {}
+        self.loader._class_cache = {}
+
+        # release all the locks
+        self.loader.cleanup()
+        self.loader.load_class_package(fqn, spec)
+
+        # check that we didn't download a thing
+        self.assertEqual(self.murano_client.packages.download.call_count, 3)
+
+        # check that old directories were *deleted*
+        self.assertFalse(os.path.isdir(os.path.join(
+            self.location, fqn, package.version, first_id)))
+        self.assertFalse(os.path.isdir(os.path.join(
+            self.location, fqn, package.version, second_id)))
+
+        # check that new directories got created correctly
+        self.assertTrue(os.path.isdir(os.path.join(
+            self.location, fqn, package.version, third_id)))
+        self.assertTrue(os.path.isfile(os.path.join(
+            self.location, fqn, package.version, third_id, 'manifest.yaml')))
 
 
 class TestCombinedPackageLoader(base.MuranoTestCase):

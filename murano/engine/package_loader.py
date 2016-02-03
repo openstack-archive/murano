@@ -270,31 +270,35 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             ipc_lock = m_utils.ExclusiveInterProcessLock(
                 path=usage_lock_path, sleep_func=eventlet.sleep)
 
-            with usage_mem_locks[pkg_id].write_lock(False) as acquired:
-                if not acquired:
-                    # the package is in use by other deployment in this process
-                    # will do nothing, someone else would delete it
-                    continue
-                acquired_ipc_lock = ipc_lock.acquire(blocking=False)
-                if not acquired_ipc_lock:
-                    # the package is in use by other deployment in another
-                    # process, will do nothing, someone else would delete it
-                    continue
+            try:
+                with usage_mem_locks[pkg_id].write_lock(False) as acquired:
+                    if not acquired:
+                        # the package is in use by other deployment in this
+                        # process will do nothing, someone else would delete it
+                        continue
+                    acquired_ipc_lock = ipc_lock.acquire(blocking=False)
+                    if not acquired_ipc_lock:
+                        # the package is in use by other deployment in another
+                        # process, will do nothing, someone else would delete
+                        continue
 
-                shutil.rmtree(stale_directory,
-                              ignore_errors=True)
-                ipc_lock.release()
+                    shutil.rmtree(stale_directory,
+                                  ignore_errors=True)
+                    ipc_lock.release()
 
-                for lock_type in ('usage', 'download'):
-                    lock_path = os.path.join(
-                        self._cache_directory,
-                        '{}_{}.lock'.format(pkg_id, lock_type))
-                    try:
-                        os.remove(lock_path)
-                    except OSError:
-                        LOG.warning(
-                            _LW("Couldn't delete lock file: "
-                                "{}").format(lock_path))
+                    for lock_type in ('usage', 'download'):
+                        lock_path = os.path.join(
+                            self._cache_directory,
+                            '{}_{}.lock'.format(pkg_id, lock_type))
+                        try:
+                            os.remove(lock_path)
+                        except OSError:
+                            LOG.warning(
+                                _LW("Couldn't delete lock file: "
+                                    "{}").format(lock_path))
+            except RuntimeError:
+                # couldn't upgrade read lock to write-lock. go on.
+                continue
 
     def _get_best_package_match(self, packages):
         public = None
@@ -318,11 +322,12 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         if not CONF.packages_opts.enable_packages_cache:
             return
 
+        package_id = package_definition.id
+
         # A work around the fact that read_lock only supports `with` syntax.
         mem_lock = _with_to_generator(
-            usage_mem_locks[package_definition].read_lock())
+            usage_mem_locks[package_id].read_lock())
 
-        package_id = package_definition.id
         usage_lock_path = os.path.join(self._cache_directory,
                                        '{}_usage.lock'.format(package_id))
         ipc_lock = m_utils.SharedInterProcessLock(
