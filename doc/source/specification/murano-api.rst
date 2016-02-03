@@ -887,7 +887,7 @@ General Request Statistics
 Actions API
 ===========
 
-Murano Actions are simple MuranoPL methods, that can be called on deployed applications.
+Murano actions are simple MuranoPL methods, that can be called on deployed applications.
 Application contains a list with available actions. Actions may return a result.
 
 Execute an action
