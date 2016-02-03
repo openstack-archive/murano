@@ -64,8 +64,8 @@ You can see steps of the deployments and the one that failed would have red colo
   * Check that linux image name is not starts with 'w' letter
 
 *  ``[exceptions.EnvironmentError]: Unexpected stack state NOT_FOUND`` - problem with heat stack creation, need to examine Heat log file.
-   If you are running the deployment on new tenant check that router exists and it has gateway to the external network.
+   If you are running the deployment on a new tenant check that the router exists and it has gateway to the external network.
 *  ``Router could not be created, no external network found`` - Find `external_network` parameter in config file and check
-   that specified external network is really exist via UI or by executiong `neutron net-external-list` cimmand.
-*  ``NoPackageForClassFound: Package for class io.murano.Environment is not found`` - Check that murano core package is uploaded.
+   that specified external network is really exist via UI or by executing `neutron net-external-list` command.
+*  ``NoPackageForClassFound: Package for class io.murano. Environment is not found`` - Check that murano core package is uploaded.
    If no, the content of `meta/io.murano` folder should be zipped and uploaded to Murano.
