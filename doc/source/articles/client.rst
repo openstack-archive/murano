@@ -123,7 +123,7 @@ Importing bundles of packages in Murano
 =======================================
 
 ``package-import`` subcommand can install packages in several different ways:
-    * from a locall file
+    * from a local file
     * from a http url
     * from murano app repository
 
