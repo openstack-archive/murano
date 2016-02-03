@@ -218,10 +218,10 @@ The UI definition may look like this:
     instance:
       ?:
         type: io.murano.resources.LinuxMuranoInstance
-    networks:
-      useEnvironmentNetwork: $.instanceConfiguration.network[0]=null
-      useFlatNetwork: false
-      customNetworks: switch($.instanceConfiguration.network[0], $=null=>list(), $!=null=>$customJoinNet)
+      networks:
+        useEnvironmentNetwork: $.instanceConfiguration.network[0]=null
+        useFlatNetwork: false
+        customNetworks: switch($.instanceConfiguration.network[0], $=null=>list(), $!=null=>$customJoinNet)
   Forms:
     - instanceConfiguration:
         fields:
