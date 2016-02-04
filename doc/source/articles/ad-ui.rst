@@ -172,7 +172,7 @@ UI Definition Of Active Directory Application
               type: flavor
               label: Instance flavor
               description: >-
-                Select registered in Openstack flavor. Consider that service performance
+                Select registered in OpenStack flavor. Consider that service performance
                 depends on this parameter.
               required: false
             - name: osImage

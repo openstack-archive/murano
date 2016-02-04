@@ -126,7 +126,7 @@ services, that have an API.
 External load-balancer
 ----------------------
 Suppose, you have powerful load-balancer on a real server. And you want to run
-the application on an Openstack VM. Murano can set up new applications to be managed
+the application on an OpenStack VM. Murano can set up new applications to be managed
 by that external load-balancer (LB). Let’s go into more details.
 
 To implement this case the following apps are used:

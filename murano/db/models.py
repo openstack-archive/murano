@@ -239,7 +239,7 @@ class Package(Base, TimestampMixin):
     fully_qualified_name = sa.Column(sa.String(128),
                                      nullable=False)
     type = sa.Column(sa.String(20), nullable=False, default='class')
-    author = sa.Column(sa.String(80), default='Openstack')
+    author = sa.Column(sa.String(80), default='OpenStack')
     supplier = sa.Column(st.JsonBlob(), nullable=True, default={})
     name = sa.Column(sa.String(80), nullable=False)
     enabled = sa.Column(sa.Boolean, default=True)

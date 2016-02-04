@@ -139,9 +139,10 @@ stands for the "class" part of the name:
    FullName: io.murano.apps.apache.ApacheHttpServer
 
 .. note::
+
    It is not necessary that all applications belong to one domain.
    This naming allows to determine an application group by its name.
-   Openstack-related applications may have full names, started with
+   OpenStack-related applications may have full names, started with
    ``org.openstack.apps``, for example, ``org.openstack.apps.Rally``
 
 

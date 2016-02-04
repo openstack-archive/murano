@@ -58,7 +58,7 @@ Version history
 ~~~~~~~~~~~~~~~
 
 +---------+-------------------------------------------------------------------+-------------------+
-| Version | Changes                                                           | Openstack Version |
+| Version | Changes                                                           | OpenStack Version |
 +=========+===================================================================+===================+
 | 1.0     | - Initial Dymanic UI implementation                               | Icehouse          |
 +---------+-------------------------------------------------------------------+-------------------+
@@ -351,7 +351,7 @@ fields.
              type: flavor
              label: Instance flavor
              description: >-
-               Select a flavor registered in Openstack. Consider that service performance
+               Select a flavor registered in OpenStack. Consider that service performance
                depends on this parameter.
              required: false
            - name: osImage

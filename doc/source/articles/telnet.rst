@@ -102,7 +102,7 @@ UI Definition of telnet application
               type: flavor
               label: Instance flavor
               description: >-
-                Select registered in Openstack flavor. Consider that application performance
+                Select registered in OpenStack flavor. Consider that application performance
                 depends on this parameter.
               required: false
             - name: osImage
