@@ -263,9 +263,10 @@ class EnvironmentServices(object):
 
     @staticmethod
     def get_network_driver(context):
-        ks = auth_utils.get_client(context.auth_token, context.tenant)
+        session = auth_utils.get_token_client_session(
+            context.auth_token, context.tenant)
         try:
-            ks.service_catalog.url_for(service_type='network')
+            session.get_endpoint(service_type='network')
         except ks_exceptions.EndpointNotFound:
             LOG.debug("Will use NovaNetwork as a network driver")
             return "nova"

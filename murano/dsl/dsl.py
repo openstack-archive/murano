@@ -247,8 +247,8 @@ class Interfaces(object):
         return MuranoObjectInterface(mpl_object)
 
     @property
-    def environment(self):
-        return helpers.get_environment()
+    def execution_session(self):
+        return helpers.get_execution_session()
 
     @property
     def caller(self):

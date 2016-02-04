@@ -16,15 +16,18 @@
 import copy
 
 import eventlet
+import heatclient.client as hclient
 import heatclient.exc as heat_exc
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
+from murano.common import auth_utils
 from murano.common.i18n import _LW
 from murano.common import utils
 from murano.dsl import dsl
 from murano.dsl import helpers
+from murano.dsl import session_local_storage
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
@@ -46,17 +49,35 @@ class HeatStack(object):
         self._hot_environment = ''
         self._applied = True
         self._description = description
-        self._clients = helpers.get_environment().clients
         self._last_stack_timestamps = (None, None)
         self._tags = ''
+        self._client = self._get_client(CONF.home_region)
+        pass
+
+    @staticmethod
+    def _create_client(session, region_name):
+        parameters = auth_utils.get_session_client_parameters(
+            service_type='orchestration', region=region_name,
+            conf=CONF.heat, session=session)
+        return hclient.Client('1', **parameters)
+
+    @staticmethod
+    @session_local_storage.execution_session_memoize
+    def _get_client(region_name):
+        session = auth_utils.get_client_session(conf=CONF.heat)
+        return HeatStack._create_client(session, region_name)
+
+    @classmethod
+    def _get_token_client(cls):
+        ks_session = auth_utils.get_token_client_session(conf=CONF.heat)
+        return cls._create_client(ks_session, CONF.home_region)
 
     def current(self):
-        client = self._clients.get_heat_client()
         if self._template is not None:
             return self._template
         try:
-            stack_info = client.stacks.get(stack_id=self._name)
-            template = client.stacks.template(
+            stack_info = self._client.stacks.get(stack_id=self._name)
+            template = self._client.stacks.template(
                 stack_id='{0}/{1}'.format(
                     stack_info.stack_name,
                     stack_info.id))
@@ -126,11 +147,11 @@ class HeatStack(object):
     def _wait_state(self, status_func, wait_progress=False):
         tries = 4
         delay = 1
+
         while tries > 0:
             while True:
-                client = self._clients.get_heat_client()
                 try:
-                    stack_info = client.stacks.get(
+                    stack_info = self._client.stacks.get(
                         stack_id=self._name)
                     status = stack_info.stack_status
                     tries = 4
@@ -194,7 +215,7 @@ class HeatStack(object):
         resources = template.get('Resources') or template.get('resources')
         if current_status == 'NOT_FOUND':
             if resources is not None:
-                token_client = self._clients.get_heat_client(use_trusts=False)
+                token_client = self._get_token_client()
                 token_client.stacks.create(
                     stack_name=self._name,
                     parameters=self._parameters,
@@ -207,9 +228,7 @@ class HeatStack(object):
                 self._wait_state(lambda status: status == 'CREATE_COMPLETE')
         else:
             if resources is not None:
-                trust_client = self._clients.get_heat_client()
-
-                trust_client.stacks.update(
+                self._client.stacks.update(
                     stack_id=self._name,
                     parameters=self._parameters,
                     files=self._files,
@@ -225,11 +244,10 @@ class HeatStack(object):
         self._applied = not utils.is_different(self._template, template)
 
     def delete(self):
-        client = self._clients.get_heat_client()
         try:
             if not self.current():
                 return
-            client.stacks.delete(stack_id=self._name)
+            self._client.stacks.delete(stack_id=self._name)
             self._wait_state(
                 lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
                 wait_progress=True)

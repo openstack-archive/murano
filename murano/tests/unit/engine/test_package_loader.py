@@ -17,6 +17,7 @@ import tempfile
 import mock
 from oslo_config import cfg
 import semantic_version
+import testtools
 
 from murano.dsl import murano_package as dsl_package
 from murano.engine import package_loader
@@ -37,23 +38,22 @@ class TestPackageCache(base.MuranoTestCase):
         CONF.set_override('packages_cache', self.location, 'packages_opts')
 
         self.murano_client = mock.MagicMock()
-        self.murano_client_factory = mock.MagicMock(
-            return_value=self.murano_client)
-        self.loader = package_loader.ApiPackageLoader(
-            self.murano_client_factory, 'test_tenant_id')
+        package_loader.ApiPackageLoader.client = self.murano_client
+        self.loader = package_loader.ApiPackageLoader(None)
 
     def tearDown(self):
         CONF.set_override('packages_cache', self.old_location, 'packages_opts')
         shutil.rmtree(self.location, ignore_errors=True)
         super(TestPackageCache, self).tearDown()
 
+    @testtools.skipIf(os.name == 'nt', "Doesn't work on Windows")
     def test_load_package(self):
         fqn = 'io.murano.apps.test'
         path, name = utils.compose_package(
             'test',
             os.path.join(self.location, 'manifest.yaml'),
             self.location, archive_dir=self.location)
-        with open(path) as f:
+        with open(path, 'rb') as f:
             package_data = f.read()
         spec = semantic_version.Spec('*')
 
@@ -154,9 +154,9 @@ class TestCombinedPackageLoader(base.MuranoTestCase):
         location = os.path.dirname(__file__)
         CONF.set_override('load_packages_from', [location], 'packages_opts',
                           enforce_type=True)
-        cls.murano_client_factory = mock.MagicMock()
+        cls.execution_session = mock.MagicMock()
         cls.loader = package_loader.CombinedPackageLoader(
-            cls.murano_client_factory, 'test_tenant_id')
+            cls.execution_session)
         cls.api_loader = mock.MagicMock()
         cls.loader.api_loader = cls.api_loader
 

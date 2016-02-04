@@ -16,15 +16,18 @@ import math
 
 import netaddr
 from netaddr.strategy import ipv4
+import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import uuidutils
 import retrying
 
+from murano.common import auth_utils
 from murano.common import exceptions as exc
 from murano.common.i18n import _LI
 from murano.dsl import dsl
 from murano.dsl import helpers
+from murano.dsl import session_local_storage
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -33,11 +36,19 @@ LOG = logging.getLogger(__name__)
 @dsl.name('io.murano.system.NetworkExplorer')
 class NetworkExplorer(object):
     def __init__(self):
-        environment = helpers.get_environment()
-        self._clients = environment.clients
-        self._tenant_id = environment.tenant_id
+        session = helpers.get_execution_session()
+        self._project_id = session.project_id
         self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
+        self._client = self._get_client(CONF.home_region)
+
+    @staticmethod
+    @session_local_storage.execution_session_memoize
+    def _get_client(region_name):
+        neutron_settings = CONF.neutron
+        return nclient.Client(**auth_utils.get_session_client_parameters(
+            service_type='network', region=region_name, conf=neutron_settings
+        ))
 
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
     # decorator with random delay 1-10 seconds between attempts and maximum
@@ -47,11 +58,10 @@ class NetworkExplorer(object):
                     wait_random_min=1000, wait_random_max=10000,
                     stop_max_delay=30000)
     def get_default_router(self):
-        client = self._clients.get_neutron_client()
         router_name = self._settings.router_name
 
-        routers = client.list_routers(
-            tenant_id=self._tenant_id, name=router_name).get('routers')
+        routers = self._client.list_routers(
+            tenant_id=self._project_id, name=router_name).get('routers')
         if len(routers) == 0:
             LOG.debug('Router {name} not found'.format(name=router_name))
             if self._settings.create_router:
@@ -61,7 +71,7 @@ class NetworkExplorer(object):
                 kwargs = {'id': external_network} \
                     if uuidutils.is_uuid_like(external_network) \
                     else {'name': external_network}
-                networks = client.list_networks(**kwargs).get('networks')
+                networks = self._client.list_networks(**kwargs).get('networks')
                 ext_nets = filter(lambda n: n['router:external'], networks)
                 if len(ext_nets) == 0:
                     raise KeyError('Router %s could not be created, '
@@ -77,7 +87,8 @@ class NetworkExplorer(object):
                         'admin_state_up': True,
                     }
                 }
-                router = client.create_router(body=body_data).get('router')
+                router = self._client.create_router(
+                    body=body_data).get('router')
                 LOG.info(_LI('Created router: {id}').format(id=router['id']))
                 return router['id']
             else:
@@ -112,20 +123,18 @@ class NetworkExplorer(object):
         return self._settings.default_dns
 
     def get_external_network_id_for_router(self, router_id):
-        client = self._clients.get_neutron_client()
-        router = client.show_router(router_id).get('router')
+        router = self._client.show_router(router_id).get('router')
         if not router or 'external_gateway_info' not in router:
             return None
         return router['external_gateway_info'].get('network_id')
 
     def get_external_network_id_for_network(self, network_id):
-        client = self._clients.get_neutron_client()
-        network = client.show_network(network_id).get('network')
+        network = self._client.show_network(network_id).get('network')
         if network.get('router:external', False):
             return network_id
 
         # Get router interfaces of the network
-        router_ports = client.list_ports(
+        router_ports = self._client.list_ports(
             **{'device_owner': 'network:router_interface',
                'network_id': network_id}).get('ports')
 
@@ -141,14 +150,13 @@ class NetworkExplorer(object):
     def _get_cidrs_taken_by_router(self, router_id):
         if not router_id:
             return []
-        client = self._clients.get_neutron_client()
-        ports = client.list_ports(device_id=router_id)['ports']
+        ports = self._client.list_ports(device_id=router_id)['ports']
         subnet_ids = []
         for port in ports:
             for fixed_ip in port['fixed_ips']:
                 subnet_ids.append(fixed_ip['subnet_id'])
 
-        all_subnets = client.list_subnets()['subnets']
+        all_subnets = self._client.list_subnets()['subnets']
         filtered_cidrs = [netaddr.IPNetwork(subnet['cidr']) for subnet in
                           all_subnets if subnet['id'] in subnet_ids]
 
@@ -169,13 +177,10 @@ class NetworkExplorer(object):
         return list(net.subnet(width - bits_for_hosts))
 
     def list_networks(self):
-        client = self._clients.get_neutron_client()
-        return client.list_networks()['networks']
+        return self._client.list_networks()['networks']
 
     def list_subnetworks(self):
-        client = self._clients.get_neutron_client()
-        return client.list_subnets()['subnets']
+        return self._client.list_subnets()['subnets']
 
     def list_ports(self):
-        client = self._clients.get_neutron_client()
-        return client.list_ports()['ports']
+        return self._client.list_ports()['ports']
