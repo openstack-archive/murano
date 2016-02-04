@@ -45,7 +45,7 @@ class ExternalContextMiddleware(wsgi.Middleware):
         """Get keystone token for external request
 
         This middleware is used for external requests. It get credentials from
-        request and try to get keystone token for futher authorization.
+        request and try to get keystone token for further authorization.
 
         :param req: wsgi request object that will be given the context object
         """
