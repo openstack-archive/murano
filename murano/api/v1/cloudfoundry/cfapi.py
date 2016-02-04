@@ -48,7 +48,10 @@ class Controller(object):
         srv = {}
         srv['id'] = package.id
         srv['name'] = package.name
-        srv['description'] = package.description
+        if len(package.description) > 256:
+            srv['description'] = u"{0} ...".format(package.description[:253])
+        else:
+            srv['description'] = package.description
         srv['bindable'] = True
         srv['tags'] = []
         for tag in package.tags:
