@@ -275,7 +275,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
 
     def new(self, owner, object_store, executor, **kwargs):
         obj = murano_object.MuranoObject(
-            self, owner, object_store, executor, **kwargs)
+            self, helpers.weak_proxy(owner), object_store, executor, **kwargs)
 
         def initializer(__context, **params):
             if __context is None:

@@ -36,8 +36,13 @@ class MistralError(Exception):
 
 @dsl.name('io.murano.system.MistralClient')
 class MistralClient(object):
-    def __init__(self):
-        self._client = self._create_client(CONF.home_region)
+    def __init__(self, this):
+        self._owner = this.find_owner('io.murano.Environment')
+
+    @property
+    def _client(self):
+        region = None if self._owner is None else self._owner['region']
+        return self._create_client(region)
 
     @staticmethod
     @session_local_storage.execution_session_memoize

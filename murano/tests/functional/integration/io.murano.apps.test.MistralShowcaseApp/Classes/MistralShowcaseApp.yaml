@@ -20,7 +20,8 @@ Properties:
 Methods:
   initialize:
     Body:
-      - $this.mistralClient: new(sys:MistralClient)
+      - $environment: $.find(std:Environment).require()
+      - $this.mistralClient: new(sys:MistralClient, $environment)
 
   deploy:
     Body:

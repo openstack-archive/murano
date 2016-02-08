@@ -23,7 +23,7 @@ Methods:
 
   deploy:
     Body:
-      - If: !yaql "not bool($.getAttr(deployed))"
+      - If: not $.getAttr(deployed, false)
         Then:
           - $._environment.reporter.report($this, 'Creating VM ')
           - $securityGroupIngress:

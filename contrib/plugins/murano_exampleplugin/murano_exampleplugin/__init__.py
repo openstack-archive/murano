@@ -20,20 +20,24 @@ import glanceclient
 from oslo_config import cfg as config
 from oslo_log import log as logging
 
-
 from murano.common import auth_utils
-
+from murano.dsl import session_local_storage
 
 CONF = config.CONF
 LOG = logging.getLogger(__name__)
 
 
 class GlanceClient(object):
-    def __init__(self, context):
-        self.client = self.create_glance_client()
+    def __init__(self, this):
+        self._owner = this.find_owner('io.murano.Environment')
+
+    @property
+    def _client(self):
+        region = None if self._owner is None else self._owner['region']
+        return self.create_glance_client(region)
 
     def list(self):
-        images = self.client.images.list()
+        images = self._client.images.list()
         while True:
             try:
                 image = next(images)
@@ -42,7 +46,7 @@ class GlanceClient(object):
                 break
 
     def get_by_name(self, name):
-        images = list(self.client.images.list(filters={"name": name}))
+        images = list(self._client.images.list(filters={"name": name}))
         if len(images) > 1:
             raise AmbiguousNameException(name)
         elif len(images) == 0:
@@ -51,7 +55,7 @@ class GlanceClient(object):
             return GlanceClient._format(images[0])
 
     def get_by_id(self, imageId):
-        image = self.client.images.get(imageId)
+        image = self._client.images.get(imageId)
         return GlanceClient._format(image)
 
     @staticmethod
@@ -65,11 +69,13 @@ class GlanceClient(object):
     def init_plugin(cls):
         cls.CONF = cfg.init_config(CONF)
 
-    def create_glance_client(self):
+    @staticmethod
+    @session_local_storage.execution_session_memoize
+    def create_glance_client(region):
         LOG.debug("Creating a glance client")
         params = auth_utils.get_session_client_parameters(
-            service_type='image', conf=self.CONF)
-        return glanceclient.Client(self.CONF.api_version, **params)
+            service_type='image', conf=CONF, region=region)
+        return glanceclient.Client(CONF.api_version, **params)
 
 
 class AmbiguousNameException(Exception):

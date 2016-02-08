@@ -20,6 +20,8 @@ import itertools
 import re
 import sys
 import uuid
+import weakref
+
 
 import eventlet.greenpool
 import eventlet.greenthread
@@ -552,3 +554,11 @@ def list_value(v):
     if not yaqlutils.is_sequence(v):
         v = [v]
     return v
+
+
+def weak_proxy(obj):
+    if obj is None or isinstance(obj, weakref.ProxyType):
+        return obj
+    if isinstance(obj, weakref.ReferenceType):
+        obj = obj()
+    return weakref.proxy(obj)

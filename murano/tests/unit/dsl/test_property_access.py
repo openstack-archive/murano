@@ -113,7 +113,7 @@ class TestPropertyAccess(test_case.DslTestCase):
             exceptions.NoWriteAccessError,
             self._runner.on(self._multi_derived).
             testModifyUsageTestProperty6)
-        self.assertRaises(
-            exceptions.NoWriteAccessError,
-            self._runner.on(self._multi_derived).
-            testModifyUsageTestProperty7)
+        self.assertEqual(
+            77,
+            self._runner.on(
+                self._multi_derived).testModifyUsageTestProperty7())

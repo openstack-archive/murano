@@ -14,8 +14,9 @@ Properties:
 Methods:
   validateImage:
     Body:
+      - $environment: $.find(std:Environment).require()
       - Try:
-        - $glance: new('io.murano.extensions.mirantis.example.Glance')
+        - $glance: new('io.murano.extensions.mirantis.example.Glance', $environment)
         Catch:
           With: 'murano.dsl.exceptions.NoPackageForClassFound'
           Do:

@@ -200,14 +200,17 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
     @property
     def owner(self):
-        return self.__object.owner
+        owner = self.__object.owner
+        if owner is None:
+            return None
+        return MuranoObjectInterface(owner, self.__executor)
 
     def find_owner(self, type, optional=False):
         if isinstance(type, six.string_types):
             type = helpers.get_class(type)
         elif isinstance(type, dsl_types.MuranoTypeReference):
             type = type.type
-        p = self.owner
+        p = self.__object.owner
         while p is not None:
             if type.is_compatible(p):
                 return MuranoObjectInterface(p, self.__executor)

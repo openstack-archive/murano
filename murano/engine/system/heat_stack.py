@@ -41,7 +41,7 @@ class HeatStackError(Exception):
 
 @dsl.name('io.murano.system.HeatStack')
 class HeatStack(object):
-    def __init__(self, name, description=None):
+    def __init__(self, this, name, description=None):
         self._name = name
         self._template = None
         self._parameters = {}
@@ -51,8 +51,7 @@ class HeatStack(object):
         self._description = description
         self._last_stack_timestamps = (None, None)
         self._tags = ''
-        self._client = self._get_client(CONF.home_region)
-        pass
+        self._owner = this.find_owner('io.murano.Environment')
 
     @staticmethod
     def _create_client(session, region_name):
@@ -61,16 +60,21 @@ class HeatStack(object):
             conf=CONF.heat, session=session)
         return hclient.Client('1', **parameters)
 
+    @property
+    def _client(self):
+        region = None if self._owner is None else self._owner['region']
+        return self._get_client(region)
+
     @staticmethod
     @session_local_storage.execution_session_memoize
     def _get_client(region_name):
         session = auth_utils.get_client_session(conf=CONF.heat)
         return HeatStack._create_client(session, region_name)
 
-    @classmethod
-    def _get_token_client(cls):
+    def _get_token_client(self):
         ks_session = auth_utils.get_token_client_session(conf=CONF.heat)
-        return cls._create_client(ks_session, CONF.home_region)
+        region = None if self._owner is None else self._owner['region']
+        return self._create_client(ks_session, region)
 
     def current(self):
         if self._template is not None:

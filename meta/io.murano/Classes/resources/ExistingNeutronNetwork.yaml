@@ -38,7 +38,8 @@ Properties:
 Workflow:
   initialize:
     Body:
-      - $._netExplorer: new(sys:NetworkExplorer)
+      - $environment: $.find(std:Environment).require()
+      - $._netExplorer: new(sys:NetworkExplorer, $environment)
       - $._networks: null
       - $._subnetworks: null
       - $._ports: null
