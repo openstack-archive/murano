@@ -184,6 +184,23 @@ Methods:
           gateway: $subnet.gateway_ip
           floatingIpNetId: $._getExternalNetId()
 
+  releaseResources:
+    Body:
+      - $template: $.environment.stack.current()
+
+      - $template.resources: $template.resources.delete(format('{0}-{1}', $.name, $.id()))
+      - $template.resources: $template.resources.delete($._getSubnetName())
+
+      - $template.outputs: $template.outputs.delete(format('{0}-id', $.name))
+
+      - If: $.externalRouterId != null
+        Then:
+          $template.resources: $template.resources.delete($._getRouterInterfaceName())
+
+      - $._environment.stack.setTemplate($template)
+      - $._environment.stack.push()
+      - $.openstackId: null
+
 
   _getRouterInterfaceName:
     Body:

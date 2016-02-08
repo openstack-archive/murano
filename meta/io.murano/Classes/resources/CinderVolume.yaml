@@ -129,6 +129,7 @@ Methods:
       - $._environment.stack.setTemplate($template)
       - $._environment.stack.push()
       - $.setAttr(lastTemplate, null)
+      - $.openstackId: null
 
   getRef:
     Body:
