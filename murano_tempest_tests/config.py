@@ -43,11 +43,6 @@ ApplicationCatalogGroup = [
                     "If no such region is found in the service catalog, "
                     "the first found one is used."),
 
-    cfg.StrOpt("identity_version",
-               default="v2",
-               help="Default identity version for "
-                    "REST client authentication."),
-
     cfg.StrOpt("catalog_type",
                default="application-catalog",
                help="Catalog type of Application Catalog."),
@@ -73,11 +68,6 @@ ServiceBrokerGroup = [
     cfg.StrOpt("run_service_broker_tests",
                default=False,
                help="Defines whether run service broker api tests or not"),
-
-    cfg.StrOpt("identity_version",
-               default="v2",
-               help="Default identity version for "
-                    "REST client authentication."),
 
     cfg.StrOpt("catalog_type",
                default="service-broker",

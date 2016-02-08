@@ -136,7 +136,7 @@ function configure_murano {
     #-------------------------
 
     # Setup keystone_authtoken section
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
+    iniset $MURANO_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
     iniset $MURANO_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
     iniset $MURANO_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
     iniset $MURANO_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
@@ -154,7 +154,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE database connection `database_connection_url murano`
 
     # Configure keystone auth url
-    iniset $MURANO_CONF_FILE keystone auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
+    iniset $MURANO_CONF_FILE keystone auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
 
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
@@ -179,7 +179,7 @@ function install_murano_apps() {
                 murano --os-username $OS_USERNAME \
                        --os-password $OS_PASSWORD \
                        --os-tenant-name $OS_PROJECT_NAME \
-                       --os-auth-url http://$KEYSTONE_AUTH_HOST:5000/v2.0 \
+                       --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
                        --murano-url http://127.0.0.1:8082 \
                        package-import \
                        --is-public \
@@ -198,7 +198,7 @@ function configure_service_broker {
     iniset $MURANO_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
     iniset $MURANO_CONF_FILE cfapi bind_host "$MURANO_SERVICE_HOST"
     iniset $MURANO_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
-    iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000/v2.0"
+    iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
 }
 
 
