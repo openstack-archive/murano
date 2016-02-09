@@ -7,11 +7,6 @@
 Using CLI
 =========
 
-This section is under development at the moment and will be available soon.
-
-Manage applications
-~~~~~~~~~~~~~~~~~~~
-
 Manage environments
 ~~~~~~~~~~~~~~~~~~~
 
