@@ -54,7 +54,7 @@ release.
    enduser-guide/quickstart
    enduser-guide/manage_environments
    enduser-guide/manage_applications
-   enduser-guide/log_into_murano_instance
+   enduser-guide/log_in_to_murano_instance
    enduser-guide/use_cli
    enduser-guide/deploying_using_cli
 
