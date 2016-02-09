@@ -77,7 +77,7 @@ Version history
 |         |   support backward compatibility, you need to manually remove     |                   |
 |         |   *name* field from class properties.                             |                   |
 +---------+-------------------------------------------------------------------+-------------------+
-| 2.3     | - Now *password* field supports ``confirmPassword`` flag and      | Mitaka            |
+| 2.3     | - Now *password* field supports ``confirmInput`` flag and         | Mitaka            |
 |         |   validator overloading with single ``regexValidator`` or         |                   |
 |         |   multiple *validators* attribute.                                |                   |
 +---------+-------------------------------------------------------------------+-------------------+
