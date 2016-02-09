@@ -414,8 +414,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         result = req.get_response(self.api)
 
-        self.assertEqual(415, result.status_code)
-        self.assertTrue('Unsupported Content-Type' in result.body)
+        self.assertEqual(406, result.status_code)
+        self.assertTrue('Acceptable response can not be provided'
+                        in result.body)
 
     def test_get_ui_definition(self):
         self._set_policy_rules(
@@ -447,8 +448,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         result = req.get_response(self.api)
 
-        self.assertEqual(415, result.status_code)
-        self.assertTrue('Unsupported Content-Type' in result.body)
+        self.assertEqual(406, result.status_code)
+        self.assertTrue('Acceptable response can not be provided'
+                        in result.body)
 
     def test_get_logo(self):
         self._set_policy_rules(
@@ -481,8 +483,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         result = req.get_response(self.api)
 
-        self.assertEqual(415, result.status_code)
-        self.assertTrue('Unsupported Content-Type' in result.body)
+        self.assertEqual(406, result.status_code)
+        self.assertTrue('Acceptable response can not be provided'
+                        in result.body)
 
     def test_add_public_unauthorized(self):
         self._set_policy_rules({
