@@ -17,9 +17,10 @@
 Network Configuration
 ---------------------
 
-Murano may work in various networking environments and is capable to detect the
-current network configuration and choose the appropriate settings automatically.
-However, some additional actions are required to support advanced scenarios.
+Murano may work in various networking environments and is capable of
+detecting the current network configuration and choosing appropriate
+settings automatically. However, some additional actions are required to
+support advanced scenarios.
 
 
 Nova network support
@@ -39,18 +40,20 @@ by Murano will be joining the same Network.
 Neutron support
 ^^^^^^^^^^^^^^^
 
-If Neutron is installed, Murano enables its advanced networking features that
-give you ability to not care about configuring networks for your application.
+If neutron is installed, murano enables its advanced networking features that
+give you the ability to avoid configuring networks for your application.
 
 By default it will create an isolated network for each environment and join
-all VMs needed by your application to that network. To install and configure application in
-just spawned virtual machine Murano also requires a router connected to the external network.
+all VMs needed by your application to that network. To install and configure
+the application in a newly spawned virtual machine, murano also requires
+a router to be connected to the external network.
 
 
-Automatic Neutron network configuration
+Automatic neutron network configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
 
-To create router automatically, provide the following parameters in config file:
+To create the router automatically, provide the following parameters
+in the config file:
 
 .. code-block:: ini
 
@@ -68,7 +71,8 @@ To figure out the name of the external network, perform the following command:
 
     openstack network list --external
 
-During the first deploy, required networks and router with specified name will be created and set up.
+During the first deployment, the required networks and router with a specified name
+will be created and set up.
 
 Manual neutron network configuration
 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
@@ -103,7 +107,8 @@ Manual neutron network configuration
   .. image:: 4_1.png
 
 
-  If you specify a name other than *murano-default-router*, it will be necessary to change the following settings in the config file:
+  If you specify a name other than *murano-default-router*, it will be necessary
+  to change the following settings in the config file:
 
   .. code-block:: ini
 
