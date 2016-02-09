@@ -66,11 +66,12 @@ Deploying Murano
 
    admin-guide/prepare_lab
    admin-guide/installation
-   admin-guide/policy_enf
+   admin-guide/manage_packages
    admin-guide/manage_images
    admin-guide/manage_categories
    admin-guide/murano_repository
    admin-guide/murano_agent
+   admin-guide/policy_enf
    admin-guide/configure_cloud_foundry_service_broker
    admin-guide/admin_troubleshooting
 
