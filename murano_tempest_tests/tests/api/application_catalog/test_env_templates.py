@@ -14,7 +14,6 @@
 #    under the License.
 
 from tempest.test import attr
-from tempest_lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -126,7 +125,6 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         template = self.alt_client.get_env_template(cloned_template['id'])
         self.assertEqual(name, template['name'])
 
-    @decorators.skip_because(bug="1540709")
     @attr(type='smoke')
     def test_get_public_private_both_env_templates(self):
         name = utils.generate_name('get_public_private_both')
