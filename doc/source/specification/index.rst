@@ -43,6 +43,8 @@ General information
   * 403 ``Forbidden`` - access denied.
   * 404 ``Not Found`` - resource was not found
   * 405 ``Method Not Allowed`` - requested method is not supported for resource.
+  * 406 ``Not Acceptable`` - the requested resource is only capable of generating content not acceptable
+    according to the Accept headers sent in the request.
   * 409 ``Conflict`` - requested method resulted in a conflict with the current state of the resource.
 
 * **Response of POSTs and PUTs**

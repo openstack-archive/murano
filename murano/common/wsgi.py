@@ -306,7 +306,7 @@ class Request(webob.Request):
         """Determine the requested response content-type.
 
         Based on the query extension then the Accept header.
-        Raise UnsupportedContentType exception if we don't find a preference
+        Raise NotAcceptableContentType exception if we don't find a preference
 
         """
         supported_content_types = (supported_content_types or
@@ -324,7 +324,7 @@ class Request(webob.Request):
             bm = self.accept.best_match(supported_content_types)
 
         if not bm:
-            raise exceptions.UnsupportedContentType(content_type=self.accept)
+            raise exceptions.NotAcceptableContentType(content_type=self.accept)
         return bm
 
     def get_content_type(self, allowed_content_types=None):
@@ -416,6 +416,9 @@ class Resource(object):
         except exceptions.UnsupportedContentType:
             msg = _("Unsupported Content-Type")
             return webob.exc.HTTPUnsupportedMediaType(detail=msg)
+        except exceptions.NotAcceptableContentType:
+            msg = _("Acceptable response can not be provided")
+            return webob.exc.HTTPNotAcceptable(detail=msg)
         except exceptions.MalformedRequestBody:
             msg = _("Malformed request body")
             return webob.exc.HTTPBadRequest(explanation=msg)

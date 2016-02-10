@@ -50,6 +50,11 @@ class UnsupportedContentType(OpenstackException):
     msg_fmt = "Unsupported content type %(content_type)s"
 
 
+class NotAcceptableContentType(OpenstackException):
+    msg_fmt = ("Response with content type %(content_type)s "
+               "expected but can not be provided")
+
+
 class MalformedRequestBody(OpenstackException):
     msg_fmt = "Malformed message body: %(reason)s"
 
