@@ -16,8 +16,8 @@
 Environment template API
 ========================
 
-Manage environment template definitions in Murano. It is possible to create, update, delete and deploy into OpenStack by translating
-it into an environment. In addition, applications can be added or delete to the environment template.
+Manage environment template definitions in murano. It is possible to create, update, delete, and deploy into OpenStack by translating
+it into an environment. In addition, applications can be added to or deleted from the environment template.
 
 **Environment Template Properties**
 
