@@ -8,7 +8,6 @@ fixtures>=1.3.1 # Apache-2.0/BSD
 mock>=1.2 # BSD
 nose # LGPL
 oslotest>=1.10.0 # Apache-2.0
-posix-ipc # BSD
 sqlalchemy-migrate>=0.9.6 # Apache-2.0
 tempest-lib>=0.14.0 # Apache-2.0
 testrepository>=0.0.18 # Apache-2.0/BSD
