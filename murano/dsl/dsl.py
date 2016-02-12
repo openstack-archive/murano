@@ -16,10 +16,10 @@ import inspect
 import os.path
 
 import six
-from yaql.language import exceptions as yaql_exc
 from yaql.language import expressions as yaql_expressions
 from yaql.language import utils
 from yaql.language import yaqltypes
+from yaql import yaql_interface
 
 from murano.dsl import constants
 from murano.dsl import dsl_types
@@ -91,7 +91,7 @@ class InterfacesParameterType(yaqltypes.HiddenParameterType,
         return Interfaces(this)
 
 
-class MuranoTypeName(yaqltypes.LazyParameterType, yaqltypes.PythonType):
+class MuranoTypeName(yaqltypes.PythonType):
     def __init__(self, nullable=False, context=None):
         self._context = context
         super(MuranoTypeName, self).__init__(
@@ -170,6 +170,17 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def owner(self):
         return self.__object.owner
 
+    def find_owner(self, type, optional=False):
+        context = helpers.get_context().create_child_context()
+        yaql_engine = helpers.get_yaql_engine(context)
+        context['$1'] = self.object
+        context['$2'] = type
+        expr_str = '$1.find($2)'
+        if not optional:
+            expr_str += '.require()'
+        result = yaql_engine(expr_str).evaluate(context=context)
+        return None if result is None else MuranoObjectInterface(result)
+
     @property
     def type(self):
         return self.__object.type
@@ -219,59 +230,13 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         return '<{0}>'.format(repr(self.object))
 
 
-class YaqlInterface(object):
-    def __init__(self, sender=utils.NO_VALUE):
-        self.__sender = sender
-
-    @property
-    def context(self):
-        return helpers.get_context()
-
-    @property
-    def engine(self):
-        return helpers.get_yaql_engine(self.context)
-
-    @property
-    def sender(self):
-        return self.__sender
-
-    def on(self, sender):
-        return YaqlInterface(sender)
-
-    def __getattr__(self, item):
-        def stub(*args, **kwargs):
-            context = self.context
-            args = tuple(helpers.evaluate(arg, context) for arg in args)
-            kwargs = dict((key, helpers.evaluate(value, context))
-                          for key, value in six.iteritems(kwargs))
-            return to_mutable(
-                context(item, self.engine, self.sender)(*args, **kwargs),
-                self.engine)
-        return stub
-
-    def __call__(self, __expression, *args, **kwargs):
-        context = helpers.get_context().create_child_context()
-        for i, param in enumerate(args):
-            context['$' + str(i + 1)] = helpers.evaluate(param, context)
-        for arg_name, arg_value in six.iteritems(kwargs):
-            context['$' + arg_name] = helpers.evaluate(arg_value, context)
-        parsed = self.engine(__expression)
-        res = parsed.evaluate(context=context)
-        return to_mutable(res, self.engine)
-
-    def __getitem__(self, item):
-        return helpers.get_context()[item]
-
-    def __setitem__(self, key, value):
-        helpers.get_context()[key] = value
-
-
 class Interfaces(object):
     def __init__(self, mpl_object):
         self.__object = mpl_object
 
-    def yaql(self, sender=utils.NO_VALUE):
-        return YaqlInterface(sender)
+    def yaql(self, receiver=utils.NO_VALUE):
+        return yaql_interface.YaqlInterface(
+            helpers.get_context(), helpers.get_yaql_engine(), receiver)
 
     def this(self):
         return self.methods(self.__object)
@@ -319,7 +284,10 @@ class NativeInstruction(object):
         return self.instruction
 
 
-def to_mutable(obj, yaql_engine):
+def to_mutable(obj, yaql_engine=None):
+    if yaql_engine is None:
+        yaql_engine = helpers.get_yaql_engine()
+
     def converter(value, limit_func, engine, rec):
         if isinstance(value, dsl_types.MuranoObject):
             return MuranoObjectInterface(value)
@@ -330,54 +298,22 @@ def to_mutable(obj, yaql_engine):
     return converter(obj, limiter, yaql_engine, converter)
 
 
-class OneOf(yaqltypes.SmartType):
-    def __init__(self, *args, **kwargs):
-        self.nullable = kwargs.pop('nullable', False)
-        super(OneOf, self).__init__(self.nullable)
+class MuranoObjectParameterType(yaqltypes.PythonType):
+    def __init__(self, nullable=False, interface=False):
+        self.interface = interface
+        super(MuranoObjectParameterType, self).__init__(
+            (dsl_types.MuranoObject, MuranoObjectInterface), nullable=nullable)
 
-        self.choices = []
-        for item in args:
-            if isinstance(item, type):
-                item = yaqltypes.PythonType(item)
-            self.choices.append(item)
-
-    def _check_match(self, value, context, engine, *args, **kwargs):
-        for type_to_check in self.choices:
-            check_result = type_to_check.check(value, context, engine,
-                                               *args, **kwargs)
-            if check_result:
-                return type_to_check
-
-    def check(self, value, context, engine, *args, **kwargs):
-        if isinstance(value, yaql_expressions.Constant):
-            if value.value is None:
-                value = None
-        if value is None:
-            return self.nullable
-
-        check_result = self._check_match(value, context, engine,
-                                         *args, **kwargs)
-        if check_result:
-            return True
-        return False
-
-    def convert(self, value, receiver, context, function_spec, engine,
-                *args, **kwargs):
-        if isinstance(value, yaql_expressions.Constant):
-            if value.value is None:
-                value = None
-        if value is None:
-            if self.nullable:
-                return None
-            else:
-                suitable_type = False
-
+    def convert(self, value, *args, **kwargs):
+        result = super(MuranoObjectParameterType, self).convert(
+            value, *args, **kwargs)
+        if result is None:
+            return None
+        if self.interface:
+            if isinstance(result, MuranoObjectInterface):
+                return result
+            return MuranoObjectInterface(result)
         else:
-            suitable_type = self._check_match(value, context, engine,
-                                              *args, **kwargs)
-        if suitable_type:
-            converted_value = suitable_type.convert(value, receiver, context,
-                                                    function_spec, engine,
-                                                    *args, **kwargs)
-            return converted_value
-        raise yaql_exc.ArgumentValueException()
+            if isinstance(result, dsl_types.MuranoObject):
+                return result
+            return result.object

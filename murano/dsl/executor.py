@@ -22,13 +22,13 @@ import eventlet.event
 from oslo_log import log as logging
 import six
 from yaql.language import specs
+from yaql.language import utils
 
 from murano.common.i18n import _LW
 from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import helpers
-from murano.dsl import linked_context
 from murano.dsl import murano_method
 from murano.dsl import object_store
 from murano.dsl.principal_objects import stack_trace
@@ -67,7 +67,7 @@ class MuranoDslExecutor(object):
                       skip_stub=False):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
-        kwargs = helpers.filter_parameters_dict(kwargs)
+        kwargs = utils.filter_parameters_dict(kwargs)
         runtime_version = method.murano_class.package.runtime_version
         yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
         if context is None or not skip_stub:
@@ -177,7 +177,7 @@ class MuranoDslExecutor(object):
     @staticmethod
     def _canonize_parameters(arguments_scheme, args, kwargs):
         arg_names = arguments_scheme.keys()
-        parameter_values = helpers.filter_parameters_dict(kwargs)
+        parameter_values = utils.filter_parameters_dict(kwargs)
         for i, arg in enumerate(args):
             name = arg_names[i]
             parameter_values[name] = arg
@@ -246,7 +246,7 @@ class MuranoDslExecutor(object):
 
     def create_package_context(self, package):
         root_context = self.create_root_context(package.runtime_version)
-        context = linked_context.link(
+        context = helpers.link_contexts(
             root_context,
             self.context_manager.create_package_context(package))
         return context
@@ -254,7 +254,7 @@ class MuranoDslExecutor(object):
     def create_class_context(self, murano_class):
         package_context = self.create_package_context(
             murano_class.package)
-        context = linked_context.link(
+        context = helpers.link_contexts(
             package_context,
             self.context_manager.create_class_context(
                 murano_class)).create_child_context()
@@ -263,7 +263,7 @@ class MuranoDslExecutor(object):
 
     def create_object_context(self, obj, caller_context=None):
         class_context = self.create_class_context(obj.type)
-        context = linked_context.link(
+        context = helpers.link_contexts(
             class_context, self.context_manager.create_object_context(
                 obj)).create_child_context()
         context[constants.CTX_THIS] = obj.real_this

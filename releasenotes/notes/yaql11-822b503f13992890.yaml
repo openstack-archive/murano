@@ -1,0 +1,8 @@
+---
+features:
+  - Murano was migrated to yaql 1.1
+  - New format MuranoPL/1.3 can be specified in manifest files.
+    MuranoPL/1.3 is identical to MuranoPL/1.2 but except for the fact
+    that MuranoPL/1.3 packages cannot be imported to earlier Murano versions.
+    Thus applications that use new features of yaql 1.1 should use this format
+    version.

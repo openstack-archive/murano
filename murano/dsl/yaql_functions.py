@@ -22,33 +22,32 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import linked_context
 
 
-@specs.parameter('value', dsl_types.MuranoObject)
-def id_(value):
-    return value.object_id
+@specs.parameter('object_', dsl.MuranoObjectParameterType())
+def id_(object_):
+    return object_.object_id
 
 
-@specs.parameter('value', dsl_types.MuranoObject)
+@specs.parameter('object_', dsl.MuranoObjectParameterType())
 @specs.parameter('type__', dsl.MuranoTypeName())
 @specs.parameter('version_spec', yaqltypes.String(True))
-def cast(context, value, type__, version_spec=None):
+def cast(context, object_, type__, version_spec=None):
     return helpers.cast(
-        value, type__.murano_class.name,
+        object_, type__.murano_class.name,
         version_spec or helpers.get_type(context))
 
 
 @specs.parameter('__type_name', dsl.MuranoTypeName())
 @specs.parameter('__extra', utils.MappingType)
-@specs.parameter('__owner', dsl_types.MuranoObject)
+@specs.parameter('__owner', dsl.MuranoObjectParameterType(nullable=True))
 @specs.parameter('__object_name', yaqltypes.String(True))
 def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         **parameters):
     object_store = helpers.get_object_store(__context)
     new_context = __context.create_child_context()
     for key, value in six.iteritems(parameters):
-        if helpers.is_keyword(key):
+        if utils.is_keyword(key):
             new_context[key] = value
     return __type_name.murano_class.new(
         __owner, object_store, name=__object_name)(new_context, **parameters)
@@ -57,31 +56,31 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
 @specs.parameter('type_name', dsl.MuranoTypeName())
 @specs.parameter('parameters', utils.MappingType)
 @specs.parameter('extra', utils.MappingType)
-@specs.parameter('owner', dsl_types.MuranoObject)
+@specs.parameter('owner', dsl.MuranoObjectParameterType(nullable=True))
 @specs.parameter('object_name', yaqltypes.String(True))
 @specs.name('new')
 def new_from_dict(type_name, context, parameters,
                   owner=None, object_name=None, extra=None):
     return new(context, type_name, owner, object_name, extra,
-               **helpers.filter_parameters_dict(parameters))
+               **utils.filter_parameters_dict(parameters))
 
 
-@specs.parameter('sender', dsl_types.MuranoObject)
+@specs.parameter('object_', dsl.MuranoObjectParameterType())
 @specs.parameter('func', yaqltypes.Lambda())
-def super_(context, sender, func=None):
+def super_(context, object_, func=None):
     cast_type = helpers.get_type(context)
     if func is None:
-        return [sender.cast(type) for type in cast_type.parents(
-            sender.real_this.type)]
-    return six.moves.map(func, super_(context, sender))
+        return [object_.cast(type) for type in cast_type.parents(
+            object_.real_this.type)]
+    return six.moves.map(func, super_(context, object_))
 
 
-@specs.parameter('value', dsl_types.MuranoObject)
+@specs.parameter('object_', dsl.MuranoObjectParameterType())
 @specs.parameter('func', yaqltypes.Lambda())
-def psuper(context, value, func=None):
+def psuper(context, object_, func=None):
     if func is None:
-        return super_(context, value)
-    return helpers.parallel_select(super_(context, value), func)
+        return super_(context, object_)
+    return helpers.parallel_select(super_(context, object_), func)
 
 
 @specs.extension_method
@@ -91,7 +90,7 @@ def require(value):
     return value
 
 
-@specs.parameter('obj', dsl_types.MuranoObject)
+@specs.parameter('obj', dsl.MuranoObjectParameterType())
 @specs.parameter('murano_class_ref', dsl.MuranoTypeName())
 @specs.extension_method
 def find(obj, murano_class_ref):
@@ -108,35 +107,35 @@ def sleep_(seconds):
     eventlet.sleep(seconds)
 
 
-@specs.parameter('object_', dsl_types.MuranoObject)
+@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
 def type_(object_):
-    return object_.type.name
+    return None if object_ is None else object_.type.name
 
 
-@specs.parameter('object_', dsl_types.MuranoObject)
+@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
 def name(object_):
-    return object_.name
+    return None if object_ is None else object_.name
 
 
-@specs.parameter('obj', dsl_types.MuranoObject)
+@specs.parameter('obj', dsl.MuranoObjectParameterType())
 @specs.parameter('property_name', yaqltypes.Keyword())
 @specs.name('#operator_.')
 def obj_attribution(context, obj, property_name):
     return obj.get_property(property_name, context)
 
 
-@specs.parameter('sender', dsl_types.MuranoObject)
+@specs.parameter('receiver', dsl.MuranoObjectParameterType())
 @specs.parameter('expr', yaqltypes.Lambda(method=True))
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
-def op_dot(context, sender, expr, operator):
+def op_dot(context, receiver, expr, operator):
     executor = helpers.get_executor(context)
-    type_context = executor.context_manager.create_class_context(sender.type)
-    obj_context = executor.context_manager.create_object_context(sender)
-    ctx2 = linked_context.link(
-        linked_context.link(context, type_context),
+    type_context = executor.context_manager.create_class_context(receiver.type)
+    obj_context = executor.context_manager.create_object_context(receiver)
+    ctx2 = helpers.link_contexts(
+        helpers.link_contexts(context, type_context),
         obj_context)
-    return operator(ctx2, sender, expr)
+    return operator(ctx2, receiver, expr)
 
 
 @specs.parameter('prefix', yaqltypes.Keyword())
@@ -150,22 +149,8 @@ def ns_resolve(context, prefix, name):
                 prefix + ':' + name), context))
 
 
-@specs.parameter('obj1', dsl_types.MuranoObject, nullable=True)
-@specs.parameter('obj2', dsl_types.MuranoObject, nullable=True)
-@specs.name('*equal')
-def equal(obj1, obj2):
-    return obj1 is obj2
-
-
-@specs.parameter('obj1', dsl_types.MuranoObject, nullable=True)
-@specs.parameter('obj2', dsl_types.MuranoObject, nullable=True)
-@specs.name('*not_equal')
-def not_equal(obj1, obj2):
-    return obj1 is not obj2
-
-
-@specs.parameter('obj', dsl_types.MuranoObject, nullable=True)
-@specs.parameter('type_', dsl.MuranoTypeName(), nullable=False)
+@specs.parameter('obj', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('type_', dsl.MuranoTypeName())
 @specs.name('#operator_is')
 def is_instance_of(obj, type_):
     if obj is None:
@@ -188,8 +173,6 @@ def register(context, runtime_version):
     context.register_function(obj_attribution)
     context.register_function(op_dot)
     context.register_function(ns_resolve)
-    context.register_function(equal)
-    context.register_function(not_equal)
     context.register_function(is_instance_of)
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:

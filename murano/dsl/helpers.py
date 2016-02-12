@@ -15,7 +15,6 @@
 import collections
 import contextlib
 import functools
-import re
 import string
 import sys
 import uuid
@@ -24,7 +23,7 @@ import eventlet.greenpool
 import eventlet.greenthread
 import semantic_version
 import six
-from six.moves import reduce
+from yaql.language import contexts
 import yaql.language.exceptions
 import yaql.language.expressions
 from yaql.language import utils as yaqlutils
@@ -34,8 +33,6 @@ from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
-
-KEYWORD_REGEX = re.compile(r'^(?!__)\b[^\W\d]\w*\b$')
 
 _threads_sequencer = 0
 
@@ -211,10 +208,6 @@ def get_class(name, context=None):
     return murano_class.package.find_class(name)
 
 
-def is_keyword(text):
-    return KEYWORD_REGEX.match(text) is not None
-
-
 def get_current_thread_id():
     global _threads_sequencer
 
@@ -334,14 +327,6 @@ def is_instance_of(obj, class_name, pov_or_version_spec=None):
         return False
 
 
-def filter_parameters_dict(parameters):
-    parameters = parameters.copy()
-    for name in parameters.keys():
-        if not is_keyword(name):
-            del parameters[name]
-    return parameters
-
-
 def memoize(func):
     cache = {}
 
@@ -395,7 +380,7 @@ def normalize_version_spec(version_spec):
             for op, funcs in transformations[item.kind]:
                 new_parts.append('{0}{1}'.format(
                     op,
-                    reduce(lambda v, f: f(v), funcs, item.spec)
+                    six.moves.reduce(lambda v, f: f(v), funcs, item.spec)
                 ))
     if not new_parts:
         return semantic_version.Spec('*')
@@ -421,3 +406,9 @@ def breakdown_spec_to_query(normalized_spec):
             res.append("%s:%s" % (semver_to_api_map[item.kind],
                                   item.spec))
     return res
+
+
+def link_contexts(parent_context, context):
+    if not context:
+        return parent_context
+    return contexts.LinkedContext(parent_context, context)

@@ -22,7 +22,6 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import linked_context
 from murano.dsl import yaql_integration
 
 
@@ -59,7 +58,7 @@ class MockContextManager(engine.ContextManager):
 
         mock_context = self._create_new_ctx_for_class(murano_class.name)
         if mock_context:
-            result_context = linked_context.link(
+            result_context = helpers.link_contexts(
                 original_context, mock_context).create_child_context()
         else:
             result_context = original_context
@@ -71,7 +70,7 @@ class MockContextManager(engine.ContextManager):
 
         mock_context = self._create_new_ctx_for_obj(murano_obj.type.name)
         if mock_context:
-            result_context = linked_context.link(
+            result_context = helpers.link_contexts(
                 original_context, mock_context).create_child_context()
         else:
             result_context = original_context
@@ -99,7 +98,7 @@ def with_original(context, **kwargs):
 
 
 @specs.parameter('target',
-                 dsl.OneOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+                 yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
 @specs.parameter('target_method', yaqltypes.String())
 @specs.parameter('mock_object', dsl_types.MuranoObject)
 @specs.parameter('mock_name', yaqltypes.String())
@@ -130,7 +129,7 @@ def inject_method_with_str(context, target, target_method,
 
 
 @specs.parameter('target',
-                 dsl.OneOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
+                 yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl_types.MuranoObject))
 @specs.parameter('target_method', yaqltypes.String())
 @specs.parameter('expr', yaqltypes.Lambda(with_context=True))
 def inject_method_with_yaql_expr(context, target, target_method, expr):

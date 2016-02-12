@@ -40,9 +40,8 @@ class TestExecutionPlan(base.MuranoTestCase):
 
         object_interface = mock.Mock(spec=murano_object.MuranoObject)
         object_interface.id = '1234'
+        object_interface.find_owner = lambda *args, **kwargs: object_interface
 
-        agent.Agent._get_environment = \
-            lambda this, iface, host: object_interface
         self.agent = agent.Agent(None, object_interface)
         self.resources = mock.Mock(spec=resource_manager.ResourceManager)
         self.resources.string.return_value = 'text'
