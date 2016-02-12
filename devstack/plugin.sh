@@ -31,22 +31,20 @@ function create_murano_accounts() {
 
     create_service_user "murano"
 
-    if [[ "$KEYSTONE_CATALOG_BACKEND" = 'sql' ]]; then
-        get_or_create_service "murano" "application-catalog" "Application Catalog Service"
-        get_or_create_endpoint "application-catalog" \
-            "$REGION_NAME" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+    get_or_create_service "murano" "application-catalog" "Application Catalog Service"
+    get_or_create_endpoint "application-catalog" \
+        "$REGION_NAME" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
 
-        if is_service_enabled murano-cfapi; then
-        get_or_create_service "murano-cfapi" "service-broker" "Murano CloudFoundry Service Broker"
-        get_or_create_endpoint "service-broker" \
-            "$REGION_NAME" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
-            "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT"
-        fi
+    if is_service_enabled murano-cfapi; then
+    get_or_create_service "murano-cfapi" "service-broker" "Murano CloudFoundry Service Broker"
+    get_or_create_endpoint "service-broker" \
+        "$REGION_NAME" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT" \
+        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_CFAPI_SERVICE_PORT"
     fi
 }
 
