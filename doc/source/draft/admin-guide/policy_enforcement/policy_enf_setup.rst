@@ -41,17 +41,17 @@ properly.
    * ``murano`` policy
 
       It is created by the Congress` murano datasource driver, which is a part
-      of Congress. Configure it for the OpenStack tenant where you plan to
+      of Congress. Configure it for the OpenStack project (tenant) where you plan to
       deploy your Murano application. Datasource driver retrieves deployed
       Murano environments and populates Congress' murano policy tables.
       See :ref:`policyenf_dev` for details.
 
       Remove the existing ``murano`` policy and create a new ``murano`` policy
-      configured for the ``demo`` tenant, by running:
+      configured for the ``demo`` project, by running:
 
       .. code-block:: console
 
-         # remove default murano datasource configuration, because it is using 'admin' tenant. We need 'demo' tenant to be used.
+         # remove default murano datasource configuration, because it is using 'admin' project. We need 'demo' project to be used.
          openstack congress datasource delete murano
          openstack congress datasource create murano murano --config username="$OS_USERNAME" --config tenant_name="demo"  --config password="$OS_PASSWORD" --config auth_url="$OS_AUTH_URL"
 

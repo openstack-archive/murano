@@ -89,7 +89,7 @@ Application lifecycle management
 #. Isolation:
 
    * Applications in the same environments can easily interact with
-     each other, though applications between different tenants are isolated.
+     each other, though applications between different projects (tenants) are isolated.
 
 
 

@@ -39,7 +39,7 @@ Transformed to these rules:
 - ``murano:objects+("83bff5ac", "tenant_id", "io.murano.Environment")``
 - ``murano:objects+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
 
-.. note:: The owner of the environment is a tenant
+.. note:: The owner of the environment is a project
 
 
 ``murano:properties(object_id, property_name, property_value)``

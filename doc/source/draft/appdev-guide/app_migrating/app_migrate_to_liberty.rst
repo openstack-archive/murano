@@ -196,7 +196,7 @@ their VM: to a new network created during the deployment, or to an already
 existing network.
 Dynamic UI now has a new type of field - ``NetworkChoiseField``. This field
 provides a selection of networks and their subnetworks as a dropdown populated
-with those which are available to the current tenant.
+with those which are available to the current project (tenant).
 
 To use this feature, you should make the following updates in the Dynamic UI of
 an application:

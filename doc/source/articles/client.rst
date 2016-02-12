@@ -37,9 +37,9 @@ Using CLI client
 ================
 
 In order to use the CLI, you must provide your OpenStack username, password,
-tenant name or id, and auth endpoint. Use the corresponding arguments
-(``--os-username``, ``--os-password``, ``--os-tenant-name`` or
-``--os-tenant-id``, ``--os-auth-url`` and ``--murano-url``) or
+project name or id, and auth endpoint. Use the corresponding arguments
+(``--os-username``, ``--os-password``, ``--os-project-name`` or
+``--os-project-id``, ``--os-auth-url`` and ``--murano-url``) or
 set corresponding environment variables::
 
     export OS_USERNAME=user
