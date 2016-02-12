@@ -38,8 +38,8 @@ Getting Started
 Trial versions of Windows 2008 R2 / 2012 R2 used by default. You could use these images for 180 days without activation.
 You could download evaluation versions from official Microsoft website:
 
-* `[Windows 2012 R2 - download] <https://www.microsoft.com/en-us/download/details.aspx?id=11093>`_
-* `[Windows 2008 R2 - download] <https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2012-r2>`_
+* `[Windows 2012 R2 - download] <https://www.microsoft.com/en-us/evalcenter/evaluate-windows-server-2012-r2>`_
+* `[Windows 2008 R2 - download] <https://www.microsoft.com/en-us/download/details.aspx?id=11093>`_
 
 System requirements
 ~~~~~~~~~~~~~~~~~~~
