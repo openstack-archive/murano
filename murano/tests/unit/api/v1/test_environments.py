@@ -178,7 +178,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                       result_msg)
 
     def test_too_long_environment_name_create(self):
-        """Check that an too long env name results in an HTTPBadResquest."""
+        """Check that a too long env name results in an HTTPBadResquest."""
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
@@ -271,6 +271,30 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected['acquired_by'] = None
 
         self.assertEqual(expected, json.loads(result.body))
+
+    def test_update_environment_with_invalid_name(self):
+        """Check that update an invalid env name results in
+        an HTTPBadResquest.
+        """
+        self._set_policy_rules(
+            {'update_environment': '@'}
+        )
+
+        self._create_fake_environment('env1', '111')
+
+        self.expect_policy_check('update_environment',
+                                 {'environment_id': '111'})
+
+        body = {
+            'name': '  '
+        }
+        req = self._put('/environments/111', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = ('Environment name must contain at least one '
+               'non-white space symbol')
+        self.assertIn(msg, result_msg)
 
     def test_update_environment_with_existing_name(self):
         self._set_policy_rules(
