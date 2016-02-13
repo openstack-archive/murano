@@ -33,17 +33,14 @@ class TestRepositorySanity(base.BaseApplicationCatalogTest):
         abs_archive_path, dir_with_archive, archive_name = \
             utils.prepare_package(application_name)
         self.addCleanup(os.remove, abs_archive_path)
-        packages_list = self.application_catalog_client.get_list_packages()
         package = self.application_catalog_client.upload_package(
             application_name, archive_name, dir_with_archive,
             {"categories": [], "tags": [], 'is_public': False})
-        updated_packages_list = self.application_catalog_client.\
-            get_list_packages()
-        self.assertEqual(len(packages_list) + 1, len(updated_packages_list))
+        package_list = self.application_catalog_client.get_list_packages()
+        self.assertIn(package, package_list)
         self.application_catalog_client.delete_package(package['id'])
-        updated_packages_list = self.application_catalog_client.\
-            get_list_packages()
-        self.assertEqual(len(packages_list), len(updated_packages_list))
+        package_list = self.application_catalog_client.get_list_packages()
+        self.assertNotIn(package, package_list)
 
 
 class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
