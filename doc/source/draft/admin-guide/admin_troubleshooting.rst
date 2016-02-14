@@ -164,7 +164,7 @@ something is wrong with nova-scheduler.
 
 Find the ``external_network`` parameter in the *networking* section of
 murano configuration file and verify that the specified external network does exist
-through Web UI or by executing the :command:`neutron net-external-list` command.
+through Web UI or by executing the :command:`openstack network list --external` command.
 
 **Deployment log in the UI contains incomplete reports**
 
