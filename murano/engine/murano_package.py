@@ -36,14 +36,33 @@ class MuranoPackage(murano_package.MuranoPackage):
         )
 
     def get_class_config(self, name):
-        json_config = os.path.join(CONF.engine.class_configs, name + '.json')
-        if os.path.exists(json_config):
-            with open(json_config) as f:
-                return json.load(f)
-        yaml_config = os.path.join(CONF.engine.class_configs, name + '.yaml')
-        if os.path.exists(yaml_config):
-            with open(yaml_config) as f:
-                return yaml.safe_load(f)
+        version_parts = (
+            str(self.version.major),
+            str(self.version.minor),
+            str(self.version.patch)
+        )
+        num_parts = len(version_parts)
+
+        for i in range(num_parts + 1):
+            for ext in ('json', 'yaml'):
+                if i == num_parts:
+                    if version_parts[0] == '0':
+                        version_suffix = ''
+                    else:
+                        continue
+                else:
+                    version_suffix = '-' + '.'.join(
+                        version_parts[:num_parts - i])
+                file_name = '{name}{version}.{extension}'.format(
+                    name=name, version=version_suffix, extension=ext)
+                path = os.path.join(CONF.engine.class_configs, file_name)
+                if os.path.exists(path):
+                    if ext == 'json':
+                        with open(path) as f:
+                            return json.load(f)
+                    else:
+                        with open(path) as f:
+                            return yaml.safe_load(f)
         return {}
 
     def get_resource(self, name):
