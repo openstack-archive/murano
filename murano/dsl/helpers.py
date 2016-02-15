@@ -290,6 +290,9 @@ def cast(obj, murano_class, pov_or_version_spec=None):
         pov_or_version_spec = pov_or_version_spec.package
     elif isinstance(pov_or_version_spec, six.string_types):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
+
+    if isinstance(murano_class, dsl_types.MuranoClassReference):
+        murano_class = murano_class.murano_class
     if isinstance(murano_class, dsl_types.MuranoClass):
         if pov_or_version_spec is None:
             pov_or_version_spec = parse_version_spec(murano_class.version)
