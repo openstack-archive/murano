@@ -314,6 +314,30 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(409, result.status_code)
 
+    def test_too_long_environment_name_update(self):
+        """Check that update a too long env name results in
+        an HTTPBadResquest.
+        """
+        self._set_policy_rules(
+            {'update_environment': '@'}
+        )
+
+        self._create_fake_environment('env1', '111')
+
+        self.expect_policy_check('update_environment',
+                                 {'environment_id': '111'})
+        new_name = 'env1' * 64
+
+        body = {
+            'name': new_name
+        }
+        req = self._put('/environments/111', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        self.assertIn('Environment name should be 255 characters maximum',
+                      result_msg)
+
     def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call."""
         result = self._test_delete_or_abandon(abandon=False)
