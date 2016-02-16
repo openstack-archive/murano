@@ -305,6 +305,9 @@ Methods:
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
       - $.setAttr(fipAssigned, false)
+      - $.openstackId: null
+      - $.ipAddresses: []
+      - $.floatingIpAddress: null
 
   validateBootSource:
     Body:

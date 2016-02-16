@@ -26,12 +26,13 @@ Properties:
     Contract: $.string()
     Usage: Out
 
-Workflow:
+Methods:
   initialize:
     Body:
       - $.environment: $.find(Environment).require()
       - $.network: $.environment.defaultNetworks.environment
       - $.instances: []
+
 
   deploy:
     Body:
@@ -59,20 +60,20 @@ Workflow:
           - If: $.assignFloatingIp
             Then:
               - $extNetId: $networkData.floatingIpNetId
-              - $fip_name: format('Shared-Floating-ip-{0}', $.id())
+              - $fipName: format('Shared-Floating-ip-{0}', $.id())
 
               - $template:
                   resources:
-                    $fip_name:
+                    $fipName:
                       type: 'OS::Neutron::FloatingIP'
                       properties:
                         floating_network_id: $extNetId
                         port_id:
                           get_resource: $aapPortName
                   outputs:
-                    $fip_name + '-val':
+                    $fipName + '-val':
                       value:
-                        get_attr: [$fip_name, floating_ip_address]
+                        get_attr: [$fipName, floating_ip_address]
                       description: Shared Floating IP assigned
               - $.environment.stack.updateTemplate($template)
 
@@ -95,6 +96,16 @@ Workflow:
           get_attr: [$aapPortName, fixed_ips, 0, ip_address]
 
 
-
-
-
+  releaseResources:
+    Body:
+      - $template: $.environment.stack.current()
+      - $template.resources: $template.resources.delete(format('AllowedAddressPairsPort-{0}', id($)))
+      - $template.outputs: $template.outputs.delete(format('AllowedAddressPairsPort-{0}-virtualIp', id($)))
+      - If: $.assignFloatingIp
+        Then:
+          - $template.resources: $template.resources.delete(format('Shared-Floating-ip-{0}', id($)))
+          - $template.outputs: $template.outputs.delete(format('Shared-Floating-ip-{0}-val', id($)))
+      - $._environment.stack.setTemplate($template)
+      - $._environment.stack.push()
+      - $.floatingIpAddress: null
+      - $.virtualIp: null
