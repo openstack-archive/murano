@@ -66,7 +66,7 @@ To figure out the name of the external network, perform the following command:
 
 .. code-block:: console
 
-    neutron net-external-list
+    openstack network list --external
 
 During the first deploy, required networks and router with specified name will be created and set up.
 
@@ -77,7 +77,7 @@ Manual neutron network configuration
 
  * First, you need to check for existence of external networks. Login as admin and go to
    *Project -> Network -> Network Topology*. And check network type in network details at *Admin -> Networks -> Network name* page.
-   The same action can be done via CLI by running `neutron net-external-list`. To create new external network examine `OpenStack documentation <http://docs.openstack.org/kilo/install-guide/install/apt/content/neutron_initial-external-network.html>`_.
+   The same action can be done via CLI by running `openstack network list --external`. To create new external network examine `OpenStack documentation <http://docs.openstack.org/cli-reference/openstack.html#openstack-network-create>`_.
 
   .. image:: 1.png
      :align: left
