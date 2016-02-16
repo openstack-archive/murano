@@ -1,0 +1,13 @@
+---
+features:
+  - "Class configs are now also versioned. For class foo.bar version 1.2.3
+    the following file names will be examined:
+    foo.bar-1.2.3.json
+    foo.bar-1.2.3.yaml
+    foo.bar-1.2.json
+    foo.bar-1.2.yaml
+    foo.bar-1.json
+    foo.bar-1.yaml
+    In addition for classes of version 0.x.y file name without version suffix
+    are also examined as a last attempt so the backward compatibility is
+    retained"
