@@ -164,6 +164,15 @@ def not_equal(obj1, obj2):
     return obj1 is not obj2
 
 
+@specs.parameter('obj', dsl_types.MuranoObject, nullable=True)
+@specs.parameter('type_', dsl.MuranoTypeName(), nullable=False)
+@specs.name('#operator_is')
+def is_instance_of(obj, type_):
+    if obj is None:
+        return False
+    return type_.murano_class.is_compatible(obj)
+
+
 def register(context, runtime_version):
     context.register_function(cast)
     context.register_function(new)
@@ -181,6 +190,7 @@ def register(context, runtime_version):
     context.register_function(ns_resolve)
     context.register_function(equal)
     context.register_function(not_equal)
+    context.register_function(is_instance_of)
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context2 = context.create_child_context()

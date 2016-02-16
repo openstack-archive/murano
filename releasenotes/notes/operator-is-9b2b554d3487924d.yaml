@@ -1,0 +1,4 @@
+---
+features:
+  - New operator *is* was added to MuranoPL.
+    Now it is possible to test if MuranoPL object is of particular type.

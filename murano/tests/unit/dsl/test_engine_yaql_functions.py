@@ -242,3 +242,7 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
 
     def test_type(self):
         self.assertEqual('TestEngineFunctions' * 2, self._runner.testType())
+
+    def test_is_operator(self):
+        self.assertTrue(self._runner.testIsOperator())
+        self.assertFalse(self._runner.testNegativeIsOperator())

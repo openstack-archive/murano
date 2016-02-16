@@ -46,10 +46,16 @@ ENGINE_12_OPTIONS = {
 }
 
 
-def _create_engine(runtime_version):
-    engine_factory = factory.YaqlFactory()
+def _add_operators(engine_factory):
+    engine_factory.insert_operator(
+        '>', True, 'is', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, False)
     engine_factory.insert_operator(
         '.', True, ':', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, True)
+
+
+def _create_engine(runtime_version):
+    engine_factory = factory.YaqlFactory()
+    _add_operators(engine_factory=engine_factory)
     options = (ENGINE_10_OPTIONS
                if runtime_version <= constants.RUNTIME_VERSION_1_1
                else ENGINE_12_OPTIONS)

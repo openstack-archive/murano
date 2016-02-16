@@ -1,3 +1,6 @@
+Namespaces:
+  sys: io.murano.system
+
 Name: TestEngineFunctions
 
 Methods:
@@ -278,3 +281,24 @@ Methods:
   testType:
     Body:
       Return: type($) + $.type()
+
+  testIsOperator:
+    Body:
+      - $logger: new(sys:Logger)
+      - $.innerVariable: new(sys:Logger)
+      - $derivedClassObject: new(DerivedFrom2Classes)
+      - Return: $logger is sys:Logger
+                and $ is 'TestEngineFunctions'
+                and $.innerVariable is 'io.murano.system.Logger'
+                and $derivedClassObject is ParentClass1
+                and $derivedClassObject is ParentClass2
+
+  testNegativeIsOperator:
+    Arguments:
+      - nullArg:
+          Contract: $.class(sys:Logger)
+          Default: null
+    Body:
+      - $nullVariable: null
+      - Return: $nullVariable is sys:Logger
+                or $nullArg is sys:Logger
