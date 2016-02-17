@@ -160,7 +160,7 @@ murano applications repository:
    # murano --murano-repo-url=http://storage.apps.openstack.org \
    package-import io.murano.databases.MySql
 
-This command supports an optional ``--version`` parameter that instructs
+This command supports an optional ``--package-version`` parameter that instructs
 murano client to download a specified package version.
 
 The :command:`package-import` command inspects package requirements

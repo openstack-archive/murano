@@ -10,8 +10,6 @@ Murano command-line client
 The ``murano`` client is the command-line
 interface (CLI) for the Application catalog API and its extensions.
 
-This chapter documents ``murano`` version ``0.6.1``.
-
 For help on a specific ``murano`` command, enter:
 
 .. code-block:: console
@@ -547,7 +545,7 @@ murano package-import
 .. code-block::console
 
  usage: murano package-import \[-c \[<CAT1 CAT2 CAT3> \[<CAT1 CAT2 CAT3> ...]]]
- \[--is-public] \[--version VERSION]
+ \[--is-public] \[--package-version VERSION]
  \[--exists-action {a,s,u}]
  <FILE> \[<FILE> ...]
 
@@ -569,7 +567,7 @@ Optional arguments
 **--is-public**
     Make the package available for user from other tenants
 
-**--version VERSION**
+**--package-version VERSION**
     Version of the package to use from repository (ignored when importing with
     multiple packages)
 

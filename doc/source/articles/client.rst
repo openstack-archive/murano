@@ -101,8 +101,9 @@ running::
     murano --murano-repo-url="http://example.com/" package-import io.app.foo
 
 would access specified repository and download app ``io.app.foo`` from it's
-app directory. This option supports an optional ``--version`` parameter, that
-would instruct murano client to download package of a specific version.
+app directory. This option supports an optional ``--package-version``
+parameter, that would instruct murano client to download package of a
+specific version.
 
 ``package-import`` inspects package requirements specified in the package's
 manifest under `Require` section and attempts to import them from
