@@ -45,7 +45,7 @@ Fedora
 
 .. note::
 
-    Fedora support wasn't thoroughly tested. We do not guarantee that Murano
+    Fedora support wasn't thoroughly tested. We do not guarantee that murano
     will work on Fedora.
 ..
 
@@ -77,17 +77,17 @@ Install tox
 Install And Configure Database
 ------------------------------
 
-Murano can use various database types on backend. For development purposes
+Murano can use various database types on the back end. For development purposes
 SQLite is enough in most cases. For production installations you should use
 MySQL or PostgreSQL databases.
 
 .. warning::
 
-    Although Murano could use PostgreSQL database on backend, it wasn't
+    Although murano could use a PostgreSQL database on the back end, it wasn't
     thoroughly tested and should be used with caution.
 ..
 
-To use MySQL database you should install it and create an empty database first:
+To use a MySQL database you should install it and create an empty database first:
 
 .. code-block:: console
 
@@ -115,7 +115,7 @@ Install the API service and Engine
         mkdir ~/murano
     ..
 
-#.  Clone the Murano git repository to the management server.
+#.  Clone the murano git repository to the management server.
 
     .. code-block:: console
 
@@ -123,11 +123,11 @@ Install the API service and Engine
         git clone git://git.openstack.org/openstack/murano
     ..
 
-#.  Set up Murano config file
+#.  Set up the murano config file
 
-    Murano has common config file for API and Engine services.
+    Murano has a common config file for API and Engine services.
 
-    First, generate sample configuration file, using tox
+    First, generate a sample configuration file, using tox
 
     .. code-block:: console
 
@@ -252,7 +252,7 @@ Install the API service and Engine
 Register in Keystone
 --------------------
 
-To make murano API available to all OpenStack users, you need to register the
+To make the murano API available to all OpenStack users, you need to register the
 Application Catalog service within the Identity service.
 
 #. Add ``application-catalog`` service:
@@ -391,10 +391,10 @@ Install Murano Dashboard
 Import Murano Applications
 ==========================
 
-Applications are needed to be imported
-to fill the catalog. It can be done via dashboard, but also possible via CLI:
+Applications need to be imported
+to fill the catalog. This can be done via the dashboard, and via CLI:
 
-1.  Clone Murano Apps repository.
+1.  Clone the murano apps repository.
 
     .. code-block:: console
 
