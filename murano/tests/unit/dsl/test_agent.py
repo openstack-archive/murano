@@ -74,7 +74,8 @@ class TestAgent(test_case.DslTestCase):
         m = mock.MagicMock()
         # Necessary because otherwise there'll be an Environment lookup
         agent_cls = 'murano.engine.system.agent.Agent'
-        with mock.patch(agent_cls + '._get_environment') as f:
+        obj_if_cls = 'murano.dsl.dsl.MuranoObjectInterface'
+        with mock.patch(obj_if_cls + '.find_owner') as f:
             f.return_value = m
             a = self.runner.testAgent().extension
             self.assertTrue(a.enabled)

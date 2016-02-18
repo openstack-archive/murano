@@ -46,14 +46,10 @@ class Agent(object):
                       'by the server configuration')
             return
 
-        self._environment = self._get_environment(interfaces, host)
+        self._environment = host.find_owner('io.murano.Environment')
         self._enabled = True
         self._queue = str('e%s-h%s' % (
             self._environment.id, host.id)).lower()
-
-    def _get_environment(self, interfaces, host):
-        return interfaces.yaql()(
-            "$.find('io.murano.Environment').require()", host)
 
     @property
     def enabled(self):

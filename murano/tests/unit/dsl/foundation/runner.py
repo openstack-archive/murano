@@ -21,7 +21,7 @@ from murano.dsl import context_manager
 from murano.dsl import dsl
 from murano.dsl import dsl_exception
 from murano.dsl import executor
-from murano.dsl import linked_context
+from murano.dsl import helpers
 from murano.dsl import murano_object
 from murano.dsl import serializer
 from murano.dsl import yaql_integration
@@ -37,7 +37,7 @@ class TestContextManager(context_manager.ContextManager):
     def create_root_context(self, runtime_version):
         root_context = super(TestContextManager, self).create_root_context(
             runtime_version)
-        context = linked_context.link(
+        context = helpers.link_contexts(
             root_context, yaql_functions.get_context(runtime_version))
         context = context.create_child_context()
         for name, func in six.iteritems(self.__functions):

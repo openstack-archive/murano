@@ -20,6 +20,7 @@ from yaql.language import contexts
 from yaql.language import conventions
 from yaql.language import factory
 from yaql.language import specs
+from yaql.language import utils
 from yaql.language import yaqltypes
 from yaql import legacy
 
@@ -264,7 +265,7 @@ def filter_parameters(__fd, *args, **kwargs):
         args = args[:position_args]
     kwargs = kwargs.copy()
     for name in kwargs.keys():
-        if not helpers.is_keyword(name):
+        if not utils.is_keyword(name):
             del kwargs[name]
     if '**' not in __fd.parameters:
         names = {p.alias or p.name for p in six.itervalues(__fd.parameters)}

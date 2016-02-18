@@ -32,7 +32,7 @@ from murano.common import rpc
 from murano.dsl import context_manager
 from murano.dsl import dsl_exception
 from murano.dsl import executor as dsl_executor
-from murano.dsl import linked_context
+from murano.dsl import helpers
 from murano.dsl import serializer
 from murano.engine import environment
 from murano.engine import package_loader
@@ -91,7 +91,7 @@ class ContextManager(context_manager.ContextManager):
     def create_root_context(self, runtime_version):
         root_context = super(ContextManager, self).create_root_context(
             runtime_version)
-        return linked_context.link(
+        return helpers.link_contexts(
             root_context, yaql_functions.get_context(runtime_version))
 
 
