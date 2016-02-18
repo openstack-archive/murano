@@ -29,7 +29,7 @@ from six.moves import cStringIO as StringIO
 
 # enabled checks
 # http://pylint-messages.wikidot.com/all-codes
-ENABLED_CODES=(
+ENABLED_CODES = (
     # refactor category
     "R0801", "R0911", "R0912", "R0913", "R0914", "R0915",
     # warning category
@@ -73,7 +73,7 @@ class LintOutput(object):
         lineno -= 1
         while True:
             line_content = cls._cached_content[lineno].rstrip()
-            lineno +=1
+            lineno += 1
             if line_content:
                 return line_content
 
@@ -131,8 +131,13 @@ class LintOutput(object):
         return json.dumps(self.__dict__)
 
     def review_str(self):
+        kargs = {"filename": self.filename,
+                 "lineno": self.lineno,
+                 "line_content": self.line_content,
+                 "code": self.code,
+                 "message": self.message}
         return ("File %(filename)s\nLine %(lineno)d:%(line_content)s\n"
-                "%(code)s: %(message)s" % self.__dict__)
+                "%(code)s: %(message)s" % kargs)
 
 
 class ErrorKeys(object):
@@ -156,7 +161,8 @@ class ErrorKeys(object):
 def run_pylint():
     buff = StringIO()
     reporter = text.ParseableTextReporter(output=buff)
-    args = ["-rn", "--disable=all", "--enable=" + ",".join(ENABLED_CODES),"murano"]
+    args = ["-rn", "--disable=all", "--enable=" + ",".join(ENABLED_CODES),
+            "murano"]
     lint.Run(args, reporter=reporter, exit=False)
     val = buff.getvalue()
     buff.close()
