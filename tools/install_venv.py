@@ -23,7 +23,7 @@ import sys
 
 from six.moves import configparser
 
-import install_venv_common as install_venv  # flake8: noqa
+import install_venv_common as install_venv
 
 
 def print_help(project, venv, root):
@@ -43,7 +43,7 @@ def print_help(project, venv, root):
 
     $ %(root)s/tools/with_venv.sh <your command>
     """
-    print help % dict(project=project, venv=venv, root=root)
+    print(help % dict(project=project, venv=venv, root=root))
 
 
 def main(argv):
