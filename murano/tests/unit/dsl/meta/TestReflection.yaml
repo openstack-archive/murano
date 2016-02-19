@@ -1,9 +1,15 @@
 Name: TestReflection
 
 Properties:
-  prop:
+  property:
     Contract: $.string()
-    Default: qwerty
+    Default: object
+    Usage: InOut
+
+  staticProperty:
+    Contract: $.string()
+    Default: static
+    Usage: Static
 
 Methods:
   testTypeInfo:
@@ -16,8 +22,8 @@ Methods:
           versionMinor: $typeinfo.version.minor
           versionPatch: $typeinfo.version.patch
           ancestors: $typeinfo.ancestors.name
-          properties: $typeinfo.properties.name
-          methods: $typeinfo.methods.name.orderBy($)
+          properties: $typeinfo.properties.name.orderBy($)
+          methods: $typeinfo.methods.name.where(not $.startsWith(test)).orderBy($)
           package: $typeinfo.package.name
 
   testMethodInfo:
@@ -36,7 +42,7 @@ Methods:
 
   testPropertyInfo:
     Body:
-      - $property: typeinfo($).properties.first()
+      - $property: typeinfo($).properties.orderBy($.name).first()
       - Return:
           name: $property.name
           hasDefault: $property.hasDefault
@@ -49,3 +55,31 @@ Methods:
           Default: null
       - baz:
           Contract: $.string()
+    Body:
+      Return: $bar + $baz
+
+  testPropertyRead:
+    Body:
+      - $instanceValues: typeinfo($).properties.orderBy($.name).
+          select($.getValue($this))
+      - $staticValues: typeinfo($).properties.orderBy($.name).
+          where($.usage = Static).select($.getValue(null))
+      - Return: [$instanceValues, $staticValues]
+
+  testPropertyWrite:
+    Body:
+      - $instanceProperty: typeinfo($).properties.where($.name = property).single()
+      - $instanceProperty.setValue($, 'new object')
+      - $staticProperty: typeinfo($).properties.where($.name = staticProperty).single()
+      - $staticProperty.setValue($, 'new static')
+      - Return: $.testPropertyRead()
+
+  testMethodInvoke:
+    Body:
+      - $method: typeinfo($).methods.where($.name = foo).single()
+      - Return: $method.invoke($, 'bar ', baz => baz)
+
+  testInstanceCreate:
+    Body:
+      - $obj: new(typeinfo($).type, property => test)
+      - Return: $obj.property

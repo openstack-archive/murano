@@ -30,12 +30,9 @@ class TestReflection(test_case.DslTestCase):
                 'versionMinor': 0,
                 'versionPatch': 0,
                 'ancestors': ['io.murano.Object'],
-                'properties': ['prop'],
+                'properties': ['property', 'staticProperty'],
                 'package': 'tests',
-                'methods': [
-                    'foo', 'getAttr', 'setAttr',
-                    'testMethodInfo', 'testPropertyInfo', 'testTypeInfo'
-                ]
+                'methods': ['foo', 'getAttr', 'setAttr']
             },
             self._runner.testTypeInfo())
 
@@ -55,8 +52,24 @@ class TestReflection(test_case.DslTestCase):
     def test_property_info(self):
         self.assertEqual(
             {
-                'name': 'prop',
+                'name': 'property',
                 'hasDefault': True,
-                'usage': 'In'
+                'usage': 'InOut'
             },
             self._runner.testPropertyInfo())
+
+    def test_property_read(self):
+        self.assertEqual(
+            [['object', 'static'], ['static']],
+            self._runner.testPropertyRead())
+
+    def test_property_write(self):
+        self.assertEqual(
+            [['new object', 'new static'], ['new static']],
+            self._runner.testPropertyWrite())
+
+    def test_method_invoke(self):
+        self.assertEqual('bar baz', self._runner.testMethodInvoke())
+
+    def test_instance_create(self):
+        self.assertEqual('test', self._runner.testInstanceCreate())

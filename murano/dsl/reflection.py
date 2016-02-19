@@ -16,7 +16,9 @@ import semantic_version
 from yaql.language import specs
 from yaql import yaqlization
 
+from murano.dsl import dsl
 from murano.dsl import dsl_types
+from murano.dsl import helpers
 
 
 @specs.yaql_property(dsl_types.MuranoClass)
@@ -94,6 +96,31 @@ def property_owner(murano_property):
     return murano_property.murano_class
 
 
+@specs.name('get_value')
+@specs.parameter('property_', dsl_types.MuranoProperty)
+@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.method
+def property_get_value(context, property_, object_):
+    if object_ is None:
+        return property_.murano_class.get_property(
+            name=property_.name, context=context)
+    return object_.cast(property_.murano_class).get_property(
+        name=property_.name, context=context)
+
+
+@specs.name('set_value')
+@specs.parameter('property_', dsl_types.MuranoProperty)
+@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.method
+def property_set_value(context, property_, object_, value):
+    if object_ is None:
+        property_.murano_class.set_property(
+            name=property_.name, value=value, context=context)
+    else:
+        object_.cast(property_.murano_class).set_property(
+            name=property_.name, value=value, context=context)
+
+
 @specs.yaql_property(dsl_types.MuranoMethod)
 @specs.name('name')
 def method_name(murano_method):
@@ -111,6 +138,15 @@ def arguments(murano_method):
 @specs.name('declaring_type')
 def method_owner(murano_method):
     return murano_method.murano_class
+
+
+@specs.parameter('method', dsl_types.MuranoMethod)
+@specs.parameter('__object', dsl.MuranoObjectParameterType(nullable=True))
+@specs.name('invoke')
+@specs.method
+def method_invoke(context, method, __object, *args, **kwargs):
+    executor = helpers.get_executor(context)
+    return method.invoke(executor, __object, args, kwargs, context)
 
 
 @specs.yaql_property(dsl_types.MuranoPackage)
@@ -167,8 +203,8 @@ def register(context):
     funcs = (
         class_name, methods, properties, ancestors, package, class_version,
         property_name, property_has_default, property_owner,
-        property_usage,
-        method_name, arguments, method_owner,
+        property_usage, property_get_value, property_set_value,
+        method_name, arguments, method_owner, method_invoke,
         types, package_name, package_version,
         argument_name, argument_has_default, argument_owner,
         type_to_type_ref
