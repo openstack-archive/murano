@@ -45,8 +45,16 @@ class MuranoTypeReference(object):
     def murano_class(self):
         return self.__murano_class
 
-    def __str__(self):
-        return self.__murano_class.name
+    def __repr__(self):
+        return '*' + repr(self.murano_class)
+
+    def __eq__(self, other):
+        if not isinstance(other, MuranoTypeReference):
+            return False
+        return self.murano_class == other.murano_class
+
+    def __hash__(self):
+        return hash(self.murano_class)
 
 
 class YaqlExpression(object):

@@ -233,21 +233,22 @@ class MuranoTestRunner(object):
                 for m in test_cases:
                     # Create new executor for each test case to provide
                     # pure test environment
-                    executer = executor.MuranoDslExecutor(
+                    dsl_executor = executor.MuranoDslExecutor(
                         pkg_loader,
                         mock_context_manager.MockContextManager(),
                         test_env)
                     obj = package.find_class(pkg_class, False).new(
-                        None, executer.object_store)(None)
-                    self._call_service_method('setUp', executer, obj)
+                        None, dsl_executor.object_store, dsl_executor)(None)
+                    self._call_service_method('setUp', dsl_executor, obj)
                     obj.type.methods[m].usage = 'Action'
 
                     test_env.start()
                     try:
-                        obj.type.invoke(m, executer, obj, (), {})
+                        obj.type.invoke(m, dsl_executor, obj, (), {})
                         LOG.debug('\n.....{0}.{1}.....OK'.format(obj.type.name,
                                                                  m))
-                        self._call_service_method('tearDown', executer, obj)
+                        self._call_service_method(
+                            'tearDown', dsl_executor, obj)
                     except Exception:
                         LOG.exception('\n.....{0}.{1}.....FAILURE\n'
                                       ''.format(obj.type.name, m))

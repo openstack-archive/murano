@@ -19,6 +19,7 @@ Name: Linux
 
 Methods:
   runCommand:
+    Usage: Static
     Arguments:
       - agent:
           Contract: $.class(sys:Agent)
@@ -54,6 +55,7 @@ Methods:
       - Return: $agent.call($template, $resources)
 
   putFile:
+    Usage: Static
     Arguments:
       - agent:
           Contract: $.class(sys:Agent)

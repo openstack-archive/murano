@@ -109,9 +109,9 @@ class MuranoTypeName(yaqltypes.PythonType):
             if function_spec.meta.get(constants.META_MURANO_METHOD):
                 context = helpers.get_caller_context(context)
             murano_type = helpers.get_type(context)
-            value = dsl_types.MuranoTypeReference(helpers.get_class(
+            value = helpers.get_class(
                 murano_type.namespace_resolver.resolve_name(value),
-                context))
+                context).get_reference()
         return value
 
 

@@ -1,0 +1,9 @@
+---
+features:
+  - "Static methods and properties were introduced.
+     Both properties and methods can be marked as Usage: Static
+     Statics can be accessed using ns:Class.property / ns:Class.method(),
+     :Class.property / :Class.method() to access class from current namespace
+     or type('full.name').property / type('full.name').method() to use full
+     type name."
+  - io.murano.configuration.Linux methods are now static

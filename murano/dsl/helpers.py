@@ -153,7 +153,9 @@ def get_environment(context=None):
 
 def get_object_store(context=None):
     context = context or get_context()
-    return context[constants.CTX_THIS].object_store
+    this = context[constants.CTX_THIS]
+    return this.object_store if isinstance(
+        this, dsl_types.MuranoObject) else None
 
 
 def get_package_loader(context=None):

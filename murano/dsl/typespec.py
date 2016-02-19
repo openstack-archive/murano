@@ -14,7 +14,9 @@
 
 import weakref
 
+from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import type_scheme
 
 
@@ -25,8 +27,9 @@ class PropertyUsages(object):
     Runtime = 'Runtime'
     Const = 'Const'
     Config = 'Config'
-    All = set([In, Out, InOut, Runtime, Const, Config])
-    Writable = set([Out, InOut, Runtime])
+    Static = 'Static'
+    All = set([In, Out, InOut, Runtime, Const, Config, Static])
+    Writable = set([Out, InOut, Runtime, Static])
 
 
 class Spec(object):
@@ -41,13 +44,19 @@ class Spec(object):
                 'Unknown type {0}. Must be one of ({1})'.format(
                     self._usage, ', '.join(PropertyUsages.All)))
 
-    def validate(self, value, this, owner, default=None):
+    def validate(self, value, this, owner, context, default=None):
         if default is None:
             default = self.default
-        return self._contract(
-            value, this.object_store.executor.create_object_context(
-                this.cast(self._container_class())),
-            this, owner, default)
+        executor = helpers.get_executor(context)
+        if isinstance(this, dsl_types.MuranoClass):
+            return self._contract(
+                value, executor.create_object_context(this),
+                None, None, default)
+        else:
+            return self._contract(
+                value, executor.create_object_context(
+                    this.cast(self._container_class())),
+                this, owner, default)
 
     @property
     def default(self):

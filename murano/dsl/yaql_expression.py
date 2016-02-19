@@ -68,7 +68,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
     def is_expression(expression, version):
         if not isinstance(expression, six.string_types):
             return False
-        if re.match('^[\s\w\d.:]*$', expression):
+        if re.match('^[\s\w\d.]*$', expression):
             return False
         try:
             yaql_integration.parse(expression, version)

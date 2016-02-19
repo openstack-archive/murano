@@ -51,7 +51,10 @@ def _add_operators(engine_factory):
     engine_factory.insert_operator(
         '>', True, 'is', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, False)
     engine_factory.insert_operator(
-        '.', True, ':', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, True)
+        None, True, ':', factory.OperatorType.BINARY_LEFT_ASSOCIATIVE, True)
+    engine_factory.insert_operator(
+        ':', True, ':', factory.OperatorType.PREFIX_UNARY, False)
+    engine_factory.operators.insert(0, ())
 
 
 def _create_engine(runtime_version):
@@ -86,7 +89,7 @@ class ContractedValue(yaqltypes.GenericType):
             lambda value, sender, context, *args, **kwargs:
                 self._value_spec.validate(
                     value, sender.real_this,
-                    context[constants.CTX_ARGUMENT_OWNER]))
+                    context[constants.CTX_ARGUMENT_OWNER], context))
 
     def convert(self, value, *args, **kwargs):
         if value is None:
@@ -220,8 +223,9 @@ def _build_mpl_wrapper_function_definition(murano_method):
     fd.set_parameter(specs.ParameterDefinition(
         '__context', yaqltypes.Context(), 0))
 
-    fd.set_parameter(specs.ParameterDefinition(
-        '__sender', yaqltypes.PythonType(dsl_types.MuranoObject, False), 1))
+    nullable = murano_method.usage == 'Static'
+    sender_type = yaqltypes.PythonType(dsl_types.MuranoObject, nullable)
+    fd.set_parameter(specs.ParameterDefinition('__sender', sender_type, 1))
 
     fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd

@@ -28,6 +28,7 @@ from murano.common.i18n import _LW
 from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
+from murano.dsl import dsl_types
 from murano.dsl import helpers
 from murano.dsl import murano_method
 from murano.dsl import object_store
@@ -85,7 +86,9 @@ class MuranoDslExecutor(object):
 
         context = self.create_method_context(
             self.create_object_context(this, context), method)
-        this = this.real_this
+
+        if isinstance(this, dsl_types.MuranoObject):
+            this = this.real_this
 
         if method.arguments_scheme is not None:
             args, kwargs = self._canonize_parameters(
@@ -119,7 +122,10 @@ class MuranoDslExecutor(object):
     @contextlib.contextmanager
     def _acquire_method_lock(self, func, this):
         method_id = id(func)
-        this_id = this.object_id
+        if isinstance(this, dsl_types.MuranoClass):
+            this_id = id(this)
+        else:
+            this_id = this.object_id
         thread_id = helpers.get_current_thread_id()
         while True:
             event, event_owner = self._locks.get(
@@ -262,13 +268,24 @@ class MuranoDslExecutor(object):
         return context
 
     def create_object_context(self, obj, caller_context=None):
-        class_context = self.create_class_context(obj.type)
-        context = helpers.link_contexts(
-            class_context, self.context_manager.create_object_context(
-                obj)).create_child_context()
-        context[constants.CTX_THIS] = obj.real_this
-        context['this'] = obj.real_this
-        context[''] = obj.real_this
+        if isinstance(obj, dsl_types.MuranoClass):
+            obj_type = obj
+            obj = None
+        else:
+            obj_type = obj.type
+        class_context = self.create_class_context(obj_type)
+        if obj is not None:
+            context = helpers.link_contexts(
+                class_context, self.context_manager.create_object_context(
+                    obj)).create_child_context()
+            context[constants.CTX_THIS] = obj.real_this
+            context['this'] = obj.real_this
+            context[''] = obj.real_this
+        else:
+            context = class_context.create_child_context()
+            type_ref = obj_type.get_reference()
+            context['this'] = type_ref
+            context[''] = type_ref
 
         if caller_context is not None:
             caller = caller_context
