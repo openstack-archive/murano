@@ -32,7 +32,8 @@ class MuranoPackage(murano_package.MuranoPackage):
             application_package.full_name,
             application_package.version,
             application_package.runtime_version,
-            application_package.requirements
+            application_package.requirements,
+            application_package.meta
         )
 
     def get_class_config(self, name):

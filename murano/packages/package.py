@@ -109,6 +109,10 @@ class Package(object):
     def ui(self):
         raise NotImplementedError()
 
+    @abc.abstractproperty
+    def meta(self):
+        raise NotImplementedError()
+
 
 def _zip_dir(path, zip_file):
     for root, _, files in os.walk(path):

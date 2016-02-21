@@ -1,0 +1,12 @@
+---
+features:
+  - Added ability to extend MuranoPL entities with custom metadata.
+  - >
+    For MuranoPL classes new key "Usage" was added. By default it is "Class".
+    But it can also be "Meta" to define meta-class. Meta-class has all the
+    capabilities of regular classes and in addition has 3 new attributes:
+    Cardinality, Applies and Inherited.
+  - It is possible to attach meta-class instances to packages,
+    classes (including other meta-classes), properties, methods and
+    method arguments. Each of them got new "Meta" key containing
+    list (or single scalar) of meta-class instances.

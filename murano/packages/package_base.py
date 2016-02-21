@@ -108,6 +108,10 @@ class PackageBase(package.Package):
         return self._load_image(self._logo, 'logo.png', 'logo')
 
     @property
+    def meta(self):
+        return None
+
+    @property
     def supplier_logo(self):
         return self._load_image(
             self._supplier.get('Logo'), 'supplier_logo.png', 'supplier logo')

@@ -52,7 +52,7 @@ class ObjectStore(object):
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
-    def load(self, value, owner, context=None, defaults=None):
+    def load(self, value, owner, context=None):
         if value is None:
             return None
         if '?' not in value or 'type' not in value['?']:
@@ -83,7 +83,7 @@ class ObjectStore(object):
                 factory = class_obj.new(
                     owner, self, self.executor,
                     name=system_key.get('name'),
-                    object_id=object_id, defaults=defaults)
+                    object_id=object_id)
                 self._store[object_id] = factory
                 system_value = ObjectStore._get_designer_attributes(system_key)
                 self._designer_attributes_store[object_id] = system_value

@@ -30,7 +30,6 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import murano_method
 from murano.dsl import object_store
 from murano.dsl.principal_objects import stack_trace
 from murano.dsl import yaql_integration
@@ -87,7 +86,7 @@ class MuranoDslExecutor(object):
                 yaql_engine, method_context, this.real_this)(*args, **kwargs)
 
         if (context[constants.CTX_ACTIONS_ONLY] and method.usage !=
-                murano_method.MethodUsages.Action):
+                dsl_types.MethodUsages.Action):
             raise Exception('{0} is not an action'.format(method.name))
 
         if method.is_static:

@@ -14,6 +14,8 @@
 
 import re
 
+import six
+
 TYPE_NAME_RE = re.compile(r'^([a-zA-Z_]\w*:|:)?[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*$')
 NS_RE = re.compile(r'^([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)?$')
 PREFIX_RE = re.compile(r'^([a-zA-Z_]\w*|=)$')
@@ -21,7 +23,11 @@ PREFIX_RE = re.compile(r'^([a-zA-Z_]\w*|=)$')
 
 class NamespaceResolver(object):
     def __init__(self, namespaces):
+        if namespaces is None:
+            namespaces = {}
         for prefix, ns in namespaces.items():
+            if ns is None:
+                ns = ''
             if PREFIX_RE.match(prefix) is None:
                 raise ValueError(
                     'Invalid namespace prefix "{0}"'.format(prefix))
@@ -32,8 +38,9 @@ class NamespaceResolver(object):
         self._namespaces[''] = ''
 
     def resolve_name(self, name):
-        if name is None or TYPE_NAME_RE.match(name) is None:
+        if not self.is_typename(name, True):
             raise ValueError('Invalid type name "{0}"'.format(name))
+        name = six.text_type(name)
         if ':' not in name:
             if '.' in name:
                 parts = ['', name]
@@ -51,3 +58,12 @@ class NamespaceResolver(object):
         if not ns:
             return parts[1]
         return '.'.join((ns, parts[1]))
+
+    @staticmethod
+    def is_typename(name, relaxed):
+        if not name:
+            return False
+        name = six.text_type(name)
+        if not relaxed and ':' not in name:
+            return False
+        return TYPE_NAME_RE.match(name) is not None

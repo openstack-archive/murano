@@ -19,12 +19,19 @@ from yaql import yaqlization
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
+from murano.dsl import meta
 
 
 @specs.yaql_property(dsl_types.MuranoType)
 @specs.name('name')
-def class_name(murano_class):
-    return murano_class.name
+def type_name(murano_type):
+    return murano_type.name
+
+
+@specs.yaql_property(dsl_types.MuranoType)
+@specs.name('usage')
+def type_usage(murano_type):
+    return murano_type.usage
 
 
 @specs.yaql_property(dsl_types.MuranoClass)
@@ -54,15 +61,15 @@ def ancestors(murano_class):
     return tuple(murano_class.ancestors())
 
 
-@specs.yaql_property(dsl_types.MuranoClass)
-def package(murano_class):
-    return murano_class.package
+@specs.yaql_property(dsl_types.MuranoType)
+def package(murano_type):
+    return murano_type.package
 
 
 @specs.yaql_property(dsl_types.MuranoClass)
 @specs.name('version')
-def class_version(murano_class):
-    return murano_class.version
+def type_version(murano_type):
+    return murano_type.version
 
 
 @specs.yaql_property(dsl_types.MuranoProperty)
@@ -195,21 +202,44 @@ def argument_owner(method_argument):
     return method_argument.murano_method
 
 
-@specs.yaql_property(dsl_types.MuranoClass)
+@specs.yaql_property(dsl_types.MuranoType)
 @specs.name('type')
-def type_to_type_ref(murano_class):
-    return murano_class.get_reference()
+def type_to_type_ref(murano_type):
+    return murano_type.get_reference()
+
+
+@specs.parameter('provider', meta.MetaProvider)
+@specs.name('#property#meta')
+def get_meta(context, provider):
+        return provider.get_meta(context)
+
+
+@specs.yaql_property(dsl_types.MuranoMetaClass)
+def cardinality(murano_meta_class):
+    return murano_meta_class.cardinality
+
+
+@specs.yaql_property(dsl_types.MuranoMetaClass)
+def targets(murano_meta_class):
+    return murano_meta_class.targets
+
+
+@specs.yaql_property(dsl_types.MuranoMetaClass)
+def inherited(murano_meta_class):
+    return murano_meta_class.inherited
 
 
 def register(context):
     funcs = (
-        class_name, methods, properties, ancestors, package, class_version,
+        type_name, type_usage, type_version, type_to_type_ref,
+        methods, properties, ancestors, package,
         property_name, property_has_default, property_owner,
         property_usage, property_get_value, property_set_value,
         method_name, arguments, method_owner, method_invoke,
         types, package_name, package_version,
         argument_name, argument_has_default, argument_owner,
-        type_to_type_ref
+        cardinality, targets, inherited,
+        get_meta
     )
     for f in funcs:
         context.register_function(f)

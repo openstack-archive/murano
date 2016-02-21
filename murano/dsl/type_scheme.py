@@ -13,7 +13,6 @@
 #    under the License.
 
 import sys
-import uuid
 
 import six
 from yaql.language import specs
@@ -35,7 +34,7 @@ class TypeScheme(object):
         self._spec = spec
 
     @staticmethod
-    def prepare_context(root_context, this, owner, default):
+    def prepare_context(root_context, this, owner, default, calling_type):
         @specs.parameter('value', nullable=True)
         @specs.method
         def int_(value):
@@ -164,17 +163,9 @@ class TypeScheme(object):
             elif isinstance(value, dsl_types.MuranoObjectInterface):
                 obj = value.object
             elif isinstance(value, utils.MappingType):
-                if '?' not in value:
-                    new_value = {'?': {
-                        'id': uuid.uuid4().hex,
-                        'type': default_name.type.name,
-                        'classVersion': str(default_name.type.version)
-                    }}
-                    new_value.update(value)
-                    value = new_value
-
-                obj = object_store.load(
-                    value, owner, root_context, defaults=default)
+                obj = helpers.instantiate(
+                    value, owner, object_store, root_context,
+                    calling_type, default_name, default)
             elif isinstance(value, six.string_types):
                 obj = object_store.get(value)
                 if obj is None:
@@ -304,7 +295,7 @@ class TypeScheme(object):
         else:
             return self._map_scalar(data, spec)
 
-    def __call__(self, data, context, this, owner, default):
+    def __call__(self, data, context, this, owner, default, calling_type):
         # TODO(ativelkov, slagun): temporary fix, need a better way of handling
         # composite defaults
         # A bug (#1313694) has been filed
@@ -312,7 +303,8 @@ class TypeScheme(object):
         if data is dsl.NO_VALUE:
             data = helpers.evaluate(default, context)
 
-        context = self.prepare_context(context, this, owner, default)
+        context = self.prepare_context(
+            context, this, owner, default, calling_type)
         return self._map(data, self._spec, context, '')
 
 

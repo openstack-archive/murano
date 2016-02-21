@@ -26,6 +26,7 @@ class MuranoPlPackage(package_base.PackageBase):
         self._classes = manifest.get('Classes')
         self._ui_file = manifest.get('UI', 'ui.yaml')
         self._requirements = manifest.get('Require') or {}
+        self._meta = manifest.get('Meta')
 
     @property
     def classes(self):
@@ -54,3 +55,7 @@ class MuranoPlPackage(package_base.PackageBase):
                 name, 'File with class definition not found')
         with open(full_path) as stream:
             return stream.read(), full_path
+
+    @property
+    def meta(self):
+        return self._meta
