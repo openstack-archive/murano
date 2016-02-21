@@ -2,7 +2,7 @@ Namespaces:
   =: io.murano.apps
   std: io.murano
 
-Name: MockApp
+# Name: MockApp # use name from the manifest
 
 Extends: std:Application
 

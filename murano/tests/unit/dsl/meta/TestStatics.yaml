@@ -3,6 +3,26 @@ Namespaces:
   =: test
   e: ''
 
+--- # ---------------------------------------------------------------------
+# TestStaticsBase class - base class for TestStatics to test how static
+# entities work in respect to class inheritance
+--- # ---------------------------------------------------------------------
+Name: TestStaticsBase
+
+Properties:
+  baseStaticProperty:
+    Contract: $.string()
+    Default: baseStaticProperty
+    Usage: Static
+
+  conflictingStaticProperty:
+    Contract: $.string()
+    Default: 'conflictingStaticProperty-base'
+    Usage: Static
+
+--- # ---------------------------------------------------------------------
+# TestStatics class - main class for the static tests
+--- # ---------------------------------------------------------------------
 Name: TestStatics
 
 Extends: TestStaticsBase
