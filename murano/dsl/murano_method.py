@@ -125,12 +125,13 @@ class MuranoMethod(dsl_types.MuranoMethod):
 
     def invoke(self, executor, this, args, kwargs, context=None,
                skip_stub=False):
-        if self.usage == 'Static':
-            this = None
-        elif not self.murano_class.is_compatible(this):
-            raise Exception("'this' must be of compatible type")
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
+        if this and not self.murano_class.is_compatible(this):
+            raise Exception("'this' must be of compatible type")
+        if not this and not self.is_static:
+            raise Exception("A class instance is required")
+
         if this is not None:
             this = this.cast(self.murano_class)
         else:

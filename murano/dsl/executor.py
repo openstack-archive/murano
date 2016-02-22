@@ -90,8 +90,12 @@ class MuranoDslExecutor(object):
                 murano_method.MethodUsages.Action):
             raise Exception('{0} is not an action'.format(method.name))
 
-        context = self.create_method_context(
-            self.create_object_context(this, context), method)
+        if method.is_static:
+            obj_context = self.create_object_context(
+                method.murano_class, context)
+        else:
+            obj_context = self.create_object_context(this, context)
+        context = self.create_method_context(obj_context, method)
 
         if isinstance(this, dsl_types.MuranoObject):
             this = this.real_this
@@ -109,10 +113,10 @@ class MuranoDslExecutor(object):
             def call():
                 if isinstance(method.body, specs.FunctionDefinition):
                     if isinstance(this, dsl_types.MuranoClass):
-                        native_this = utils.NO_VALUE
+                        native_this = this.get_reference()
                     else:
-                        native_this = this.cast(
-                            method.murano_class).extension
+                        native_this = dsl.MuranoObjectInterface(this.cast(
+                            method.murano_class), self)
                     return method.body(
                         yaql_engine, context, native_this)(*args, **kwargs)
                 else:
@@ -301,6 +305,7 @@ class MuranoDslExecutor(object):
         else:
             context = class_context.create_child_context()
             type_ref = obj_type.get_reference()
+            context[constants.CTX_THIS] = type_ref
             context['this'] = type_ref
             context[''] = type_ref
 
