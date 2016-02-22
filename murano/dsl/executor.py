@@ -108,8 +108,11 @@ class MuranoDslExecutor(object):
 
             def call():
                 if isinstance(method.body, specs.FunctionDefinition):
-                    native_this = this.cast(
-                        method.murano_class).extension
+                    if isinstance(this, dsl_types.MuranoClass):
+                        native_this = utils.NO_VALUE
+                    else:
+                        native_this = this.cast(
+                            method.murano_class).extension
                     return method.body(
                         yaql_engine, context, native_this)(*args, **kwargs)
                 else:
@@ -126,10 +129,10 @@ class MuranoDslExecutor(object):
                 return call()
 
     @contextlib.contextmanager
-    def _acquire_method_lock(self, func, this):
-        method_id = id(func)
-        if isinstance(this, dsl_types.MuranoClass):
-            this_id = id(this)
+    def _acquire_method_lock(self, method, this):
+        method_id = id(method)
+        if method.is_static:
+            this_id = id(method.murano_class)
         else:
             this_id = this.object_id
         thread_id = helpers.get_current_thread_id()

@@ -22,6 +22,7 @@ from yaql.language import specs
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import macros
 from murano.dsl import typespec
 from murano.dsl import virtual_exceptions
@@ -40,8 +41,9 @@ class MethodUsages(object):
 
 
 class MuranoMethod(dsl_types.MuranoMethod):
-    def __init__(self, murano_class, name, payload):
+    def __init__(self, murano_class, name, payload, original_name=None):
         self._name = name
+        original_name = original_name or name
         self._murano_class = weakref.ref(murano_class)
 
         if callable(payload):
@@ -49,11 +51,18 @@ class MuranoMethod(dsl_types.MuranoMethod):
                 self._body = payload
             else:
                 self._body = yaql_integration.get_function_definition(
-                    payload, weakref.proxy(self))
+                    payload, weakref.proxy(self), original_name)
             self._arguments_scheme = None
-            self._usage = (self._body.meta.get('usage') or
-                           self._body.meta.get('Usage') or
-                           MethodUsages.Runtime)
+            if any((
+                helpers.inspect_is_static(
+                    murano_class.extension_class, original_name),
+                helpers.inspect_is_classmethod(
+                    murano_class.extension_class, original_name))):
+                self._usage = MethodUsages.Static
+            else:
+                self._usage = (self._body.meta.get('usage') or
+                               self._body.meta.get('Usage') or
+                               MethodUsages.Runtime)
             if (self._body.name.startswith('#') or
                     self._body.name.startswith('*')):
                 raise ValueError(
@@ -105,6 +114,10 @@ class MuranoMethod(dsl_types.MuranoMethod):
     @property
     def body(self):
         return self._body
+
+    @property
+    def is_static(self):
+        return self.usage == MethodUsages.Static
 
     def __repr__(self):
         return 'MuranoMethod({0}::{1})'.format(

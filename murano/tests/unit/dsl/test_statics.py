@@ -13,6 +13,10 @@
 #    under the License.
 
 
+from yaql.language import specs
+from yaql.language import yaqltypes
+
+from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.tests.unit.dsl.foundation import object_model as om
@@ -21,9 +25,21 @@ from murano.tests.unit.dsl.foundation import test_case
 
 class TestStatics(test_case.DslTestCase):
     def setUp(self):
+        @dsl.name('test.TestStatics')
+        class PythonClass(object):
+            @staticmethod
+            @specs.parameter('arg', yaqltypes.Integer())
+            def static_python_method(arg):
+                return 7 * arg
+
+            @classmethod
+            def classmethod_python_method(cls, arg):
+                return cls.__name__ + str(arg)
+
         super(TestStatics, self).setUp()
         self._runner = self.new_runner(
             om.Object('test.TestStatics', staticProperty2='INVALID'))
+        self._runner.root.type.package.register_class(PythonClass)
 
     def test_call_static_method_on_object(self):
         self.assertEqual(123, self._runner.testCallStaticMethodOnObject())
@@ -104,3 +120,11 @@ class TestStatics(test_case.DslTestCase):
 
     def test_type_info_of_type(self):
         self.assertTrue(self._runner.testTypeinfoOfType())
+
+    def test_call_python_static_method(self):
+        self.assertEqual([777] * 4, self._runner.testCallPythonStaticMethod())
+
+    def test_call_python_classmethod(self):
+        self.assertEqual(
+            ['PythonClass!'] * 4,
+            self._runner.testCallPythonClassMethod())

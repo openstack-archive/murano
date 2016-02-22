@@ -39,6 +39,7 @@ class MuranoClass(dsl_types.MuranoClass):
         self._name = name
         self._properties = {}
         self._config = {}
+        self._extension_class = None
         if self._name == constants.CORE_LIBRARY_OBJECT:
             self._parents = []
         else:
@@ -117,12 +118,18 @@ class MuranoClass(dsl_types.MuranoClass):
     def parent_mappings(self):
         return self._parent_mappings
 
-    def extend_with_class(self, cls):
+    @property
+    def extension_class(self):
+        return self._extension_class
+
+    @extension_class.setter
+    def extension_class(self, cls):
+        self._extension_class = cls
         ctor = yaql_integration.get_class_factory_definition(cls, self)
         self.add_method('__init__', ctor)
 
-    def add_method(self, name, payload):
-        method = murano_method.MuranoMethod(self, name, payload)
+    def add_method(self, name, payload, original_name=None):
+        method = murano_method.MuranoMethod(self, name, payload, original_name)
         self._methods[name] = method
         self._context = None
         return method

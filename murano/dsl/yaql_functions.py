@@ -171,14 +171,14 @@ def op_dot(context, receiver, expr, operator):
     return operator(ctx2, receiver, expr)
 
 
-@specs.parameter('sender', dsl_types.MuranoTypeReference)
+@specs.parameter('receiver', dsl_types.MuranoTypeReference)
 @specs.parameter('expr', yaqltypes.Lambda(method=True))
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
-def op_dot_static(context, sender, expr, operator):
+def op_dot_static(context, receiver, expr, operator):
     executor = helpers.get_executor(context)
     type_context = executor.context_manager.create_class_context(
-        sender.murano_class)
+        receiver.murano_class)
     ctx2 = helpers.link_contexts(context, type_context)
     return operator(ctx2, None, expr)
 

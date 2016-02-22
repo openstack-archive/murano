@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import inspect
-
 import six
 import yaql
 from yaql.language import contexts
@@ -86,9 +84,9 @@ class ContractedValue(yaqltypes.GenericType):
 
         super(ContractedValue, self).__init__(
             True, None,
-            lambda value, sender, context, *args, **kwargs:
+            lambda value, receiver, context, *args, **kwargs:
                 self._value_spec.validate(
-                    value, sender.real_this,
+                    value, receiver.real_this,
                     context[constants.CTX_ARGUMENT_OWNER], context))
 
     def convert(self, value, *args, **kwargs):
@@ -146,25 +144,25 @@ def _infer_parameter_type(name, class_name):
         return _infer_parameter_type(name[3 + len(class_name):], class_name)
 
 
-def get_function_definition(func, murano_method):
+def get_function_definition(func, murano_method, original_name):
+    param_type_func = lambda name: _infer_parameter_type(
+        name, cls.__name__)
     body = func
-    param_type_func = lambda name: _infer_parameter_type(name, None)
-    is_method = False
-    if inspect.ismethod(func):
-        is_method = True
+    cls = murano_method.murano_class.extension_class
+    if helpers.inspect_is_method(cls, original_name):
         body = func.im_func
-        param_type_func = lambda name: _infer_parameter_type(
-            name, func.im_class.__name__)
+    if helpers.inspect_is_classmethod(cls, original_name):
+        body = func.im_func
     fd = specs.get_function_definition(
         body, convention=CONVENTION,
         parameter_type_func=param_type_func)
-    if is_method:
-        fd.is_method = True
-        fd.is_function = False
-        fd.set_parameter(
-            0,
-            yaqltypes.PythonType(func.im_class),
-            overwrite=True)
+    fd.is_method = True
+    fd.is_function = False
+    if helpers.inspect_is_method(cls, original_name):
+        fd.set_parameter(0, yaqltypes.PythonType(cls), overwrite=True)
+    if helpers.inspect_is_classmethod(cls, original_name):
+        _remove_first_parameter(fd)
+        body = func
     name = getattr(func, '__murano_name', None)
     if name:
         fd.name = name
@@ -178,6 +176,24 @@ def get_function_definition(func, murano_method):
     fd.payload = payload
     fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd
+
+
+def _remove_first_parameter(fd):
+    first_param = None
+    first_param_name = None
+    for p_name, p in fd.parameters.items():
+        if isinstance(p.value_type, yaqltypes.HiddenParameterType):
+            continue
+        if p.position is None:
+            continue
+        if first_param is None or p.position < first_param.position:
+            first_param = p
+            first_param_name = p_name
+    if first_param:
+        del fd.parameters[first_param_name]
+        for p_name, p in fd.parameters.items():
+            if p.position is not None and p.position > first_param.position:
+                p.position -= 1
 
 
 def build_wrapper_function_definition(murano_method):
@@ -194,21 +210,21 @@ def _build_native_wrapper_function_definition(murano_method):
     @specs.method
     @specs.name(murano_method.name)
     @specs.meta(constants.META_MURANO_METHOD, murano_method)
-    def payload(__context, __sender, *args, **kwargs):
+    def payload(__context, __receiver, *args, **kwargs):
         executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         return helpers.evaluate(murano_method.invoke(
-            executor, __sender, args, kwargs, __context, True), __context)
+            executor, __receiver, args, kwargs, __context, True), __context)
 
     return specs.get_function_definition(payload)
 
 
 def _build_mpl_wrapper_function_definition(murano_method):
-    def payload(__context, __sender, *args, **kwargs):
+    def payload(__context, __receiver, *args, **kwargs):
         executor = helpers.get_executor(__context)
         return murano_method.invoke(
-            executor, __sender, args, kwargs, __context, True)
+            executor, __receiver, args, kwargs, __context, True)
 
     fd = specs.FunctionDefinition(
         murano_method.name, payload, is_function=False, is_method=True)
@@ -224,8 +240,8 @@ def _build_mpl_wrapper_function_definition(murano_method):
         '__context', yaqltypes.Context(), 0))
 
     nullable = murano_method.usage == 'Static'
-    sender_type = yaqltypes.PythonType(dsl_types.MuranoObject, nullable)
-    fd.set_parameter(specs.ParameterDefinition('__sender', sender_type, 1))
+    receiver_type = yaqltypes.PythonType(dsl_types.MuranoObject, nullable)
+    fd.set_parameter(specs.ParameterDefinition('__receiver', receiver_type, 1))
 
     fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd
@@ -235,8 +251,8 @@ def get_class_factory_definition(cls, murano_class):
     runtime_version = murano_class.package.runtime_version
     engine = choose_yaql_engine(runtime_version)
 
-    def payload(__context, __sender, *args, **kwargs):
-        assert __sender is None
+    def payload(__context, __receiver, *args, **kwargs):
+        assert __receiver is None
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):
