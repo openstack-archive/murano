@@ -16,7 +16,7 @@
 
 import json
 
-from oslo_config import cfg
+from oslo_config import fixture as config_fixture
 from oslo_utils import timeutils
 
 from murano.api.v1 import environments
@@ -25,22 +25,13 @@ from murano.services import states
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 
-CONF = cfg.CONF
-
 
 class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def setUp(self):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
-
-    @staticmethod
-    def _configure_opts():
-        opts = [
-            cfg.StrOpt('config_dir'),
-            cfg.StrOpt('config_file', default='murano.conf'),
-            cfg.StrOpt('project', default='murano'),
-        ]
-        CONF.register_opts(opts)
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
 
     def test_list_empty_environments(self):
         """Check that with no environments an empty list is returned."""
@@ -56,7 +47,6 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def test_list_all_tenants(self):
         """Check whether all_tenants param is taken into account."""
 
-        self._configure_opts()
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
@@ -81,7 +71,6 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_create_environment(self):
         """Create an environment, test environment.show()."""
-        self._configure_opts()
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',
@@ -147,7 +136,6 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_unicode_environment_name_create(self):
         """Check that an unicode env name doesn't raise an HTTPClientError."""
-        self._configure_opts()
         self._set_policy_rules(
             {'list_environments': '@',
              'create_environment': '@',

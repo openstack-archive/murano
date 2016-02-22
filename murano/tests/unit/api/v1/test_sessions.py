@@ -15,13 +15,11 @@
 
 import json
 
-from oslo_config import cfg
+from oslo_config import fixture as config_fixture
 
 from murano.api.v1 import environments
 from murano.api.v1 import sessions
 import murano.tests.unit.api.base as tb
-
-CONF = cfg.CONF
 
 
 class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
@@ -29,6 +27,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         super(TestSessionsApi, self).setUp()
         self.environments_controller = environments.Controller()
         self.sessions_controller = sessions.Controller()
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
 
     def test_cant_deploy_from_another_tenant(self):
         """If user from one tenant uses session id and environment id
@@ -39,12 +39,6 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         """
         CREDENTIALS_1 = {'tenant': 'test_tenant_1', 'user': 'test_user_1'}
         CREDENTIALS_2 = {'tenant': 'test_tenant_2', 'user': 'test_user_2'}
-        opts = [
-            cfg.StrOpt('config_dir'),
-            cfg.StrOpt('config_file', default='murano.conf'),
-            cfg.StrOpt('project', default='murano'),
-        ]
-        CONF.register_opts(opts)
 
         self._set_policy_rules(
             {'create_environment': '@'}
