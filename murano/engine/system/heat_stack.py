@@ -247,6 +247,7 @@ class HeatStack(object):
         try:
             if not self.current():
                 return
+            self._wait_state(lambda s: True)
             self._client.stacks.delete(stack_id=self._name)
             self._wait_state(
                 lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
