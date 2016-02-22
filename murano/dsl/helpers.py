@@ -109,10 +109,14 @@ def generate_id():
 def parallel_select(collection, func, limit=1000):
     # workaround for eventlet issue 232
     # https://github.com/eventlet/eventlet/issues/232
+    context = get_context()
+    session = get_execution_session()
+
     def wrapper(element):
         try:
-            with contextual(get_context()):
-                return func(element), False, None
+            with contextual(context):
+                with execution_session(session):
+                    return func(element), False, None
         except Exception as e:
             return e, True, sys.exc_info()[2]
 
@@ -132,7 +136,7 @@ def enum(**enums):
 
 def get_context():
     current_thread = eventlet.greenthread.getcurrent()
-    return getattr(current_thread, '__murano_context', None)
+    return getattr(current_thread, constants.TL_CONTEXT, None)
 
 
 def get_executor(context=None):
@@ -146,9 +150,15 @@ def get_type(context=None):
     return context[constants.CTX_TYPE]
 
 
-def get_environment(context=None):
+def get_execution_session(context=None):
     context = context or get_context()
-    return context[constants.CTX_ENVIRONMENT]
+    session = None
+    if context is not None:
+        session = context[constants.CTX_EXECUTION_SESSION]
+    if session is None:
+        current_thread = eventlet.greenthread.getcurrent()
+        session = getattr(current_thread, constants.TL_SESSION, None)
+    return session
 
 
 def get_object_store(context=None):
@@ -215,27 +225,37 @@ def get_current_thread_id():
     global _threads_sequencer
 
     current_thread = eventlet.greenthread.getcurrent()
-    thread_id = getattr(current_thread, '__thread_id', None)
+    thread_id = getattr(current_thread, constants.TL_ID, None)
     if thread_id is None:
         thread_id = 'T' + str(_threads_sequencer)
         _threads_sequencer += 1
-        setattr(current_thread, '__thread_id', thread_id)
+        setattr(current_thread, constants.TL_ID, thread_id)
     return thread_id
 
 
 @contextlib.contextmanager
-def contextual(ctx):
+def thread_local_attribute(name, value):
     current_thread = eventlet.greenthread.getcurrent()
-    current_context = getattr(current_thread, '__murano_context', None)
-    if ctx:
-        setattr(current_thread, '__murano_context', ctx)
+    old_value = getattr(current_thread, name, None)
+    if value is not None:
+        setattr(current_thread, name, value)
+    elif hasattr(current_thread, name):
+        delattr(current_thread, name)
     try:
         yield
     finally:
-        if current_context:
-            setattr(current_thread, '__murano_context', current_context)
-        elif hasattr(current_thread, '__murano_context'):
-            delattr(current_thread, '__murano_context')
+        if old_value is not None:
+            setattr(current_thread, name, old_value)
+        elif hasattr(current_thread, name):
+            delattr(current_thread, name)
+
+
+def contextual(ctx):
+    return thread_local_attribute(constants.TL_CONTEXT, ctx)
+
+
+def execution_session(session):
+    return thread_local_attribute(constants.TL_SESSION, session)
 
 
 def parse_version_spec(version_spec):
@@ -332,7 +352,10 @@ def is_instance_of(obj, class_name, pov_or_version_spec=None):
 
 def memoize(func):
     cache = {}
+    return get_memoize_func(func, cache)
 
+
+def get_memoize_func(func, cache):
     @functools.wraps(func)
     def wrap(*args):
         if args not in cache:

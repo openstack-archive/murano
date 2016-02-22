@@ -18,7 +18,6 @@ import mock
 from oslo_config import cfg
 
 from murano.common import engine
-from murano.engine import client_manager
 from murano.policy import model_policy_enforcer
 from murano.tests.unit import base
 
@@ -45,14 +44,8 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         self.congress_client_mock = \
             mock.Mock(spec=congressclient.v1.client.Client)
-
-        self.client_manager_mock = mock.Mock(spec=client_manager.ClientManager)
-
-        self.client_manager_mock.get_congress_client.return_value = \
-            self.congress_client_mock
-
-        self.environment = mock.Mock()
-        self.environment.clients = self.client_manager_mock
+        model_policy_enforcer.ModelPolicyEnforcer._create_client = mock.Mock(
+            return_value=self.congress_client_mock)
 
     def test_enforcer_disabled(self):
         executor = engine.TaskExecutor(self.task)
@@ -74,17 +67,11 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
             .validate.assert_called_once_with(self.model_dict,
                                               self.package_loader)
 
-    def test_enforcer_no_client(self):
-        self.client_manager_mock.get_congress_client.return_value = None
-        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
-        model = {'?': {'id': '123', 'type': 'class'}}
-        self.assertRaises(ValueError, enforcer.validate, model)
-
     def test_validation_pass(self):
         self.congress_client_mock.execute_policy_action.return_value = \
             {"result": []}
         model = {'?': {'id': '123', 'type': 'class'}}
-        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(mock.Mock())
         enforcer.validate(model)
 
     def test_validation_failure(self):
@@ -92,7 +79,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
             {"result": ['predeploy_errors("123","instance1","failure")']}
 
         model = {'?': {'id': '123', 'type': 'class'}}
-        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(mock.Mock())
         self.assertRaises(model_policy_enforcer.ValidationError,
                           enforcer.validate, model)
 
@@ -107,7 +94,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         action_manager = mock.MagicMock()
         enforcer = model_policy_enforcer.ModelPolicyEnforcer(
-            self.environment, action_manager)
+            mock.Mock(), action_manager)
 
         enforcer.modify(obj)
         self.assertTrue(action_manager.apply_action.called)
@@ -120,7 +107,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
             'predeploy_errors("env2","instance1","Instance 3 has problem")'
         ]
 
-        enforcer = model_policy_enforcer.ModelPolicyEnforcer(self.environment)
+        enforcer = model_policy_enforcer.ModelPolicyEnforcer(None)
         result = enforcer._parse_simulation_result(
             'predeploy_errors', 'env1', congress_response)
 

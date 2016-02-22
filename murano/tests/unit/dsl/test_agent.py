@@ -19,7 +19,7 @@ from murano.common import exceptions as exc
 from murano.dsl import constants
 from murano.dsl import helpers
 from murano.dsl import yaql_integration
-from murano.engine import environment
+from murano.engine import execution_session
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.tests.unit.dsl.foundation import object_model as om
@@ -37,7 +37,8 @@ class TestAgentListener(test_case.DslTestCase):
             'AgentListenerTests')
         self.runner = self.new_runner(model)
         self.context = yaql_integration.create_empty_context()
-        self.context[constants.CTX_ENVIRONMENT] = environment.Environment()
+        self.context[constants.CTX_EXECUTION_SESSION] = \
+            execution_session.ExecutionSession()
 
     def test_listener_enabled(self):
         self.override_config('disable_murano_agent', False, 'engine')

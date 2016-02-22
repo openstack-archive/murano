@@ -17,9 +17,17 @@
 import json
 
 import eventlet
+try:
+    import mistralclient.api.client as mistralclient
+except ImportError as mistral_import_error:
+    mistralclient = None
+from oslo_config import cfg
 
+from murano.common import auth_utils
 from murano.dsl import dsl
-from murano.dsl import helpers
+from murano.dsl import session_local_storage
+
+CONF = cfg.CONF
 
 
 class MistralError(Exception):
@@ -28,18 +36,44 @@ class MistralError(Exception):
 
 @dsl.name('io.murano.system.MistralClient')
 class MistralClient(object):
-    def __init__(self, context):
-        self._clients = helpers.get_environment(context).clients
+    def __init__(self):
+        self._client = self._create_client(CONF.home_region)
+
+    @staticmethod
+    @session_local_storage.execution_session_memoize
+    def _create_client(region):
+        if not mistralclient:
+            raise mistral_import_error
+
+        mistral_settings = CONF.mistral
+
+        endpoint_type = mistral_settings.endpoint_type
+        service_type = mistral_settings.service_type
+        session = auth_utils.get_client_session()
+
+        mistral_url = mistral_settings.url or session.get_endpoint(
+            service_type=service_type,
+            endpoint_type=endpoint_type,
+            region_name=region)
+        auth_ref = session.auth.get_access(session)
+
+        return mistralclient.client(
+            mistral_url=mistral_url,
+            project_id=auth_ref.project_id,
+            endpoint_type=endpoint_type,
+            service_type=service_type,
+            auth_token=auth_ref.auth_token,
+            user_id=auth_ref.user_id,
+            insecure=mistral_settings.insecure,
+            cacert=mistral_settings.ca_cert
+        )
 
     def upload(self, definition):
-        mistral_client = self._clients.get_mistral_client()
-        mistral_client.workflows.create(definition)
+        self._client.workflows.create(definition)
 
     def run(self, name, timeout=600, inputs=None, params=None):
-        mistral_client = self._clients.get_mistral_client()
-        execution = mistral_client.executions.create(workflow_name=name,
-                                                     workflow_input=inputs,
-                                                     params=params)
+        execution = self._client.executions.create(
+            workflow_name=name, workflow_input=inputs, params=params)
         # For the fire and forget functionality - when we do not want to wait
         # for the result of the run.
         if timeout == 0:
@@ -51,7 +85,7 @@ class MistralClient(object):
             with eventlet.timeout.Timeout(timeout):
                 while state not in ('ERROR', 'SUCCESS'):
                     eventlet.sleep(2)
-                    execution = mistral_client.executions.get(execution.id)
+                    execution = self._client.executions.get(execution.id)
                     state = execution.state
         except eventlet.timeout.Timeout:
             error_message = (

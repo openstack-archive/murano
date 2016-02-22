@@ -25,7 +25,7 @@ from murano.dsl import helpers
 from murano.dsl import murano_object
 from murano.dsl import serializer
 from murano.dsl import yaql_integration
-from murano.engine import environment
+from murano.engine import execution_session
 from murano.engine.system import yaql_functions
 from murano.tests.unit.dsl.foundation import object_model
 
@@ -77,7 +77,7 @@ class Runner(object):
 
         self.executor = executor.MuranoDslExecutor(
             package_loader, TestContextManager(functions),
-            environment.Environment())
+            execution_session.ExecutionSession())
         self._root = self.executor.load(model).object
 
     def _execute(self, name, object_id, *args, **kwargs):

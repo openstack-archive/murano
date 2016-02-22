@@ -15,14 +15,22 @@
 
 import re
 
+try:
+    # integration with congress is optional
+    import congressclient.v1.client as congress_client
+except ImportError as congress_client_import_error:
+    congress_client = None
+from oslo_config import cfg
 from oslo_log import log as logging
 
+from murano.common import auth_utils
 from murano.common.i18n import _, _LI
 from murano.policy import congress_rules
 from murano.policy.modify.actions import action_manager as am
 
 
 LOG = logging.getLogger(__name__)
+CONF = cfg.CONF
 
 
 class ValidationError(Exception):
@@ -40,10 +48,25 @@ class ModelPolicyEnforcer(object):
     table along with congress data rules to return validation results.
     """
 
-    def __init__(self, environment, action_manager=None):
-        self._environment = environment
-        self._client_manager = environment.clients
+    def __init__(self, execution_session, action_manager=None):
+        self._execution_session = execution_session
         self._action_manager = action_manager or am.ModifyActionManager()
+        self._client = None
+
+    def _create_client(self):
+        if not congress_client:
+            # congress client was not imported
+            raise congress_client_import_error
+        return congress_client.Client(
+            **auth_utils.get_session_client_parameters(
+                service_type='policy',
+                execution_session=self._execution_session))
+
+    @property
+    def client(self):
+        if self._client is None:
+            self._client = self._create_client()
+        return self._client
 
     def modify(self, obj, package_loader=None):
         """Modifies model using Congress rule engine.
@@ -110,7 +133,7 @@ class ModelPolicyEnforcer(object):
 
     def _execute_simulation(self, package_loader, env_id, model, query):
         rules = congress_rules.CongressRulesManager().convert(
-            model, package_loader, self._environment.tenant_id)
+            model, package_loader, self._execution_session.project_id)
         rules_str = list(map(str, rules))
         # cleanup of data populated by murano driver
         rules_str.insert(0, 'deleteEnv("{0}")'.format(env_id))
@@ -118,9 +141,7 @@ class ModelPolicyEnforcer(object):
         LOG.debug('Congress rules: \n  {rules} '
                   .format(rules='\n  '.join(rules_str)))
 
-        client = self._check_client()
-
-        validation_result = client.execute_policy_action(
+        validation_result = self.client.execute_policy_action(
             "murano_system",
             "simulate",
             False,
@@ -129,12 +150,6 @@ class ModelPolicyEnforcer(object):
              'action_policy': 'murano_action',
              'sequence': rules_line})
         return validation_result
-
-    def _check_client(self):
-        client = self._client_manager.get_congress_client(self._environment)
-        if not client:
-            raise ValueError(_('Congress client is not configured!'))
-        return client
 
     @staticmethod
     def _parse_simulation_result(query, env_id, results):

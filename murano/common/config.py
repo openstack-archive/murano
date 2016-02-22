@@ -58,6 +58,8 @@ rabbit_opts = [
 ]
 
 heat_opts = [
+    cfg.StrOpt('url', help='Optional heat endpoint override'),
+
     cfg.BoolOpt('insecure', default=False,
                 help='This option explicitly allows Murano to perform '
                 '"insecure" SSL connections and transfers with Heat API.'),
@@ -82,13 +84,26 @@ heat_opts = [
 ]
 
 mistral_opts = [
+    cfg.StrOpt('url', help='Optional mistral endpoint override'),
+
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Mistral endpoint type.'),
+
     cfg.StrOpt('service_type', default='workflowv2',
-               help='Mistral service type.')
+               help='Mistral service type.'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                '"insecure" SSL connections and transfers with Mistral.'),
+
+    cfg.StrOpt('ca_cert',
+               help='(SSL) Tells Murano to use the specified client '
+               'certificate file when communicating with Mistral.')
 ]
 
 neutron_opts = [
+    cfg.StrOpt('url', help='Optional neutron endpoint override'),
+
     cfg.BoolOpt('insecure', default=False,
                 help='This option explicitly allows Murano to perform '
                 '"insecure" SSL connections and transfers with Neutron API.'),
@@ -99,24 +114,6 @@ neutron_opts = [
 
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Neutron endpoint type.')
-]
-
-keystone_opts = [
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                     '"insecure" SSL connections and transfers with '
-                     'Keystone API running Kyestone API.'),
-
-    cfg.StrOpt('ca_file',
-               help='(SSL) Tells Murano to use the specified certificate file '
-                    'to verify the peer when communicating with Keystone.'),
-
-    cfg.StrOpt('cert_file',
-               help='(SSL) Tells Murano to use the specified client '
-                    'certificate file when communicating with Keystone.'),
-
-    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
-                                'communicate with Keystone API')
 ]
 
 murano_opts = [
@@ -148,10 +145,7 @@ murano_opts = [
     cfg.ListOpt('enabled_plugins',
                 help="List of enabled Extension Plugins. "
                      "Remove or leave commented to enable all installed "
-                     "plugins."),
-
-    cfg.StrOpt('region_name_for_services',
-               help="Default region name used to get services endpoints.")
+                     "plugins.")
 ]
 
 networking_opts = [
@@ -271,6 +265,11 @@ file_server = [
                help='Set a file server.')
 ]
 
+home_region = cfg.StrOpt(
+    'home_region', default=None,
+    help="Default region name used to get services endpoints.")
+
+
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
 CONF.register_cli_opts(bind_opts)
@@ -278,10 +277,10 @@ CONF.register_opts(rabbit_opts, group='rabbitmq')
 CONF.register_opts(heat_opts, group='heat')
 CONF.register_opts(mistral_opts, group='mistral')
 CONF.register_opts(neutron_opts, group='neutron')
-CONF.register_opts(keystone_opts, group='keystone')
 CONF.register_opts(murano_opts, group='murano')
 CONF.register_opts(engine_opts, group='engine')
 CONF.register_opts(file_server)
+CONF.register_opt(home_region)
 CONF.register_cli_opts(metadata_dir)
 CONF.register_opts(packages_opts, group='packages_opts')
 CONF.register_opts(stats_opts, group='stats')

@@ -33,8 +33,7 @@ from murano.common import engine
 from murano.dsl import exceptions
 from murano.dsl import executor
 from murano.dsl import helpers
-from murano.engine import client_manager
-from murano.engine import environment
+from murano.engine import execution_session
 from murano.engine import mock_context_manager
 from murano.engine import package_loader
 
@@ -202,19 +201,14 @@ class MuranoTestRunner(object):
         ks_opts = self._validate_keystone_opts(self.args)
 
         client = ks_client.Client(**ks_opts)
-        test_env = environment.Environment()
-        test_env.token = client.auth_token
-        test_env.tenant_id = client.auth_tenant_id
-        test_env.clients = client_manager.ClientManager(test_env)
-
-        murano_client_factory = lambda: \
-            test_env.clients.get_murano_client(test_env)
+        test_session = execution_session.ExecutionSession()
+        test_session.token = client.auth_token
+        test_session.project_id = client.project_id
 
         # Replace location of loading packages with provided from command line.
         if load_packages_from:
             cfg.CONF.packages_opts.load_packages_from = load_packages_from
-        with package_loader.CombinedPackageLoader(
-                murano_client_factory, client.tenant_id) as pkg_loader:
+        with package_loader.CombinedPackageLoader(test_session) as pkg_loader:
             engine.get_plugin_loader().register_in_loader(pkg_loader)
 
             package = self._load_package(pkg_loader, provided_pkg_name)
@@ -236,13 +230,13 @@ class MuranoTestRunner(object):
                     dsl_executor = executor.MuranoDslExecutor(
                         pkg_loader,
                         mock_context_manager.MockContextManager(),
-                        test_env)
+                        test_session)
                     obj = package.find_class(pkg_class, False).new(
                         None, dsl_executor.object_store, dsl_executor)(None)
                     self._call_service_method('setUp', dsl_executor, obj)
                     obj.type.methods[m].usage = 'Action'
 
-                    test_env.start()
+                    test_session.start()
                     try:
                         obj.type.invoke(m, dsl_executor, obj, (), {})
                         LOG.debug('\n.....{0}.{1}.....OK'.format(obj.type.name,
@@ -254,7 +248,7 @@ class MuranoTestRunner(object):
                                       ''.format(obj.type.name, m))
                         exit_code = 1
                     finally:
-                        test_env.finish()
+                        test_session.finish()
         return exit_code
 
     def get_parser(self):

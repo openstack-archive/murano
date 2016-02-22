@@ -34,7 +34,7 @@ from murano.dsl import dsl_exception
 from murano.dsl import executor as dsl_executor
 from murano.dsl import helpers
 from murano.dsl import serializer
-from murano.engine import environment
+from murano.engine import execution_session
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
 from murano.engine.system import yaql_functions
@@ -125,8 +125,8 @@ class TaskExecutor(object):
         return self._action
 
     @property
-    def environment(self):
-        return self._environment
+    def session(self):
+        return self._session
 
     @property
     def model(self):
@@ -137,14 +137,14 @@ class TaskExecutor(object):
             reporter = status_reporter.StatusReporter(task['id'])
         self._action = task.get('action')
         self._model = task['model']
-        self._environment = environment.Environment()
-        self._environment.token = task['token']
-        self._environment.tenant_id = task['tenant_id']
-        self._environment.system_attributes = self._model.get('SystemData', {})
+        self._session = execution_session.ExecutionSession()
+        self._session.token = task['token']
+        self._session.project_id = task['tenant_id']
+        self._session.system_attributes = self._model.get('SystemData', {})
         self._reporter = reporter
 
         self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
-            self._environment)
+            self._session)
 
     def execute(self):
         try:
@@ -152,13 +152,9 @@ class TaskExecutor(object):
         except Exception as e:
             return self.exception_result(e, None, '<system>')
 
-        murano_client_factory = \
-            lambda: self._environment.clients.get_murano_client()
-        with package_loader.CombinedPackageLoader(
-                murano_client_factory,
-                self._environment.tenant_id) as pkg_loader:
+        with package_loader.CombinedPackageLoader(self._session) as pkg_loader:
             result = self._execute(pkg_loader)
-        self._model['SystemData'] = self._environment.system_attributes
+        self._model['SystemData'] = self._session.system_attributes
         result['model'] = self._model
 
         if (not self._model.get('Objects') and
@@ -174,7 +170,7 @@ class TaskExecutor(object):
         get_plugin_loader().register_in_loader(pkg_loader)
 
         executor = dsl_executor.MuranoDslExecutor(
-            pkg_loader, ContextManager(), self.environment)
+            pkg_loader, ContextManager(), self.session)
         try:
             obj = executor.load(self.model)
         except Exception as e:
@@ -188,20 +184,20 @@ class TaskExecutor(object):
 
         try:
             LOG.debug('Invoking pre-cleanup hooks')
-            self.environment.start()
+            self.session.start()
             executor.cleanup(self._model)
         except Exception as e:
             return self.exception_result(e, obj, '<GC>')
         finally:
             LOG.debug('Invoking post-cleanup hooks')
-            self.environment.finish()
+            self.session.finish()
         self._model['ObjectsCopy'] = copy.deepcopy(self._model.get('Objects'))
 
         action_result = None
         if self.action:
             try:
                 LOG.debug('Invoking pre-execution hooks')
-                self.environment.start()
+                self.session.start()
                 try:
                     action_result = self._invoke(executor)
                 finally:
@@ -213,7 +209,7 @@ class TaskExecutor(object):
                 return self.exception_result(e, obj, self.action['method'])
             finally:
                 LOG.debug('Invoking post-execution hooks')
-                self.environment.finish()
+                self.session.finish()
 
         try:
             action_result = serializer.serialize(action_result)
@@ -266,16 +262,16 @@ class TaskExecutor(object):
     def _create_trust(self):
         if not CONF.engine.use_trusts:
             return
-        trust_id = self._environment.system_attributes.get('TrustId')
+        trust_id = self._session.system_attributes.get('TrustId')
         if not trust_id:
-            trust_id = auth_utils.create_trust(self._environment.token,
-                                               self._environment.tenant_id)
-            self._environment.system_attributes['TrustId'] = trust_id
-        self._environment.trust_id = trust_id
+            trust_id = auth_utils.create_trust(
+                self._session.token, self._session.project_id)
+            self._session.system_attributes['TrustId'] = trust_id
+        self._session.trust_id = trust_id
 
     def _delete_trust(self):
-        trust_id = self._environment.trust_id
+        trust_id = self._session.trust_id
         if trust_id:
-            auth_utils.delete_trust(self._environment.trust_id)
-            self._environment.system_attributes['TrustId'] = None
-            self._environment.trust_id = None
+            auth_utils.delete_trust(self._session.trust_id)
+            self._session.system_attributes['TrustId'] = None
+            self._session.trust_id = None

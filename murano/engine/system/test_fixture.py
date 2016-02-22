@@ -34,12 +34,12 @@ class TestFixture(object):
         return exc.load(model)
 
     def finish_env(self):
-        env = helpers.get_environment()
-        env.finish()
+        session = helpers.get_execution_session()
+        session.finish()
 
     def start_env(self):
-        env = helpers.get_environment()
-        env.start()
+        session = helpers.get_execution_session()
+        session.start()
 
     def assert_equal(self, expected, observed, message=None):
         self._test_case.assertEqual(expected, observed, message)

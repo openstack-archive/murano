@@ -18,7 +18,7 @@ from yaql import specs
 from murano.dsl import constants
 from murano.dsl import executor
 from murano.dsl import murano_class
-from murano.engine import environment
+from murano.engine import execution_session
 from murano.engine import mock_context_manager
 from murano.engine.system import test_fixture
 from murano.tests.unit import base
@@ -58,7 +58,7 @@ class MockRunner(runner.Runner):
             model = {'Objects': model}
         self.executor = executor.MuranoDslExecutor(
             package_loader, TestMockContextManager(functions),
-            environment.Environment())
+            execution_session.ExecutionSession())
         self._root = self.executor.load(model).object
 
 

@@ -39,10 +39,10 @@ LOG = logging.getLogger(__name__)
 
 
 class MuranoDslExecutor(object):
-    def __init__(self, package_loader, context_manager, environment=None):
+    def __init__(self, package_loader, context_manager, session=None):
         self._package_loader = package_loader
         self._context_manager = context_manager
-        self._environment = environment
+        self._session = session
         self._attribute_store = attribute_store.AttributeStore()
         self._object_store = object_store.ObjectStore(self)
         self._locks = {}
@@ -66,6 +66,12 @@ class MuranoDslExecutor(object):
 
     def invoke_method(self, method, this, context, args, kwargs,
                       skip_stub=False):
+        with helpers.execution_session(self._session):
+            return self._invoke_method(
+                method, this, context, args, kwargs, skip_stub=skip_stub)
+
+    def _invoke_method(self, method, this, context, args, kwargs,
+                       skip_stub=False):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
         kwargs = utils.filter_parameters_dict(kwargs)
@@ -190,6 +196,10 @@ class MuranoDslExecutor(object):
         return tuple(), parameter_values
 
     def load(self, data):
+        with helpers.execution_session(self._session):
+            return self._load(data)
+
+    def _load(self, data):
         if not isinstance(data, dict):
             raise TypeError()
         self._attribute_store.load(data.get(constants.DM_ATTRIBUTES) or [])
@@ -199,6 +209,10 @@ class MuranoDslExecutor(object):
         return dsl.MuranoObjectInterface(result, executor=self)
 
     def cleanup(self, data):
+        with helpers.execution_session(self._session):
+            return self._cleanup(data)
+
+    def _cleanup(self, data):
         objects_copy = data.get(constants.DM_OBJECTS_COPY)
         if not objects_copy:
             return
@@ -244,7 +258,7 @@ class MuranoDslExecutor(object):
             context[constants.CTX_EXECUTOR] = weakref.ref(self)
             context[constants.CTX_PACKAGE_LOADER] = weakref.ref(
                 self._package_loader)
-            context[constants.CTX_ENVIRONMENT] = self._environment
+            context[constants.CTX_EXECUTION_SESSION] = self._session
             context[constants.CTX_ATTRIBUTE_STORE] = weakref.ref(
                 self._attribute_store)
             self._root_context_cache[runtime_version] = context

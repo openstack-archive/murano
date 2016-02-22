@@ -24,10 +24,13 @@ import uuid
 
 import eventlet
 from muranoclient.common import exceptions as muranoclient_exc
+from muranoclient.glance import client as glare_client
+import muranoclient.v1.client as muranoclient
 from oslo_config import cfg
 from oslo_log import log as logging
 import six
 
+from murano.common import auth_utils
 from murano.common.i18n import _LE, _LI, _LW
 from murano.dsl import constants
 from murano.dsl import exceptions
@@ -48,17 +51,66 @@ usage_mem_locks = collections.defaultdict(m_utils.ReaderWriterLock)
 
 
 class ApiPackageLoader(package_loader.MuranoPackageLoader):
-    def __init__(self, murano_client_factory, tenant_id, root_loader=None):
+    def __init__(self, execution_session, root_loader=None):
         self._cache_directory = self._get_cache_directory()
-        self._murano_client_factory = murano_client_factory
-        self.tenant_id = tenant_id
         self._class_cache = {}
         self._package_cache = {}
         self._root_loader = root_loader or self
+        self._execution_session = execution_session
+        self._last_glare_token = None
+        self._glare_client = None
+        self._murano_client = None
+        self._murano_client_session = None
 
         self._mem_locks = []
         self._ipc_locks = []
         self._downloaded = []
+
+    def _get_glare_client(self):
+        glance_settings = CONF.glance
+        session = auth_utils.get_client_session(self._execution_session)
+        token = session.auth.get_token(session)
+        if self._last_glare_token != token:
+            self._last_glare_token = token
+            self._glare_client = None
+
+        if self._glare_client is None:
+            url = glance_settings.url
+            if not url:
+                url = session.get_endpoint(
+                    service_type='image',
+                    interface=glance_settings.endpoint_type,
+                    region_name=CONF.home_region)
+
+            self._glare_client = glare_client.Client(
+                endpoint=url, token=token,
+                insecure=glance_settings.insecure,
+                key_file=glance_settings.key_file or None,
+                ca_file=glance_settings.ca_file or None,
+                cert_file=glance_settings.cert_file or None,
+                type_name='murano',
+                type_version=1)
+        return self._glare_client
+
+    @property
+    def client(self):
+        murano_settings = CONF.murano
+        last_glare_client = self._glare_client
+        if CONF.packages_opts.packages_service == 'glance':
+            artifacts_client = self._get_glare_client()
+        else:
+            artifacts_client = None
+        if artifacts_client != last_glare_client:
+            self._murano_client = None
+        if not self._murano_client:
+            parameters = auth_utils.get_session_client_parameters(
+                service_type='application-catalog',
+                execution_session=self._execution_session,
+                conf=murano_settings
+            )
+            self._murano_client = muranoclient.Client(
+                artifacts_client=artifacts_client, **parameters)
+        return self._murano_client
 
     def load_class_package(self, class_name, version_spec):
         packages = self._class_cache.get(class_name)
@@ -97,8 +149,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             exc_info = sys.exc_info()
             six.reraise(exceptions.NoPackageFound(package_name),
                         None, exc_info[2])
-        return self._to_dsl_package(
-            self._get_package_by_definition(package_definition))
+        else:
+            return self._to_dsl_package(
+                self._get_package_by_definition(package_definition))
 
     def register_package(self, package):
         for name in package.classes:
@@ -129,7 +182,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def _get_definition(self, filter_opts):
         filter_opts['catalog'] = True
         try:
-            packages = list(self._murano_client_factory().packages.filter(
+            packages = list(self.client.packages.filter(
                 **filter_opts))
             if len(packages) > 1:
                 LOG.debug('Ambiguous package resolution: more then 1 package '
@@ -180,8 +233,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         download_ipc_lock = m_utils.ExclusiveInterProcessLock(
             path=download_lock_path, sleep_func=eventlet.sleep)
 
-        with download_mem_locks[package_id].write_lock(),\
-                download_ipc_lock:
+        with download_mem_locks[package_id].write_lock(), download_ipc_lock:
 
             # NOTE(kzaitsev):
             # in case there were 2 concurrent threads/processes one might have
@@ -198,8 +250,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             try:
                 LOG.debug("Attempting to download package {} {}".format(
                     package_def.fully_qualified_name, package_id))
-                package_data = self._murano_client_factory().packages.download(
-                    package_id)
+                package_data = self.client.packages.download(package_id)
             except muranoclient_exc.HTTPException as e:
                 msg = 'Error loading package id {0}: {1}'.format(
                     package_id, str(e)
@@ -304,7 +355,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         public = None
         other = []
         for package in packages:
-            if package.owner_id == self.tenant_id:
+            if package.owner_id == self._execution_session.project_id:
                 return package
             elif package.is_public:
                 public = package
@@ -451,10 +502,9 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
 
 
 class CombinedPackageLoader(package_loader.MuranoPackageLoader):
-    def __init__(self, murano_client_factory, tenant_id, root_loader=None):
+    def __init__(self, execution_session, root_loader=None):
         root_loader = root_loader or self
-        self.api_loader = ApiPackageLoader(
-            murano_client_factory, tenant_id, root_loader)
+        self.api_loader = ApiPackageLoader(execution_session, root_loader)
         self.directory_loaders = []
 
         for folder in CONF.packages_opts.load_packages_from:
