@@ -20,7 +20,7 @@ from murano.dsl import helpers
 
 @dsl.name('io.murano.Object')
 class SysObject(object):
-    @specs.parameter('owner', dsl.MuranoTypeName(True), nullable=False)
+    @specs.parameter('owner', dsl.MuranoTypeParameter(True), nullable=False)
     def set_attr(self, this, context, name, value, owner=None):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(context))
@@ -28,7 +28,7 @@ class SysObject(object):
         attribute_store = helpers.get_attribute_store(context)
         attribute_store.set(this.object, owner, name, value)
 
-    @specs.parameter('owner', dsl.MuranoTypeName(True), nullable=False)
+    @specs.parameter('owner', dsl.MuranoTypeParameter(True), nullable=False)
     def get_attr(self, this, context, name, default=None, owner=None):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(context))

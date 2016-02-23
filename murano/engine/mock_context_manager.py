@@ -99,9 +99,9 @@ def with_original(context, **kwargs):
 
 @specs.parameter(
     'target',
-    yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl.MuranoObjectParameterType()))
+    yaqltypes.AnyOf(dsl.MuranoTypeParameter(), dsl.MuranoObjectParameter()))
 @specs.parameter('target_method', yaqltypes.String())
-@specs.parameter('mock_object', dsl.MuranoObjectParameterType())
+@specs.parameter('mock_object', dsl.MuranoObjectParameter())
 @specs.parameter('mock_name', yaqltypes.String())
 def inject_method_with_str(context, target, target_method,
                            mock_object, mock_name):
@@ -131,7 +131,7 @@ def inject_method_with_str(context, target, target_method,
 
 @specs.parameter(
     'target',
-    yaqltypes.AnyOf(dsl.MuranoTypeName(), dsl.MuranoObjectParameterType()))
+    yaqltypes.AnyOf(dsl.MuranoTypeParameter(), dsl.MuranoObjectParameter()))
 @specs.parameter('target_method', yaqltypes.String())
 @specs.parameter('expr', yaqltypes.Lambda(with_context=True))
 def inject_method_with_yaql_expr(context, target, target_method, expr):

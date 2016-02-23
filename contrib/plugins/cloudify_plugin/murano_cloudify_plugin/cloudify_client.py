@@ -29,7 +29,7 @@ archive_upload_lock = threading.Lock()
 
 
 class CloudifyClient(object):
-    @specs.parameter('app', dsl.MuranoType('io.murano.Application'))
+    @specs.parameter('app', dsl.MuranoObjectParameter('io.murano.Application'))
     def __init__(self, app):
         cloudify_manager = self.CONF.cloudify_manager
         self._client = cloudify_rest_client.CloudifyClient(cloudify_manager)

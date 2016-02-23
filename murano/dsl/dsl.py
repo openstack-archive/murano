@@ -36,42 +36,56 @@ def name(dsl_name):
     return wrapper
 
 
-class MuranoType(yaqltypes.PythonType):
-    def __init__(self, murano_class, nullable=False, version_spec=None):
+class MuranoObjectParameter(yaqltypes.PythonType):
+    def __init__(self, murano_class=None, nullable=False, version_spec=None,
+                 decorate=True):
         self.murano_class = murano_class
         self.version_spec = version_spec
-        super(MuranoType, self).__init__(
+        self.decorate = decorate
+        super(MuranoObjectParameter, self).__init__(
             (dsl_types.MuranoObject, MuranoObjectInterface), nullable)
 
     def check(self, value, context, *args, **kwargs):
-        if not super(MuranoType, self).check(
+        if not super(MuranoObjectParameter, self).check(
                 value, context, *args, **kwargs):
             return False
-        if isinstance(value, MuranoObjectInterface):
-            value = value.object
         if value is None or isinstance(value, yaql_expressions.Expression):
             return True
-        murano_class = self.murano_class
-        if isinstance(murano_class, six.string_types):
-            murano_class_name = murano_class
+        if isinstance(value, MuranoObjectInterface):
+            value = value.object
+        if not isinstance(value, dsl_types.MuranoObject):
+            return False
+        if self.murano_class:
+            murano_class = self.murano_class
+            if isinstance(murano_class, six.string_types):
+                murano_class_name = murano_class
+            else:
+                murano_class_name = murano_class.name
+            return helpers.is_instance_of(
+                value, murano_class_name,
+                self.version_spec or helpers.get_type(context))
         else:
-            murano_class_name = murano_class.name
-        return helpers.is_instance_of(
-            value, murano_class_name,
-            self.version_spec or helpers.get_type(context))
+            return True
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
-        result = super(MuranoType, self).convert(
+        result = super(MuranoObjectParameter, self).convert(
             value, sender, context, function_spec, engine, *args, **kwargs)
-        if isinstance(result, dsl_types.MuranoObject):
+        if result is None:
+            return None
+        if self.decorate:
+            if isinstance(result, MuranoObjectInterface):
+                return result
             return MuranoObjectInterface(result)
-        return result
+        else:
+            if isinstance(result, dsl_types.MuranoObject):
+                return result
+            return result.object
 
 
-class ThisParameterType(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
+class ThisParameter(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
     def __init__(self):
-        super(ThisParameterType, self).__init__(False)
+        super(ThisParameter, self).__init__(False)
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
@@ -82,10 +96,10 @@ class ThisParameterType(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
         return this
 
 
-class InterfacesParameterType(yaqltypes.HiddenParameterType,
-                              yaqltypes.SmartType):
+class InterfacesParameter(yaqltypes.HiddenParameterType,
+                          yaqltypes.SmartType):
     def __init__(self):
-        super(InterfacesParameterType, self).__init__(False)
+        super(InterfacesParameter, self).__init__(False)
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
@@ -93,10 +107,10 @@ class InterfacesParameterType(yaqltypes.HiddenParameterType,
         return Interfaces(this)
 
 
-class MuranoTypeName(yaqltypes.PythonType):
+class MuranoTypeParameter(yaqltypes.PythonType):
     def __init__(self, nullable=False, context=None):
         self._context = context
-        super(MuranoTypeName, self).__init__(
+        super(MuranoTypeParameter, self).__init__(
             (dsl_types.MuranoTypeReference,
              six.string_types), nullable)
 
@@ -105,7 +119,7 @@ class MuranoTypeName(yaqltypes.PythonType):
         context = self._context or context
         if isinstance(value, yaql_expressions.Expression):
             value = value(utils.NO_VALUE, context, engine)
-        value = super(MuranoTypeName, self).convert(
+        value = super(MuranoTypeParameter, self).convert(
             value, sender, context, function_spec, engine)
         if isinstance(value, six.string_types):
             if function_spec.meta.get(constants.META_MURANO_METHOD):
@@ -173,15 +187,19 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         return self.__object.owner
 
     def find_owner(self, type, optional=False):
-        context = helpers.get_context().create_child_context()
-        yaql_engine = helpers.get_yaql_engine(context)
-        context['$1'] = self.object
-        context['$2'] = type
-        expr_str = '$1.find($2)'
+        if isinstance(type, six.string_types):
+            type = helpers.get_class(type)
+        elif isinstance(type, dsl_types.MuranoTypeReference):
+            type = type.murano_class
+        p = self.owner
+        while p is not None:
+            if type.is_compatible(p):
+                return MuranoObjectInterface(p, self.__executor)
+            p = p.owner
         if not optional:
-            expr_str += '.require()'
-        result = yaql_engine(expr_str).evaluate(context=context)
-        return None if result is None else MuranoObjectInterface(result)
+            raise ValueError('Object is not owned by any instance of type '
+                             '{0}'.format(type.name))
+        return None
 
     @property
     def type(self):
@@ -191,8 +209,13 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def package(self):
         return self.type.package
 
-    def data(self):
+    @property
+    def properties(self):
         return MuranoObjectInterface.DataInterface(self)
+
+    @property
+    def name(self):
+        return self.object.name
 
     @property
     def extension(self):
@@ -298,24 +321,3 @@ def to_mutable(obj, yaql_engine=None):
 
     limiter = lambda it: utils.limit_iterable(it, constants.ITERATORS_LIMIT)
     return converter(obj, limiter, yaql_engine, converter)
-
-
-class MuranoObjectParameterType(yaqltypes.PythonType):
-    def __init__(self, nullable=False, interface=False):
-        self.interface = interface
-        super(MuranoObjectParameterType, self).__init__(
-            (dsl_types.MuranoObject, MuranoObjectInterface), nullable=nullable)
-
-    def convert(self, value, *args, **kwargs):
-        result = super(MuranoObjectParameterType, self).convert(
-            value, *args, **kwargs)
-        if result is None:
-            return None
-        if self.interface:
-            if isinstance(result, MuranoObjectInterface):
-                return result
-            return MuranoObjectInterface(result)
-        else:
-            if isinstance(result, dsl_types.MuranoObject):
-                return result
-            return result.object

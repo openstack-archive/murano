@@ -132,9 +132,9 @@ def _infer_parameter_type(name, class_name):
     if name == 'context':
         return yaqltypes.Context()
     if name == 'this':
-        return dsl.ThisParameterType()
+        return dsl.ThisParameter()
     if name == 'interfaces':
-        return dsl.InterfacesParameterType()
+        return dsl.InterfacesParameter()
     if name == 'yaql_engine':
         return yaqltypes.Engine()
 
@@ -160,7 +160,9 @@ def get_function_definition(func, murano_method, original_name):
     fd.is_function = False
     if helpers.inspect_is_method(cls, original_name):
         fd.set_parameter(
-            0, dsl.MuranoType(murano_method.murano_class), overwrite=True)
+            0,
+            dsl.MuranoObjectParameter(murano_method.murano_class),
+            overwrite=True)
     if helpers.inspect_is_classmethod(cls, original_name):
         _remove_first_parameter(fd)
         body = func

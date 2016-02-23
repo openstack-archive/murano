@@ -98,7 +98,8 @@ def property_owner(murano_property):
 
 @specs.name('get_value')
 @specs.parameter('property_', dsl_types.MuranoProperty)
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(
+    nullable=True, decorate=False))
 @specs.method
 def property_get_value(context, property_, object_):
     if object_ is None:
@@ -110,7 +111,8 @@ def property_get_value(context, property_, object_):
 
 @specs.name('set_value')
 @specs.parameter('property_', dsl_types.MuranoProperty)
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(
+    nullable=True, decorate=False))
 @specs.method
 def property_set_value(context, property_, object_, value):
     if object_ is None:
@@ -141,7 +143,7 @@ def method_owner(murano_method):
 
 
 @specs.parameter('method', dsl_types.MuranoMethod)
-@specs.parameter('__object', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('__object', dsl.MuranoObjectParameter(nullable=True))
 @specs.name('invoke')
 @specs.method
 def method_invoke(context, method, __object, *args, **kwargs):

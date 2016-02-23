@@ -50,7 +50,7 @@ class ResourceManager(object):
         self._package = murano_class.package
 
     @staticmethod
-    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
     def string(receiver, name, owner=None):
         path = ResourceManager._get_package(owner, receiver).get_resource(name)
@@ -58,13 +58,13 @@ class ResourceManager(object):
             return file.read()
 
     @classmethod
-    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
     def json(cls, receiver, name, owner=None):
         return jsonlib.loads(cls.string(receiver, name, owner))
 
     @classmethod
-    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
     def yaml(cls, receiver, name, owner=None):
         return yamllib.load(
