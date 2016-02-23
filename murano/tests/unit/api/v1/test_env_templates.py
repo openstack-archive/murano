@@ -15,15 +15,13 @@
 
 import json
 
-from oslo_config import cfg
+from oslo_config import fixture as config_fixture
 from oslo_utils import timeutils
 
 from murano.api.v1 import templates
 from murano.db import models
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
-
-CONF = cfg.CONF
 
 
 class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
@@ -33,6 +31,8 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.uuids = ['env_template_id', 'other', 'network_id',
                       'environment_id', 'session_id']
         self.mock_uuid = self._stub_uuid(self.uuids)
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
 
     def test_list_empty_env_templates(self):
         """Check that with no templates an empty list is returned."""
@@ -440,12 +440,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def test_create_environment(self):
         """Test that environment is created, session configured."""
 
-        opts = [
-            cfg.StrOpt('config_dir'),
-            cfg.StrOpt('config_file', default='murano.conf'),
-            cfg.StrOpt('project', default='murano'),
-        ]
-        CONF.register_opts(opts)
         self._set_policy_rules(
             {'create_env_template': '@',
              'create_environment': '@'}
@@ -469,12 +463,6 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         """Test that environment is created and session with template
         without services.
         """
-        opts = [
-            cfg.StrOpt('config_dir'),
-            cfg.StrOpt('config_file', default='murano.conf'),
-            cfg.StrOpt('project', default='murano'),
-        ]
-        CONF.register_opts(opts)
         self._set_policy_rules(
             {'create_env_template': '@',
              'create_environment': '@'}
