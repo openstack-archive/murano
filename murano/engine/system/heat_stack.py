@@ -213,8 +213,10 @@ class HeatStack(murano_object.MuranoObject):
         try:
             if not self.current(_context):
                 return
+            self._wait_state(_context, lambda s: True)
             client.stacks.delete(stack_id=self._name)
             self._wait_state(
+                _context,
                 lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
                 wait_progress=True)
         except heat_exc.NotFound:
