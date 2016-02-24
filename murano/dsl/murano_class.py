@@ -259,6 +259,8 @@ class MuranoClass(dsl_types.MuranoClass):
         if isinstance(obj, (murano_object.MuranoObject,
                             dsl.MuranoObjectInterface)):
             obj = obj.type
+        elif isinstance(obj, dsl_types.MuranoTypeReference):
+            obj = obj.murano_class
         if obj is self:
             return True
         return any(cls is self for cls in obj.ancestors())

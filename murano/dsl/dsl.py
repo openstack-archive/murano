@@ -58,12 +58,11 @@ class MuranoObjectParameter(yaqltypes.PythonType):
         if self.murano_class:
             murano_class = self.murano_class
             if isinstance(murano_class, six.string_types):
-                murano_class_name = murano_class
+                return helpers.is_instance_of(
+                    value, murano_class,
+                    self.version_spec or helpers.get_type(context))
             else:
-                murano_class_name = murano_class.name
-            return helpers.is_instance_of(
-                value, murano_class_name,
-                self.version_spec or helpers.get_type(context))
+                return murano_class.is_compatible(value)
         else:
             return True
 
@@ -108,11 +107,22 @@ class InterfacesParameter(yaqltypes.HiddenParameterType,
 
 
 class MuranoTypeParameter(yaqltypes.PythonType):
-    def __init__(self, nullable=False, context=None):
+    def __init__(self, base_type=None, nullable=False, context=None):
         self._context = context
+        self._base_type = base_type
         super(MuranoTypeParameter, self).__init__(
             (dsl_types.MuranoTypeReference,
              six.string_types), nullable)
+
+    def check(self, value, context, *args, **kwargs):
+        if not super(MuranoTypeParameter, self).check(
+                value, context, *args, **kwargs):
+            return False
+        if isinstance(value, dsl_types.MuranoTypeReference):
+            if not self._base_type:
+                return True
+            return self._base_type.is_compatible(value)
+        return True
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
@@ -128,6 +138,10 @@ class MuranoTypeParameter(yaqltypes.PythonType):
             value = helpers.get_class(
                 murano_type.namespace_resolver.resolve_name(value),
                 context).get_reference()
+        if self._base_type and not self._base_type.is_compatible(value):
+            raise ValueError('Value must be subtype of {0}'.format(
+                self._base_type.name
+            ))
         return value
 
 

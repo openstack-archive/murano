@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import weakref
+
 import six
 import yaql
 from yaql.language import contexts
@@ -24,7 +26,6 @@ from yaql import legacy
 
 from murano.dsl import constants
 from murano.dsl import dsl
-from murano.dsl import dsl_types
 from murano.dsl import helpers
 from murano.dsl import yaql_functions
 
@@ -254,8 +255,11 @@ def _build_mpl_wrapper_function_definition(murano_method):
     fd.set_parameter(specs.ParameterDefinition(
         '__context', yaqltypes.Context(), 0))
 
-    nullable = murano_method.usage == 'Static'
-    receiver_type = yaqltypes.PythonType(dsl_types.MuranoObject, nullable)
+    receiver_type = dsl.MuranoObjectParameter(
+        weakref.proxy(murano_method.murano_class), decorate=False)
+    if murano_method.is_static:
+        receiver_type = yaqltypes.AnyOf(dsl.MuranoTypeParameter(
+            weakref.proxy(murano_method.murano_class)), receiver_type)
     fd.set_parameter(specs.ParameterDefinition('__receiver', receiver_type, 1))
 
     fd.meta[constants.META_MURANO_METHOD] = murano_method
@@ -267,7 +271,6 @@ def get_class_factory_definition(cls, murano_class):
     engine = choose_yaql_engine(runtime_version)
 
     def payload(__context, __receiver, *args, **kwargs):
-        # assert __receiver is None
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):

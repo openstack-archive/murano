@@ -176,7 +176,7 @@ def op_dot_static(context, receiver, expr, operator):
     type_context = executor.context_manager.create_class_context(
         receiver.murano_class)
     ctx2 = helpers.link_contexts(context, type_context)
-    return operator(ctx2, None, expr)
+    return operator(ctx2, receiver, expr)
 
 
 @specs.parameter('prefix', yaqltypes.Keyword())

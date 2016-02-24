@@ -13,6 +13,7 @@
 #    under the License.
 
 
+from yaql.language import exceptions as yaql_exceptions
 from yaql.language import specs
 from yaql.language import yaqltypes
 
@@ -137,3 +138,8 @@ class TestStatics(test_case.DslTestCase):
         self.assertEqual(
             ['PYTHONCLASS!'] + ['PythonClass!'] * 3,
             self._runner.testCallPythonClassMethod())
+
+    def test_call_static_method_on_invalid_class(self):
+        self.assertRaises(
+            yaql_exceptions.NoMatchingMethodException,
+            self._runner.testCallStaticMethodOnInvalidClass)

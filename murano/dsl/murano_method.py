@@ -132,7 +132,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
         if not this and not self.is_static:
             raise Exception("A class instance is required")
 
-        if this is not None:
+        if isinstance(this, dsl_types.MuranoObject):
             this = this.cast(self.murano_class)
         else:
             this = self.murano_class
