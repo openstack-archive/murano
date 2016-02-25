@@ -41,10 +41,10 @@ class MethodUsages(object):
 
 
 class MuranoMethod(dsl_types.MuranoMethod):
-    def __init__(self, murano_class, name, payload, original_name=None):
+    def __init__(self, declaring_type, name, payload, original_name=None):
         self._name = name
         original_name = original_name or name
-        self._murano_class = weakref.ref(murano_class)
+        self._declaring_type = weakref.ref(declaring_type)
 
         if callable(payload):
             if isinstance(payload, specs.FunctionDefinition):
@@ -55,9 +55,9 @@ class MuranoMethod(dsl_types.MuranoMethod):
             self._arguments_scheme = None
             if any((
                 helpers.inspect_is_static(
-                    murano_class.extension_class, original_name),
+                    declaring_type.extension_class, original_name),
                 helpers.inspect_is_classmethod(
-                    murano_class.extension_class, original_name))):
+                    declaring_type.extension_class, original_name))):
                 self._usage = MethodUsages.Static
             else:
                 self._usage = (self._body.meta.get('usage') or
@@ -92,8 +92,8 @@ class MuranoMethod(dsl_types.MuranoMethod):
         return self._name
 
     @property
-    def murano_class(self):
-        return self._murano_class()
+    def declaring_type(self):
+        return self._declaring_type()
 
     @property
     def arguments_scheme(self):
@@ -121,21 +121,21 @@ class MuranoMethod(dsl_types.MuranoMethod):
 
     def __repr__(self):
         return 'MuranoMethod({0}::{1})'.format(
-            self.murano_class.name, self.name)
+            self.declaring_type.name, self.name)
 
     def invoke(self, executor, this, args, kwargs, context=None,
                skip_stub=False):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
-        if this and not self.murano_class.is_compatible(this):
+        if this and not self.declaring_type.is_compatible(this):
             raise Exception("'this' must be of compatible type")
         if not this and not self.is_static:
             raise Exception("A class instance is required")
 
         if isinstance(this, dsl_types.MuranoObject):
-            this = this.cast(self.murano_class)
+            this = this.cast(self.declaring_type)
         else:
-            this = self.murano_class
+            this = self.declaring_type
         return executor.invoke_method(
             self, this, context, args, kwargs, skip_stub)
 
@@ -143,7 +143,7 @@ class MuranoMethod(dsl_types.MuranoMethod):
 class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec):
     def __init__(self, murano_method, method_name, arg_name, declaration):
         super(MuranoMethodArgument, self).__init__(
-            declaration, murano_method.murano_class)
+            declaration, murano_method.declaring_type)
         self._method_name = method_name
         self._arg_name = arg_name
         self._murano_method = weakref.ref(murano_method)
@@ -153,7 +153,7 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec):
             return super(MuranoMethodArgument, self).validate(*args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}::{1}({2}{3})] {4}'.format(
-                self.murano_method.murano_class.name,
+                self.murano_method.declaring_type.name,
                 self.murano_method.name, self.name,
                 e.path, six.text_type(e))
             six.reraise(exceptions.ContractViolationException,

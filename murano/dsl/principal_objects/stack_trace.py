@@ -49,8 +49,8 @@ class StackTrace(object):
                 native_frames.append({
                     'instruction': frame[4][0].strip(),
                     'location': location,
-                    'method': method,
-                    'class': None
+                    'methodName': method,
+                    'typeName': None
                 })
             frames.extend(native_frames)
 
@@ -72,18 +72,18 @@ def compose_stack_frame(context):
         'location': None if instruction is None
         else instruction.source_file_position,
 
-        'method': None if method is None else method.name,
-        'class': None if method is None else method.murano_class.name
+        'methodName': None if method is None else method.name,
+        'typeName': None if method is None else method.declaring_type.name
     }
 
 
 def format_frame(frame, prefix=''):
     instruction = frame['instruction']
-    method = frame['method']
-    murano_class = frame['class']
+    method_name = frame['methodName']
+    type_name = frame['typeName']
     location = frame['location']
-    if murano_class:
-        method += ' of class ' + murano_class
+    if type_name:
+        method_name += ' of type ' + type_name
 
     if location:
         args = (
@@ -91,7 +91,7 @@ def format_frame(frame, prefix=''):
             location.start_line,
             ':' + str(location.start_column)
             if location.start_column >= 0 else '',
-            method,
+            method_name,
             instruction,
             prefix
         )
@@ -99,7 +99,7 @@ def format_frame(frame, prefix=''):
                 u'{5}    {4}').format(*args)
     else:
         return u'{2}File <unknown> in method {0}\n{2}    {1}'.format(
-            method, instruction, prefix)
+            method_name, instruction, prefix)
 
 
 def create_stack_trace(context, include_native_frames=True):

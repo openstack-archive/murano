@@ -17,8 +17,8 @@ import os
 import mock
 import yaml as yamllib
 
-from murano.dsl import murano_class
 from murano.dsl import murano_object
+from murano.dsl import murano_type
 from murano.dsl import object_store
 from murano.engine.system import agent
 from murano.engine.system import resource_manager
@@ -33,7 +33,7 @@ class TestExecutionPlan(base.MuranoTestCase):
         else:
             self.yaml_loader = yamllib.SafeLoader
 
-        self.mock_murano_class = mock.Mock(spec=murano_class.MuranoClass)
+        self.mock_murano_class = mock.Mock(spec=murano_type.MuranoClass)
         self.mock_murano_class.name = 'io.murano.system.Agent'
         self.mock_murano_class.declared_parents = []
         self.mock_object_store = mock.Mock(spec=object_store.ObjectStore)

@@ -184,16 +184,16 @@ class MuranoObject(dsl_types.MuranoObject):
         if name in start_type.properties:
             spec = start_type.properties[name]
             if spec.usage == typespec.PropertyUsages.Static:
-                return spec.murano_class.get_property(name, context)
+                return spec.declaring_type.get_property(name, context)
             else:
                 return self.cast(start_type)._get_property_value(name)
         else:
             try:
                 spec = start_type.find_single_property(name)
                 if spec.usage == typespec.PropertyUsages.Static:
-                    return spec.murano_class.get_property(name, context)
+                    return spec.declaring_type.get_property(name, context)
                 else:
-                    return self.cast(spec.murano_class).__properties[name]
+                    return self.cast(spec.declaring_type).__properties[name]
             except exceptions.NoPropertyFound:
                 if derived:
                     return self.cast(caller_class)._get_property_value(name)
@@ -229,13 +229,13 @@ class MuranoObject(dsl_types.MuranoObject):
                     raise exceptions.NoWriteAccessError(name)
 
                 if spec.usage == typespec.PropertyUsages.Static:
-                    classes_for_static_properties.append(spec.murano_class)
+                    classes_for_static_properties.append(spec.declaring_type)
                 else:
                     default = self.__config.get(name, spec.default)
                     default = self.__defaults.get(name, default)
                     default = helpers.evaluate(default, context)
 
-                    obj = self.cast(spec.murano_class)
+                    obj = self.cast(spec.declaring_type)
                     values_to_assign.append((obj, spec.validate(
                         value, self.real_this,
                         self.real_this, context, default=default)))

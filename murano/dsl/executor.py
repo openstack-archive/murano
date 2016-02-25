@@ -75,7 +75,7 @@ class MuranoDslExecutor(object):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
         kwargs = utils.filter_parameters_dict(kwargs)
-        runtime_version = method.murano_class.package.runtime_version
+        runtime_version = method.declaring_type.package.runtime_version
         yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
         if context is None or not skip_stub:
             actions_only = context is None and not method.name.startswith('.')
@@ -92,7 +92,7 @@ class MuranoDslExecutor(object):
 
         if method.is_static:
             obj_context = self.create_object_context(
-                method.murano_class, context)
+                method.declaring_type, context)
         else:
             obj_context = self.create_object_context(this, context)
         context = self.create_method_context(obj_context, method)
@@ -112,11 +112,11 @@ class MuranoDslExecutor(object):
 
             def call():
                 if isinstance(method.body, specs.FunctionDefinition):
-                    if isinstance(this, dsl_types.MuranoClass):
+                    if isinstance(this, dsl_types.MuranoType):
                         native_this = this.get_reference()
                     else:
                         native_this = dsl.MuranoObjectInterface(this.cast(
-                            method.murano_class), self)
+                            method.declaring_type), self)
                     return method.body(
                         yaql_engine, context, native_this)(*args, **kwargs)
                 else:
@@ -136,7 +136,7 @@ class MuranoDslExecutor(object):
     def _acquire_method_lock(self, method, this):
         method_id = id(method)
         if method.is_static:
-            this_id = id(method.murano_class)
+            this_id = id(method.declaring_type)
         else:
             this_id = this.object_id
         thread_id = helpers.get_current_thread_id()
@@ -168,7 +168,7 @@ class MuranoDslExecutor(object):
             (u'{0} => {1}'.format(name, value)
              for name, value in six.iteritems(kwargs)))
         params_str = u', '.join(param_gen)
-        method_name = '{0}::{1}'.format(method.murano_class.name, method.name)
+        method_name = '::'.join((method.declaring_type.name, method.name))
         thread_id = helpers.get_current_thread_id()
         caller_str = ''
         caller_ctx = helpers.get_caller_context(context)
@@ -278,14 +278,14 @@ class MuranoDslExecutor(object):
             self.context_manager.create_package_context(package))
         return context
 
-    def create_class_context(self, murano_class):
+    def create_type_context(self, murano_type):
         package_context = self.create_package_context(
-            murano_class.package)
+            murano_type.package)
         context = helpers.link_contexts(
             package_context,
-            self.context_manager.create_class_context(
-                murano_class)).create_child_context()
-        context[constants.CTX_TYPE] = murano_class
+            self.context_manager.create_type_context(
+                murano_type)).create_child_context()
+        context[constants.CTX_TYPE] = murano_type
         return context
 
     def create_object_context(self, obj, caller_context=None):
@@ -294,7 +294,7 @@ class MuranoDslExecutor(object):
             obj = None
         else:
             obj_type = obj.type
-        class_context = self.create_class_context(obj_type)
+        class_context = self.create_type_context(obj_type)
         if obj is not None:
             context = helpers.link_contexts(
                 class_context, self.context_manager.create_object_context(

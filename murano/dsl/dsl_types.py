@@ -13,7 +13,11 @@
 #    under the License.
 
 
-class MuranoClass(object):
+class MuranoType(object):
+    pass
+
+
+class MuranoClass(MuranoType):
     pass
 
 
@@ -38,23 +42,23 @@ class MuranoProperty(object):
 
 
 class MuranoTypeReference(object):
-    def __init__(self, murano_class):
-        self.__murano_class = murano_class
+    def __init__(self, murano_type):
+        self.__murano_type = murano_type
 
     @property
-    def murano_class(self):
-        return self.__murano_class
+    def type(self):
+        return self.__murano_type
 
     def __repr__(self):
-        return '*' + repr(self.murano_class)
+        return '*' + repr(self.type)
 
     def __eq__(self, other):
         if not isinstance(other, MuranoTypeReference):
             return False
-        return self.murano_class == other.murano_class
+        return self.type == other.type
 
     def __hash__(self):
-        return hash(self.murano_class)
+        return hash(self.type)
 
 
 class YaqlExpression(object):

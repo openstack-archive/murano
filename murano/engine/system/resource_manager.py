@@ -77,5 +77,5 @@ class ResourceManager(object):
                 return receiver.extension._package
             murano_class = helpers.get_type(helpers.get_caller_context())
         else:
-            murano_class = owner.murano_class
+            murano_class = owner.type
         return murano_class.package

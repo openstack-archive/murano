@@ -22,8 +22,8 @@ from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
-from murano.dsl import murano_class
 from murano.dsl import murano_object
+from murano.dsl import murano_type
 from murano.dsl import principal_objects
 from murano.dsl import yaql_integration
 
@@ -88,7 +88,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
     def _register_mpl_class(self, data, name=None):
         type_obj = self._classes.get(name)
         if not type_obj:
-            type_obj = murano_class.MuranoClass.create(data, self, name)
+            type_obj = murano_type.create(data, self, name)
             self._classes[name] = type_obj
         return type_obj
 
@@ -131,7 +131,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 self._register_native_class(cls, name)
             else:
                 self._native_load_queue[name] = cls
-        elif isinstance(cls, murano_class.MuranoClass):
+        elif isinstance(cls, dsl_types.MuranoType):
             self._classes[cls.name] = cls
         else:
             self._load_queue[name] = cls

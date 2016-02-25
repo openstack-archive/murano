@@ -30,8 +30,8 @@ class ContextManager(object):
     def create_package_context(self, package):
         return package.context
 
-    def create_class_context(self, murano_class):
-        return murano_class.context
+    def create_type_context(self, murano_type):
+        return murano_type.context
 
     def create_object_context(self, obj):
         return None

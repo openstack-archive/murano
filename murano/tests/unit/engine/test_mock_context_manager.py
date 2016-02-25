@@ -17,7 +17,7 @@ from yaql import specs
 
 from murano.dsl import constants
 from murano.dsl import executor
-from murano.dsl import murano_class
+from murano.dsl import murano_type
 from murano.engine import execution_session
 from murano.engine import mock_context_manager
 from murano.engine.system import test_fixture
@@ -64,9 +64,9 @@ class MockRunner(runner.Runner):
 
 class TestMockManager(base.MuranoTestCase):
 
-    def test_create_class_context(self):
+    def test_create_type_context(self):
         mock_manager = mock_context_manager.MockContextManager()
-        mock_murano_class = mock.MagicMock(spec=murano_class.MuranoClass)
+        mock_murano_class = mock.MagicMock(spec=murano_type.MuranoClass)
         mock_murano_class.name = FIXTURE_CLASS
         original_function = mock.MagicMock(spec=specs.FunctionDefinition)
         original_function.is_method = True
@@ -84,7 +84,7 @@ class TestMockManager(base.MuranoTestCase):
 
         mock_manager.class_mock_ctx[FIXTURE_CLASS] = [mock_function]
 
-        result_context = mock_manager.create_class_context(mock_murano_class)
+        result_context = mock_manager.create_type_context(mock_murano_class)
         all_functions = result_context.collect_functions(FIXTURE_FUNC)
 
         # Mock function should go first, but result context should contain both
