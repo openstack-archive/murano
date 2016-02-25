@@ -145,7 +145,8 @@ Workarounds:
   :file:`/var/log/murano-agent.log` The first part of the log file contains
   reconnection attempts to the RabbitMQ since the valid RabbitMQ address
   and queue have not been obtained yet.
-* Verify that the ``driver`` option is set to ``messagingv2``
+* Verify that the ``driver`` option in ``[oslo_messaging_notifications]`` group
+  is set to ``messagingv2``.
 
 **murano.engine.system.agent.AgentException**
 
