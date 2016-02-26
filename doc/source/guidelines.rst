@@ -20,6 +20,12 @@ To check your code against PEP 8 run:
    * https://flake8.readthedocs.org
    * http://docs.openstack.org/developer/hacking/
 
+Blueprints and Specs
+--------------------
+
+Murano team uses the `murano-specs`_ repository for its blueprint and
+specification (specs) review process. See `Launchpad`_ to propose or
+see the status of a current blueprint.
 
 Testing Guidelines
 ------------------
@@ -73,3 +79,5 @@ Run the following command to build docs locally.
 .. _PEP 257: http://www.python.org/dev/peps/pep-0257/
 .. _Tox: http://tox.testrun.org/
 .. _Sphinx: http://sphinx.pocoo.org/markup/index.html
+.. _murano-specs: http://git.openstack.org/cgit/openstack/murano-specs
+.. _Launchpad: http://blueprints.launchpad.net/murano
