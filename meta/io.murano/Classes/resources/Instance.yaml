@@ -278,10 +278,10 @@ Methods:
     Body:
       - $blockDevice.volume.deploy()
       - Return:
-          device_name: $volItem.deviceName
-          volume_id: $volItem.volume.getRef()
-          device_type: $volItem.deviceType
-          boot_index: $volItem.bootIndex
+          device_name: $blockDevice.deviceName
+          volume_id: $blockDevice.volume.getRef()
+          device_type: $blockDevice.deviceType
+          boot_index: $blockDevice.bootIndex
 
   releaseResources:
     Body:
