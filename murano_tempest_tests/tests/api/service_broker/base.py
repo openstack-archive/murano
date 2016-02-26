@@ -34,7 +34,7 @@ class BaseServiceBrokerTest(test.BaseTestCase):
                                        type_of_creds="admin"):
 
         cls.dynamic_cred = dynamic_creds.DynamicCredentialProvider(
-            identity_version=CONF.service_broker.identity_version,
+            identity_version=CONF.identity.auth_version,
             name=cls.__name__)
         if "admin" in type_of_creds:
             creds = cls.dynamic_cred.get_admin_creds()

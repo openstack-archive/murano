@@ -21,7 +21,7 @@ murano_group = cfg.OptGroup(name='murano', title="murano")
 
 MuranoGroup = [
     cfg.StrOpt('auth_url',
-               default='http://127.0.0.1:5000/v2.0/',
+               default='http://127.0.0.1:5000',
                help="keystone url"),
     cfg.StrOpt('user',
                default='admin',

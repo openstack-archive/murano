@@ -39,14 +39,13 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
 
     @classmethod
     def get_configured_isolated_creds(cls, type_of_creds='admin'):
-
         identity_version = cls.get_identity_version()
         if identity_version == 'v3':
             cls.admin_role = CONF.identity.admin_role
         else:
             cls.admin_role = 'admin'
         cls.dynamic_cred = dynamic_creds.DynamicCredentialProvider(
-            identity_version=CONF.application_catalog.identity_version,
+            identity_version=CONF.identity.auth_version,
             name=cls.__name__, admin_role=cls.admin_role,
             admin_creds=common_creds.get_configured_credentials(
                 'identity_admin'))

@@ -14,7 +14,9 @@
 
 import base64
 
+from keystoneclient.auth.identity import v3
 from keystoneclient import exceptions
+from keystoneclient import session as ks_session
 from keystoneclient.v3 import client
 from oslo_config import cfg
 from oslo_log import log
@@ -33,11 +35,15 @@ class ExternalContextMiddleware(wsgi.Middleware):
         # section related to Cloud Foundry service broker is probably a duct
         # tape and should be rewritten as soon as we get more non-OpenStack
         # services as murano recipients.
-        keystone = client.Client(username=user,
-                                 password=password,
-                                 project_name=CONF.cfapi.tenant,
-                                 auth_url=CONF.cfapi.auth_url.replace(
-                                     'v2.0', 'v3'))
+
+        kwargs = {'auth_url': CONF.cfapi.auth_url.replace('v2.0', 'v3'),
+                  'username': user,
+                  'password': password,
+                  'project_name': CONF.cfapi.tenant}
+        password_auth = v3.Password(**kwargs)
+        session = ks_session.Session(auth=password_auth)
+        keystone = client.Client(session=session)
+
         return keystone.auth_token
 
     def process_request(self, req):
