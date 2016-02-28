@@ -159,7 +159,8 @@ def get_function_definition(func, murano_method, original_name):
     fd.is_method = True
     fd.is_function = False
     if helpers.inspect_is_method(cls, original_name):
-        fd.set_parameter(0, yaqltypes.PythonType(cls), overwrite=True)
+        fd.set_parameter(
+            0, dsl.MuranoType(murano_method.murano_class), overwrite=True)
     if helpers.inspect_is_classmethod(cls, original_name):
         _remove_first_parameter(fd)
         body = func
@@ -168,12 +169,24 @@ def get_function_definition(func, murano_method, original_name):
         fd.name = name
     fd.insert_parameter(specs.ParameterDefinition(
         '?1', yaqltypes.Context(), 0))
+    is_static = (helpers.inspect_is_static(cls, original_name) or
+                 helpers.inspect_is_classmethod(cls, original_name))
+    if is_static:
+        fd.insert_parameter(specs.ParameterDefinition(
+            '?2', yaqltypes.PythonType(object), 1))
 
-    def payload(__context, *args, **kwargs):
+    def payload(__context, __self, *args, **kwargs):
+        with helpers.contextual(__context):
+            return body(__self.extension, *args, **kwargs)
+
+    def static_payload(__context, __receiver, *args, **kwargs):
         with helpers.contextual(__context):
             return body(*args, **kwargs)
 
-    fd.payload = payload
+    if is_static:
+        fd.payload = static_payload
+    else:
+        fd.payload = payload
     fd.meta[constants.META_MURANO_METHOD] = murano_method
     return fd
 
@@ -252,7 +265,7 @@ def get_class_factory_definition(cls, murano_class):
     engine = choose_yaql_engine(runtime_version)
 
     def payload(__context, __receiver, *args, **kwargs):
-        assert __receiver is None
+        # assert __receiver is None
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):

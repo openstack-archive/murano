@@ -29,17 +29,24 @@ class TestStatics(test_case.DslTestCase):
         class PythonClass(object):
             @staticmethod
             @specs.parameter('arg', yaqltypes.Integer())
-            def static_python_method(arg):
+            @specs.inject('receiver', yaqltypes.Receiver())
+            def static_python_method(arg, receiver):
+                if isinstance(receiver, dsl_types.MuranoObjectInterface):
+                    return 3 * arg
                 return 7 * arg
 
             @classmethod
-            def classmethod_python_method(cls, arg):
+            @specs.inject('receiver', yaqltypes.Receiver())
+            def classmethod_python_method(cls, arg, receiver):
+                if isinstance(receiver, dsl_types.MuranoObjectInterface):
+                    return cls.__name__.upper() + str(arg)
                 return cls.__name__ + str(arg)
 
         super(TestStatics, self).setUp()
+        self.package_loader.load_class_package(
+            'test.TestStatics', None).register_class(PythonClass)
         self._runner = self.new_runner(
             om.Object('test.TestStatics', staticProperty2='INVALID'))
-        self._runner.root.type.package.register_class(PythonClass)
 
     def test_call_static_method_on_object(self):
         self.assertEqual(123, self._runner.testCallStaticMethodOnObject())
@@ -122,9 +129,11 @@ class TestStatics(test_case.DslTestCase):
         self.assertTrue(self._runner.testTypeinfoOfType())
 
     def test_call_python_static_method(self):
-        self.assertEqual([777] * 4, self._runner.testCallPythonStaticMethod())
+        self.assertEqual(
+            [333] + [777] * 3,
+            self._runner.testCallPythonStaticMethod())
 
     def test_call_python_classmethod(self):
         self.assertEqual(
-            ['PythonClass!'] * 4,
+            ['PYTHONCLASS!'] + ['PythonClass!'] * 3,
             self._runner.testCallPythonClassMethod())

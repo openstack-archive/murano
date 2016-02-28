@@ -76,8 +76,10 @@ class ThisParameterType(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
         this = helpers.get_this(context)
-        executor = helpers.get_executor(context)
-        return MuranoObjectInterface(this, executor)
+        if isinstance(this, dsl_types.MuranoObject):
+            executor = helpers.get_executor(context)
+            return MuranoObjectInterface(this, executor)
+        return this
 
 
 class InterfacesParameterType(yaqltypes.HiddenParameterType,

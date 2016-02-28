@@ -16,8 +16,11 @@
 import json as jsonlib
 
 import yaml as yamllib
+from yaql.language import specs
+from yaql.language import yaqltypes
 
 from murano.dsl import dsl
+from murano.dsl import dsl_types
 from murano.dsl import helpers
 
 if hasattr(yamllib, 'CSafeLoader'):
@@ -46,13 +49,33 @@ class ResourceManager(object):
         murano_class = helpers.get_type(helpers.get_caller_context(context))
         self._package = murano_class.package
 
-    def string(self, name):
-        path = self._package.get_resource(name)
+    @staticmethod
+    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.inject('receiver', yaqltypes.Receiver())
+    def string(receiver, name, owner=None):
+        path = ResourceManager._get_package(owner, receiver).get_resource(name)
         with open(path) as file:
             return file.read()
 
-    def json(self, name):
-        return jsonlib.loads(self.string(name))
+    @classmethod
+    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.inject('receiver', yaqltypes.Receiver())
+    def json(cls, receiver, name, owner=None):
+        return jsonlib.loads(cls.string(receiver, name, owner))
 
-    def yaml(self, name):
-        return yamllib.load(self.string(name), Loader=yaml_loader)
+    @classmethod
+    @specs.parameter('owner', dsl.MuranoTypeName(nullable=True))
+    @specs.inject('receiver', yaqltypes.Receiver())
+    def yaml(cls, receiver, name, owner=None):
+        return yamllib.load(
+            cls.string(receiver, name, owner), Loader=yaml_loader)
+
+    @staticmethod
+    def _get_package(owner, receiver):
+        if owner is None:
+            if isinstance(receiver, dsl_types.MuranoObjectInterface):
+                return receiver.extension._package
+            murano_class = helpers.get_type(helpers.get_caller_context())
+        else:
+            murano_class = owner.murano_class
+        return murano_class.package
