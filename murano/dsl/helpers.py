@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import functools
+import inspect
 import itertools
 import string
 import sys
@@ -438,3 +439,33 @@ def link_contexts(parent_context, context):
     if not context:
         return parent_context
     return contexts.LinkedContext(parent_context, context)
+
+
+def inspect_is_static(cls, name):
+    m = cls.__dict__.get(name)
+    if m is None:
+        return False
+    return isinstance(m, staticmethod)
+
+
+def inspect_is_classmethod(cls, name):
+    m = cls.__dict__.get(name)
+    if m is None:
+        return False
+    return isinstance(m, classmethod)
+
+
+def inspect_is_method(cls, name):
+    m = getattr(cls, name, None)
+    if m is None:
+        return False
+    return ((inspect.isfunction(m) or inspect.ismethod(m)) and not
+            inspect_is_static(cls, name) and not
+            inspect_is_classmethod(cls, name))
+
+
+def inspect_is_property(cls, name):
+    m = getattr(cls, name, None)
+    if m is None:
+        return False
+    return inspect.isdatadescriptor(m)

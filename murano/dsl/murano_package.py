@@ -101,13 +101,16 @@ class MuranoPackage(dsl_types.MuranoPackage):
         except exceptions.NoClassFound:
             m_class = self._register_mpl_class({'Name': name}, name)
 
-        m_class.extend_with_class(cls)
+        m_class.extension_class = cls
 
         for method_name in dir(cls):
             if method_name.startswith('_'):
                 continue
             method = getattr(cls, method_name)
-            if not inspect.ismethod(method):
+            if not any((
+                    helpers.inspect_is_method(cls, method_name),
+                    helpers.inspect_is_static(cls, method_name),
+                    helpers.inspect_is_classmethod(cls, method_name))):
                 continue
             # TODO(slagun): update the code below to use yaql native
             # method for this when https://review.openstack.org/#/c/220748/
@@ -117,14 +120,17 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 method, '__murano_name', None) or
                 yaql_integration.CONVENTION.convert_function_name(
                     method_name.rstrip('_')))
-            m_class.add_method(method_name_alias, method)
+            m_class.add_method(method_name_alias, method, method_name)
         self._imported_types.add(cls)
         return m_class
 
     def register_class(self, cls, name=None):
         if inspect.isclass(cls):
             name = name or getattr(cls, '__murano_name', None) or cls.__name__
-            self._native_load_queue[name] = cls
+            if name in self._classes:
+                self._register_native_class(cls, name)
+            else:
+                self._native_load_queue[name] = cls
         elif isinstance(cls, murano_class.MuranoClass):
             self._classes[cls.name] = cls
         else:
