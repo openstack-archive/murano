@@ -49,5 +49,5 @@ class NamespaceResolver(object):
 
         ns = self._namespaces[parts[0]]
         if not ns:
-            return name
+            return parts[1]
         return '.'.join((ns, parts[1]))
