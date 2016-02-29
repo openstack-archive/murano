@@ -21,6 +21,9 @@ import yaql
 import yaql.exceptions
 import yaql.expressions
 
+from murano.openstack.common import log as logging
+
+LOG = logging.getLogger(__name__)
 
 class YaqlExpression(object):
     def __init__(self, expression):
@@ -72,7 +75,12 @@ class YaqlExpression(object):
             return False
 
     def evaluate(self, context=None):
-        return self._parsed_expression.evaluate(context=context)
+        try:
+            return self._parsed_expression.evaluate(context=context)
+        except Exception:
+            msg = "Failed to execute expression: {0}".format(self._expression)
+            LOG.error(msg)
+            raise
 
 
 class YaqlExpressionFilePosition(object):
