@@ -1,6 +1,7 @@
 Namespaces:
   ns: test
   =: test
+  e: ''
 
 Name: TestStatics
 
@@ -39,6 +40,10 @@ Methods:
   testCallStaticMethodOnClassName:
     Body:
       Return: :TestStatics.simpleStaticMethod()
+
+  testCallStaticMethodOnInvalidClass:
+    Body:
+      Return: e:TestUnicode.simpleStaticMethod()
 
   testCallStaticMethodOnClassNameWithNs:
     Body:

@@ -146,9 +146,9 @@ class TypeScheme(object):
                     'Object {0} violates notOwned() contract'.format(obj))
 
         @specs.parameter('name', dsl.MuranoTypeParameter(
-            False, root_context))
+            nullable=False, context=root_context))
         @specs.parameter('default_name', dsl.MuranoTypeParameter(
-            True, root_context))
+            nullable=True, context=root_context))
         @specs.parameter('value', nullable=True)
         @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
