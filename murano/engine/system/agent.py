@@ -21,7 +21,7 @@ import uuid
 import eventlet.event
 from oslo_config import cfg
 from oslo_log import log as logging
-from six.moves import urllib
+import six
 from yaql import specs
 
 import murano.common.exceptions as exceptions
@@ -39,7 +39,7 @@ class AgentException(Exception):
 
 @dsl.name('io.murano.system.Agent')
 class Agent(object):
-    def __init__(self, interfaces, host):
+    def __init__(self, host):
         self._enabled = False
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
@@ -116,7 +116,7 @@ class Agent(object):
             return None
 
     @specs.parameter(
-        'resources', dsl.MuranoType('io.murano.system.Resources'))
+        'resources', dsl.MuranoObjectParameter('io.murano.system.Resources'))
     def call(self, template, resources, timeout=None):
         if timeout is None:
             timeout = CONF.engine.agent_timeout
@@ -125,7 +125,7 @@ class Agent(object):
         return self._send(plan, True, timeout)
 
     @specs.parameter(
-        'resources', dsl.MuranoType('io.murano.system.Resources'))
+        'resources', dsl.MuranoObjectParameter('io.murano.system.Resources'))
     def send(self, template, resources):
         self._check_enabled()
         plan = self.build_execution_plan(template, resources())
@@ -254,7 +254,7 @@ class Agent(object):
 
     def _is_url(self, file):
         file = self._get_url(file)
-        parts = urllib.parse.urlsplit(file)
+        parts = six.moves.urllib.parse.urlsplit(file)
         if not parts.scheme or not parts.netloc:
             return False
         else:

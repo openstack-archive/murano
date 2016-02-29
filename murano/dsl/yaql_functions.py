@@ -25,13 +25,13 @@ from murano.dsl import helpers
 from murano.dsl import reflection
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType())
+@specs.parameter('object_', dsl.MuranoObjectParameter())
 def id_(object_):
-    return object_.object_id
+    return object_.id
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType())
-@specs.parameter('type__', dsl.MuranoTypeName())
+@specs.parameter('object_', dsl.MuranoObjectParameter())
+@specs.parameter('type__', dsl.MuranoTypeParameter())
 @specs.parameter('version_spec', yaqltypes.String(True))
 def cast(context, object_, type__, version_spec=None):
     return helpers.cast(
@@ -39,9 +39,10 @@ def cast(context, object_, type__, version_spec=None):
         version_spec or helpers.get_type(context))
 
 
-@specs.parameter('__type_name', dsl.MuranoTypeName())
+@specs.parameter('__type_name', dsl.MuranoTypeParameter())
 @specs.parameter('__extra', utils.MappingType)
-@specs.parameter('__owner', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('__owner', dsl.MuranoObjectParameter(
+    nullable=True, decorate=False))
 @specs.parameter('__object_name', yaqltypes.String(True))
 def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         **parameters):
@@ -56,10 +57,10 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         new_context, **parameters)
 
 
-@specs.parameter('type_name', dsl.MuranoTypeName())
+@specs.parameter('type_name', dsl.MuranoTypeParameter())
 @specs.parameter('parameters', utils.MappingType)
 @specs.parameter('extra', utils.MappingType)
-@specs.parameter('owner', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('owner', dsl.MuranoObjectParameter(nullable=True))
 @specs.parameter('object_name', yaqltypes.String(True))
 @specs.name('new')
 def new_from_dict(type_name, context, parameters,
@@ -68,7 +69,7 @@ def new_from_dict(type_name, context, parameters,
                **utils.filter_parameters_dict(parameters))
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType())
+@specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('func', yaqltypes.Lambda())
 def super_(context, object_, func=None):
     cast_type = helpers.get_type(context)
@@ -78,7 +79,7 @@ def super_(context, object_, func=None):
     return six.moves.map(func, super_(context, object_))
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType())
+@specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('func', yaqltypes.Lambda())
 def psuper(context, object_, func=None):
     if func is None:
@@ -93,16 +94,11 @@ def require(value):
     return value
 
 
-@specs.parameter('obj', dsl.MuranoObjectParameterType())
-@specs.parameter('murano_class_ref', dsl.MuranoTypeName())
+@specs.parameter('obj', dsl.MuranoObjectParameter())
+@specs.parameter('murano_class_ref', dsl.MuranoTypeParameter())
 @specs.extension_method
 def find(obj, murano_class_ref):
-    p = obj.owner
-    while p is not None:
-        if murano_class_ref.murano_class.is_compatible(p):
-            return p
-        p = p.owner
-    return None
+    return obj.find_owner(murano_class_ref, optional=True)
 
 
 @specs.parameter('seconds', yaqltypes.Number())
@@ -110,40 +106,40 @@ def sleep_(seconds):
     eventlet.sleep(seconds)
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(nullable=True))
 def type_(object_):
     return None if object_ is None else object_.type.get_reference()
 
 
 @specs.name('type')
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(nullable=True))
 def type_legacy(object_):
     return None if object_ is None else object_.type.name
 
 
 @specs.name('type')
-@specs.parameter('cls', dsl.MuranoTypeName())
+@specs.parameter('cls', dsl.MuranoTypeParameter())
 def type_from_name(cls):
     return cls
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(nullable=True))
 def typeinfo(object_):
     return None if object_ is None else object_.type
 
 
-@specs.parameter('cls', dsl.MuranoTypeName())
+@specs.parameter('cls', dsl.MuranoTypeParameter())
 @specs.name('typeinfo')
 def typeinfo_for_class(cls):
     return cls.murano_class
 
 
-@specs.parameter('object_', dsl.MuranoObjectParameterType(nullable=True))
+@specs.parameter('object_', dsl.MuranoObjectParameter(nullable=True))
 def name(object_):
     return None if object_ is None else object_.name
 
 
-@specs.parameter('obj', dsl.MuranoObjectParameterType())
+@specs.parameter('obj', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('property_name', yaqltypes.Keyword())
 @specs.name('#operator_.')
 def obj_attribution(context, obj, property_name):
@@ -157,7 +153,7 @@ def obj_attribution_static(context, cls, property_name):
     return cls.murano_class.get_property(property_name, context)
 
 
-@specs.parameter('receiver', dsl.MuranoObjectParameterType())
+@specs.parameter('receiver', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('expr', yaqltypes.Lambda(method=True))
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
@@ -199,8 +195,8 @@ def ns_resolve_unary(context, name):
     return ns_resolve(context, '', name)
 
 
-@specs.parameter('obj', dsl.MuranoObjectParameterType(nullable=True))
-@specs.parameter('type_', dsl.MuranoTypeName())
+@specs.parameter('obj', dsl.MuranoObjectParameter(nullable=True))
+@specs.parameter('type_', dsl.MuranoTypeParameter())
 @specs.name('#operator_is')
 def is_instance_of(obj, type_):
     if obj is None:

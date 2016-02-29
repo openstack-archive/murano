@@ -54,7 +54,7 @@ class StackTrace(object):
                 })
             frames.extend(native_frames)
 
-        this.data().frames = frames
+        this.properties.frames = frames
 
     @specs.meta(constants.META_NO_TRACE, True)
     @specs.meta('Usage', 'Action')

@@ -149,7 +149,7 @@ class LhsExpression(object):
             return _wrap_type_reference(yaql_functions.type_(object_))
 
         @specs.name('type')
-        @specs.parameter('cls', dsl.MuranoTypeName())
+        @specs.parameter('cls', dsl.MuranoTypeParameter())
         def type_from_name(cls):
             return _wrap_type_reference(cls)
 
