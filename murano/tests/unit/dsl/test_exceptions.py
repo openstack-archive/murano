@@ -80,7 +80,7 @@ class TestExceptions(test_case.DslTestCase):
         self.assertThat(
             call_stack,
             matchers.StartsWith(
-                'exceptions.LookupError: just random Python exception'))
+                'LookupError: just random Python exception'))
 
         self.assertIsInstance(e.original_exception, LookupError)
 

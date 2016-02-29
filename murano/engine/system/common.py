@@ -15,7 +15,7 @@
 
 from oslo_config import cfg
 
-import murano.common.messaging as messaging
+from murano.common.messaging import mqclient
 
 CONF = cfg.CONF
 
@@ -31,4 +31,4 @@ def create_rmq_client():
         'ssl': rabbitmq.ssl,
         'ca_certs': rabbitmq.ca_certs.strip() or None
     }
-    return messaging.MqClient(**connection_params)
+    return mqclient.MqClient(**connection_params)

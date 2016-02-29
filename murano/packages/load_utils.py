@@ -19,6 +19,7 @@ import sys
 import tempfile
 import zipfile
 
+import six
 import yaml
 
 from murano.common.plugins import package_types_loader
@@ -91,9 +92,11 @@ def load_from_dir(source_directory, filename='manifest.yaml'):
             content = yaml.safe_load(stream)
     except Exception as ex:
         trace = sys.exc_info()[2]
-        raise e.PackageLoadError(
-            "Unable to load due to '{0}'".format(str(ex))), None, trace
-    if content:
+        six.reraise(
+            e.PackageLoadError,
+            e.PackageLoadError("Unable to load due to '{0}'".format(ex)),
+            trace)
+    else:
         format_spec = str(content.get('Format') or 'MuranoPL/1.0')
         if format_spec[0].isdigit():
             format_spec = 'MuranoPL/' + format_spec

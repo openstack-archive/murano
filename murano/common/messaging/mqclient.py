@@ -17,7 +17,8 @@ import ssl as ssl_module
 
 from eventlet import patcher
 from oslo_serialization import jsonutils
-from subscription import Subscription
+
+from murano.common.messaging import subscription
 
 kombu = patcher.import_patched('kombu')
 
@@ -100,4 +101,5 @@ class MqClient(object):
         if not self._connected:
             raise RuntimeError('Not connected to RabbitMQ')
 
-        return Subscription(self._connection, queue, prefetch_count)
+        return subscription.Subscription(
+            self._connection, queue, prefetch_count)

@@ -88,7 +88,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
             self._load_classes(class_def_file)
 
     def _load_classes(self, class_def_file):
-        with open(class_def_file) as stream:
+        with open(class_def_file, 'rb') as stream:
             data_lst = self._yaml_loader(stream.read(), class_def_file)
 
         last_ns = {}

@@ -127,8 +127,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
-            raise (exceptions.NoPackageForClassFound(class_name),
-                   None, exc_info[2])
+            six.reraise(exceptions.NoPackageForClassFound,
+                        exceptions.NoPackageForClassFound(class_name),
+                        exc_info[2])
         return self._to_dsl_package(
             self._get_package_by_definition(package_definition))
 
@@ -256,7 +257,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     package_id, str(e)
                 )
                 exc_info = sys.exc_info()
-                six.reraise(pkg_exc.PackageLoadError(msg), None, exc_info[2])
+                six.reraise(pkg_exc.PackageLoadError,
+                            pkg_exc.PackageLoadError(msg),
+                            exc_info[2])
             package_file = None
             try:
                 with tempfile.NamedTemporaryFile(delete=False) as package_file:
@@ -278,7 +281,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             except IOError:
                 msg = 'Unable to extract package data for %s' % package_id
                 exc_info = sys.exc_info()
-                raise pkg_exc.PackageLoadError(msg), None, exc_info[2]
+                six.reraise(pkg_exc.PackageLoadError,
+                            pkg_exc.PackageLoadError(msg),
+                            exc_info[2])
             finally:
                 try:
                     if package_file:
@@ -296,7 +301,6 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         if not package_directory:
             return
 
-        pkg_ids_listed = set()
         try:
             pkg_ids_listed = set(os.listdir(package_directory))
         except OSError:

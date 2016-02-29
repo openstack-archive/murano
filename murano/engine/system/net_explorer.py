@@ -72,7 +72,8 @@ class NetworkExplorer(object):
                     if uuidutils.is_uuid_like(external_network) \
                     else {'name': external_network}
                 networks = self._client.list_networks(**kwargs).get('networks')
-                ext_nets = filter(lambda n: n['router:external'], networks)
+                ext_nets = list(filter(lambda n: n['router:external'],
+                                       networks))
                 if len(ext_nets) == 0:
                     raise KeyError('Router %s could not be created, '
                                    'no external network found' % router_name)

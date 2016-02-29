@@ -25,7 +25,7 @@ import six
 from yaql import specs
 
 import murano.common.exceptions as exceptions
-import murano.common.messaging as messaging
+from murano.common.messaging import message
 from murano.dsl import dsl
 import murano.engine.system.common as common
 
@@ -75,7 +75,7 @@ class Agent(object):
                 'by the server configuration')
 
     def _prepare_message(self, template, msg_id):
-        msg = messaging.Message()
+        msg = message.Message()
         msg.body = template
         msg.id = msg_id
         return msg

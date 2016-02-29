@@ -27,7 +27,7 @@ class CodeBlock(expressions.DslExpression):
     def __init__(self, body):
         if not isinstance(body, list):
             body = [body]
-        self.code_block = map(expressions.parse_expression, body)
+        self.code_block = list(map(expressions.parse_expression, body))
 
     def execute(self, context):
         for expr in self.code_block:

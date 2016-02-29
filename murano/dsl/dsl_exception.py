@@ -14,6 +14,8 @@
 
 import sys
 
+import six
+
 from murano.dsl.principal_objects import stack_trace
 
 
@@ -53,8 +55,13 @@ class MuranoPlException(Exception):
     def from_python_exception(exception, context):
         stacktrace = stack_trace.create_stack_trace(context)
         exception_type = type(exception)
-        names = ['{0}.{1}'.format(exception_type.__module__,
-                                  exception_type.__name__)]
+        builtins_module = 'builtins' if six.PY3 else 'exceptions'
+        module = exception_type.__module__
+        if module == builtins_module:
+            names = [exception_type.__name__]
+        else:
+            names = ['{0}.{1}'.format(exception_type.__module__,
+                                      exception_type.__name__)]
 
         result = MuranoPlException(
             names, str(exception), stacktrace)

@@ -67,29 +67,29 @@ class TestContracts(test_case.DslTestCase):
     def test_bool_contract(self):
         result = self._runner.testBoolContract(True)
         self.assertIsInstance(result, bool)
-        self.assertIs(result, True)
+        self.assertTrue(result)
 
         result = self._runner.testBoolContract(False)
         self.assertIsInstance(result, bool)
-        self.assertIs(result, False)
+        self.assertFalse(result)
 
     def test_bool_from_int_contract(self):
         result = self._runner.testBoolContract(10)
         self.assertIsInstance(result, bool)
-        self.assertIs(result, True)
+        self.assertTrue(result)
 
         result = self._runner.testBoolContract(0)
         self.assertIsInstance(result, bool)
-        self.assertIs(result, False)
+        self.assertFalse(result)
 
     def test_bool_from_string_contract(self):
         result = self._runner.testBoolContract('something')
         self.assertIsInstance(result, bool)
-        self.assertIs(result, True)
+        self.assertTrue(result)
 
         result = self._runner.testBoolContract('')
         self.assertIsInstance(result, bool)
-        self.assertIs(result, False)
+        self.assertFalse(result)
 
     def test_bool_null_contract(self):
         self.assertIsNone(self._runner.testIntContract(None))
