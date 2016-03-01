@@ -15,8 +15,8 @@
 import os
 import uuid
 
+from tempest.lib import exceptions
 from tempest.test import attr
-from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
 from murano.tests.functional.common import utils as common_utils

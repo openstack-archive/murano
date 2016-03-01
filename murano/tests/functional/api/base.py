@@ -22,9 +22,9 @@ from tempest import clients
 from tempest.common import credentials_factory as common_creds
 from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib.common import rest_client
+from tempest.lib import exceptions
 from tempest import test
-from tempest_lib.common import rest_client
-from tempest_lib import exceptions
 
 
 CONF = config.CONF
