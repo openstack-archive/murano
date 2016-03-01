@@ -78,12 +78,12 @@ Importing packages in Murano
 ============================
 
 ``package-import`` subcommand can install packages in several different ways:
-    * from a locall file
+    * from a local file
     * from a http url
     * from murano app repository
 
 When creating a package you can specify it's categories with
-``-c/--categories`` and set it's publicity with ``--public``
+``-c/--categories`` and set it's publicity with ``--is-public``
 
 To import a local package run::
 
@@ -123,13 +123,14 @@ would ask you what do do with it. You can specify the default action with
 Importing bundles of packages in Murano
 =======================================
 
-``package-import`` subcommand can install packages in several different ways:
+``bundle-import`` subcommand can install bundles of packages in several
+different ways:
     * from a local file
     * from a http url
     * from murano app repository
 
 When creating a package you can specify it's categories with
-``-c/--categories`` and set it's publicity with ``--public``
+``-c/--categories`` and set it's publicity with ``--is-public``
 
 To import a local bundle run::
 
@@ -143,10 +144,12 @@ To import a bundle from murano repository run::
 
     murano bundle-import bundle_name
 
-Note: When importing from a local file packages would first be searched in a
-directory, relative to the directory containing the bundle file itself. This
-is done to facilitate installing bundles in an environment with no access to
-the repository itself.
+.. note::
+
+   When importing from a local file packages would first be searched in a
+   directory, relative to the directory containing the bundle file itself.
+   This is done to facilitate installing bundles in an environment with no
+   access to the repository itself.
 
 Deleting packages from murano
 =============================
@@ -174,7 +177,7 @@ files/directories. To find out more about this command run::
     murano help package-create
 
 This command is useful, when application package files are spread across
-several directories, and for auto-generating packages from heat templates
+several directories, and for auto-generating packages from heat templates.
 For more info about package composition please see package creation docs:
 :ref:`step-by-step`.
 

@@ -199,11 +199,11 @@ murano applications repository using the package URL:
   # murano package-import http://storage.apps.openstack.org/apps/io.murano.databases.MySql.zip
   Inspecting required images
   Importing package io.murano.databases.MySql
-  +----------------------------------+-------+--------------------------+--------------+----------+
-  | ID                               | Name  | FQN                      | Author       | Is Public|
-  +----------------------------------+-------+-----------------------------------------+----------+
-  | 1aa62196595f411399e4e48cc2f6a512 | MySQL | io.murano.databases.MySql| Mirantis, Inc|          |
-  +----------------------------------+-------+-----------------------------------------+----------+
+  +----------------------------------+-------+--------------------------+--------------+--------+----------+------------+
+  | ID                               | Name  | FQN                      | Author       | Active | Is Public| Type       |
+  +----------------------------------+-------+-----------------------------------------+--------+----------+------------+
+  | 1aa62196595f411399e4e48cc2f6a512 | MySQL | io.murano.databases.MySql| Mirantis, Inc| True   |          | Application|
+  +----------------------------------+-------+-----------------------------------------+--------+----------+------------+
 
 .. _cli_bundles:
 
@@ -218,7 +218,7 @@ several different ways:
 * :ref:`from murano app repository <cli_bundle_repo>`
 
 When importing bundles, you can specify their categories with
-``-c/--categories`` and set their publicity with ``--public``.
+``-c/--categories`` and set their publicity with ``--is-public``.
 
 .. _cli_local_bundle:
 
@@ -247,12 +247,12 @@ The following example shows the import of a monitoring bundle:
  Inspecting required images
  Importing package io.murano.apps.ZabbixServer
  Importing package io.murano.apps.ZabbixAgent
- +----------------------------------+---------------+-----------------------------+---------------+-----------+
- | ID                               | Name          | FQN                         | Author        | Is Public |
- +----------------------------------+---------------+-----------------------------+---------------+-----------+
- | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent  | io.murano.apps.ZabbixAgent  | Mirantis, Inc |           |
- | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server | io.murano.apps.ZabbixServer | Mirantis, Inc |           |
- +----------------------------------+---------------+-----------------------------+---------------+-----------+
+ +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
+ | ID                               | Name          | FQN                         | Author        | Active | Is Public| Type       |
+ +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent  | io.murano.apps.ZabbixAgent  | Mirantis, Inc | True   |          | Application|
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server | io.murano.apps.ZabbixServer | Mirantis, Inc | True   |          | Application|
+ +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
 
 .. note::
 
@@ -317,16 +317,16 @@ ID, name, author and if it is public or not. For example:
 .. code-block:: console
 
  # murano package-list
- +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
- | ID                               | Name               | FQN                                    | Author        | Is Public |
- +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
- | daa46cfd78c74c11bcbe66d3239e546e | Apache HTTP Server | io.murano.apps.apache.ApacheHttpServer | Mirantis, Inc |           |
- | 5252c9897e864c9f940e08500056f155 | Cloud Foundry      | io.murano.apps.paas.CloudFoundry       | Mirantis, Inc |           |
- | 1aa62196595f411399e4e48cc2f6a512 | MySQL              | io.murano.databases.MySql              | Mirantis, Inc |           |
- | 11d73cfdc6d7447a910984d95090463b | SQL Library        | io.murano.databases                    | Mirantis, Inc |           |
- | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent       | io.murano.apps.ZabbixAgent             | Mirantis, Inc |           |
- | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server      | io.murano.apps.ZabbixServer            | Mirantis, Inc |           |
- +----------------------------------+--------------------+----------------------------------------+---------------+-----------+
+ +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
+ | ID                               | Name               | FQN                                    | Author        | Active | Is Public| Type       |
+ +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
+ | daa46cfd78c74c11bcbe66d3239e546e | Apache HTTP Server | io.murano.apps.apache.ApacheHttpServer | Mirantis, Inc | True   |          | Application|
+ | 5252c9897e864c9f940e08500056f155 | Cloud Foundry      | io.murano.apps.paas.CloudFoundry       | Mirantis, Inc | True   |          | Application|
+ | 1aa62196595f411399e4e48cc2f6a512 | MySQL              | io.murano.databases.MySql              | Mirantis, Inc | True   |          | Application|
+ | 11d73cfdc6d7447a910984d95090463b | SQL Library        | io.murano.databases                    | Mirantis, Inc | True   |          | Application|
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent       | io.murano.apps.ZabbixAgent             | Mirantis, Inc | True   |          | Application|
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server      | io.murano.apps.ZabbixServer            | Mirantis, Inc | True   |          | Application|
+ +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
 
 .. _cli_display:
 
