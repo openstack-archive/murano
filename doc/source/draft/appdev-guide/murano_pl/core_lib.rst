@@ -170,6 +170,18 @@ deploying, joining to the network, applying security group, and deleting.
        to ``True``. Without additional configuration, instance will be joined
        to the default network that is set in the current environment.
      - ``In``
+   * - ``volumes``
+     - Specifies the mapping of a mounting path to volume implementations
+       that must be attached to the instance. Custom volumes that extend
+       ``Volume`` class can be specified.
+     - ``In``
+   * - ``blockDevices``
+     - Specifies the list of block device mappings that an instance will use
+       to boot from. Each mapping defines a volume that must be an instance of
+       ``Volume`` class, device name, device type, and boot order.
+       Either the ``blockDevices`` property or ``image`` property must be
+       specified in order to boot an instance
+     - ``In``
    * - ``assignFloatingIp``
      - Determines if floating IP is required. Default is ``False``.
      - ``In``
