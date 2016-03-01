@@ -13,8 +13,8 @@
 #    under the License.
 
 from nose.plugins.attrib import attr as tag
+from tempest.lib import exceptions
 from tempest.test import attr
-from tempest_lib import exceptions
 import testtools
 
 from murano.tests.functional.api import base

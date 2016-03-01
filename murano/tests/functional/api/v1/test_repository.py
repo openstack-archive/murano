@@ -16,8 +16,8 @@ import os
 import uuid
 
 from nose.plugins.attrib import attr as tag
+from tempest.lib import exceptions
 from tempest.test import attr
-from tempest_lib import exceptions
 
 from murano.tests.functional.api import base
 import murano.tests.functional.common.zip_utils_mixin as zip_utils
