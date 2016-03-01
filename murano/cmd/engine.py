@@ -28,6 +28,7 @@ else:
 
 import sys
 
+from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_service import service
 
@@ -49,9 +50,11 @@ def main():
         config.parse_args()
 
         logging.setup(CONF, 'murano')
-        launcher = service.ServiceLauncher(CONF)
-        launcher.launch_service(engine.EngineService())
-
+        workers = CONF.engine.workers
+        if not workers:
+            workers = processutils.get_worker_count()
+        launcher = service.launch(CONF,
+                                  engine.EngineService(), workers=workers)
         launcher.wait()
     except RuntimeError as e:
         sys.stderr.write("ERROR: %s\n" % e)

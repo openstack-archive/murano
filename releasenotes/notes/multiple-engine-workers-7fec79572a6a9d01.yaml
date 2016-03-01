@@ -1,0 +1,6 @@
+---
+features:
+  - Add multiple engine workers
+issues:
+  - Enabling multiple workers might break workflows under BSD and Windows systems
+

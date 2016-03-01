@@ -158,6 +158,11 @@ function configure_murano {
 
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
+
+    # Configure the number of engine workers
+    if [[ -n "$MURANO_ENGINE_WORKERS" ]]; then
+        iniset $MURANO_CONF_FILE engine workers $MURANO_ENGINE_WORKERS
+    fi
 }
 
 # install_murano_apps() - Install Murano apps from repository murano-apps, if required
