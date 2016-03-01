@@ -21,7 +21,7 @@ from murano.dsl import dsl_types
 from murano.dsl import helpers
 
 
-@specs.yaql_property(dsl_types.MuranoClass)
+@specs.yaql_property(dsl_types.MuranoType)
 @specs.name('name')
 def class_name(murano_class):
     return murano_class.name
@@ -93,7 +93,7 @@ def property_usage(murano_property):
 @specs.yaql_property(dsl_types.MuranoProperty)
 @specs.name('declaring_type')
 def property_owner(murano_property):
-    return murano_property.murano_class
+    return murano_property.declaring_type
 
 
 @specs.name('get_value')
@@ -103,9 +103,9 @@ def property_owner(murano_property):
 @specs.method
 def property_get_value(context, property_, object_):
     if object_ is None:
-        return property_.murano_class.get_property(
+        return property_.declaring_type.get_property(
             name=property_.name, context=context)
-    return object_.cast(property_.murano_class).get_property(
+    return object_.cast(property_.declaring_type).get_property(
         name=property_.name, context=context)
 
 
@@ -116,10 +116,10 @@ def property_get_value(context, property_, object_):
 @specs.method
 def property_set_value(context, property_, object_, value):
     if object_ is None:
-        property_.murano_class.set_property(
+        property_.declaring_type.set_property(
             name=property_.name, value=value, context=context)
     else:
-        object_.cast(property_.murano_class).set_property(
+        object_.cast(property_.declaring_type).set_property(
             name=property_.name, value=value, context=context)
 
 
@@ -139,7 +139,7 @@ def arguments(murano_method):
 @specs.yaql_property(dsl_types.MuranoMethod)
 @specs.name('declaring_type')
 def method_owner(murano_method):
-    return murano_method.murano_class
+    return murano_method.declaring_type
 
 
 @specs.parameter('method', dsl_types.MuranoMethod)

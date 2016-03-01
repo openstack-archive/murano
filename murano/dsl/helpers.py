@@ -303,14 +303,14 @@ def traverse(seed, producer=None, track_visited=True):
 def cast(obj, murano_class, pov_or_version_spec=None):
     if isinstance(obj, dsl_types.MuranoObjectInterface):
         obj = obj.object
-    if isinstance(pov_or_version_spec, dsl_types.MuranoClass):
+    if isinstance(pov_or_version_spec, dsl_types.MuranoType):
         pov_or_version_spec = pov_or_version_spec.package
     elif isinstance(pov_or_version_spec, six.string_types):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
 
     if isinstance(murano_class, dsl_types.MuranoTypeReference):
-        murano_class = murano_class.murano_class
-    if isinstance(murano_class, dsl_types.MuranoClass):
+        murano_class = murano_class.type
+    if isinstance(murano_class, dsl_types.MuranoType):
         if pov_or_version_spec is None:
             pov_or_version_spec = parse_version_spec(murano_class.version)
         murano_class = murano_class.name

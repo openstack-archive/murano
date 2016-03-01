@@ -149,7 +149,7 @@ def get_function_definition(func, murano_method, original_name):
     param_type_func = lambda name: _infer_parameter_type(
         name, cls.__name__)
     body = func
-    cls = murano_method.murano_class.extension_class
+    cls = murano_method.declaring_type.extension_class
     if helpers.inspect_is_method(cls, original_name):
         body = func.im_func
     if helpers.inspect_is_classmethod(cls, original_name):
@@ -162,7 +162,7 @@ def get_function_definition(func, murano_method, original_name):
     if helpers.inspect_is_method(cls, original_name):
         fd.set_parameter(
             0,
-            dsl.MuranoObjectParameter(murano_method.murano_class),
+            dsl.MuranoObjectParameter(murano_method.declaring_type),
             overwrite=True)
     if helpers.inspect_is_classmethod(cls, original_name):
         _remove_first_parameter(fd)
@@ -220,7 +220,7 @@ def build_wrapper_function_definition(murano_method):
 
 
 def _build_native_wrapper_function_definition(murano_method):
-    runtime_version = murano_method.murano_class.package.runtime_version
+    runtime_version = murano_method.declaring_type.package.runtime_version
     engine = choose_yaql_engine(runtime_version)
 
     @specs.method
@@ -256,10 +256,10 @@ def _build_mpl_wrapper_function_definition(murano_method):
         '__context', yaqltypes.Context(), 0))
 
     receiver_type = dsl.MuranoObjectParameter(
-        weakref.proxy(murano_method.murano_class), decorate=False)
+        weakref.proxy(murano_method.declaring_type), decorate=False)
     if murano_method.is_static:
         receiver_type = yaqltypes.AnyOf(dsl.MuranoTypeParameter(
-            weakref.proxy(murano_method.murano_class)), receiver_type)
+            weakref.proxy(murano_method.declaring_type)), receiver_type)
     fd.set_parameter(specs.ParameterDefinition('__receiver', receiver_type, 1))
 
     fd.meta[constants.META_MURANO_METHOD] = murano_method

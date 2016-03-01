@@ -72,9 +72,9 @@ class LhsExpression(object):
                     src.set_property(key, value, root_context)
                 elif isinstance(src, (
                         dsl_types.MuranoTypeReference,
-                        dsl_types.MuranoClass)):
-                    if not isinstance(src, dsl_types.MuranoClass):
-                        mc = src.murano_class
+                        dsl_types.MuranoType)):
+                    if isinstance(src, dsl_types.MuranoTypeReference):
+                        mc = src.type
                     else:
                         mc = src
                     mc.set_property(key, value, root_context)

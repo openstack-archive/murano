@@ -20,7 +20,6 @@ from yaql.language import yaqltypes
 from murano.common import engine
 from murano.dsl import constants
 from murano.dsl import dsl
-from murano.dsl import dsl_types
 from murano.dsl import helpers
 from murano.dsl import yaql_integration
 
@@ -52,11 +51,11 @@ class MockContextManager(engine.ContextManager):
             new_context = self._create_new_ctx(self.obj_mock_ctx[obj_id])
         return new_context
 
-    def create_class_context(self, murano_class):
-        original_context = super(MockContextManager,
-                                 self).create_class_context(murano_class)
+    def create_type_context(self, murano_type):
+        original_context = super(
+            MockContextManager, self).create_type_context(murano_type)
 
-        mock_context = self._create_new_ctx_for_class(murano_class.name)
+        mock_context = self._create_new_ctx_for_class(murano_type.name)
         if mock_context:
             result_context = helpers.link_contexts(
                 original_context, mock_context).create_child_context()
@@ -65,8 +64,8 @@ class MockContextManager(engine.ContextManager):
         return result_context
 
     def create_object_context(self, murano_obj):
-        original_context = super(MockContextManager,
-                                 self).create_object_context(murano_obj)
+        original_context = super(
+            MockContextManager, self).create_object_context(murano_obj)
 
         mock_context = self._create_new_ctx_for_obj(murano_obj.type.name)
         if mock_context:
@@ -109,11 +108,7 @@ def inject_method_with_str(context, target, target_method,
 
     current_class = helpers.get_type(context)
     mock_func = current_class.find_single_method(mock_name)
-
-    if isinstance(target, dsl_types.MuranoTypeReference):
-        original_class = target.murano_class
-    else:
-        original_class = target.type
+    original_class = target.type
 
     original_function = original_class.find_single_method(target_method)
     result_fd = original_function.yaql_function_definition.clone()
@@ -136,10 +131,7 @@ def inject_method_with_str(context, target, target_method,
 @specs.parameter('expr', yaqltypes.Lambda(with_context=True))
 def inject_method_with_yaql_expr(context, target, target_method, expr):
     ctx_manager = helpers.get_executor(context).context_manager
-    if isinstance(target, dsl_types.MuranoTypeReference):
-        original_class = target.murano_class
-    else:
-        original_class = target.type
+    original_class = target.type
 
     original_function = original_class.find_single_method(target_method)
     result_fd = original_function.yaql_function_definition.clone()

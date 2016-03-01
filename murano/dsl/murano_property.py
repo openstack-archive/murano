@@ -23,23 +23,23 @@ from murano.dsl import typespec
 
 
 class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec):
-    def __init__(self, murano_class, property_name, declaration):
-        super(MuranoProperty, self).__init__(declaration, murano_class)
+    def __init__(self, declaring_type, property_name, declaration):
+        super(MuranoProperty, self).__init__(declaration, declaring_type)
         self._property_name = property_name
-        self._murano_class = weakref.ref(murano_class)
+        self._declaring_type = weakref.ref(declaring_type)
 
     def validate(self, *args, **kwargs):
         try:
             return super(MuranoProperty, self).validate(*args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}.{1}{2}] {3}'.format(
-                self.murano_class.name, self.name, e.path, six.text_type(e))
+                self.declaring_type.name, self.name, e.path, six.text_type(e))
             six.reraise(exceptions.ContractViolationException,
                         msg, sys.exc_info()[2])
 
     @property
-    def murano_class(self):
-        return self._murano_class()
+    def declaring_type(self):
+        return self._declaring_type()
 
     @property
     def name(self):
@@ -47,4 +47,4 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec):
 
     def __repr__(self):
         return 'MuranoProperty({type}::{name})'.format(
-            type=self.murano_class.name, name=self.name)
+            type=self.declaring_type.name, name=self.name)

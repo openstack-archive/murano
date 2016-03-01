@@ -90,7 +90,7 @@ class TestExceptions(test_case.DslTestCase):
             matchers.MatchesRegex(
                 r'.*^  File \".*ExceptionHandling\.yaml\", '
                 r'line \d+:\d+ in method testStackTrace .*'
-                r'of class ExceptionHandling$.*'
+                r'of type ExceptionHandling$.*'
                 r'^  File \".*{0}\", line {1} '
                 r'in method exception_func$.*'.format(filename, line),
                 re.MULTILINE | re.DOTALL))

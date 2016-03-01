@@ -35,7 +35,7 @@ def id_(object_):
 @specs.parameter('version_spec', yaqltypes.String(True))
 def cast(context, object_, type__, version_spec=None):
     return helpers.cast(
-        object_, type__.murano_class.name,
+        object_, type__.type.name,
         version_spec or helpers.get_type(context))
 
 
@@ -52,7 +52,7 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
     for key, value in six.iteritems(parameters):
         if utils.is_keyword(key):
             new_context[key] = value
-    return __type_name.murano_class.new(
+    return __type_name.type.new(
         __owner, object_store, executor, name=__object_name)(
         new_context, **parameters)
 
@@ -131,7 +131,7 @@ def typeinfo(object_):
 @specs.parameter('cls', dsl.MuranoTypeParameter())
 @specs.name('typeinfo')
 def typeinfo_for_class(cls):
-    return cls.murano_class
+    return cls.type
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameter(nullable=True))
@@ -150,7 +150,7 @@ def obj_attribution(context, obj, property_name):
 @specs.parameter('property_name', yaqltypes.Keyword())
 @specs.name('#operator_.')
 def obj_attribution_static(context, cls, property_name):
-    return cls.murano_class.get_property(property_name, context)
+    return cls.type.get_property(property_name, context)
 
 
 @specs.parameter('receiver', dsl.MuranoObjectParameter(decorate=False))
@@ -159,7 +159,7 @@ def obj_attribution_static(context, cls, property_name):
 @specs.name('#operator_.')
 def op_dot(context, receiver, expr, operator):
     executor = helpers.get_executor(context)
-    type_context = executor.context_manager.create_class_context(receiver.type)
+    type_context = executor.context_manager.create_type_context(receiver.type)
     obj_context = executor.context_manager.create_object_context(receiver)
     ctx2 = helpers.link_contexts(
         helpers.link_contexts(context, type_context),
@@ -173,8 +173,8 @@ def op_dot(context, receiver, expr, operator):
 @specs.name('#operator_.')
 def op_dot_static(context, receiver, expr, operator):
     executor = helpers.get_executor(context)
-    type_context = executor.context_manager.create_class_context(
-        receiver.murano_class)
+    type_context = executor.context_manager.create_type_context(
+        receiver.type)
     ctx2 = helpers.link_contexts(context, type_context)
     return operator(ctx2, receiver, expr)
 
@@ -201,7 +201,7 @@ def ns_resolve_unary(context, name):
 def is_instance_of(obj, type_):
     if obj is None:
         return False
-    return type_.murano_class.is_compatible(obj)
+    return type_.type.is_compatible(obj)
 
 
 def register(context, runtime_version):

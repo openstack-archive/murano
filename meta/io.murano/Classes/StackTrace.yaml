@@ -20,5 +20,5 @@ Properties:
     Contract:
       - instruction: $.string()
         location: $
-        method: $
-        class: $
+        methodName: $
+        typeName: $

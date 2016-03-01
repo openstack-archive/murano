@@ -204,7 +204,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         if isinstance(type, six.string_types):
             type = helpers.get_class(type)
         elif isinstance(type, dsl_types.MuranoTypeReference):
-            type = type.murano_class
+            type = type.type
         p = self.owner
         while p is not None:
             if type.is_compatible(p):

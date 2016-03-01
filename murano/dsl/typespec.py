@@ -48,7 +48,7 @@ class Spec(object):
         if default is None:
             default = self.default
         executor = helpers.get_executor(context)
-        if isinstance(this, dsl_types.MuranoClass):
+        if isinstance(this, dsl_types.MuranoType):
             return self._contract(
                 value, executor.create_object_context(this),
                 None, None, default)

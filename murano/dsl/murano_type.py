@@ -31,61 +31,11 @@ from murano.dsl import namespace_resolver
 from murano.dsl import yaql_integration
 
 
-class MuranoClass(dsl_types.MuranoClass):
-    def __init__(self, ns_resolver, name, package, parents=None):
-        self._package = weakref.ref(package)
-        self._methods = {}
+class MuranoType(dsl_types.MuranoType):
+    def __init__(self, ns_resolver, name, package):
         self._namespace_resolver = ns_resolver
         self._name = name
-        self._properties = {}
-        self._config = {}
-        self._extension_class = None
-        if self._name == constants.CORE_LIBRARY_OBJECT:
-            self._parents = []
-        else:
-            self._parents = parents or [
-                package.find_class(constants.CORE_LIBRARY_OBJECT)]
-        self._context = None
-        self._parent_mappings = self._build_parent_remappings()
-        self._property_values = {}
-
-    @classmethod
-    def create(cls, data, package, name=None):
-        namespaces = data.get('Namespaces') or {}
-        ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
-
-        if not name:
-            name = ns_resolver.resolve_name(str(data['Name']))
-
-        parent_class_names = data.get('Extends')
-        parent_classes = []
-        if parent_class_names:
-            if not utils.is_sequence(parent_class_names):
-                parent_class_names = [parent_class_names]
-            for parent_name in parent_class_names:
-                full_name = ns_resolver.resolve_name(str(parent_name))
-                parent_classes.append(package.find_class(full_name))
-
-        type_obj = cls(ns_resolver, name, package, parent_classes)
-
-        properties = data.get('Properties') or {}
-        for property_name, property_spec in six.iteritems(properties):
-            spec = murano_property.MuranoProperty(
-                type_obj, property_name, property_spec)
-            type_obj.add_property(property_name, spec)
-
-        methods = data.get('Methods') or data.get('Workflow') or {}
-
-        method_mappings = {
-            'initialize': '.init',
-            'destroy': '.destroy'
-        }
-
-        for method_name, payload in six.iteritems(methods):
-            type_obj.add_method(
-                method_mappings.get(method_name, method_name), payload)
-
-        return type_obj
+        self._package = weakref.ref(package)
 
     @property
     def name(self):
@@ -98,6 +48,23 @@ class MuranoClass(dsl_types.MuranoClass):
     @property
     def namespace_resolver(self):
         return self._namespace_resolver
+
+
+class MuranoClass(dsl_types.MuranoClass, MuranoType):
+    def __init__(self, ns_resolver, name, package, parents=None):
+        super(MuranoClass, self).__init__(ns_resolver, name, package)
+        self._methods = {}
+        self._properties = {}
+        self._config = {}
+        self._extension_class = None
+        if self._name == constants.CORE_LIBRARY_OBJECT:
+            self._parents = []
+        else:
+            self._parents = parents or [
+                package.find_class(constants.CORE_LIBRARY_OBJECT)]
+        self._context = None
+        self._parent_mappings = self._build_parent_remappings()
+        self._property_values = {}
 
     @property
     def declared_parents(self):
@@ -257,10 +224,9 @@ class MuranoClass(dsl_types.MuranoClass):
 
     def is_compatible(self, obj):
         if isinstance(obj, (murano_object.MuranoObject,
-                            dsl.MuranoObjectInterface)):
+                            dsl.MuranoObjectInterface,
+                            dsl_types.MuranoTypeReference)):
             obj = obj.type
-        elif isinstance(obj, dsl_types.MuranoTypeReference):
-            obj = obj.murano_class
         if obj is self:
             return True
         return any(cls is self for cls in obj.ancestors())
@@ -386,14 +352,52 @@ class MuranoClass(dsl_types.MuranoClass):
 
     def get_property(self, name, context):
         prop = self.find_static_property(name)
-        cls = prop.murano_class
+        cls = prop.declaring_type
         value = cls._property_values.get(name, prop.default)
         return prop.validate(value, cls, None, context)
 
     def set_property(self, name, value, context):
         prop = self.find_static_property(name)
-        cls = prop.murano_class
+        cls = prop.declaring_type
         cls._property_values[name] = prop.validate(value, cls, None, context)
 
     def get_reference(self):
         return dsl_types.MuranoTypeReference(self)
+
+
+def create(data, package, name=None):
+    namespaces = data.get('Namespaces') or {}
+    ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
+
+    if not name:
+        name = ns_resolver.resolve_name(str(data['Name']))
+
+    parent_class_names = data.get('Extends')
+    parent_classes = []
+    if parent_class_names:
+        if not utils.is_sequence(parent_class_names):
+            parent_class_names = [parent_class_names]
+        for parent_name in parent_class_names:
+            full_name = ns_resolver.resolve_name(str(parent_name))
+            parent_classes.append(package.find_class(full_name))
+
+    type_obj = MuranoClass(ns_resolver, name, package, parent_classes)
+
+    properties = data.get('Properties') or {}
+    for property_name, property_spec in six.iteritems(properties):
+        spec = murano_property.MuranoProperty(
+            type_obj, property_name, property_spec)
+        type_obj.add_property(property_name, spec)
+
+    methods = data.get('Methods') or data.get('Workflow') or {}
+
+    method_mappings = {
+        'initialize': '.init',
+        'destroy': '.destroy'
+    }
+
+    for method_name, payload in six.iteritems(methods):
+        type_obj.add_method(
+            method_mappings.get(method_name, method_name), payload)
+
+    return type_obj

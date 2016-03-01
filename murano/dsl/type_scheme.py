@@ -156,7 +156,7 @@ class TypeScheme(object):
             object_store = this.object_store
             if not default_name:
                 default_name = name
-            murano_class = name.murano_class
+            murano_class = name.type
             if value is None:
                 return None
             if isinstance(value, dsl_types.MuranoObject):
@@ -167,8 +167,8 @@ class TypeScheme(object):
                 if '?' not in value:
                     new_value = {'?': {
                         'id': uuid.uuid4().hex,
-                        'type': default_name.murano_class.name,
-                        'classVersion': str(default_name.murano_class.version)
+                        'type': default_name.type.name,
+                        'classVersion': str(default_name.type.version)
                     }}
                     new_value.update(value)
                     value = new_value
