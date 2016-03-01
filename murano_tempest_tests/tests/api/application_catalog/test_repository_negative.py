@@ -14,8 +14,8 @@
 
 import os
 
+from tempest.lib import exceptions
 from tempest.test import attr
-from tempest_lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils

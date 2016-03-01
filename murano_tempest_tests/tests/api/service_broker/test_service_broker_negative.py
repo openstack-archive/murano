@@ -13,8 +13,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from tempest.lib import exceptions
 from tempest import test
-from tempest_lib import exceptions
 
 from murano_tempest_tests.tests.api.service_broker import base
 from murano_tempest_tests import utils
