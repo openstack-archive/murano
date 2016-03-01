@@ -23,6 +23,9 @@ from murano.dsl import dsl_types
 from murano.dsl import yaql_integration
 
 
+EXPRESSION_REGEX = re.compile('^[\s\w\d.]*$')
+
+
 class YaqlExpression(dsl_types.YaqlExpression):
     def __init__(self, expression, version):
         self._version = version
@@ -68,7 +71,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
     def is_expression(expression, version):
         if not isinstance(expression, six.string_types):
             return False
-        if re.match('^[\s\w\d.]*$', expression):
+        if EXPRESSION_REGEX.match(expression):
             return False
         try:
             yaql_integration.parse(expression, version)
