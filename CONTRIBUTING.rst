@@ -49,3 +49,6 @@ Project Hosting Details
     * https://review.openstack.org/#/q/murano+AND+status:+open,n,z
 
     * http://docs.openstack.org/infra/manual/developers.html#development-workflow
+
+* Murano Design Specifications
+    * https://git.openstack.org/openstack/murano-specs
