@@ -32,19 +32,24 @@ class Spec(object):
                 'Unknown type {0}. Must be one of ({1})'.format(
                     self._usage, ', '.join(dsl_types.PropertyUsages.All)))
 
-    def validate(self, value, this, owner, context, default=None):
+    def transform(self, value, this, owner, context, default=None):
         if default is None:
             default = self.default
         executor = helpers.get_executor(context)
         if isinstance(this, dsl_types.MuranoType):
-            return self._contract(
+            return self._contract.transform(
                 value, executor.create_object_context(this),
                 None, None, default, helpers.get_type(context))
         else:
-            return self._contract(
+            return self._contract.transform(
                 value, executor.create_object_context(
                     this.cast(self._container_type())),
                 this, owner, default, helpers.get_type(context))
+
+    def validate(self, value, context, default=None):
+        if default is None:
+            default = self.default
+        return self._contract.validate(value, context, default)
 
     @property
     def default(self):

@@ -50,14 +50,21 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                     payload, weakref.proxy(self), original_name)
             self._arguments_scheme = None
             if any((
-                helpers.inspect_is_static(
-                    declaring_type.extension_class, original_name),
-                helpers.inspect_is_classmethod(
-                    declaring_type.extension_class, original_name))):
-                self._usage = dsl_types.MethodUsages.Static
+                    helpers.inspect_is_static(
+                        declaring_type.extension_class, original_name),
+                    helpers.inspect_is_classmethod(
+                        declaring_type.extension_class, original_name))):
+                self._usage = self._body.meta.get(
+                    constants.META_USAGE, dsl_types.MethodUsages.Static)
+                if self._usage not in dsl_types.MethodUsages.StaticMethods:
+                    raise ValueError(
+                        'Invalid Usage for static method ' + self.name)
             else:
                 self._usage = (self._body.meta.get(constants.META_USAGE) or
                                dsl_types.MethodUsages.Runtime)
+                if self._usage not in dsl_types.MethodUsages.InstanceMethods:
+                    raise ValueError(
+                        'Invalid Usage for instance method ' + self.name)
             if (self._body.name.startswith('#') or
                     self._body.name.startswith('*')):
                 raise ValueError(
@@ -68,10 +75,10 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 declaring_type)
         else:
             payload = payload or {}
-            self._body = macros.MethodBlock(payload.get('Body') or [], name)
+            self._body = macros.MethodBlock(payload.get('Body'), name)
             self._usage = payload.get(
                 'Usage') or dsl_types.MethodUsages.Runtime
-            arguments_scheme = payload.get('Arguments') or []
+            arguments_scheme = helpers.list_value(payload.get('Arguments'))
             if isinstance(arguments_scheme, dict):
                 arguments_scheme = [{key: value} for key, value in
                                     six.iteritems(arguments_scheme)]
@@ -87,8 +94,9 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 payload.get('Meta'),
                 dsl_types.MetaTargets.Method,
                 declaring_type)
-        self._yaql_function_definition = \
-            yaql_integration.build_wrapper_function_definition(
+
+        self._instance_stub, self._static_stub = \
+            yaql_integration.build_stub_function_definitions(
                 weakref.proxy(self))
 
     @property
@@ -104,8 +112,12 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
         return self._arguments_scheme
 
     @property
-    def yaql_function_definition(self):
-        return self._yaql_function_definition
+    def instance_stub(self):
+        return self._instance_stub
+
+    @property
+    def static_stub(self):
+        return self._static_stub
 
     @property
     def usage(self):
@@ -121,7 +133,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
 
     @property
     def is_static(self):
-        return self.usage == dsl_types.MethodUsages.Static
+        return self.usage in dsl_types.MethodUsages.StaticMethods
 
     def get_meta(self, context):
         def meta_producer(cls):
@@ -168,9 +180,12 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
             declaration.get('Meta'),
             dsl_types.MetaTargets.Argument, self.murano_method.declaring_type)
 
-    def validate(self, *args, **kwargs):
+    def transform(self, value, this, *args, **kwargs):
         try:
-            return super(MuranoMethodArgument, self).validate(*args, **kwargs)
+            if self.murano_method.usage == dsl_types.MethodUsages.Extension:
+                this = self.murano_method.declaring_type
+            return super(MuranoMethodArgument, self).transform(
+                value, this, *args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}::{1}({2}{3})] {4}'.format(
                 self.murano_method.declaring_type.name,

@@ -82,8 +82,16 @@ class MuranoDslExecutor(object):
                 self.create_object_context(this, context), method)
             method_context[constants.CTX_SKIP_FRAME] = True
             method_context[constants.CTX_ACTIONS_ONLY] = actions_only
-            return method.yaql_function_definition(
-                yaql_engine, method_context, this.real_this)(*args, **kwargs)
+
+            stub = method.static_stub if isinstance(
+                this, dsl_types.MuranoType) else method.instance_stub
+            if stub is None:
+                raise ValueError(
+                    'Method {0} cannot be called on receiver {1}'.format(
+                        method, this))
+
+            return stub(yaql_engine, method_context, this.real_this)(
+                *args, **kwargs)
 
         if (context[constants.CTX_ACTIONS_ONLY] and method.usage !=
                 dsl_types.MethodUsages.Action):
@@ -119,6 +127,8 @@ class MuranoDslExecutor(object):
                     return method.body(
                         yaql_engine, context, native_this)(*args, **kwargs)
                 else:
+                    context[constants.CTX_NAMES_SCOPE] = \
+                        method.declaring_type
                     return (None if method.body is None
                             else method.body.execute(context))
 
@@ -312,9 +322,13 @@ class MuranoDslExecutor(object):
             caller = caller_context
             while caller is not None and caller[constants.CTX_SKIP_FRAME]:
                 caller = caller[constants.CTX_CALLER_CONTEXT]
+            context[constants.CTX_NAMES_SCOPE] = caller_context[
+                constants.CTX_NAMES_SCOPE]
             context[constants.CTX_CALLER_CONTEXT] = caller
             context[constants.CTX_ALLOW_PROPERTY_WRITES] = caller_context[
                 constants.CTX_ALLOW_PROPERTY_WRITES]
+        else:
+            context[constants.CTX_NAMES_SCOPE] = obj_type
         return context
 
     @staticmethod

@@ -32,10 +32,7 @@ class MetaProvider(object):
 class MetaData(MetaProvider):
     def __init__(self, definition, target, scope_type):
         scope_type = weakref.ref(scope_type)
-        if not definition:
-            definition = []
-        elif not isinstance(definition, list):
-            definition = [definition]
+        definition = helpers.list_value(definition)
         factories = []
         used_types = set()
         for d in definition:

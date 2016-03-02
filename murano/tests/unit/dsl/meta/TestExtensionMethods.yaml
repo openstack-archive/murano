@@ -1,0 +1,122 @@
+Namespaces:
+  =: extcls
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Extended
+
+Properties:
+  prop:
+    Contract: $.int()
+    Default: 123
+Methods:
+  method:
+    Body:
+      Return: $.prop
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Extender
+
+Methods:
+  importedExtensionMethod:
+    Usage: Extension
+    Arguments:
+      - obj:
+          Contract: $.class(Extended).notNull()
+      - n:
+          Contract: $.int().notNull()
+    Body:
+      Return: [$obj.prop * $n, $obj.method() * $n]
+
+  nullableExtension:
+    Usage: Extension
+    Arguments:
+      - obj:
+          Contract: $.class(Extended)
+    Body:
+      Return: $obj?.prop
+
+  extensionMethod:
+    Usage: Extension
+    Arguments:
+      - obj:
+          Contract: $.class(Extended).notNull()
+    Body:
+      Return: 222
+
+  toTileCase:
+    Usage: Extension
+    Arguments:
+      - str:
+          Contract: $.string().notNull()
+    Body:
+      Return: join($str.toCharArray().select(
+        selectCase($.toLower() = $).switchCase($.toUpper(), $.toLower())), '')
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestClass
+Import: Extender
+
+Methods:
+  testSelfExtensionMethod:
+    Body:
+      Return: new(Extended).selfExtensionMethod()
+
+  testImportedExtensionMethod:
+    Body:
+      Return: new(Extended).importedExtensionMethod(2)
+
+  testNullableExtensionMethod:
+    Body:
+      Return:
+        - new(Extended).nullableExtension()
+        - null.nullableExtension()
+
+  testExtensionsPrecedence:
+    Body:
+      Return: new(Extended).extensionMethod()
+
+  testCallOnPrimitiveTypes:
+    Body:
+      Return: QwertY.toTileCase()
+
+  testCallExtensionExplicitly:
+    Body:
+      Return: :Extender.extensionMethod(new(:Extended))
+
+  testExplicitCallDoenstWorkOnInstance:
+    Body:
+      Return: new(Extended).extensionMethod(new(Extended))
+
+  testCallPythonExtension:
+    Body:
+      Return: 4.pythonExtension()
+
+  testCallPythonExtensionExplicitly:
+    Body:
+      Return: :Extender.pythonExtension(5)
+
+  testCallPythonClassmethodExtension:
+    Body:
+      Return: 7.pythonExtension2()
+
+  selfExtensionMethod:
+    Usage: Extension
+    Arguments:
+      - obj:
+          Contract: $.class(Extended).notNull()
+    Body:
+      Return: [$obj.prop, $obj.method()]
+
+  extensionMethod:
+    Usage: Extension
+    Arguments:
+      - obj:
+          Contract: $.class(Extended).notNull()
+    Body:
+      Return: 111
+

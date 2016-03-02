@@ -232,7 +232,7 @@ class MuranoObject(dsl_types.MuranoObject):
                     # default = helpers.evaluate(default, context)
 
                     obj = self.cast(spec.declaring_type)
-                    values_to_assign.append((obj, spec.validate(
+                    values_to_assign.append((obj, spec.transform(
                         value, self.real_this,
                         self.real_this, context, default=default)))
             for obj, value in values_to_assign:

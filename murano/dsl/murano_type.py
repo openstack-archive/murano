@@ -51,7 +51,6 @@ class MuranoType(dsl_types.MuranoType):
         return self._namespace_resolver
 
     @abc.abstractproperty
-    @property
     def usage(self):
         raise NotImplementedError()
 
@@ -66,7 +65,8 @@ class MuranoType(dsl_types.MuranoType):
 class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
     _allowed_usages = {dsl_types.ClassUsages.Class}
 
-    def __init__(self, ns_resolver, name, package, parents, meta=None):
+    def __init__(self, ns_resolver, name, package, parents, meta=None,
+                 imports=None):
         super(MuranoClass, self).__init__(ns_resolver, name, package)
         self._methods = {}
         self._properties = {}
@@ -84,10 +84,12 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                     u'Type {0} cannot have parent with Usage {1}'.format(
                         self.name, p.usage))
         self._context = None
+        self._exported_context = None
         self._parent_mappings = self._build_parent_remappings()
         self._property_values = {}
         self._meta = dslmeta.MetaData(meta, dsl_types.MetaTargets.Type, self)
         self._meta_values = None
+        self._imports = list(self._resolve_imports(imports))
 
     @property
     def usage(self):
@@ -126,6 +128,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         method = murano_method.MuranoMethod(self, name, payload, original_name)
         self._methods[name] = method
         self._context = None
+        self._exported_context = None
         return method
 
     @property
@@ -155,9 +158,21 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                 leaf = False
                 queue.append((p, path + segment))
             if leaf:
-                path = path + segment
+                path += segment
                 if path:
                     yield path
+
+    def _resolve_imports(self, imports):
+        seen = {self.name}
+        for imp in helpers.list_value(imports):
+            if imp in seen:
+                continue
+            type = helpers.resolve_type(imp, self)
+            if type in seen:
+                continue
+            seen.add(imp)
+            seen.add(type)
+            yield type
 
     def _choose_symbol(self, func):
         chains = sorted(
@@ -366,23 +381,51 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
     @property
     def context(self):
         if not self._context:
-            self._context = yaql_integration.create_empty_context()
+            ctx = None
+            for imp in reversed(self._imports):
+                if ctx is None:
+                    ctx = imp.exported_context
+                else:
+                    ctx = helpers.link_contexts(ctx, imp.exported_context)
+
+            if ctx is None:
+                self._context = yaql_integration.create_empty_context()
+            else:
+                self._context = ctx.create_child_context()
+
             for m in self._iterate_unique_methods():
-                self._context.register_function(
-                    m.yaql_function_definition,
-                    name=m.yaql_function_definition.name)
+                if m.instance_stub:
+                    self._context.register_function(
+                        m.instance_stub, name=m.instance_stub.name)
+                if m.static_stub:
+                    self._context.register_function(
+                        m.static_stub, name=m.static_stub.name)
         return self._context
+
+    @property
+    def exported_context(self):
+        if not self._exported_context:
+            self._exported_context = yaql_integration.create_empty_context()
+            for m in self._iterate_unique_methods():
+                if m.usage == dsl_types.MethodUsages.Extension:
+                    if m.instance_stub:
+                        self._exported_context.register_function(
+                            m.instance_stub, name=m.instance_stub.name)
+                    if m.static_stub:
+                        self._exported_context.register_function(
+                            m.static_stub, name=m.static_stub.name)
+        return self._exported_context
 
     def get_property(self, name, context):
         prop = self.find_static_property(name)
         cls = prop.declaring_type
         value = cls._property_values.get(name, prop.default)
-        return prop.validate(value, cls, None, context)
+        return prop.transform(value, cls, None, context)
 
     def set_property(self, name, value, context):
         prop = self.find_static_property(name)
         cls = prop.declaring_type
-        cls._property_values[name] = prop.validate(value, cls, None, context)
+        cls._property_values[name] = prop.transform(value, cls, None, context)
 
     def get_meta(self, context):
         if self._meta_values is None:
@@ -394,9 +437,10 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
 class MuranoMetaClass(dsl_types.MuranoMetaClass, MuranoClass):
     _allowed_usages = {dsl_types.ClassUsages.Meta, dsl_types.ClassUsages.Class}
 
-    def __init__(self, ns_resolver, name, package, parents, meta=None):
+    def __init__(self, ns_resolver, name, package, parents, meta=None,
+                 imports=None):
         super(MuranoMetaClass, self).__init__(
-            ns_resolver, name, package, parents, meta)
+            ns_resolver, name, package, parents, meta, imports)
         self._cardinality = dsl_types.MetaCardinality.One
         self._targets = list(dsl_types.MetaCardinality.All)
         self._inherited = False
@@ -456,7 +500,7 @@ def _create_class(cls, name, ns_resolver, data, package, *args, **kwargs):
 
     type_obj = cls(
         ns_resolver, name, package, parent_classes, data.get('Meta'),
-        *args, **kwargs)
+        data.get('Import'), *args, **kwargs)
 
     properties = data.get('Properties') or {}
     for property_name, property_spec in six.iteritems(properties):

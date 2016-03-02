@@ -169,7 +169,8 @@ class LhsExpression(object):
     def __call__(self, value, context):
         new_context = self._create_context(context)
         new_context[''] = context['$']
-        new_context[constants.CTX_TYPE] = context[constants.CTX_TYPE]
+        for name in (constants.CTX_NAMES_SCOPE,):
+            new_context[name] = context[name]
         self._current_obj = None
         self._current_obj_name = None
         property = self._expression(context=new_context)

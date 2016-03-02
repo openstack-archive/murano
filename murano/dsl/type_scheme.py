@@ -32,7 +32,8 @@ class TypeScheme(object):
         self._spec = spec
 
     @staticmethod
-    def prepare_context(root_context, this, owner, default, calling_type):
+    def prepare_transform_context(root_context, this, owner, default,
+                                  calling_type):
         @specs.parameter('value', nullable=True)
         @specs.method
         def int_(value):
@@ -150,7 +151,7 @@ class TypeScheme(object):
         @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
         def class_(value, name, default_name=None, version_spec=None):
-            object_store = this.object_store
+            object_store = None if this is None else this.object_store
             if not default_name:
                 default_name = name
             murano_class = name.type
@@ -164,7 +165,7 @@ class TypeScheme(object):
                 obj = helpers.instantiate(
                     value, owner, object_store, root_context,
                     calling_type, default_name, default)
-            elif isinstance(value, six.string_types):
+            elif isinstance(value, six.string_types) and object_store:
                 obj = object_store.get(value)
                 if obj is None:
                     if not object_store.initializing:
@@ -195,6 +196,66 @@ class TypeScheme(object):
         context.register_function(owned)
         context.register_function(not_owned_ref)
         context.register_function(not_owned)
+        return context
+
+    @staticmethod
+    def prepare_validate_context(root_context):
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def int_(value):
+            if value is None or isinstance(
+                    value, int) and not isinstance(value, bool):
+                return value
+            raise exceptions.ContractViolationException()
+
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def string(value):
+            if value is None or isinstance(value, six.string_types):
+                return value
+            raise exceptions.ContractViolationException()
+
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def bool_(value):
+            if value is None or isinstance(value, bool):
+                return value
+            raise exceptions.ContractViolationException()
+
+        @specs.parameter('value', nullable=True)
+        @specs.method
+        def not_null(value):
+            if value is None:
+                raise exceptions.ContractViolationException()
+            return value
+
+        @specs.parameter('value', nullable=True)
+        @specs.parameter('predicate', yaqltypes.Lambda(with_context=True))
+        @specs.method
+        def check(value, predicate):
+            if predicate(root_context.create_child_context(), value):
+                return value
+            raise exceptions.ContractViolationException()
+
+        @specs.parameter('type', dsl.MuranoTypeParameter(
+            nullable=False, context=root_context))
+        @specs.parameter('value', nullable=True)
+        @specs.parameter('version_spec', yaqltypes.String(True))
+        @specs.method
+        def class_(value, type, version_spec=None):
+            if helpers.is_instance_of(
+                    value, type.type.name,
+                    version_spec or helpers.get_names_scope(root_context)):
+                return value
+            raise exceptions.ContractViolationException()
+
+        context = root_context.create_child_context()
+        context.register_function(int_)
+        context.register_function(string)
+        context.register_function(bool_)
+        context.register_function(check)
+        context.register_function(not_null)
+        context.register_function(class_)
         return context
 
     def _map_dict(self, data, spec, context, path):
@@ -298,7 +359,7 @@ class TypeScheme(object):
         else:
             return self._map_scalar(data, spec)
 
-    def __call__(self, data, context, this, owner, default, calling_type):
+    def transform(self, data, context, this, owner, default, calling_type):
         # TODO(ativelkov, slagun): temporary fix, need a better way of handling
         # composite defaults
         # A bug (#1313694) has been filed
@@ -306,9 +367,20 @@ class TypeScheme(object):
         if data is dsl.NO_VALUE:
             data = helpers.evaluate(default, context)
 
-        context = self.prepare_context(
+        context = self.prepare_transform_context(
             context, this, owner, default, calling_type)
         return self._map(data, self._spec, context, '')
+
+    def validate(self, data, context, default):
+        if data is dsl.NO_VALUE:
+            data = helpers.evaluate(default, context)
+
+        context = self.prepare_validate_context(context)
+        try:
+            self._map(data, self._spec, context, '')
+            return True
+        except exceptions.ContractViolationException:
+            return False
 
 
 def format_scalar(value):
