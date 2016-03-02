@@ -1,5 +1,5 @@
 Namespaces:
-  =: io.murano.conflang.chef.ExampleChef
+  =: io.murano.conflang.chef
   std: io.murano
   res: io.murano.resources
   sys: io.murano.system

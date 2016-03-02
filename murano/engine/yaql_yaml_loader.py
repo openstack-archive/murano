@@ -72,6 +72,9 @@ def get_loader(version):
 
         YaqlYamlLoader.add_constructor(u'!yaql', yaql_constructor)
         YaqlYamlLoader.add_implicit_resolver(u'!yaql', YaqlExpression, None)
-        return yaml.load(contents, Loader=YaqlYamlLoader)
+        return list(filter(
+            lambda t: t,
+            yaml.load_all(contents, Loader=YaqlYamlLoader))
+        )
 
     return load

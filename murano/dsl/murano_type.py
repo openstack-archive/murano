@@ -27,7 +27,6 @@ from murano.dsl import helpers
 from murano.dsl import murano_method
 from murano.dsl import murano_object
 from murano.dsl import murano_property
-from murano.dsl import namespace_resolver
 from murano.dsl import yaql_integration
 
 
@@ -365,13 +364,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType):
         return dsl_types.MuranoTypeReference(self)
 
 
-def create(data, package, name=None):
-    namespaces = data.get('Namespaces') or {}
-    ns_resolver = namespace_resolver.NamespaceResolver(namespaces)
-
-    if not name:
-        name = ns_resolver.resolve_name(str(data['Name']))
-
+def create(data, package, name, ns_resolver):
     parent_class_names = data.get('Extends')
     parent_classes = []
     if parent_class_names:

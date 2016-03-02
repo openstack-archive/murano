@@ -78,29 +78,33 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
             raise KeyError(class_name)
 
     def _build_index(self, directory):
-        yamls = [os.path.join(dirpath, f)
-                 for dirpath, _, files in os.walk(directory)
-                 for f in fnmatch.filter(files, '*.yaml')
-                 if f != 'manifest.yaml'
-                 ]
+        yamls = [
+            os.path.join(dirpath, f)
+            for dirpath, _, files in os.walk(directory)
+            for f in fnmatch.filter(files, '*.yaml')
+            if f != 'manifest.yaml'
+        ]
         for class_def_file in yamls:
-            self._load_class(class_def_file)
+            self._load_classes(class_def_file)
 
-    def _load_class(self, class_def_file):
+    def _load_classes(self, class_def_file):
         with open(class_def_file) as stream:
-            data = self._yaml_loader(stream.read(), class_def_file)
+            data_lst = self._yaml_loader(stream.read(), class_def_file)
 
-        if 'Name' not in data:
-            return
+        last_ns = {}
+        for data in data_lst:
+            last_ns = data.get('Namespaces', last_ns)
+            if 'Name' not in data:
+                continue
 
-        for name, method in six.iteritems(data.get('Methods') or data.get(
-                'Workflow') or {}):
-            if name.startswith('test'):
-                method['Usage'] = 'Action'
+            for name, method in six.iteritems(data.get('Methods') or data.get(
+                    'Workflow') or {}):
+                if name.startswith('test'):
+                    method['Usage'] = 'Action'
 
-        ns = namespace_resolver.NamespaceResolver(data.get('Namespaces', {}))
-        class_name = ns.resolve_name(data['Name'])
-        self._classes[class_name] = data
+            ns = namespace_resolver.NamespaceResolver(last_ns)
+            class_name = ns.resolve_name(data['Name'])
+            self._classes[class_name] = data_lst
 
     def set_config_value(self, class_name, property_name, value):
         if isinstance(class_name, object_model.Object):

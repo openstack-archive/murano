@@ -17,6 +17,8 @@ import weakref
 
 import semantic_version
 import six
+from yaql.language import specs
+from yaql.language import utils
 
 from murano.dsl import constants
 from murano.dsl import dsl_types
@@ -24,12 +26,12 @@ from murano.dsl import exceptions
 from murano.dsl import helpers
 from murano.dsl import murano_object
 from murano.dsl import murano_type
+from murano.dsl import namespace_resolver
 from murano.dsl import principal_objects
 from murano.dsl import yaql_integration
 
 
 class MuranoPackage(dsl_types.MuranoPackage):
-
     def __init__(self, package_loader, name, version=None,
                  runtime_version=None, requirements=None):
         super(MuranoPackage, self).__init__()
@@ -85,11 +87,37 @@ class MuranoPackage(dsl_types.MuranoPackage):
     def get_class_config(self, name):
         return {}
 
-    def _register_mpl_class(self, data, name=None):
+    def _register_mpl_classes(self, data, name):
         type_obj = self._classes.get(name)
-        if not type_obj:
-            type_obj = murano_type.create(data, self, name)
-            self._classes[name] = type_obj
+        if type_obj is not None:
+            return type_obj
+        if callable(data):
+            data = data()
+        if not utils.is_sequence(data):
+            data = [data]
+        unnamed_class = None
+        last_ns = {}
+        for cls_data in data:
+            last_ns = cls_data.setdefault('Namespaces', last_ns)
+            if len(cls_data) == 1:
+                continue
+            cls_name = cls_data.get('Name')
+            if not cls_name:
+                if unnamed_class:
+                    raise exceptions.AmbiguousClassName(name)
+                unnamed_class = cls_data
+            else:
+                ns_resolver = namespace_resolver.NamespaceResolver(last_ns)
+                cls_name = ns_resolver.resolve_name(cls_name)
+                if cls_name == name:
+                    type_obj = murano_type.create(
+                        cls_data, self, cls_name, ns_resolver)
+                    self._classes[name] = type_obj
+                else:
+                    self._load_queue.setdefault(cls_name, cls_data)
+        if type_obj is None and unnamed_class:
+            unnamed_class['Name'] = name
+            return self._register_mpl_classes(unnamed_class, name)
         return type_obj
 
     def _register_native_class(self, cls, name):
@@ -99,7 +127,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
         try:
             m_class = self.find_class(name, False)
         except exceptions.NoClassFound:
-            m_class = self._register_mpl_class({'Name': name}, name)
+            m_class = self._register_mpl_classes({'Name': name}, name)
 
         m_class.extension_class = cls
 
@@ -112,14 +140,10 @@ class MuranoPackage(dsl_types.MuranoPackage):
                     helpers.inspect_is_static(cls, method_name),
                     helpers.inspect_is_classmethod(cls, method_name))):
                 continue
-            # TODO(slagun): update the code below to use yaql native
-            # method for this when https://review.openstack.org/#/c/220748/
-            # will get merged and Murano requirements bump to corresponding
-            # yaql version
             method_name_alias = (getattr(
                 method, '__murano_name', None) or
-                yaql_integration.CONVENTION.convert_function_name(
-                    method_name.rstrip('_')))
+                specs.convert_function_name(
+                    method_name, yaql_integration.CONVENTION))
             m_class.add_method(method_name_alias, method, method_name)
         self._imported_types.add(cls)
         return m_class
@@ -130,10 +154,10 @@ class MuranoPackage(dsl_types.MuranoPackage):
             if name in self._classes:
                 self._register_native_class(cls, name)
             else:
-                self._native_load_queue[name] = cls
+                self._native_load_queue.setdefault(name, cls)
         elif isinstance(cls, dsl_types.MuranoType):
             self._classes[cls.name] = cls
-        else:
+        elif name not in self._classes:
             self._load_queue[name] = cls
 
     def find_class(self, name, search_requirements=True):
@@ -143,9 +167,9 @@ class MuranoPackage(dsl_types.MuranoPackage):
 
         payload = self._load_queue.pop(name, None)
         if payload is not None:
-            if callable(payload):
-                payload = payload()
-            return self._register_mpl_class(payload, name)
+            result = self._register_mpl_classes(payload, name)
+            if result:
+                return result
 
         result = self._classes.get(name)
         if result:

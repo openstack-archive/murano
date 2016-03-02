@@ -1,0 +1,10 @@
+---
+features:
+  - Now it is possible to have several classes in one YAML file.
+    Classes are separated using YAML document separator (3 dashes).
+    Empty documents are skipped. If the class doesn't have Namespace
+    section corresponding section from the previous class in the same
+    file is used. Thus it is possible to declare namespace prefixes once
+    at the file header. Even if there are several classes in one file all of
+    them are still required to be declared in manifest file.
+

@@ -11,14 +11,14 @@
 #  under the License.
 
 Namespaces:
-  =: io.murano.apps.apache
+  =: io.murano.apps.test
   std: io.murano
   res: io.murano.resources
   sys: io.murano.system
   conf: io.murano.configuration
 
 
-Name: ApacheHttpServer
+Name: ApacheHttpServerCustom
 
 Extends: std:Application
 
