@@ -20,10 +20,9 @@ Glossary
 
 * **Environment**
 
-    The environment is a set of applications managed by a single tenant. They could be related logically with each other or not.
+    The environment is a set of applications managed by a single project (tenant). They could be related logically with each other or not.
     Applications within a single environment may comprise of complex configuration while applications in different environments are always
-    independent from one another. Each environment is associated with a single
-    OpenStack project (tenant).
+    independent from one another. Each environment is associated with a single OpenStack project.
 
 .. _`sessions`:
 
@@ -44,7 +43,7 @@ Glossary
     A .zip archive, containing instructions for an application deployment.
 
 * **Environment-Template**
-    The environment template is the specification of a set of applications managed by a single tenant, which are
+    The environment template is the specification of a set of applications managed by a single project, which are
     related to each other. The environment template is stored in an environment template catalog, and it can be
     managed by the user (creation, deletion, updating). Finally, it can be deployed on OpenStack by translating
     into an environment.
@@ -64,7 +63,7 @@ Environment API
 +----------------------+------------+-------------------------------------------+
 | updated              | datetime   | Modification date and time in ISO format  |
 +----------------------+------------+-------------------------------------------+
-| tenant_id            | string     | OpenStack tenant ID                       |
+| tenant_id            | string     | OpenStack project ID                      |
 +----------------------+------------+-------------------------------------------+
 | version              | int        | Current version                           |
 +----------------------+------------+-------------------------------------------+
@@ -103,9 +102,9 @@ List environments
 
 *Parameters:*
 
-* `all_tenants` - boolean, indicates whether environments from all tenants are listed.
-  *True* environments from all tenants are listed. Admin user required.
-  *False* environments only from current tenant are listed (default like option unspecified).
+* `all_tenants` - boolean, indicates whether environments from all projects are listed.
+  *True* environments from all projects are listed. Admin user required.
+  *False* environments only from current project are listed (default like option unspecified).
 
 
 *Response*
@@ -842,7 +841,7 @@ General Request Statistics
 +----------------------+------------+-----------------------------------------------------------------+
 | Attribute            | Type       | Description                                                     |
 +======================+============+=================================================================+
-| requests_per_tenant  | int        | Number of incoming requests for user tenant                     |
+| requests_per_tenant  | int        | Number of incoming requests for user project                    |
 +----------------------+------------+-----------------------------------------------------------------+
 | errors_per_second    | int        | Class name of the statistic object                              |
 +----------------------+------------+-----------------------------------------------------------------+

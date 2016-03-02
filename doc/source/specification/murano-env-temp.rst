@@ -32,7 +32,7 @@ it into an environment. In addition, applications can be added to or deleted fro
 +----------------------+------------+-------------------------------------------+
 | updated              | datetime   | Modification date and time in ISO format  |
 +----------------------+------------+-------------------------------------------+
-| tenant_id            | string     | OpenStack tenant ID                       |
+| tenant_id            | string     | OpenStack project                         |
 +----------------------+------------+-------------------------------------------+
 | version              | int        | Current version                           |
 +----------------------+------------+-------------------------------------------+
@@ -68,9 +68,9 @@ List Environments Templates
 *Parameters:*
 
 * `is_public` - boolean, indicates whether public environment templates are listed or not.
-  *True* public environments templates from all tenants are listed.
-  *False* private environments templates from current tenant are listed
-  *empty* all tenant templates plus public templates from all tenants are listed
+  *True* public environments templates from all projects are listed.
+  *False* private environments templates from current project are listed
+  *empty* all project templates plus public templates from all projects are listed
 
 *Response*
 
@@ -432,7 +432,7 @@ Create an environment from an environment template
 +----------+--------------------------------+-------------------------------------------------+
 | Method   | URI                            | Description                                     |
 +==========+================================+=================================================+
-| POST     | /templates/{env-temp-id}/clone | It clones a public template from one tenant     |
+| POST     | /templates/{env-temp-id}/clone | It clones a public template from one project    |
 |          |                                | to another                                      |
 +----------+--------------------------------+-------------------------------------------------+
 

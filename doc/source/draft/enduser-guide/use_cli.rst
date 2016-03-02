@@ -121,7 +121,7 @@ For example:
   | 83e4038885c248e3a758f8217ff8241f| MySQL| io.murano.databases.MySql| Mirantis, Inc|         |
   +---------------------------------+------+--------------------------+--------------+---------+
 
-To make the package available for users from other tenants, use the
+To make the package available for users from other projects (tenants), use the
 ``--is-public`` parameter. For example:
 
 .. code-block:: console

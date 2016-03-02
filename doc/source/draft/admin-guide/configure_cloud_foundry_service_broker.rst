@@ -33,7 +33,7 @@ broker in a few simple steps:
     .. code-block:: ini
 
         [cfapi]
-        tenat = %TENANT_NAME%
+        tenant = %TENANT_NAME%
         bind_host = %HOST_IP%
         bind_port = 8083
         auth_url = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'

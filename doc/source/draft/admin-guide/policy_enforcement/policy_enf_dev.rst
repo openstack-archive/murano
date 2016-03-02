@@ -44,7 +44,7 @@ of rules that are as follows:
 
   .. note::
 
-     The owner of the environment is a tenant.
+     The owner of the environment is a project (tenant).
 
 **murano:properties(object_id, property_name, property_value)**
 

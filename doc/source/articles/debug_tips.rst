@@ -17,8 +17,9 @@
 Murano TroubleShooting and Debug Tips
 =====================================
 
-During installation and setting environment of new projects you can run into different problems.
-This section intends to reduce the time spent on the solution of these problems.
+During installation and setting environment of new projects (tenants) you 
+can run into different problems. This section intends to reduce the time 
+spent on the solution of these problems.
 
 Problems during configuration
 =============================

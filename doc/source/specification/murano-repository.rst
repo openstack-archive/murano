@@ -35,9 +35,9 @@ Methods for application package management
 - ``tags``: list of short names, connected with the package, which allows to search applications easily
 - ``categories``: list of application categories
 - ``class_definition``: list of class names used by a package
-- ``is_public``: determines whether the package is shared for other tenants
+- ``is_public``: determines whether the package is shared for other projects
 - ``enabled``: determines whether the package is browsed in the Application Catalog
-- ``owner_id``: id of a tenant that owns the package
+- ``owner_id``: id of a project that owns the package
 
 List packages
 -------------
@@ -45,7 +45,7 @@ List packages
 `/v1/catalog/packages?{marker}{limit}{order_by}{type}{category}{fqn}{owned}{id}{catalog}{class_name}{name} [GET]`
 
 This is the compound request to list and search through application catalog.
-If there are no search parameters all packages that is_public, enabled and belong to the user's tenant will be listed.
+If there are no search parameters all packages that is_public, enabled and belong to the user's project will be listed.
 Default order is by 'created' field.
 For an admin role all packages are available.
 
@@ -71,7 +71,7 @@ For an admin role all packages are available.
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
 | ``fqn``              | string      | Allows to point a fully qualified package name for a search                                                                  |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
-| ``owned``            | bool        | Search only from packages owned by current tenant                                                                            |
+| ``owned``            | bool        | Search only from packages owned by current project                                                                            |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
 | ``id``               | string      | Allows to point an id for a search                                                                                           |                                 |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
@@ -224,7 +224,7 @@ Display details for a package.
 
 **Response 403**
 
-*  In attempt to get a non-public package by a user whose tenant is not an owner of this package.
+*  In attempt to get a non-public package by a user whose project is not an owner of this package.
 
 **Response 404**
 
@@ -302,7 +302,7 @@ Allowed operations:
 
 *  An attempt to update immutable fields
 *  An attempt to perform operation that is not allowed on the specified path
-*  An attempt to update non-public package by user whose tenant is not an owner of this package
+*  An attempt to update non-public package by user whose project is not an owner of this package
 
 **Response 404**
 
@@ -364,7 +364,7 @@ Specified package id doesn't exist
 
 **Response 403**
 
-Specified package is not public and not owned by user tenant, performing the request
+Specified package is not public and not owned by user project, performing the request
 
 **Response 404**
 
@@ -388,12 +388,12 @@ The sequence of bytes representing application logo
 
 **Response 403**
 
-Specified package is not public and not owned by user tenant,
+Specified package is not public and not owned by user project,
 performing the request
 
 **Response 404**
 
-Specified package is not public and not owned by user tenant,
+Specified package is not public and not owned by user project,
 performing the request
 
 Categories

@@ -50,19 +50,19 @@ following command.
    - **murano** policy
 
       Policy is created by Congress' murano datasource driver, which is part of
-      Congress. It has to be configured for the OpenStack tenant where Murano
-      application will be deployed. Datasource driver retrieves deployed Murano
-      environments and populates Congress' murano policy tables
+      Congress. It has to be configured for the OpenStack project (tenant) where
+      Murano application will be deployed. Datasource driver retrieves deployed
+      Murano environments and populates Congress' murano policy tables
       (:ref:`policyenf_dev`).
 
       Following commands removes existing **murano** policy, and creates new
-      **murano** policy configured for tenant *demo*.
+      **murano** policy configured for project *demo*.
 
    .. code-block:: console
 
       . ~/devstack/openrc admin admin # if you are using devstack, otherwise you have to setup env manually
 
-      # remove default murano datasource configuration, because it is using 'admin' tenant. We need 'demo' tenant to be used.
+      # remove default murano datasource configuration, because it is using 'admin' project. We need 'demo' project to be used.
       openstack congress datasource delete murano
       openstack congress datasource create murano murano --config username="$OS_USERNAME" --config tenant_name="demo"  --config password="$OS_PASSWORD" --config auth_url="$OS_AUTH_URL"
    ..
