@@ -1,0 +1,5 @@
+---
+fixes:
+  - RequestContext now serialises it's roles. This should allow murano to
+    work correctly (and allow rules like "role:xxx" in policy.json)
+    when using oslo.context prior to 2.2.0 and oslo.policy
