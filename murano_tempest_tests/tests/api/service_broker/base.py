@@ -18,8 +18,8 @@ import time
 
 from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib import exceptions
 from tempest import test
-from tempest_lib import exceptions
 
 from murano_tempest_tests import clients
 
