@@ -28,6 +28,7 @@ from muranoclient.glance import client as glare_client
 import muranoclient.v1.client as muranoclient
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_log import versionutils
 import six
 
 from murano.common import auth_utils
@@ -67,7 +68,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         self._downloaded = []
 
     def _get_glare_client(self):
-        glance_settings = CONF.glance
+        glare_settings = CONF.glare
         session = auth_utils.get_client_session(self._execution_session)
         token = session.auth.get_token(session)
         if self._last_glare_token != token:
@@ -75,19 +76,19 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._glare_client = None
 
         if self._glare_client is None:
-            url = glance_settings.url
+            url = glare_settings.url
             if not url:
                 url = session.get_endpoint(
-                    service_type='image',
-                    interface=glance_settings.endpoint_type,
+                    service_type='artifact',
+                    interface=glare_settings.endpoint_type,
                     region_name=CONF.home_region)
 
             self._glare_client = glare_client.Client(
                 endpoint=url, token=token,
-                insecure=glance_settings.insecure,
-                key_file=glance_settings.key_file or None,
-                ca_file=glance_settings.ca_file or None,
-                cert_file=glance_settings.cert_file or None,
+                insecure=glare_settings.insecure,
+                key_file=glare_settings.key_file or None,
+                ca_file=glare_settings.ca_file or None,
+                cert_file=glare_settings.cert_file or None,
                 type_name='murano',
                 type_version=1)
         return self._glare_client
@@ -96,7 +97,11 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def client(self):
         murano_settings = CONF.murano
         last_glare_client = self._glare_client
-        if CONF.packages_opts.packages_service == 'glance':
+        if CONF.packages_opts.packages_service in ['glance', 'glare']:
+            if CONF.packages_opts.packages_service == 'glance':
+                versionutils.report_deprecated_feature(
+                    LOG, _("'glance' packages_service option has been renamed "
+                           "to 'glare', please update your configuration"))
             artifacts_client = self._get_glare_client()
         else:
             artifacts_client = None

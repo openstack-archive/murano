@@ -35,7 +35,7 @@ _opt_lists = [
     ('heat', murano.common.config.heat_opts),
     ('neutron', murano.common.config.neutron_opts),
     ('murano', murano.common.config.murano_opts),
-    ('glance', murano.common.config.glance_opts),
+    ('glare', murano.common.config.glare_opts),
     ('mistral', murano.common.config.mistral_opts),
     ('networking', murano.common.config.networking_opts),
     ('stats', murano.common.config.stats_opts),
