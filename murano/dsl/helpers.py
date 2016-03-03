@@ -469,3 +469,66 @@ def inspect_is_property(cls, name):
     if m is None:
         return False
     return inspect.isdatadescriptor(m)
+
+
+def updated_dict(d, val):
+    if d is None:
+        d = {}
+    else:
+        d = d.copy()
+    if val is not None:
+        d.update(val)
+    return d
+
+
+def resolve_type(value, scope_type, return_reference=False):
+    if value is None:
+        return None
+    if isinstance(scope_type, dsl_types.MuranoTypeReference):
+        scope_type = scope_type.type
+    if not isinstance(value, (dsl_types.MuranoType,
+                              dsl_types.MuranoTypeReference)):
+        name = scope_type.namespace_resolver.resolve_name(value)
+        result = scope_type.package.find_class(name)
+    else:
+        result = value
+
+    if isinstance(result, dsl_types.MuranoTypeReference):
+        if return_reference:
+            return result
+        return result.type
+    elif return_reference:
+        return result.get_reference()
+    return result
+
+
+def instantiate(data, owner, object_store, context, scope_type,
+                default_type=None, defaults=None):
+    if data is None:
+        data = {}
+    if not isinstance(data, yaqlutils.MappingType):
+        raise ValueError('Incorrect object initialization format')
+    default_type = resolve_type(default_type, scope_type)
+    if len(data) == 1:
+        key = next(iter(data.keys()))
+        ns_resolver = scope_type.namespace_resolver
+        if ns_resolver.is_typename(key, False) or isinstance(
+                key, (dsl_types.MuranoTypeReference, dsl_types.MuranoType)):
+            type_obj = resolve_type(key, scope_type)
+            props = yaqlutils.filter_parameters_dict(data[key] or {})
+            return type_obj.new(
+                owner, object_store, object_store.executor)(
+                context, **props)
+
+    data = updated_dict(defaults, data)
+    if '?' not in data:
+        if not default_type:
+            raise ValueError('Type information is missing')
+        data.update({'?': {
+            'type': default_type.name,
+            'classVersion': str(default_type.version)
+        }})
+    if 'id' not in data['?']:
+        data['?']['id'] = uuid.uuid4().hex
+
+    return object_store.load(data, owner, context)

@@ -27,11 +27,11 @@ from murano.tests.unit.dsl.foundation import object_model
 
 class TestPackage(murano_package.MuranoPackage):
     def __init__(self, pkg_loader, name, version,
-                 runtime_version, requirements, configs):
+                 runtime_version, requirements, configs, meta):
         self.__configs = configs
         super(TestPackage, self).__init__(
             pkg_loader, name, version,
-            runtime_version, requirements)
+            runtime_version, requirements, meta)
 
     def get_class_config(self, name):
         return self.__configs.get(name, {})
@@ -43,7 +43,7 @@ class TestPackage(murano_package.MuranoPackage):
 class TestPackageLoader(package_loader.MuranoPackageLoader):
     _classes_cache = {}
 
-    def __init__(self, directory, package_name, parent_loader=None):
+    def __init__(self, directory, package_name, parent_loader=None, meta=None):
         self._package_name = package_name
         self._yaml_loader = yaql_yaml_loader.get_loader('1.0')
         if directory in TestPackageLoader._classes_cache:
@@ -56,7 +56,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         self._configs = {}
         self._package = TestPackage(
             self, package_name, None, constants.RUNTIME_VERSION_1_0,
-            None, self._configs)
+            None, self._configs, meta)
         for name, payload in six.iteritems(self._classes):
             self._package.register_class(payload, name)
         super(TestPackageLoader, self).__init__()

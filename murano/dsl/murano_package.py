@@ -24,6 +24,7 @@ from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
+from murano.dsl import meta as dslmeta
 from murano.dsl import murano_object
 from murano.dsl import murano_type
 from murano.dsl import namespace_resolver
@@ -31,12 +32,13 @@ from murano.dsl import principal_objects
 from murano.dsl import yaql_integration
 
 
-class MuranoPackage(dsl_types.MuranoPackage):
+class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
     def __init__(self, package_loader, name, version=None,
-                 runtime_version=None, requirements=None):
+                 runtime_version=None, requirements=None, meta=None):
         super(MuranoPackage, self).__init__()
         self._package_loader = weakref.proxy(package_loader)
         self._name = name
+        self._meta = None
         self._version = helpers.parse_version(version)
         self._runtime_version = helpers.parse_version(runtime_version)
         self._requirements = {
@@ -54,6 +56,9 @@ class MuranoPackage(dsl_types.MuranoPackage):
         self._native_load_queue = {}
         if self.name == constants.CORE_LIBRARY:
             principal_objects.register(self)
+        self._package_class = self._create_package_class()
+        self._meta = dslmeta.MetaData(
+            meta, dsl_types.MetaTargets.Package, self._package_class)
 
     @property
     def package_loader(self):
@@ -87,7 +92,7 @@ class MuranoPackage(dsl_types.MuranoPackage):
     def get_class_config(self, name):
         return {}
 
-    def _register_mpl_classes(self, data, name):
+    def _register_mpl_classes(self, data, name=None):
         type_obj = self._classes.get(name)
         if type_obj is not None:
             return type_obj
@@ -187,13 +192,24 @@ class MuranoPackage(dsl_types.MuranoPackage):
                 except exceptions.NoClassFound:
                     pkgs_for_search.append(referenced_package)
                     continue
-            raise exceptions.NoClassFound(name, packages=pkgs_for_search)
+            raise exceptions.NoClassFound(
+                name, packages=pkgs_for_search + [self])
 
         raise exceptions.NoClassFound(name, packages=[self])
 
     @property
     def context(self):
         return None
+
+    def _create_package_class(self):
+        ns_resolver = namespace_resolver.NamespaceResolver(None)
+        return murano_type.MuranoClass(
+            ns_resolver, self.name, self, utils.NO_VALUE)
+
+    def get_meta(self, context):
+        if not self._meta:
+            return []
+        return self._meta.get_meta(context)
 
     def __repr__(self):
         return 'MuranoPackage({name})'.format(name=self.name)

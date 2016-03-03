@@ -19,14 +19,20 @@ import six
 
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import meta
 from murano.dsl import typespec
 
 
-class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec):
+class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
+                     meta.MetaProvider):
     def __init__(self, declaring_type, property_name, declaration):
         super(MuranoProperty, self).__init__(declaration, declaring_type)
         self._property_name = property_name
         self._declaring_type = weakref.ref(declaring_type)
+        self._meta = meta.MetaData(
+            declaration.get('Meta'),
+            dsl_types.MetaTargets.Property, declaring_type)
+        self._meta_values = None
 
     def validate(self, *args, **kwargs):
         try:
@@ -44,6 +50,18 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec):
     @property
     def name(self):
         return self._property_name
+
+    def get_meta(self, context):
+        def meta_producer(cls):
+            prop = cls.properties.get(self.name)
+            if prop is None:
+                return None
+            return prop._meta
+
+        if self._meta_values is None:
+            self._meta_values = meta.merge_providers(
+                self.declaring_type, meta_producer, context)
+        return self._meta_values
 
     def __repr__(self):
         return 'MuranoProperty({type}::{name})'.format(

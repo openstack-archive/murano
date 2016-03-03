@@ -1,0 +1,275 @@
+Namespaces:
+  =: metatests
+
+Name: InheritedMultiMeta
+Usage: Meta
+Cardinality: Many
+Applies: All
+Inherited: true
+
+Properties:
+  val:
+    Contract: $.int().notNull()
+    Default: 111
+
+--- # ------------------------------------------------------------------------
+
+Name: InheritedSingleMeta
+Usage: Meta
+Cardinality: One
+Applies: All
+Inherited: true
+
+Properties:
+  val:
+    Contract: $.int().notNull()
+    Default: 222
+
+--- # ------------------------------------------------------------------------
+
+Name: InheritedSingleMeta2
+Usage: Meta
+Cardinality: One
+Applies: All
+Inherited: true
+Extends: InheritedSingleMeta
+
+--- # ------------------------------------------------------------------------
+
+Name: MultiMeta
+Usage: Meta
+Cardinality: Many
+Applies: All
+Inherited: false
+
+Properties:
+  val:
+    Contract: $.int().notNull()
+    Default: 333
+
+--- # ------------------------------------------------------------------------
+
+Name: SingleMeta
+Usage: Meta
+Cardinality: One
+Applies: All
+Inherited: false
+
+Properties:
+  val:
+    Contract: $.int().notNull()
+    Default: 444
+
+--- # ------------------------------------------------------------------------
+
+Name: SingleMeta2
+Usage: Meta
+Cardinality: One
+Applies: All
+Inherited: false
+Extends: SingleMeta
+
+--- # ------------------------------------------------------------------------
+
+Name: ComplexMeta
+Usage: Meta
+Cardinality: Many
+Properties:
+  cls:
+    Contract: $.class(PropertyType).notNull()
+
+
+--- # ------------------------------------------------------------------------
+
+Name: ParentClass0
+Meta: [InheritedMultiMeta, SingleMeta]
+
+Properties:
+  prop1:
+    Contract: $
+    Meta:
+    - SingleMeta:
+        val: 1
+
+Methods:
+  foo:
+    Meta:
+      - InheritedMultiMeta:
+          val: 1
+      - InheritedSingleMeta:
+          val: 2
+      - SingleMeta:
+          val: 3
+      - InheritedSingleMeta2:
+          val: 10
+      - SingleMeta2:
+          val: 11
+
+    Arguments:
+      arg:
+        Contract: $.string()
+
+--- # ------------------------------------------------------------------------
+
+Name: ParentClass1
+Extends: ParentClass0
+Meta:
+  - InheritedMultiMeta:
+      val: 1
+  - InheritedSingleMeta:
+      val: 6
+  - SingleMeta:
+      val: 7
+
+Methods:
+  foo:
+    Meta:
+      - InheritedMultiMeta:
+          val: 4
+      - InheritedSingleMeta:
+          val: 5
+      - SingleMeta:
+          val: 6
+
+    Arguments:
+      arg:
+        Contract: $.string()
+
+
+--- # ------------------------------------------------------------------------
+
+Name: ParentClass2
+Extends: ParentClass0
+Usage: Class
+Meta:
+  - InheritedMultiMeta:
+      val: 2
+  - SingleMeta:
+      val: 3
+
+Properties:
+  prop2:
+    Contract: $
+    Meta:
+    - InheritedMultiMeta:
+        val: 1
+    - MultiMeta:
+        val: 2
+    - SingleMeta:
+        val: 3
+
+--- # ------------------------------------------------------------------------
+
+Name: TestMeta
+Extends: [ParentClass1, ParentClass2]
+Meta:
+  - 'metatests.InheritedMultiMeta':
+      val: 4
+  - :SingleMeta:
+      val: 5
+
+Properties:
+  prop2:
+    Contract: $
+    Meta:
+    - InheritedMultiMeta:
+        val: 4
+
+Methods:
+  testClassInheritedMeta:
+    Body:
+     - Return: typeinfo($).meta.where($ is InheritedMultiMeta).val
+
+  testClassNotInheritedMeta:
+    Body:
+     - Return: typeinfo($).meta.
+        where($ is SingleMeta or $ is InheritedSingleMeta).val
+
+  testParentClassNotInheritedMeta:
+    Body:
+     - Return: typeinfo(ParentClass2).meta.
+        where(not typeinfo($).inherited).single().val
+
+  testMethodMeta:
+    Body:
+     - Return: typeinfo($).methods.where($.name = foo).single().meta.val
+
+  testMethodArgumentMeta:
+    Body:
+     - Return: typeinfo($).
+        methods.where($.name = foo).single().
+        arguments.single().meta.val
+
+  testInheritedPropertyMeta:
+    Body:
+     - Return: typeinfo($).properties.
+        where($.name = prop1).single().meta.val
+
+  testOverriddenPropertyMeta:
+    Body:
+     - Return: typeinfo($).properties.
+        where($.name = prop2).single().meta.val
+
+  testPackageMeta:
+    Body:
+     - Return: typeinfo($).package.meta
+
+  testComplexMeta:
+    Body:
+     - Return: typeinfo($).
+        methods.where($.name = bar).single().meta.cls.
+          select([$.prop, typeinfo($).name])
+
+  foo:
+    Meta:
+      - InheritedMultiMeta:
+          val: 7
+      - InheritedSingleMeta:
+          val: 8
+      - SingleMeta:
+          val: 9
+
+    Arguments:
+      arg:
+        Contract: $.string()
+        Meta:
+        - SingleMeta:
+            val: 1
+        - MultiMeta:
+            val: 2
+        - MultiMeta:
+            val: 3
+  bar:
+    Meta:
+      - ComplexMeta:
+          cls:
+            :PropertyType:
+              prop: 1
+      - ComplexMeta:
+          cls:
+            prop: 2
+      - :ComplexMeta:
+          cls:
+            :PropertyType2:
+              prop: 3
+      - 'metatests.ComplexMeta':
+          cls:
+            prop: 4
+      - ComplexMeta:
+          cls:
+            ?:
+              type: 'metatests.PropertyType2'
+            prop: 5
+
+--- # ------------------------------------------------------------------------
+
+Name: PropertyType
+Properties:
+  prop:
+    Contract: $.int().notNull()
+    Default: 44
+
+--- # ------------------------------------------------------------------------
+
+Name: PropertyType2
+Extends: PropertyType

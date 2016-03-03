@@ -41,6 +41,8 @@ DM_ATTRIBUTES = 'Attributes'
 
 META_MURANO_METHOD = '?muranoMethod'
 META_NO_TRACE = '?noTrace'
+META_MPL_META = 'Meta'
+META_USAGE = 'Usage'
 
 CORE_LIBRARY = 'io.murano'
 CORE_LIBRARY_OBJECT = 'io.murano.Object'

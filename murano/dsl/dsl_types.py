@@ -13,11 +13,55 @@
 #    under the License.
 
 
+class ClassUsages(object):
+    Class = 'Class'
+    Meta = 'Meta'
+    All = {Class, Meta}
+
+
+class MetaCardinality(object):
+    One = 'One'
+    Many = 'Many'
+    All = {One, Many}
+
+
+class MetaTargets(object):
+    Package = 'Package'
+    Type = 'Type'
+    Property = 'Property'
+    Method = 'Method'
+    Argument = 'Argument'
+    All = {Package, Type, Property, Method, Argument}
+
+
+class PropertyUsages(object):
+    In = 'In'
+    Out = 'Out'
+    InOut = 'InOut'
+    Runtime = 'Runtime'
+    Const = 'Const'
+    Config = 'Config'
+    Static = 'Static'
+    All = {In, Out, InOut, Runtime, Const, Config, Static}
+    Writable = {Out, InOut, Runtime, Static}
+
+
+class MethodUsages(object):
+    Action = 'Action'
+    Runtime = 'Runtime'
+    Static = 'Static'
+    All = {Action, Runtime, Static}
+
+
 class MuranoType(object):
     pass
 
 
 class MuranoClass(MuranoType):
+    pass
+
+
+class MuranoMetaClass(MuranoClass):
     pass
 
 

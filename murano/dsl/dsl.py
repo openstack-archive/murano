@@ -17,6 +17,7 @@ import os.path
 
 import six
 from yaql.language import expressions as yaql_expressions
+from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
 from yaql import yaql_interface
@@ -335,3 +336,12 @@ def to_mutable(obj, yaql_engine=None):
 
     limiter = lambda it: utils.limit_iterable(it, constants.ITERATORS_LIMIT)
     return converter(obj, limiter, yaql_engine, converter)
+
+
+def meta(type_name, value):
+    def wrapper(func):
+        fd = specs.get_function_definition(func)
+        mpl_meta = fd.meta.get(constants.META_MPL_META, [])
+        mpl_meta.append({type_name: value})
+        specs.meta(type_name, mpl_meta)(func)
+    return wrapper

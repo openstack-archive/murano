@@ -18,7 +18,6 @@ from yaql import utils
 
 from murano.dsl import dsl
 from murano.dsl import dsl_types
-from murano.dsl import murano_method
 
 
 class ObjRef(object):
@@ -73,7 +72,7 @@ def serialize_model(root_object, executor, allow_refs=False):
 def _serialize_available_action(obj, current_actions):
     result = {}
     actions = obj.type.find_methods(
-        lambda m: m.usage == murano_method.MethodUsages.Action)
+        lambda m: m.usage == dsl_types.MethodUsages.Action)
     for action in actions:
         action_id = '{0}_{1}'.format(obj.object_id, action.name)
         entry = current_actions.get(action_id, {'enabled': True})

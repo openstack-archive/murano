@@ -14,7 +14,7 @@
 
 import mock
 
-from murano.dsl import murano_method
+from murano.dsl import dsl_types
 from murano.dsl import serializer
 from murano.services import actions
 from murano.tests.unit import base
@@ -26,13 +26,13 @@ class TestActionsSerializer(base.MuranoTestCase):
 
     def _get_mocked_obj(self):
         method1 = mock.Mock()
-        method1.usage = murano_method.MethodUsages.Action
+        method1.usage = dsl_types.MethodUsages.Action
         method1.name = 'method1'
         method2 = mock.Mock()
-        method2.usage = murano_method.MethodUsages.Runtime
+        method2.usage = dsl_types.MethodUsages.Runtime
         method2.name = 'method2'
         method3 = mock.Mock()
-        method3.usage = murano_method.MethodUsages.Action
+        method3.usage = dsl_types.MethodUsages.Action
         method3.name = 'method3'
 
         obj2_type = mock.Mock()

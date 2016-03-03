@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import abc
 import collections
 import weakref
 
@@ -24,6 +25,7 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
+from murano.dsl import meta as dslmeta
 from murano.dsl import murano_method
 from murano.dsl import murano_object
 from murano.dsl import murano_property
@@ -48,22 +50,48 @@ class MuranoType(dsl_types.MuranoType):
     def namespace_resolver(self):
         return self._namespace_resolver
 
+    @abc.abstractproperty
+    @property
+    def usage(self):
+        raise NotImplementedError()
 
-class MuranoClass(dsl_types.MuranoClass, MuranoType):
-    def __init__(self, ns_resolver, name, package, parents=None):
+    @property
+    def version(self):
+        return self.package.version
+
+    def get_reference(self):
+        return dsl_types.MuranoTypeReference(self)
+
+
+class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
+    _allowed_usages = {dsl_types.ClassUsages.Class}
+
+    def __init__(self, ns_resolver, name, package, parents, meta=None):
         super(MuranoClass, self).__init__(ns_resolver, name, package)
         self._methods = {}
         self._properties = {}
         self._config = {}
         self._extension_class = None
-        if self._name == constants.CORE_LIBRARY_OBJECT:
+        if (self._name == constants.CORE_LIBRARY_OBJECT or
+                parents is utils.NO_VALUE):
             self._parents = []
         else:
             self._parents = parents or [
                 package.find_class(constants.CORE_LIBRARY_OBJECT)]
+        for p in self._parents:
+            if p.usage not in self._allowed_usages:
+                raise exceptions.InvalidInheritanceError(
+                    u'Type {0} cannot have parent with Usage {1}'.format(
+                        self.name, p.usage))
         self._context = None
         self._parent_mappings = self._build_parent_remappings()
         self._property_values = {}
+        self._meta = dslmeta.MetaData(meta, dsl_types.MetaTargets.Type, self)
+        self._meta_values = None
+
+    @property
+    def usage(self):
+        return dsl_types.ClassUsages.Class
 
     @property
     def declared_parents(self):
@@ -111,10 +139,10 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType):
             names.update(c.properties.keys())
         return tuple(names)
 
-    def add_property(self, name, property_typespec):
+    def add_property(self, property_typespec):
         if not isinstance(property_typespec, murano_property.MuranoProperty):
             raise TypeError('property_typespec')
-        self._properties[name] = property_typespec
+        self._properties[property_typespec.name] = property_typespec
 
     def _find_symbol_chains(self, func, origin):
         queue = collections.deque([(self, ())])
@@ -248,10 +276,6 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType):
     def __repr__(self):
         return 'MuranoClass({0}/{1})'.format(self.name, self.version)
 
-    @property
-    def version(self):
-        return self.package.version
-
     def _build_parent_remappings(self):
         """Remaps class parents.
 
@@ -360,11 +384,67 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType):
         cls = prop.declaring_type
         cls._property_values[name] = prop.validate(value, cls, None, context)
 
-    def get_reference(self):
-        return dsl_types.MuranoTypeReference(self)
+    def get_meta(self, context):
+        if self._meta_values is None:
+            self._meta_values = dslmeta.merge_providers(
+                self, lambda cls: cls._meta, context)
+        return self._meta_values
+
+
+class MuranoMetaClass(dsl_types.MuranoMetaClass, MuranoClass):
+    _allowed_usages = {dsl_types.ClassUsages.Meta, dsl_types.ClassUsages.Class}
+
+    def __init__(self, ns_resolver, name, package, parents, meta=None):
+        super(MuranoMetaClass, self).__init__(
+            ns_resolver, name, package, parents, meta)
+        self._cardinality = dsl_types.MetaCardinality.One
+        self._targets = list(dsl_types.MetaCardinality.All)
+        self._inherited = False
+
+    @property
+    def usage(self):
+        return dsl_types.ClassUsages.Meta
+
+    @property
+    def cardinality(self):
+        return self._cardinality
+
+    @cardinality.setter
+    def cardinality(self, value):
+        self._cardinality = value
+
+    @property
+    def targets(self):
+        return self._targets
+
+    @targets.setter
+    def targets(self, value):
+        self._targets = value
+
+    @property
+    def inherited(self):
+        return self._inherited
+
+    @inherited.setter
+    def inherited(self, value):
+        self._inherited = value
+
+    def __repr__(self):
+        return 'MuranoMetaClass({0}/{1})'.format(self.name, self.version)
 
 
 def create(data, package, name, ns_resolver):
+    usage = data.get('Usage', dsl_types.ClassUsages.Class)
+    if usage == dsl_types.ClassUsages.Class:
+        return _create_class(MuranoClass, name, ns_resolver, data, package)
+    elif usage == dsl_types.ClassUsages.Meta:
+        return _create_meta_class(
+            MuranoMetaClass, name, ns_resolver, data, package)
+    else:
+        raise ValueError(u'Invalid type Usage: "{}"'.format(usage))
+
+
+def _create_class(cls, name, ns_resolver, data, package, *args, **kwargs):
     parent_class_names = data.get('Extends')
     parent_classes = []
     if parent_class_names:
@@ -374,13 +454,15 @@ def create(data, package, name, ns_resolver):
             full_name = ns_resolver.resolve_name(str(parent_name))
             parent_classes.append(package.find_class(full_name))
 
-    type_obj = MuranoClass(ns_resolver, name, package, parent_classes)
+    type_obj = cls(
+        ns_resolver, name, package, parent_classes, data.get('Meta'),
+        *args, **kwargs)
 
     properties = data.get('Properties') or {}
     for property_name, property_spec in six.iteritems(properties):
         spec = murano_property.MuranoProperty(
             type_obj, property_name, property_spec)
-        type_obj.add_property(property_name, spec)
+        type_obj.add_property(spec)
 
     methods = data.get('Methods') or data.get('Workflow') or {}
 
@@ -394,3 +476,32 @@ def create(data, package, name, ns_resolver):
             method_mappings.get(method_name, method_name), payload)
 
     return type_obj
+
+
+def _create_meta_class(cls, name, ns_resolver, data, package, *args, **kwargs):
+    cardinality = data.get('Cardinality', dsl_types.MetaCardinality.One)
+    if cardinality not in dsl_types.MetaCardinality.All:
+        raise ValueError(u'Invalid MetaClass Cardinality "{}"'.format(
+            cardinality))
+    applies_to = data.get('Applies', dsl_types.MetaTargets.All)
+    if isinstance(applies_to, six.string_types):
+        applies_to = [applies_to]
+    if isinstance(applies_to, list):
+        applies_to = set(applies_to)
+    delta = applies_to - dsl_types.MetaTargets.All - {'All'}
+    if delta:
+        raise ValueError(u'Invalid MetaClass target(s) {}:'.format(
+            ', '.join(map(u'"{}"'.format, delta)))
+        )
+    if 'All' in applies_to:
+        applies_to = dsl_types.MetaTargets.All
+    inherited = data.get('Inherited', False)
+    if not isinstance(inherited, bool):
+        raise ValueError('Invalid Inherited value. Must be true or false')
+
+    meta_cls = _create_class(
+        cls, name, ns_resolver, data, package, *args, **kwargs)
+    meta_cls.targets = list(applies_to)
+    meta_cls.cardinality = cardinality
+    meta_cls.inherited = inherited
+    return meta_cls
