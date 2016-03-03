@@ -217,8 +217,7 @@ several different ways:
 * :ref:`from an URL <cli_bundle_url>`
 * :ref:`from murano app repository <cli_bundle_repo>`
 
-When importing bundles, you can specify their categories with
-``-c/--categories`` and set their publicity with ``--is-public``.
+When importing bundles, you can set their publicity with ``--is-public``.
 
 .. _cli_local_bundle:
 

@@ -129,8 +129,7 @@ different ways:
     * from a http url
     * from murano app repository
 
-When creating a package you can specify it's categories with
-``-c/--categories`` and set it's publicity with ``--is-public``
+When creating a bundle you can set it's publicity with ``--is-public``
 
 To import a local bundle run::
 
