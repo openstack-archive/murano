@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import sys
-
 import six
 from yaql.language import specs
 from yaql.language import utils
@@ -244,7 +242,7 @@ class TypeScheme(object):
         if len(spec) < 1:
             return data
         shift = 0
-        max_length = sys.maxint
+        max_length = -1
         min_length = 0
         if isinstance(spec[-1], int):
             min_length = spec[-1]
@@ -254,10 +252,14 @@ class TypeScheme(object):
             min_length = spec[-2]
             shift += 1
 
-        if not min_length <= len(data) <= max_length:
+        if max_length >= 0 and not min_length <= len(data) <= max_length:
             raise exceptions.ContractViolationException(
                 'Array length {0} is not within [{1}..{2}] range'.format(
                     len(data), min_length, max_length))
+        elif not min_length <= len(data):
+            raise exceptions.ContractViolationException(
+                'Array length {0} must not be less than {1}'.format(
+                    len(data), min_length))
 
         def map_func():
             for index, item in enumerate(data):
@@ -284,7 +286,8 @@ class TypeScheme(object):
         if isinstance(spec, dsl_types.YaqlExpression):
             child_context[''] = data
             try:
-                return spec(context=child_context)
+                result = spec(context=child_context)
+                return result
             except exceptions.ContractViolationException as e:
                 e.path = path
                 raise

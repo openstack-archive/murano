@@ -37,7 +37,7 @@ class MuranoPlPackage(package_base.PackageBase):
         full_path = os.path.join(self._source_directory, 'UI', self._ui_file)
         if not os.path.isfile(full_path):
             return None
-        with open(full_path) as stream:
+        with open(full_path, 'rb') as stream:
             return stream.read()
 
     @property
@@ -53,7 +53,7 @@ class MuranoPlPackage(package_base.PackageBase):
         if not os.path.isfile(full_path):
             raise exceptions.PackageClassLoadError(
                 name, 'File with class definition not found')
-        with open(full_path) as stream:
+        with open(full_path, 'rb') as stream:
             return stream.read(), full_path
 
     @property

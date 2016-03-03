@@ -150,10 +150,9 @@ def get_function_definition(func, murano_method, original_name):
         name, cls.__name__)
     body = func
     cls = murano_method.declaring_type.extension_class
-    if helpers.inspect_is_method(cls, original_name):
-        body = func.im_func
-    if helpers.inspect_is_classmethod(cls, original_name):
-        body = func.im_func
+    if (helpers.inspect_is_method(cls, original_name) or
+            helpers.inspect_is_classmethod(cls, original_name)):
+        body = helpers.function(func)
     fd = specs.get_function_definition(
         body, convention=CONVENTION,
         parameter_type_func=param_type_func)
@@ -276,11 +275,11 @@ def get_class_factory_definition(cls, murano_class):
         with helpers.contextual(__context):
             return helpers.evaluate(cls(*args, **kwargs), __context)
 
-    if hasattr(cls.__init__, 'im_func'):
+    if '__init__' in cls.__dict__:
         fd = specs.get_function_definition(
-            cls.__init__.im_func,
+            helpers.function(cls.__init__),
             parameter_type_func=lambda name: _infer_parameter_type(
-                name, cls.__init__.im_class.__name__),
+                name, cls.__name__),
             convention=CONVENTION)
     else:
         fd = specs.get_function_definition(lambda self: None)
@@ -302,12 +301,12 @@ def filter_parameters(__fd, *args, **kwargs):
                 position_args += 1
         args = args[:position_args]
     kwargs = kwargs.copy()
-    for name in kwargs.keys():
+    for name in list(kwargs.keys()):
         if not utils.is_keyword(name):
             del kwargs[name]
     if '**' not in __fd.parameters:
         names = {p.alias or p.name for p in six.itervalues(__fd.parameters)}
-        for name in kwargs.keys():
+        for name in list(kwargs.keys()):
             if name not in names:
                 del kwargs[name]
     return args, kwargs

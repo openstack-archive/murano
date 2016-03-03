@@ -304,7 +304,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         }
         for cls, parent in helpers.traverse(
                 ((self, parent) for parent in self._parents),
-                lambda (c, p): ((p, anc) for anc in p.declared_parents)):
+                lambda cp: ((cp[1], anc) for anc in cp[1].declared_parents)):
             if cls.package != parent.package:
                 requirement = cls.package.requirements[parent.package.name]
                 aggregation.setdefault(parent.package.name, set()).add(

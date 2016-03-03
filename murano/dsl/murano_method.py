@@ -177,7 +177,8 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
                 self.murano_method.name, self.name,
                 e.path, six.text_type(e))
             six.reraise(exceptions.ContractViolationException,
-                        msg, sys.exc_info()[2])
+                        exceptions.ContractViolationException(msg),
+                        sys.exc_info()[2])
 
     @property
     def murano_method(self):

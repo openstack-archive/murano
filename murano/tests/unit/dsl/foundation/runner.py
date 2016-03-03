@@ -105,8 +105,10 @@ class Runner(object):
                         original_exception, dsl_exception.MuranoPlException):
                     exc_traceback = getattr(
                         e, 'original_traceback', None) or sys.exc_info()[2]
-                    raise type(original_exception), original_exception, \
-                        exc_traceback
+                    six.reraise(
+                        type(original_exception),
+                        original_exception,
+                        exc_traceback)
             raise
 
     def __getattr__(self, item):

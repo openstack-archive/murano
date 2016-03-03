@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import exceptions
-
 from oslo_log import log as logging
 from yaql.language import specs
 from yaql.language import yaqltypes
@@ -98,7 +96,7 @@ class Logger(object):
         """
         try:
             message = format_function(message, *args, **kwargs)
-        except (exceptions.IndexError, exceptions.KeyError):
+        except (IndexError, KeyError):
             # NOTE(akhivin): we do not want break program workflow
             # even formatting parameters are incorrect
             self._underlying_logger.warning(

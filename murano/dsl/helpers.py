@@ -17,7 +17,7 @@ import contextlib
 import functools
 import inspect
 import itertools
-import string
+import re
 import sys
 import uuid
 
@@ -267,7 +267,7 @@ def parse_version_spec(version_spec):
             semantic_version.Spec('==' + str(version_spec)))
     if not version_spec:
         version_spec = '0'
-    version_spec = str(version_spec).translate(None, string.whitespace)
+    version_spec = re.sub('\s+', '', str(version_spec))
     if version_spec[0].isdigit():
         version_spec = '==' + str(version_spec)
     version_spec = semantic_version.Spec(version_spec)
@@ -532,3 +532,9 @@ def instantiate(data, owner, object_store, context, scope_type,
         data['?']['id'] = uuid.uuid4().hex
 
     return object_store.load(data, owner, context)
+
+
+def function(c):
+    if hasattr(c, 'im_func'):
+        return c.im_func
+    return c

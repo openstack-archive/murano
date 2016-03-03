@@ -41,7 +41,8 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
             msg = u'[{0}.{1}{2}] {3}'.format(
                 self.declaring_type.name, self.name, e.path, six.text_type(e))
             six.reraise(exceptions.ContractViolationException,
-                        msg, sys.exc_info()[2])
+                        exceptions.ContractViolationException(msg),
+                        sys.exc_info()[2])
 
     @property
     def declaring_type(self):

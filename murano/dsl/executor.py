@@ -194,7 +194,7 @@ class MuranoDslExecutor(object):
 
     @staticmethod
     def _canonize_parameters(arguments_scheme, args, kwargs):
-        arg_names = arguments_scheme.keys()
+        arg_names = list(arguments_scheme.keys())
         parameter_values = utils.filter_parameters_dict(kwargs)
         for i, arg in enumerate(args):
             name = arg_names[i]
