@@ -79,9 +79,7 @@ Methods:
               properties:
                 description: format('Composite security group of Murano environment {0}', $.environment.name)
                 rules:
-                  - port_range_min: null
-                    port_range_max: null
-                    protocol: icmp
+                  - protocol: icmp
                     remote_ip_prefix: '0.0.0.0/0'
       - $.environment.stack.updateTemplate($template)
 
