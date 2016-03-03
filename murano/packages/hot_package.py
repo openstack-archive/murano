@@ -281,7 +281,7 @@ class HotPackage(package_base.PackageBase):
                 ]
             },
             {YAQL('$stack'): YAQL(
-                "new('io.murano.system.HeatStack', "
+                "new('io.murano.system.HeatStack', $environment, "
                 "name => $.getAttr(generatedHeatStackName))")},
 
             YAQL("$reporter.report($this, "

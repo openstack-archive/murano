@@ -35,12 +35,12 @@ LOG = logging.getLogger(__name__)
 
 @dsl.name('io.murano.system.NetworkExplorer')
 class NetworkExplorer(object):
-    def __init__(self):
+    def __init__(self, this):
         session = helpers.get_execution_session()
         self._project_id = session.project_id
         self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
-        self._client = self._get_client(CONF.home_region)
+        self._owner = this.find_owner('io.murano.Environment')
 
     @staticmethod
     @session_local_storage.execution_session_memoize
@@ -49,6 +49,11 @@ class NetworkExplorer(object):
         return nclient.Client(**auth_utils.get_session_client_parameters(
             service_type='network', region=region_name, conf=neutron_settings
         ))
+
+    @property
+    def _client(self):
+        region = None if self._owner is None else self._owner['region']
+        return self._get_client(region)
 
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
     # decorator with random delay 1-10 seconds between attempts and maximum

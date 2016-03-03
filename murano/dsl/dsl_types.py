@@ -43,7 +43,7 @@ class PropertyUsages(object):
     Config = 'Config'
     Static = 'Static'
     All = {In, Out, InOut, Runtime, Const, Config, Static}
-    Writable = {Out, InOut, Runtime, Static}
+    Writable = {Out, InOut, Runtime, Static, Config}
 
 
 class MethodUsages(object):

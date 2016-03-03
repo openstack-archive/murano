@@ -53,7 +53,7 @@ Methods:
   initialize:
     Body:
       - $._environment: $.find(std:Environment).require()
-      - $._netExplorer: new(sys:NetworkExplorer)
+      - $._netExplorer: new(sys:NetworkExplorer, $._environment)
 
 
   deploy:
