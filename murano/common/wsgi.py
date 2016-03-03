@@ -39,6 +39,7 @@ import webob.dec
 import webob.exc
 
 from murano.api.v1 import schemas
+from murano.common import config
 from murano.common import exceptions
 from murano.common.i18n import _, _LE, _LW
 from murano.common import xmlutils
@@ -82,6 +83,7 @@ class Service(service.Service):
         self._backlog = backlog if backlog else CONF.backlog
         self._logger = logging.getLogger('eventlet.wsgi')
         self.greenthread = None
+        config.set_middleware_defaults()
         super(Service, self).__init__(threads)
 
     def _get_socket(self, host, port, backlog):

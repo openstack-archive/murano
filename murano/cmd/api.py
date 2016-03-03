@@ -54,6 +54,7 @@ if os.path.exists(os.path.join(root, 'murano', '__init__.py')):
 def main():
     try:
         config.parse_args()
+        config.set_middleware_defaults()
         request_statistics.init_stats()
         policy.init()
 
