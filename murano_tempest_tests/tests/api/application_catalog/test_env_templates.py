@@ -29,8 +29,6 @@ class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
 
     @attr(type='smoke')
     def test_create_and_delete_env_template(self):
-        env_templates_list_start = self.application_catalog_client.\
-            get_env_templates_list()
         name = utils.generate_name('create_and_delete_env_template')
         env_template = self.application_catalog_client.\
             create_env_template(name)
@@ -38,14 +36,12 @@ class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
         self.assertEqual(name, env_template['name'])
         env_templates_list = self.application_catalog_client.\
             get_env_templates_list()
-        self.assertEqual(len(env_templates_list_start) + 1,
-                         len(env_templates_list))
+        self.assertIn(env_template, env_templates_list)
         self.application_catalog_client.\
             delete_env_template(env_template['id'])
         env_templates_list = self.application_catalog_client.\
             get_env_templates_list()
-        self.assertEqual(len(env_templates_list_start),
-                         len(env_templates_list))
+        self.assertNotIn(env_template, env_templates_list)
 
 
 class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
