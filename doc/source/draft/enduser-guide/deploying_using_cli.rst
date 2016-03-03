@@ -118,7 +118,7 @@ For convenience, the murano client replaces the ``"===id1==="``, ``"===id2==="``
 (and so on) strings with UUIDs. This way you can ensure that object IDs
 inside your object model are unique.
 To learn more about jsonpatch, consult jsonpatch.com_ and `RFC 6902`_.
-The :command:`murano-environment-edit` command fully supports jsonpatch.
+The :command:`environment-apps-edit` command fully supports jsonpatch.
 This means that you can alter, add, or remove parts of your applications
 object model.
 
