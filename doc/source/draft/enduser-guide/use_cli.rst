@@ -7,6 +7,12 @@
 Using CLI
 =========
 
+This section provides murano end users with information on how they can use
+the Application Catalog through the command-line interface (CLI).
+
+Using python-muranoclient, the CLI client for murano, you can easily manage
+your environments, packages, categories, and deploy environments.
+
 Manage environments
 ~~~~~~~~~~~~~~~~~~~
 
