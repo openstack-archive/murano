@@ -17,12 +17,11 @@ import base64
 from keystoneclient.auth.identity import v3
 from keystoneclient import exceptions
 from keystoneclient import session as ks_session
-from keystoneclient.v3 import client
 from oslo_config import cfg
 from oslo_log import log
 from webob import exc
 
-from murano.common.i18n import _
+from murano.common.i18n import _, _LW
 from murano.common import wsgi
 
 CONF = cfg.CONF
@@ -34,17 +33,29 @@ class ExternalContextMiddleware(wsgi.Middleware):
         # TODO(starodubcevna): picking up project_name and auth_url from
         # section related to Cloud Foundry service broker is probably a duct
         # tape and should be rewritten as soon as we get more non-OpenStack
-        # services as murano recipients.
+        # services as murano recipients. The same is right for project and user
+        # domain names.
 
-        kwargs = {'auth_url': CONF.cfapi.auth_url.replace('v2.0', 'v3'),
+        auth_url = CONF.cfapi.auth_url
+        if not (auth_url.endswith('v2.0') or auth_url.endswith('v3')):
+            auth_url += '/v3'
+        elif auth_url.endswith('v2.0'):
+            auth_url = auth_url.replace('v2.0', 'v3')
+        elif auth_url.endswith('v3'):
+            pass
+        else:
+            LOG.warning(_LW('Wrong format for service broker auth url'))
+
+        kwargs = {'auth_url': auth_url,
                   'username': user,
                   'password': password,
-                  'project_name': CONF.cfapi.tenant}
+                  'project_name': CONF.cfapi.tenant,
+                  'user_domain_name': CONF.cfapi.user_domain_name,
+                  'project_domain_name': CONF.cfapi.project_domain_name}
         password_auth = v3.Password(**kwargs)
         session = ks_session.Session(auth=password_auth)
-        keystone = client.Client(session=session)
 
-        return keystone.auth_token
+        return session.get_token()
 
     def process_request(self, req):
 

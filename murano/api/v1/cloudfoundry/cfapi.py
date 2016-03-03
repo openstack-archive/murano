@@ -34,7 +34,9 @@ cfapi_opts = [
                help=('host for service broker')),
     cfg.StrOpt('bind_port', default='8083',
                help=('host for service broker')),
-    cfg.StrOpt('auth_url', default='localhost:5000/v2.0')]
+    cfg.StrOpt('auth_url', default='localhost:5000'),
+    cfg.StrOpt('user_domain_name', default='default'),
+    cfg.StrOpt('project_domain_name', default='default')]
 
 LOG = logging.getLogger(__name__)
 CONF = cfg.CONF
