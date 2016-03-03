@@ -77,10 +77,10 @@ Application package could be composed manually. Follow the 5 steps below.
 
 `Applications` page looks like:
 
-.. image:: hotpackages/chef_server.png
+.. image:: chef_server.png
 
 The configuration form, where you can enter template parameters, will be generated automatically and looks as follows:
 
-.. image:: hotpackages/chef_server_form.png
+.. image:: chef_server_form.png
 
 After filling the form the application is ready to be deployed.
