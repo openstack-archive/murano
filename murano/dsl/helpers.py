@@ -216,10 +216,16 @@ def are_property_modifications_allowed(context=None):
     return context[constants.CTX_ALLOW_PROPERTY_WRITES] or False
 
 
+def get_names_scope(context=None):
+    context = context or get_context()
+    return context[constants.CTX_NAMES_SCOPE]
+
+
 def get_class(name, context=None):
     context = context or get_context()
-    murano_class = get_type(context)
-    return murano_class.package.find_class(name)
+    murano_type = get_names_scope(context)
+    name = murano_type.namespace_resolver.resolve_name(name)
+    return murano_type.package.find_class(name)
 
 
 def get_current_thread_id():
@@ -538,3 +544,11 @@ def function(c):
     if hasattr(c, 'im_func'):
         return c.im_func
     return c
+
+
+def list_value(v):
+    if v is None:
+        return []
+    if not yaqlutils.is_sequence(v):
+        v = [v]
+    return v

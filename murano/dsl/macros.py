@@ -25,8 +25,7 @@ from murano.dsl import yaql_expression
 
 class CodeBlock(expressions.DslExpression):
     def __init__(self, body):
-        if not isinstance(body, list):
-            body = [body]
+        body = helpers.list_value(body)
         self.code_block = list(map(expressions.parse_expression, body))
 
     def execute(self, context):

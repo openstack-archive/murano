@@ -183,10 +183,7 @@ def op_dot_static(context, receiver, expr, operator):
 @specs.parameter('name', yaqltypes.Keyword())
 @specs.name('#operator_:')
 def ns_resolve(context, prefix, name):
-    murano_type = helpers.get_type(context)
-    return helpers.get_class(
-        murano_type.namespace_resolver.resolve_name(
-            prefix + ':' + name), context).get_reference()
+    return helpers.get_class(prefix + ':' + name, context).get_reference()
 
 
 @specs.parameter('name', yaqltypes.Keyword())

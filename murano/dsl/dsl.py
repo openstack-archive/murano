@@ -108,9 +108,11 @@ class InterfacesParameter(yaqltypes.HiddenParameterType,
 
 
 class MuranoTypeParameter(yaqltypes.PythonType):
-    def __init__(self, base_type=None, nullable=False, context=None):
+    def __init__(self, base_type=None, nullable=False, context=None,
+                 resolve_strings=True):
         self._context = context
         self._base_type = base_type
+        self._resolve_strings = resolve_strings
         super(MuranoTypeParameter, self).__init__(
             (dsl_types.MuranoTypeReference,
              six.string_types), nullable)
@@ -119,6 +121,10 @@ class MuranoTypeParameter(yaqltypes.PythonType):
         if not super(MuranoTypeParameter, self).check(
                 value, context, *args, **kwargs):
             return False
+        if isinstance(value, six.string_types):
+            if not self._resolve_strings:
+                return False
+            value = helpers.get_class(value, context).get_reference()
         if isinstance(value, dsl_types.MuranoTypeReference):
             if not self._base_type:
                 return True
@@ -133,12 +139,7 @@ class MuranoTypeParameter(yaqltypes.PythonType):
         value = super(MuranoTypeParameter, self).convert(
             value, sender, context, function_spec, engine)
         if isinstance(value, six.string_types):
-            if function_spec.meta.get(constants.META_MURANO_METHOD):
-                context = helpers.get_caller_context(context)
-            murano_type = helpers.get_type(context)
-            value = helpers.get_class(
-                murano_type.namespace_resolver.resolve_name(value),
-                context).get_reference()
+            value = helpers.get_class(value, context).get_reference()
         if self._base_type and not self._base_type.is_compatible(value):
             raise ValueError('Value must be subtype of {0}'.format(
                 self._base_type.name

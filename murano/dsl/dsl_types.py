@@ -50,7 +50,11 @@ class MethodUsages(object):
     Action = 'Action'
     Runtime = 'Runtime'
     Static = 'Static'
-    All = {Action, Runtime, Static}
+    Extension = 'Extension'
+
+    All = {Action, Runtime, Static, Extension}
+    InstanceMethods = {Runtime, Action}
+    StaticMethods = {Static, Extension}
 
 
 class MuranoType(object):

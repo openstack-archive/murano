@@ -98,12 +98,11 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
             return type_obj
         if callable(data):
             data = data()
-        if not utils.is_sequence(data):
-            data = [data]
+        data = helpers.list_value(data)
         unnamed_class = None
         last_ns = {}
         for cls_data in data:
-            last_ns = cls_data.setdefault('Namespaces', last_ns)
+            last_ns = cls_data.setdefault('Namespaces', last_ns.copy())
             if len(cls_data) == 1:
                 continue
             cls_name = cls_data.get('Name')

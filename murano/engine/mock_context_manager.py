@@ -111,7 +111,7 @@ def inject_method_with_str(context, target, target_method,
     original_class = target.type
 
     original_function = original_class.find_single_method(target_method)
-    result_fd = original_function.yaql_function_definition.clone()
+    result_fd = original_function.instance_stub.clone()
 
     def payload_adapter(__context, __sender, *args, **kwargs):
         executor = helpers.get_executor(__context)
@@ -134,7 +134,7 @@ def inject_method_with_yaql_expr(context, target, target_method, expr):
     original_class = target.type
 
     original_function = original_class.find_single_method(target_method)
-    result_fd = original_function.yaql_function_definition.clone()
+    result_fd = original_function.instance_stub.clone()
 
     def payload_adapter(__super, __context, __sender, *args, **kwargs):
         new_context = context.create_child_context()

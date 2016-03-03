@@ -34,9 +34,9 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
             dsl_types.MetaTargets.Property, declaring_type)
         self._meta_values = None
 
-    def validate(self, *args, **kwargs):
+    def transform(self, *args, **kwargs):
         try:
-            return super(MuranoProperty, self).validate(*args, **kwargs)
+            return super(MuranoProperty, self).transform(*args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}.{1}{2}] {3}'.format(
                 self.declaring_type.name, self.name, e.path, six.text_type(e))

@@ -1,0 +1,14 @@
+---
+features:
+  - >
+    New method type: extension methods. Extension methods enable you to "add"
+    methods to existing types without modifying the original type.
+    Extension methods are a special kind of static method, but they are called
+    as if they were instance methods on the extended type.
+    Extension methods are identified by "Usage: Extension" and the type
+    they extend is determined by their first argument contract. Thus
+    such methods must have at lease one parameter.
+  - >
+    New type-level keyword "Import" which can be either list or scalar
+    that specifies type names which extensions methods should be imported
+    into class context and thus become available to type members.

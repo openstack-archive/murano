@@ -93,7 +93,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
 
         last_ns = {}
         for data in data_lst:
-            last_ns = data.get('Namespaces', last_ns)
+            last_ns = data.get('Namespaces', last_ns.copy())
             if 'Name' not in data:
                 continue
 
