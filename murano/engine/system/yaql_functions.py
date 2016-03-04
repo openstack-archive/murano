@@ -202,8 +202,6 @@ def get_context(runtime_version):
     context.register_function(bind)
     context.register_function(random_name)
     context.register_function(patch_)
-    context.register_function(config)
-    context.register_function(config_default)
     context.register_function(logger)
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:
@@ -216,4 +214,12 @@ def get_context(runtime_version):
                   'flatten'):
             for spec in utils.to_extension_method(t, root_context):
                 context.register_function(spec)
+    return context
+
+
+@helpers.memoize
+def get_restricted_context():
+    context = yaql_integration.create_empty_context()
+    context.register_function(config)
+    context.register_function(config_default)
     return context
