@@ -49,7 +49,7 @@ to manage applications and environments.
 And it provides information on how to contribute to the project.
 
 .. note::
-   `Deploying Murano` and `Contibuting` guides are under development
+   `Deploying Murano` and `Contributing` guides are under development
    at the moment. The most recently updated information is published
    as the :ref:`BETA version of the Murano documentation <content>`.
 
