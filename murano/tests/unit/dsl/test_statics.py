@@ -57,7 +57,7 @@ class TestStatics(test_case.DslTestCase):
 
     def test_call_static_method_on_class_name_with_ns(self):
         self.assertEqual(
-            123, self._runner.testCallStaticMethodOnClassNameWithNs())
+            678, self._runner.testCallStaticMethodOnClassNameWithNs())
 
     def test_call_static_method_from_another_method(self):
         self.assertEqual(

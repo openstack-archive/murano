@@ -39,8 +39,8 @@ Properties:
     Usage: Static
 
   instanceProperty:
-    Contract: $.string()
-    Default: instanceProperty
+    Contract: $.int()
+    Default: 555
 
   staticProperty2:
     Contract: $.string()
@@ -67,7 +67,7 @@ Methods:
 
   testCallStaticMethodOnClassNameWithNs:
     Body:
-      Return: ns:TestStatics.simpleStaticMethod()
+      Return: ns:TestStatics.simpleStaticMethod($.instanceProperty)
 
   testCallStaticMethodFromAnotherMethod:
     Body:
@@ -91,8 +91,12 @@ Methods:
 
   simpleStaticMethod:
     Usage: Static
+    Arguments:
+      arg:
+        Contract: $.int()
+        Default: 0
     Body:
-      Return: 123
+      Return: 123 + $arg
 
   simpleStaticMethod2:
     Usage: Static
