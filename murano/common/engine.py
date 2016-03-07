@@ -94,6 +94,14 @@ class ContextManager(context_manager.ContextManager):
         return helpers.link_contexts(
             root_context, yaql_functions.get_context(runtime_version))
 
+    def create_package_context(self, package):
+        context = super(ContextManager, self).create_package_context(
+            package)
+        if package.name == 'io.murano':
+            context = helpers.link_contexts(
+                context, yaql_functions.get_restricted_context())
+        return context
+
 
 class TaskProcessingEndpoint(object):
     @classmethod
