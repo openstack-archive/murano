@@ -128,12 +128,27 @@ class PackageBase(package.Package):
             self._source_directory, file_name or default_name)
         if not os.path.isfile(full_path) and not file_name:
             return
+
+        allowed_ftype = ('png', 'jpeg', 'gif')
+        allowed_size = 500 * 1024
         try:
-            if imghdr.what(full_path) != 'png':
-                raise exceptions.PackageLoadError(
-                    '{0} is not in PNG format'.format(what_image))
-            with open(full_path) as stream:
+
+            if imghdr.what(full_path) not in allowed_ftype:
+                msg = _('{0}: Unsupported Format. Only {1} allowed').format(
+                    what_image, ', '.join(allowed_ftype))
+
+                raise exceptions.PackageLoadError(msg)
+
+            fsize = os.stat(full_path).st_size
+            if fsize > allowed_size:
+                msg = _('{0}: Uploaded image size {1} is too large. '
+                        'Max allowed size is {2}').format(
+                    what_image, fsize, allowed_size)
+                raise exceptions.PackageLoadError(msg)
+
+            with open(full_path, 'rb') as stream:
                 return stream.read()
+
         except Exception as ex:
             trace = sys.exc_info()[2]
             six.reraise(exceptions.PackageLoadError,
