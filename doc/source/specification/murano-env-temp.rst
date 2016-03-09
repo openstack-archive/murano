@@ -213,10 +213,12 @@ Delete environment template
 
 * `env-temp_id` - environment template ID, required
 
+*Response*
+
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | OK. Environment Template created successfully             |
+| 200            | OK. Environment Template deleted successfully             |
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
@@ -295,11 +297,42 @@ Adding application to environment template
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | OK. Environment Template created successfully             |
+| 200            | OK. Application added successfully                        |
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
 | 404            | The environment template does not exist                   |
++----------------+-----------------------------------------------------------+
+
+Delete application from an environment template
+-----------------------------------------------
+
+*Request*
+
++----------+---------------------------------------------+--------------------------------------+
+| Method   | URI                                         | Description                          |
++==========+=============================================+======================================+
+| DELETE   | /templates/{env-temp-id}/services/{app-id}  | Delete application with Specified id |
++----------+---------------------------------------------+--------------------------------------+
+
+*Parameters:*
+
+* `env-temp-id` - The environment template ID, required
+* `app-id` - The application ID, required
+
+*Content-Type*
+  application/json
+
+*Response*
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Application deleted successfully                      |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 404            | The application does not exist                            |
 +----------------+-----------------------------------------------------------+
 
 Get applications information from an environment template
