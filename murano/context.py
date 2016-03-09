@@ -29,13 +29,7 @@ class RequestContext(context.RequestContext):
                  **kwargs):
         super(RequestContext, self).__init__(**kwargs)
         self.session = session
-        self.roles = roles or []
 
         self.is_admin = is_admin
         if self.is_admin is None:
             self.is_admin = policy.check_is_admin(self)
-
-    def to_dict(self):
-        d = super(RequestContext, self).to_dict()
-        d.setdefault('roles', self.roles)
-        return d
