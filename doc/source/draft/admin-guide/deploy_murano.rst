@@ -9,3 +9,4 @@ Deploying murano
 
    deploy_murano/devstack
    deploy_murano/install_manually
+   deploy_murano/configure_ssl
