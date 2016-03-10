@@ -22,13 +22,13 @@ class TestMeta(test_case.DslTestCase):
         super(TestMeta, self).setUp()
         self._runner = self.new_runner(om.Object('metatests.TestMeta'))
 
-    def test_class_inherited_meta(self):
+    def test_class_multi_meta(self):
         self.assertItemsEqual(
-            [4, 1, 111, 2], self._runner.testClassInheritedMeta())
+            [4, 1, 111, 2], self._runner.testClassMultiMeta())
 
-    def test_class_not_inherited_meta(self):
+    def test_class_single_meta(self):
         self.assertItemsEqual(
-            [5, 6], self._runner.testClassNotInheritedMeta())
+            [5, 6], self._runner.testClassSingleMeta())
 
     def test_parent_class_not_inherited_meta(self):
         self.assertEqual(3, self._runner.testParentClassNotInheritedMeta())

@@ -41,22 +41,26 @@ from murano.dsl import exceptions
 _threads_sequencer = 0
 
 
-def evaluate(value, context):
+def evaluate(value, context, freeze=True):
+    list_type = tuple if freeze else list
+    dict_type = yaqlutils.FrozenDict if freeze else dict
+    set_type = frozenset if freeze else set
+
     if isinstance(value, (dsl_types.YaqlExpression,
                           yaql.language.expressions.Statement)):
         return value(context)
     elif isinstance(value, yaqlutils.MappingType):
-        return yaqlutils.FrozenDict(
-            (evaluate(d_key, context),
-             evaluate(d_value, context))
+        return dict_type(
+            (evaluate(d_key, context, freeze),
+             evaluate(d_value, context, freeze))
             for d_key, d_value in six.iteritems(value))
     elif yaqlutils.is_sequence(value):
-        return tuple(evaluate(t, context) for t in value)
+        return list_type(evaluate(t, context, freeze) for t in value)
     elif isinstance(value, yaqlutils.SetType):
-        return frozenset(evaluate(t, context) for t in value)
+        return set_type(evaluate(t, context, freeze) for t in value)
     elif yaqlutils.is_iterable(value):
-        return tuple(
-            evaluate(t, context)
+        return list_type(
+            evaluate(t, context, freeze)
             for t in yaqlutils.limit_iterable(
                 value, constants.ITERATORS_LIMIT))
     elif isinstance(value, dsl_types.MuranoObjectInterface):
@@ -524,11 +528,12 @@ def instantiate(data, owner, object_store, context, scope_type,
                 key, (dsl_types.MuranoTypeReference, dsl_types.MuranoType)):
             type_obj = resolve_type(key, scope_type)
             props = yaqlutils.filter_parameters_dict(data[key] or {})
+            props = evaluate(props, context, freeze=False)
             return type_obj.new(
                 owner, object_store, object_store.executor)(
                 context, **props)
 
-    data = updated_dict(defaults, data)
+    data = evaluate(updated_dict(defaults, data), context, freeze=False)
     if '?' not in data:
         if not default_type:
             raise ValueError('Type information is missing')

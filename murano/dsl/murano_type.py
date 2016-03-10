@@ -429,6 +429,9 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
 
     def get_meta(self, context):
         if self._meta_values is None:
+            executor = helpers.get_executor(context)
+            context = executor.create_type_context(
+                self, caller_context=context)
             self._meta_values = dslmeta.merge_providers(
                 self, lambda cls: cls._meta, context)
         return self._meta_values

@@ -287,7 +287,7 @@ class MuranoDslExecutor(object):
             self.context_manager.create_package_context(package))
         return context
 
-    def create_type_context(self, murano_type):
+    def create_type_context(self, murano_type, caller_context=None):
         package_context = self.create_package_context(
             murano_type.package)
         context = helpers.link_contexts(
@@ -295,6 +295,9 @@ class MuranoDslExecutor(object):
             self.context_manager.create_type_context(
                 murano_type)).create_child_context()
         context[constants.CTX_TYPE] = murano_type
+        if caller_context:
+            context[constants.CTX_NAMES_SCOPE] = caller_context[
+                constants.CTX_NAMES_SCOPE]
         return context
 
     def create_object_context(self, obj, caller_context=None):

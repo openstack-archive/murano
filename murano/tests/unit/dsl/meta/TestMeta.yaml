@@ -176,11 +176,11 @@ Properties:
         val: 4
 
 Methods:
-  testClassInheritedMeta:
+  testClassMultiMeta:
     Body:
      - Return: typeinfo($).meta.where($ is InheritedMultiMeta).val
 
-  testClassNotInheritedMeta:
+  testClassSingleMeta:
     Body:
      - Return: typeinfo($).meta.
         where($ is SingleMeta or $ is InheritedSingleMeta).val
@@ -227,7 +227,7 @@ Methods:
       - InheritedSingleMeta:
           val: 8
       - SingleMeta:
-          val: 9
+          val: 8 + 1
 
     Arguments:
       arg:

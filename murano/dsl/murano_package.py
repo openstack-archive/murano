@@ -208,6 +208,8 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
     def get_meta(self, context):
         if not self._meta:
             return []
+        executor = helpers.get_executor(context)
+        context = executor.create_package_context(self)
         return self._meta.get_meta(context)
 
     def __repr__(self):

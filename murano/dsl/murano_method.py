@@ -143,6 +143,9 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
             return method._meta
 
         if self._meta_values is None:
+            executor = helpers.get_executor(context)
+            context = executor.create_type_context(
+                self.declaring_type, caller_context=context)
             self._meta_values = meta.merge_providers(
                 self.declaring_type, meta_producer, context)
         return self._meta_values
@@ -204,6 +207,10 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
         return self._arg_name
 
     def get_meta(self, context):
+        executor = helpers.get_executor(context)
+        context = executor.create_type_context(
+            self.murano_method.declaring_type, caller_context=context)
+
         return self._meta.get_meta(context)
 
     def __repr__(self):

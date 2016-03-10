@@ -19,6 +19,7 @@ import six
 
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import meta
 from murano.dsl import typespec
 
@@ -60,6 +61,10 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
             return prop._meta
 
         if self._meta_values is None:
+            executor = helpers.get_executor(context)
+            context = executor.create_type_context(
+                self.declaring_type, caller_context=context)
+
             self._meta_values = meta.merge_providers(
                 self.declaring_type, meta_producer, context)
         return self._meta_values
