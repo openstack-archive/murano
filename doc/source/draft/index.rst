@@ -64,6 +64,7 @@ Deploying Murano
 .. toctree::
    :maxdepth: 2
 
+   admin-guide/deploy_murano
    admin-guide/prepare_lab
    admin-guide/installation
    admin-guide/manage_packages
