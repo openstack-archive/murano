@@ -22,6 +22,7 @@ import sys
 import semantic_version
 import six
 
+from murano.common.i18n import _
 from murano.packages import exceptions
 from murano.packages import package
 
