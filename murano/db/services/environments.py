@@ -131,7 +131,7 @@ class EnvironmentServices(object):
         """Deletes environment and notify orchestration engine about deletion
 
            :param environment_id: Environment that is going to be deleted
-           :param token: OpenStack auth token
+           :param session_id: Session Id
         """
 
         env_description = EnvironmentServices.get_environment_description(
