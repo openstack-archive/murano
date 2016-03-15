@@ -49,7 +49,7 @@ class TestCaseShell(testtools.TestCase):
         dirs = [os.path.dirname(__file__),
                 os.path.join(os.path.dirname(__file__), os.pardir, os.pardir,
                              os.pardir, os.pardir, os.pardir, 'meta')]
-        self.override_config('load_packages_from', dirs, 'packages_opts')
+        self.override_config('load_packages_from', dirs, 'engine')
 
     def tearDown(self):
         super(TestCaseShell, self).tearDown()

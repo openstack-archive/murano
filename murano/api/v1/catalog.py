@@ -85,7 +85,7 @@ def _validate_body(body):
        reset the file position to the beginning
     """
     def check_file_size(f):
-        mb_limit = CONF.packages_opts.package_size_limit
+        mb_limit = CONF.murano.package_size_limit
         pkg_size_limit = mb_limit * 1024 * 1024
         f.seek(0, 2)
         size = f.tell()
@@ -191,8 +191,8 @@ class Controller(object):
 
         limit = self._validate_limit(filters.get('limit'))
         if limit is None:
-            limit = CONF.packages_opts.limit_param_default
-        limit = min(CONF.packages_opts.api_limit_max, limit)
+            limit = CONF.murano.limit_param_default
+        limit = min(CONF.murano.api_limit_max, limit)
 
         result = {}
 

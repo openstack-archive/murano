@@ -33,16 +33,16 @@ class TestPackageCache(base.MuranoTestCase):
         super(TestPackageCache, self).setUp()
 
         self.location = tempfile.mkdtemp()
-        CONF.set_override('enable_packages_cache', True, 'packages_opts')
-        self.old_location = CONF.packages_opts.packages_cache
-        CONF.set_override('packages_cache', self.location, 'packages_opts')
+        CONF.set_override('enable_packages_cache', True, 'engine')
+        self.old_location = CONF.engine.packages_cache
+        CONF.set_override('packages_cache', self.location, 'engine')
 
         self.murano_client = mock.MagicMock()
         package_loader.ApiPackageLoader.client = self.murano_client
         self.loader = package_loader.ApiPackageLoader(None)
 
     def tearDown(self):
-        CONF.set_override('packages_cache', self.old_location, 'packages_opts')
+        CONF.set_override('packages_cache', self.old_location, 'engine')
         shutil.rmtree(self.location, ignore_errors=True)
         super(TestPackageCache, self).tearDown()
 
@@ -152,7 +152,7 @@ class TestCombinedPackageLoader(base.MuranoTestCase):
         super(TestCombinedPackageLoader, cls).setUpClass()
 
         location = os.path.dirname(__file__)
-        CONF.set_override('load_packages_from', [location], 'packages_opts',
+        CONF.set_override('load_packages_from', [location], 'engine',
                           enforce_type=True)
         cls.execution_session = mock.MagicMock()
         cls.loader = package_loader.CombinedPackageLoader(

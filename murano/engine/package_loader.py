@@ -97,8 +97,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def client(self):
         murano_settings = CONF.murano
         last_glare_client = self._glare_client
-        if CONF.packages_opts.packages_service in ['glance', 'glare']:
-            if CONF.packages_opts.packages_service == 'glance':
+        if CONF.engine.packages_service in ['glance', 'glare']:
+            if CONF.engine.packages_service == 'glance':
                 versionutils.report_deprecated_feature(
                     LOG, _("'glance' packages_service option has been renamed "
                            "to 'glare', please update your configuration"))
@@ -168,11 +168,11 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     @staticmethod
     def _get_cache_directory():
         base_directory = (
-            CONF.packages_opts.packages_cache or
+            CONF.engine.packages_cache or
             os.path.join(tempfile.gettempdir(), 'murano-packages-cache')
         )
 
-        if CONF.packages_opts.enable_packages_cache:
+        if CONF.engine.enable_packages_cache:
             directory = os.path.abspath(base_directory)
         else:
             directory = os.path.abspath(os.path.join(base_directory,
@@ -379,7 +379,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         """Locks package for usage"""
 
         # do not lock anything if we do not persist packages on disk
-        if not CONF.packages_opts.enable_packages_cache:
+        if not CONF.engine.enable_packages_cache:
             return
 
         package_id = package_definition.id
@@ -404,7 +404,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def cleanup(self):
         """Cleans up any lock we had acquired and removes any stale packages"""
 
-        if not CONF.packages_opts.enable_packages_cache:
+        if not CONF.engine.enable_packages_cache:
             shutil.rmtree(self._cache_directory, ignore_errors=True)
             return
 
@@ -516,7 +516,7 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
         self.api_loader = ApiPackageLoader(execution_session, root_loader)
         self.directory_loaders = []
 
-        for folder in CONF.packages_opts.load_packages_from:
+        for folder in CONF.engine.load_packages_from:
             if os.path.exists(folder):
                 self.directory_loaders.append(DirectoryPackageLoader(
                     folder, root_loader))

@@ -39,7 +39,6 @@ _opt_lists = [
     ('mistral', murano.common.config.mistral_opts),
     ('networking', murano.common.config.networking_opts),
     ('stats', murano.common.config.stats_opts),
-    ('packages_opts', murano.common.config.packages_opts),
     (None, build_list([
         murano.common.config.metadata_dir,
         murano.common.config.bind_opts,
