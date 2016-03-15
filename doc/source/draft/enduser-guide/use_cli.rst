@@ -13,6 +13,8 @@ the Application Catalog through the command-line interface (CLI).
 Using python-muranoclient, the CLI client for murano, you can easily manage
 your environments, packages, categories, and deploy environments.
 
+.. include:: install_client.rst
+
 Manage environments
 ~~~~~~~~~~~~~~~~~~~
 
