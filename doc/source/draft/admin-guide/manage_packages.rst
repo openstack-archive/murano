@@ -21,7 +21,7 @@ Local package directories
 -------------------------
 
 To define a list of directories where the engine would look for package files,
-set the ``load_packages_from`` option in the ``packages_opts`` section
+set the ``load_packages_from`` option in the ``engine`` section
 of the :file:`murano.conf` configuration file. This option can be set to a
 comma-separated list of directory paths. Whenever an engine needs to access a
 package, it would inspect these directories first, before accessing
@@ -35,7 +35,7 @@ or if none were specified, then ``murano-engine`` queries API for package
 contents.
 Whenever ``murano-engine`` downloads a package from API, it stores and unpacks
 it locally. The engine uses the directory defined in the ``packages_cache``
-option in the ``packages_opts`` section of the :file:`murano.conf`
+option in the ``engine`` section of the :file:`murano.conf`
 configuration file. If it is not used, a temporary directory is created.
 
 The ``enable_packages_cache`` option in the same section defines whether the
