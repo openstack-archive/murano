@@ -192,8 +192,8 @@ that values confirm to the contracts.
 
 .. _property_usage:
 
-Usage
-+++++
+Property usage
+++++++++++++++
 
 Usage states the purpose of the property. This implies who and how can
 access it. The following usages are available:
@@ -204,7 +204,7 @@ access it. The following usages are available:
    :stub-columns: 0
    :class: borderless
 
-   * - | Property
+   * - | Value
      - | Explanation
 
    * - | In
@@ -226,6 +226,10 @@ access it. The following usages are available:
    * - | Runtime
      - | A property is visible only from within workflows. It is neither read
          from input nor serialized to a workflow output.
+
+   * - | Static
+     - | Property is defined on a class rather than on an instance.
+         See :ref:`static_methods_and_properties` for details.
 
 The usage attribute is optional and can be omitted (which implies ``In``).
 
@@ -306,9 +310,44 @@ optional default::
 The Method body is an array of instructions that get executed sequentially.
 There are 3 types of instructions that can be found in a workflow body:
 
-* expressions,
-* assignments,
-* block constructs.
+* Expressions,
+* Assignments,
+* Block constructs.
+
+.. method_usage:
+
+Method usage
+++++++++++++
+
+Usage states the purpose of the method. This implies who and how can
+access it. The following usages are available:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+   :stub-columns: 0
+   :class: borderless
+
+   * - | Value
+     - | Explanation
+
+   * - | Runtime
+     - | Normal instance method.
+
+   * - | Static
+     - | Static method that does not require class instance.
+         See :ref:`static_methods_and_properties` for details.
+
+   * - | Extension
+     - | Extension static method that extends some other type.
+         See :ref:`extension_methods` for details.
+
+   * - | Action
+     - | Method can be invoked from outside (using Murano API).
+         See :ref:`actions` for details.
+
+The usage attribute is optional and can be omitted (which implies ``Runtime``).
+
 
 Expressions
 +++++++++++
