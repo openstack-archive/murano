@@ -19,7 +19,7 @@ import uuid
 import muranoclient.client as client
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
+from oslo_service import loopingcall
 from webob import exc
 
 from murano.api.v1.cloudfoundry import auth as keystone_auth
@@ -219,7 +219,6 @@ class Controller(object):
         return {}
 
     def bind(self, req, body, instance_id, app_id):
-        filtered = [u'?', u'instance']
         db_service = db_cf.get_service_for_instance(instance_id)
         if not db_service:
             return {}
@@ -237,12 +236,42 @@ class Controller(object):
         LOG.debug('Got environment {0}'.format(env))
         service = self._get_service(env, service_id)
         LOG.debug('Got service {0}'.format(service))
-        credentials = {}
-        for k, v in six.iteritems(service):
-            if k not in filtered:
-                credentials[k] = v
 
-        return {'credentials': credentials}
+        # NOTE(starodubcevna): Here we need to find an action which will return
+        # us needed credentials. By default we will looking for getCredentials
+        # action.
+        result = {}
+        try:
+            actions = service['?']['_actions']
+            for action_id in list(actions):
+                if 'getCredentials' in action_id:
+
+                    @loopingcall.RetryDecorator(max_retry_count=10,
+                                                inc_sleep_time=2,
+                                                max_sleep_time=60,
+                                                exceptions=(TypeError))
+                    def _get_creds(client, task_id, environment_id):
+                        result = m_cli.actions.get_result(environment_id,
+                                                          task_id)['result']
+                        return result
+
+                    task_id = m_cli.actions.call(environment_id, action_id)
+                    result = _get_creds(m_cli, task_id, environment_id)
+
+            if not result:
+                LOG.warning(_LW("This application doesn't have action "
+                                "getCredentials"))
+                return exc.HTTPInternalServerError
+        except KeyError:
+            # NOTE(starodubcevna): In CF service broker API spec return
+            # code for failed bind is not present, so we will return 500.
+            LOG.warning(_LW("This application doesn't have actions at all"))
+            return exc.HTTPInternalServerError
+
+        if 'credentials' in list(result):
+            return result
+        else:
+            return {'credentials': result}
 
     def unbind(self, req, instance_id, app_id):
         """Unsupported functionality
