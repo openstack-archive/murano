@@ -91,6 +91,7 @@ Developing Applications
    appdev-guide/app_unit_tests
    appdev-guide/examples
    appdev-guide/use_cases
+   appdev-guide/app_debugging
    appdev-guide/faq
 
 Contributing
