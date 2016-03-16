@@ -67,9 +67,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         app_list = self.service_broker_client.get_applications_list()
         app = self.service_broker_client.get_application(application_name,
                                                          app_list)
-        post_json = {
-            "userName": application_name
-        }
+        post_json = {}
         instance_id = utils.generate_uuid()
         space_id = utils.generate_uuid()
         service = self.service_broker_client.provision(
@@ -80,7 +78,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.assertIsInstance(json.loads(service), dict)
         binding = self.service_broker_client.create_binding(instance_id)
         self.assertIsInstance(binding, dict)
-        self.assertEqual(application_name, binding['userName'])
+        self.assertEqual({'uri': 'localhost'}, binding)
 
     @test.attr(type=["smoke", "gate"])
     def test_provision_with_incorrect_input(self):

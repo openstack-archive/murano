@@ -16,6 +16,12 @@ Methods:
     Usage: Action
     Body:
       - $this.find(std:Environment).reporter.report($this, 'Completed')
+  getCredentials:
+    Usage: Action
+    Body:
+      - Return:
+          credentials:
+            uri: localhost
   deploy:
      Body:
       - $this.find(std:Environment).reporter.report($this, 'Follow the white rabbit')

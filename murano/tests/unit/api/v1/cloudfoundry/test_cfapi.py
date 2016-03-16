@@ -136,13 +136,17 @@ class TestController(base.MuranoTestCase):
         mock_get_si.return_value = service
 
         services = [{'id': 'xxx-xxx-xxx',
-                     '?': {'id': '111-111'},
-                     'instance': {},
-                     'smthg': 'nothing'}]
+                     '?': {'id': '111-111',
+                           '_actions': {
+                               'dafsa_getCredentials': {
+                                   'name': 'getCredentials'}}},
+                     'instance': {}}]
         mock_client.return_value.environments.get =\
             mock.MagicMock(return_value=mock.MagicMock(services=services))
 
-        nice_resp = {'credentials': {'smthg': 'nothing', 'id': 'xxx-xxx-xxx'}}
+        mock_client.return_value.actions.get_result =\
+            mock.MagicMock(return_value={'result': {'smthg': 'nothing'}})
+        nice_resp = {'credentials': {'smthg': 'nothing'}}
         resp = self.controller.bind(self.request, {}, '555-555', '666-666')
 
         self.assertEqual(nice_resp, resp)
