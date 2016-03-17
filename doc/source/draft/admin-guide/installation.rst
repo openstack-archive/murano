@@ -75,6 +75,28 @@ The :file:`policy.json` example is:
 So, changing ``"upload_package": "rule:default"`` to ``"rule:admin_api"``
 will forbid regular users to upload packages.
 
+For reference:
+
+- ``"get_package"`` is checked whenever a user accesses a package
+  from the catalog. default: anyone
+- ``"upload_package"`` is checked whenever a user uploads a package
+  to the catalog.  default: anyone
+- ``"modify_package"`` is checked whenever a user modifies a package
+  in the catalog. default: anyone
+- ``"publicize_package"`` is checked whenever a user is trying to
+  make a murano package public (both when creating a new package or
+  modifying an existing one). default: admin users
+- ``"manage_public_package"`` is checked whenever a user attempts to
+  modify parameters of a public package. default: admin users
+- ``"delete_package"`` is checked whenever a user attempts to
+  delete a package from the catalog. default: anyone
+- ``"download_package"`` is checked whenever a user attempts to
+  download a package from the catalog. default: anyone
+- ``"list_environments_all_tenants"`` is checked whenever a request
+  to list environments of all tenants is made. default: admin users
+- ``"execute_action"`` is checked whenever a user attempts to execute
+  an action on deployment environments. default: anyone
+
 Uploading package wizard in murano dashboard consists of several steps.
 Upload package API call requested from the first form and modify from
 the second one. It provides modifying package parameters on time of
