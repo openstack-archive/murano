@@ -65,8 +65,8 @@ def main():
 
         launcher.launch_service(wsgi.Service(cfapp, cfport, cfhost))
 
-        launcher.launch_service(server.get_rpc_service())
-        launcher.launch_service(server.get_notification_service())
+        launcher.launch_service(server.ApiService())
+        launcher.launch_service(server.NotificationService())
 
         launcher.wait()
     except RuntimeError as e:

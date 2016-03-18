@@ -19,6 +19,7 @@ from oslo_log import log as logging
 import oslo_messaging as messaging
 from oslo_messaging.notify import dispatcher as oslo_dispatcher
 from oslo_messaging import target
+from oslo_service import service
 from oslo_utils import timeutils
 from sqlalchemy import desc
 
@@ -31,9 +32,6 @@ from murano.common.i18n import _LI, _LW
 from murano.services import states
 
 CONF = cfg.CONF
-
-RPC_SERVICE = None
-NOTIFICATION_SERVICE = None
 
 LOG = logging.getLogger(__name__)
 
@@ -198,35 +196,52 @@ def get_last_deployment(unit, env_id):
     return query.first()
 
 
-def _prepare_rpc_service(server_id):
-    endpoints = [ResultEndpoint()]
+class Service(service.Service):
+    """Service class, that contains common methods for custom services"""
 
-    transport = messaging.get_transport(CONF)
-    s_target = target.Target('murano', 'results', server=server_id)
-    return messaging.get_rpc_server(transport, s_target, endpoints, 'eventlet')
+    def __init__(self):
+        super(Service, self).__init__()
+        self.server = None
 
+    def stop(self, graceful=False):
+        if self.server:
+            self.server.stop()
+            if graceful:
+                self.server.wait()
+        super(Service, self).stop()
 
-def _prepare_notification_service(server_id):
-    endpoints = [report_notification, track_instance, untrack_instance]
-
-    transport = messaging.get_transport(CONF)
-    s_target = target.Target(topic='murano', server=server_id)
-    dispatcher = oslo_dispatcher.NotificationDispatcher(
-        [s_target], endpoints, None, True)
-    return messaging.MessageHandlingServer(transport, dispatcher, 'eventlet')
-
-
-def get_rpc_service():
-    global RPC_SERVICE
-
-    if RPC_SERVICE is None:
-        RPC_SERVICE = _prepare_rpc_service(str(uuid.uuid4()))
-    return RPC_SERVICE
+    def reset(self):
+        if self.server:
+            self.server.reset()
+        super(Service, self).reset()
 
 
-def get_notification_service():
-    global NOTIFICATION_SERVICE
+class NotificationService(Service):
+    def __init__(self):
+        super(NotificationService, self).__init__()
+        self.server = None
 
-    if NOTIFICATION_SERVICE is None:
-        NOTIFICATION_SERVICE = _prepare_notification_service(str(uuid.uuid4()))
-    return NOTIFICATION_SERVICE
+    def start(self):
+        endpoints = [report_notification, track_instance, untrack_instance]
+
+        transport = messaging.get_transport(CONF)
+        s_target = target.Target(topic='murano', server=str(uuid.uuid4()))
+        dispatcher = oslo_dispatcher.NotificationDispatcher(
+            [s_target], endpoints, None, True)
+        self.server = messaging.MessageHandlingServer(
+            transport, dispatcher, 'eventlet')
+        self.server.start()
+        super(NotificationService, self).start()
+
+
+class ApiService(Service):
+
+    def start(self):
+        endpoints = [ResultEndpoint()]
+
+        transport = messaging.get_transport(CONF)
+        s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
+        self.server = messaging.get_rpc_server(
+            transport, s_target, endpoints, 'eventlet')
+        self.server.start()
+        super(ApiService, self).start()

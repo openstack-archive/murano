@@ -66,8 +66,8 @@ def main():
 
         launcher.launch_service(wsgi.Service(app, port, host))
 
-        launcher.launch_service(server.get_rpc_service())
-        launcher.launch_service(server.get_notification_service())
+        launcher.launch_service(server.ApiService())
+        launcher.launch_service(server.NotificationService())
         launcher.launch_service(stats.StatsCollectingService())
 
         launcher.wait()
