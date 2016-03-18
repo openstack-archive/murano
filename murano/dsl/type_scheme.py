@@ -164,7 +164,7 @@ class TypeScheme(object):
             elif isinstance(value, utils.MappingType):
                 obj = helpers.instantiate(
                     value, owner, object_store, root_context,
-                    calling_type, default_name, default)
+                    calling_type, default_name)
             elif isinstance(value, six.string_types) and object_store:
                 obj = object_store.get(value)
                 if obj is None:

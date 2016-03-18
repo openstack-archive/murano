@@ -515,7 +515,7 @@ def resolve_type(value, scope_type, return_reference=False):
 
 
 def instantiate(data, owner, object_store, context, scope_type,
-                default_type=None, defaults=None):
+                default_type=None):
     if data is None:
         data = {}
     if not isinstance(data, yaqlutils.MappingType):
@@ -533,7 +533,7 @@ def instantiate(data, owner, object_store, context, scope_type,
                 owner, object_store, object_store.executor)(
                 context, **props)
 
-    data = evaluate(updated_dict(defaults, data), context, freeze=False)
+    data = evaluate(data, context, freeze=False)
     if '?' not in data:
         if not default_type:
             raise ValueError('Type information is missing')
