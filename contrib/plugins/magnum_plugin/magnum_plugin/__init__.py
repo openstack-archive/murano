@@ -66,11 +66,16 @@ class MagnumClient(object):
     def delete_baymodel(self, baymodel_id):
         self._client.baymodels.delete(baymodel_id)
 
+    def get_bay_status(self, bay_id):
+        bays = self._client.bays
+        bay = bays.get(bay_id)
+        return bay.status
+
     def create_bay(self, args):
         bays = self._client.bays
         bay = bays.create(**args)
         self._wait_on_status(bays, bay.uuid, [None, "CREATE_IN_PROGRESS"],
-                             ["CREATE_COMPLETE"])
+                             ["CREATE_COMPLETE", "CREATE_FAILED"])
         return bay.uuid
 
     def delete_bay(self, bay_id):
