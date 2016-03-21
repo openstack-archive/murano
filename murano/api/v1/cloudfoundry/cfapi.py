@@ -15,7 +15,6 @@
 import json
 import uuid
 
-import muranoclient.client as client
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import loopingcall
@@ -23,9 +22,11 @@ import six
 from webob import response
 
 from murano.common.i18n import _LI, _LW
+from murano.common import auth_utils  # noqa
 from murano.common import wsgi
-from murano.db.catalog import api as db_api
 from murano.db.services import cf_connections as db_cf
+import muranoclient.client as muranoclient
+from muranoclient.glance import client as glare_client
 
 
 cfapi_opts = [
@@ -58,7 +59,7 @@ class Controller(object):
         srv['bindable'] = True
         srv['tags'] = []
         for tag in package.tags:
-            srv['tags'].append(tag.name)
+            srv['tags'].append(tag)
         plan = {'id': package.id + '-1',
                 'name': 'default',
                 'description': 'Default plan for the service {name}'.format(
@@ -82,9 +83,10 @@ class Controller(object):
 
     def list(self, req):
 
-        packages = db_api.package_search({'type': 'application'},
-                                         req.context,
-                                         catalog=True)
+        token = req.headers['X-Auth-Token']
+        m_cli = _get_muranoclient(token, req)
+        kwargs = {'type': 'application'}
+        packages = m_cli.packages.filter(**kwargs)
         services = []
         for package in packages:
             services.append(self._package_to_service(package))
@@ -125,7 +127,7 @@ class Controller(object):
                                                  tenant_name=tenant))
 
         token = req.headers['X-Auth-Token']
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token, req)
         try:
             environment_id = db_cf.get_environment_for_space(space_guid)
         except AttributeError:
@@ -137,7 +139,7 @@ class Controller(object):
                      .format(space_id=space_guid,
                              environment_id=environment_id))
 
-        package = db_api.package_get(service_id, req.context)
+        package = m_cli.packages.get(service_id)
         LOG.debug('Adding service {name}'.format(name=package.name))
 
         service = self._make_service(space_guid, package, plan_id)
@@ -180,7 +182,7 @@ class Controller(object):
         service_id = service.service_id
         environment_id = service.environment_id
         token = req.headers['X-Auth-Token']
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token, req)
 
         session_id = create_session(m_cli, environment_id)
         m_cli.services.delete(environment_id, '/' + service_id, session_id)
@@ -195,7 +197,7 @@ class Controller(object):
         service_id = db_service.service_id
         environment_id = db_service.environment_id
         token = req.headers['X-Auth-Token']
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token, req)
 
         session_id = create_session(m_cli, environment_id)
         env = m_cli.environments.get(environment_id, session_id)
@@ -262,7 +264,7 @@ class Controller(object):
             return resp
         env_id = service.environment_id
         token = req.headers["X-Auth-Token"]
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token, req)
 
         # NOTE(starodubcevna): we can track only environment status. it's
         # murano API limitation.
@@ -283,17 +285,37 @@ class Controller(object):
         return resp
 
 
-def muranoclient(token_id):
-    # TODO(starodubcevna): I guess it can be done better.
-    endpoint = "http://{murano_host}:{murano_port}".format(
-        murano_host=CONF.bind_host, murano_port=CONF.bind_port)
-    insecure = False
+def _get_muranoclient(token_id, req):
 
-    LOG.debug('murano client created. Murano::Client <Url: {endpoint}'.format(
-        endpoint=endpoint))
+    artifacts_client = None
+    if CONF.engine.packages_service in ['glance', 'glare']:
+        artifacts_client = _get_glareclient(token_id, req)
 
-    return client.Client(1, endpoint=endpoint, token=token_id,
-                         insecure=insecure)
+    murano_url = CONF.murano.url or req.endpoints.get('murano')
+    if not murano_url:
+        LOG.error('No murano url is specified and no "application-catalog" '
+                  'service is registered in keystone.')
+
+    return muranoclient.Client(1, murano_url, token=token_id,
+                               artifacts_client=artifacts_client)
+
+
+def _get_glareclient(token_id, req):
+    glare_settings = CONF.glare
+
+    url = glare_settings.url or req.endpoints.get('glare')
+    if not url:
+        LOG.error('No glare url is specified and no "artifact" '
+                  'service is registered in keystone.')
+
+    return glare_client.Client(
+        endpoint=url, token=token_id,
+        insecure=glare_settings.insecure,
+        key_file=glare_settings.key_file or None,
+        ca_file=glare_settings.ca_file or None,
+        cert_file=glare_settings.cert_file or None,
+        type_name='murano',
+        type_version=1)
 
 
 def create_session(client, environment_id):

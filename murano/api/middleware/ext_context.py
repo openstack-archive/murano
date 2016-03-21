@@ -14,6 +14,7 @@
 
 import base64
 
+import keystoneclient
 from keystoneclient.auth.identity import v3
 from keystoneclient import exceptions
 from keystoneclient import session as ks_session
@@ -55,7 +56,29 @@ class ExternalContextMiddleware(wsgi.Middleware):
         password_auth = v3.Password(**kwargs)
         session = ks_session.Session(auth=password_auth)
 
+        self._query_endpoints(password_auth, session)
+
         return session.get_token()
+
+    def _query_endpoints(self, auth, session):
+        if not hasattr(self, '_murano_endpoint'):
+            try:
+                self._murano_endpoint = auth.get_endpoint(
+                    session, 'application-catalog')
+            except keystoneclient.exceptions.EndpointNotFound:
+                pass
+        if not hasattr(self, '_glare_endpoint'):
+            try:
+                self._glare_endpoint = auth.get_endpoint(
+                    session, 'artifact')
+            except keystoneclient.exceptions.EndpointNotFound:
+                pass
+
+    def get_endpoints(self):
+        return {
+            'murano': getattr(self, '_murano_endpoint', None),
+            'glare': getattr(self, '_glare_endpoint', None),
+        }
 
     def process_request(self, req):
 
@@ -72,6 +95,7 @@ class ExternalContextMiddleware(wsgi.Middleware):
             user, password = credentials.split(':', 2)
             req.headers['X-Auth-Token'] = self.get_keystone_token(user,
                                                                   password)
+            req.endpoints = self.get_endpoints()
         except KeyError:
             msg = _("Authorization required")
             LOG.warning(msg)

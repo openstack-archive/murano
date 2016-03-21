@@ -33,15 +33,16 @@ class TestController(base.MuranoTestCase):
             'X-Project-Id': 'bar-baz'}
 
     @mock.patch('murano.common.policy.check_is_admin')
-    @mock.patch('murano.db.catalog.api.package_search')
-    def test_list(self, mock_db_search, mock_policy):
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
+    def test_list(self, mock_client, mock_policy):
 
         pkg0 = mock.MagicMock()
         pkg0.id = 'xxx'
         pkg0.name = 'foo'
         pkg0.description = 'stub pkg'
 
-        mock_db_search.return_value = [pkg0]
+        mock_client.return_value.packages.filter =\
+            mock.MagicMock(return_value=[pkg0])
 
         answer = {'services': [{'bindable': True,
                                 'description': pkg0.description,
@@ -59,14 +60,13 @@ class TestController(base.MuranoTestCase):
         self.assertEqual(answer, resp)
 
     @mock.patch('murano.common.policy.check_is_admin')
-    @mock.patch('murano.db.catalog.api.package_get')
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.set_instance_for_service')
     @mock.patch('murano.db.services.cf_connections.get_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.get_tenant_for_org')
     def test_provision_from_scratch(self, mock_get_tenant,
                                     mock_get_environment, mock_is, mock_client,
-                                    mock_package, mock_policy):
+                                    mock_policy):
 
         body = {"space_guid": "s1-p1",
                 "organization_guid": "o1-r1",
@@ -78,7 +78,6 @@ class TestController(base.MuranoTestCase):
 
         mock_get_environment.return_value = '555-555'
         mock_client.return_value = mock.MagicMock()
-        mock_package.return_value = mock.MagicMock()
 
         resp = self.controller.provision(self.request, {}, '111-111')
 
@@ -86,7 +85,7 @@ class TestController(base.MuranoTestCase):
 
     @mock.patch('murano.common.policy.check_is_admin')
     @mock.patch('murano.db.catalog.api.package_get')
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.set_instance_for_service')
     @mock.patch('murano.db.services.cf_connections.set_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.set_tenant_for_org')
@@ -113,7 +112,7 @@ class TestController(base.MuranoTestCase):
 
         self.assertIsInstance(resp, response.Response)
 
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
     def test_deprovision(self, mock_get_si, mock_client):
         service = mock.MagicMock()
@@ -126,7 +125,7 @@ class TestController(base.MuranoTestCase):
 
         self.assertIsInstance(resp, response.Response)
 
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
     def test_bind(self, mock_get_si, mock_client):
         service = mock.MagicMock()
