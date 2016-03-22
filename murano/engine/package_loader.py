@@ -100,8 +100,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         if CONF.engine.packages_service in ['glance', 'glare']:
             if CONF.engine.packages_service == 'glance':
                 versionutils.report_deprecated_feature(
-                    LOG, _("'glance' packages_service option has been renamed "
-                           "to 'glare', please update your configuration"))
+                    LOG,
+                    _LW("'glance' packages_service option has been renamed "
+                        "to 'glare', please update your configuration"))
             artifacts_client = self._get_glare_client()
         else:
             artifacts_client = None
