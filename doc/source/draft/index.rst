@@ -74,6 +74,7 @@ Deploying Murano
    admin-guide/murano_agent
    admin-guide/policy_enf
    admin-guide/configure_cloud_foundry_service_broker
+   admin-guide/using_glare.rst
    admin-guide/admin_troubleshooting
 
 Developing Applications

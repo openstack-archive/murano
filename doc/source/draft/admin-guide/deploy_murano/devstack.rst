@@ -31,6 +31,16 @@ with murano, proceed with the following steps:
 
       enable_service murano-cfapi
 
+#. If you want to use Glare Artifact Repository as a strorage for packages,
+   add the following line to ``local.conf``:
+
+   .. code-block:: ini
+
+      enable_service g-glare
+
+   For more information on how to use Glare Artifact Repository,
+   see :ref:`glare_usage`.
+
 #. (Optional) To import murano packages when DevStack is up, define an ordered
    list of FQDN packages in ``local.conf``. Verify that you list all package
    dependencies. These packages will be imported from the ``murano-apps``
