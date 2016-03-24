@@ -3,8 +3,8 @@
 .. toctree::
    :maxdepth: 2
 
-Install the murano client
-~~~~~~~~~~~~~~~~~~~~~~~~~
+Install and use the murano client
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Application Catalog project provides a command-line client,
 python-muiranoclient, which enables you to access the project API.
@@ -46,6 +46,42 @@ To upgrade or remove the python-muranoclient, use the corresponding commands.
 .. code-block:: console
 
    $ pip uninstall python-muranoclient
+
+Set environment variables
+-------------------------
+
+To use the murano client, you must set the environment variables. To do this,
+download and source the OpenStack RC file. For more information, see
+`Download and source the OpenStack RC file <http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html#download-and-source-the-openstack-rc-file>`_.
+
+Alternatively, create the ``PROJECT-openrc.sh`` file from scratch. For this,
+perform the following steps:
+
+#. In a text editor, create a file named ``PROJECT-openrc.sh`` containing the
+   following authentication information:
+
+   .. code-block:: console
+
+      export OS_USERNAME=user
+      export OS_PASSWORD=password
+      export OS_TENANT_NAME=tenant
+      export OS_AUTH_URL=http://auth.example.com:5000
+      export MURANO_URL=http://murano.example.com:8082/
+
+#. In the terminal, source the ``PROJECT-openrc.sh`` file. For example:
+
+   .. code-block:: console
+
+      $ . admin-openrc.sh
+
+Once you have configured your authentication parameters, run
+:command:`murano help` to see a complete list of available commands and
+arguments. Use :command:`murano help <sub_command>` to get help on a specific
+subcommand.
+
+.. seealso::
+
+   `Set environment variables using the OpenStack RC file <http://docs.openstack.org/user-guide/common/cli_set_environment_variables_using_openstack_rc.html>`_.
 
 Bash completion
 ---------------
