@@ -31,16 +31,17 @@ class TestController(base.MuranoTestCase):
             encoded=base64.b64encode('test:test'))}
 
     @mock.patch('murano.common.policy.check_is_admin')
-    @mock.patch('murano.db.catalog.api.package_search')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
-    def test_list(self, mock_auth, mock_db_search, mock_policy):
+    def test_list(self, mock_auth, mock_client, mock_policy):
 
         pkg0 = mock.MagicMock()
         pkg0.id = 'xxx'
         pkg0.name = 'foo'
         pkg0.description = 'stub pkg'
 
-        mock_db_search.return_value = [pkg0]
+        mock_client.return_value.packages.filter =\
+            mock.MagicMock(return_value=[pkg0])
 
         answer = {'services': [{'bindable': True,
                                 'description': pkg0.description,
@@ -59,7 +60,7 @@ class TestController(base.MuranoTestCase):
 
     @mock.patch('murano.common.policy.check_is_admin')
     @mock.patch('murano.db.catalog.api.package_get')
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.set_instance_for_service')
     @mock.patch('murano.db.services.cf_connections.get_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.get_tenant_for_org')
@@ -86,7 +87,7 @@ class TestController(base.MuranoTestCase):
 
     @mock.patch('murano.common.policy.check_is_admin')
     @mock.patch('murano.db.catalog.api.package_get')
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.set_instance_for_service')
     @mock.patch('murano.db.services.cf_connections.set_environment_for_space')
     @mock.patch('murano.db.services.cf_connections.set_tenant_for_org')
@@ -114,7 +115,7 @@ class TestController(base.MuranoTestCase):
 
         self.assertEqual({}, resp)
 
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
     def test_deprovision(self, mock_get_si, mock_auth, mock_client):
@@ -128,7 +129,7 @@ class TestController(base.MuranoTestCase):
 
         self.assertEqual({}, resp)
 
-    @mock.patch('murano.api.v1.cloudfoundry.cfapi.muranoclient')
+    @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
     @mock.patch('murano.db.services.cf_connections.get_service_for_instance')
     @mock.patch('murano.api.v1.cloudfoundry.auth.authenticate')
     def test_bind(self, mock_auth, mock_get_si, mock_client):
