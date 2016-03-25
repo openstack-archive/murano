@@ -152,11 +152,12 @@ def _infer_parameter_type(name, class_name):
 
 
 def get_function_definition(func, murano_method, original_name):
-    param_type_func = lambda name: _infer_parameter_type(
-        name, cls.__name__)
-    body = func
     cls = murano_method.declaring_type.extension_class
-    if (helpers.inspect_is_method(cls, original_name) or
+    param_type_func = \
+        lambda name: None if not cls else _infer_parameter_type(
+            name, cls.__name__)
+    body = func
+    if (cls is None or helpers.inspect_is_method(cls, original_name) or
             helpers.inspect_is_classmethod(cls, original_name)):
         body = helpers.function(func)
     fd = specs.get_function_definition(
@@ -164,12 +165,12 @@ def get_function_definition(func, murano_method, original_name):
         parameter_type_func=param_type_func)
     fd.is_method = True
     fd.is_function = False
-    if helpers.inspect_is_method(cls, original_name):
+    if not cls or helpers.inspect_is_method(cls, original_name):
         fd.set_parameter(
             0,
             dsl.MuranoObjectParameter(murano_method.declaring_type),
             overwrite=True)
-    if helpers.inspect_is_classmethod(cls, original_name):
+    if cls and helpers.inspect_is_classmethod(cls, original_name):
         _remove_first_parameter(fd)
         body = func
     name = getattr(func, '__murano_name', None)
@@ -177,8 +178,9 @@ def get_function_definition(func, murano_method, original_name):
         fd.name = name
     fd.insert_parameter(specs.ParameterDefinition(
         '?1', yaqltypes.Context(), 0))
-    is_static = (helpers.inspect_is_static(cls, original_name) or
-                 helpers.inspect_is_classmethod(cls, original_name))
+    is_static = cls and (
+        helpers.inspect_is_static(cls, original_name) or
+        helpers.inspect_is_classmethod(cls, original_name))
     if is_static:
         fd.insert_parameter(specs.ParameterDefinition(
             '?2', yaqltypes.PythonType(object), 1))

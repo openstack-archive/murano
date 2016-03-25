@@ -250,7 +250,8 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             except exceptions.AmbiguousMethodName as e:
                 def func(*args, **kwargs):
                     raise e
-                yield murano_method.MuranoMethod(self, name, func)
+                yield murano_method.MuranoMethod(
+                    self, name, func, ephemeral=True)
 
     def find_single_property(self, name):
         result = self.find_property(name)
