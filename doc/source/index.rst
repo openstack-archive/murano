@@ -83,7 +83,7 @@ Using Murano
    draft/enduser-guide/quickstart
    draft/enduser-guide/manage_environments
    draft/enduser-guide/manage_applications
-   draft/enduser-guide/log_into_murano_instance
+   draft/enduser-guide/log_in_to_murano_instance
    draft/enduser-guide/deploying_using_cli
 
 

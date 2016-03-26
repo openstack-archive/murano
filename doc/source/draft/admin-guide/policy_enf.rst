@@ -40,7 +40,6 @@ the deployment fails as well.
 .. _Congress: https://wiki.openstack.org/wiki/Congress
 
 
-.. include:: /draft/admin-guide/policy_enforcement/policy_enf_overview.rst
 .. include:: /draft/admin-guide/policy_enforcement/policy_enf_setup.rst
 .. include:: /draft/admin-guide/policy_enforcement/policy_enf_rules.rst
 .. include:: /draft/admin-guide/policy_enforcement/policy_enf_dev.rst

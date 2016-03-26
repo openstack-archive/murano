@@ -1,7 +1,7 @@
-.. _actions:
-
 .. toctree::
    :maxdepth: 2
+
+.. _actions:
 
 ==============
 Murano actions

@@ -27,6 +27,7 @@ Classes included in the Murano core library are as follows:
 **io.murano.system**
 
 - :ref:`logger`
+- :ref:`status-reporter`
 
 
 .. _object:
@@ -321,3 +322,17 @@ This method uses the ERROR level:
 
   * `OpenStack networking logging
     configuration <http://docs.openstack.org/liberty/config-reference/content/networking-options-logging.html>`_.
+
+.. _status-reporter:
+
+Class: StatusReporter
+---------------------
+
+Provides feedback feature. To follow the deployment process in the UI, all status changes should be included
+in the application configuration.
+
+.. seealso::
+
+   Source `StatusReporter.yaml
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/system/StatusReporter.yaml>`_
+   file.

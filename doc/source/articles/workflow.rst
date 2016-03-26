@@ -42,14 +42,14 @@ parameters the user selected prior to deployment. Examples are:
 Each object in this *model* has an ID so that the state of each can be tracked.
 
 The classes that are required are determined by the application's manifest. In
-the :ref:`Telnet example <Telnet Manifest>` only one class is explicitly
+the :ref:`Telnet example <telnet-example>` only one class is explicitly
 required; the telnet application definition.
 
-The :ref:`Telnet class definition <Telnet Class>` refers to several other
+The :ref:`Telnet class definition <telnet-example>` refers to several other
 classes. It extends :ref:`Application` and it requires an :ref:`Instance`.
 It also refers to the :ref:`Environment` in which it will be contained,
-sends reports through the environment's :ref:`io.murano.system.StatusReporter`
-and adds security group rules to the :ref:`SecurityGroupManager`.
+sends reports through the environment's :ref:`status-reporter`
+and adds security group rules to the :ref:`security-group-manager`.
 
 
 Step 2.  Load definitions
@@ -75,7 +75,7 @@ to murano-agent (see later). The next stage is to deploy each application the
 environment knows about in turn, by running deploy() for each application.
 This happens concurrently for all the applications belonging to an instance.
 
-In the :ref:`Telnet example <Telnet Class>` (under *Workflow*), the workflow
+In the :ref:`Telnet example <telnet-example>` (under *Workflow*), the workflow
 dictates sending a status message (via the environment's *reporter*, and
 configuring some security group rules. It is at this stage that the engine
 first contacts Heat to request information about any pre-existing resources

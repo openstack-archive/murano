@@ -102,7 +102,7 @@ Contributing
    contributor-guide/how_to_contribute
    contributor-guide/dev_guidelines
    contributor-guide/plugins
-   contributor-guide/deploy_local_dev_env
+   contributor-guide/dev_env
    contributor-guide/testing
    contributor-guide/doc_guidelines
 

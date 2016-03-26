@@ -15,7 +15,7 @@ Just choose the desired Heat Orchestration Template and perform the following co
 
 ::
 
-murano package-create  --template wordpress/template.yaml
+  murano package-create  --template wordpress/template.yaml
 
 Note, that optional parameters could be specified:
 
@@ -77,10 +77,10 @@ Application package could be composed manually. Follow the 5 steps below.
 
 `Applications` page looks like:
 
-.. image:: chef_server.png
+.. image:: /draft/appdev-guide/hotpackages/chef_server.png
 
 The configuration form, where you can enter template parameters, will be generated automatically and looks as follows:
 
-.. image:: chef_server_form.png
+.. image:: /draft/appdev-guide/hotpackages/chef_server_form.png
 
 After filling the form the application is ready to be deployed.
