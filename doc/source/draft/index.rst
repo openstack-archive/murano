@@ -105,6 +105,7 @@ Contributing
    contributor-guide/deploy_local_dev_env
    contributor-guide/testing
    contributor-guide/doc_guidelines
+   contributor-guide/stable_branches
 
 Appendix
 ~~~~~~~~
