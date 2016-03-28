@@ -78,7 +78,7 @@ Version history
 |         |   *name* field from class properties.                             |                   |
 +---------+-------------------------------------------------------------------+-------------------+
 | 2.3     | - Now *password* field supports ``confirmInput`` flag and         | Mitaka            |
-|         |   validator overloading with single ``regexValidator`` or         |                   |
+|         |   validator overloading with single ``regexpValidator`` or        |                   |
 |         |   multiple *validators* attribute.                                |                   |
 +---------+-------------------------------------------------------------------+-------------------+
 
@@ -214,15 +214,15 @@ field attributes. The most common attributes are the following:
 * **minLength**, **maxLength** (for string fields) and **minValue**,
   **maxValue** (for integer fields) are transparently translated into django
   validation properties.
-* **regexValidator** - regular expression to validate user input. Used with
-  *string* field.
+* **regexpValidator** - regular expression to validate user input. Used with
+  *string* or *password* field.
 * **errorMessages** - dictionary with optional 'invalid' and 'required' keys
   that set up what message to show to the user in case of errors.
 * **validators** is a list of dictionaries, each dictionary should at least
   have *expr* key, under that key either some
   `YAQL <https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`_
-  expression is stored, either one-element dictionary with *regexValidator* key
-  (and some regexp string as value).
+  expression is stored, either one-element dictionary with *regexpValidator*
+   key (and some regexp string as value).
   Another possible key of a validator dictionary is *message*, and although
   it is not required, it is highly desirable to specify it - otherwise, when
   validator fails (i.e. regexp doesn't match or YAQL expression evaluates to
@@ -249,6 +249,33 @@ field attributes. The most common attributes are the following:
        helpText: >-
          Just letters, numbers and dashes are allowed.
          A dot can be used to create subdomains
+
+  Using of *regexpValidator* and *validators* attributes with *password*
+  field was introduced in version 2.3. By default, password should have at
+  least 7 characters, 1 capital letter, 1 non-capital letter, 1 digit, and 1
+  special character. If you do not want password validation to be so strong,
+  you can override it by setting a custom validator or multiple validators for
+  password. For that add *regexpValidator* or *validators* to the *password*
+  field and specify custom regexp string as value, just like with any *string*
+  field.
+
+  *Example*
+
+  .. code-block:: yaml
+
+     - name: password
+       type: password
+       label: Password
+       descriptionTitle: Password
+          description: >-
+            Please, provide password for the application. Password should be
+             5-50 characters long and consist of alphanumeric characters
+       regexpValidator: '^[a-zA-Z0-9]{5,50}?$'
+
+* **confirmInput** is a flag used only with password field and defaults to
+  ``true``. If you decided to turn off automatic password field cloning, you
+  should set it to ``false``. In this case password confirmation is not
+  required from a user.
 
 * **widgetMedia** sets some custom *CSS* and *JavaScript* used for the field's
   widget rendering. Note, that files should be placed to Django static folder
@@ -305,6 +332,27 @@ field attributes. The most common attributes are the following:
   use this field to indicate that the instance should join default environment
   network. For use-cases where such behavior is not desired, this parameter
   should be set to ``False``.
+
+*Network* field and its specific attributes (*include_subnets*, *filter*,
+*murano_networks*, *allow_auto*) are available since version 2.1.
+Before that, there was no way for the end user to select existing network in
+the UI. The only way to change the default networking behavior was the usage
+of networking.yaml file. It allows to override the networking setting at
+the environment level, for all the murano environments of all the tenants.
+Now you can simple add a *network* field to your form definition and provide
+the ability to select the desired network for the specific application.
+
+*Example*
+
+.. code-block:: yaml
+
+  - instanceConfiguration:
+      fields:
+        - name: network
+          type: network
+          label: Network
+          description: Select a network to join. 'Auto' corresponds to a default environment's network.
+          murano_networks: translate
 
 Besides field-level validators, form-level validators also exist. They
 use **standard context** for YAQL evaluation and are required when
