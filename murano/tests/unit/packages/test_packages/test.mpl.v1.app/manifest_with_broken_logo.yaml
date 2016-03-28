@@ -1,0 +1,19 @@
+Format: 1.0
+Type: Application
+FullName: test.mpl.v1.app
+Description: Test V1 Application
+Author: Test runner
+Tags: [Linux]
+Classes:
+  test.mpl.v1.app.Thing: Thing.yaml
+Logo: test_logo.png.not_valid
+UI: ui.yaml
+Supplier:
+  Name: Supplier Name
+  CompanyUrl:
+    Text: Example Company
+    Link: http://example.com
+  Logo: test_supplier_logo.png
+  Summary: Company summary goes here 
+  Description: Marked up company description goes here
+

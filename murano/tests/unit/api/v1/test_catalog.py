@@ -27,12 +27,14 @@ from six.moves import range
 from murano.api.v1 import catalog
 from murano.db.catalog import api as db_catalog_api
 from murano.db import models
+from murano.packages import exceptions
 from murano.packages import load_utils
 import murano.tests.unit.api.base as test_base
 import murano.tests.unit.utils as test_utils
 
 
 class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
+
     def setUp(self):
         super(TestCatalogApi, self).setUp()
         self.controller = catalog.Controller()
@@ -332,15 +334,15 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             '/v1/catalog/packages/', params={'catalog': 'True'}))
         self.assertEqual(4, len(result['packages']))
 
-    def _test_package(self):
+    def _test_package(self, manifest='manifest.yaml'):
         package_dir = os.path.abspath(
             os.path.join(
                 __file__,
-                '../../../packages/test_packages/test.mpl.v1.app'
+                '../../../packages/test_packages/test.mpl.v1.app',
             )
         )
         pkg = load_utils.load_from_dir(
-            package_dir
+            package_dir, filename=manifest
         )
         package = {
             'fully_qualified_name': pkg.full_name,
@@ -359,6 +361,10 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
             'categories': [],
         }
         return pkg, package
+
+    def test_not_valid_logo(self):
+        self.assertRaises(exceptions.PackageLoadError,
+                          self._test_package, 'manifest_with_broken_logo.yaml')
 
     def test_load_package_with_supplier_info(self):
         self._set_policy_rules(
