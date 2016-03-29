@@ -19,8 +19,8 @@ from netaddr.strategy import ipv4
 import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_service import loopingcall
 from oslo_utils import uuidutils
-import retrying
 
 from murano.common import auth_utils
 from murano.common import exceptions as exc
@@ -58,10 +58,11 @@ class NetworkExplorer(object):
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
     # decorator with random delay 1-10 seconds between attempts and maximum
     # delay time 30 seconds.
-    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
-                    exc.RouterInfoException),
-                    wait_random_min=1000, wait_random_max=10000,
-                    stop_max_delay=30000)
+    @loopingcall.RetryDecorator(max_retry_count=10,
+                                inc_sleep_time=2,
+                                max_sleep_time=60,
+                                exceptions=(lambda e: isinstance(e,
+                                            exc.RouterInfoException),))
     def get_default_router(self):
         router_name = self._settings.router_name
 
