@@ -85,7 +85,7 @@ class Controller(object):
 
         token = req.headers['X-Auth-Token']
         m_cli = _get_muranoclient(token, req)
-        kwargs = {'type': 'application'}
+        kwargs = {'type': 'Application'}
         packages = m_cli.packages.filter(**kwargs)
         services = []
         for package in packages:
