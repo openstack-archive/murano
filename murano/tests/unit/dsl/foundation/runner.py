@@ -124,7 +124,7 @@ class Runner(object):
 
     @property
     def serialized_model(self):
-        return serializer.serialize_model(self._root, self.executor)
+        return serializer.serialize_model(self._root, self.executor)[0]
 
     @property
     def preserve_exception(self):

@@ -52,6 +52,12 @@ class ObjectStore(object):
     def put(self, murano_object):
         self._store[murano_object.object_id] = murano_object
 
+    def iterate(self):
+        return six.iterkeys(self._store)
+
+    def remove(self, object_id):
+        self._store.pop(object_id)
+
     def load(self, value, owner, context=None):
         if value is None:
             return None
