@@ -16,7 +16,8 @@ import base64
 import json
 import uuid
 
-import muranoclient.client as client
+import muranoclient.client as muranoclient
+from muranoclient.glance import client as glare_client
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import loopingcall
@@ -25,8 +26,6 @@ from webob import exc
 from murano.api.v1.cloudfoundry import auth as keystone_auth
 from murano.common.i18n import _LI, _LW
 from murano.common import wsgi
-from murano import context
-from murano.db.catalog import api as db_api
 from murano.db.services import cf_connections as db_cf
 
 
@@ -97,10 +96,10 @@ class Controller(object):
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
 
-        ctx = context.RequestContext(user=user, tenant='', auth_token=token)
+        m_cli = _get_muranoclient(token)
+        kwargs = {'type': 'application'}
+        packages = m_cli.packages.filter(**kwargs)
 
-        packages = db_api.package_search({'type': 'application'}, ctx,
-                                         catalog=True)
         services = []
         for package in packages:
             services.append(self._package_to_service(package))
@@ -147,7 +146,7 @@ class Controller(object):
         user, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token)
         try:
             environment_id = db_cf.get_environment_for_space(space_guid)
         except AttributeError:
@@ -159,11 +158,7 @@ class Controller(object):
                      .format(space_id=space_guid,
                              environment_id=environment_id))
 
-        LOG.debug('Keystone endpoint: {0}'.format(keystone.auth_ref))
-        tenant_id = keystone.project_id
-        ctx = context.RequestContext(user=user, tenant=tenant_id)
-
-        package = db_api.package_get(service_id, ctx)
+        package = m_cli.packages.get(service_id)
         LOG.debug('Adding service {name}'.format(name=package.name))
 
         service = self._make_service(space_guid, package, plan_id)
@@ -201,7 +196,7 @@ class Controller(object):
         _, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token)
 
         try:
             session_id = create_session(m_cli, environment_id)
@@ -229,7 +224,7 @@ class Controller(object):
         _, _, keystone = self._check_auth(req, tenant)
         # Once we get here we were authorized by keystone
         token = keystone.auth_token
-        m_cli = muranoclient(token)
+        m_cli = _get_muranoclient(token)
 
         session_id = create_session(m_cli, environment_id)
         env = m_cli.environments.get(environment_id, session_id)
@@ -296,16 +291,35 @@ class Controller(object):
         raise NotImplementedError
 
 
-def muranoclient(token_id):
-    endpoint = "http://{murano_host}:{murano_port}".format(
-        murano_host=CONF.bind_host, murano_port=CONF.bind_port)
-    insecure = False
+def _get_muranoclient(token_id):
 
-    LOG.debug('murano client created. Murano::Client <Url: {endpoint}'.format(
-        endpoint=endpoint))
+    artifacts_client = None
+    if CONF.packages_opts.packages_service in ['glance', 'glare']:
+        artifacts_client = _get_glareclient(token_id)
 
-    return client.Client(1, endpoint=endpoint, token=token_id,
-                         insecure=insecure)
+    murano_url = CONF.murano.url
+    if not murano_url:
+        LOG.error('No murano url is specified')
+
+    return muranoclient.Client(1, murano_url, token=token_id,
+                               artifacts_client=artifacts_client)
+
+
+def _get_glareclient(token_id):
+    glare_settings = CONF.glare
+
+    url = glare_settings.url
+    if not url:
+        LOG.error('No glare url is specified')
+
+    return glare_client.Client(
+        endpoint=url, token=token_id,
+        insecure=glare_settings.insecure,
+        key_file=glare_settings.key_file or None,
+        ca_file=glare_settings.ca_file or None,
+        cert_file=glare_settings.cert_file or None,
+        type_name='murano',
+        type_version=1)
 
 
 def create_session(client, environment_id):
