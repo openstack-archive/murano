@@ -36,20 +36,22 @@ virtual_exceptions.register()
 
 
 class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
-    def __init__(self, declaring_type, name, payload, original_name=None):
+    def __init__(self, declaring_type, name, payload, original_name=None,
+                 ephemeral=False):
         self._name = name
         original_name = original_name or name
         self._declaring_type = weakref.ref(declaring_type)
         self._meta_values = None
+        self_ref = self if ephemeral else weakref.proxy(self)
 
         if callable(payload):
             if isinstance(payload, specs.FunctionDefinition):
                 self._body = payload
             else:
                 self._body = yaql_integration.get_function_definition(
-                    payload, weakref.proxy(self), original_name)
+                    payload, self_ref, original_name)
             self._arguments_scheme = None
-            if any((
+            if declaring_type.extension_class and any((
                     helpers.inspect_is_static(
                         declaring_type.extension_class, original_name),
                     helpers.inspect_is_classmethod(
@@ -96,8 +98,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 declaring_type)
 
         self._instance_stub, self._static_stub = \
-            yaql_integration.build_stub_function_definitions(
-                weakref.proxy(self))
+            yaql_integration.build_stub_function_definitions(self_ref)
 
     @property
     def name(self):
