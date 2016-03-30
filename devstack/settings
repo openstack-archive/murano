@@ -50,7 +50,7 @@ MURANO_APPS_BRANCH=${MURANO_APPS_BRANCH:-master}
 # The problem arise when Murano installed in 'devbox' mode, allowing two or more
 #   devboxes to use one common OpenStack host. In this case it's better devboxes
 #   use separated virtual hosts, to avoid conflicts between Murano services.
-# This couldn't be done using exitsting variables, so that's why this variable was added.
+# This couldn't be done using existing variables, so that's why this variable was added.
 MURANO_RABBIT_VHOST=${MURANO_RABBIT_VHOST:-''}
 
 # Settings needed for the Murano Tempest Plugin installation
