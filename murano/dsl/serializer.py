@@ -26,7 +26,7 @@ class ObjRef(object):
 
 
 def serialize(obj):
-    return serialize_model(obj, None, True)['Objects']
+    return serialize_model(obj, None, True)[0]['Objects']
 
 
 def _serialize_object(root_object, designer_attributes, allow_refs):
@@ -53,6 +53,7 @@ def serialize_model(root_object, executor, allow_refs=False):
         tree = None
         tree_copy = None
         attributes = []
+        serialized_objects = set()
     else:
         tree, serialized_objects = _serialize_object(
             root_object, designer_attributes, allow_refs)
@@ -66,7 +67,7 @@ def serialize_model(root_object, executor, allow_refs=False):
         'Objects': tree,
         'ObjectsCopy': tree_copy,
         'Attributes': attributes
-    }
+    }, serialized_objects
 
 
 def _serialize_available_action(obj, current_actions):

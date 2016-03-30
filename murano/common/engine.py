@@ -210,7 +210,12 @@ class TaskExecutor(object):
                     action_result = self._invoke(executor)
                 finally:
                     try:
-                        self._model = serializer.serialize_model(obj, executor)
+                        self._model, alive_object_ids = \
+                            serializer.serialize_model(obj, executor)
+                        LOG.debug('Cleaning up orphan objects')
+                        n = executor.cleanup_orphans(alive_object_ids)
+                        LOG.debug('{} orphan objects were destroyed'.format(n))
+
                     except Exception as e:
                         return self.exception_result(e, None, '<model>')
             except Exception as e:
