@@ -15,11 +15,12 @@
 import collections
 import functools as func
 
+import eventlet
 import jsonschema
 from oslo_log import log as logging
 import six
 
-from murano.common.i18n import _
+from murano.common.i18n import _, _LE
 
 
 LOG = logging.getLogger(__name__)
@@ -207,6 +208,50 @@ def build_entity_map(value):
     id_map = {}
     build_entity_map_recursive(value, id_map)
     return id_map
+
+
+def retry(ExceptionToCheck, tries=4, delay=3, backoff=2):
+    """Retry calling the decorated function using an exponential backoff.
+
+    http://www.saltycrane.com/blog/2009/11/trying-out-retry-decorator-python/
+    original from: http://wiki.python.org/moin/PythonDecoratorLibrary#Retry
+
+    :param ExceptionToCheck: the exception to check. may be a tuple of
+        exceptions to check
+    :type ExceptionToCheck: Exception or tuple
+    :param tries: number of times to try (not retry) before giving up
+    :type tries: int
+    :param delay: initial delay between retries in seconds
+    :type delay: int
+    :param backoff: backoff multiplier e.g. value of 2 will double the delay
+        each retry
+    :type backoff: int
+    """
+
+    def deco_retry(f):
+        @func.wraps(f)
+        def f_retry(*args, **kwargs):
+            mtries, mdelay = tries, delay
+            forever = mtries == -1
+            while forever or mtries > 1:
+                try:
+                    return f(*args, **kwargs)
+                except ExceptionToCheck as e:
+                    LOG.exception(_LE("An exception occurred {exc}. Retrying "
+                                      "in {time} seconds").format(exc=e,
+                                                                  time=mdelay))
+                    eventlet.sleep(mdelay)
+
+                    if not forever:
+                        mtries -= 1
+
+                    if mdelay < 60:
+                        mdelay *= backoff
+            return f(*args, **kwargs)
+
+        return f_retry
+
+    return deco_retry
 
 
 def handle(f):
