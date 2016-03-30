@@ -18,5 +18,6 @@ YAQL languages. The sections below describe these languages.
 .. include:: murano_pl/reflection.rst
 .. include:: murano_pl/statics.rst
 .. include:: murano_pl/metadata.rst
+.. include:: murano_pl/versioning.rst
 .. include:: murano_pl/actions.rst
 
