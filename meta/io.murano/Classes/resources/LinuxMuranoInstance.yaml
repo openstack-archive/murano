@@ -45,6 +45,7 @@ Methods:
                 - config: {get_resource: $bootConfigResourceName}
                 - config: {get_resource: $bootScriptResourceName}
 
+    - $.setAttr(resourceCloudConfig, [$bootScriptResourceName, $userDataResourceName, $bootConfigResourceName])
     - $environment.stack.updateTemplate($template)
     - Return: {get_resource: $userDataResourceName}
 
@@ -86,6 +87,15 @@ Methods:
 
         - $userData: $muranoScript.replace($muranoReplacements) + $initScript.replace($scriptReplacements)
         - Return: $userData
+  
+  releaseResources:
+    Body:
+      - $environment: $.find(std:Environment).require()
+      - $template: $environment.stack.current()
+      - If: bool($template.resources) and bool($template.outputs)
+        Then:
+          - $resourcesToDelete: $.getAttr(resourceCloudConfig, [])
+          - $template.resources: $template.resources.deleteAll($resourcesToDelete)
+          - $environment.stack.setTemplate($template)
 
-
-
+      - $.super($.releaseResources())
