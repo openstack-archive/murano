@@ -243,11 +243,13 @@ class Agent(object):
             if 'EntryPoint' not in script:
                 raise ValueError('No entry point in script ' + name)
 
-            if 'Application' in script['Type']:
-                script['EntryPoint'] = self._place_file(scripts_folder,
-                                                        script['EntryPoint'],
-                                                        template, resources,
-                                                        files)
+            if 'Application' == script['Type']:
+                if script['EntryPoint'] not in files:
+                    script['EntryPoint'] = self._place_file(
+                        scripts_folder, script['EntryPoint'],
+                        template, resources, files)
+                else:
+                    script['EntryPoint'] = files[script['EntryPoint']]
             if 'Files' in script:
                 for i, file in enumerate(script['Files']):
                     if self._get_name(file) not in files:
