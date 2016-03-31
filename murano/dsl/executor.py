@@ -242,14 +242,35 @@ class MuranoDslExecutor(object):
                 objects_to_clean.append(obj)
         if objects_to_clean:
             for obj in objects_to_clean:
-                methods = obj.type.find_methods(lambda m: m.name == '.destroy')
-                for method in methods:
-                    try:
-                        method.invoke(self, obj, (), {}, None)
-                    except Exception as e:
-                        LOG.warning(_LW(
-                            'Muted exception during execution of .destroy '
-                            'on {0}: {1}').format(obj, e), exc_info=True)
+                self._destroy_object(obj)
+
+    def cleanup_orphans(self, alive_object_ids):
+        with helpers.execution_session(self._session):
+            orphan_ids = self._collect_orphans(alive_object_ids)
+            self._destroy_orphans(orphan_ids)
+            return len(orphan_ids)
+
+    def _collect_orphans(self, alive_object_ids):
+        orphan_ids = []
+        for obj_id in self._object_store.iterate():
+            if obj_id not in alive_object_ids:
+                orphan_ids.append(obj_id)
+        return orphan_ids
+
+    def _destroy_orphans(self, orphan_ids):
+        for obj_id in orphan_ids:
+            self._destroy_object(self._object_store.get(obj_id))
+            self._object_store.remove(obj_id)
+
+    def _destroy_object(self, obj):
+        methods = obj.type.find_methods(lambda m: m.name == '.destroy')
+        for method in methods:
+            try:
+                method.invoke(self, obj, (), {}, None)
+            except Exception as e:
+                LOG.warning(_LW(
+                    'Muted exception during execution of .destroy '
+                    'on {0}: {1}').format(obj, e), exc_info=True)
 
     def _list_potential_object_ids(self, data):
         if isinstance(data, dict):
