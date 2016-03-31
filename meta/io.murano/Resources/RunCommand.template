@@ -14,18 +14,19 @@ FormatVersion: 2.0.0
 Version: 1.0.0
 Name: $planName
 
-Parameters:
-  command: $command
+Body: return runCommand()
 
-Body: |
-  return runCommand("{0}".format(args.command))
+Files:
+  scriptFile:
+    BodyType: Text
+    Name: scriptFile.sh
+    Body: $command
 
 Scripts:
   runCommand:
     Type: Application
     Version: 1.0.0
-    EntryPoint: runCommand.sh
-    Files: []
+    EntryPoint: scriptFile.sh
     Options:
       captureStdout: $captureStdout
       captureStderr: $captureStderr
