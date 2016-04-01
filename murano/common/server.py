@@ -178,6 +178,8 @@ def report_notification(report):
     del report['id']
 
     status = models.Status()
+    if 'timestamp' in report:
+        report['created'] = timeutils.parse_isotime(report.pop('timestamp'))
     status.update(report)
 
     unit = session.get_session()
