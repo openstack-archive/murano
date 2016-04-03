@@ -48,7 +48,7 @@ broker in a few simple steps:
     .. code-block:: console
 
         cd ~/murano/murano
-        tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
+        tox -e venv -- murano-cfapi --config-file ./etc/murano/murano.conf
 
 Devstack installation
 ~~~~~~~~~~~~~~~~~~~~~
@@ -106,7 +106,7 @@ To access and use murano packages through Cloud Foundry, you need to perform fol
 
    .. code-block:: console
 
-      cf create-service 'Apache HTTP Server' default  -c apache.json
+      cf create-service 'Apache HTTP Server' default MyApacheInstance  -c apache.json
 
    .. code-block:: json
 
