@@ -97,7 +97,7 @@ class Controller(object):
         token = keystone.auth_token
 
         m_cli = _get_muranoclient(token)
-        kwargs = {'type': 'application'}
+        kwargs = {'type': 'Application'}
         packages = m_cli.packages.filter(**kwargs)
 
         services = []
