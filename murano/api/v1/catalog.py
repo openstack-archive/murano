@@ -18,6 +18,8 @@ import os
 import tempfile
 
 import jsonschema
+from keystoneclient import exceptions as keystone_ex
+from keystoneclient import service_catalog
 from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
@@ -34,6 +36,7 @@ from murano.db.catalog import api as db_api
 from murano.common.i18n import _, _LW
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
+from muranoclient.glance import client as glare_client
 
 
 LOG = logging.getLogger(__name__)
@@ -266,11 +269,21 @@ class Controller(object):
             os.remove(tempf.name)
 
     def get_ui(self, req, package_id):
-        target = {'package_id': package_id}
-        policy.check("get_package", req.context, target)
+        if CONF.engine.packages_service == 'murano':
+            target = {'package_id': package_id}
+            policy.check("get_package", req.context, target)
 
-        package = db_api.package_get(package_id, req.context)
-        return package.ui_definition
+            package = db_api.package_get(package_id, req.context)
+            return package.ui_definition
+        else:
+            g_client = self._get_glare_client(req)
+            blob_data = g_client.artifacts.download_blob(package_id, 'archive')
+            with tempfile.NamedTemporaryFile() as tempf:
+                for chunk in blob_data:
+                    tempf.write(chunk)
+                with load_utils.load_from_file(tempf.name, target_dir=None,
+                                               drop_dir=True) as pkg:
+                    return pkg.ui
 
     def get_logo(self, req, package_id):
         target = {'package_id': package_id}
@@ -391,6 +404,38 @@ class Controller(object):
                     "to the package, uploaded to the catalog")
             raise exc.HTTPForbidden(explanation=msg)
         db_api.category_delete(category_id)
+
+    def _get_glare_client(self, request):
+        glare_settings = CONF.glare
+        token = request.context.auth_token
+        url = glare_settings.url
+        if not url:
+            self._get_glare_url(request)
+        client = glare_client.Client(
+            endpoint=url, token=token, insecure=glare_settings.insecure,
+            key_file=glare_settings.key_file or None,
+            ca_file=glare_settings.ca_file or None,
+            cert_file=glare_settings.cert_file or None,
+            type_name='murano',
+            type_version=1)
+        return client
+
+    def _get_glare_url(self, request):
+        sc = request.context.service_catalog
+        token = request.context.auth_token
+        try:
+            return service_catalog.ServiceCatalogV2(
+                {'serviceCatalog': sc}).url_for(
+                service_type='artifact',
+                endpoint_type=CONF.glare.endpoint_type,
+                region_name=CONF.home_region)
+        except keystone_ex.EndpointNotFound:
+            return service_catalog.ServiceCatalogV3(
+                token,
+                {'catalog': sc}).url_for(
+                    service_type='artifact',
+                    endpoint_type=CONF.glare.endpoint_type,
+                    region_name=CONF.home_region)
 
 
 def create_resource():
