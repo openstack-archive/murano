@@ -480,3 +480,39 @@ category or multiple categories to delete:
    Verify that no packages belong to the category to be deleted, otherwise an
    error appears. For this, use the :command:`murano category-show <ID>`
    command.
+
+Manage environment templates
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To manage environment templates, use the following commands specifying
+appropriate values:
+
+:command:`murano env-template-create <ENV_TEMPLATE_NAME>`
+ Creates an environment template.
+
+:command:`murano env-template-clone <ID> <NEW_ENV_TEMPLATE_NAME>`
+ Creates a new template, cloned from an existing template.
+
+:command:`murano env-template-create-env <ID> <ENV_TEMPLATE_NAME>`
+ Creates a new environment from template.
+
+:command:`murano env-template-add-app <ENV_TEMPLATE_ID> <FILE>`
+ Adds an application or multiple applications to the environment template.
+
+:command:`murano env-template-del-app <ENV_TEMPLATE_ID> <ENV_TEMPLATE_APP_ID>`
+ Deletes an application from the enviroment template.
+
+:command:`murano env-template-list`
+ Lists the environments templates.
+
+:command:`murano env-template-show <ID>`
+ Displays environment template details.
+
+:command:`murano env-template-update <ID> <ENV_TEMPLATE_NAME>`
+ Updates an environment template.
+
+:command:`murano env-template-delete <ID>`
+ Deletes an environment template.
+
+.. seealso::
+   `Application Catalog service command-line client <http://docs.openstack.org/cli-reference/murano.html>`_.
