@@ -331,10 +331,12 @@ class HotPackage(package_base.PackageBase):
         ]
 
         destroy = [
+            {YAQL('$environment'): YAQL(
+                "$.find('io.murano.Environment').require()"
+            )},
             {YAQL('$stack'): YAQL(
-                "new('io.murano.system.HeatStack', "
+                "new('io.murano.system.HeatStack', $environment, "
                 "name => $.getAttr(generatedHeatStackName))")},
-
             YAQL('$stack.delete()')
         ]
 
