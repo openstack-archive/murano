@@ -1,0 +1,6 @@
+---
+fixes:
+  - Fixed a bug when the UI dialog was not displayed in Murano Dashboard for
+    applications which don't have UI definitions bundled in the package but
+    generate them based on the package contents instead. This usually affected
+    HOT-based packages and other non-muranopl-based applications.

@@ -14,6 +14,7 @@
 
 from oslo_config import cfg
 from oslo_middleware import request_id as oslo_request_id
+from oslo_serialization import jsonutils
 
 from murano.common.i18n import _
 from murano.common import wsgi
@@ -50,6 +51,9 @@ class ContextMiddleware(wsgi.Middleware):
             'request_id': req.environ.get(oslo_request_id.ENV_REQUEST_ID),
             'roles': roles
         }
+        sc_header = req.headers.get('X-Service-Catalog')
+        if sc_header:
+            kwargs['service_catalog'] = jsonutils.loads(sc_header)
         req.context = murano.context.RequestContext(**kwargs)
 
     @classmethod
