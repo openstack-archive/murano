@@ -35,7 +35,7 @@ from oslo_service import service
 
 from murano.api.v1 import request_statistics
 from murano.common import app_loader
-from murano.common import config
+from murano.common import cf_config as config
 from murano.common import policy
 from murano.common import server
 from murano.common import wsgi
