@@ -58,6 +58,11 @@ TEMPEST_DIR=$DEST/tempest
 TEMPEST_CONFIG_DIR=${TEMPEST_CONFIG_DIR:-$TEMPEST_DIR/etc}
 TEMPEST_CONFIG=$TEMPEST_CONFIG_DIR/tempest.conf
 
+# GlARe variables
+# Glance Artifact Repository endpoint type for Murano communications.
+# Public by default.
+GLARE_ENDPOINT_TYPE=${GLARE_ENDPOINT_TYPE:-publicURL}
+
 enable_service murano
 enable_service murano-api
 enable_service murano-engine

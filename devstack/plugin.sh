@@ -75,6 +75,39 @@ function configure_murano_rpc_backend() {
     fi
 }
 
+function configure_murano_glare_backend() {
+    # Configure Murano to use GlARe application storage backend
+    iniset $MURANO_CONF_FILE engine packages_service 'glare'
+    iniset $MURANO_CONF_FILE glare url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT
+    iniset $MURANO_CONF_FILE glare endpoint_type $GLARE_ENDPOINT_TYPE
+    echo -e $"\nexport MURANO_PACKAGES_SERVICE='glare'" | sudo tee -a $TOP_DIR/openrc
+}
+
+function restart_glare_service() {
+    # Restart GlARe service to apply Murano artifact plugin
+    if is_running glance-glare; then
+        echo_summary "Restarting GlARe to apply config changes"
+        stop_process g-glare
+        run_process g-glare "$GLANCE_BIN_DIR/glance-glare --config-file=$GLANCE_CONF_DIR/glance-glare.conf"
+        echo "Waiting for GlARe [g-glare] ($GLANCE_GLARE_HOSTPORT) to start..."
+        if ! wait_for_service $SERVICE_TIMEOUT $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT; then
+            die $LINENO " GlARe [g-glare] did not start"
+        fi
+    else
+        echo_summary "GlARe service wasn't started yet. It will start in usual way."
+    fi
+}
+
+function install_murano_artifact_plugin() {
+    # Provide support of Murano artifacts type to GlARe
+    setup_package $MURANO_DIR/contrib/glance -e
+}
+
+function is_murano_backend_glare() {
+    is_service_enabled g-glare && [[ "$MURANO_USE_GLARE" == "True" ]] && return 0
+    return 1
+}
+
 function configure_murano_networking {
     # Use keyword 'public' if Murano external network was not set.
     # If it was set but the network is not exist then
@@ -164,6 +197,9 @@ function configure_murano {
     if [[ -n "$MURANO_ENGINE_WORKERS" ]]; then
         iniset $MURANO_CONF_FILE engine workers $MURANO_ENGINE_WORKERS
     fi
+    if is_murano_backend_glare; then
+        configure_murano_glare_backend
+    fi
 }
 
 # install_murano_apps() - Install Murano apps from repository murano-apps, if required
@@ -227,8 +263,11 @@ function install_murano() {
     git_clone $MURANO_REPO $MURANO_DIR $MURANO_BRANCH
 
     setup_develop $MURANO_DIR
-}
 
+    if is_murano_backend_glare; then
+        install_murano_artifact_plugin
+    fi
+}
 
 function install_murano_pythonclient() {
 # For using non-released client from git branch, need to add
@@ -361,6 +400,14 @@ function configure_local_settings_py() {
 
     mkdir_chown_stack "$MURANO_DASHBOARD_CACHE_DIR"
 
+    if is_murano_backend_glare; then
+    # Make Murano use GlARe only if MURANO_USE_GLARE set to True and GlARe
+    # service is enabled
+        local murano_use_glare=True
+    else
+        local murano_use_glare=False
+    fi
+
     # Write changes for dashboard config to a separate file
     cat << EOF >> "$horizon_config_part"
 
@@ -375,6 +422,7 @@ DATABASES = {
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 MURANO_REPO_URL = '$MURANO_REPOSITORY_URL'
+MURANO_USE_GLARE = '$murano_use_glare'
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
 
@@ -449,6 +497,9 @@ if is_service_enabled murano; then
             init_murano_dashboard
         fi
         start_murano
+        if is_murano_backend_glare; then
+            restart_glare_service
+        fi
         if is_service_enabled murano-cfapi; then
             start_service_broker
         fi
