@@ -176,8 +176,7 @@ Currently supported options for **type** attribute are:
 * *password* - text field with validation for strong password, rendered as two
   masked text inputs (second one is for password confirmation)
 * *clusterip* - specific text field, used for entering cluster IP address
-  (validations for valid IP address syntax and for that IP to belong to a fixed
-  subnet)
+  (validation for valid IP address syntax)
 * *databaselist* - specific field, a list of databases (comma-separated list of
   databases' names, where each name has the following syntax first symbol
   should be latin letter or underscore; subsequent symbols can be latin
