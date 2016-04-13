@@ -108,6 +108,7 @@ Contributing
    contributor-guide/dev_env
    contributor-guide/testing
    contributor-guide/doc_guidelines
+   contributor-guide/stable_branches
 
 Appendix
 ~~~~~~~~
