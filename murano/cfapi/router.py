@@ -13,7 +13,7 @@
 #    under the License.
 import routes
 
-from murano.api.v1.cloudfoundry import cfapi
+from murano.cfapi import cfapi
 from murano.common import wsgi
 
 

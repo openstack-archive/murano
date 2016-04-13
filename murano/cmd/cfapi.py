@@ -37,7 +37,6 @@ from murano.api.v1 import request_statistics
 from murano.common import app_loader
 from murano.common import cf_config as config
 from murano.common import policy
-from murano.common import server
 from murano.common import wsgi
 
 CONF = cfg.CONF
@@ -64,9 +63,6 @@ def main():
                           config.CONF.cfapi.bind_host)
 
         launcher.launch_service(wsgi.Service(cfapp, cfport, cfhost))
-
-        launcher.launch_service(server.ApiService())
-        launcher.launch_service(server.NotificationService())
 
         launcher.wait()
     except RuntimeError as e:
