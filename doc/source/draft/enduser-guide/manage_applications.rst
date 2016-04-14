@@ -87,7 +87,7 @@ murano applications repository:
   http://apps.openstack.org/#tab=murano-apps and click on the desired
   package to see its full name.
 
-#. In dashboard, navigate to
+#. In OpenStack dashboard, navigate to
    :menuselection:`Murano > Manage > Packages`.
 #. Click the :guilabel:`Import Package` button on the top right of the
    page.
@@ -128,7 +128,7 @@ Perform the following steps to import a bundle of applications:
   to http://apps.openstack.org/#tab=murano-apps and click on the
   desired bundle to see its full name.
 
-#. In dashboard, navigate to
+#. In OpenStack dashboard, navigate to
    :menuselection:`Murano > Manage > Packages`.
 #. Click the :guilabel:`Import Bundle` button on the top right of the
    page.
@@ -138,7 +138,7 @@ Perform the following steps to import a bundle of applications:
       :width: 630 px
 
 #. From the :guilabel:`Package Bundle Source` drop-down list, choose
-   :guilabel:`Repository`, enter the bundle name, and then 
+   :guilabel:`Repository`, enter the bundle name, and then
    click :guilabel:`Create`.
 
    .. image:: figures/bundle_name.png
@@ -152,7 +152,7 @@ When you have imported many applications and want to quickly find
 a required one, you can filter them by category, tags and words that
 the application name or description contains:
 
-In dashboard, navigate to :menuselection:`Murano > Application Catalog
+In OpenStack dashboard, navigate to :menuselection:`Murano > Application Catalog
 > Applications`.
 
 The page is divided into two sections:
@@ -195,7 +195,7 @@ Delete an application package
 To delete an application package from the catalog, please perform
 the following steps:
 
-#. In dashboard, navigate to :menuselection:`Murano > Manage > Package
+#. In OpenStack dashboard, navigate to :menuselection:`Murano > Manage > Package
    Definitions`.
 
 #. Select a package or multiple packages you want to delete and click
@@ -421,7 +421,7 @@ a component:
 
 To browse a component details, perform the following steps:
 
-#. In OpenStack Dashboard, navigate to
+#. In OpenStack dashboard, navigate to
    :menuselection:`Murano > Application Catalog > Environments`.
 
 #. Click the name of the required environment.
@@ -446,7 +446,7 @@ this environment becomes available in a separate tab. The topology represents
 an elastic diagram showing the relationship between a component and the
 infrastructure it runs on. To view the topology:
 
-#. In OpenStack Dashboard, navigate to
+#. In OpenStack dashboard, navigate to
    :menuselection:`Murano > Application Catalog > Environments`.
 
 #. Click the name of the necessary environment.
@@ -501,7 +501,7 @@ To get detailed information on a deployment, use:
 To see the log of a particular deployment, proceed with the steps
 below:
 
-#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
    Catalog > Environments`.
 
 #. Click the name of the required environment.
@@ -522,7 +522,7 @@ below:
 
 To see the latest deployment log, proceed with the steps below:
 
-#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
    Catalog > Environments`.
 
 #. Click the name of the required environment.
@@ -536,7 +536,7 @@ To see the latest deployment log, proceed with the steps below:
 To see the logs of a particular component of an environment, proceed with the
 steps below:
 
-#. In OpenStack Dashboard, navigate to :menuselection:`Murano > Application
+#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
    Catalog > Environments`.
 
 #. Click the name of the required environment.

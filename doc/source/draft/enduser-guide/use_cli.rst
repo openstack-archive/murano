@@ -38,7 +38,7 @@ environment name:
 
 .. code-block:: console
 
-   murano environment-create <NAME>
+   $ murano environment-create <NAME>
 
 Rename an environment
 ---------------------
@@ -48,7 +48,7 @@ the environment or its ID and the new name:
 
 .. code-block:: console
 
-   murano environment-rename <OLD_NAME_OR_ID> <NEW_NAME>
+   $ murano environment-rename <OLD_NAME_OR_ID> <NEW_NAME>
 
 Delete an environment
 ---------------------
@@ -58,7 +58,7 @@ environment name or ID:
 
 .. code-block:: console
 
-   murano environment-delete <NAME_OR_ID>
+   $ murano environment-delete <NAME_OR_ID>
 
 List deployments for an environment
 -----------------------------------
@@ -68,7 +68,7 @@ command specifying the environment name or ID:
 
 .. code-block:: console
 
-   murano deployment-list <NAME_OR_ID>
+   $ murano deployment-list <NAME_OR_ID>
 
 List the environments
 ---------------------
@@ -77,7 +77,7 @@ To get a list of all existing environments, run:
 
 .. code-block:: console
 
-   murano environment-list
+   $ murano environment-list
 
 Manage packages
 ~~~~~~~~~~~~~~~
@@ -112,7 +112,7 @@ To import a package from a local .zip file, run:
 
 .. code-block:: console
 
-  # murano package-import /path/to/PACKAGE.zip
+  $ murano package-import /path/to/PACKAGE.zip
 
 where ``PACKAGE`` is the name of the package stored on your
 computer.
@@ -121,7 +121,7 @@ For example:
 
 .. code-block:: console
 
-  # murano package-import /home/downloads/mysql.zip
+  $ murano package-import /home/downloads/mysql.zip
   Importing package io.murano.databases.MySql
   +---------------------------------+------+--------------------------+--------------+---------+
   | ID                              | Name | FQN                      | Author       |Is Public|
@@ -134,7 +134,7 @@ To make the package available for users from other projects (tenants), use the
 
 .. code-block:: console
 
-   # murano package-import --is-public mysql.zip
+   $ murano package-import --is-public mysql.zip
 
 .. note::
 
@@ -165,7 +165,7 @@ murano applications repository:
 
 .. code-block:: console
 
-   # murano --murano-repo-url=http://storage.apps.openstack.org \
+   $ murano --murano-repo-url=http://storage.apps.openstack.org \
    package-import io.murano.databases.MySql
 
 This command supports an optional ``--package-version`` parameter that instructs
@@ -197,14 +197,14 @@ To import an application package from an URL, use the following command:
 
 .. code-block:: console
 
-  # murano package-import http://example.com/path/to/PACKAGE.zip
+  $ murano package-import http://example.com/path/to/PACKAGE.zip
 
 The example below shows how to import a MySQL package from the
 murano applications repository using the package URL:
 
 .. code-block:: console
 
-  # murano package-import http://storage.apps.openstack.org/apps/io.murano.databases.MySql.zip
+  $ murano package-import http://storage.apps.openstack.org/apps/io.murano.databases.MySql.zip
   Inspecting required images
   Importing package io.murano.databases.MySql
   +----------------------------------+-------+--------------------------+--------------+--------+----------+------------+
@@ -236,7 +236,7 @@ command:
 
 .. code-block:: console
 
-  # murano bundle-import /path/to/bundle/BUNDLE_NAME
+  $ murano bundle-import /path/to/bundle/BUNDLE_NAME
 
 This command imports all the requirements of packages and
 images.
@@ -250,7 +250,7 @@ The following example shows the import of a monitoring bundle:
 
 .. code-block:: console
 
- # murano bundle-import /home/downloads/monitoring.bundle
+ $ murano bundle-import /home/downloads/monitoring.bundle
  Inspecting required images
  Importing package io.murano.apps.ZabbixServer
  Importing package io.murano.apps.ZabbixAgent
@@ -274,7 +274,7 @@ To import a bundle from an URL, use the following command:
 
 .. code-block:: console
 
-  # murano bundle-import http://example.com/path/to/bundle/BUNDLE_NAME
+  $ murano bundle-import http://example.com/path/to/bundle/BUNDLE_NAME
 
 Where ``http://example.com/path/to/bundle/BUNDLE_NAME`` is any external http/https
 URL to load the bundle from.
@@ -283,7 +283,7 @@ For example:
 
 .. code-block:: console
 
-  # murano bundle-import http://storage.apps.openstack.org/bundles/monitoring.bundle
+  $ murano bundle-import http://storage.apps.openstack.org/bundles/monitoring.bundle
 
 .. _cli_bundle_repo:
 
@@ -294,13 +294,13 @@ following command, where ``bundle_name`` stands for the bundle name:
 
 .. code-block:: console
 
-  # murano bundle-import BUNDLE_NAME
+  $ murano bundle-import BUNDLE_NAME
 
 For example:
 
 .. code-block:: console
 
-  # murano bundle-import monitoring
+  $ murano bundle-import monitoring
 
 .. |location| raw:: html
 
@@ -323,7 +323,7 @@ ID, name, author and if it is public or not. For example:
 
 .. code-block:: console
 
- # murano package-list
+ $ murano package-list
  +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
  | ID                               | Name               | FQN                                    | Author        | Active | Is Public| Type       |
  +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
@@ -345,7 +345,7 @@ command. For example:
 
 .. code-block:: console
 
- # murano package-show 1aa62196595f411399e4e48cc2f6a512
+ $ murano package-show 1aa62196595f411399e4e48cc2f6a512
  +----------------------+-----------------------------------------------------+
  | Property             | Value                                               |
  +----------------------+-----------------------------------------------------+
@@ -374,7 +374,7 @@ To delete a package, use the following command:
 
 .. code-block:: console
 
-  # murano package-delete PACKAGE_ID
+  $ murano package-delete PACKAGE_ID
 
 .. _cli_download:
 
@@ -386,7 +386,7 @@ with a specified package:
 
 .. code-block:: console
 
-  # murano package-download PACKAGE_ID > FILE.zip
+  $ murano package-download PACKAGE_ID > FILE.zip
 
 You need to specify the package ID and enter the .zip file name
 under which to save the package.
@@ -395,7 +395,7 @@ For example:
 
 .. code-block:: console
 
-  # murano package-download e44a3f526dfb4e08b3c1018c9968d911 > Wordpress.zip
+  $ murano package-download e44a3f526dfb4e08b3c1018c9968d911 > Wordpress.zip
 
 .. _cli_create:
 
@@ -418,7 +418,7 @@ Example:
 
 .. code-block:: console
 
-  murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
+  $ murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
   -n mysql -f io.murano.MySQL -d Package -o MySQL.zip --type Library
   Application package is available at /home/Downloads/MySQL.zip
 
@@ -444,7 +444,7 @@ To create a category, use the following command specifying the category name:
 
 .. code-block:: console
 
-   murano category-create <NAME>
+   $ murano category-create <NAME>
 
 List available categories
 -------------------------
@@ -453,7 +453,7 @@ To get a list of all existing categories, run:
 
 .. code-block:: console
 
-   murano category-list
+   $ murano category-list
 
 Show category details
 ---------------------
@@ -463,7 +463,7 @@ command specifying the category ID:
 
 .. code-block:: console
 
-   murano category-show <ID>
+   $ murano category-show <ID>
 
 Delete a category
 -----------------
@@ -473,7 +473,7 @@ category or multiple categories to delete:
 
 .. code-block:: console
 
-   murano category-delete <ID> [<ID> ...]
+   $ murano category-delete <ID> [<ID> ...]
 
 .. note::
 

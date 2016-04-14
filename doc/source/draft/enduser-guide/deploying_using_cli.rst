@@ -43,7 +43,7 @@ configuration. For convenience, this guide refers to environment ID as
 
 .. code-block:: console
 
-  murano environment-create deployed_from_cli
+  $ murano environment-create deployed_from_cli
 
   +----------------------------------+-------------------+---------------------+---------------------+
   | ID                               | Name              | Created             | Updated             |
@@ -64,7 +64,7 @@ To create a configuration session, use the
 
 .. code-block:: console
 
-  murano environment-session-create $ENV_ID
+  $ murano environment-session-create $ENV_ID
 
   +----------+----------------------------------+
   | Property | Value                            |
@@ -81,7 +81,7 @@ To manipulate environments object model from CLI, use the
 
 .. code-block:: console
 
-  murano environment-apps-edit --session-id $SESS_ID $ENV_ID object_model_patch.json
+  $ murano environment-apps-edit --session-id $SESS_ID $ENV_ID object_model_patch.json
 
 The :file:`object_model_patch.json` contains the ``jsonpatch`` object. This
 object is applied to the ``/services`` key of the environment in question.
@@ -131,7 +131,7 @@ running the :command:`environment-show` command with the
 
 .. code-block:: console
 
-    murano environment-show $ENV_ID --session-id $SESS_ID --only-apps
+   $ murano environment-show $ENV_ID --session-id $SESS_ID --only-apps
 
     [
       {
@@ -166,7 +166,7 @@ To deploy a session ``$SESS_ID`` of your environment, use the
 
 .. code-block:: console
 
-    murano environment-deploy $ENV_ID --session-id $SESS_ID
+   $ murano environment-deploy $ENV_ID --session-id $SESS_ID
 
 You can later use the :command:`murano environment-show` command to
 track the deployment status.
@@ -177,7 +177,7 @@ parameter and specifying the environment ID:
 
 .. code-block:: console
 
-   murano environment-show $ENV_ID --only-apps
+   $ murano environment-show $ENV_ID --only-apps
 
 .. _jsonpatch.com: http://jsonpatch.com
 .. _RFC 6902: http://tools.ietf.org/html/rfc6902
