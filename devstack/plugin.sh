@@ -126,6 +126,7 @@ function configure_murano {
 
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG
+    iniset $MURANO_CONF_FILE DEFAULT home_region $REGION_NAME
 
     # Murano Policy Enforcement Configuration
     if [[ -n "$MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT" ]]; then
