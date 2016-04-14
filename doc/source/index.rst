@@ -121,7 +121,6 @@ Miscellaneous
    :maxdepth: 1
 
    articles/workflow
-   articles/policy_enf_index
 
 
 **Tutorials**
@@ -132,12 +131,6 @@ Miscellaneous
    image_builders/index
    articles/test_docs
 
-**Client**
-
-.. toctree::
-   :maxdepth: 1
-
-   articles/client
 
 **Guidelines**
 
