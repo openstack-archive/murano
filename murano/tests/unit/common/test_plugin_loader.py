@@ -43,7 +43,8 @@ class PluginLoaderTest(base.MuranoTestCase):
                               extensions_loader.PackageDefinition)
         self.assertEqual('test.namespace.Test',
                          list(loaded_pkg.classes.keys())[0])
-        self.assertEqual({'test.namespace.Test': test_obj.packages.keys()},
+        result = {'test.namespace.Test': list(test_obj.packages.keys())}
+        self.assertEqual(result,
                          name_map)
 
     def test_cleanup_duplicates(self):
