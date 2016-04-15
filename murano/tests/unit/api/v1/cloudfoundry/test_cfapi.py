@@ -12,10 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import base64
-
 import json
 import mock
+from oslo_serialization import base64
 from webob import response
 
 from murano.api.v1.cloudfoundry import cfapi as api
@@ -28,9 +27,10 @@ class TestController(base.MuranoTestCase):
         self.controller = api.Controller()
 
         self.request = mock.MagicMock()
-        self.request.headers = {'Authorization': 'Basic {encoded}'.format(
-            encoded=base64.b64encode('test:test')), 'X-Auth-Token': 'foo-bar',
-            'X-Project-Id': 'bar-baz'}
+        auth = 'Basic {}'.format(base64.encode_as_text(b'test:test'))
+        self.request.headers = {'Authorization': auth,
+                                'X-Auth-Token': 'foo-bar',
+                                'X-Project-Id': 'bar-baz'}
 
     @mock.patch('murano.common.policy.check_is_admin')
     @mock.patch('murano.api.v1.cloudfoundry.cfapi._get_muranoclient')
