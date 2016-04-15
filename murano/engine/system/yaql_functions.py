@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import base64
 import collections
 import random
 import re
@@ -22,6 +21,7 @@ import time
 
 import jsonpatch
 import jsonpointer
+from oslo_serialization import base64
 import six
 from yaql.language import specs
 from yaql.language import utils
@@ -40,13 +40,13 @@ _random_string_counter = None
 @specs.parameter('value', yaqltypes.String())
 @specs.extension_method
 def base64encode(value):
-    return base64.b64encode(value)
+    return base64.encode_as_text(value)
 
 
 @specs.parameter('value', yaqltypes.String())
 @specs.extension_method
 def base64decode(value):
-    return base64.b64decode(value)
+    return base64.decode_as_text(value)
 
 
 @specs.parameter('collection', yaqltypes.Iterable())
