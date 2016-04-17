@@ -79,5 +79,12 @@ Methods:
               - $._environment.reporter.report_error($, $formatString.format($e.message))
               - Rethrow:
       - $.setAttr(bayId, $bayId)
+      - $bayStatus: $._magnum.getBayStatus($bayId)
+      - If: $bayStatus = "CREATE_FAILED"
+        Then:
+          - $msg: 'Magnum bay create failed'
+          - $._environment.reporter.report_error($this, $msg)
+          - Throw: MagnumBayCreateFailed
+            Message: $msg
       - $msg: format('Magnum bay {0} is created', $.name)
       - $._environment.reporter.report($this, $msg)
