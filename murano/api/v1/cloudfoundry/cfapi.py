@@ -17,7 +17,7 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-from oslo_service import loopingcall
+import retrying
 import six
 from webob import response
 
@@ -217,10 +217,11 @@ class Controller(object):
             for action_id in list(actions):
                 if 'getCredentials' in action_id:
 
-                    @loopingcall.RetryDecorator(max_retry_count=10,
-                                                inc_sleep_time=2,
-                                                max_sleep_time=60,
-                                                exceptions=(TypeError))
+                    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
+                                    TypeError),
+                                    wait_random_min=1000,
+                                    wait_random_max=10000,
+                                    stop_max_delay=30000)
                     def _get_creds(client, task_id, environment_id):
                         result = m_cli.actions.get_result(environment_id,
                                                           task_id)['result']
