@@ -14,11 +14,18 @@
 service murano-agent stop
 
 AgentConfigBase64='%AGENT_CONFIG_BASE64%'
+RMQCaCertBase64='%CA_ROOT_CERT_BASE64%'
 
 if [ ! -d /etc/murano ]; then
     mkdir /etc/murano
 fi
 echo $AgentConfigBase64 | base64 -d > /etc/murano/agent.conf
 chmod 664 /etc/murano/agent.conf
+
+if [ ! -d /etc/murano/certs ]; then
+    mkdir /etc/murano/certs
+fi
+echo $RMQCaCertBase64 | base64 -d > /etc/murano/certs/ca_certs
+chmod 664 /etc/murano/certs/ca_certs
 
 service murano-agent start
