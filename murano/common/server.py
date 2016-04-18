@@ -20,6 +20,7 @@ import oslo_messaging as messaging
 from oslo_messaging import target
 from oslo_service import service
 from oslo_utils import timeutils
+import pytz
 from sqlalchemy import desc
 
 from murano.common.helpers import token_sanitizer
@@ -178,7 +179,8 @@ def report_notification(report):
 
     status = models.Status()
     if 'timestamp' in report:
-        report['created'] = timeutils.parse_isotime(report.pop('timestamp'))
+        dt = timeutils.parse_isotime(report.pop('timestamp'))
+        report['created'] = dt.astimezone(pytz.utc).replace(tzinfo=None)
     status.update(report)
 
     unit = session.get_session()
