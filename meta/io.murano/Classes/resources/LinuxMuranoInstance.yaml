@@ -80,7 +80,11 @@ Methods:
             "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
             "%INTERNAL_HOSTNAME%": $.name
             "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), $rabbitMqParams.host)
-            "%CA_ROOT_CERT_BASE64%": ""
+        - If: config(rabbitmq, ca_certs)
+          Then:
+            - $scriptReplacements["%CA_ROOT_CERT_BASE64%"]: base64encode(config(rabbitmq, ca_certs, true))
+          Else:
+            - $scriptReplacements["%CA_ROOT_CERT_BASE64%"]: ''
         - $muranoReplacements:
             "%MURANO_AGENT_CONF%": base64encode($muranoAgentConf)
             "%MURANO_AGENT_SERVICE%": base64encode($muranoAgentService)
