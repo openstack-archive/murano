@@ -14,13 +14,24 @@
 
 import os
 
+from tempest import config
 from tempest.test import attr
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
 
+CONF = config.CONF
+
 
 class TestRepositorySanity(base.BaseApplicationCatalogTest):
+
+    @classmethod
+    def resource_setup(cls):
+        if CONF.application_catalog.glare_backend:
+            msg = ("Murano using GLARE backend. "
+                   "Repository tests will be skipped.")
+            raise cls.skipException(msg)
+        super(TestRepositorySanity, cls).resource_setup()
 
     @attr(type='smoke')
     def test_get_list_packages(self):
@@ -47,6 +58,11 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
 
     @classmethod
     def resource_setup(cls):
+        if CONF.application_catalog.glare_backend:
+            msg = ("Murano using GLARE backend. "
+                   "Repository tests will be skipped.")
+            raise cls.skipException(msg)
+
         super(TestRepository, cls).resource_setup()
 
         application_name = utils.generate_name('test_repository_class')

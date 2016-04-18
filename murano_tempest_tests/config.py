@@ -25,7 +25,10 @@ ServiceAvailableGroup = [
     cfg.BoolOpt("murano_cfapi",
                 default=False,
                 help="Whether or not murano-cfapi is expected to be "
-                     "unavailable by default")
+                     "unavailable by default"),
+    cfg.BoolOpt("glare",
+                default=False,
+                help="Whether or not glare is expected to be unavailable")
 ]
 
 application_catalog_group = cfg.OptGroup(name="application_catalog",
@@ -60,7 +63,11 @@ ApplicationCatalogGroup = [
     cfg.IntOpt("build_timeout",
                default=500,
                help="Timeout in seconds to wait for a application catalog"
-                    " to become available.")
+                    " to become available."),
+    cfg.BoolOpt("glare_backend",
+                default=False,
+                help="Tells tempest about murano glare backend "
+                     "configuration.")
 ]
 
 ServiceBrokerGroup = [
