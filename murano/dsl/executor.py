@@ -21,6 +21,7 @@ import eventlet
 import eventlet.event
 from oslo_log import log as logging
 import six
+from yaql.language import exceptions as yaql_exceptions
 from yaql.language import specs
 from yaql.language import utils
 
@@ -109,7 +110,7 @@ class MuranoDslExecutor(object):
 
         if method.arguments_scheme is not None:
             args, kwargs = self._canonize_parameters(
-                method.arguments_scheme, args, kwargs)
+                method.arguments_scheme, args, kwargs, method.name, this)
 
         with self._acquire_method_lock(method, this):
             for i, arg in enumerate(args, 2):
@@ -203,9 +204,13 @@ class MuranoDslExecutor(object):
             raise
 
     @staticmethod
-    def _canonize_parameters(arguments_scheme, args, kwargs):
+    def _canonize_parameters(arguments_scheme, args, kwargs,
+                             method_name, receiver):
         arg_names = list(arguments_scheme.keys())
         parameter_values = utils.filter_parameters_dict(kwargs)
+        if len(args) > len(arg_names):
+            raise yaql_exceptions.NoMatchingMethodException(
+                method_name, receiver)
         for i, arg in enumerate(args):
             name = arg_names[i]
             parameter_values[name] = arg
