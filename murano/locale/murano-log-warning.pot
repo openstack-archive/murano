@@ -1,21 +1,25 @@
 # Translations template for murano.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the murano project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-12-30 06:30+0000\n"
+"Project-Id-Version: murano 2.0.0.0rc2.dev91\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-19 06:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.2.0\n"
+
+#: murano/api/middleware/ext_context.py:48
+msgid "Wrong format for service broker auth url"
+msgstr ""
 
 #: murano/api/middleware/version_negotiation.py:56
 msgid "Unknown version. Returning version choices."
@@ -27,41 +31,49 @@ msgid ""
 "deploying status."
 msgstr ""
 
-#: murano/api/v1/catalog.py:61
+#: murano/api/v1/catalog.py:65
 msgid "Search by parameter '{name}' is not supported. Skipping it."
 msgstr ""
 
-#: murano/api/v1/catalog.py:73
+#: murano/api/v1/catalog.py:77
 msgid ""
 "Value of 'order_by' parameter is not valid. Allowed values are: {values}."
 " Skipping it."
 msgstr ""
 
-#: murano/api/v1/cloudfoundry/cfapi.py:147
+#: murano/api/v1/cloudfoundry/cfapi.py:158
 msgid ""
 "Incorrect input parameters. Package related parameters shouldn't be "
 "passed through Cloud Foundry"
 msgstr ""
 
-#: murano/api/v1/cloudfoundry/cfapi.py:224
+#: murano/api/v1/cloudfoundry/cfapi.py:234
+msgid "This application doesn't have action getCredentials"
+msgstr ""
+
+#: murano/api/v1/cloudfoundry/cfapi.py:240
+msgid "This application doesn't have actions at all"
+msgstr ""
+
+#: murano/api/v1/cloudfoundry/cfapi.py:265
 msgid "Requested service for instance {} is not found"
 msgstr ""
 
-#: murano/common/engine.py:169
+#: murano/common/engine.py:173
 msgid "Cannot delete trust"
 msgstr ""
 
-#: murano/common/server.py:55
+#: murano/common/server.py:52
 msgid ""
 "Environment result could not be handled, specified environment not found "
 "in database"
 msgstr ""
 
-#: murano/common/server.py:118
+#: murano/common/server.py:115
 msgid "EnvId: {env_id} TenantId: {tenant_id} Status: Failed Apps: {services}"
 msgstr ""
 
-#: murano/common/wsgi.py:1036
+#: murano/common/wsgi.py:1046
 msgid "Unable deserialize to json, using raw text"
 msgstr ""
 
@@ -89,17 +101,27 @@ msgid ""
 "be ignored"
 msgstr ""
 
-#: murano/db/catalog/api.py:169
+#: murano/db/catalog/api.py:192
 msgid ""
 "One of the specified {path} is already associated with a package. Doing "
 "nothing."
 msgstr ""
 
-#: murano/dsl/executor.py:213
+#: murano/dsl/executor.py:271
 msgid "Muted exception during execution of .destroy on {0}: {1}"
 msgstr ""
 
-#: murano/engine/system/heat_stack.py:230
+#: murano/engine/package_loader.py:104
+msgid ""
+"'glance' packages_service option has been renamed to 'glare', please "
+"update your configuration"
+msgstr ""
+
+#: murano/engine/package_loader.py:358
+msgid "Couldn't delete lock file: {}"
+msgstr ""
+
+#: murano/engine/system/heat_stack.py:260
 msgid "Stack {stack_name} already deleted?"
 msgstr ""
 

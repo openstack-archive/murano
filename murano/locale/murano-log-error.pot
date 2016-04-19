@@ -1,21 +1,21 @@
 # Translations template for murano.
-# Copyright (C) 2015 ORGANIZATION
+# Copyright (C) 2016 ORGANIZATION
 # This file is distributed under the same license as the murano project.
-# FIRST AUTHOR <EMAIL@ADDRESS>, 2015.
+# FIRST AUTHOR <EMAIL@ADDRESS>, 2016.
 #
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: murano 2.0.0.0b2.dev90\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2015-12-30 06:30+0000\n"
+"Project-Id-Version: murano 2.0.0.0rc2.dev91\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-19 06:30+0000\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Generated-By: Babel 2.1.1\n"
+"Generated-By: Babel 2.2.0\n"
 
 #: murano/api/v1/actions.py:55
 msgid "Session <SessionId {id}> is invalid"
@@ -26,14 +26,14 @@ msgid "Deployment with id {id} not found"
 msgstr ""
 
 #: murano/api/v1/deployments.py:94
-msgid "Deployment with id {d_id} not found in environment{env_id}"
+msgid "Deployment with id {d_id} not found in environment {env_id}"
 msgstr ""
 
 #: murano/api/v1/request_statistics.py:66
 msgid "API {api} method {method} raised an exception"
 msgstr ""
 
-#: murano/api/v1/templates.py:229 murano/api/v1/templates.py:254
+#: murano/api/v1/templates.py:230 murano/api/v1/templates.py:255
 msgid "User has no access to these resources."
 msgstr ""
 
@@ -51,22 +51,22 @@ msgid ""
 "{traceback}"
 msgstr ""
 
-#: murano/cmd/test_runner.py:171
+#: murano/cmd/test_runner.py:172
 msgid "Please provide murano config file or credentials for authorization: {0}"
 msgstr ""
 
-#: murano/cmd/test_runner.py:314
+#: murano/cmd/test_runner.py:312
 #, python-format
 msgid "Failed to initialize murano-test-runner: %s"
 msgstr ""
 
-#: murano/cmd/test_runner.py:322
+#: murano/cmd/test_runner.py:320
 msgid ""
 "Command failed: {0}\n"
 "{1}"
 msgstr ""
 
-#: murano/common/engine.py:237
+#: murano/common/engine.py:246
 #, python-format
 msgid "Exception %(exc)s occurred during invocation of %(method)s"
 msgstr ""
@@ -75,15 +75,11 @@ msgstr ""
 msgid "Failed to get statistics object from a database. {error_code}"
 msgstr ""
 
-#: murano/common/utils.py:239
-msgid "An exception occured {exc}. Retrying in{time} seconds"
-msgstr ""
-
-#: murano/common/wsgi.py:756
+#: murano/common/wsgi.py:766
 msgid "Unrecognized Content-Type provided in request: {error}"
 msgstr ""
 
-#: murano/common/wsgi.py:901
+#: murano/common/wsgi.py:911
 msgid "Schema validation error occured: {error}"
 msgstr ""
 
@@ -95,23 +91,23 @@ msgstr ""
 msgid "Incorrect format name {name}"
 msgstr ""
 
-#: murano/engine/environment.py:45
+#: murano/engine/execution_session.py:43
 msgid "Unhandled exception on invocation of pre-execution hook"
 msgstr ""
 
-#: murano/engine/environment.py:54
+#: murano/engine/execution_session.py:52
 msgid "Unhandled exception on invocation of post-execution hook"
 msgstr ""
 
-#: murano/engine/package_loader.py:148
+#: murano/engine/package_loader.py:234 murano/engine/package_loader.py:253
 msgid "Unable to load package from cache. Clean-up."
 msgstr ""
 
-#: murano/engine/system/agent_listener.py:49
+#: murano/engine/system/agent_listener.py:48
 msgid "Use of murano-agent is disallowed by the server configuration"
 msgstr ""
 
-#: murano/tests/unit/db/migration/test_migrations_base.py:183
+#: murano/tests/unit/db/migration/test_migrations_base.py:185
 msgid "Failed to migrate to version {ver} on engine {eng}"
 msgstr ""
 

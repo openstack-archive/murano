@@ -1,11 +1,10 @@
-# Filatov Sergey <filatecs@gmail.com>, 2015. #zanata
-# Kirill Zaitsev <k.zaitsev@me.com>, 2015. #zanata
-# Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: murano 2.0.0.0b2.dev141\n"
-"Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2016-01-15 15:36+0000\n"
+"Project-Id-Version: murano 2.0.0.0rc2.dev91\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2016-04-17 20:06+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
@@ -26,6 +25,9 @@ msgstr ""
 
 msgid "Attribute '{0}' is invalid"
 msgstr "Неверный атрибут '{0}'"
+
+msgid "Authentication URL"
+msgstr "URL аутентификации"
 
 msgid "Authorization required"
 msgstr "Требуется авторизация"
@@ -49,9 +51,6 @@ msgid ""
 "Class with the same full name is already registered in the visibility scope"
 msgstr ""
 "Класс с таким полным именем уже зарегистрирован в текущей области видимости"
-
-msgid "Congress client is not configured!"
-msgstr "Не настроен клиент Congress."
 
 msgid "Content-Type must be '{type}'"
 msgstr "Content-Type должен быть '{type}'"
@@ -149,13 +148,6 @@ msgid "Limit param must be positive"
 msgstr "Параметр limit должен быть положительным числом"
 
 msgid ""
-"List of directories to load local packages from. If not provided, packages "
-"will be loaded by API"
-msgstr ""
-"Список каталогов из которых будут загружаться пакеты. Если не указано, "
-"пакеты будут загружаться через API"
-
-msgid ""
 "Local package is not found since \"load-packages-from\" engine parameter is "
 "not provided and specified packages is not loaded to murano-api"
 msgstr ""
@@ -243,13 +235,6 @@ msgstr "Пустое тело запроса: укажите объектную 
 msgid "Request body must be a JSON array of operation objects."
 msgstr "Тело запроса должно быть массивом JSON объектов операций."
 
-msgid ""
-"Result for task with environment_id: {env_id} and task_id:{task_id} was not "
-"found."
-msgstr ""
-"Результат выполнения задачи с environment_id: {env_id} и task_id: {task_id} "
-"не найдены."
-
 msgid "Role used to identify an authenticated user as administrator."
 msgstr ""
 "Роль, применяемая для определения идентифицированного пользователя в "
@@ -304,13 +289,6 @@ msgstr "Интервал сбора статистики в минутах. Зн
 
 msgid "The environment template {templ_id} does not exist"
 msgstr "Шаблон окружения {templ_id} не существует"
-
-msgid ""
-"The service to store murano packages: murano (stands for legacy behavior "
-"using murano-api) or glance (stands for Glance V3 artifact repository)"
-msgstr ""
-"Сервис для хранения пакетов мурано: murano (наследуемое поведение, используя "
-"murano-api) или glance (Glance v3 хранилище артефактов)"
 
 msgid "The template does not exist {templ_id}"
 msgstr "Шаблон не существует {templ_id}"
