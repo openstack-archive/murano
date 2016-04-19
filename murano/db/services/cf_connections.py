@@ -13,7 +13,7 @@
 from oslo_db import exception
 import sqlalchemy
 
-from murano.db import models
+from murano.db import cfapi_models as models
 from murano.db import session as db_session
 
 
