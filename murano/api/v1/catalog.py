@@ -410,7 +410,7 @@ class Controller(object):
         token = request.context.auth_token
         url = glare_settings.url
         if not url:
-            self._get_glare_url(request)
+            url = self._get_glare_url(request)
         client = glare_client.Client(
             endpoint=url, token=token, insecure=glare_settings.insecure,
             key_file=glare_settings.key_file or None,
