@@ -52,7 +52,7 @@ DevStack installation
              ``packages_service`` option for the same behaviour
 
 #. Enable Glare in ``murano-dashboard``. For this, add the following line
-   to the ``local_settins.py`` file
+   to the ``local_settings.py`` file
 
    .. code-block:: python
 
