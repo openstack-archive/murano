@@ -92,7 +92,7 @@ test cases from the specified package and class will be executed.
 
    murano-test-runner io.murano.apps.apache.Tomcat io.murano.test.TomcatTest -l /package/location/directory /io.murano/location -v
 
-The following command runs a single *testApacheDeploy* test case from the
+The following command runs a single *testDeploy1* test case from the
 application package.
 
 .. code-block:: console
@@ -183,10 +183,10 @@ unit tests:
             # Set up mock for the push method of *io.murano.system.HeatStack* class
             - inject(sys:HeatStack, push, $.heatOutput)
 
-            # Set up mock for the concrete object with mock method name
+            # Set up mock with YAQL function
             - inject($.env.stack, output, $.heatOutput)
 
-            # Set up mock with YAQL function
+            # Set up mock for the concrete object with mock method name
             - inject('io.murano.system.Agent', call, $this, agentMock)
 
             # Mocks will be called instead of original function during the deployment
