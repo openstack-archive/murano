@@ -85,13 +85,36 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 arguments_scheme = [{key: value} for key, value in
                                     six.iteritems(arguments_scheme)]
             self._arguments_scheme = collections.OrderedDict()
+            seen_varargs = False
+            seen_kwargs = False
+            args_order_error = False
             for record in arguments_scheme:
-                if (not isinstance(record, dict) or
-                        len(record) > 1):
-                    raise ValueError()
+                if not isinstance(record, dict) or len(record) > 1:
+                    raise exceptions.DslSyntaxError(
+                        'Invalid arguments declaration')
                 name = list(record.keys())[0]
-                self._arguments_scheme[name] = MuranoMethodArgument(
+                argument = MuranoMethodArgument(
                     self, self.name, name, record[name])
+                usage = argument.usage
+                if (usage == dsl_types.MethodArgumentUsages.Standard and
+                        (seen_kwargs or seen_varargs)):
+                    args_order_error = True
+                elif usage == dsl_types.MethodArgumentUsages.VarArgs:
+                    if seen_kwargs or seen_varargs:
+                        args_order_error = True
+                    seen_varargs = True
+                elif usage == dsl_types.MethodArgumentUsages.KwArgs:
+                    if seen_kwargs:
+                        args_order_error = True
+                    seen_kwargs = True
+
+                if args_order_error:
+                    raise exceptions.DslSyntaxError(
+                        'Invalid argument order in method {0}'.format(
+                            self.name))
+                else:
+                    self._arguments_scheme[name] = argument
+
             self._meta = meta.MetaData(
                 payload.get('Meta'),
                 dsl_types.MetaTargets.Method,
@@ -183,6 +206,14 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
         self._meta = meta.MetaData(
             declaration.get('Meta'),
             dsl_types.MetaTargets.Argument, self.murano_method.declaring_type)
+        self._usage = declaration.get('Usage') or \
+            dsl_types.MethodArgumentUsages.Standard
+
+        if self._usage not in dsl_types.MethodArgumentUsages.All:
+            raise exceptions.DslSyntaxError(
+                'Unknown usage {0}. Must be one of ({1})'.format(
+                    self._usage, ', '.join(dsl_types.MethodArgumentUsages.All)
+                ))
 
     def transform(self, value, this, *args, **kwargs):
         try:
@@ -206,6 +237,10 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
     @property
     def name(self):
         return self._arg_name
+
+    @property
+    def usage(self):
+        return self._usage
 
     def get_meta(self, context):
         executor = helpers.get_executor(context)

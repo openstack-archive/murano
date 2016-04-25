@@ -335,21 +335,33 @@ def _create_basic_mpl_stub(murano_method, reserve_params, payload,
     fd = specs.FunctionDefinition(
         murano_method.name, payload, is_function=False, is_method=True)
 
-    i = 0
-    for i, (name, arg_spec) in enumerate(
-            six.iteritems(murano_method.arguments_scheme), reserve_params + 1):
+    i = reserve_params + 1
+    varargs = False
+    kwargs = False
+    for name, arg_spec in six.iteritems(murano_method.arguments_scheme):
+        position = i
+        if arg_spec.usage == dsl_types.MethodArgumentUsages.VarArgs:
+            name = '*'
+            varargs = True
+        elif arg_spec.usage == dsl_types.MethodArgumentUsages.KwArgs:
+            name = '**'
+            position = None
+            kwargs = True
         p = specs.ParameterDefinition(
             name, ContractedValue(arg_spec, with_check=check_first_arg),
-            position=i, default=dsl.NO_VALUE)
+            position=position, default=dsl.NO_VALUE)
         check_first_arg = False
         fd.parameters[name] = p
+        i += 1
 
-    fd.parameters['*'] = specs.ParameterDefinition(
-        '*',
-        value_type=yaqltypes.PythonType(object, nullable=True),
-        position=i)
-    fd.parameters['**'] = specs.ParameterDefinition(
-        '**', value_type=yaqltypes.PythonType(object, nullable=True))
+    if not varargs:
+        fd.parameters['*'] = specs.ParameterDefinition(
+            '*',
+            value_type=yaqltypes.PythonType(object, nullable=True),
+            position=i)
+    if not kwargs:
+        fd.parameters['**'] = specs.ParameterDefinition(
+            '**', value_type=yaqltypes.PythonType(object, nullable=True))
 
     fd.set_parameter(specs.ParameterDefinition(
         '__context', yaqltypes.Context(), 0))

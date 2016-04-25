@@ -1,0 +1,11 @@
+---
+features:
+  - >
+    It is possible now to declare MuranoPL YAML methods with variable length
+    positional and keyword arguments. This is done using argument Usage
+    attribute. Regular arguments have Standard usage which is the default.
+    Variable length args (args in Python) should have "Usage: VarArgs" and
+    keyword args (kwargs) are declared with "Usage: KwArgs". Inside the
+    method they seen as a list and a dictionary correspondingly. For such
+    arguments contracts are written for individual argument values thus
+    no need to write them as lists/dicts.

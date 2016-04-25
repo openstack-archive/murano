@@ -30,6 +30,11 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
         super(MuranoProperty, self).__init__(declaration, declaring_type)
         self._property_name = property_name
         self._declaring_type = weakref.ref(declaring_type)
+        self._usage = declaration.get('Usage') or dsl_types.PropertyUsages.In
+        if self._usage not in dsl_types.PropertyUsages.All:
+            raise exceptions.DslSyntaxError(
+                'Unknown usage {0}. Must be one of ({1})'.format(
+                    self._usage, ', '.join(dsl_types.PropertyUsages.All)))
         self._meta = meta.MetaData(
             declaration.get('Meta'),
             dsl_types.MetaTargets.Property, declaring_type)
@@ -52,6 +57,10 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
     @property
     def name(self):
         return self._property_name
+
+    @property
+    def usage(self):
+        return self._usage
 
     def get_meta(self, context):
         def meta_producer(cls):
