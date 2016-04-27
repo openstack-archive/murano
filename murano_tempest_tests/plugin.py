@@ -44,4 +44,6 @@ class MuranoTempestPlugin(plugins.TempestPlugin):
         return [(config_application_catalog.application_catalog_group.name,
                  config_application_catalog.ApplicationCatalogGroup),
                 (config_application_catalog.service_broker_group.name,
-                 config_application_catalog.ServiceBrokerGroup)]
+                 config_application_catalog.ServiceBrokerGroup),
+                ('service_available',
+                 config_application_catalog.ServiceAvailableGroup)]
