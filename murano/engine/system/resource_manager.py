@@ -52,9 +52,10 @@ class ResourceManager(object):
     @staticmethod
     @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
-    def string(receiver, name, owner=None):
+    def string(receiver, name, owner=None, binary=False):
         path = ResourceManager._get_package(owner, receiver).get_resource(name)
-        with open(path) as file:
+        mode = 'rb' if binary else 'rU'
+        with open(path, mode) as file:
             return file.read()
 
     @classmethod

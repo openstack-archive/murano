@@ -13,8 +13,10 @@
 #    under the License.
 
 import os
+import tempfile
 
 import mock
+from oslo_serialization import base64
 import yaml as yamllib
 
 from murano.dsl import murano_object
@@ -309,3 +311,52 @@ class TestExecutionPlan(base.MuranoTestCase):
         mock_uuid4 = mock.patch('uuid.uuid4').start()
         mock_uuid4.side_effect = [FakeUUID(v) for v in values]
         return mock_uuid4
+
+    @mock.patch('murano.engine.system.resource_manager.ResourceManager'
+                '._get_package')
+    def test_file_line_endings(self, _get_package):
+        class FakeResources(object):
+            """Class with only string() method from ResourceManager class"""
+            @staticmethod
+            def string(name, owner=None, binary=False):
+                return resource_manager.ResourceManager.string(
+                    receiver=None, name=name, owner=owner, binary=binary)
+
+        # make path equal to provided name inside resources.string()
+        package = mock.Mock()
+        package.get_resource.side_effect = lambda m: m
+        _get_package.return_value = package
+
+        text = b"First line\nSecond line\rThird line\r\nFourth line"
+        modified_text = u"First line\nSecond line\nThird line\nFourth line"
+        encoded_text = base64.encode_as_text(text) + "\n"
+        resources = FakeResources()
+
+        with tempfile.NamedTemporaryFile() as script_file:
+            script_file.write(text)
+            script_file.file.flush()
+            os.fsync(script_file.file.fileno())
+
+            # check that data has been written correctly
+            script_file.seek(0)
+            file_data = script_file.read()
+            self.assertEqual(text, file_data)
+
+            # check resources.string() output
+            # text file
+            result = resources.string(script_file.name)
+            self.assertEqual(modified_text, result)
+            # binary file
+            result = resources.string(script_file.name, binary=True)
+            self.assertEqual(text, result)
+
+            # check _get_body() output
+            filename = os.path.basename(script_file.name)
+            folder = os.path.dirname(script_file.name)
+            # text file
+            body = self.agent._get_body(filename, resources, folder)
+            self.assertEqual(modified_text, body)
+            # binary file
+            filename = '<{0}>'.format(filename)
+            body = self.agent._get_body(filename, resources, folder)
+            self.assertEqual(encoded_text, body)

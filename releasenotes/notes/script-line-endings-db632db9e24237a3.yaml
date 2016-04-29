@@ -1,0 +1,5 @@
+---
+fixes:
+  - Text script files are opened in 'rU' mode which recognizes all types of
+    newlines, and binary files are opened in 'rb' mode to prevent their
+    corruption.
