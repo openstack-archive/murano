@@ -49,7 +49,7 @@ class StatusReporter(object):
             'details': details,
             'level': level,
             'environment_id': self._environment_id,
-            'timestamp': timeutils.isotime()
+            'timestamp': timeutils.isotime(subsecond=True)
         }
         self._notifier.info({}, 'murano.report_notification', body)
 
