@@ -93,8 +93,14 @@ def _convert_macro_parameter(macro, mappings):
 
 @specs.parameter('group', yaqltypes.String())
 @specs.parameter('setting', yaqltypes.String())
-def config(group, setting):
-    return cfg.CONF[group][setting]
+@specs.parameter('read_as_file', bool)
+def config(group, setting, read_as_file=False):
+    config_value = cfg.CONF[group][setting]
+    if read_as_file:
+        with open(config_value) as target_file:
+            return target_file.read()
+    else:
+        return config_value
 
 
 @specs.parameter('setting', yaqltypes.String())

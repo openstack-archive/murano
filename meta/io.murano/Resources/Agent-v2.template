@@ -25,7 +25,7 @@ port = %RABBITMQ_PORT%
 ssl = %RABBITMQ_SSL%
 
 # Path to SSL CA certificate or empty to allow self signed server certificate
-ca_certs =
+ca_certs = '/etc/murano/certs/ca_certs'
 
 # RabbitMQ credentials. Fresh RabbitMQ installation has "guest" account with "guest" password.
 login = %RABBITMQ_USER%
