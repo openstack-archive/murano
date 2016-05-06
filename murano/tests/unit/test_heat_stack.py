@@ -205,7 +205,9 @@ class TestHeatStack(base.MuranoTestCase):
     @mock.patch(CLS_NAME + '._wait_state')
     @mock.patch(CLS_NAME + '._get_status')
     def test_heat_stack_tags_are_sent(self, status_get, wait_st):
-        """Assert that heat_stack `tags` parameter get push & with
+        """Assert heat_stack tags are sent
+
+        Assert that heat_stack `tags` parameter get push & with
         value from config parameter `stack_tags`.
         """
 

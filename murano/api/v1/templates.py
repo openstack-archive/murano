@@ -36,7 +36,9 @@ API_NAME = 'Templates'
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
-        """It lists the env templates associated to an tenant-id.
+        """Lists the env templates associated to an tenant-id
+
+        It lists the env templates associated to an tenant-id.
         :param request: The operation request.
         :return: the env template description list.
         """
@@ -67,7 +69,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create')
     def create(self, request, body):
-        """It creates the env template from the payload obtaining.
+        """Creates the env template from the payload
+
         This payload can contain just the template name, or include
         also service information.
         :param request: the operation request.
@@ -91,7 +94,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Show')
     def show(self, request, env_template_id):
-        """It shows the description about a template.
+        """It shows the description of a template
+
         :param request: the operation request.
         :param env_template_id: the env template ID.
         :return: the description of the env template.
@@ -113,7 +117,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Update')
     def update(self, request, env_template_id, body):
-        """It updates the description template.
+        """It updates the description template
+
         :param request: the operation request.
         :param env_template_id: the env template ID.
         :param body: the description to be updated
@@ -143,7 +148,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Delete')
     def delete(self, request, env_template_id):
-        """It deletes the env template.
+        """It deletes the env template
+
         :param request: the operation request.
         :param env_template_id: the template ID.
         """
@@ -158,6 +164,7 @@ class Controller(object):
 
     def has_services(self, template):
         """"It checks if the template has services
+
         :param template: the template to check.
         :return: True or False
         """
@@ -170,7 +177,8 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Create_environment')
     def create_environment(self, request, env_template_id, body):
-        """Creates environment and session from template.
+        """Creates environment and session from template
+
         :param request: operation request
         :param env_template_id: environment template ID
         :param body: the environment name
@@ -212,7 +220,9 @@ class Controller(object):
 
     @request_statistics.stats_count(API_NAME, 'Clone')
     def clone(self, request, env_template_id, body):
-        """It clones the env template from another env template
+        """Clones env template from another tenant
+
+        It clones the env template from another env template
         from other tenant.
         :param request: the operation request.
         :param env_template_id: the env template ID.

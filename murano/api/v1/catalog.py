@@ -81,11 +81,13 @@ def _get_filters(query_params):
 
 
 def _validate_body(body):
-    """Check multipart/form-data has two parts: text (which is json string and
-       should parsed into dictionary in serializer) and file, which stores as
-       cgi.FieldStorage instance. Also validate file size doesn't exceed
-       the limit: seek to the end of the file, get the position of EOF and
-       reset the file position to the beginning
+    """Check multipart/form-data has two parts
+
+    Check multipart/form-data has two parts: text (which is json string and
+    should parsed into dictionary in serializer) and file, which stores as
+    cgi.FieldStorage instance. Also validate file size doesn't exceed
+    the limit: seek to the end of the file, get the position of EOF and
+    reset the file position to the beginning
     """
     def check_file_size(f):
         mb_limit = CONF.murano.package_size_limit
@@ -142,7 +144,9 @@ class Controller(object):
             return value
 
     def update(self, req, body, package_id):
-        """List of allowed changes:
+        """List of allowed changes
+
+        List of allowed changes:
             { "op": "add", "path": "/tags", "value": [ "foo", "bar" ] }
             { "op": "add", "path": "/categories", "value": [ "foo", "bar" ] }
             { "op": "remove", "path": "/tags" }
@@ -208,8 +212,10 @@ class Controller(object):
         return result
 
     def upload(self, req, body=None):
-        """Upload new file archive for the new package
-           together with package metadata.
+        """Upload new file archive
+
+        Upload new file archive for the new package
+        together with package metadata.
         """
         policy.check("upload_package", req.context)
 
@@ -325,7 +331,9 @@ class Controller(object):
         return {'categories': [category.name for category in categories]}
 
     def list_categories(self, req):
-        """List all categories with pagination and sorting
+        """List all categories
+
+        List all categories with pagination and sorting
            Acceptable filter params:
            :param sort_keys: an array of fields used to sort the list
            :param sort_dir: the direction of the sort ('asc' or 'desc')

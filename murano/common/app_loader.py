@@ -25,7 +25,9 @@ CONF = cfg.CONF
 
 
 def _get_deployment_flavor():
-    """Retrieve the paste_deploy.flavor config item, formatted appropriately
+    """Retrieve the paste_deploy.flavor config item
+
+       Retrieve the paste_deploy.flavor config item, formatted appropriately
        for appending to the application name.
     """
     flavor = CONF.paste_deploy.flavor
@@ -45,7 +47,9 @@ def _get_paste_config_path():
 
 
 def _get_deployment_config_file():
-    """Retrieve the deployment_config_file config item, formatted as an
+    """Retrieve the deployment_config_file config item
+
+       Retrieve the deployment_config_file config item, formatted as an
        absolute pathname.
     """
     path = CONF.paste_deploy.config_file

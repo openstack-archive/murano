@@ -27,6 +27,7 @@ class PluginLoaderTest(base.MuranoTestCase):
     @mock.patch('stevedore.extension.Extension')
     def test_load_extension(self, ext):
         """Test PluginLoader.load_extension.
+
         Check that stevedore plugin loading creates instance
         of PackageDefinition class, new class are added to that package
         and name mapping between class and plugin are updated.
@@ -49,6 +50,7 @@ class PluginLoaderTest(base.MuranoTestCase):
 
     def test_cleanup_duplicates(self):
         """Test PluginLoader.cleanup_duplicates.
+
         Check loading two plugins with same 'Test1' classes
         inside initiates removing of all duplicated classes.
         """
@@ -73,6 +75,7 @@ class PluginLoaderTest(base.MuranoTestCase):
 
     def test_load_plugin_with_inappropriate_class_name(self):
         """Negative test load_extension.
+
         Check plugin that contains incorrect MuranoPL class name
         won't be loaded.
         """
@@ -88,6 +91,7 @@ class PluginLoaderTest(base.MuranoTestCase):
     @mock.patch('stevedore.extension.Extension')
     def test_is_plugin_enabled(self, ext):
         """Test is_plugin_enabled.
+
         Check that only plugins specified in config file can be loaded.
         """
         self.override_config('enabled_plugins',

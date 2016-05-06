@@ -49,8 +49,10 @@ class BaseWalkMigrationTestCase(object):
     ALEMBIC_CONFIG.murano_config = CONF
 
     def _configure(self, engine):
-        """For each type of repository we should do some of configure steps.
-        For migrate_repo we should set under version control our database.
+        """Repo and database configuration
+
+        For each type of repository we should do some configuration steps.
+        For migrate_repo we should set our database under version control.
         For alembic we should configure database settings. For this goal we
         should use oslo.config and openstack.commom.db.sqlalchemy.session with
         database functionality (reset default settings and session cleanup).
@@ -59,7 +61,9 @@ class BaseWalkMigrationTestCase(object):
                           enforce_type=True)
 
     def _alembic_command(self, alembic_command, engine, *args, **kwargs):
-        """Most of alembic command return data into output.
+        """Redefines alembic command data return setting
+
+        Most of alembic command return data into output.
         We should redefine this setting for getting info.
         """
         self.ALEMBIC_CONFIG.stdout = buf = io.StringIO()
@@ -72,7 +76,9 @@ class BaseWalkMigrationTestCase(object):
         return res
 
     def _up_and_down_versions(self):
-        """Since alembic version has a random algorithm of generation
+        """Store tuple of versions for successful testing
+
+        Since alembic version has a random algorithm of generation
         (SA-migrate has an ordered autoincrement naming) we should store
         a tuple of versions (version for upgrade and version for downgrade)
         for successful testing of migrations in up>down>up mode.
@@ -119,7 +125,9 @@ class BaseWalkMigrationTestCase(object):
                     self._migrate_down(engine, ver_down, next_version=ver_up)
 
     def _get_version_from_db(self, engine):
-        """For each type of migrate repo latest version from db
+        """Fetches latest version of migrate repo from database
+
+        For each type of migrate repo, the latest version from db
         will be returned.
         """
         conn = engine.connect()
@@ -131,7 +139,8 @@ class BaseWalkMigrationTestCase(object):
         return version
 
     def _migrate(self, engine, version, cmd):
-        """Base method for manipulation with migrate repo.
+        """Base method for manipulation with migrate repo
+
         It will upgrade or downgrade the actual database.
         """
 
@@ -159,7 +168,7 @@ class BaseWalkMigrationTestCase(object):
         return True
 
     def _migrate_up(self, engine, version, with_data=False):
-        """migrate up to a new version of the db.
+        """Migrate up to a new version of the db.
 
         We allow for data insertion and post checks at every
         migration version with special _pre_upgrade_### and

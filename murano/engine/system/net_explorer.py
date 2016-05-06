@@ -107,10 +107,11 @@ class NetworkExplorer(object):
         return router_id
 
     def get_available_cidr(self, router_id, net_id):
-        """Uses hash of network IDs to minimize the collisions:
-        different nets will attempt to pick different cidrs out of available
+        """Uses hash of network IDs to minimize the collisions
+
+        Different nets will attempt to pick different cidrs out of available
         range.
-        If the cidr is taken will pick another one
+        If the cidr is taken will pick another one.
         """
         taken_cidrs = self._get_cidrs_taken_by_router(router_id)
         id_hash = hash(net_id)

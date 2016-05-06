@@ -68,8 +68,9 @@ class CoreServices(object):
 
     @staticmethod
     def get_template_data(env_template_id, path):
-        """It obtains the data for the template. It includes
-        all the services. In case the path includes information
+        """It obtains the data for the template.
+
+        It includes all the services. In case the path includes information
         such as the env_template_id, the information provided will
         be related to the entity specified in the path
 
@@ -96,8 +97,8 @@ class CoreServices(object):
 
     @staticmethod
     def post_env_template_data(env_template_id, data, path):
-        """It stores the template data inside the template
-        description.
+        """It stores the template data inside the template description.
+
         :param env_template_id: The env_template_id to obtain the data
         :param data: the template description
         :param path: Id of service for which we checking status.
@@ -126,8 +127,8 @@ class CoreServices(object):
 
     @staticmethod
     def post_application_data(env_template_id, data, path):
-        """It stores the application data inside the template
-        description.
+        """It stores the application data inside the template description.
+
         :param env_template_id: The env_template_id to obtain the data
         :param data: the template description
         :param path: Id of service for which we checking status.
@@ -211,6 +212,7 @@ class CoreServices(object):
     @staticmethod
     def delete_env_template_data(env_template_id, path):
         """It deletes a template.
+
         :param env_template_id: The env_template_id to be deleted.
         :param path: The path to check.
         """

@@ -17,13 +17,15 @@ import six
 
 
 class TokenSanitizer(object):
-    """Helper class for cleaning some object from different passwords/tokens.
+    """Helper class for cleaning some object from different passwords/tokens
+
     Simply searches attribute with `look a like` name as one of
     the token and replace it value with message.
     """
     def __init__(self, tokens=('token', 'pass', 'trustid'),
                  message='*** SANITIZED ***'):
-        """Init method of TokenSanitizer.
+        """Init method of TokenSanitizer
+
         :param tokens:  iterable with tokens
         :param message: string by which each token going to be replaced
         """
@@ -48,6 +50,7 @@ class TokenSanitizer(object):
 
     def sanitize(self, obj):
         """Replaces each token found in object by message.
+
         :param obj: dict, list, tuple, object
         :return: Sanitized object
         """

@@ -197,7 +197,9 @@ class TestCongressRules(unittest.TestCase):
             ' "io.murano.apps.linux.Git")' in rules_str)
 
     def test_to_dictionary(self):
-        """If model contains object entry (not dict)
+        """test to_dictionary
+
+        If model contains object entry (not dict)
         we try to convert to dict using 'to_dictionary' method.
         """
 

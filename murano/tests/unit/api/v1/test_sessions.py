@@ -31,7 +31,9 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.fixture.conf(args=[])
 
     def test_cant_deploy_from_another_tenant(self):
-        """If user from one tenant uses session id and environment id
+        """Test to prevent deployment under another tenant user's creds
+
+        If user from one tenant uses session id and environment id
         of user from another tenant - he is not able to deploy
         the environment.
 

@@ -166,7 +166,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertEqual(2, len(result['packages']))
 
     def test_packages_filter_by_id(self):
-        """GET /catalog/packages with parameter "id" returns packages
+        """Test that packages are filtered by ID
+
+        GET /catalog/packages with parameter "id" returns packages
         filtered by id.
         """
         self._set_policy_rules(
@@ -201,7 +203,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertEqual(expected_package.id, found_package['id'])
 
     def test_packages_filter_by_name(self):
-        """GET /catalog/packages with parameter "name" returns packages
+        """Test that packages are filtered by name
+
+        GET /catalog/packages with parameter "name" returns packages
         filtered by name.
         """
         self._set_policy_rules(
@@ -234,7 +238,9 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
                          res_pkgname2.json['packages'][0]['name'])
 
     def test_packages_filter_by_type(self):
-        """GET /catalog/packages with parameter "type" returns packages
+        """Test that packages are filtered by type
+
+        GET /catalog/packages with parameter "type" returns packages
         filtered by type.
         """
         self._set_policy_rules(
@@ -565,8 +571,7 @@ This is a fake zip archive
             self.assertEqual(200, res.status_code)
 
     def test_add_category(self):
-        """Check that category added successfully
-        """
+        """Check that category added successfully"""
 
         self._set_policy_rules({'add_category': '@'})
         self.expect_policy_check('add_category')
@@ -590,8 +595,7 @@ This is a fake zip archive
         self.assertDictEqual(expected, processed_result)
 
     def test_delete_category(self):
-        """Check that category deleted successfully
-        """
+        """Check that category deleted successfully"""
 
         self._set_policy_rules({'delete_category': '@'})
         self.expect_policy_check('delete_category',
@@ -612,8 +616,7 @@ This is a fake zip archive
         self.assertEqual(200, processed_result.status_code)
 
     def test_add_category_failed_for_non_admin(self):
-        """Check that non admin user couldn't add new category
-        """
+        """Check that non admin user couldn't add new category"""
 
         self._set_policy_rules({'add_category': 'role:context_admin'})
         self.is_admin = False
@@ -628,8 +631,10 @@ This is a fake zip archive
         self.assertEqual(403, result.status_code)
 
     def test_add_long_category(self):
-        """Check that category, that contains more then 80 characters
-           fails to add
+        """Test that category name does not exceed 80 characters
+
+        Check that a category that contains more then 80 characters
+        fails to be added
         """
 
         self._set_policy_rules({'add_category': '@'})

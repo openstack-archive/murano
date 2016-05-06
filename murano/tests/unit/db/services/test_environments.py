@@ -24,7 +24,9 @@ from murano.tests.unit import base
 
 class TestEnvironmentServices(base.MuranoWithDBTestCase):
     def test_environment_ready_if_last_session_deployed_after_failed(self):
-        """If last session was deployed successfully and other session
+        """Test environment ready status
+
+        If last session was deployed successfully and other session
         was failed - environment must have status "ready".
 
         Bug: #1413260

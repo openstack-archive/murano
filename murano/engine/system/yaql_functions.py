@@ -133,7 +133,9 @@ def patch_(engine, obj, patch):
 
 def _int2base(x, base):
     """Converts decimal integers into another number base
-     from base-2 to base-36.
+
+    Converts decimal integers into another number base
+    from base-2 to base-36.
 
     :param x: decimal integer
     :param base: number base, max value is 36
@@ -158,8 +160,10 @@ def _int2base(x, base):
 
 
 def random_name():
-    """Replace '#' char in pattern with supplied number, if no pattern is
-       supplied generate short and unique name for the host.
+    """Replace '#' char in pattern with supplied number
+
+    Replace '#' char in pattern with supplied number. If no pattern is
+    supplied, generate a short and unique name for the host.
 
     :param pattern: hostname pattern
     :param number: number to replace with in pattern

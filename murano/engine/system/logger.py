@@ -29,6 +29,7 @@ inject_format = specs.inject(
 @dsl.name('io.murano.system.Logger')
 class Logger(object):
     """Logger object for MuranoPL.
+
     Instance of this object returned by 'logger' YAQL function
     and should not be instantiated directly
     """
@@ -89,10 +90,12 @@ class Logger(object):
     def _format_without_exceptions(self, format_function,
                                    message, args, kwargs):
         """Wrap YAQL function "format" to suppress exceptions
-        whose may be raised when message cannot be formatted
+
+        Wrap YAQL function "format" to suppress exceptions
+        that may be raised when message cannot be formatted
         due to invalid parameters provided
         We do not want to break program workflow
-        even formatting parameters are incorrect
+        even when formatting parameters are incorrect
         """
         try:
             message = format_function(message, *args, **kwargs)

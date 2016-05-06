@@ -43,7 +43,9 @@ def test_with_middleware(self, middleware, func, req, *args, **kwargs):
 
 
 class FakeLogMixin(object):
-    """Allow logs to be tested (rather than just disabling
+    """Allows logs to be tested
+
+    Allow logs to be tested (rather than just disabling
     logging. This is taken from heat
     """
     def setup_logging(self):
@@ -157,6 +159,8 @@ class ControllerTest(object):
     def _simple_request(self, path, params=None, method='GET',
                         user=DEFAULT_USER, tenant=DEFAULT_TENANT):
         """Returns a request with a fake but valid-looking context
+
+        Returns a request with a fake but valid-looking context
         and sets the request environment variables. If `params` is given,
         it should be a dictionary or sequence of tuples.
         """

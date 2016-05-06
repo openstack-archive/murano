@@ -33,9 +33,10 @@ MYSQL_CHARSET = 'utf8'
 
 
 def upgrade():
-    """It creates the table environment-template. The name
-    plus the tenant_id should be unique in the table, since each
-    tenant cannot duplicate template names.
+    """It creates the table environment-template.
+
+    The name plus the tenant_id should be unique in the table,
+    since each tenant cannot duplicate template names.
     """
 
     op.create_table(

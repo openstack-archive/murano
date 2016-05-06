@@ -109,7 +109,9 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         self.assertEqual(pkg_a_id + pkg_z_id, [r.id for r in res])
 
     def test_pagination_backwards(self):
-        """Creates 10 packages with unique names and iterates backwards,
+        """Tests backwards pagination
+
+        Creates 10 packages with unique names and iterates backwards,
         checking that package order is correct.
         """
         pkgs = []
@@ -149,7 +151,9 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         self.assertEqual(0, len(res))
 
     def test_pagination(self):
-        """Creates 10 packages with unique names and iterates through them,
+        """Tests that package order is correct
+
+        Creates 10 packages with unique names and iterates through them,
         checking that package order is correct.
         """
 
@@ -182,8 +186,10 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         self.assertEqual(0, len(res))
 
     def test_pagination_loops_through_names(self):
-        """Creates 10 packages with the same display name and iterates through them,
-        checking that package are not skipped.
+        """Tests that packages with same display name are not skipped
+
+        Creates 10 packages with the same display name and iterates
+        through them, checking that package are not skipped.
         """
 
         for dummy in range(10):
