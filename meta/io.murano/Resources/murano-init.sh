@@ -1,6 +1,10 @@
 #!/bin/sh
 
-ps cax | grep muranoagent > /dev/null
+if [ -d /opt/stack/venvs/murano-agent ] && [ ! -f /usr/local/bin/muranoagent ]; then
+    ln -s /opt/stack/venvs/murano-agent/bin/muranoagent /usr/local/bin/muranoagent
+fi
+
+which muranoagent > /dev/null
 if [ $? -eq 0 ]; then
   echo "murano-agent service exists"
 else
@@ -13,8 +17,3 @@ else
   chmod +x /etc/init.d/murano-agent
   pip install murano-agent
 fi
-
-
-
-
-
