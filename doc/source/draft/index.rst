@@ -91,6 +91,7 @@ Developing Applications
    appdev-guide/murano_bundles
    appdev-guide/app_migrating
    appdev-guide/app_unit_tests
+   appdev-guide/cinder_volume_supporting
    appdev-guide/examples
    appdev-guide/use_cases
    appdev-guide/app_debugging
