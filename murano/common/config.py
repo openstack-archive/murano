@@ -57,6 +57,10 @@ rabbit_opts = [
 
     cfg.StrOpt('ca_certs', default='',
                help='SSL cert file (valid only if SSL enabled).'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                     '"insecure" SSL connections to RabbitMQ'),
 ]
 
 heat_opts = [

@@ -61,6 +61,7 @@ Properties:
           virtual_host: $.string() or '/'
           ssl: $.bool() or false
           ca_certs: $.string() or ''
+          insecure: $.bool() or false
     Usage: Config
 
   region:

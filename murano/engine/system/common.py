@@ -29,6 +29,7 @@ def create_rmq_client():
         'port': rabbitmq.port,
         'virtual_host': rabbitmq.virtual_host,
         'ssl': rabbitmq.ssl,
-        'ca_certs': rabbitmq.ca_certs.strip() or None
+        'ca_certs': rabbitmq.ca_certs.strip() or None,
+        'insecure': rabbitmq.insecure
     }
     return mqclient.MqClient(**connection_params)

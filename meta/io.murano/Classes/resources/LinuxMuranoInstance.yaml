@@ -74,6 +74,7 @@ Methods:
             "%RABBITMQ_PASSWORD%": $rabbitMqParams.password
             "%RABBITMQ_VHOST%": $rabbitMqParams.virtual_host
             "%RABBITMQ_SSL%": str($rabbitMqParams.ssl).toLower()
+            "%RABBITMQ_INSECURE%": str($rabbitMqParams.insecure).toLower()
             "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
             "%RESULT_QUEUE%": $environment.agentListener.queueName()
         - $scriptReplacements:
