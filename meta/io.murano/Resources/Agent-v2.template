@@ -24,6 +24,9 @@ port = %RABBITMQ_PORT%
 # Use SSL for RabbitMQ connections (True or False)
 ssl = %RABBITMQ_SSL%
 
+# Do not verify SSL certificates
+insecure = %RABBITMQ_INSECURE%
+
 # Path to SSL CA certificate or empty to allow self signed server certificate
 ca_certs = '/etc/murano/certs/ca_certs'
 

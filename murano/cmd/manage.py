@@ -17,7 +17,6 @@
   This file is about to be deprecated, please use python-muranoclient.
   *** Deprecation warning ***
 """
-
 import sys
 import traceback
 

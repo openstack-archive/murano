@@ -25,13 +25,19 @@ kombu = patcher.import_patched('kombu')
 
 class MqClient(object):
     def __init__(self, login, password, host, port, virtual_host,
-                 ssl=False, ca_certs=None):
+                 ssl=False, ca_certs=None, insecure=False):
         ssl_params = None
 
-        if ssl is True:
+        if ssl:
+            cert_reqs = ssl_module.CERT_REQUIRED
+            if insecure:
+                if ca_certs:
+                    cert_reqs = ssl_module.CERT_OPTIONAL
+                else:
+                    cert_reqs = ssl_module.CERT_NONE
             ssl_params = {
                 'ca_certs': ca_certs,
-                'cert_reqs': ssl_module.CERT_REQUIRED
+                'cert_reqs': cert_reqs
             }
 
         self._connection = kombu.Connection(
