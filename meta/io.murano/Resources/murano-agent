@@ -8,7 +8,7 @@
 # Description:       murano-agent service
 ### END INIT INFO
 
-SCRIPT="/usr/bin/muranoagent --config-dir /etc/murano"
+SCRIPT="/usr/local/bin/muranoagent --config-dir /etc/murano"
 RUNAS=root
 
 PIDFILE=/var/run/murano.pid
