@@ -42,16 +42,13 @@ Clone the components required to build an image to that directory:
     cd $GITDIR
     git clone git://git.openstack.org/openstack/murano
     git clone git://git.openstack.org/openstack/murano-agent
-    git clone git://git.openstack.org/openstack/diskimage-builder
 
 
-Checkout a change request that allows to build an image using disk image builder
-completely installed to virtual environment:
+Install diskimage-builder
 
 .. code-block:: console
 
-    cd $GITDIR/diskimage-builder
-    git fetch https://review.openstack.org/openstack/diskimage-builder refs/changes/02/168002/2 && git checkout FETCH_HEAD
+    sudo pip install diskimage-builder
 
 
 Install additional packages required by disk image builder:
@@ -67,13 +64,12 @@ Export paths where additional dib elements are located:
 
     export ELEMENTS_PATH=$GITDIR/murano/contrib/elements:$GITDIR/murano-agent/contrib/elements
 
-Add passenv = ELEMENTS_PATH at testenv:venv section in tox.ini.
-And build Ubuntu-based image with the murano agent:
+
+Build Ubuntu-based image with the murano agent:
 
 .. code-block:: console
 
-    cd $GITDIR/diskimage-builder
-    tox -e venv -- disk-image-create vm ubuntu murano-agent -o ../murano-agent.qcow2
+    disk-image-create vm ubuntu murano-agent -o murano-agent.qcow2
 
 
 If you need a Fedora based image, replace 'ubuntu' to 'fedora' in the last command.
