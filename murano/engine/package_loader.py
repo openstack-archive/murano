@@ -119,7 +119,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                 return packages[0]
             else:
                 LOG.debug('There are no packages matching filter '
-                          '{filter}'.format(optst=filter_opts))
+                          '{opts}'.format(opts=filter_opts))
                 raise LookupError()
         except muranoclient_exc.HTTPException:
             LOG.debug('Failed to get package definition from repository')
