@@ -16,7 +16,7 @@ always independent from one another.
 An environment is a single unit of deployment. This means that you deploy not
 an application but an environment that contains one or multiple applications.
 
-Using OpenStack Dashboard you can easily perform such actions with an
+Using OpenStack dashboard you can easily perform such actions with an
 environment as creating, editing, reviewing, deploying, and others.
 
 Create an environment
@@ -24,7 +24,7 @@ Create an environment
 
 To create an environment, perform the following steps:
 
-#. In OpenStack Dashboard, navigate to Murano > Application Catalog > Environments.
+#. In OpenStack dashboard, navigate to Murano > Application Catalog > Environments.
 
 #. On the :guilabel:`Environments` page, click the :guilabel:`Add New` button.
 
@@ -51,7 +51,7 @@ Edit an environment
 
 You can edit the name of an environment. For this, perform the following steps:
 
-#. In OpenStack Dashboard, navigate to Murano > Application Catalog > Environments.
+#. In OpenStack dashboard, navigate to Murano > Application Catalog > Environments.
 
 #. Position your mouse pointer over the environment name and click the
    appeared pencil icon.
