@@ -21,7 +21,9 @@ from murano.tests.unit import base
 
 
 class HackingTestCase(base.MuranoTestCase):
-    """This class tests the hacking checks in murano.hacking.checks by passing
+    """Tests the hacking checks in murano.hacking.checks
+
+    This class tests the hacking checks in murano.hacking.checks by passing
     strings to the check methods like the pep8/flake8 parser would. The parser
     loops over each line in the file and then passes the parameters to the
     check method. The parameter names in the check method dictate what type of

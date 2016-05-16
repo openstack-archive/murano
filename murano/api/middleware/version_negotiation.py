@@ -63,7 +63,9 @@ class VersionNegotiationFilter(wsgi.Middleware):
         return None
 
     def _match_version_string(self, subject):
-        """Given a string, tries to match a major and/or
+        """Tries to match major and/or minor version
+
+           Given a string, tries to match a major and/or
            minor version number.
 
            :param subject: The string to check
@@ -77,7 +79,9 @@ class VersionNegotiationFilter(wsgi.Middleware):
         return major_version
 
     def _pop_path_info(self, req):
-        """'Pops' off the next segment of PATH_INFO, returns the popped
+        """Returns the popped off next segment
+
+           'Pops' off the next segment of PATH_INFO, returns the popped
            segment. Do NOT push it onto SCRIPT_NAME.
         """
         path = req.path_info

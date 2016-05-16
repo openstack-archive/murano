@@ -71,6 +71,7 @@ def _authorize_package(package, context, allow_public=False):
 
 def package_get(package_id, context):
     """Return package details
+
        :param package_id: ID or name of a package, string
        :returns: detailed information about package, dict
     """
@@ -112,6 +113,7 @@ def _existing_tag(tag_name, session=None):
 
 def _get_tags(tag_names, session=None):
     """Return existing tags object or create new ones
+
        :param tag_names: name of tags to associate with package, list
        :returns: list of Tag objects to associate with package, list
     """
@@ -219,6 +221,7 @@ def _do_remove(package, change):
 
 def _get_packages_for_category(session, category_id):
     """Return detailed list of packages, belonging to the provided category
+
     :param session:
     :param category_id:
     :return: list of dictionaries, containing id, name and package fqn
@@ -241,6 +244,7 @@ def _get_packages_for_category(session, category_id):
 @oslo_db_api.wrap_db_retry(max_retries=5, retry_on_deadlock=True)
 def package_update(pkg_id_or_name, changes, context):
     """Update package information
+
        :param changes: parameters to update
        :returns: detailed information about new package, dict
     """
@@ -275,6 +279,7 @@ def package_update(pkg_id_or_name, changes, context):
 def package_search(filters, context, manage_public=False,
                    limit=None, catalog=False):
     """Search packages with different filters
+
       Catalog param controls the base query creation. Catalog queries
       only search packages a user can deploy. Non-catalog queries searches
       packages a user can edit.
@@ -377,6 +382,7 @@ def package_search(filters, context, manage_public=False,
 @oslo_db_api.wrap_db_retry(max_retries=5, retry_on_deadlock=True)
 def package_upload(values, tenant_id):
     """Upload a package with new application
+
        :param values: parameters describing the new package
        :returns: detailed information about new package, dict
     """
@@ -436,6 +442,7 @@ def package_delete(package_id, context):
 
 def category_get(category_id, session=None, packages=False):
     """Return category details
+
        :param category_id: ID of a category, string
        :returns: detailed information about category, dict
     """

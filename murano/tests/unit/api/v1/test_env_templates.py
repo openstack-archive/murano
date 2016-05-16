@@ -150,7 +150,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(result.status_code, 403)
 
     def test_list_public_env_templates_default(self):
-        """Create an template, test list public with no
+        """Test listing public templates when there aren't any
+
+        Create a template; test list public with no
         public templates.
         """
         self._set_policy_rules(
@@ -171,7 +173,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertFalse(0, len(json.loads(result.body)))
 
     def test_list_private_env_templates(self):
-        """Create a public template and a private template,
+        """Test listing private templates
+
+        Create a public template and a private template;
         test list private templates.
         """
         self._set_policy_rules(
@@ -197,7 +201,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(1, len(json.loads(result.body)['templates']))
 
     def test_list_env_templates(self):
-        """Create an template, test list public with no
+        """Test listing public templates when there aren't any
+
+        Create a template; test list public with no
         public templates.
         """
         self._set_policy_rules(
@@ -224,7 +230,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(2, len(json.loads(result.body)['templates']))
 
     def test_list_env_templates_with_different_tenant(self):
-        """Create two template in two different tenants,
+        """Test listing public template from another tenant
+
+        Create two template in two different tenants;
         test list public template from another tenant.
         """
         self._set_policy_rules(
@@ -296,9 +304,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(400, result.status_code)
 
     def test_missing_env_template(self):
-        """Check that a missing environment template
-        results in an HTTPNotFound.
-        """
+        """Check that a missing env template results in an HTTPNotFound."""
         self._set_policy_rules(
             {'show_env_template': '@'}
         )
@@ -630,7 +636,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(self.uuids[3], body_returned['environment_id'])
 
     def test_create_env_with_template_no_services(self):
-        """Test that environment is created and session with template
+        """Test env and session creation without services
+
+        Test that environment is created and session with template
         without services.
         """
         self.fixture = self.useFixture(config_fixture.Config())

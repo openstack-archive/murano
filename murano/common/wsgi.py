@@ -175,7 +175,9 @@ class Service(service.Service):
 
 
 class Middleware(object):
-    """Base WSGI middleware wrapper. These classes require an application to be
+    """Base WSGI middleware wrapper.
+
+    These classes require an application to be
     initialized that will be called next.  By default the middleware will
     simply call its wrapped app, or you can override __call__ to customize its
     behavior.
@@ -207,7 +209,9 @@ class Middleware(object):
 
 
 class Debug(Middleware):
-    """Helper class that can be inserted into any WSGI application chain
+    """Helper class to get info about request and response
+
+    Helper class that can be inserted into any WSGI application chain
     to get information about the request and response.
     """
 
@@ -230,7 +234,9 @@ class Debug(Middleware):
 
     @staticmethod
     def print_generator(app_iter):
-        """Iterator that prints the contents of a wrapper string iterator
+        """Prints the contents of a wrapper string iterator
+
+        Iterator that prints the contents of a wrapper string iterator
         when iterated.
         """
         print(("*" * 40) + " BODY")
@@ -273,7 +279,9 @@ class Router(object):
 
     @webob.dec.wsgify
     def __call__(self, req):
-        """Route the incoming request to a controller based on self.map.
+        """Route the incoming request to a controller
+
+           Route the incoming request to a controller based on self.map.
            If no match, return a 404.
         """
         return self._router
@@ -281,7 +289,9 @@ class Router(object):
     @staticmethod
     @webob.dec.wsgify
     def _dispatch(req):
-        """Called by self._router after matching the incoming request to
+        """Looks for routed WSGI app's response
+
+           Called by self._router after matching the incoming request to
            a route and putting the information into req.environ.
            Either returns 404 or the routed WSGI app's response.
         """
@@ -394,6 +404,7 @@ class Resource(object):
 
     def __init__(self, controller, deserializer=None, serializer=None):
         """Resource init.
+
         :param controller: object that implement methods created by routes lib
         :param deserializer: object that supports webob request deserialization
                              through controller-like actions
@@ -534,6 +545,7 @@ class JSONDictSerializer(DictSerializer):
 class XMLDictSerializer(DictSerializer):
     def __init__(self, metadata=None, xmlns=None):
         """Default XML request body serialization.
+
         :param metadata: information needed to deserialize xml into
                          a dictionary.
         :param xmlns: XML namespace to include with serialized xml
@@ -971,6 +983,7 @@ class JSONPatchDeserializer(TextDeserializer):
 class XMLDeserializer(TextDeserializer):
     def __init__(self, metadata=None):
         """XMLDeserializer.
+
         :param metadata: information needed to deserialize xml into
                          a dictionary.
         """

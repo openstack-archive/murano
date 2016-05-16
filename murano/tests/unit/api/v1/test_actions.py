@@ -130,7 +130,9 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(expected_result, response.json)
 
     def test_get_result_not_found(self, _):
-        """If task does not exists, it should be handled correctly
+        """Return 404 on null task
+
+        If task does not exist, it should be handled correctly
         and API should return 404.
         """
         expected_environment_id = 'test_environment'

@@ -261,8 +261,10 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(expected, json.loads(result.body))
 
     def test_update_environment_with_invalid_name(self):
-        """Check that update an invalid env name results in
-        an HTTPBadResquest.
+        """Test that invalid env name returns HTTPBadRequest
+
+        Check that update an invalid env name results in
+        an HTTPBadRequest.
         """
         self._set_policy_rules(
             {'update_environment': '@'}
@@ -303,7 +305,9 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(409, result.status_code)
 
     def test_too_long_environment_name_update(self):
-        """Check that update a too long env name results in
+        """Test updating too long env name
+
+        Check that update a too long env name results in
         an HTTPBadResquest.
         """
         self._set_policy_rules(

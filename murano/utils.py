@@ -192,6 +192,7 @@ class ReaderWriterLock(lockutils.ReaderWriterLock):
     @contextlib.contextmanager
     def write_lock(self, blocking=True):
         """Context manager that grants a write lock.
+
         Will wait until no active readers. Blocks readers after acquiring.
         Raises a ``RuntimeError`` if an active reader attempts to acquire
         a lock.

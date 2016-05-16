@@ -32,7 +32,9 @@ API_NAME = 'Services'
 
 
 def normalize_path(f):
-    """It normalizes the path obtaining in the requests.
+    """Normalizes request path
+
+       It normalizes the path obtaining in the requests.
        It is used in all the operations in the controller
     """
     @func.wraps(f)
@@ -52,7 +54,9 @@ class Controller(object):
     @utils.verify_env_template
     @normalize_path
     def index(self, request, env_template_id, path):
-        """It obtains all the services/applications associated to
+        """Obtains services/applications for a template
+
+           It obtains all the services/applications associated to
            a template
            :param request: The operation request.
            :param env_template_id: The environment template id with
@@ -76,7 +80,8 @@ class Controller(object):
     @utils.verify_env_template
     @normalize_path
     def show(self, request, env_template_id, path):
-        """It shows the service description.
+        """It shows the service description
+
         :param request: The operation request.
         :param env_template_id: the env template ID where the service
         belongs to.
@@ -100,7 +105,8 @@ class Controller(object):
     @utils.verify_env_template
     @normalize_path
     def post(self, request, env_template_id, path, body):
-        """It adds a service into a template.
+        """It adds a service into a template
+
         :param request: The operation request.
         :param env_template_id: the env template ID where the
         service belongs to.
@@ -130,6 +136,7 @@ class Controller(object):
     def put(self, request, env_template_id, path, body):
 
         """It updates a service into a template.
+
         :param request: The operation request.
         :param env_template_id: the env template ID where the service
         belongs to.
@@ -159,6 +166,7 @@ class Controller(object):
     @normalize_path
     def delete(self, request, env_template_id, path):
         """It deletes a service into a template.
+
         :param request: The operation request.
         :param env_template_id: the env template ID where
         the service belongs to.

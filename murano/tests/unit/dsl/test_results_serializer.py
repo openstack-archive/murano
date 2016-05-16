@@ -38,7 +38,9 @@ class TestResultsSerializer(test_case.DslTestCase):
         self._runner = self.new_runner(self._root_class)
 
     def _test_data_in_section(self, name, serialized):
-        """Test that a section of Object Model has expected structure and
+        """Test that Model -> Load -> Serialize = Model
+
+        Test that a section of Object Model has expected structure and
            property values that are equal to those originally loaded
            (e.g. that Model -> Load -> Serialize = Model)
 
@@ -62,7 +64,9 @@ class TestResultsSerializer(test_case.DslTestCase):
                              'sampleClass']['stringProperty'])
 
     def test_results_serialize(self):
-        """Test that serialized Object Model has both Objects and ObjectsCopy
+        """Test that serialized contains same values and headers
+
+        Test that serialized Object Model has both Objects and ObjectsCopy
         sections and they both contain the same property values and object
         headers. Note, that Objects section may contain additional designer
         metadata and information on available actions that is not needed in
@@ -77,7 +81,9 @@ class TestResultsSerializer(test_case.DslTestCase):
         self._test_data_in_section('ObjectsCopy', serialized)
 
     def test_actions(self):
-        """Test that information on actions can be invoked on each MuranoPL
+        """Test that information on actions can be invoked
+
+        Test that information on actions can be invoked on each MuranoPL
         object are persisted into object header ('?' key) during serialization
         of Objects section of Object Model
 
@@ -93,7 +99,9 @@ class TestResultsSerializer(test_case.DslTestCase):
                 matchers.StartsWith('test'))
 
     def test_attribute_serialization(self):
-        """Test that attributes produced by MuranoPL code are persisted in
+        """Test that attributes produced by MuranoPL code are persisted
+
+        Test that attributes produced by MuranoPL code are persisted in
         dedicated section of Object Model. Attributes are values that are
         stored in special key-value storage that is private to each class.
         Classes can store state data there. Attributes are persisted across
@@ -112,7 +120,9 @@ class TestResultsSerializer(test_case.DslTestCase):
             serialized['Attributes'][0])
 
     def test_attribute_deserialization(self):
-        """Test that attributes that are put into Attributes section of
+        """Test that attributes are available
+
+        Test that attributes that are put into Attributes section of
         Object Model become available to appropriate MuranoPL classes
         """
 
@@ -125,7 +135,9 @@ class TestResultsSerializer(test_case.DslTestCase):
             runner2.on(self._class1).testAttributes('John'))
 
     def test_value_deserialization(self):
-        """Test serialization of arbitrary values that can be returned
+        """Test serialization of arbitrary values
+
+        Test serialization of arbitrary values that can be returned
         from action methods
         """
 

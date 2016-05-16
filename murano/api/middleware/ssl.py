@@ -27,7 +27,9 @@ LOG = logging.getLogger(__name__)
 
 
 class SSLMiddleware(wsgi.Middleware):
-    """A middleware that replaces the request wsgi.url_scheme environment
+    """Replaces the request wsgi.url_scheme environment
+
+    A middleware that replaces the request wsgi.url_scheme environment
     variable with the value of HTTP header configured in
     secure_proxy_ssl_header if exists in the incoming request.
     This is useful if the server is behind a SSL termination proxy.

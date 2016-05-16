@@ -153,12 +153,17 @@ class ModelPolicyEnforcer(object):
 
     @staticmethod
     def _parse_simulation_result(query, env_id, results):
-        """Transforms list of strings in format
-            ['predeploy_errors("env_id_1", "obj_id_1", "message1")',
-            'predeploy_errors("env_id_2", "obj_id_2", "message2")']
-        to list of strings with message only filtered to provided
+        """Transforms the list of results
+
+        Transforms a list of strings in format:
+
+        ['predeploy_errors("env_id_1", "obj_id_1", "message1")',
+        'predeploy_errors("env_id_2", "obj_id_2", "message2")']
+
+        to a list of strings with message only filtered to provided
         env_id (e.g. 'env_id_1'):
-            ['message2']
+
+        ['message2']
         """
 
         messages = []

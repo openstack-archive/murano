@@ -20,7 +20,9 @@ from murano.dsl import helpers
 
 
 class CongressRulesManager(object):
-    """Converts murano model to list of congress rules:
+    """Converts murano model to list of congress rules
+
+    The Congress rules are:
         - murano:objects+(env_id, obj_id, type_name)
         - murano:properties+(obj_id, prop_name, prop_value)
         - murano:relationships+(source, target, name)

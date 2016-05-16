@@ -26,7 +26,9 @@ from murano.packages import exceptions as pkg_exc
 
 
 class HTTPExceptionDisguise(Exception):
-    """Disguises HTTP exceptions so they can be handled by the webob fault
+    """Disguises HTTP exceptions
+
+    Disguises HTTP exceptions so they can be handled by the webob fault
     application in the wsgi pipeline.
     """
 

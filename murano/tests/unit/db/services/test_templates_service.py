@@ -73,7 +73,9 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
         self.assertEqual(fixture.env_template_desc, template_des)
 
     def test_get_template_no_exists(self):
-        """Check obtaining information about a template which
+        """Check obtaining information about a non-existent template
+
+        Check obtaining information about a template which
         does not exist.
         """
         self.assertRaises(ValueError,

@@ -39,6 +39,7 @@ class EnvironmentServices(object):
     @staticmethod
     def get_environments_by(filters):
         """Returns list of environments
+
            :param filters: property filters
            :return: Returns list of environments
         """

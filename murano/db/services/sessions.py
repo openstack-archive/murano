@@ -73,7 +73,9 @@ class SessionServices(object):
 
     @staticmethod
     def validate(session):
-        """Session is valid only if no other session for same.
+        """Validates session
+
+        Session is valid only if no other session for same.
         environment was already deployed on in deploying state,
 
         :param session: Session for validation
@@ -101,7 +103,9 @@ class SessionServices(object):
 
     @staticmethod
     def deploy(session, environment, unit, token):
-        """Prepares environment for deployment and send deployment command to
+        """Prepares and deployes environment
+
+        Prepares environment for deployment and send deployment command to
         orchestration engine
 
         :param session: session that is going to be deployed

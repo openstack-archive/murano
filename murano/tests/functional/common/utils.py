@@ -48,7 +48,9 @@ def ignored(*exceptions):
 
 
 def memoize(f):
-    """Decorator, which saves result of a decorated function
+    """Saves result of decorated function to cache
+
+    Decorator, which saves result of a decorated function
     to cache.
     TTL for cache is 1800 sec
 

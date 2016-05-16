@@ -30,7 +30,9 @@ class TraverseHelper(object):
 
     @staticmethod
     def get(path, source):
-        """Provides the ability to traverse a data source made up of any
+        """Provides the ability to traverse a data source
+
+        Provides the ability to traverse a data source made up of any
         combination of lists and dicts. Has simple rules for selecting item of
         the list:
 
