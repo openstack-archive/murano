@@ -207,13 +207,39 @@ class MuranoDslExecutor(object):
     def _canonize_parameters(arguments_scheme, args, kwargs,
                              method_name, receiver):
         arg_names = list(arguments_scheme.keys())
-        parameter_values = utils.filter_parameters_dict(kwargs)
-        if len(args) > len(arg_names):
-            raise yaql_exceptions.NoMatchingMethodException(
-                method_name, receiver)
+        parameter_values = {}
+        varargs_arg = None
+        vararg_values = []
+        kwargs_arg = None
+        kwarg_values = {}
+        for name, definition in six.iteritems(arguments_scheme):
+            if definition.usage == dsl_types.MethodArgumentUsages.VarArgs:
+                varargs_arg = name
+                parameter_values[name] = vararg_values
+            elif definition.usage == dsl_types.MethodArgumentUsages.KwArgs:
+                kwargs_arg = name
+                parameter_values[name] = kwarg_values
+
         for i, arg in enumerate(args):
-            name = arg_names[i]
-            parameter_values[name] = arg
+            name = None if i >= len(arg_names) else arg_names[i]
+            if name is None or name in (varargs_arg, kwargs_arg):
+                if varargs_arg:
+                    vararg_values.append(arg)
+                else:
+                    raise yaql_exceptions.NoMatchingMethodException(
+                        method_name, receiver)
+            else:
+                parameter_values[name] = arg
+
+        for name, value in six.iteritems(utils.filter_parameters_dict(kwargs)):
+            if name in arguments_scheme and name not in (
+                    varargs_arg, kwargs_arg):
+                parameter_values[name] = value
+            elif kwargs_arg:
+                kwarg_values[name] = value
+            else:
+                raise yaql_exceptions.NoMatchingMethodException(
+                    method_name, receiver)
         return tuple(), parameter_values
 
     def load(self, data):

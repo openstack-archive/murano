@@ -57,6 +57,13 @@ class MethodUsages(object):
     StaticMethods = {Static, Extension}
 
 
+class MethodArgumentUsages(object):
+    Standard = 'Standard'
+    VarArgs = 'VarArgs'
+    KwArgs = 'KwArgs'
+    All = {Standard, VarArgs, KwArgs}
+
+
 class MuranoType(object):
     pass
 

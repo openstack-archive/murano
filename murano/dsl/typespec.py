@@ -15,7 +15,6 @@
 import weakref
 
 from murano.dsl import dsl_types
-from murano.dsl import exceptions
 from murano.dsl import helpers
 from murano.dsl import type_scheme
 
@@ -24,13 +23,8 @@ class Spec(object):
     def __init__(self, declaration, container_type):
         self._container_type = weakref.ref(container_type)
         self._contract = type_scheme.TypeScheme(declaration['Contract'])
-        self._usage = declaration.get('Usage') or dsl_types.PropertyUsages.In
-        self._default = declaration.get('Default')
         self._has_default = 'Default' in declaration
-        if self._usage not in dsl_types.PropertyUsages.All:
-            raise exceptions.DslSyntaxError(
-                'Unknown type {0}. Must be one of ({1})'.format(
-                    self._usage, ', '.join(dsl_types.PropertyUsages.All)))
+        self._default = declaration.get('Default')
 
     def transform(self, value, this, owner, context, default=None):
         if default is None:
@@ -64,7 +58,3 @@ class Spec(object):
     @property
     def has_default(self):
         return self._has_default
-
-    @property
-    def usage(self):
-        return self._usage
