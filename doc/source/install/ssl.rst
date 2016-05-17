@@ -96,6 +96,7 @@ Just set *ssl* parameter to True to enable ssl.
     password = guest
     virtual_host = /
     ssl = True
+    insecure = False
 
 If you want to configure Murano Agent in a different way change
 the default template. It can be found in Murano Core Library, located at *http://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Resources/Agent-v1.template*. Take
