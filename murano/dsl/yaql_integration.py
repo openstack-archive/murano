@@ -335,6 +335,7 @@ def _create_basic_mpl_stub(murano_method, reserve_params, payload,
     fd = specs.FunctionDefinition(
         murano_method.name, payload, is_function=False, is_method=True)
 
+    i = 0
     for i, (name, arg_spec) in enumerate(
             six.iteritems(murano_method.arguments_scheme), reserve_params + 1):
         p = specs.ParameterDefinition(
@@ -342,6 +343,13 @@ def _create_basic_mpl_stub(murano_method, reserve_params, payload,
             position=i, default=dsl.NO_VALUE)
         check_first_arg = False
         fd.parameters[name] = p
+
+    fd.parameters['*'] = specs.ParameterDefinition(
+        '*',
+        value_type=yaqltypes.PythonType(object, nullable=True),
+        position=i)
+    fd.parameters['**'] = specs.ParameterDefinition(
+        '**', value_type=yaqltypes.PythonType(object, nullable=True))
 
     fd.set_parameter(specs.ParameterDefinition(
         '__context', yaqltypes.Context(), 0))

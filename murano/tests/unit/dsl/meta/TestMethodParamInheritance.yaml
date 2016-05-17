@@ -1,0 +1,30 @@
+Name: TestMethodParamInheritanceBase
+
+Methods:
+  testRunWithParam:
+    Body:
+      - $this.method1('foo')
+
+  testRunWithoutParam:
+    Body:
+      - $this.method2()
+
+  method1:
+    Arguments:
+      - foo:
+          Contract: $.string().notNull()
+  method2:
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestMethodParamInheritanceDerived
+Extends: TestMethodParamInheritanceBase
+
+Methods:
+  method1:
+
+  method2:
+    Arguments:
+      - foo:
+          Contract: $.string().notNull()
