@@ -82,7 +82,7 @@ First of all make sure that all additional components are installed.
 
 
 
-All tests are kept in *sanity_check.py* and divided into 5 test suites:
+All tests are kept in *sanity_check.py* and divided into 10 test suites:
 
   * TestSuiteSmoke - verification of Murano panels; check, that could be open without errors.
   * TestSuiteEnvironment - verification of all operations with environment are finished successfully.
@@ -90,6 +90,11 @@ All tests are kept in *sanity_check.py* and divided into 5 test suites:
   * TestSuiteFields - verification of custom fields validators.
   * TestSuitePackages - verification of operations with Murano packages.
   * TestSuiteApplications - verification of Application Catalog page and of application creation process.
+
+  * TestSuiteAppsPagination - verification of apps pagination in case of many applications installed.
+  * TestSuiteRepository - verification of importing packages and bundles.
+  * TestSuitePackageCategory - verification of main operations with categories.
+  * TestSuiteCategoriesPagination - verification of categories pagination in case of many categories created.
 
 To specify which tests/suite to run, pass test/suite names on the command line:
 
