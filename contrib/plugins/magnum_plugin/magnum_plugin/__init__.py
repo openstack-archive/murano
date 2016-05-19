@@ -15,10 +15,10 @@
 import cfg
 import time
 
+import magnumclient
+from magnumclient import client
 from murano.common import auth_utils
 from murano.dsl import session_local_storage
-
-import magnumclient
 from oslo_config import cfg as config
 
 CONF = config.CONF
@@ -57,7 +57,7 @@ class MagnumClient(object):
         params = auth_utils.get_session_client_parameters(
             service_type='container', region=region, conf=CONF,
             session=session)
-        return magnumclient.client.Client(**params)
+        return client.Client(**params)
 
     def create_baymodel(self, args):
         baymodel = self._client.baymodels.create(**args)
