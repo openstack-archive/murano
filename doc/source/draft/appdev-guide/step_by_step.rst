@@ -100,7 +100,8 @@ Format
 
 Specifies the version of the format for manifest.yaml to track
 the syntax changes. Format key presents in each manifest file.
-Currently, ``1.0`` is the only available version:
+Currently, available versions are: `1.0`, `1.1`, `1.2` and `1.3`.
+For more information, refer to :ref:`format documentation<ManifestFormat>`.
 
 .. code-block:: yaml
 

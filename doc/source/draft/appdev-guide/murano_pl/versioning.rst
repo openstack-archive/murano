@@ -36,7 +36,7 @@ If no version is specified, the package version is *0.0.0*.
    dashboard: only the last one is shown if the multiple versions are present.
 
 Package requirements
-````````````````````
+--------------------
 
 In some cases, packages may require other packages for their work.
 You need to list such packages in the `Require` section of the manifest
@@ -133,6 +133,39 @@ catalog and the classes from both classes are never interfere. In other words,
 engine always tries to minimize the number of versions in use for
 the single package to avoid conflicts and unnecessary package downloads.
 However, it also means that packages not always get the latest requirements.
+
+.. _ManifestFormat:
+
+Manifest format versioning
+--------------------------
+
+The manifests of packages are versioned using *Format* attribute. Currently,
+available versions are: `1.0`, `1.1`, `1.2` and `1.3`.
+The versioning of manifest format is directly connected with YAQL and version
+of murano itself.
+
+The short description of versions:
+
+==================  ===========================================================
+  Format version                             Description
+==================  ===========================================================
+      **1.0**         supported by all versions of murano. Use this version
+                      if you are planning to use *yaql 0.2* in your
+                      application
+
+      **1.1**         supported since Liberty. *yaql 0.2* is supported in
+                      legacy mode. Specify it, if you want to use features
+                      from *yaql 0.2* and *yaql 1.0.0* at the same time in
+                      your application.
+
+      **1.2**         supported since Liberty. Do not use *yaql 0.2* in
+                      applications with this format.
+
+      **1.3**         supported since Mitaka. *yaql 1.1* is available. It's
+                      recommended specifying this format in new applications,
+                      where compatibility with older versions of murano is not
+                      required.
+==================  ===========================================================
 
 UI forms versioning
 -------------------
