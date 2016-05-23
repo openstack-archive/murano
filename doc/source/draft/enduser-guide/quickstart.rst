@@ -20,7 +20,7 @@ To upload an application to the catalog:
 
 #. Log in to the OpenStack dashboard.
 
-#. Navigate to :menuselection:`Murano > Manage > Packages`.
+#. Navigate to :menuselection:`Applications > Manage > Packages`.
 
 #. Click on the :guilabel:`Import Package` button:
 
@@ -56,8 +56,8 @@ To upload an application to the catalog:
       :width: 600 px
       :alt: Import Package dialog 3
 
-#. Now your application is available from :menuselection:`Murano >
-   Application Catalog > Applications` page.
+#. Now your application is available from :menuselection:`Applications >
+   Catalog > Browse` page.
 
 
 Deploy an application
@@ -68,7 +68,7 @@ and deploy the environment:
 
 #. Log in to the OpenStack dashboard.
 
-#. Navigate to :menuselection:`Murano > Application Catalog > Applications`.
+#. Navigate to :menuselection:`Applications > Catalog > Browse`.
 
 #. Click on the :guilabel:`Quick Deploy` button from the required application
    from the list. Lets deploy Apache HTTP Server, for example:
@@ -91,7 +91,7 @@ and deploy the environment:
       :alt: Configure Application dialog 2
 
 #. Now the Apache HTTP Server application is successfully added to the newly
-   created ``quick-env-1`` environment.
+   created ``quick-env-4`` environment.
    Click the :guilabel:`Deploy This Environment` button
    to start the deployment:
 
@@ -102,7 +102,7 @@ and deploy the environment:
    It may take some time for the environment to deploy. Wait until the status
    is changed from ``Deploying`` to ``Ready``.
 
-#. Navigate to `Murano > Application Catalog > Environments` to view the
+#. Navigate to `Applications > Catalog > Environments` to view the
    details.
 
 
@@ -113,7 +113,7 @@ To delete an application that belongs to the environment:
 
 #. Log in to the OpenStack dashboard.
 
-#. Navigate to :menuselection:`Murano > Application Catalog > Environments`.
+#. Navigate to :menuselection:`Applications > Catalog > Environments`.
 
 #. Click on the name of the environment to view its details, which include
    components, topology, and deployment history.

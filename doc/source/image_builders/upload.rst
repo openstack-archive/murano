@@ -74,7 +74,7 @@ where:
 .. note::
 
   Existing images could be marked in a simple way in the horizon UI with the murano dashboard installed.
-  Navigate to *Murano -> Manage -> Images -> Mark Image* and fill up a form:
+  Navigate to *Applications -> Manage -> Images -> Mark Image* and fill up a form:
 
   *  **Image** - ws-2012-std
   *  **Title** - My Prepared Image

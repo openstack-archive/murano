@@ -75,7 +75,7 @@ Application package could be composed manually. Follow the 5 steps below.
 
 * *Step 5. Create a zip archive, containing the specified files:* ``template.yaml``, ``manifest.yaml``, ``logo.png``
 
-`Applications` page looks like:
+`Browse` page looks like:
 
 .. image:: /draft/appdev-guide/hotpackages/chef_server.png
 

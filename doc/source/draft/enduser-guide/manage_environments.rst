@@ -24,7 +24,7 @@ Create an environment
 
 To create an environment, perform the following steps:
 
-#. In OpenStack dashboard, navigate to Murano > Application Catalog > Environments.
+#. In OpenStack dashboard, navigate to Applications > Catalog > Environments.
 
 #. On the :guilabel:`Environments` page, click the :guilabel:`Add New` button.
 
@@ -51,7 +51,7 @@ Edit an environment
 
 You can edit the name of an environment. For this, perform the following steps:
 
-#. In OpenStack dashboard, navigate to Murano > Application Catalog > Environments.
+#. In OpenStack dashboard, navigate to Applications > Catalog > Environments.
 
 #. Position your mouse pointer over the environment name and click the
    appeared pencil icon.
@@ -67,7 +67,7 @@ This section provides a general overview of an environment, its structure,
 possible statuses, and actions. An environment groups applications together.
 An application that is added to an environment is called a component.
 
-To see an environment status, navigate to :menuselection:`Murano > Application Catalog > Environments`.
+To see an environment status, navigate to :menuselection:`Applications > Catalog > Environments`.
 Environments may have one of the following statuses:
 
 * **Ready to configure**. When the environment is new and contains no

@@ -59,7 +59,7 @@ If any problems occur, first of all verify that:
 * Check that MySQL or PostgreSQL (depending of what you provided in
   connection string) Python modules are installed on the system.
 
-**Murano panel is not seen in horizon**
+**Applications panel is not seen in horizon**
 
 * Make sure that :file:`_50_murano.py` file is copied to
   ``openstack-dashboard/local/enabled`` directory and there is no other file,
@@ -68,7 +68,7 @@ If any problems occur, first of all verify that:
 * Check that murano data is not inserted twice in the settings file and as a
   plugin.
 
-**Murano panel can be browsed, but 'Unable to communicate to murano-api server.' appears**
+**Applications panel can be browsed, but 'Unable to communicate to murano-api server.' appears**
 
 If you have murano registered in keystone, verify the endpoint URL is valid
 and service has *application-catalog* name. If you don't want to register

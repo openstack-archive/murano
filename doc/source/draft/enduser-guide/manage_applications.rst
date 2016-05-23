@@ -36,7 +36,7 @@ Perform the following steps to import an application package from a
 .zip file:
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Manage > Packages`.
+   :menuselection:`Applications > Manage > Packages`.
 #. Click the :guilabel:`Import Package` button on the top right of the
    page.
 
@@ -88,7 +88,8 @@ murano applications repository:
   package to see its full name.
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Manage > Packages`.
+   :menuselection:`Applications > Manage > Packages`.
+
 #. Click the :guilabel:`Import Package` button on the top right of the
    page.
 
@@ -129,7 +130,8 @@ Perform the following steps to import a bundle of applications:
   desired bundle to see its full name.
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Manage > Packages`.
+   :menuselection:`Applications > Manage > Packages`.
+
 #. Click the :guilabel:`Import Bundle` button on the top right of the
    page.
 
@@ -152,8 +154,8 @@ When you have imported many applications and want to quickly find
 a required one, you can filter them by category, tags and words that
 the application name or description contains:
 
-In OpenStack dashboard, navigate to :menuselection:`Murano > Application Catalog
-> Applications`.
+In OpenStack dashboard, navigate to :menuselection:`Applications > Catalog
+> Browse`.
 
 The page is divided into two sections:
 
@@ -182,7 +184,7 @@ description, use the rightmost filter:
    Tags can be specified during the import of an application package.
 
 For example, there is an application that has the word
-*community-developed* in description. Let's find it with the filter.
+*document-oriented* in description. Let's find it with the filter.
 The following screenshot shows you the result.
 
  .. image:: figures/app_filter_example.png
@@ -195,8 +197,7 @@ Delete an application package
 To delete an application package from the catalog, please perform
 the following steps:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Murano > Manage > Package
-   Definitions`.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications > Manage > Packages.
 
 #. Select a package or multiple packages you want to delete and click
    :guilabel:`Delete Packages`.
@@ -222,7 +223,7 @@ From environment details page
 -----------------------------
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Application catalog > Environments`.
+   :menuselection:`Applications > Catalog > Environments`.
 
 #. Find the environment you want to manage and click
    :guilabel:`Manage Components`, or simply click on the environment's
@@ -270,9 +271,9 @@ the Environment Components page.
    settings may vary from app to app and are predefined by the
    application author.
 
-#. To add more applications, check :guilabel:`Add more applications
-   to the environment`, then click :guilabel:`Create` and repeat the
-   steps above. Otherwise, just click :guilabel:`Create`.
+#. To add more applications, check :guilabel:`Continue application adding`,
+   then click :guilabel:`Create` and repeat the steps above. Otherwise, just
+   click :guilabel:`Create`.
 
    .. image:: figures/add_to_env/add_more_apps.png
       :alt: Configure Application dialog: Add more applications
@@ -287,7 +288,7 @@ From applications catalog page
 ------------------------------
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Application catalog > Applications`.
+   :menuselection:`Applications > Catalog > Browse`.
 
 #. On the Applications catalog page, use one of the following methods:
 
@@ -368,8 +369,8 @@ following one of the options below:
 
 * Deploy an environment from the Environments page
 
-  #. In OpenStack dashboard, navigate to :menuselection:`Murano >
-     Application Catalog > Environments`.
+  #. In OpenStack dashboard, navigate to :menuselection:`Applications >
+     Catalog > Environments`.
 
   #. Select :guilabel:`Deploy Environment` from the Actions drop-down list
      next to the environment you want to deploy.
@@ -384,8 +385,8 @@ following one of the options below:
 
 * Deploy an environment from the Environment Components page
 
-  #. In OpenStack dashboard, navigate to :menuselection:`Murano >
-     Application Catalog > Environments`.
+  #. In OpenStack dashboard, navigate to :menuselection:`Applications >
+     Catalog > Environments`.
 
   #. Click the name of the environment you want to deploy.
 
@@ -422,7 +423,7 @@ a component:
 To browse a component details, perform the following steps:
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Application Catalog > Environments`.
+   :menuselection:`Applications > Catalog > Environments`.
 
 #. Click the name of the required environment.
 
@@ -447,7 +448,7 @@ an elastic diagram showing the relationship between a component and the
 infrastructure it runs on. To view the topology:
 
 #. In OpenStack dashboard, navigate to
-   :menuselection:`Murano > Application Catalog > Environments`.
+   :menuselection:`Applications > Catalog > Environments`.
 
 #. Click the name of the necessary environment.
 
@@ -501,8 +502,8 @@ To get detailed information on a deployment, use:
 To see the log of a particular deployment, proceed with the steps
 below:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
-   Catalog > Environments`.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications > Catalog >
+   Environments`.
 
 #. Click the name of the required environment.
 
@@ -522,8 +523,8 @@ below:
 
 To see the latest deployment log, proceed with the steps below:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
-   Catalog > Environments`.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications > Catalog >
+   Environments`.
 
 #. Click the name of the required environment.
 
@@ -536,8 +537,8 @@ To see the latest deployment log, proceed with the steps below:
 To see the logs of a particular component of an environment, proceed with the
 steps below:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Murano > Application
-   Catalog > Environments`.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications > Catalog >
+   Environments`.
 
 #. Click the name of the required environment.
 
@@ -554,8 +555,8 @@ Delete an application
 
 To delete an application that belongs to the environment:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Murano >
-   Application Catalog > Environments`.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications >
+   Catalog > Environments`.
 
 #. Click on the name of the environment you want to delete an
    application from.
