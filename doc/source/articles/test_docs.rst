@@ -98,7 +98,7 @@ All tests are kept in *sanity_check.py* and divided into 10 test suites:
 
 To specify which tests/suite to run, pass test/suite names on the command line:
 
-  * to run all tests: ``nosetests sanity_check.p``
+  * to run all tests: ``nosetests sanity_check.py``
   * to run a single suite: ``nosetests sanity_check.py:<test suite name>``
   * to run a single test: ``nosetests sanity_check.py:<test suite name>.<test name>``
 
