@@ -143,7 +143,8 @@ class CloudifyToscaPackage(package_base.PackageBase):
             data = yaml.safe_load(blueprint)
             return data.get('inputs') or {}, data.get('outputs') or {}
 
-    def _generate_application_ui_section(self, inputs):
+    def _generate_application_ui_section(self, inputs, package_name=None,
+                                         package_version=None):
         section = {
             key: YAQL(
                 '$.appConfiguration.' + key) for key in six.iterkeys(inputs)
@@ -153,6 +154,10 @@ class CloudifyToscaPackage(package_base.PackageBase):
                 'type': self.full_name
             }
         })
+        if package_name:
+            section['?']['package'] = package_name
+        if package_version:
+            section['?']['classVersion'] = package_version
         return section
 
     @staticmethod
@@ -176,7 +181,8 @@ class CloudifyToscaPackage(package_base.PackageBase):
         inputs, outputs = self._get_inputs_outputs()
         ui = {
             'Version': '2.2',
-            'Application': self._generate_application_ui_section(inputs),
+            'Application': self._generate_application_ui_section(
+                inputs, self.full_name, str(self.version)),
             'Forms': self._generate_form_ui_section(inputs)
         }
         return yaml.dump(ui, Dumper=Dumper, default_style='"')
