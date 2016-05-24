@@ -287,6 +287,8 @@ class Controller(object):
             with tempfile.NamedTemporaryFile() as tempf:
                 for chunk in blob_data:
                     tempf.write(chunk)
+                tempf.file.flush()
+                os.fsync(tempf.file.fileno())
                 with load_utils.load_from_file(tempf.name, target_dir=None,
                                                drop_dir=True) as pkg:
                     return pkg.ui
