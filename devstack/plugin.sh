@@ -243,6 +243,13 @@ function configure_service_broker {
     iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
 }
 
+function prepare_core_library() {
+    cd $MURANO_DIR/meta/io.murano && zip -r io.murano.zip .
+}
+
+function remove_core_library_zip() {
+    rm -f $MURANO_DIR/meta/io.murano/io.murano.zip
+}
 
 # init_murano() - Initialize databases, etc.
 function init_murano() {
@@ -252,10 +259,27 @@ function init_murano() {
     recreate_database murano utf8
 
     $MURANO_BIN_DIR/murano-db-manage --config-file $MURANO_CONF_FILE upgrade
-    $MURANO_BIN_DIR/murano-manage --config-file $MURANO_CONF_FILE import-package $MURANO_DIR/meta/io.murano
 }
 
+function setup_core_library() {
+    prepare_core_library
+    if is_murano_backend_glare; then
+        MURANO_PACKAGES_SERVICE='glare'
+    else
+        MURANO_PACKAGES_SERVICE='murano'
+    fi
+    murano --os-username admin \
+           --os-password $ADMIN_PASSWORD \
+           --os-tenant-name admin \
+           --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
+           --os-region-name $REGION_NAME \
+           --murano-url http://127.0.0.1:8082 \
+           --murano-packages-service $MURANO_PACKAGES_SERVICE \
+           package-import $MURANO_DIR/meta/io.murano/io.murano.zip \
+           --is-public
+    remove_core_library_zip
 
+}
 # install_murano() - Collect source and prepare
 function install_murano() {
     install_murano_pythonclient
@@ -503,7 +527,7 @@ if is_service_enabled murano; then
         if is_service_enabled murano-cfapi; then
             start_service_broker
         fi
-
+        setup_core_library
         configure_murano_tempest_plugin
 
         # Give Murano some time to Start
