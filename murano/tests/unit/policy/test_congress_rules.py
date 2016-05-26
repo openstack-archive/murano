@@ -87,7 +87,7 @@ class TestCongressRules(unittest.TestCase):
             os.path.dirname(inspect.getfile(self.__class__)), file_name)
 
         with open(model_file) as stream:
-            return yaml.load(stream)
+            return yaml.safe_load(stream)
 
     def _create_rules_str(self, model_file, package_loader=None):
         model = self._load_file(model_file)
