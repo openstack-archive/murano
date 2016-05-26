@@ -249,7 +249,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         """
         component = service.to_dict()
         component = json.dumps(component)
-        return yaml.load(component)
+        return yaml.safe_load(component)
 
     @classmethod
     def get_service_id(cls, service):

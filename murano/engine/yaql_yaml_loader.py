@@ -43,7 +43,7 @@ def get_loader(version):
                 node.end_mark.line + 1,
                 node.end_mark.column + 1)
 
-        class MuranoPlYamlConstructor(yaml.constructor.Constructor):
+        class MuranoPlYamlConstructor(yaml.constructor.SafeConstructor):
             def construct_yaml_map(self, node):
                 data = MuranoPlDict()
                 data.source_file_position = build_position(node)
@@ -51,7 +51,7 @@ def get_loader(version):
                 value = self.construct_mapping(node)
                 data.update(value)
 
-        class YaqlYamlLoader(yaml.Loader, MuranoPlYamlConstructor):
+        class YaqlYamlLoader(yaml.SafeLoader, MuranoPlYamlConstructor):
             pass
 
         YaqlYamlLoader.add_constructor(
@@ -60,7 +60,7 @@ def get_loader(version):
 
         # workaround for PyYAML bug: http://pyyaml.org/ticket/221
         resolvers = {}
-        for k, v in yaml.Loader.yaml_implicit_resolvers.items():
+        for k, v in yaml.SafeLoader.yaml_implicit_resolvers.items():
             resolvers[k] = v[:]
         YaqlYamlLoader.yaml_implicit_resolvers = resolvers
 
