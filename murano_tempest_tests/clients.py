@@ -23,7 +23,7 @@ from murano_tempest_tests.services.service_broker import service_broker_client
 
 class Manager(clients.Manager):
     def __init__(self,
-                 credentials=common_creds.get_configured_credentials(
+                 credentials=common_creds.get_configured_admin_credentials(
                      'identity_admin'),
                  service=None):
         super(Manager, self).__init__(credentials, service)
@@ -37,4 +37,4 @@ class Manager(clients.Manager):
 class AltManager(Manager):
     def __init__(self, service=None):
         super(AltManager, self).__init__(
-            common_creds.get_configured_credentials('alt_user'), service)
+            common_creds.get_configured_admin_credentials('alt_user'), service)

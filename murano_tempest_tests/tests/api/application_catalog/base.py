@@ -47,7 +47,7 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
         cls.dynamic_cred = dynamic_creds.DynamicCredentialProvider(
             identity_version=CONF.identity.auth_version,
             name=cls.__name__, admin_role=cls.admin_role,
-            admin_creds=common_creds.get_configured_credentials(
+            admin_creds=common_creds.get_configured_admin_credentials(
                 'identity_admin'))
         if type_of_creds == 'primary':
             creds = cls.dynamic_cred.get_primary_creds()
