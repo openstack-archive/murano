@@ -422,7 +422,7 @@ DATABASES = {
 }
 SESSION_ENGINE = 'django.contrib.sessions.backends.db'
 MURANO_REPO_URL = '$MURANO_REPOSITORY_URL'
-MURANO_USE_GLARE = '$murano_use_glare'
+MURANO_USE_GLARE = $murano_use_glare
 #-------------------------------------------------------------------------------
 #MURANO_CONFIG_SECTION_END
 
