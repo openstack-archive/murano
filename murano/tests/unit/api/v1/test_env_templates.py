@@ -668,13 +668,35 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(self.uuids[4], body_returned['session_id'])
         self.assertEqual(self.uuids[3], body_returned['environment_id'])
 
+    def test_update_service_in_template(self):
+        """Test the service is updated in the environment template"""
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'update_service_env_template': '@'}
+        )
+        updated_env = "UPDATED_ENV"
+        env_template = self._create_env_template_services()
+        self.expect_policy_check('update_service_env_template')
+        env_template["name"] = updated_env
+
+        req = self._put('/templates/{0}/services/{1}'.
+                        format(self.uuids[0], "service_id"),
+                        jsonutils.dump_as_bytes(env_template))
+        result = req.get_response(self.api)
+        self.assertIsNotNone(result)
+        self.assertEqual(200, result.status_code)
+        body_returned = jsonutils.loads(result.body)
+        self.assertEqual(updated_env, body_returned['name'])
+
     def test_mallformed_env_body(self):
         """Check that an illegal temp name results in an HTTPClientError."""
         self._set_policy_rules(
             {'create_env_template': '@',
              'create_environment': '@'}
         )
-        self. _create_env_template_no_service()
+        self._create_env_template_no_service()
 
         self.expect_policy_check('create_environment',
                                  {'env_template_id': self.uuids[0]})
@@ -770,11 +792,12 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     "port": "8080",
                     "?": {
                         "type": "io.murano.apps.apache.Tomcat",
-                        "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+                        "id": "service_id"
                     }
                 }
             ]
         }
 
         req = self._post('/templates', jsonutils.dump_as_bytes(body))
-        req.get_response(self.api)
+        result = req.get_response(self.api)
+        return result.json

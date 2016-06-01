@@ -21,6 +21,7 @@ from webob import exc
 from murano.api.v1 import request_statistics
 from murano.common.helpers import token_sanitizer
 from murano.common.i18n import _
+from murano.common import policy
 from murano.common import wsgi
 from murano.db.services import core_services
 from murano import utils
@@ -144,16 +145,16 @@ class Controller(object):
         :param body: the information about the service
         :return: the service description updated.
         """
+        policy.check('update_service_env_template', request.context)
         LOG.debug('Applications:Put <EnvTempId: {templ_id}, Path: {path}, '
                   'Body: {body}>'.format(templ_id=env_template_id,
                                          body=body,
                                          path=path))
 
-        put_data = core_services.CoreServices.put_data
-        session_id = request.context.session
+        put_data = core_services.CoreServices.put_application_data
 
         try:
-            result = put_data(env_template_id, session_id, body, path)
+            result = put_data(env_template_id, body, path)
         except (KeyError, ValueError):
             msg = _('The template does not exist {templ_id}').format(
                 templ_id=env_template_id)

@@ -141,6 +141,10 @@ class API(wsgi.Router):
                        conditions={'method': ['POST']}, path='')
         mapper.connect('/templates/{env_template_id}/services/{path:.*?}',
                        controller=applications_resource,
+                       action='put',
+                       conditions={'method': ['PUT']}, path='')
+        mapper.connect('/templates/{env_template_id}/services/{path:.*?}',
+                       controller=applications_resource,
                        action='delete',
                        conditions={'method': ['DELETE']}, path='')
 
