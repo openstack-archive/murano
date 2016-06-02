@@ -29,12 +29,12 @@ def _get_keystone_admin_parameters(scoped):
         'auth_url': cfg.CONF.keystone_authtoken.auth_uri.replace('v2.0', 'v3'),
         'username': cfg.CONF.keystone_authtoken.admin_user,
         'password': cfg.CONF.keystone_authtoken.admin_password,
-        'user_domain_name': 'default'
+        'user_domain_name': "Default"
     }
     if scoped:
         settings.update({
             'project_name': cfg.CONF.keystone_authtoken.admin_tenant_name,
-            'project_domain_name': 'default'
+            'project_domain_name': "Default"
         })
     return settings
 
