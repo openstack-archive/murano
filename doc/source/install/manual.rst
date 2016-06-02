@@ -311,12 +311,21 @@ Install Murano Dashboard
 
     This step enables murano panel in horizon dashboard.
 
-    .. code-block:: console
+    * For the OpenStack installations prior to the Newton release, run::
 
-        cp ../murano-dashboard/muranodashboard/local/_50_murano.py openstack_dashboard/local/enabled/
-    ..
+      .. code-block:: console
 
-#.  Prepare local settings.
+          cp ../murano-dashboard/muranodashboard/local/_50_murano.py openstack_dashboard/local/enabled/
+      ..
+
+    * For the Newton (and later) OpenStack installations, run::
+
+      .. code-block:: console
+
+          cp ../murano-dashboard/muranodashboard/local/enabled/_50_murano.py openstack_dashboard/local/enabled/
+      ..
+
+#.  Prepare horizon local settings.
 
     To get more information, check out official
     `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
@@ -345,21 +354,33 @@ Install Murano Dashboard
         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
     ..
 
-    Also, it's better to change default session backend from  browser cookies to database to avoid
-    issues with forms during creating applications:
+    * For the OpenStack installations prior to the Newton release:
 
-    .. code-block:: python
+      Also, it's better to change default session backend from browser cookies
+      to database to avoid issues with forms during creating applications:
 
-        ...
-        DATABASES = {
-            'default': {
-            'ENGINE': 'django.db.backends.sqlite3',
-            'NAME': 'murano-dashboard.sqlite',
-            }
-        }
+      .. code-block:: python
 
-        SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-    ..
+          ...
+          DATABASES = {
+              'default': {
+              'ENGINE': 'django.db.backends.sqlite3',
+              'NAME': 'murano-dashboard.sqlite',
+              }
+          }
+
+          SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+      ..
+
+    * For the OpenStack installations of the Newton (and later) version:
+
+      Copy murano dashboard specific settings file to horizon dashboard.
+
+      .. code-block:: console
+
+          cp ../murano-dashboard/muranodashboard/local/local_settings.d/_50_murano.py openstack_dashboard/local/local_settings.d/
+
+      ..
 
     If you do not plan to get murano service from keystone application catalog,
     provide where murano-api service is running:
