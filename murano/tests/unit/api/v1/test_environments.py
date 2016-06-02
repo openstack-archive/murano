@@ -87,12 +87,13 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected = {'tenant_id': self.tenant,
                     'id': 'environment_id',
                     'name': 'my_env',
+                    'description_text': 'description',
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1],
                     }
 
-        body = {'name': 'my_env'}
+        body = {'name': 'my_env', 'description_text': 'description'}
         req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(expected, jsonutils.loads(result.body))
@@ -220,6 +221,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
             id='12345',
             name='my-env',
             version=0,
+            description_text='',
             created=fake_now,
             updated=fake_now,
             tenant_id=self.tenant,
@@ -379,6 +381,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'id': env_id,
                     'name': 'my-env',
                     'version': 0,
+                    'description_text': '',
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1],
                     'acquired_by': None,
@@ -425,6 +428,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'id': env_id,
                     'name': 'my-env',
                     'version': 0,
+                    'description_text': '',
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1],
                     'acquired_by': sess_id,

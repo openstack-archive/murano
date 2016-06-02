@@ -65,6 +65,7 @@ class Environment(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(255), nullable=False)
     tenant_id = sa.Column(sa.String(36), nullable=False)
+    description_text = sa.Column(sa.String(), nullable=False, default='')
     version = sa.Column(sa.BigInteger, nullable=False, default=0)
     description = sa.Column(st.JsonBlob(), nullable=False, default={})
 
@@ -96,6 +97,7 @@ class EnvironmentTemplate(Base, TimestampMixin):
                    default=uuidutils.generate_uuid)
     name = sa.Column(sa.String(255), nullable=False)
     tenant_id = sa.Column(sa.String(36), nullable=False)
+    description_text = sa.Column(sa.String(), nullable=False, default='')
     version = sa.Column(sa.BigInteger, nullable=False, default=0)
     description = sa.Column(st.JsonBlob(), nullable=False, default={})
     is_public = sa.Column(sa.Boolean, default=False)
