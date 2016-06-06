@@ -517,7 +517,13 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
     def _get_stack(cls, environment_id):
 
         for stack in cls.heat_client().stacks.list():
-            if environment_id in stack.description:
+            stack_description = (
+                cls.heat_client().stacks.get(stack.id).description)
+            if not stack_description:
+                err_msg = ("Stack {0} description is empty".format(stack.id))
+                LOG.error(err_msg)
+                raise RuntimeError(err_msg)
+            if environment_id in stack_description:
                 return stack
 
     @classmethod
