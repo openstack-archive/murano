@@ -37,6 +37,9 @@ Methods:
       - ignoreErrors:
           Contract: $.bool().notNull()
           Default: false
+      - timeout:
+          Contract: $.int()
+          Default: null
 
     Body:
       - $resources: new(sys:Resources)
@@ -52,7 +55,7 @@ Methods:
             captureStdout => $captureStdout,
             verifyExitcode => not $ignoreErrors
           ))
-      - Return: $agent.call($template, $resources)
+      - Return: $agent.call($template, $resources, $timeout)
 
   putFile:
     Usage: Static
@@ -69,6 +72,9 @@ Methods:
       - ignoreErrors:
           Contract: $.bool().notNull()
           Default: false
+      - timeout:
+          Contract: $.int()
+          Default: null
 
     Body:
       - $data: base64encode($fileContent)
@@ -84,4 +90,4 @@ Methods:
             planName => $planName,
             verifyExitcode => not $ignoreErrors
           ))
-      - Return: $agent.call($template, $resources)
+      - Return: $agent.call($template, $resources, $timeout)

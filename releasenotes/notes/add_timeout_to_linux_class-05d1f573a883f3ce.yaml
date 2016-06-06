@@ -1,0 +1,4 @@
+---
+
+features:
+  - timeout parameter was added to the methods of Linux class.
