@@ -1,0 +1,15 @@
+Please see https://alembic.readthedocs.org/en/latest/index.html for general documentation
+
+To create alembic migrations use:
+$ murano-cfapi-db-manage revision --message --autogenerate
+
+Stamp db with most recent migration version, without actually running migrations
+$ murano-cfapi-db-manage stamp --revision head
+
+Upgrade can be performed by:
+$ murano-cfapi-db-manage upgrade
+$ murano-cfapi-db-manage upgrade --revision head
+
+Downgrading db:
+$ murano-cfapi-db-manage downgrade
+$ murano-cfapi-db-manage downgrade --revision base

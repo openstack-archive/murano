@@ -12,6 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+__all__ = [
+    'list_opts',
+    'list_cfapi_opts',
+]
 
 import copy
 import itertools
@@ -19,6 +23,7 @@ import itertools
 import oslo_service.sslutils
 
 import murano.api.middleware.ssl
+import murano.common.cf_config
 import murano.common.config
 import murano.common.wsgi
 
@@ -48,6 +53,10 @@ _opt_lists = [
     ])),
 ]
 
+_cfapi_opt_lists = [
+    ('cfapi', murano.common.cf_config.cfapi_opts),
+]
+
 _opt_lists.extend(oslo_service.sslutils.list_opts())
 
 
@@ -68,3 +77,8 @@ def list_opts():
     :returns: a list of (group_name, opts) tuples
     """
     return [(g, copy.deepcopy(o)) for g, o in _opt_lists]
+
+
+def list_cfapi_opts():
+    """Return a list of oslo_config options available in service broker."""
+    return [(g, copy.deepcopy(o)) for g, o in _cfapi_opt_lists]
