@@ -177,12 +177,13 @@ class Controller(object):
                                          path=path))
         delete_data = core_services.CoreServices.delete_env_template_data
         try:
-            delete_data(env_template_id, path)
+            result = delete_data(env_template_id, path)
         except (KeyError, ValueError):
             msg = _('The template does not exist {templ_id}').format(
                 templ_id=env_template_id)
             LOG.exception(msg)
             raise exc.HTTPNotFound(msg)
+        return result
 
 
 def create_resource():

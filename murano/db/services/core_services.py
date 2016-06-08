@@ -228,3 +228,4 @@ class CoreServices(object):
 
         utils.TraverseHelper.remove(path, tmp_description)
         save_description(tmp_description, env_template_id)
+        return tmp_description

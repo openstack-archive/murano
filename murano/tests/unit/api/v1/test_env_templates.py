@@ -588,6 +588,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._post('/templates', json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
+        self.assertEqual(1, len(json.loads(result.body)['services']))
 
         req = self._get('/templates/%s/services' % self.uuids[0])
         result = req.get_response(self.api)
@@ -603,7 +604,9 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._delete('/templates/' + self.uuids[0] +
                            '/services/' + service_id)
         result = req.get_response(self.api)
+
         self.assertEqual(200, result.status_code)
+        self.assertEqual(0, len(json.loads(result.body)['services']))
 
         req = self._get('/templates/' + self.uuids[0] +
                         '/services/' + service_id)
@@ -677,6 +680,41 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                          self.uuids[0], json.dumps(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
+
+    def test_delete_notexisting_service(self):
+        """Check deleting a not existing service, return a 404 error."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'delete_env_application': '@'}
+        )
+        self.expect_policy_check('create_env_template')
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        body = {
+            "name": "mytemplate",
+            "services": [
+                {
+                    "name": "tomcat",
+                    "port": "8080",
+                    "?": {
+                        "type": "io.murano.apps.apache.Tomcat",
+                        "id": "ID1"
+                    }
+                }
+            ]
+        }
+
+        req = self._post('/templates', json.dumps(body))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        self.assertEqual(1, len(json.loads(result.body)['services']))
+
+        req = self._delete('/templates/{0}/services/{1}'.format(self.uuids[0],
+                                                                "NO_EXIST"))
+        result = req.get_response(self.api)
+        self.assertEqual(404, result.status_code)
 
     def test_create_env_notexisting_templatebody(self):
         """Check that an illegal temp name results in an HTTPClientError."""
