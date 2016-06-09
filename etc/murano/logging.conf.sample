@@ -47,7 +47,7 @@ qualname = eventlet.wsgi.server
 [logger_messaging]
 level = WARNING
 handlers = stderr
-qualname = oslo.messaginga
+qualname = oslo.messaging
 
 [handler_null]
 class = oslo_log.handlers.NullHandler
