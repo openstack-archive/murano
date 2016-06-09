@@ -6,7 +6,7 @@ Application developer's cookbook
 
 If you have not written murano packages before,
 start from the existing :ref:`Step-by-Step <step-by-step>` guide. It contains
-general information about murano packages development process. Additionaly,
+general information about murano packages development process. Additionally,
 see the :ref:`MuranoPL reference <murano-pl>`.
 
 Load applications from a local directory

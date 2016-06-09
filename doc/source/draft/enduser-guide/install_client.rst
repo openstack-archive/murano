@@ -7,7 +7,7 @@ Install and use the murano client
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The Application Catalog project provides a command-line client,
-python-muiranoclient, which enables you to access the project API.
+python-muranoclient, which enables you to access the project API.
 For prerequisites, see `Install the prerequisite software <http://docs.openstack.org/cli-reference/common/cli_install_openstack_command_line_clients.html#install-the-prerequisite-software>`_.
 
 To install the latest murano CLI client, run the following command in your
