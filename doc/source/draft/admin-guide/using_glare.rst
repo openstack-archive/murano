@@ -64,7 +64,7 @@ DevStack installation
 #. Restart the ``apache2`` service.
    Now ``murano-dashboard`` will retrieve packages from Glare.
 
-#. Log in to Dashboard and navigate to :menuselection:`Murano > Manage > Packages`
+#. Log in to Dashboard and navigate to :menuselection:`Applications > Manage > Packages`
    to view the empty list of packages.
    Alternatively, use the :command:`murano` command.
 
