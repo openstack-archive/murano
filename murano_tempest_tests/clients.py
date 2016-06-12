@@ -13,20 +13,22 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest import clients
 from tempest.common import credentials_factory as common_creds
+from tempest import config
+from tempest.lib import auth
 
 from murano_tempest_tests.services.application_catalog \
     import application_catalog_client
 from murano_tempest_tests.services.service_broker import service_broker_client
 
+CONF = config.CONF
 
-class Manager(clients.Manager):
+
+class Manager(object):
     def __init__(self,
                  credentials=common_creds.get_configured_admin_credentials(
-                     'identity_admin'),
-                 service=None):
-        super(Manager, self).__init__(credentials, service)
+                     'identity_admin')):
+        self.auth_provider = get_auth_provider(credentials)
         self.service_broker_client = service_broker_client.ServiceBrokerClient(
             self.auth_provider)
         self.application_catalog_client = \
@@ -38,3 +40,25 @@ class AltManager(Manager):
     def __init__(self, service=None):
         super(AltManager, self).__init__(
             common_creds.get_configured_admin_credentials('alt_user'), service)
+
+
+def get_auth_provider(credentials, scope='project'):
+    default_params = {
+        'disable_ssl_certificate_validation':
+            CONF.identity.disable_ssl_certificate_validation,
+        'ca_certs': CONF.identity.ca_certificates_file,
+        'trace_requests': CONF.debug.trace_requests
+    }
+
+    if isinstance(credentials, auth.KeystoneV3Credentials):
+        auth_provider_class, auth_url = \
+            auth.KeystoneV3AuthProvider, CONF.identity.uri_v3
+    else:
+        auth_provider_class, auth_url = \
+            auth.KeystoneV2AuthProvider, CONF.identity.uri
+
+    _auth_provider = auth_provider_class(credentials, auth_url,
+                                         scope=scope,
+                                         **default_params)
+    _auth_provider.set_auth()
+    return _auth_provider

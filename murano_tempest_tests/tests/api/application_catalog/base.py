@@ -16,7 +16,7 @@
 from tempest.common import credentials_factory as common_creds
 from tempest.common import dynamic_creds
 from tempest import config
-from tempest import test
+from tempest.lib import base
 
 from murano_tempest_tests import clients
 from murano_tempest_tests import utils
@@ -24,8 +24,18 @@ from murano_tempest_tests import utils
 CONF = config.CONF
 
 
-class BaseApplicationCatalogTest(test.BaseTestCase):
+class BaseApplicationCatalogTest(base.BaseTestCase):
     """Base test class for Murano Service Broker API tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseApplicationCatalogTest, cls).setUpClass()
+        cls.resource_setup()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.resource_cleanup()
+        super(BaseApplicationCatalogTest, cls).tearDownClass()
 
     @classmethod
     def get_client_with_isolated_creds(cls, type_of_creds="admin"):
@@ -39,7 +49,7 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
 
     @classmethod
     def get_configured_isolated_creds(cls, type_of_creds='admin'):
-        identity_version = cls.get_identity_version()
+        identity_version = CONF.identity.auth_version
         if identity_version == 'v3':
             cls.admin_role = CONF.identity.admin_role
         else:
@@ -72,7 +82,6 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
-        super(BaseApplicationCatalogTest, cls).resource_setup()
         if not hasattr(cls, "os"):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
             cls.os = clients.Manager(credentials=creds)
@@ -80,7 +89,6 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
 
     @classmethod
     def resource_cleanup(cls):
-        super(BaseApplicationCatalogTest, cls).resource_cleanup()
         cls.clear_isolated_creds()
 
     @classmethod

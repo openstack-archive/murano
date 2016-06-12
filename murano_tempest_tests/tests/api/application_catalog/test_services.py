@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.test import attr
+import testtools
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -33,7 +33,7 @@ class TestServices(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestServices, cls).resource_cleanup()
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_services_list(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -43,7 +43,7 @@ class TestServices(base.BaseApplicationCatalogTest):
             get_services_list(self.environment['id'], session['id'])
         self.assertIsInstance(services_list, list)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_and_delete_demo_service(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -65,7 +65,7 @@ class TestServices(base.BaseApplicationCatalogTest):
             get_services_list(self.environment['id'], session['id'])
         self.assertEqual(len(services_list), len(services_list_))
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_service(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -85,7 +85,7 @@ class TestServices(base.BaseApplicationCatalogTest):
                         session['id'])
         self.assertEqual(service, service_)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_services_without_sess_id(self):
         services = self.application_catalog_client.\
             get_services_list(self.environment['id'], None)

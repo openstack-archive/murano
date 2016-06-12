@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.test import attr
+import testtools
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -21,13 +21,13 @@ from murano_tempest_tests import utils
 
 class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_list_empty_env_templates(self):
         templates_list = self.application_catalog_client.\
             get_env_templates_list()
         self.assertIsInstance(templates_list, list)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_and_delete_env_template(self):
         name = utils.generate_name('create_and_delete_env_template')
         env_template = self.application_catalog_client.\
@@ -60,13 +60,13 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             delete_env_template(cls.env_template['id'])
         super(TestEnvironmentTemplates, cls).resource_cleanup()
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_env_template(self):
         env_template = self.application_catalog_client.\
             get_env_template(self.env_template['id'])
         self.assertEqual(self.env_template['name'], env_template['name'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_env_template_with_a_service(self):
         name = utils.generate_name('create_env_template_with_service')
         post_body = self._get_demo_app()
@@ -79,7 +79,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         self.assertIsInstance(list_services, list)
         self.assertIn(post_body, list_services)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_add_and_remove_service_in_env_templates(self):
         env_template_services = self.application_catalog_client.\
             get_services_list_in_env_template(self.env_template['id'])
@@ -98,7 +98,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             get_services_list_in_env_template(self.env_template['id'])
         self.assertNotIn(service, services)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_public_env_template(self):
         name = utils.generate_name('create_public_env_template')
         env_template = self.application_catalog_client.\
@@ -110,7 +110,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             get_env_template(env_template['id'])
         self.assertTrue(env_temp['is_public'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_clone_env_template(self):
         name = utils.generate_name('clone_env_template')
         cloned_template = self.alt_client.\
@@ -121,7 +121,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         template = self.alt_client.get_env_template(cloned_template['id'])
         self.assertEqual(name, template['name'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_public_private_both_env_templates(self):
         name = utils.generate_name('get_public_private_both')
         public_env_template = self.application_catalog_client.\
@@ -174,7 +174,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         self.assertNotIn(private_env_template, alt_env_templates)
         self.assertIn(private_alt_env_template, alt_env_templates)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_env_from_template(self):
         name = utils.generate_name('create_env_from_template')
         env_template = self.application_catalog_client.\
