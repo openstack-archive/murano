@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from tempest.test import attr
+import testtools
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -33,7 +33,7 @@ class TestSessions(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestSessions, cls).resource_cleanup()
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -41,14 +41,14 @@ class TestSessions(base.BaseApplicationCatalogTest):
                         self.environment['id'], session['id'])
         self.assertEqual(self.environment['id'], session['environment_id'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_delete_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
         self.application_catalog_client.delete_session(self.environment['id'],
                                                        session['id'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])

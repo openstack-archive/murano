@@ -13,8 +13,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.lib import exceptions
-from tempest import test
 
 from murano_tempest_tests.tests.api.service_broker import base
 from murano_tempest_tests import utils
@@ -22,7 +23,8 @@ from murano_tempest_tests import utils
 
 class ServiceBrokerNegativeTest(base.BaseServiceBrokerAdminTest):
 
-    @test.attr(type=['gate', 'negative'])
+    @testtools.testcase.attr('gate')
+    @testtools.testcase.attr('negative')
     def test_get_status_with_not_present_instance_id(self):
         not_present_instance_id = utils.generate_uuid()
         self.assertRaises(

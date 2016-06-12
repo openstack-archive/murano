@@ -13,8 +13,7 @@
 #    under the License.
 
 import os
-
-from tempest.test import attr
+import testtools
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -41,12 +40,12 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         cls.application_catalog_client.delete_category(cls.category['id'])
         super(TestCategories, cls).resource_cleanup()
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_list_categories(self):
         categories_list = self.application_catalog_client.list_categories()
         self.assertIsInstance(categories_list, list)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_create_and_delete_category(self):
         name = utils.generate_name('create_and_delete_category')
         categories_list = self.application_catalog_client.list_categories()
@@ -59,14 +58,14 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         categories_list = self.application_catalog_client.list_categories()
         self.assertNotIn(name, categories_list)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])
         self.assertEqual(self.category['id'], category['id'])
         self.assertEqual(self.category['name'], category['name'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_add_package_to_new_category_and_remove_it_from_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])

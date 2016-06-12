@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.lib import exceptions
-from tempest.test import attr
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -34,7 +35,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestServicesNegative, cls).resource_cleanup()
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_services_list_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -45,7 +46,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           None,
                           session['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_services_list_after_delete_env(self):
         name = utils.generate_name("get_services_list_after_delete_env")
         environment = self.application_catalog_client.create_environment(name)
@@ -57,7 +58,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           environment['id'],
                           session['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_services_list_after_delete_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -68,7 +69,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           self.environment['id'],
                           session['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_create_service_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -81,7 +82,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           session['id'],
                           post_body)
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_create_service_without_sess_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -94,7 +95,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           "",
                           post_body)
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_delete_service_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -109,7 +110,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           session['id'],
                           service['?']['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_delete_service_without_session_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -124,7 +125,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           "",
                           service['?']['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_double_delete_service(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -143,7 +144,7 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           session['id'],
                           service['?']['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_service_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -176,7 +177,7 @@ class TestServicesNegativeTenantIsolation(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestServicesNegativeTenantIsolation, cls).resource_cleanup()
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_list_services_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -187,7 +188,7 @@ class TestServicesNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           self.environment['id'],
                           session['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_create_service_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -200,7 +201,7 @@ class TestServicesNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           session['id'],
                           post_body)
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_delete_service_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -215,7 +216,7 @@ class TestServicesNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           session['id'],
                           service['?']['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_service_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
