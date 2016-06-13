@@ -59,7 +59,7 @@ class BaseApplicationCatalogTest(test.BaseTestCase):
             creds = cls.dynamic_cred.get_credentials(type_of_creds)
         cls.dynamic_cred.type_of_creds = type_of_creds
 
-        return creds
+        return creds.credentials
 
     @classmethod
     def verify_nonempty(cls, *args):
