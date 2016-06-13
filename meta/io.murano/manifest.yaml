@@ -69,4 +69,12 @@ Classes:
   io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml
   io.murano.system.MistralClient: system/MistralClient.yaml
 
+  io.murano.metadata.Description: metadata/Description.yaml
+  io.murano.metadata.HelpText: metadata/HelpText.yaml
+  io.murano.metadata.ModelBuilder: metadata/ModelBuilder.yaml
+  io.murano.metadata.Position: metadata/Position.yaml
+  io.murano.metadata.Title: metadata/Title.yaml
+  io.murano.metadata.forms.Hidden: metadata/forms/Hidden.yaml
+  io.murano.metadata.forms.Section: metadata/forms/Section.yaml
+
   io.murano.test.TestFixture: test/TestFixture.yaml
