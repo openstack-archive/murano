@@ -14,14 +14,24 @@
 
 import os
 
+from tempest import config
 from tempest.lib import exceptions
 from tempest.test import attr
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
 
+CONF = config.CONF
+
 
 class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
+    @classmethod
+    def resource_setup(cls):
+        if CONF.application_catalog.glare_backend:
+            msg = ("Murano using GLARE backend. "
+                   "Repository tests will be skipped.")
+            raise cls.skipException(msg)
+        super(TestRepositoryNegativeNotFound, cls).resource_setup()
 
     @attr(type='negative')
     def test_update_package_with_incorrect_id(self):
@@ -75,6 +85,11 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
     # TODO(freerunner): dramatically better.
     @classmethod
     def resource_setup(cls):
+        if CONF.application_catalog.glare_backend:
+            msg = ("Murano using GLARE backend. "
+                   "Repository tests will be skipped.")
+            raise cls.skipException(msg)
+
         super(TestRepositoryNegativeForbidden, cls).resource_setup()
 
         application_name = utils.generate_name('package_test_upload')

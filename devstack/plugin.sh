@@ -332,6 +332,15 @@ function configure_murano_tempest_plugin() {
             iniset $TEMPEST_CONFIG service_available murano_cfapi "True"
             iniset $TEMPEST_CONFIG service_broker run_service_broker_tests "True"
         fi
+        if is_service_enabled g-glare; then
+            # TODO(freerunner): This is bad way to configure tempest to
+            # TODO see glare as enabled. We need to move it out to tempest
+            # TODO of glance repo when glare become official OS API.
+            iniset $TEMPEST_CONFIG service_available glare "True"
+        fi
+        if is_murano_backend_glare; then
+            iniset $TEMPEST_CONFIG application_catalog glare_backend "True"
+        fi
     fi
 }
 
