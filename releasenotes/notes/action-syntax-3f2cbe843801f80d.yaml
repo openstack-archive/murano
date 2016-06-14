@@ -1,0 +1,8 @@
+---
+upgrade:
+  - New manifest format 1.4.0 is available. Keyword 'Scope' is introduced
+    for class methods to declare method's accessibility from outside through
+    the API call.
+deprecations:
+  - Keyword 'Usage Action' is deprecated to declare class method as an
+    action in favor of 'Scope Public' for the package format versions > 1.3.

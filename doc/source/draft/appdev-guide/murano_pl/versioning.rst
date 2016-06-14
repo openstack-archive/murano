@@ -165,6 +165,10 @@ The short description of versions:
                       recommended specifying this format in new applications,
                       where compatibility with older versions of murano is not
                       required.
+
+      **1.4**         supported since Newton. Keyword ``Scope`` is introduced
+                      for class methods to declare method's accessibility from
+                      outside through the API call.
 ==================  ===========================================================
 
 UI forms versioning

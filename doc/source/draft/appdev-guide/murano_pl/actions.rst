@@ -32,9 +32,13 @@ can be tracked.
 
 .. note::
  Now murano doesn't support big files download during action execution. This is
- because action results are stored in murano database and are limited by approximately 10kb size.
+ because action results are stored in murano database and are limited by
+ approximately 10kb size.
 
-To mark a method as an action, use ``Usage: Action``.
+To mark a method as an action, use ``Scope: Public`` or ``Usage: Action``.
+The latter option is deprecated for the package format versions > 1.3 and
+occasionally will be no longer supported. Also, you cannot use both
+``Usage: Action`` and ``Scope: Session`` in one method.
 
 The following example shows an action that returns an archive with a
 configuration file:
@@ -42,7 +46,7 @@ configuration file:
 ::
 
  exportConfig:
-     Usage: Action
+     Scope: Public
      Body:
        - $._environment.reporter.report($this, 'Action exportConfig called')
        - $resources: new(sys:Resources)

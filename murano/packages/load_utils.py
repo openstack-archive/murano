@@ -36,7 +36,7 @@ def get_plugin_loader():
 
     if PLUGIN_LOADER is None:
         PLUGIN_LOADER = package_types_loader.PluginLoader()
-        for runtime_version in ('1.0', '1.1', '1.2', '1.3'):
+        for runtime_version in ('1.0', '1.1', '1.2', '1.3', '1.4'):
             format_string = 'MuranoPL/' + runtime_version
             PLUGIN_LOADER.register_format(
                 format_string, murano.packages.mpl_package.MuranoPlPackage)

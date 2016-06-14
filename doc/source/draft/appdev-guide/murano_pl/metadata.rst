@@ -244,7 +244,7 @@ The following example shows how applications can access attached metadata:
 
     Methods:
       sampleAction:
-        Usage: Action
+        Scope: Public
         Body:
           - $._environment.reporter.report($this, typeinfo($).meta.
               where($ is MetaClassOne).single().description)
@@ -295,7 +295,7 @@ meta-classes:
 
     Methods:
       importantAction:
-        Usage: Action
+        Scope: Public
         Meta:
           m:CallerMustBeAdmin
 

@@ -72,8 +72,7 @@ def serialize_model(root_object, executor, allow_refs=False):
 
 def _serialize_available_action(obj, current_actions):
     result = {}
-    actions = obj.type.find_methods(
-        lambda m: m.usage == dsl_types.MethodUsages.Action)
+    actions = obj.type.find_methods(lambda m: m.is_action)
     for action in actions:
         action_id = '{0}_{1}'.format(obj.object_id, action.name)
         entry = current_actions.get(action_id, {'enabled': True})

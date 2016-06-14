@@ -44,6 +44,7 @@ META_MURANO_METHOD = '?muranoMethod'
 META_NO_TRACE = '?noTrace'
 META_MPL_META = 'Meta'
 META_USAGE = 'Usage'
+META_SCOPE = 'Scope'
 
 CORE_LIBRARY = 'io.murano'
 CORE_LIBRARY_OBJECT = 'io.murano.Object'
@@ -56,3 +57,4 @@ RUNTIME_VERSION_1_0 = semantic_version.Version('1.0.0')
 RUNTIME_VERSION_1_1 = semantic_version.Version('1.1.0')
 RUNTIME_VERSION_1_2 = semantic_version.Version('1.2.0')
 RUNTIME_VERSION_1_3 = semantic_version.Version('1.3.0')
+RUNTIME_VERSION_1_4 = semantic_version.Version('1.4.0')

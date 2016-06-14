@@ -282,7 +282,7 @@ Methods are defined in the Workflow section of the class using the
 following template::
 
   methodName:
-      Usage: Action
+      Scope: Public
       Arguments:
          - list
          - of
@@ -292,7 +292,7 @@ following template::
          - of
          - instructions
 
-Action is an optional parameter that specifies methods to be executed
+Public is an optional parameter that specifies methods to be executed
 by direct triggering after deployment.
 
 Arguments are optional too, and are declared using the same syntax
@@ -344,10 +344,28 @@ access it. The following usages are available:
 
    * - | Action
      - | Method can be invoked from outside (using Murano API).
+         This option is deprecated for the package format versions > 1.3 in
+         favor of ``Scope: Public`` and occasionally will be no longer
+         supported.
          See :ref:`actions` for details.
 
-The usage attribute is optional and can be omitted (which implies ``Runtime``).
+The ``Usage`` attribute is optional and can be omitted (which implies
+``Runtime``).
 
+Method scope
+++++++++++++
+
+The ``Scope`` attribute declares method visibility. It can have two possible
+values:
+
+* `Session` - regular method that is accessible from anywhere in the current
+  execution session. This is the default if the attribute is omitted;
+
+* `Public` - accessible anywhere, both within the session and from
+  outside through the API call.
+
+The ``Scope`` attribute is optional and can be omitted (which implies
+``Session``).
 
 Expressions
 +++++++++++

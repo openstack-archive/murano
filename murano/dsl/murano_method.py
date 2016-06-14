@@ -16,6 +16,7 @@ import collections
 import sys
 import weakref
 
+from oslo_log import log as logging
 import six
 from yaql.language import specs
 
@@ -31,6 +32,7 @@ from murano.dsl import virtual_exceptions
 from murano.dsl import yaql_integration
 
 
+LOG = logging.getLogger(__name__)
 macros.register()
 virtual_exceptions.register()
 
@@ -51,6 +53,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 self._body = yaql_integration.get_function_definition(
                     payload, self_ref, original_name)
             self._arguments_scheme = None
+            self._scope = self._body.meta.get(constants.META_SCOPE)
             if declaring_type.extension_class and any((
                     helpers.inspect_is_static(
                         declaring_type.extension_class, original_name),
@@ -67,6 +70,9 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
                 if self._usage not in dsl_types.MethodUsages.InstanceMethods:
                     raise ValueError(
                         'Invalid Usage for instance method ' + self.name)
+                self._resolve_usage_and_scope()
+            if self._scope is None:
+                self._scope = dsl_types.MethodScopes.Session
             if (self._body.name.startswith('#') or
                     self._body.name.startswith('*')):
                 raise ValueError(
@@ -80,6 +86,10 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
             self._body = macros.MethodBlock(payload.get('Body'), name)
             self._usage = payload.get(
                 'Usage') or dsl_types.MethodUsages.Runtime
+            self._scope = payload.get('Scope')
+            self._resolve_usage_and_scope()
+            if self._scope is None:
+                self._scope = dsl_types.MethodScopes.Session
             arguments_scheme = helpers.list_value(payload.get('Arguments'))
             if isinstance(arguments_scheme, dict):
                 arguments_scheme = [{key: value} for key, value in
@@ -123,6 +133,18 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
         self._instance_stub, self._static_stub = \
             yaql_integration.build_stub_function_definitions(self_ref)
 
+    def _resolve_usage_and_scope(self):
+        if self._usage == dsl_types.MethodUsages.Action:
+            runtime_version = self.declaring_type.package.runtime_version
+            if runtime_version > constants.RUNTIME_VERSION_1_3:
+                LOG.warning('"Usage: Action" is deprecated, '
+                            'use "Scope: Public" instead')
+            if self._scope == dsl_types.MethodScopes.Session:
+                raise ValueError(
+                    'Both "Usage: Action" and "Scope: Session" are '
+                    'provided for method ' + self.name)
+            self._scope = dsl_types.MethodScopes.Public
+
     @property
     def name(self):
         return self._name
@@ -152,12 +174,25 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
         self._usage = value
 
     @property
+    def scope(self):
+        return self._scope
+
+    @scope.setter
+    def scope(self, value):
+        self._scope = value
+
+    @property
     def body(self):
         return self._body
 
     @property
     def is_static(self):
         return self.usage in dsl_types.MethodUsages.StaticMethods
+
+    @property
+    def is_action(self):
+        return (self.scope == dsl_types.MethodScopes.Public or
+                self.usage == dsl_types.MethodUsages.Action)
 
     def get_meta(self, context):
         def meta_producer(cls):

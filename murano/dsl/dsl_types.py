@@ -57,6 +57,13 @@ class MethodUsages(object):
     StaticMethods = {Static, Extension}
 
 
+class MethodScopes(object):
+    Session = 'Session'
+    Public = 'Public'
+
+    All = {Session, Public}
+
+
 class MethodArgumentUsages(object):
     Standard = 'Standard'
     VarArgs = 'VarArgs'

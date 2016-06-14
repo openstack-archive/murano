@@ -94,8 +94,7 @@ class MuranoDslExecutor(object):
             return stub(yaql_engine, method_context, this.real_this)(
                 *args, **kwargs)
 
-        if (context[constants.CTX_ACTIONS_ONLY] and method.usage !=
-                dsl_types.MethodUsages.Action):
+        if context[constants.CTX_ACTIONS_ONLY] and not method.is_action:
             raise Exception('{0} is not an action'.format(method.name))
 
         if method.is_static:
