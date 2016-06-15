@@ -62,7 +62,7 @@ Version history
 +---------+-------------------------------------------------------------------+-------------------+
 | Version | Changes                                                           | OpenStack Version |
 +=========+===================================================================+===================+
-| 1.0     | - Initial Dymanic UI implementation                               | Icehouse          |
+| 1.0     | - Initial Dynamic UI implementation                               | Icehouse          |
 +---------+-------------------------------------------------------------------+-------------------+
 | 2.0     | - *instance* field support is dropped                             | Juno, Kilo        |
 |         | - New *Application* section that describes engine object model    |                   |
