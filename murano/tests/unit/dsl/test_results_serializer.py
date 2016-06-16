@@ -89,14 +89,28 @@ class TestResultsSerializer(test_case.DslTestCase):
 
         """
         serialized = self._runner.serialized_model
-        self.assertIsInstance(
-            serialized['Objects']['?'].get('_actions'), dict)
-        for action in serialized['Objects']['?']['_actions'].values():
+        actions = serialized['Objects']['?'].get('_actions')
+        self.assertIsInstance(actions, dict)
+        action_names = [action['name'] for action in actions.values()]
+        self.assertIn('testAction', action_names)
+        self.assertNotIn('notAction', action_names)
+        self.assertIn('testRootMethod', action_names)
+        action_meta = None
+        for action in actions.values():
             self.assertIsInstance(action.get('enabled'), bool)
             self.assertIsInstance(action.get('name'), six.string_types)
             self.assertThat(
                 action['name'],
                 matchers.StartsWith('test'))
+            if action['name'] == 'testActionMeta':
+                action_meta = action
+            else:
+                self.assertEqual(action['title'], action['name'])
+        self.assertIsNotNone(action_meta)
+        self.assertEqual(action_meta['title'], "Title of the method")
+        self.assertEqual(action_meta['description'],
+                         "Description of the method")
+        self.assertEqual(action_meta['helpText'], "HelpText of the method")
 
     def test_attribute_serialization(self):
         """Test that attributes produced by MuranoPL code are persisted
@@ -152,4 +166,4 @@ class TestResultsSerializer(test_case.DslTestCase):
                 'key5': {'x': 'y'},
                 'key6': [{'w': 'q'}]
             },
-            serializer.serialize(result))
+            serializer.serialize(result, runner.executor))
