@@ -407,7 +407,7 @@ Get applications information from an environment template
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | OK. Environment Template created successfully             |
+| 200            | OK. Application information received successfully         |
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
@@ -461,7 +461,7 @@ Create an environment from an environment template
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | OK. Environment template created successfully             |
+| 200            | OK. Environment created from template successfully        |
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
