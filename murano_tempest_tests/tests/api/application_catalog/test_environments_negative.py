@@ -12,8 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import testtools
+
 from tempest.lib import exceptions
-from tempest.test import attr
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -21,13 +22,13 @@ from murano_tempest_tests import utils
 
 class TestEnvironmentsNegative(base.BaseApplicationCatalogTest):
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_delete_environment_with_wrong_env_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_environment,
                           utils.generate_uuid())
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_double_delete_environment(self):
         name = utils.generate_name('double_del_negavive')
         environment = self.application_catalog_client.\
@@ -37,7 +38,7 @@ class TestEnvironmentsNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.delete_environment,
                           environment['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_deleted_environment(self):
         name = utils.generate_name('double_del_negavive')
         environment = self.application_catalog_client.\
@@ -65,19 +66,19 @@ class TestEnvironmentNegativeTenantIsolation(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestEnvironmentNegativeTenantIsolation, cls).resource_cleanup()
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_get_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_environment,
                           self.environment['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_update_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.update_environment,
                           self.environment['id'])
 
-    @attr(type='negative')
+    @testtools.testcase.attr('negative')
     def test_delete_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_environment,

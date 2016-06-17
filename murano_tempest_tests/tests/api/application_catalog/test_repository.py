@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
+import testtools
 
 from tempest import config
-from tempest.test import attr
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -33,12 +33,12 @@ class TestRepositorySanity(base.BaseApplicationCatalogTest):
             raise cls.skipException(msg)
         super(TestRepositorySanity, cls).resource_setup()
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_list_packages(self):
         package_list = self.application_catalog_client.get_list_packages()
         self.assertIsInstance(package_list, list)
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_upload_and_delete_package(self):
         application_name = utils.generate_name('package_test_upload')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -78,13 +78,13 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
         os.remove(cls.abs_archive_path)
         cls.application_catalog_client.delete_package(cls.package['id'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_package(self):
         package = self.application_catalog_client.get_package(
             self.package['id'])
         self.assertEqual(self.package['tags'], package['tags'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_update_package(self):
         post_body = [
             {
@@ -171,14 +171,14 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
             self.package['id'], post_body)
         self.assertEqual("New name", result['name'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_download_package(self):
         self.application_catalog_client.download_package(self.package['id'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_ui_definitions(self):
         self.application_catalog_client.get_ui_definition(self.package['id'])
 
-    @attr(type='smoke')
+    @testtools.testcase.attr('smoke')
     def test_get_logo(self):
         self.application_catalog_client.get_logo(self.package['id'])

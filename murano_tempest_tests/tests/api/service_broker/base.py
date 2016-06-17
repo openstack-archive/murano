@@ -18,16 +18,26 @@ import time
 
 from tempest.common import dynamic_creds
 from tempest import config
+from tempest.lib import base
 from tempest.lib import exceptions
-from tempest import test
 
 from murano_tempest_tests import clients
 
 CONF = config.CONF
 
 
-class BaseServiceBrokerTest(test.BaseTestCase):
+class BaseServiceBrokerTest(base.BaseTestCase):
     """Base test class for Murano Service Broker API tests."""
+
+    @classmethod
+    def setUpClass(cls):
+        super(BaseServiceBrokerTest, cls).setUpClass()
+        cls.resource_setup()
+
+    @classmethod
+    def tearDownClass(cls):
+        cls.resource_cleanup()
+        super(BaseServiceBrokerTest, cls).tearDownClass()
 
     @classmethod
     def get_client_with_isolated_creds(cls, name=None,
@@ -66,7 +76,6 @@ class BaseServiceBrokerTest(test.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
-        super(BaseServiceBrokerTest, cls).resource_setup()
         if not hasattr(cls, "os"):
             cls.username = CONF.identity.username
             cls.password = CONF.identity.password
@@ -82,7 +91,6 @@ class BaseServiceBrokerTest(test.BaseTestCase):
 
     @classmethod
     def resource_cleanup(cls):
-        super(BaseServiceBrokerTest, cls).resource_cleanup()
         cls.clear_isolated_creds()
 
     @classmethod
