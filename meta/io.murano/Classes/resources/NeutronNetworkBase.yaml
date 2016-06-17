@@ -20,6 +20,11 @@ Name: NeutronNetworkBase
 Extends: Network
 
 Methods:
+  initialize:
+    Body:
+      - $._netExplorer: new(sys:NetworkExplorer, $this)
+      - $._securityGroupsEnabled: $._netExplorer.listNeutronExtensions().alias.contains('security-group')
+
   joinInstanceToNetwork:
     Arguments:
       - instance:
@@ -49,7 +54,7 @@ Methods:
                   - subnet: $subnetRef
                 replacement_policy: AUTO
 
-      - If: bool($securityGroupName)
+      - If: bool($securityGroupName) and $this._securityGroupsEnabled
         Then:
           - $template:
               resources:
@@ -107,4 +112,9 @@ Methods:
       - environment:
           Contract: $.class(std:Environment).notNull()
     Body:
-      - Return: new(sys:NeutronSecurityGroupManager, environment => $environment)
+      - If: $this._securityGroupsEnabled
+        Then:
+          - Return: new(sys:NeutronSecurityGroupManager, environment => $environment)
+        Else:
+          - $environment.reporter.report($this, "Warning! Security groups are disabled!")
+          - Return: new(sys:DummySecurityGroupManager, environment => $environment)
