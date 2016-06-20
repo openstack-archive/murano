@@ -100,7 +100,7 @@ def _validate_body(body):
                 'Uploading file is too large. '
                 'The limit is {0} Mb').format(mb_limit))
 
-    if len(body.keys()) > 2:
+    if len(body) > 2:
         msg = _("'multipart/form-data' request body should contain 1 or 2 "
                 "parts: json string and zip archive. Current body consists "
                 "of {amount} part(s)").format(amount=len(body.keys()))

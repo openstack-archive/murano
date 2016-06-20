@@ -14,9 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-
 from oslo_config import fixture as config_fixture
+from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 
 from murano.api.v1 import environments
@@ -42,7 +41,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         req = self._get('/environments')
         result = req.get_response(self.api)
-        self.assertEqual({'environments': []}, json.loads(result.body))
+        self.assertEqual({'environments': []}, jsonutils.loads(result.body))
 
     def test_list_all_tenants(self):
         """Check whether all_tenants param is taken into account."""
@@ -55,7 +54,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'name': 'my_env'}
-        req = self._post('/environments', json.dumps(body), tenant="other")
+        req = self._post('/environments', jsonutils.dump_as_bytes(body),
+                         tenant="other")
         req.get_response(self.api)
 
         self._check_listing(False, 'list_environments', 0)
@@ -65,7 +65,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check(expected_check)
         req = self._get('/environments', {'all_tenants': all_tenants})
         response = req.get_response(self.api)
-        body = json.loads(response.body)
+        body = jsonutils.loads(response.body)
         self.assertEqual(200, response.status_code)
         self.assertEqual(expected_count, len(body['environments']))
 
@@ -93,9 +93,9 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     }
 
         body = {'name': 'my_env'}
-        req = self._post('/environments', json.dumps(body))
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
-        self.assertEqual(expected, json.loads(result.body))
+        self.assertEqual(expected, jsonutils.loads(result.body))
 
         expected['status'] = 'ready'
 
@@ -105,7 +105,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/environments')
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
-        self.assertEqual({'environments': [expected]}, json.loads(result.body))
+        self.assertEqual({'environments': [expected]},
+                         jsonutils.loads(result.body))
 
         expected['services'] = []
         expected['acquired_by'] = None
@@ -117,7 +118,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/environments/%s' % uuids[-1])
         result = req.get_response(self.api)
 
-        self.assertEqual(expected, json.loads(result.body))
+        self.assertEqual(expected, jsonutils.loads(result.body))
         self.assertEqual(3, mock_uuid.call_count)
 
     def test_illegal_environment_name_create(self):
@@ -130,7 +131,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'name': '   '}
-        req = self._post('/environments', json.dumps(body))
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
 
@@ -144,7 +145,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'name': u'$yaql \u2665 unicode'}
-        req = self._post('/environments', json.dumps(body))
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
 
@@ -158,7 +159,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'no_name': 'fake'}
-        req = self._post('/environments', json.dumps(body))
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_msg = result.text.replace('\n', '')
@@ -175,7 +176,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.expect_policy_check('create_environment')
 
         body = {'name': 'a' * 256}
-        req = self._post('/environments', json.dumps(body))
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_msg = result.text.replace('\n', '')
@@ -184,7 +185,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
     def test_create_environment_with_empty_body(self):
         """Check that empty request body results in an HTTPBadResquest."""
-        body = ''
+        body = b''
         req = self._post('/environments', body)
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
@@ -244,7 +245,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         body = {
             'name': 'renamed_env'
         }
-        req = self._put('/environments/12345', json.dumps(body))
+        req = self._put('/environments/12345', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
 
@@ -258,7 +259,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
         expected['acquired_by'] = None
 
-        self.assertEqual(expected, json.loads(result.body))
+        self.assertEqual(expected, jsonutils.loads(result.body))
 
     def test_update_environment_with_invalid_name(self):
         """Test that invalid env name returns HTTPBadRequest
@@ -278,7 +279,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         body = {
             'name': '  '
         }
-        req = self._put('/environments/111', json.dumps(body))
+        req = self._put('/environments/111', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_msg = result.text.replace('\n', '')
@@ -300,7 +301,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         body = {
             'name': 'env2'
         }
-        req = self._put('/environments/111', json.dumps(body))
+        req = self._put('/environments/111', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(409, result.status_code)
 
@@ -323,7 +324,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         body = {
             'name': new_name
         }
-        req = self._put('/environments/111', json.dumps(body))
+        req = self._put('/environments/111', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_msg = result.text.replace('\n', '')
@@ -333,21 +334,21 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def test_delete_environment(self):
         """Test that environment deletion results in the correct rpc call."""
         result = self._test_delete_or_abandon(abandon=False)
-        self.assertEqual('', result.body)
+        self.assertEqual(b'', result.body)
         self.assertEqual(200, result.status_code)
 
     def test_abandon_environment(self):
         """Check that abandon feature works"""
         result = self._test_delete_or_abandon(abandon=True)
-        self.assertEqual('', result.body)
+        self.assertEqual(b'', result.body)
         self.assertEqual(200, result.status_code)
 
     def test_abandon_environment_of_different_tenant(self):
         """Test abandon environment belongs to another tenant."""
         result = self._test_delete_or_abandon(abandon=True, tenant='not_match')
         self.assertEqual(403, result.status_code)
-        self.assertTrue(('User is not authorized to access these'
-                         ' tenant resources') in result.body)
+        self.assertTrue((b'User is not authorized to access these'
+                         b' tenant resources') in result.body)
 
     def test_get_last_status_of_different_tenant(self):
         """Test get last services status of env belongs to another tenant."""
@@ -355,8 +356,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/environments/111/lastStatus', tenant='not_match')
         result = req.get_response(self.api)
         self.assertEqual(403, result.status_code)
-        self.assertTrue(('User is not authorized to access these'
-                         ' tenant resources') in result.body)
+        self.assertTrue((b'User is not authorized to access these'
+                         b' tenant resources') in result.body)
 
     def test_get_environment(self):
         """Test GET request of an environment in ready status"""
@@ -384,7 +385,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'services': [],
                     'status': 'ready',
                     }
-        self.assertEqual(expected, json.loads(result.body))
+        self.assertEqual(expected, jsonutils.loads(result.body))
 
     def test_get_environment_acquired(self):
         """Test GET request of an environment in deploying status"""
@@ -430,7 +431,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'services': [],
                     'status': states.EnvironmentStatus.DEPLOYING,
                     }
-        self.assertEqual(expected, json.loads(result.body))
+        self.assertEqual(expected, jsonutils.loads(result.body))
 
     def _create_fake_environment(self, env_name='my-env', env_id='123'):
         fake_now = timeutils.utcnow()

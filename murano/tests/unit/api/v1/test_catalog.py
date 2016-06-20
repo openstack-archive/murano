@@ -15,12 +15,13 @@
 
 import cgi
 import imghdr
-import json
 import os
 import uuid
 
 import mock
+from oslo_serialization import jsonutils
 from oslo_utils import timeutils
+import six
 from six.moves import cStringIO
 from six.moves import range
 
@@ -427,7 +428,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue('Acceptable response can not be provided'
+        self.assertTrue(b'Acceptable response can not be provided'
                         in result.body)
 
     def test_get_ui_definition(self):
@@ -461,7 +462,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue('Acceptable response can not be provided'
+        self.assertTrue(b'Acceptable response can not be provided'
                         in result.body)
 
     def test_get_logo(self):
@@ -496,7 +497,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue('Acceptable response can not be provided'
+        self.assertTrue(b'Acceptable response can not be provided'
                         in result.body)
 
     def test_add_public_unauthorized(self):
@@ -518,7 +519,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         file_obj.file = file_obj_str
         package_from_dir, _ = self._test_package()
 
-        body = '''\
+        body_fmt = '''\
 
 --BOUNDARY
 Content-Disposition: form-data; name="__metadata__"
@@ -530,6 +531,13 @@ Content-Disposition: form-data; name="ziparchive"; filename="file.zip"
 This is a fake zip archive
 --BOUNDARY--'''
 
+        def format_body(content):
+            content = jsonutils.dumps(content)
+            body = body_fmt.format(content)
+            if six.PY3:
+                body = body.encode('utf-8')
+            return body
+
         with mock.patch('murano.packages.load_utils.load_from_file') as lff:
             ctxmgr = mock.Mock()
             ctxmgr.__enter__ = mock.Mock(return_value=package_from_dir)
@@ -539,14 +547,14 @@ This is a fake zip archive
             # Uploading a non-public package
             req = self._post(
                 '/catalog/packages',
-                body.format(json.dumps({'is_public': False})),
+                format_body({'is_public': False}),
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
             )
             res = req.get_response(self.api)
             self.assertEqual(200, res.status_code)
 
             self.is_admin = True
-            app_id = json.loads(res.body)['id']
+            app_id = jsonutils.loads(res.body)['id']
             req = self._delete('/catalog/packages/{0}'.format(app_id))
             res = req.get_response(self.api)
 
@@ -554,7 +562,7 @@ This is a fake zip archive
             # Uploading a public package fails
             req = self._post(
                 '/catalog/packages',
-                body.format(json.dumps({'is_public': True})),
+                format_body({'is_public': True}),
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
             )
             res = req.get_response(self.api)
@@ -564,7 +572,7 @@ This is a fake zip archive
             self.is_admin = True
             req = self._post(
                 '/catalog/packages',
-                body.format(json.dumps({'is_public': True})),
+                format_body({'is_public': True}),
                 content_type='multipart/form-data; ; boundary=BOUNDARY',
             )
             res = req.get_response(self.api)
@@ -587,9 +595,9 @@ This is a fake zip archive
         }
 
         body = {'name': 'new_category'}
-        req = self._post('/catalog/categories', json.dumps(body))
+        req = self._post('/catalog/categories', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
-        processed_result = json.loads(result.body)
+        processed_result = jsonutils.loads(result.body)
         self.assertIn('id', processed_result.keys())
         expected['id'] = processed_result['id']
         self.assertDictEqual(expected, processed_result)
@@ -612,7 +620,7 @@ This is a fake zip archive
 
         req = self._delete('/catalog/categories/12345')
         processed_result = req.get_response(self.api)
-        self.assertEqual('', processed_result.body)
+        self.assertEqual(b'', processed_result.body)
         self.assertEqual(200, processed_result.status_code)
 
     def test_add_category_failed_for_non_admin(self):
@@ -626,7 +634,7 @@ This is a fake zip archive
         timeutils.utcnow.override_time = fake_now
 
         body = {'name': 'new_category'}
-        req = self._post('/catalog/categories', json.dumps(body))
+        req = self._post('/catalog/categories', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(403, result.status_code)
 
@@ -644,7 +652,7 @@ This is a fake zip archive
         timeutils.utcnow.override_time = fake_now
 
         body = {'name': 'cat' * 80}
-        req = self._post('/catalog/categories', json.dumps(body))
+        req = self._post('/catalog/categories', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(400, result.status_code)
         result_message = result.text.replace('\n', '')
@@ -662,7 +670,7 @@ This is a fake zip archive
         req = self._get('/catalog/categories')
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
-        result_categories = json.loads(result.body)['categories']
+        result_categories = jsonutils.loads(result.body)['categories']
         self.assertEqual(2, len(result_categories))
         self.assertEqual(names, [c['name'] for c in result_categories])
 
@@ -671,7 +679,7 @@ This is a fake zip archive
         self.expect_policy_check('get_category')
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
-        result_categories = json.loads(result.body)['categories']
+        result_categories = jsonutils.loads(result.body)['categories']
         self.assertEqual(names, [c['name'] for c in result_categories])
 
         names.reverse()
@@ -681,7 +689,7 @@ This is a fake zip archive
         self.expect_policy_check('get_category')
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
-        result_categories = json.loads(result.body)['categories']
+        result_categories = jsonutils.loads(result.body)['categories']
         self.assertEqual(names, [c['name'] for c in result_categories])
 
     def test_list_category_negative(self):

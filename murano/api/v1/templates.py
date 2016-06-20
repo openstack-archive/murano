@@ -280,14 +280,14 @@ class Controller(object):
 
         if not('name' in body and body['name'].strip()):
             msg = _('Please, specify a name of the environment template.')
-            LOG.exception(msg)
+            LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
         name = six.text_type(body['name'])
         if len(name) > 255:
             msg = _('Environment template name should be 255 characters '
                     'maximum')
-            LOG.exception(msg)
+            LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
 
