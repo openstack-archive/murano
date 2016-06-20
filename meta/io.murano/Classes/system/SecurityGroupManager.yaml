@@ -22,7 +22,7 @@ Properties:
 
   defaultGroupName:
     Contract: $.string()
-    Default: format('MuranoSecurityGroup-{0}', $.environment.name)
+    Default: format('MuranoSecurityGroup-{0}', $.environment.id())
 
 Methods:
   addGroupIngress:
