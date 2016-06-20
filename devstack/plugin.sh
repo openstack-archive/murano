@@ -458,6 +458,10 @@ function init_murano_dashboard() {
     python "$horizon_manage_py" compress --force
     python "$horizon_manage_py" migrate --noinput
 
+    # Compile message for murano-dashboard
+    cd $MURANO_DASHBOARD_DIR/muranodashboard
+    python "$horizon_manage_py" compilemessages
+
     restart_apache_server
 }
 
