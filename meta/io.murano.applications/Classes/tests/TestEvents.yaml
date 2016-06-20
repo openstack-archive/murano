@@ -1,0 +1,262 @@
+Namespaces:
+  =: io.murano.applications.tests
+  tst: io.murano.test
+  apps: io.murano.applications
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestSubscriber
+
+Properties:
+  called:
+    Usage: Runtime
+    Default: 0
+    Contract: $.int()
+
+  lastSender:
+    Usage: Runtime
+    Contract: $
+
+  lastFoo:
+    Usage: Runtime
+    Contract: $
+
+  lastBar:
+    Usage: Runtime
+    Contract: $
+
+Methods:
+  handleFoo:
+    Arguments:
+      - sender:
+          Contract: $.notNull()
+      - foo:
+          Contract: $
+      - bar:
+          Contract: $
+    Body:
+      - $this.called: $this.called + 1
+      - $this.lastFoo: $foo
+      - $this.lastBar: $bar
+      - $this.lastSender: $sender
+
+  handleWithNoExtraArgs:
+    Arguments:
+      - sender:
+          Contract: $.notNull()
+    Body:
+      - $this.called: $this.called + 1
+      - $this.lastSender: $sender
+
+  noArgsMethod:
+    Body:
+
+  varArgsKwArgsOnlyMethod:
+    Arguments:
+      - args:
+          Usage: VarArgs
+          Contract: $
+      - kwargs:
+          Usage: KwArgs
+          Contract: $
+    Body:
+
+  reset:
+    Body:
+      - $this.called: 0
+      - $this.lastSender: null
+      - $this.lastFoo: null
+      - $this.lastBar: null
+--- # ------------------------------------------------------------------ # ---
+Name: TestEmitter
+
+Properties:
+  foo:
+    Usage: Runtime
+    Contract: $.class(apps:Event).notNull()
+    Default:
+      name: foo
+
+Methods:
+  onFoo:
+    Body:
+      - $this.foo.notify($this)
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestEvents
+Extends: tst:TestFixture
+
+Methods:
+  testSubscribeAndNotify:
+    Body:
+      - $subscriber: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.notify($this, 'Hello Events', 42)
+      - $this.assertEqual(1, $subscriber.called)
+      - $this.assertEqual('Hello Events', $subscriber.lastFoo)
+      - $this.assertEqual(42, $subscriber.lastBar)
+      - $event.notify($this)
+      - $this.assertEqual(2, $subscriber.called)
+
+  testNotifyWithNoSubscribers:
+    Body:
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.notify($this)
+
+  testUnableToNotifyWithUnexpectedArgs:
+    Body:
+      - $subscriber: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $cought: false
+      - Try:
+          - $event.notify($this, qux=>1, baz=>2)
+        Catch:
+          With: 'yaql.language.exceptions.NoMatchingMethodException'
+          Do:
+            - $cought: true
+      - $this.assertTrue($cought)
+
+  testUnsubscribe:
+    Body:
+      - $subscriber: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+      - $event.unsubscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+
+  testSubscribeManyNotifyOnce:
+    Body:
+      - $subscriber: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+
+  testUnsubscribeAsManyAsSubscribe:
+    Body:
+      - $subscriber: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.subscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+      - $subscriber.reset()
+      - $event.unsubscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+      - $subscriber.reset()
+      - $event.unsubscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+      - $subscriber.reset()
+      - $event.unsubscribe($subscriber, handleFoo)
+      - $event.notify($this)
+      - $this.assertEqual(0, $subscriber.called)
+
+  testSubscribeSimple:
+    Body:
+      - $event: new(apps:Event, name=>foo)
+      - $subscriber: new(TestSubscriber)
+      - $event.subscribe($subscriber)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+
+  testHandleWithNoExtraArgs:
+    Body:
+      - $event: new(apps:Event, name=>foo)
+      - $subscriber: new(TestSubscriber)
+      - $event.subscribe($subscriber, handleWithNoExtraArgs)
+      - $event.notify($this)
+      - $this.assertEqual(1, $subscriber.called)
+      - $this.assertEqual($this, $subscriber.lastSender)
+
+  testUnableToSubscribeWithWrongMethod:
+    Body:
+      - $event: new(apps:Event, name=>testEvent)
+      - $subscriber: new(TestSubscriber)
+      - $cought: false
+      - Try:
+          - $event.subscribe($subscriber, handleBar)
+        Catch:
+          With: apps:NoHandlerMethodException
+          Do:
+            - $cought: true
+      - $this.assertTrue($cought)
+
+
+  testUnableToSubscribeWithWrongSimpleMethod:
+    Body:
+      - $event: new(apps:Event, name=>testEvent)
+      - $subscriber: new(TestSubscriber)
+      - $cought: false
+      - Try:
+          - $event.subscribe($subscriber)
+        Catch:
+          With: apps:NoHandlerMethodException
+          Do:
+            - $cought: true
+      - $this.assertTrue($cought)
+
+  testUnableToSubscribeWithoutSender:
+    Body:
+      - $event: new(apps:Event, name=>testEvent)
+      - $subscriber: new(TestSubscriber)
+      - $cought: false
+      - Try:
+          - $event.subscribe($subscriber, noArgsMethod)
+        Catch:
+          With: apps:WrongHandlerMethodException
+          Do:
+            - $cought: true
+      - $this.assertTrue($cought)
+
+  testUnableToSubscribeWithoutStandardArgs:
+    Body:
+      - $event: new(apps:Event, name=>testEvent)
+      - $subscriber: new(TestSubscriber)
+      - $cought: false
+      - Try:
+          - $event.subscribe($subscriber, varArgsKwArgsOnlyMethod)
+        Catch:
+          With: apps:WrongHandlerMethodException
+          Do:
+            - $cought: true
+      - $this.assertTrue($cought)
+
+  testMultipleSubscribers:
+    Body:
+      - $subscriber1: new(TestSubscriber)
+      - $subscriber2: new(TestSubscriber)
+      - $event: new(apps:Event, name=>testEvent)
+      - $event.subscribe($subscriber1, handleFoo)
+      - $event.subscribe($subscriber2, handleFoo)
+      - $event.notify($this, 'Hello Events', 42)
+      - $this.assertEqual(1, $subscriber1.called)
+      - $this.assertEqual('Hello Events', $subscriber1.lastFoo)
+      - $this.assertEqual(42, $subscriber1.lastBar)
+      - $this.assertEqual(1, $subscriber2.called)
+      - $this.assertEqual('Hello Events', $subscriber2.lastFoo)
+      - $this.assertEqual(42, $subscriber2.lastBar)
+
+  testEmitterWithEvent:
+    Body:
+      - $emitter: new(TestEmitter)
+      - $subscriber: new(TestSubscriber)
+      - $emitter.foo.subscribe($subscriber)
+      - $emitter.onFoo()
+      - $this.assertEqual(1, $subscriber.called)
+      - $this.assertEqual($emitter, $subscriber.lastSender)
+

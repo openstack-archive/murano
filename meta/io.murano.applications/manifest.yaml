@@ -29,9 +29,11 @@ Classes:
   io.murano.applications.BaseTemplateReplicaProvider: replication.yaml
   io.murano.applications.TemplateReplicaProvider: replication.yaml
   io.murano.applications.CloneReplicaProvider: replication.yaml
+  io.murano.applications.Event: events.yaml
 
   io.murano.applications.tests.TestReplication: tests/TestReplication.yaml
   io.murano.applications.tests.TestCloneReplicaProvider: tests/TestCloneReplicaProvider.yaml
   io.murano.applications.tests.TestTemplateReplicaProvider: tests/TestTemplateReplicaProvider.yaml
   io.murano.applications.tests.ReplicationTarget: tests/TestTemplateReplicaProvider.yaml
   io.murano.applications.tests.NestedReplicationTarget: tests/TestTemplateReplicaProvider.yaml
+  io.murano.applications.tests.TestEvents: tests/TestEvents.yaml

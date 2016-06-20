@@ -1,0 +1,104 @@
+
+Namespaces:
+  =: io.murano.applications
+  std: io.murano
+  py:   # empty, for python-originating exceptions
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Event
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+Methods:
+
+  .init:
+    Body:
+      - $this._handlers: {}
+
+  subscribe:
+    Arguments:
+      - subscriber:
+          Contract: $.class(std:Object).notNull()
+      - methodName:
+          Contract: $.string()
+    Body:
+      - If: not $methodName
+        Then:
+          - $methodName: format('handle{0}', $this.name.substring(0,1).toUpper()+
+                                $this.name.substring(1))
+
+      - Try:
+          - $method: typeinfo($subscriber).methods.where($.name = $methodName).single()
+        Catch:
+          With: py:StopIteration
+          Do:
+            - Throw: NoHandlerMethodException
+              Message: format('Unknown method {0} for
+                              receiver {1} to handle event {2}',
+                              $methodName, $subscriber, $this.name)
+
+      # This check ensures that the method passed as a handler has at least one
+      # standard (i.e. non vararg or kwarg) argument which is supposed to be
+      # "sender" object of the event.
+      # Although having the sender in the handler is not always nessesary it's
+      # still better to enforce its presence since it helps to prevent many
+      # hard-to-debug errors
+      - If: not $method.arguments.where($.usage=Standard).any()
+        Then:
+          - Throw: WrongHandlerMethodException
+            Message: format("Method {0} of handler {1} should accept at least
+                            a 'sender' argument to handle event {2}",
+                            $methodName, $subscriber, $this.name)
+      - $key: list($subscriber, $methodName)
+      - $this._handlers[$key]: $this._handlers.get($key, 0) + 1
+
+  unsubscribe:
+    Arguments:
+      - subscriber:
+          Contract: $.class(std:Object).notNull()
+      - methodName:
+          Contract: $.string()
+    Body:
+      - If: not $methodName
+        Then:
+          - $methodName: format('handle{0}', $this.name.substring(0,1).toUpper()+
+                                $this.name.substring(1))
+      - $key: list($subscriber, $methodName)
+      - If: $key in $this._handlers.keys()
+        Then:
+          - $this._handlers[$key]: $this._handlers[$key] - 1
+          - If: $this._handlers[$key] = 0
+            Then:
+              - $this._handlers: $this._handlers.delete($key)
+
+  notify:
+    Arguments:
+      - sender:
+          Contract: $.notNull()
+      - args:
+          Contract: $
+          Usage: VarArgs
+      - kwargs:
+          Contract: $
+          Usage: KwArgs
+    Body:
+      - $combinedArgs: list($sender) + $args
+      - $this._handlers.keys().select(call($[1], $combinedArgs, $kwargs, $[0]))
+
+  notifyInParallel:
+    Arguments:
+      - sender:
+          Contract: $.notNull()
+      - args:
+          Contract: $
+          Usage: VarArgs
+      - kwargs:
+          Contract: $
+          Usage: KwArgs
+    Body:
+      - $combinedArgs: list($sender) + $args
+      - $this._handlers.keys().pselect(call($[1], $combinedArgs, $kwargs, $[0]))

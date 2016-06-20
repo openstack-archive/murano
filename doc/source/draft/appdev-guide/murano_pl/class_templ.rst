@@ -306,10 +306,41 @@ following template::
 Public is an optional parameter that specifies methods to be executed
 by direct triggering after deployment.
 
+
+.. _method_arguments:
+
+Method arguments
+++++++++++++++++
+
 Arguments are optional too, and are declared using the same syntax
-as class properties, except for the Usage attribute that is meaningless
-for method parameters. For example, arguments also have a contract and
-optional default::
+as class properties. Same as properties, arguments also have contracts and
+optional defaults.
+
+Unlike class properties Arguments may have a different set of Usages:
+
+.. list-table::
+   :header-rows: 1
+   :widths: 20 80
+   :stub-columns: 0
+   :class: borderless
+
+   * - | Value
+     - | Explanation
+
+   * - | Standard
+     - | Regular method argument. Holds a single value based on its contract.
+         This is the default value for the Usage key.
+
+   * - | VarArgs
+     - | A variable length argument. Method body sees it as a list of values,
+         each matching a contract of the argument.
+
+   * - | KwArgs
+     - | A keywrod-based argument, Method body sees it as a dict of values,
+         with keys being valid keyword strings and values matching a contract
+         of the argument.
+
+Arguments example::
 
   scaleRc:
     Arguments:
@@ -317,6 +348,17 @@ optional default::
           Contract: $.string().notNull()
       - newSize:
           Contract: $.int().notNull()
+      - rest:
+          Contract: $.int()
+          Usage: VarArgs
+      - others:
+          Contract: $.int()
+          Usage: KwArgs
+
+.. method_body:
+
+Method body
++++++++++++
 
 The Method body is an array of instructions that get executed sequentially.
 There are 3 types of instructions that can be found in a workflow body:
