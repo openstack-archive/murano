@@ -215,50 +215,66 @@ class HeatStack(object):
         template = copy.deepcopy(self._template)
         LOG.debug('Pushing: {template}'.format(template=template))
 
-        current_status = self._get_status()
-        resources = template.get('Resources') or template.get('resources')
-        if current_status == 'NOT_FOUND':
-            if resources is not None:
-                token_client = self._get_token_client()
-                token_client.stacks.create(
-                    stack_name=self._name,
-                    parameters=self._parameters,
-                    template=template,
-                    files=self._files,
-                    environment=self._hot_environment,
-                    disable_rollback=True,
-                    tags=self._tags)
+        while True:
+            try:
+                current_status = self._get_status()
+                resources = template.get('Resources') or template.get(
+                    'resources')
+                if current_status == 'NOT_FOUND':
+                    if resources is not None:
+                        token_client = self._get_token_client()
+                        token_client.stacks.create(
+                            stack_name=self._name,
+                            parameters=self._parameters,
+                            template=template,
+                            files=self._files,
+                            environment=self._hot_environment,
+                            disable_rollback=True,
+                            tags=self._tags)
 
-                self._wait_state(lambda status: status == 'CREATE_COMPLETE')
-        else:
-            if resources is not None:
-                self._client.stacks.update(
-                    stack_id=self._name,
-                    parameters=self._parameters,
-                    files=self._files,
-                    environment=self._hot_environment,
-                    template=template,
-                    disable_rollback=True,
-                    tags=self._tags)
-                self._wait_state(
-                    lambda status: status == 'UPDATE_COMPLETE', True)
+                        self._wait_state(
+                            lambda status: status == 'CREATE_COMPLETE')
+                else:
+                    if resources is not None:
+                        self._client.stacks.update(
+                            stack_id=self._name,
+                            parameters=self._parameters,
+                            files=self._files,
+                            environment=self._hot_environment,
+                            template=template,
+                            disable_rollback=True,
+                            tags=self._tags)
+                        self._wait_state(
+                            lambda status: status == 'UPDATE_COMPLETE', True)
+                    else:
+                        self.delete()
+            except heat_exc.HTTPConflict as e:
+                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
+                eventlet.sleep(3)
             else:
-                self.delete()
+                break
 
         self._applied = not utils.is_different(self._template, template)
 
     def delete(self):
-        try:
-            if not self.current():
-                return
-            self._wait_state(lambda s: True)
-            self._client.stacks.delete(stack_id=self._name)
-            self._wait_state(
-                lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
-                wait_progress=True)
-        except heat_exc.NotFound:
-            LOG.warning(_LW('Stack {stack_name} already deleted?')
-                        .format(stack_name=self._name))
+        while True:
+            try:
+                if not self.current():
+                    return
+                self._wait_state(lambda s: True)
+                self._client.stacks.delete(stack_id=self._name)
+                self._wait_state(
+                    lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
+                    wait_progress=True)
+            except heat_exc.NotFound:
+                LOG.warning(_LW('Stack {stack_name} already deleted?')
+                            .format(stack_name=self._name))
+                break
+            except heat_exc.HTTPConflict as e:
+                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
+                eventlet.sleep(3)
+            else:
+                break
 
         self._template = {}
         self._applied = True
