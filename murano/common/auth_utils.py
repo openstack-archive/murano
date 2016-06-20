@@ -12,39 +12,60 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-from keystoneclient.auth import identity
-from keystoneclient import session as ks_session
+from keystoneauth1 import identity
+from keystoneauth1 import loading as ka_loading
 from keystoneclient.v3 import client as ks_client
 from oslo_config import cfg
-from oslo_utils import importutils
 
 from murano.dsl import helpers
 
 
-@helpers.memoize
-def _get_keystone_admin_parameters(scoped):
-    importutils.import_module('keystonemiddleware.auth_token')
-    settings = {
-        'auth_url': cfg.CONF.keystone_authtoken.auth_uri.replace('v2.0', 'v3'),
-        'username': cfg.CONF.keystone_authtoken.admin_user,
-        'password': cfg.CONF.keystone_authtoken.admin_password,
-        'user_domain_name': "Default"
-    }
-    if scoped:
-        settings.update({
-            'project_name': cfg.CONF.keystone_authtoken.admin_tenant_name,
-            'project_domain_name': "Default"
-        })
-    return settings
+CFG_KEYSTONE_GROUP = 'keystone_authtoken'
+
+cfg.CONF.import_group(CFG_KEYSTONE_GROUP, 'keystonemiddleware.auth_token')
 
 
-@helpers.memoize
-def create_keystone_admin_client(scoped):
-    kwargs = _get_keystone_admin_parameters(scoped)
-    password_auth = identity.Password(**kwargs)
-    session = ks_session.Session(auth=password_auth)
-    _set_ssl_parameters(cfg.CONF.keystone_authtoken, session)
+def _get_keystone_auth(trust_id=None):
+    if not cfg.CONF[CFG_KEYSTONE_GROUP].auth_type:
+        # Fallback to legacy v2 options if no auth_type is set.
+        # If auth_type is set, it is possible to use the auth loader
+        # from keystoneauth1. This is the same fallback as keystonemiddleware
+        # uses.
+        kwargs = {
+            'auth_url':
+                cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri.replace('v2.0', 'v3'),
+            'username': cfg.CONF[CFG_KEYSTONE_GROUP].admin_user,
+            'password': cfg.CONF[CFG_KEYSTONE_GROUP].admin_password,
+            'user_domain_name': "Default"
+        }
+        if not trust_id:
+            kwargs['project_name'] = \
+                cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
+            kwargs['project_domain_name'] = "Default"
+        else:
+            kwargs['trust_id'] = trust_id
+        auth = identity.Password(**kwargs)
+    else:
+        kwargs = {}
+        if trust_id:
+            # Remove project_name and project_id, since we need a trust scoped
+            # auth object
+            kwargs['project_name'] = None
+            kwargs['project_domain_name'] = None
+            kwargs['project_id'] = None
+            kwargs['trust_id'] = trust_id
+        auth = ka_loading.load_auth_from_conf_options(
+            cfg.CONF,
+            CFG_KEYSTONE_GROUP,
+            **kwargs)
+    return auth
+
+
+def _create_keystone_admin_client():
+    auth = _get_keystone_auth()
+    session = _get_session(
+        auth=auth,
+        conf_section=cfg.CONF[CFG_KEYSTONE_GROUP])
     return ks_client.Client(session=session)
 
 
@@ -56,23 +77,22 @@ def get_client_session(execution_session=None, conf=None):
         return get_token_client_session(
             token=execution_session.token,
             project_id=execution_session.project_id)
-    kwargs = _get_keystone_admin_parameters(False)
-    kwargs['trust_id'] = trust_id
-    password_auth = identity.Password(**kwargs)
-    session = ks_session.Session(auth=password_auth)
-    _set_ssl_parameters(conf, session)
+    auth = _get_keystone_auth(trust_id)
+    session = _get_session(auth=auth, conf_section=conf)
     return session
 
 
 def get_token_client_session(token=None, project_id=None, conf=None):
-    auth_url = _get_keystone_admin_parameters(False)['auth_url']
+    auth_url = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri.replace('v2.0', 'v3')
     if token is None or project_id is None:
         execution_session = helpers.get_execution_session()
         token = execution_session.token
         project_id = execution_session.project_id
-    token_auth = identity.Token(auth_url, token=token, project_id=project_id)
-    session = ks_session.Session(auth=token_auth)
-    _set_ssl_parameters(conf, session)
+    token_auth = identity.Token(
+        auth_url,
+        token=token,
+        project_id=project_id)
+    session = _get_session(auth=token_auth, conf_section=conf)
     return session
 
 
@@ -82,7 +102,7 @@ def create_keystone_client(token=None, project_id=None, conf=None):
 
 
 def create_trust(trustee_token=None, trustee_project_id=None):
-    admin_client = create_keystone_admin_client(True)
+    admin_client = _create_keystone_admin_client()
     user_client = create_keystone_client(
         token=trustee_token, project_id=trustee_project_id)
     trustee_user = admin_client.session.auth.get_user_id(admin_client.session)
@@ -100,7 +120,7 @@ def create_trust(trustee_token=None, trustee_project_id=None):
 
 
 def delete_trust(trust):
-    user_client = create_keystone_admin_client(True)
+    user_client = _create_keystone_admin_client()
     user_client.trusts.delete(trust)
 
 
@@ -113,25 +133,20 @@ def _get_config_option(conf_section, option_names, default=None):
     return default
 
 
-def _set_ssl_parameters(conf_section, session):
+def _get_session(auth, conf_section):
+    # Fallback to keystone_authtoken section for TLS parameters
+    # if no other conf_section supplied
     if not conf_section:
-        return
-    insecure = _get_config_option(conf_section, 'insecure', False)
-    if insecure:
-        session.verify = False
-    else:
-        session.verify = _get_config_option(
-            conf_section, ('ca_file', 'cafile', 'cacert')) or True
-
-    cert_file = _get_config_option(conf_section, ('cert_file', 'certfile'))
-    key_file = _get_config_option(conf_section, ('key_file', 'keyfile'))
-
-    if cert_file and key_file:
-        session.cert = (cert_file, key_file)
-    elif cert_file:
-        session.cert = cert_file
-    else:
-        session.cert = None
+        conf_section = cfg.CONF[CFG_KEYSTONE_GROUP]
+    session = ka_loading.session.Session().load_from_options(
+        auth=auth,
+        insecure=_get_config_option(conf_section, 'insecure', False),
+        cacert=_get_config_option(
+            conf_section,
+            ('ca_file', 'cafile', 'cacert')),
+        key=_get_config_option(conf_section, ('key_file', 'keyfile')),
+        cert=_get_config_option(conf_section, ('cert_file', 'certfile')))
+    return session
 
 
 def get_session_client_parameters(service_type=None,
