@@ -105,7 +105,7 @@ class MuranoMigrationsCheckers(object):
 
         package = {
             'id': str(uuid.uuid4()),
-            'archive': "archive blob here",
+            'archive': b"archive blob here",
             'fully_qualified_name': 'com.example.package',
             'type': 'class',
             'author': 'OpenStack',
@@ -114,7 +114,7 @@ class MuranoMigrationsCheckers(object):
             'description': 'some text',
             'is_public': False,
             'tags': ['tag1', 'tag2'],
-            'logo': "logo blob here",
+            'logo': b"logo blob here",
             'ui_definition': '{}',
             'owner_id': '123',
             'created': datetime.datetime.now(),
