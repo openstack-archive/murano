@@ -1,0 +1,4 @@
+---
+features:
+  - The meta-classes Title, Description, HelpText, Hidden, Section, Position,
+    ModelBuilder are implemented and placed to the core library .
