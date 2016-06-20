@@ -33,7 +33,6 @@ import yaql.language.expressions
 from yaql.language import utils as yaqlutils
 
 
-from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
@@ -74,7 +73,7 @@ def merge_lists(list1, list2):
     for item in list1 + list2:
         exists = False
         for old_item in result:
-            if not utils.is_different(item, old_item):
+            if item == old_item:
                 exists = True
                 break
         if not exists:

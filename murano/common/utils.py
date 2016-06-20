@@ -139,62 +139,6 @@ class TraverseHelper(object):
             raise ValueError(_('Source object or path is malformed'))
 
 
-def is_different(obj1, obj2):
-    """Stripped-down version of deep.diff comparator
-
-    Compares arbitrary nested objects, handles circular links, but doesn't
-    point to the first difference as deep.diff does.
-    """
-    class Difference(Exception):
-        pass
-
-    def is_in(o, st):
-        for _o in st:
-            if o is _o:
-                return True
-        return False
-
-    def rec(o1, o2, stack1=(), stack2=()):
-        if is_in(o1, stack1) and is_in(o2, stack2):
-            # circular reference detected - break the loop
-            return
-        elif is_in(o1, stack1):
-            raise Difference()
-        else:
-            stack1 += (o1,)
-            stack2 += (o2,)
-
-        if o1 is o2:
-            return
-        elif (isinstance(o1, six.string_types) and
-                isinstance(o2, six.string_types)) and o1 == o2:
-            return
-        elif type(o1) != type(o2):
-            raise Difference()
-        elif isinstance(o1, dict):
-            # check for keys inequality
-            rec(o1.keys(), o2.keys(), stack1, stack2)
-            for key in o1.keys():
-                rec(o1[key], o2[key], stack1, stack2)
-        elif isinstance(o1, (list, tuple, set)):
-            if len(o1) != len(o2):
-                raise Difference()
-            else:
-                for _o1, _o2 in zip(o1, o2):
-                    rec(_o1, _o2, stack1, stack2)
-        elif hasattr(o1, '__dict__'):
-            return rec(o1.__dict__, o2.__dict__, stack1, stack2)
-        elif o1 != o2:
-            raise Difference()
-
-    try:
-        rec(obj1, obj2)
-    except Difference:
-        return True
-    else:
-        return False
-
-
 def build_entity_map(value):
     def build_entity_map_recursive(value, id_map):
         if isinstance(value, dict):
