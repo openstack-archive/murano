@@ -40,7 +40,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
 
     def _stub_package(self, **kwargs):
         base = {
-            'archive': "archive blob here",
+            'archive': b"archive blob here",
             'fully_qualified_name': 'com.example.package',
             'type': 'class',
             'author': 'OpenStack',
@@ -49,7 +49,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
             'description': 'some text',
             'is_public': False,
             'tags': ['tag1', 'tag2'],
-            'logo': "logo blob here",
+            'logo': b"logo blob here",
             'ui_definition': '{}',
         }
         base.update(**kwargs)
