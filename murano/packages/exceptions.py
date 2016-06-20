@@ -19,8 +19,9 @@ import murano.common.exceptions as e
 
 
 class PackageException(e.Error):
-    def __str__(self):
-        return six.text_type(self.message).encode('UTF-8')
+    if six.PY2:
+        def __str__(self):
+            return six.text_type(self.message).encode('UTF-8')
 
 
 class PackageClassLoadError(PackageException):

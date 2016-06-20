@@ -66,7 +66,7 @@ class Controller(object):
 
         if not('name' in body and body['name'].strip()):
             msg = _('Please, specify a name of the environment to create')
-            LOG.exception(msg)
+            LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
         name = six.text_type(body['name'])

@@ -13,9 +13,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import json
-
 from oslo_config import fixture as config_fixture
+from oslo_serialization import jsonutils
 
 from murano.api.v1 import environments
 from murano.api.v1 import sessions
@@ -49,10 +48,11 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         # Create environment for user #1
         request = self._post(
-            '/environments', json.dumps({'name': 'test_environment_1'}),
+            '/environments',
+            jsonutils.dump_as_bytes({'name': 'test_environment_1'}),
             **CREDENTIALS_1
         )
-        response_body = json.loads(request.get_response(self.api).body)
+        response_body = jsonutils.loads(request.get_response(self.api).body)
         self.assertEqual(CREDENTIALS_1['tenant'],
                          response_body['tenant_id'])
 
@@ -62,10 +62,10 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         request = self._post(
             '/environments/{environment_id}/configure'
             .format(environment_id=ENVIRONMENT_ID),
-            '',
+            b'',
             **CREDENTIALS_1
         )
-        response_body = json.loads(request.get_response(self.api).body)
+        response_body = jsonutils.loads(request.get_response(self.api).body)
 
         SESSION_ID = response_body['id']
 
@@ -75,7 +75,7 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             '/environments/{environment_id}/sessions/'
             '{session_id}/deploy'
             .format(environment_id=ENVIRONMENT_ID, session_id=SESSION_ID),
-            '',
+            b'',
             **CREDENTIALS_2
         )
         response = request.get_response(self.api)

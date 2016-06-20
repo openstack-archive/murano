@@ -538,8 +538,8 @@ class JSONDictSerializer(DictSerializer):
                 return _dtime.isoformat()
             return six.text_type(obj)
         if result:
-            data.body = jsonutils.dumps(result)
-        return jsonutils.dumps(data, default=sanitizer)
+            data.body = jsonutils.dump_as_bytes(result)
+        return jsonutils.dump_as_bytes(data, default=sanitizer)
 
 
 class XMLDictSerializer(DictSerializer):

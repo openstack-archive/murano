@@ -87,7 +87,7 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             'id': '12345'
         }
 
-        req = self._post('/environments/12345/actions/actionID_action', '{}')
+        req = self._post('/environments/12345/actions/actionID_action', b'{}')
         result = self.controller.execute(req, '12345', 'actionsID_action',
                                          '{}')
 
