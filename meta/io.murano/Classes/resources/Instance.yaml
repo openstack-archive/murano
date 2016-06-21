@@ -103,7 +103,7 @@ Methods:
     Body:
       $.sharedIps: $ips
 
-  deploy:
+  beginDeploy:
     Body:
       - $.validateBootSource()
       - $securityGroupName: coalesce(
@@ -162,6 +162,9 @@ Methods:
       # Any additional template preparation
       - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
       - $.environment.stack.updateTemplate($.instanceTemplate)
+
+  endDeploy:
+    Body:
       - $.environment.stack.push()
       - $outputs: $.environment.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten().distinct()
@@ -172,6 +175,11 @@ Methods:
           - If: $.floatingIpAddress != null
             Then: $.setAttr(fipAssigned, true)
       - $.environment.instanceNotifier.trackCloudInstance($this)
+
+  deploy:
+    Body:
+      - $this.beginDeploy()
+      - $this.endDeploy()
 
   detectPrimaryNetwork:
     Body:
@@ -283,7 +291,7 @@ Methods:
           device_type: $blockDevice.deviceType
           boot_index: $blockDevice.bootIndex
 
-  releaseResources:
+  beginReleaseResources:
     Body:
       - $template: $.environment.stack.current()
       - If: bool($template.resources) and bool($template.outputs)
@@ -301,6 +309,12 @@ Methods:
           - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
 
           - $.environment.stack.setTemplate($template)
+
+  endReleaseResources:
+    Body:
+      - $template: $.environment.stack.current()
+      - If: bool($template.resources) and bool($template.outputs)
+        Then:
           - $.environment.stack.push()
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
@@ -308,6 +322,11 @@ Methods:
       - $.openstackId: null
       - $.ipAddresses: []
       - $.floatingIpAddress: null
+
+  releaseResources:
+    Body:
+      - $this.beginReleaseResources()
+      - $this.endReleaseResources()
 
   validateBootSource:
     Body:
