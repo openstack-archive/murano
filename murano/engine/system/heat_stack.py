@@ -24,7 +24,6 @@ import six
 
 from murano.common import auth_utils
 from murano.common.i18n import _LW
-from murano.common import utils
 from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import session_local_storage
@@ -129,9 +128,9 @@ class HeatStack(object):
             err_msg = ("Currently only heat_template_version %s "
                        "is supported." % HEAT_TEMPLATE_VERSION)
             raise HeatStackError(err_msg)
-        self.current()
+        current = self.current()
         self._template = helpers.merge_dicts(self._template, template)
-        self._applied = False
+        self._applied = self._template == current and self._applied
 
     @staticmethod
     def _remove_system_params(parameters):
@@ -254,7 +253,7 @@ class HeatStack(object):
             else:
                 break
 
-        self._applied = not utils.is_different(self._template, template)
+        self._applied = self._template == template
 
     def delete(self):
         while True:
