@@ -145,7 +145,7 @@ Workflow:
   describe:
     Body:
       - $.deploy()
-      - $subnet: $._getSubnetworks.where(
+      - $subnet: $._getSubnetworks().where(
             $.network_id = $this._internalNetworkId).first()
       - Return:
           provider: Neutron
