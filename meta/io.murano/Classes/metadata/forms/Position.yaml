@@ -11,7 +11,7 @@
 #  under the License.
 
 Namespaces:
-  =: io.murano.metadata
+  =: io.murano.metadata.forms
 
 Name: Position
 Usage: Meta

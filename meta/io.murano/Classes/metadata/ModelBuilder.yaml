@@ -17,3 +17,8 @@ Name: ModelBuilder
 Usage: Meta
 Applies: Method
 Inherited: true
+
+Properties:
+  enabled:
+    Contract: $.bool().notNull()
+    Default: true

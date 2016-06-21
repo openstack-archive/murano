@@ -38,7 +38,7 @@ import six
 import webob.dec
 import webob.exc
 
-from murano.api.v1 import schemas
+from murano.api.v1 import validation_schemas
 from murano.common import config
 from murano.common import exceptions
 from murano.common.i18n import _, _LE, _LW
@@ -918,7 +918,8 @@ class JSONPatchDeserializer(TextDeserializer):
         property_to_update = {change_path: change['value']}
 
         try:
-            jsonschema.validate(property_to_update, schemas.PKG_UPDATE_SCHEMA)
+            jsonschema.validate(property_to_update,
+                                validation_schemas.PKG_UPDATE_SCHEMA)
         except jsonschema.ValidationError as e:
             LOG.error(_LE("Schema validation error occured: {error}")
                       .format(error=e))

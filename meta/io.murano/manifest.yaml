@@ -73,9 +73,9 @@ Classes:
   io.murano.metadata.Description: metadata/Description.yaml
   io.murano.metadata.HelpText: metadata/HelpText.yaml
   io.murano.metadata.ModelBuilder: metadata/ModelBuilder.yaml
-  io.murano.metadata.Position: metadata/Position.yaml
   io.murano.metadata.Title: metadata/Title.yaml
   io.murano.metadata.forms.Hidden: metadata/forms/Hidden.yaml
+  io.murano.metadata.forms.Position: metadata/forms/Position.yaml
   io.murano.metadata.forms.Section: metadata/forms/Section.yaml
   io.murano.metadata.engine.Serialize: metadata/engine/Serialize.yaml
   io.murano.metadata.engine.Synchronize: metadata/engine/Synchronize.yaml

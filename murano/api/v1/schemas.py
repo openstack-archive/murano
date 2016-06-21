@@ -1,4 +1,4 @@
-#    Copyright (c) 2013 Mirantis, Inc.
+#    Copyright (c) 2016 Mirantis, Inc.
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,63 +12,48 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# TODO(all): write detailed schema.
-ENV_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
+from oslo_log import log as logging
+from oslo_messaging.rpc import client
+import six
+from webob import exc
 
-    "type": "object",
-    "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string"}
-    },
-    "required": ["id", "name"]
-}
+from murano.api.v1 import request_statistics
+from murano.common import policy
+from murano.common import rpc
+from murano.common import wsgi
 
-PKG_UPLOAD_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
 
-    "type": "object",
-    "properties": {
-        "tags": {
-            "type": "array",
-            "minItems": 0,
-            "items": {"type": "string"},
-            "uniqueItems": True
-        },
-        "categories": {
-            "type": "array",
-            "minItems": 0,
-            "items": {"type": "string"},
-            "uniqueItems": True
-        },
-        "description": {"type": "string"},
-        "name": {"type": "string"},
-        "is_public": {"type": "boolean"},
-        "enabled": {"type": "boolean"}
-    },
-    "additionalProperties": False
-}
+LOG = logging.getLogger(__name__)
+API_NAME = 'Schemas'
 
-PKG_UPDATE_SCHEMA = {
-    "$schema": "http://json-schema.org/draft-04/schema#",
 
-    "type": "object",
-    "properties": {
-        "tags": {
-            "type": "array",
-            "items": {"type": "string"},
-            "uniqueItems": True
-        },
-        "categories": {
-            "type": "array",
-            "items": {"type": "string"},
-            "uniqueItems": True
-        },
-        "description": {"type": "string"},
-        "name": {"type": "string"},
-        "is_public": {"type": "boolean"},
-        "enabled": {"type": "boolean"}
-    },
-    "additionalProperties": False,
-    "minProperties": 1,
-}
+class Controller(object):
+    @request_statistics.stats_count(API_NAME, 'GetSchema')
+    def get_schema(self, request, class_name, method_names=None):
+        LOG.debug('GetSchema:GetSchema')
+        target = {"class_name": class_name}
+        policy.check("get_schema", request.context, target)
+        class_version = request.GET.get('classVersion')
+        package_name = request.GET.get('packageName')
+        credentials = {
+            'token': request.context.auth_token,
+            'project_id': request.context.tenant
+        }
+
+        try:
+            methods = (list(
+                six.moves.map(six.text_type.strip, method_names.split(',')))
+                if method_names else [])
+            return rpc.engine().generate_schema(
+                credentials, class_name, methods,
+                class_version, package_name)
+        except client.RemoteError as e:
+            if e.exc_type in ('NoClassFound',
+                              'NoPackageForClassFound',
+                              'NoPackageFound'):
+                raise exc.HTTPNotFound(e.value)
+            raise
+
+
+def create_resource():
+    return wsgi.Resource(Controller())

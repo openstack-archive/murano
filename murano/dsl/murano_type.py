@@ -538,3 +538,21 @@ def _create_meta_class(cls, name, ns_resolver, data, package, *args, **kwargs):
     meta_cls.cardinality = cardinality
     meta_cls.inherited = inherited
     return meta_cls
+
+
+def weigh_type_hierarchy(cls):
+    """Weighs classes in type hierarchy by their distance from the root
+
+    :param cls: root of hierarchy
+    :return: dictionary that has class name as keys and distance from the root
+             a values. Root class has always a distance of 0. If the class
+             (or different versions of that class) is achievable through
+             several paths the shortest distance is used.
+    """
+
+    result = {}
+    for c, w in helpers.traverse(
+            [(cls, 0)], lambda t: six.moves.map(
+                lambda p: (p, t[1] + 1), t[0].parents(cls))):
+        result.setdefault(c.name, w)
+    return result

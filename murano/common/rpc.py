@@ -43,6 +43,16 @@ class EngineClient(object):
     def call_static_action(self, task):
         return self._client.call({}, 'call_static_action', task=task)
 
+    def generate_schema(self, credentials, class_name, method_names=None,
+                        class_version=None, package_name=None):
+        return self._client.call(
+            credentials, 'generate_schema',
+            class_name=class_name,
+            method_names=method_names,
+            class_version=class_version,
+            package_name=package_name
+        )
+
 
 def api():
     global TRANSPORT
