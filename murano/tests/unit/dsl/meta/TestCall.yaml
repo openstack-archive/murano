@@ -1,0 +1,45 @@
+Name: OtherClass
+
+Methods:
+  toCall:
+    Arguments:
+      - source:
+          Contract: $.string()
+      - foo:
+          Contract: $
+      - bar:
+          Contract: $
+      - baz:
+          Contract: $
+    Body:
+      - trace('called as ' + $source)
+
+  staticMethod:
+    Usage: Static
+    Body:
+      - trace('called as static')
+--- # ------------------------------------------------------------------------
+
+Name: TestCall
+
+Methods:
+  .init:
+    Body:
+      - $.other: new(OtherClass)
+
+  testCall:
+    Body:
+      - call('toCall', ['call', 'foo'], {baz=>1, bar=>2}, $.other)
+
+  testMethodInvocation:
+    Body:
+      - $.other.toCall('method', 'foo', baz=>baz, bar=>bar)
+
+  testCallStatic:
+    Body:
+      - call('staticMethod', [], {}, :OtherClass)
+
+  testCallStaticAsInstance:
+    Body:
+      - call('staticMethod', [], {}, $.other)
+--- # ------------------------------------------------------------------------

@@ -14,6 +14,7 @@
 
 import eventlet
 import six
+from yaql.language import expressions
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -201,6 +202,27 @@ def is_instance_of(obj, type_):
     return type_.type.is_compatible(obj)
 
 
+@specs.name('call')
+@specs.parameter('name', yaqltypes.String())
+@specs.parameter('args', yaqltypes.Sequence())
+@specs.parameter('kwargs', utils.MappingType)
+@specs.inject('op_dot', yaqltypes.Delegate('#operator_.', with_context=True))
+@specs.inject('base', yaqltypes.Super(with_context=True))
+def call_func(context, op_dot, base, name, args, kwargs,
+              receiver=utils.NO_VALUE):
+    if isinstance(receiver, (dsl_types.MuranoObject,
+                             dsl_types.MuranoTypeReference)):
+        kwargs = utils.filter_parameters_dict(kwargs)
+        args += tuple(
+            expressions.MappingRuleExpression(expressions.KeywordConstant(key),
+                                              value)
+            for key, value in six.iteritems(kwargs))
+        function = expressions.Function(name, *args)
+        return op_dot(context, receiver, function)
+    else:
+        return base(context, name, args, kwargs, receiver)
+
+
 def register(context, runtime_version):
     context.register_function(cast)
     context.register_function(new)
@@ -226,6 +248,7 @@ def register(context, runtime_version):
         context.register_function(type_legacy)
     else:
         context.register_function(type_)
+    context.register_function(call_func)
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context = context.create_child_context()
