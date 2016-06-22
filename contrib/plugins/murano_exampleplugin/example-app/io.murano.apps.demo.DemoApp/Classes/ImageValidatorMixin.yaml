@@ -1,6 +1,7 @@
 Namespaces:
   =: io.murano.apps.example.plugin
   res: io.murano.resources
+  std: io.murano
 
 Name: ImageValidatorMixin
 
