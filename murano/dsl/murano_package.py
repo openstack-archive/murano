@@ -13,8 +13,10 @@
 #    under the License.
 
 import inspect
+import warnings
 import weakref
 
+import debtcollector
 import semantic_version
 import six
 from yaql.language import specs
@@ -188,6 +190,24 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
                 try:
                     return referenced_package.find_class(name, False)
                 except exceptions.NoClassFound:
+                    if name.startswith('io.murano.extensions'):
+                        try:
+                            short_name = name.replace(
+                                'io.murano.extensions.', '', 1)
+                            result = referenced_package.find_class(
+                                short_name, False)
+                            warnings.simplefilter("once")
+                            msg = ("Plugin %(name)s was not found, but a "
+                                   "%(shorter_name)s was found instead and "
+                                   "will be used. This could be caused by "
+                                   "recent change in plugin naming scheme. If "
+                                   "you are developing applications targeting "
+                                   "this plugin consider changing its name" %
+                                   {'name': name, 'shorter_name': short_name})
+                            debtcollector.deprecate(msg)
+                            return result
+                        except exceptions.NoClassFound:
+                            pass
                     pkgs_for_search.append(referenced_package)
                     continue
             raise exceptions.NoClassFound(
