@@ -75,7 +75,7 @@ class GlanceClient(object):
         LOG.debug("Creating a glance client")
         params = auth_utils.get_session_client_parameters(
             service_type='image', conf=CONF, region=region)
-        return glanceclient.Client(CONF.api_version, **params)
+        return glanceclient.Client(CONF.images.api_version, **params)
 
 
 class AmbiguousNameException(Exception):
