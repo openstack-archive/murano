@@ -17,11 +17,11 @@ from murano.db import session as db_session
 
 stats = None
 
-SUPPORTED_PARAMS = ('id', 'order_by', 'category', 'marker', 'tag',
+SUPPORTED_PARAMS = {'id', 'order_by', 'category', 'marker', 'tag',
                     'class_name', 'limit', 'type', 'fqn', 'category', 'owned',
-                    'search', 'include_disabled', 'sort_dir', 'name')
-LIST_PARAMS = ('id', 'category', 'tag', 'class', 'order_by')
-ORDER_VALUES = ('fqn', 'name', 'created')
+                    'search', 'include_disabled', 'sort_dir', 'name'}
+LIST_PARAMS = {'id', 'category', 'tag', 'class', 'order_by'}
+ORDER_VALUES = {'fqn', 'name', 'created'}
 PKG_PARAMS_MAP = {'display_name': 'name',
                   'full_name': 'fully_qualified_name',
                   'ui': 'ui_definition',
