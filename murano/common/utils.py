@@ -14,6 +14,7 @@
 
 import collections
 import functools as func
+import re
 
 import jsonschema
 from oslo_log import log as logging
@@ -177,3 +178,57 @@ def validate_body(schema):
                 return f(*args, **kwargs)
         return f_validate_body
     return deco_validate_body
+
+
+def validate_quotes(value):
+    """Validate filter values
+
+    Validation opening/closing quotes in the expression.
+    """
+    open_quotes = True
+    count_backslash_in_row = 0
+    for i in range(len(value)):
+        if value[i] == '"':
+            if count_backslash_in_row % 2:
+                continue
+            if open_quotes:
+                if i and value[i - 1] != ',':
+                    msg = _("Invalid filter value %s. There is no comma "
+                            "before opening quotation mark.") % value
+                    raise ValueError(msg)
+            else:
+                if i + 1 != len(value) and value[i + 1] != ",":
+                    msg = _("Invalid filter value %s. There is no comma "
+                            "after opening quotation mark.") % value
+                    raise ValueError(msg)
+            open_quotes = not open_quotes
+        elif value[i] == '\\':
+            count_backslash_in_row += 1
+        else:
+            count_backslash_in_row = 0
+    if not open_quotes:
+        msg = _("Invalid filter value %s. The quote is not closed.") % value
+        raise ValueError(msg)
+    return True
+
+
+def split_for_quotes(value):
+    """Split filter values
+
+    Split values by commas and quotes for 'in' operator, according api-wg.
+    """
+    validate_quotes(value)
+    tmp = re.compile(r'''
+        "(                 # if found a double-quote
+           [^\"\\]*        # take characters either non-quotes or backslashes
+           (?:\\.          # take backslashes and character after it
+            [^\"\\]*)*     # take characters either non-quotes or backslashes
+         )                 # before double-quote
+        ",?                # a double-quote with comma maybe
+        | ([^,]+),?        # if not found double-quote take any non-comma
+                           # characters with comma maybe
+        | ,                # if we have only comma take empty string
+        ''', re.VERBOSE)
+    val_split = [val[0] or val[1] for val in re.findall(tmp, value)]
+    replaced_inner_quotes = [s.replace(r'\"', '"') for s in val_split]
+    return replaced_inner_quotes
