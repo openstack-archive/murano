@@ -95,6 +95,7 @@ All tests are kept in *sanity_check.py* and divided into 10 test suites:
   * TestSuiteRepository - verification of importing packages and bundles.
   * TestSuitePackageCategory - verification of main operations with categories.
   * TestSuiteCategoriesPagination - verification of categories pagination in case of many categories created.
+  * TestSuiteMultipleEnvironments - verification of ability to apply action to multiple environments.
 
 To specify which tests/suite to run, pass test/suite names on the command line:
 
