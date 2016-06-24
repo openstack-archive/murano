@@ -202,6 +202,15 @@ function configure_murano {
     fi
 }
 
+# set the murano packages service backend
+function set_packages_service_backend() {
+    if is_murano_backend_glare; then
+        MURANO_PACKAGES_SERVICE='glare'
+    else
+        MURANO_PACKAGES_SERVICE='murano'
+    fi
+}
+
 # install_murano_apps() - Install Murano apps from repository murano-apps, if required
 function install_murano_apps() {
     if [[ -z $MURANO_APPS ]]; then
@@ -210,6 +219,8 @@ function install_murano_apps() {
 
     # clone murano-apps only if app installation is required
     git_clone $MURANO_APPS_REPO $MURANO_APPS_DIR $MURANO_APPS_BRANCH
+
+    set_packages_service_backend
 
     # install Murano apps defined in the comma-separated list $MURANO_APPS
     for murano_app in ${MURANO_APPS//,/ }; do
@@ -223,6 +234,7 @@ function install_murano_apps() {
                        --os-tenant-name $OS_PROJECT_NAME \
                        --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
                        --murano-url http://127.0.0.1:8082 \
+                       --murano-packages-service $MURANO_PACKAGES_SERVICE \
                        package-import \
                        --is-public \
                        --exists-action u \
@@ -263,11 +275,9 @@ function init_murano() {
 
 function setup_core_library() {
     prepare_core_library
-    if is_murano_backend_glare; then
-        MURANO_PACKAGES_SERVICE='glare'
-    else
-        MURANO_PACKAGES_SERVICE='murano'
-    fi
+
+    set_packages_service_backend
+
     murano --os-username admin \
            --os-password $ADMIN_PASSWORD \
            --os-tenant-name admin \
