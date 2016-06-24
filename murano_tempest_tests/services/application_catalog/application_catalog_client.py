@@ -279,7 +279,8 @@ class ApplicationCatalogClient(rest_client.RestClient):
         return self._parse_resp(body)
 
     def create_env_template(self, env_template_name):
-        body = {'name': env_template_name, "is_public": False}
+        body = {'name': env_template_name, "is_public": False,
+                "description_text": "description"}
         uri = 'v1/templates'
         resp, body = self.post(uri, json.dumps(body))
         self.expected_success(200, resp.status)

@@ -58,11 +58,12 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'id': 'env_template_id',
                     'is_public': False,
                     'name': 'mytemp',
+                    'description_text': 'description',
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1]}
 
-        body = {'name': 'mytemp'}
+        body = {'name': 'mytemp', 'description_text': 'description'}
         req = self._post('/templates', jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
 
@@ -337,6 +338,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
             created=fake_now,
             updated=fake_now,
             tenant_id=self.tenant,
+            description_text='',
             description={
                 'name': 'my-temp',
                 '?': {'id': '12345'}
@@ -418,6 +420,7 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'id': self.uuids[0],
                     'is_public': False,
                     'name': 'env_template_name',
+                    'description_text': '',
                     'version': 0,
                     'created': timeutils.isotime(fake_now)[:-1],
                     'updated': timeutils.isotime(fake_now)[:-1]}

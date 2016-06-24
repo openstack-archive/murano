@@ -34,6 +34,7 @@ class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
             create_env_template(name)
         self.assertFalse(env_template['is_public'])
         self.assertEqual(name, env_template['name'])
+        self.assertEqual("description", env_template['description_text'])
         env_templates_list = self.application_catalog_client.\
             get_env_templates_list()
         self.assertIn(env_template, env_templates_list)
