@@ -163,3 +163,80 @@ Methods:
 
   testAction:
     Scope: Public
+
+---
+
+Name: TestedTarget
+
+Properties:
+  prop:
+    Contract:
+      - $.string()
+Methods:
+  foo:
+    Arguments:
+      - contracted:
+          Contract:
+            - $.string()
+    Body:
+      - Return: $contracted[2]
+
+  wildList:
+    Arguments:
+      - contracted:
+          Contract:
+            - $
+    Body:
+      - Return: $contracted[1][2]
+
+  wildContract:
+    Arguments:
+      - untyped:
+          Contract: $
+    Body:
+      - Return: $untyped[1]
+
+  typedList:
+    Arguments:
+      - contracted:
+          Contract:
+            - [$.string()]
+    Body:
+      - Return: $contracted[1][2]
+
+  dictArgs:
+    Arguments:
+      - arg:
+          Contract: {$.string(): [$.int()]}
+    Body:
+      - Return: $arg.get('a')[1]
+
+---
+
+Name: TestIteratorsTransform
+Methods:
+  testProperties:
+    Body:
+      - $.target: new(TestedTarget, $this, prop => ['1', '2', '3'].where($))
+      - Return: $.target.prop[2]
+  testArgs:
+    Body:
+      - $.target: new(TestedTarget, $this)
+      - Return: $.target.foo(['1', '2', '3'].where($))
+  testUntypedArgs:
+    Body:
+      - $.target: new(TestedTarget, $this)
+      - Return: $.target.wildContract(['1', '2', '3'].where($))
+  testNotTypedListArgs:
+    Body:
+      - $.target: new(TestedTarget, $this)
+      - Return: $.target.wildList([['1', '2', '3'].where($), ['4', '5', '6'].where($)].where($))
+  testTypedList:
+    Body:
+      - $.target: new(TestedTarget, $this)
+      - Return: $.target.typedList([['1', '2', '3'].where($), ['4', '5', '6'].where($)].where($))
+  testListDict:
+    Body:
+      - $.target: new(TestedTarget, $this)
+      - Return: $.target.dictArgs({'a' => [1, 2, 4].where($)})
+
