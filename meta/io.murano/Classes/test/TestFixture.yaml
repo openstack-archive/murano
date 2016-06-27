@@ -12,6 +12,10 @@
 
 Namespaces:
   =: io.murano.test
+  std: io.murano
+  sys: io.murano.system
+  res: io.murano.resources
+--- # ------------------------------------------------------------------ # ---
 
 Name: TestFixture
 
@@ -21,3 +25,59 @@ Methods:
 
   tearDown:
     Body:
+
+--- # ------------------------------------------------------------------ # ---
+Name: DummyNetwork
+Extends: res:Network
+
+Methods:
+  joinInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(res:Instance).notNull()
+      - securityGroupName:
+          Contract: $.string()
+      - assignFloatingIp:
+          Contract: $.bool().notNull()
+      - sharedIps:
+          Contract:
+            - $.class(std:SharedIp)
+    Body:
+      - Return: {}
+
+  generateSecurityGroupManager:
+    Arguments:
+      - environment:
+          Contract: $.class(std:Environment).notNull()
+    Body:
+      - Return: new(sys:SecurityGroupManager, environment => $environment)
+
+  describe:
+    Body:
+      - Return: {}
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestFixtureWithEnvironment
+Extends: TestFixture
+
+Properties:
+  environment:
+    Usage: Runtime
+    Contract: $.class(std:Environment)
+
+Methods:
+  setUp:
+    Body:
+      - $testClassName: typeinfo($).name
+      - $envName: format('environment-of-testclass-{0}', $testClassName)
+      - $netName: format('default-network-of-testclass-{0}', $testClassName)
+      - $envSnippet:
+          Objects:
+            std:Environment:
+              name: $envName
+              defaultNetworks:
+                environment:
+                  :DummyNetwork:
+
+      - $this.environment: $this.load($envSnippet)
