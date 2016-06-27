@@ -143,3 +143,8 @@ class TestStatics(test_case.DslTestCase):
         self.assertRaises(
             yaql_exceptions.NoMatchingMethodException,
             self._runner.testCallStaticMethodOnInvalidClass)
+
+    def test_static_method_callable_from_python(self):
+        self.assertEqual(
+            'It works!',
+            self._runner.on_class('test.TestStatics').testStaticAction())

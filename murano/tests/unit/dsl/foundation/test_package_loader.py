@@ -100,7 +100,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
             for name, method in six.iteritems(data.get('Methods') or data.get(
                     'Workflow') or {}):
                 if name.startswith('test'):
-                    method['Usage'] = 'Action'
+                    method['Scope'] = 'Public'
 
             ns = namespace_resolver.NamespaceResolver(last_ns)
             class_name = ns.resolve_name(data['Name'])

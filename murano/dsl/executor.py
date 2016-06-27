@@ -91,7 +91,9 @@ class MuranoDslExecutor(object):
                     'Method {0} cannot be called on receiver {1}'.format(
                         method, this))
 
-            return stub(yaql_engine, method_context, this.real_this)(
+            real_this = this.real_this if isinstance(
+                this, dsl_types.MuranoObject) else this.get_reference()
+            return stub(yaql_engine, method_context, real_this)(
                 *args, **kwargs)
 
         if context[constants.CTX_ACTIONS_ONLY] and not method.is_action:
