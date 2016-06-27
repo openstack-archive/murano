@@ -30,6 +30,7 @@ from murano import version
 from murano.common.i18n import _, _LE
 from murano.common import config
 from murano.common import engine
+from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import executor
 from murano.dsl import helpers
@@ -151,8 +152,9 @@ class MuranoTestRunner(object):
         return class_to_methods
 
     def _call_service_method(self, name, exc, obj):
-        if name in obj.type.methods:
-            obj.type.methods[name].usage = 'Action'
+        if name in obj.type.all_method_names:
+            method = obj.type.find_single_method(name)
+            method.scope = dsl_types.MethodScopes.Public
             LOG.debug('Executing: {0}.{1}'.format(obj.type.name, name))
             obj.type.invoke(name, exc, obj, (), {})
 
