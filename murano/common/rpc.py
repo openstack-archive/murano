@@ -40,6 +40,9 @@ class EngineClient(object):
     def handle_task(self, task):
         return self._client.cast({}, 'handle_task', task=task)
 
+    def call_static_action(self, task):
+        return self._client.call({}, 'call_static_action', task=task)
+
 
 def api():
     global TRANSPORT

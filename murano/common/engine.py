@@ -57,7 +57,7 @@ class EngineService(service.Service):
         self.server = None
 
     def start(self):
-        endpoints = [TaskProcessingEndpoint()]
+        endpoints = [TaskProcessingEndpoint(), StaticActionEndpoint()]
 
         transport = messaging.get_transport(CONF)
         s_target = target.Target('murano', 'tasks', server=str(uuid.uuid4()))
@@ -125,6 +125,25 @@ class TaskProcessingEndpoint(object):
         finally:
             LOG.info(_LI('Finished processing task: {task_desc}').format(
                 task_desc=jsonutils.dumps(result)))
+
+
+class StaticActionEndpoint(object):
+    @classmethod
+    def call_static_action(cls, context, task):
+        s_task = token_sanitizer.TokenSanitizer().sanitize(task)
+        LOG.info(_LI('Starting execution of static action: '
+                     '{task_desc}').format(task_desc=jsonutils.dumps(s_task)))
+
+        result = None
+        reporter = status_reporter.StatusReporter(task['id'])
+
+        try:
+            task_executor = StaticActionExecutor(task, reporter)
+            result = task_executor.execute()
+            return result
+        finally:
+            LOG.info(_LI('Finished execution of static action: '
+                     '{task_desc}').format(task_desc=jsonutils.dumps(result)))
 
 
 class TaskExecutor(object):
@@ -288,3 +307,49 @@ class TaskExecutor(object):
             auth_utils.delete_trust(self._session.trust_id)
             self._session.system_attributes['TrustId'] = None
             self._session.trust_id = None
+
+
+class StaticActionExecutor(object):
+    @property
+    def action(self):
+        return self._action
+
+    @property
+    def session(self):
+        return self._session
+
+    def __init__(self, task, reporter=None):
+        if reporter is None:
+            reporter = status_reporter.StatusReporter(task['id'])
+        self._action = task['action']
+        self._session = execution_session.ExecutionSession()
+        self._session.token = task['token']
+        self._session.project_id = task['tenant_id']
+        self._reporter = reporter
+        self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
+            self._session)
+
+    def execute(self):
+        with package_loader.CombinedPackageLoader(self._session) as pkg_loader:
+            get_plugin_loader().register_in_loader(pkg_loader)
+            executor = dsl_executor.MuranoDslExecutor(pkg_loader,
+                                                      ContextManager())
+            action_result = self._invoke(executor)
+            action_result = serializer.serialize(action_result, executor)
+            return action_result
+
+    def _invoke(self, mpl_executor):
+        class_name = self.action['class_name']
+        pkg_name = self.action['pkg_name']
+        class_version = self.action['class_version']
+        version_spec = helpers.parse_version_spec(class_version)
+        if pkg_name:
+            package = mpl_executor.package_loader.load_package(
+                pkg_name, version_spec)
+        else:
+            package = mpl_executor.package_loader.load_class_package(
+                class_name, version_spec)
+        cls = package.find_class(class_name, search_requirements=False)
+        method_name, kwargs = self.action['method'], self.action['args']
+
+        return cls.invoke(method_name, mpl_executor, None, (), kwargs)

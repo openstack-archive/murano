@@ -963,3 +963,77 @@ Json, describing action result is returned. Result type and value are provided.
       "isException": false,
         "result": ["item1", "item2"]
     }
+
+
+Static Actions API
+==================
+
+Static actions are MuranoPL methods that can be called on a MuranoPL class
+without deploying actual applications and usually return a result.
+
+Execute a static action
+-----------------------
+
+Invoke public static method of the specified MuranoPL class.
+Input parameters may be provided if method requires them.
+
+*Request*
+
+**Content-Type**
+  application/json
+
++----------------+-----------------------------------------------------------+------------------------------------+
+| Method         | URI                                                       | Header                             |
++================+===========================================================+====================================+
+| POST           | /actions                                                  |                                    |
++----------------+-----------------------------------------------------------+------------------------------------+
+
+::
+
+  {
+      "className": "my.class.fqn",
+      "methodName": "myMethod",
+      "packageName": "optional.package.fqn",
+      "classVersion": "1.2.3",
+      "parameters": {
+          "arg1": "value1",
+          "arg2": "value2"
+      }
+   }
+
++-----------------+------------+-----------------------------------------------------------------------------+
+| Attribute       | Type       | Description                                                                 |
++=================+============+=============================================================================+
+| className       | string     | Fully qualified name of MuranoPL class with static method                   |
++-----------------+------------+-----------------------------------------------------------------------------+
+| methodName      | string     | Name of the method to invoke                                                |
++-----------------+------------+-----------------------------------------------------------------------------+
+| packageName     | string     | Fully qualified name of a package with the MuranoPL class (optional)        |
++-----------------+------------+-----------------------------------------------------------------------------+
+| classVersion    | string     | Class version specification, "=0" by default                                |
++-----------------+------------+-----------------------------------------------------------------------------+
+| parameters      | object     | Key-value pairs of method parameter names and their values, "{}" by default |
++-----------------+------------+-----------------------------------------------------------------------------+
+
+*Response*
+
+JSON-serialized result of the static method execution.
+
+HTTP codes:
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Action was executed successfully                      |
++----------------+-----------------------------------------------------------+
+| 400            | Bad request. The format of the body is invalid, method    |
+|                | doesn't match provided arguments, mandatory arguments are |
+|                | not provided                                              |
++----------------+-----------------------------------------------------------+
+| 403            | User is not allowed to execute the action                 |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified class, package or method doesn't     |
+|                | exist or method is not exposed                            |
++----------------+-----------------------------------------------------------+
+| 503            | Unhandled exception in the action                         |
++----------------+-----------------------------------------------------------+

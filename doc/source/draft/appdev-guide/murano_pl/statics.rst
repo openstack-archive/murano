@@ -54,8 +54,8 @@ particular version of the class).
 Declaration of static methods and properties
 --------------------------------------------
 
-Methods and properties are declared to be static by specifying ``Usage: Static``
-on them.
+Methods and properties are declared to be static by specifying
+``Usage: Static`` on them.
 
 For example:
 
@@ -74,9 +74,10 @@ For example:
 
 Static properties are never initialized from object model but can be modified
 from within MuranoPL code (i.e. they are not immutable).
-Static methods cannot be executed as an `Action` from outside. Within static
-method `Body` ``$this`` (and ``$`` if not set to something else in expression)
-are set to type object rather than to instance, as it is for regular methods.
+Static methods also can be executed as an action from outside using
+``Scope: Public``. Within static method `Body` ``$this`` (and ``$`` if not
+set to something else in expression) are set to type object rather than to
+instance, as it is for regular methods.
 
 
 Static methods written in Python

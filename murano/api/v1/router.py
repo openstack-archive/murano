@@ -22,6 +22,7 @@ from murano.api.v1 import instance_statistics
 from murano.api.v1 import request_statistics
 from murano.api.v1 import services
 from murano.api.v1 import sessions
+from murano.api.v1 import static_actions
 from murano.api.v1 import template_applications
 from murano.api.v1 import templates
 from murano.common import wsgi
@@ -205,6 +206,12 @@ class API(wsgi.Router):
                        controller=actions_resource,
                        action='get_result',
                        conditions={'method': ['GET']})
+
+        static_actions_resource = static_actions.create_resource()
+        mapper.connect('/actions',
+                       controller=static_actions_resource,
+                       action='execute',
+                       conditions={'method': ['POST']})
 
         catalog_resource = catalog.create_resource()
         mapper.connect('/catalog/packages/categories',

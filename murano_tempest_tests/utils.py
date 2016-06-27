@@ -25,7 +25,7 @@ MANIFEST = {'Format': 'MuranoPL/1.0',
 
 
 def compose_package(app_name, manifest, package_dir,
-                    require=None, archive_dir=None):
+                    require=None, archive_dir=None, add_class_name=False):
     """Composes a murano package
 
     Composes package `app_name` with `manifest` file as a template for the
@@ -44,6 +44,14 @@ def compose_package(app_name, manifest, package_dir,
             mfest_copy['Require'] = require
         f.write(yaml.dump(mfest_copy, default_flow_style=False))
 
+    if add_class_name:
+        class_file = os.path.join(package_dir, 'Classes', 'mock_muranopl.yaml')
+        with open(class_file, 'r+') as f:
+            line = ''
+            while line != '# Write name into next line\n':
+                line = f.readline()
+            f.write('Name: {0}'.format(app_name))
+
     name = app_name + '.zip'
 
     if not archive_dir:
@@ -61,11 +69,12 @@ def compose_package(app_name, manifest, package_dir,
     return archive_path, name
 
 
-def prepare_package(name, require=None):
+def prepare_package(name, require=None, add_class_name=False):
     """Prepare package.
 
     :param name: Package name to compose
     :param require: Parameter 'require' for manifest
+    :param add_class_name: Option to write class name to class file
     :return: Path to archive, directory with archive, filename of archive
     """
     app_dir = acquire_package_directory()
@@ -73,7 +82,8 @@ def prepare_package(name, require=None):
 
     arc_path, filename = compose_package(
         name, os.path.join(app_dir, 'manifest.yaml'),
-        app_dir, require=require, archive_dir=target_arc_path)
+        app_dir, require=require, archive_dir=target_arc_path,
+        add_class_name=add_class_name)
     return arc_path, target_arc_path, filename
 
 

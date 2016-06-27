@@ -77,6 +77,10 @@ class NoObjectFoundError(Exception):
             'Object "%s" is not found in object store' % object_id)
 
 
+class MethodNotExposed(Exception):
+    pass
+
+
 class AmbiguousMethodName(Exception):
     def __init__(self, name):
         super(AmbiguousMethodName, self).__init__(
