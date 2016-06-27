@@ -1,0 +1,6 @@
+---
+fixes:
+  - test-runner now outputs the running tests and their results to stdout
+    directly, not via a logging system
+  - test-runner now does not output logs to stderr by default unless a
+    'use_stderr' parameter is specified in configuration file

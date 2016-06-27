@@ -24,6 +24,7 @@ from oslo_config import cfg
 from oslo_db import options
 from oslo_log import log as logging
 from oslo_utils import importutils
+from oslo_utils import timeutils
 import six
 
 from murano import version
@@ -45,6 +46,11 @@ options.set_defaults(CONF)
 
 BASE_CLASS = 'io.murano.test.TestFixture'
 TEST_CASE_NAME = re.compile('^test(?![a-z])')
+
+OK_COLOR = '\033[92m'
+FAIL_COLOR = '\033[91m'
+END_COLOR = '\033[0m'
+
 
 if os.name == 'nt':
     # eventlet monkey patching causes subprocess.Popen to fail on Windows
@@ -194,6 +200,9 @@ class MuranoTestRunner(object):
             self.parser.print_help()
         sys.exit(1)
 
+    def message(self, msg):
+        sys.stdout.write('{0}\n'.format(msg))
+
     def run_tests(self):
         exit_code = 0
         provided_pkg_name = self.args.package
@@ -218,13 +227,25 @@ class MuranoTestRunner(object):
             run_set = self._get_methods_to_run(package,
                                                tests_to_run,
                                                class_to_methods)
+            max_length = 0
+            num_tests = 0
+            for pkg_class, test_cases in six.iteritems(run_set):
+                for m in test_cases:
+                    max_length = max(max_length, len(pkg_class)+len(m)+1)
+                num_tests += len(test_cases)
+            max_length += 3
+
             if run_set:
                 LOG.debug('Starting test execution.')
+                self.message('About to execute {0} tests(s)'.format(num_tests))
             else:
                 msg = _('No tests found for execution.')
                 LOG.error(msg)
                 self.error(msg)
 
+            run_count = 0
+            error_count = 0
+            started = timeutils.utcnow()
             for pkg_class, test_cases in six.iteritems(run_set):
                 for m in test_cases:
                     # Create new executor for each test case to provide
@@ -235,22 +256,45 @@ class MuranoTestRunner(object):
                         test_session)
                     obj = package.find_class(pkg_class, False).new(
                         None, dsl_executor.object_store, dsl_executor)(None)
+
+                    test_name = "{0}.{1}".format(obj.type.name, m)
+                    dots_number = max_length - len(test_name)
+                    msg = "{0} {1} ".format(test_name, '.' * dots_number)
+                    sys.stdout.write(msg)
+                    sys.stdout.flush()
                     self._call_service_method('setUp', dsl_executor, obj)
                     obj.type.methods[m].usage = 'Action'
-
                     test_session.start()
                     try:
+                        run_count += 1
                         obj.type.invoke(m, dsl_executor, obj, (), {})
-                        LOG.debug('\n.....{0}.{1}.....OK'.format(obj.type.name,
-                                                                 m))
                         self._call_service_method(
                             'tearDown', dsl_executor, obj)
-                    except Exception:
-                        LOG.exception('\n.....{0}.{1}.....FAILURE\n'
-                                      ''.format(obj.type.name, m))
+                        msg = '{0}{1}{2}\n'.format(OK_COLOR, 'OK', END_COLOR)
+                        LOG.debug('Test {0} successful'.format(test_name))
+                        sys.stdout.write(msg)
+                        sys.stdout.flush()
+                    except Exception as e:
+                        error_count += 1
+                        msg = '{0}{1}: {2}{3}\n'.format(FAIL_COLOR,
+                                                        'FAIL!',
+                                                        e,
+                                                        END_COLOR)
+                        sys.stdout.write(msg)
+                        sys.stdout.flush()
+
+                        LOG.exception('Test {0} failed'.format(test_name))
                         exit_code = 1
                     finally:
                         test_session.finish()
+            completed = timeutils.utcnow()
+            self.message('Executed {0} tests in {1} seconds: '
+                         '{2} passed, '
+                         '{3} failed'.format(run_count,
+                                             timeutils.delta_seconds(
+                                                 started, completed),
+                                             run_count-error_count,
+                                             error_count))
         return exit_code
 
     def get_parser(self):
@@ -309,6 +353,7 @@ def main():
                     default_config_files = [murano_conf]
         sys.argv = [sys.argv[0]]
         config.parse_args(default_config_files=default_config_files)
+        CONF.set_default('use_stderr', False)
         logging.setup(CONF, 'murano')
     except RuntimeError as e:
         LOG.exception(_LE("Failed to initialize murano-test-runner: %s") % e)
