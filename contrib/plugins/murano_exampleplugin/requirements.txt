@@ -1,1 +1,1 @@
-python-glanceclient>=0.15.0
+python-glanceclient>=2.0.0  # Apache-2.0
