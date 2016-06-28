@@ -332,6 +332,14 @@ class ApplicationCatalogClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return json.loads(body)
 
+    def update_service_from_env_template(self, env_template_id, service_id,
+                                         post_body):
+        uri = 'v1/templates/{0}/services/{1}'.format(env_template_id,
+                                                     service_id)
+        resp, body = self.put(uri, json.dumps(post_body))
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
     def delete_service_from_env_template(self, env_template_name, service_id):
         uri = 'v1/templates/{0}/services/{1}'.format(env_template_name,
                                                      service_id)

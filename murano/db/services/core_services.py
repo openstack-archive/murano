@@ -229,3 +229,36 @@ class CoreServices(object):
         utils.TraverseHelper.remove(path, tmp_description)
         save_description(tmp_description, env_template_id)
         return tmp_description
+
+    @staticmethod
+    def put_application_data(env_template_id, data, path):
+        """It stores the application data inside the template description.
+
+        :param env_template_id: The env_template_id to obtain the data
+        :param data: the template description
+        :param path: Id of service for which we checking status.
+        :return: The template description
+        """
+        get_description = env_temp.EnvTemplateServices.get_description
+        save_description = env_temp.EnvTemplateServices.save_description
+
+        temp_description = get_description(env_template_id)
+        if temp_description is None:
+            msg = _('Environment Template <EnvId {0}> is not found').format(
+                env_template_id)
+            LOG.error(msg)
+            raise exc.HTTPNotFound(explanation=msg)
+
+        count = 0
+        id = path[1:].split('/')[-1]
+        for service in temp_description["services"]:
+            if service["?"]["id"]:
+                if service["?"]["id"] == id:
+                    break
+                count+1
+
+        utils.TraverseHelper.update("services/{0}".format(count),
+                                    data, temp_description)
+        temp_description['updated'] = str(timeutils.utcnow())
+        save_description(temp_description, env_template_id)
+        return data

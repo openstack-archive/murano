@@ -414,6 +414,86 @@ Get applications information from an environment template
 | 404            | The environment template does not exist                   |
 +----------------+-----------------------------------------------------------+
 
+Update applications information from an environment template
+------------------------------------------------------------
+
+*Request*
+
++----------+-----------------------------------------------+-----------------------------------+
+| Method   | URI                                           | Description                       |
++==========+===============================================+===================================+
+| PUT      | /templates/{env-temp-id}/services/{service-id}| It updates the service description|
++----------+-----------------------------------------------+-----------------------------------+
+
+*Parameters:*
+
+* `env-temp-id` - The environment template ID, required
+* `service-id` - The service ID to be updated
+* payload - the service description
+
+*Content-Type*
+  application/json
+
+*Example*
+
+::
+
+    {
+        "instance": {
+            "assignFloatingIp": "true",
+            "keyname": "mykeyname",
+            "image": "cloud-fedora-v3",
+            "flavor": "m1.medium",
+            "?": {
+                "type": "io.murano.resources.LinuxMuranoInstance",
+                "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+            }
+        },
+        "name": "orion",
+        "port": "8080",
+        "?": {
+            "type": "io.murano.apps.apache.Tomcat",
+            "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+        }
+    }
+
+*Response*
+
+::
+
+
+    {
+       "instance":
+       {
+           "assignFloatingIp": "true",
+           "keyname": "mykeyname",
+           "image": "cloud-fedora-v3",
+           "flavor": "m1.medium",
+           "?":
+           {
+               "type": "io.murano.resources.LinuxMuranoInstance",
+               "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+           }
+       },
+       "name": "orion",
+       "?":
+       {
+           "type": "io.murano.apps.apache.Tomcat",
+           "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+       },
+       "port": "8080"
+    }
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | OK. Environment Template updated successfully             |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized to access this session             |
++----------------+-----------------------------------------------------------+
+| 404            | The environment template does not exist                   |
++----------------+-----------------------------------------------------------+
+
 Create an environment from an environment template
 --------------------------------------------------
 

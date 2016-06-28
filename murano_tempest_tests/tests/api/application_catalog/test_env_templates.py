@@ -100,6 +100,22 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         self.assertNotIn(service, services)
 
     @testtools.testcase.attr('smoke')
+    def test_update_service_in_env_templates(self):
+        env_template_services = self.application_catalog_client.\
+            get_services_list_in_env_template(self.env_template['id'])
+        self.assertIsInstance(env_template_services, list)
+        post_body = self._get_demo_app()
+        service = self.application_catalog_client.\
+            create_service_in_env_template(self.env_template['id'], post_body)
+        self.assertEqual(post_body['name'], service['name'])
+        post_body["name"] = "updated_name"
+        service = self.application_catalog_client.\
+            update_service_from_env_template(self.env_template['id'],
+                                             service["?"]["id"],
+                                             post_body)
+        self.assertEqual("updated_name", service['name'])
+
+    @testtools.testcase.attr('smoke')
     def test_create_public_env_template(self):
         name = utils.generate_name('create_public_env_template')
         env_template = self.application_catalog_client.\
