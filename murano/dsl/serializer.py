@@ -25,17 +25,18 @@ class ObjRef(object):
         self.ref_obj = obj
 
 
-def serialize(obj):
-    return serialize_model(obj, None, True)[0]['Objects']
+def serialize(obj, executor):
+    return serialize_model(obj, executor, True)[0]['Objects']
 
 
-def _serialize_object(root_object, designer_attributes, allow_refs):
+def _serialize_object(root_object, designer_attributes, allow_refs,
+                      executor):
     serialized_objects = set()
 
     obj = root_object
     while True:
         obj, need_another_pass = _pass12_serialize(
-            obj, None, serialized_objects, designer_attributes)
+            obj, None, serialized_objects, designer_attributes, executor)
         if not need_another_pass:
             break
     tree = [obj]
@@ -44,10 +45,7 @@ def _serialize_object(root_object, designer_attributes, allow_refs):
 
 
 def serialize_model(root_object, executor, allow_refs=False):
-    if executor is not None:
-        designer_attributes = executor.object_store.designer_attributes
-    else:
-        designer_attributes = None
+    designer_attributes = executor.object_store.designer_attributes
 
     if root_object is None:
         tree = None
@@ -56,12 +54,10 @@ def serialize_model(root_object, executor, allow_refs=False):
         serialized_objects = set()
     else:
         tree, serialized_objects = _serialize_object(
-            root_object, designer_attributes, allow_refs)
-        tree_copy, _ = _serialize_object(root_object, None, allow_refs)
-        if executor is not None:
-            attributes = executor.attribute_store.serialize(serialized_objects)
-        else:
-            attributes = []
+            root_object, designer_attributes, allow_refs, executor)
+        tree_copy, _ = _serialize_object(root_object, None, allow_refs,
+                                         executor)
+        attributes = executor.attribute_store.serialize(serialized_objects)
 
     return {
         'Objects': tree,
@@ -70,19 +66,33 @@ def serialize_model(root_object, executor, allow_refs=False):
     }, serialized_objects
 
 
-def _serialize_available_action(obj, current_actions):
+def _serialize_available_action(obj, current_actions, executor):
     result = {}
     actions = obj.type.find_methods(lambda m: m.is_action)
     for action in actions:
         action_id = '{0}_{1}'.format(obj.object_id, action.name)
         entry = current_actions.get(action_id, {'enabled': True})
         entry['name'] = action.name
+        context = executor.create_type_context(action.declaring_type)
+        meta = action.get_meta(context)
+        meta_dict = {item.type.name: item for item in meta}
+        title = meta_dict.get('io.murano.metadata.Title')
+        if title:
+            entry['title'] = title.get_property('text')
+        else:
+            entry['title'] = action.name
+        description = meta_dict.get('io.murano.metadata.Description')
+        if description:
+            entry['description'] = description.get_property('text')
+        help_text = meta_dict.get('io.murano.metadata.HelpText')
+        if help_text:
+            entry['helpText'] = help_text.get_property('text')
         result[action_id] = entry
     return result
 
 
 def _pass12_serialize(value, parent, serialized_objects,
-                      designer_attributes_getter):
+                      designer_attributes_getter, executor):
     if isinstance(value, dsl.MuranoObjectInterface):
         value = value.object
     if isinstance(value, (six.string_types,
@@ -103,10 +113,11 @@ def _pass12_serialize(value, parent, serialized_objects,
             result['?'].update(designer_attributes_getter(value.object_id))
             # deserialize and merge list of actions
             result['?']['_actions'] = _serialize_available_action(
-                value, result['?'].get('_actions', {}))
+                value, result['?'].get('_actions', {}), executor)
         serialized_objects.add(value.object_id)
         return _pass12_serialize(
-            result, value, serialized_objects, designer_attributes_getter)
+            result, value, serialized_objects, designer_attributes_getter,
+            executor)
     elif isinstance(value, utils.MappingType):
         result = {}
         need_another_pass = False
@@ -115,7 +126,7 @@ def _pass12_serialize(value, parent, serialized_objects,
             result_key = str(d_key)
             result_value = _pass12_serialize(
                 d_value, parent, serialized_objects,
-                designer_attributes_getter)
+                designer_attributes_getter, executor)
             result[result_key] = result_value[0]
             if result_value[1]:
                 need_another_pass = True
@@ -125,7 +136,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         result = []
         for t in value:
             v, nmp = _pass12_serialize(
-                t, parent, serialized_objects, designer_attributes_getter)
+                t, parent, serialized_objects, designer_attributes_getter,
+                executor)
             if nmp:
                 need_another_pass = True
             result.append(v)

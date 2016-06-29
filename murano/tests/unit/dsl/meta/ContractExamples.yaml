@@ -1,5 +1,7 @@
 Name: ContractExamples
 
+Extends: CommonParent
+
 Properties:
   sampleClass:
     Contract: $.class(SampleClass1)
@@ -146,3 +148,18 @@ Methods:
     Body:
       Return: $arg
 
+  testActionMeta:
+    Scope: Public
+    Meta:
+      - io.murano.metadata.Title:
+          text: "Title of the method"
+      - io.murano.metadata.Description:
+          text: "Description of the method"
+      - io.murano.metadata.HelpText:
+          text: "HelpText of the method"
+
+  notAction:
+    Scope: Session
+
+  testAction:
+    Scope: Public

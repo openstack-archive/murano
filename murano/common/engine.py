@@ -225,7 +225,7 @@ class TaskExecutor(object):
                 self.session.finish()
 
         try:
-            action_result = serializer.serialize(action_result)
+            action_result = serializer.serialize(action_result, executor)
         except Exception as e:
             return self.exception_result(e, None, '<result>')
 
