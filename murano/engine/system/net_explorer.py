@@ -190,3 +190,7 @@ class NetworkExplorer(object):
 
     def list_ports(self):
         return self._client.list_ports()['ports']
+
+    @session_local_storage.execution_session_memoize
+    def list_neutron_extensions(self):
+        return self._client.list_extensions()['extensions']

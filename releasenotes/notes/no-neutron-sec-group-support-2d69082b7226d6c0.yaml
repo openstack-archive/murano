@@ -1,0 +1,5 @@
+---
+fixes:
+  - Murano is now able to deploy applications in the environments with disabled
+    Neutron Security Groups. Detection is based on the presence of
+    'security-group' Neutron extension.
