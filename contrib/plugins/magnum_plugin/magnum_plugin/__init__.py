@@ -60,7 +60,7 @@ class MagnumClient(object):
     def _create_magnum_client(region):
         session = auth_utils.get_token_client_session(conf=CONF)
         params = auth_utils.get_session_client_parameters(
-            service_type='container', region=region, conf=CONF,
+            service_type='container-infra', region=region, conf=CONF,
             session=session)
         return client.Client(**params)
 
