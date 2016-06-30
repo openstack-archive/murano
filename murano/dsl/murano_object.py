@@ -157,6 +157,9 @@ class MuranoObject(dsl_types.MuranoObject):
             init.invoke(executor, self.real_this, (), init_args, context)
             self.__initialized = True
 
+        if object_store is not None and not object_store.initializing:
+            object_store.put(self.real_this)
+
     @property
     def object_id(self):
         return self.__object_id

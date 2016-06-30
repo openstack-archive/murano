@@ -246,3 +246,6 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
     def test_is_operator(self):
         self.assertTrue(self._runner.testIsOperator())
         self.assertFalse(self._runner.testNegativeIsOperator())
+
+    def test_new_object_assignment(self):
+        self.assertTrue(self._runner.testNewObjectAssignment())

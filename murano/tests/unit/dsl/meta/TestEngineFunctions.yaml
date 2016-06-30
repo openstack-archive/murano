@@ -1,7 +1,14 @@
 Namespaces:
   sys: io.murano.system
+  std: io.murano
 
 Name: TestEngineFunctions
+
+Properties:
+  target:
+    Usage: Runtime
+    Contract: $.class(std:Object)
+
 
 Methods:
   testJoin:
@@ -302,3 +309,12 @@ Methods:
       - $nullVariable: null
       - Return: $nullVariable is sys:Logger
                 or $nullArg is sys:Logger
+
+  testNewObjectAssignment:
+    Body:
+      - $newObject: new(std:Object)
+        # Assignment of object-contracted properties by IDs is possible only
+        # if the object with the given id is present in the object store.
+        # Thus this assignment tests the fix for bug #1597452
+      - $this.target: id($newObject)
+      - Return: $this.target = $newObject
