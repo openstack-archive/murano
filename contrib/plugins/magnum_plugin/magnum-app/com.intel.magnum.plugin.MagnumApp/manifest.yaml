@@ -12,15 +12,15 @@
 
 Format: 1.0
 Type: Application
-FullName: io.murano.apps.magnum.plugin.MagnumBayApp
+FullName: com.intel.magnum.plugin.MagnumBayApp
 Name: Magnum App
 Description: |
  App to deploy Kubernetes cluster using Magnum
 Author: 'Intel, Inc'
 Tags: [Magnum, Kubernetes, Docker]
 Classes:
- io.murano.apps.magnum.plugin.MagnumBaymodel: MagnumBaymodel.yaml
- io.murano.apps.magnum.plugin.MagnumBayApp: MagnumBayApp.yaml
+ com.intel.magnum.plugin.MagnumBaymodel: MagnumBaymodel.yaml
+ com.intel.magnum.plugin.MagnumBayApp: MagnumBayApp.yaml
 
 Require:
   murano.plugins.magnum:

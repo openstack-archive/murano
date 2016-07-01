@@ -11,7 +11,7 @@
 #  under the License.
 
 Namespaces:
-  =: io.murano.apps.magnum.plugin
+  =: com.intel.magnum.plugin
   std: io.murano
 
 Name: MagnumBaymodel

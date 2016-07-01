@@ -15,7 +15,7 @@ Version: 2
 Templates:
   baymodel:
     ?:
-      type: io.murano.apps.magnum.plugin.MagnumBaymodel
+      type: com.intel.magnum.plugin.MagnumBaymodel
     name: $.baymodelConfiguration.name
     imageId: $.baymodelConfiguration.imageId
     keypairId: $.baymodelConfiguration.keyPair
@@ -38,7 +38,7 @@ Templates:
 
 Application:
   ?:
-    type: io.murano.apps.magnum.plugin.MagnumBayApp
+    type: com.intel.magnum.plugin.MagnumBayApp
   name: $.appConfiguration.name
   nodeCount: $.appConfiguration.nodeCount
   masterCount: $.appConfiguration.masterCount
