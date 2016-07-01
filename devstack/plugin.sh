@@ -412,26 +412,11 @@ MURANO_DASHBOARD_CACHE_DIR=${MURANO_DASHBOARD_CACHE_DIR:-/tmp/murano}
 
 MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://apps.openstack.org/api/v1/murano_repo/liberty/'}
 
-# Functions
-# ---------
-
-function remove_config_block() {
-    local config_file="$1"
-    local label="$2"
-
-    if [[ -f "$config_file" ]] && [[ -n "$label" ]]; then
-        sed -e "/^#${label}_BEGIN/,/^#${label}_END/ d" -i "$config_file"
-    fi
-}
-
-
 # Entry points
 # ------------
 
 # configure_murano_dashboard() - Set config files, create data dirs, etc
 function configure_murano_dashboard() {
-    remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
-
     configure_local_settings_py
 
     restart_apache_server
@@ -451,34 +436,21 @@ function configure_local_settings_py() {
         local murano_use_glare=False
     fi
 
-    # Write changes for dashboard config to a separate file
-    cat << EOF >> "$horizon_config_part"
-
-#MURANO_CONFIG_SECTION_BEGIN
-#-------------------------------------------------------------------------------
-METADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'
-DATABASES = {
-    'default': {
-        'ENGINE': 'django.db.backends.sqlite3',
-        'NAME': os.path.join('$MURANO_DASHBOARD_DIR', 'openstack-dashboard.sqlite')
-    }
-}
-SESSION_ENGINE = 'django.contrib.sessions.backends.db'
-MURANO_REPO_URL = '$MURANO_REPOSITORY_URL'
-MURANO_USE_GLARE = $murano_use_glare
-#-------------------------------------------------------------------------------
-#MURANO_CONFIG_SECTION_END
-
-EOF
-
-    cat "$horizon_config_part" >> "$HORIZON_LOCAL_CONFIG"
-
     if [[ -f "$HORIZON_LOCAL_CONFIG" ]]; then
         sed -e "s/\(^\s*OPENSTACK_HOST\s*=\).*$/\1 '$HOST_IP'/" -i "$HORIZON_LOCAL_CONFIG"
     fi
 
     # Install Murano as plugin for Horizon
-    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/enabled/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
+
+    # Install setting to Horizon
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/local_settings.d/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/local_settings.d/
+
+    # Change Murano dashboard settings
+    sed -e "s/\(^\s*MURANO_USE_GLARE\s*=\).*$/\1 $murano_use_glare/" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+    sed -e "s%\(^\s*MURANO_REPO_URL\s*=\).*$%\1 '$MURANO_REPOSITORY_URL'%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+    echo -e $"\nMETADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'" | sudo tee -a $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+
 }
 
 # init_murano_dashboard() - Initialize databases, etc.
@@ -514,8 +486,10 @@ function install_murano_dashboard() {
 # runs that a clean run would need to clean up
 function cleanup_murano_dashboard() {
     echo_summary "Cleanup Murano Dashboard"
-    remove_config_block "$HORIZON_CONFIG" "MURANO_CONFIG_SECTION"
+
     rm $HORIZON_DIR/openstack_dashboard/local/enabled/_50_murano.py
+
+    rm $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
 }
 
 # Main dispatcher
