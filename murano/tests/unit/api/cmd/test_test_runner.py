@@ -54,6 +54,7 @@ class TestCaseShell(testtools.TestCase):
 
     def override_config(self, name, override, group=None):
         CONF.set_override(name, override, group, enforce_type=True)
+        CONF.set_override('use_stderr', True)
         self.addCleanup(CONF.clear_override, name, group)
 
     def shell(self, cmd_args=None, exitcode=0):
@@ -113,38 +114,54 @@ class TestCaseShell(testtools.TestCase):
         _, stderr = self.shell('io.murano.test.MyTest1 -v')
         # NOTE(efedorova): May be, there is a problem with test-runner, since
         # all logs are passed to stderr
-        self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple1.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
+        self.assertIn('Test io.murano.test.MyTest1.testSimple1 successful',
+                      stderr)
+        self.assertIn('Test io.murano.test.MyTest1.testSimple2 successful',
+                      stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple1 successful',
+                      stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple2 successful',
+                      stderr)
         self.assertNotIn('thisIsNotAtestMethod', stderr)
 
     def test_package_by_class(self):
         _, stderr = self.shell(
             'io.murano.test.MyTest1 io.murano.test.MyTest2 -v')
 
-        self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
-        self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple1.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
+        self.assertNotIn('Test io.murano.test.MyTest1.testSimple1 successful',
+                         stderr)
+        self.assertNotIn('Test io.murano.test.MyTest1.testSimple2 successful',
+                         stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple1 successful',
+                      stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple2 successful',
+                      stderr)
 
     def test_package_by_test_name(self):
         _, stderr = self.shell(
             'io.murano.test.MyTest1 testSimple1 -v')
 
-        self.assertIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
-        self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple1.....OK', stderr)
-        self.assertNotIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
+        self.assertIn('Test io.murano.test.MyTest1.testSimple1 successful',
+                      stderr)
+        self.assertNotIn('Test io.murano.test.MyTest1.testSimple2 successful',
+                         stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple1 successful',
+                      stderr)
+        self.assertNotIn('Test io.murano.test.MyTest2.testSimple2 successful',
+                         stderr)
 
     def test_package_by_test_and_class_name(self):
         _, stderr = self.shell(
             'io.murano.test.MyTest1 io.murano.test.MyTest2.testSimple1 -v')
 
-        self.assertNotIn('io.murano.test.MyTest1.testSimple1.....OK', stderr)
-        self.assertNotIn('io.murano.test.MyTest1.testSimple2.....OK', stderr)
-        self.assertIn('io.murano.test.MyTest2.testSimple1.....OK', stderr)
-        self.assertNotIn('io.murano.test.MyTest2.testSimple2.....OK', stderr)
+        self.assertNotIn('Test io.murano.test.MyTest1.testSimple1 successful',
+                         stderr)
+        self.assertNotIn('Test io.murano.test.MyTest1.testSimple2 successful',
+                         stderr)
+        self.assertIn('Test io.murano.test.MyTest2.testSimple1 successful',
+                      stderr)
+        self.assertNotIn('Test io.murano.test.MyTest2.testSimple2 successful',
+                         stderr)
 
     def test_service_methods(self):
         _, stderr = self.shell(
