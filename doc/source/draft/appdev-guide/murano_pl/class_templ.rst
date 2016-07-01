@@ -154,6 +154,10 @@ The following contracts are available:
 | | A: StringMap                                            | | the dictionary with the ``A`` key that must be equal to ``StringMap``, and other keys be      |
 | | $.string().notNull(): $                                 | | any scalar or data structure                                                                  |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| | $.check($ in $this.myStaticMethod())                    | | the value must be equal to one of a member of a list returned by static method of the class   |
++-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| | $.check($this.myStaticMethod($))                        | | the static method of the class must return true for the value                                 |
++-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
 In the example above property ``port`` must be int value greater than 0 and
 less than 65536; ``scope`` must be a string value and one of 'public', 'cloud',
