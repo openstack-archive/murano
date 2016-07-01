@@ -42,12 +42,20 @@ find . -type f -name "*.pyc" -delete && python setup.py testr --coverage --testr
 coverage report > $current_report
 current_missing=$(awk 'END { print $3 }' $current_report)
 
+baseline_percentage=$(awk 'END { print $6 }' $baseline_report)
+current_percentage=$(awk 'END { print $6 }' $current_report)
 # Show coverage details
 allowed_missing=$((baseline_missing+ALLOWED_EXTRA_MISSING))
 
+echo "Baseline report: $(cat ${baseline_report})"
+echo "Proposed change report: $(cat ${current_report})"
+echo ""
+echo ""
 echo "Allowed to introduce missing lines : ${ALLOWED_EXTRA_MISSING}"
 echo "Missing lines in master            : ${baseline_missing}"
 echo "Missing lines in proposed change   : ${current_missing}"
+echo "Current percentage                 : ${baseline_percentage}"
+echo "Proposed change percentage         : ${current_percentage}"
 
 if [ $allowed_missing -gt $current_missing ];
 then
