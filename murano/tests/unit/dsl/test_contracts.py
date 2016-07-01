@@ -295,3 +295,19 @@ class TestContracts(test_case.DslTestCase):
     def test_default_expression(self):
         self.assertEqual('PROPERTY', self._runner.testDefaultExpression())
         self.assertEqual('value', self._runner.testDefaultExpression('value'))
+
+
+class TestContractsTransform(test_case.DslTestCase):
+    def setUp(self):
+        super(TestContractsTransform, self).setUp()
+        self._runner = self.new_runner(om.Object('TestIteratorsTransform'))
+
+    def test_property(self):
+        self.assertEqual('3', self._runner.testProperties())
+
+    def test_argument(self):
+        self.assertEqual('3', self._runner.testArgs())
+        self.assertEqual('2', self._runner.testUntypedArgs())
+        self.assertEqual('6', self._runner.testNotTypedListArgs())
+        self.assertEqual('6', self._runner.testTypedList())
+        self.assertEqual(2, self._runner.testListDict())

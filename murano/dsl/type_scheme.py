@@ -295,7 +295,9 @@ class TypeScheme(object):
         return utils.FrozenDict(result)
 
     def _map_list(self, data, spec, context, path):
-        if not utils.is_sequence(data):
+        if utils.is_iterator(data):
+            data = list(data)
+        elif not utils.is_sequence(data):
             if data is None or data is dsl.NO_VALUE:
                 data = []
             else:
