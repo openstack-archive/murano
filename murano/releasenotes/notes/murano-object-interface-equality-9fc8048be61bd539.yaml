@@ -1,0 +1,4 @@
+---
+fixes:
+  - Equality check (assertEqual) in test-runner can now properly compare
+    two MuranoPl objects.

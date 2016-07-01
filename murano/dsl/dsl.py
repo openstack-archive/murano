@@ -273,6 +273,18 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def __repr__(self):
         return '<{0}>'.format(repr(self.object))
 
+    def __eq__(self, other):
+        if isinstance(other, MuranoObjectInterface):
+            return self.object == other.object
+        else:
+            return False
+
+    def __ne__(self, other):
+        return not (self == other)
+
+    def __hash__(self):
+        return hash(self.object)
+
 
 class Interfaces(object):
     def __init__(self, mpl_object):
