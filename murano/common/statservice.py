@@ -14,6 +14,7 @@
 
 
 import json
+import multiprocessing
 import socket
 import time
 
@@ -72,7 +73,7 @@ class StatsCollectingService(service.Service):
                                       v1.stats.error_count,
                                       v1.stats.average_time,
                                       v1.stats.requests_per_tenant,
-                                      psutil.NUM_CPUS,
+                                      multiprocessing.cpu_count(),
                                       psutil.cpu_percent())
                 return
 
