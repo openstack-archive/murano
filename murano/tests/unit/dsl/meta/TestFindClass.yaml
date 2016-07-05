@@ -1,0 +1,14 @@
+Name: TestFindClass
+
+Methods:
+  testFindClassWithPrefix:
+    Body:
+      - new('io.murano.extensions.io.murano.test.TestFixture')
+
+  testFindClassShortName:
+    Body:
+      - new('io.murano.test.TestFixture')
+
+  testClassWithPrefixNotFound:
+    Body:
+      - new('io.murano.extensions.io.murano.test.TestFixture1')

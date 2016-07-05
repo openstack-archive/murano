@@ -53,7 +53,6 @@ class PluginLoader(object):
             LOG.warning(_LW("Entry-point 'name' {name} is invalid").format(
                 name=name))
             return
-        name = "%s.%s" % (self.namespace, name)
         name_map.setdefault(name, []).append(dist_name)
         if dist_name in self.packages:
             package = self.packages[dist_name]
