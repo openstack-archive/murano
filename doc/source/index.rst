@@ -143,6 +143,13 @@ Miscellaneous
    guidelines
    articles/debug_tips
 
+**Gerrit review dashboard**
+
+.. toctree::
+   :maxdepth: 1
+
+   murano_gerrit_dashboard
+
 
 **API specification**
 
