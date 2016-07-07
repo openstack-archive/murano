@@ -159,6 +159,14 @@ function configure_murano {
 
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG
+    # Format logging
+    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ]; then
+        setup_colorized_logging $MURANO_CONF_FILE DEFAULT
+    else
+        # Show user_name and project_name instead of user_id and project_id
+        iniset $MURANO_CONF_FILE DEFAULT logging_context_format_string "%(asctime)s.%(msecs)03d %(levelname)s %(name)s [%(request_id)s %(user_name)s %(project_name)s] %(instance)s%(message)s"
+    fi
+
     iniset $MURANO_CONF_FILE DEFAULT home_region $REGION_NAME
 
     # Murano Policy Enforcement Configuration
