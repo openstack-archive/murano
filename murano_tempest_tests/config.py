@@ -57,7 +57,7 @@ ApplicationCatalogGroup = [
 
     cfg.IntOpt("build_interval",
                default=3,
-               help="Time in seconds between applcation catalog"
+               help="Time in seconds between application catalog"
                     " availability checks."),
 
     cfg.IntOpt("build_timeout",
