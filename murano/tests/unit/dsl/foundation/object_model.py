@@ -18,13 +18,15 @@ from murano.dsl import helpers
 
 
 class Object(object):
-    def __init__(self, __name, __id=None, **kwargs):
+    def __init__(self, __name, __id=None, class_version=None, **kwargs):
         self.data = {
             '?': {
                 'type': __name,
                 'id': __id or helpers.generate_id()
             }
         }
+        if class_version is not None:
+            self.data['?']['classVersion'] = class_version
         self.data.update(kwargs)
 
     @property
