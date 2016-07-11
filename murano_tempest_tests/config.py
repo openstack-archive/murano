@@ -35,7 +35,10 @@ application_catalog_group = cfg.OptGroup(name="application_catalog",
                                          title="Application Catalog Options")
 
 service_broker_group = cfg.OptGroup(name="service_broker",
-                                         title="Service Broker Options")
+                                    title="Service Broker Options")
+
+artifacts_group = cfg.OptGroup(name="artifacts",
+                               title="Glance Artifacts Options")
 
 ApplicationCatalogGroup = [
     # Application catalog tempest configuration
@@ -96,4 +99,26 @@ ServiceBrokerGroup = [
                     " to become available.")
 
 
+]
+
+ArtifactsGroup = [
+    # Glance artifacts options
+    cfg.StrOpt("catalog_type",
+               default="artifact",
+               help="Catalog type of Artifacts API"),
+
+    cfg.StrOpt("endpoint_type",
+               default="publicURL",
+               choices=["publicURL", "adminURL", "internalURL"],
+               help="The endpoint type for artifacts service"),
+
+    cfg.IntOpt("build_interval",
+               default=3,
+               help="Time in seconds between artifacts"
+                    " availability checks."),
+
+    cfg.IntOpt("build_timeout",
+               default=500,
+               help="Timeout in seconds to wait for a artifacts"
+                    " to become available.")
 ]
