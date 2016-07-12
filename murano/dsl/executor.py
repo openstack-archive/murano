@@ -30,6 +30,7 @@ from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
+from murano.dsl import exceptions as dsl_exceptions
 from murano.dsl import helpers
 from murano.dsl import object_store
 from murano.dsl.principal_objects import stack_trace
@@ -97,7 +98,8 @@ class MuranoDslExecutor(object):
                 *args, **kwargs)
 
         if context[constants.CTX_ACTIONS_ONLY] and not method.is_action:
-            raise Exception('{0} is not an action'.format(method.name))
+            raise dsl_exceptions.MethodNotExposed(
+                '{0} is not an action'.format(method.name))
 
         if method.is_static:
             obj_context = self.create_object_context(

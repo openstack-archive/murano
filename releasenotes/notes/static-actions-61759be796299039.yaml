@@ -1,0 +1,7 @@
+---
+features:
+  - Static public methods can be called synchronously through the API call
+    "http://murano-url:port/v1/actions" specifying class name, method name,
+    method arguments and optionally package name and class version in the
+    request body. This call does not create environment, object instances and
+    database records.

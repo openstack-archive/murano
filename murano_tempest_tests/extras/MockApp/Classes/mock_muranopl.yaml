@@ -2,7 +2,8 @@ Namespaces:
   =: io.murano.apps
   std: io.murano
 
-# Name: MockApp # use name from the manifest
+# Write name into next line
+Name: test_repository_class_xxxxxxxx
 
 Extends: std:Application
 
@@ -11,13 +12,18 @@ Properties:
   userName:
     Contract: $.string()
 
+  greeting:
+    Usage: Static
+    Contract: $.string()
+    Default: 'Hello, '
+
 Methods:
   testAction:
-    Usage: Action
+    Scope: Public
     Body:
       - $this.find(std:Environment).reporter.report($this, 'Completed')
   getCredentials:
-    Usage: Action
+    Scope: Public
     Body:
       - Return:
           credentials:
@@ -25,3 +31,20 @@ Methods:
   deploy:
      Body:
       - $this.find(std:Environment).reporter.report($this, 'Follow the white rabbit')
+
+  staticAction:
+    Scope: Public
+    Usage: Static
+    Arguments:
+      - myName:
+          Contract: $.string().notNull()
+    Body:
+      - Return: concat($.greeting, $myName)
+
+  staticNotAction:
+    Usage: Static
+    Arguments:
+      - myName:
+          Contract: $.string().notNull()
+    Body:
+      - Return: concat($.greeting, $myName)

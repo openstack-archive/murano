@@ -365,3 +365,22 @@ class ApplicationCatalogClient(rest_client.RestClient):
         resp, body = self.post(uri, json.dumps(body))
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+# ----------------------------Static action methods----------------------------
+    def call_static_action(self, class_name=None, method_name=None, args=None,
+                           package_name=None, class_version="=0"):
+        uri = 'v1/actions'
+        post_body = {
+            'parameters': args or {},
+            'packageName': package_name,
+            'classVersion': class_version
+        }
+        if class_name:
+            post_body['className'] = class_name
+        if method_name:
+            post_body['methodName'] = method_name
+
+        resp, body = self.post(uri, json.dumps(post_body))
+        self.expected_success(200, resp.status)
+        # _parse_resp() cannot be used because body is expected to be string
+        return body

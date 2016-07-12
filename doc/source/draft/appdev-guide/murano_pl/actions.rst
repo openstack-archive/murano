@@ -83,3 +83,54 @@ Response:
         }
       }
     }
+
+
+==============
+Static actions
+==============
+
+Static methods (:ref:`static_methods_and_properties`) can also be called
+through the API if they are exposed by specifying ``Scope: Public``, and the
+result of its execution will be returned.
+
+Consider the following example of the static action that makes use both of
+static class property and user's input as an argument:
+
+::
+
+ Name: Bar
+
+ Properties:
+   greeting:
+     Usage: Static
+     Contract: $.string()
+     Default: 'Hello, '
+
+ Methods:
+   staticAction:
+     Scope: Public
+     Usage: Static
+     Arguments:
+       - myName:
+           Contract: $.string().notNull()
+     Body:
+       - Return: concat($.greeting, $myName)
+
+Request:
+``http://localhost:8082/v1/actions``
+
+Request body:
+
+.. code-block:: javascript
+
+    {
+      "className": "ns.Bar",
+      "methodName": "staticAction",
+      "parameters": {"myName": "John"}
+    }
+
+Responce:
+
+.. code-block:: javascript
+
+   "Hello, John"
