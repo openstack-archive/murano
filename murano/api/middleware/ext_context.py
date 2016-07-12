@@ -14,10 +14,9 @@
 
 import base64
 
-import keystoneclient
-from keystoneclient.auth.identity import v3
-from keystoneclient import exceptions
-from keystoneclient import session as ks_session
+from keystoneauth1 import exceptions
+from keystoneauth1.identity import v3
+from keystoneauth1 import session as ks_session
 from oslo_config import cfg
 from oslo_log import log
 from webob import exc
@@ -65,13 +64,13 @@ class ExternalContextMiddleware(wsgi.Middleware):
             try:
                 self._murano_endpoint = auth.get_endpoint(
                     session, 'application-catalog')
-            except keystoneclient.exceptions.EndpointNotFound:
+            except exceptions.EndpointNotFound:
                 pass
         if not hasattr(self, '_glare_endpoint'):
             try:
                 self._glare_endpoint = auth.get_endpoint(
                     session, 'artifact')
-            except keystoneclient.exceptions.EndpointNotFound:
+            except exceptions.EndpointNotFound:
                 pass
 
     def get_endpoints(self):

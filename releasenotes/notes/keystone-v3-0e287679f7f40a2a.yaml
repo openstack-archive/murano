@@ -1,0 +1,7 @@
+---
+fixes:
+  - Removed the need for Keystone v2 options (admin_user,
+    admin_password, admin_tenant_name) when Keystone v3
+    is in use, also don't assume that the service user
+    and service project in the 'Default' domain. This
+    properly fixes #1580611.
