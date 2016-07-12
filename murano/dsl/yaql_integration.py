@@ -362,13 +362,14 @@ def get_class_factory_definition(cls, murano_class):
                 murano_class
             return helpers.evaluate(cls(*args, **kwargs), __context)
 
-    if '__init__' in cls.__dict__:
+    try:
         fd = specs.get_function_definition(
             helpers.function(cls.__init__),
             parameter_type_func=lambda name: _infer_parameter_type(
                 name, cls.__name__),
             convention=CONVENTION)
-    else:
+    except AttributeError:
+        # __init__ is a slot wrapper inherited from object or other C type
         fd = specs.get_function_definition(lambda self: None)
         fd.meta[constants.META_NO_TRACE] = True
     fd.insert_parameter(specs.ParameterDefinition(
