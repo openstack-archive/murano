@@ -235,3 +235,8 @@ Methods:
         - :TestStatics.classmethodPythonMethod('!')
         - ns:TestStatics.classmethodPythonMethod('!')
         - type('test.TestStatics').classmethodPythonMethod('!')
+
+  testStaticAction:
+    Usage: Static
+    Body:
+      Return: 'It works!'

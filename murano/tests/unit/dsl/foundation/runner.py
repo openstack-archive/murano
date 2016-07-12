@@ -20,6 +20,7 @@ import six
 from murano.dsl import context_manager
 from murano.dsl import dsl
 from murano.dsl import dsl_exception
+from murano.dsl import dsl_types
 from murano.dsl import executor
 from murano.dsl import helpers
 from murano.dsl import murano_object
@@ -49,22 +50,27 @@ class Runner(object):
     class DslObjectWrapper(object):
         def __init__(self, obj, runner):
             self._runner = runner
-            if isinstance(obj, six.string_types):
-                self._object_id = obj
+            if isinstance(obj, six.string_types + (dsl_types.MuranoType,)):
+                pass
             elif isinstance(obj, (object_model.Object, object_model.Ref)):
-                self._object_id = obj.id
+                obj = obj.id
             elif isinstance(obj, murano_object.MuranoObject):
-                self._object_id = obj.object_id
+                obj = obj.object_id
             else:
                 raise ValueError(
-                    'obj must be object ID string, MuranoObject or one of '
-                    'object_model helper classes (Object, Ref)')
+                    'obj must be object ID string, MuranoObject, MuranoType '
+                    'or one of object_model helper classes (Object, Ref)')
+            if isinstance(obj, six.string_types):
+                self._receiver = runner.executor.object_store.get(obj)
+            else:
+                self._receiver = obj
+
             self._preserve_exception = False
 
         def __getattr__(self, item):
             def call(*args, **kwargs):
                 return self._runner._execute(
-                    item, self._object_id, *args, **kwargs)
+                    item, self._receiver, *args, **kwargs)
             if item.startswith('test'):
                 return call
 
@@ -80,8 +86,7 @@ class Runner(object):
             execution_session.ExecutionSession())
         self._root = self.executor.load(model).object
 
-    def _execute(self, name, object_id, *args, **kwargs):
-        obj = self.executor.object_store.get(object_id)
+    def _execute(self, name, obj, *args, **kwargs):
         try:
             final_args = []
             final_kwargs = {}
@@ -93,9 +98,10 @@ class Runner(object):
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_kwargs[name] = arg
-            runtime_version = obj.type.package.runtime_version
+            cls = obj if isinstance(obj, dsl_types.MuranoType) else obj.type
+            runtime_version = cls.package.runtime_version
             yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
-            return dsl.to_mutable(obj.type.invoke(
+            return dsl.to_mutable(cls.invoke(
                 name, self.executor, obj, tuple(final_args), final_kwargs),
                 yaql_engine)
         except dsl_exception.MuranoPlException as e:
@@ -117,6 +123,12 @@ class Runner(object):
 
     def on(self, obj):
         return Runner.DslObjectWrapper(obj, self)
+
+    def on_class(self, class_name):
+        cls = self.executor.package_loader.load_class_package(
+            class_name, helpers.parse_version_spec(None)).find_class(
+            class_name, False)
+        return Runner.DslObjectWrapper(cls, self)
 
     @property
     def root(self):
