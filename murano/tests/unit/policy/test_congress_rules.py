@@ -57,6 +57,15 @@ class MockPackageLoader(package_loader.MuranoPackageLoader):
     def load_package(self, package_name, version_spec):
         return self._package
 
+    def export_fixation_table(self):
+        pass
+
+    def import_fixation_table(self, fixations):
+        pass
+
+    def compact_fixation_table(self):
+        pass
+
 
 class MockPackage(object):
     def __init__(self, classes):

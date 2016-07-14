@@ -180,7 +180,11 @@ class TaskExecutor(object):
             return self.exception_result(e, None, '<system>')
 
         with package_loader.CombinedPackageLoader(self._session) as pkg_loader:
+            pkg_loader.import_fixation_table(
+                self._session.system_attributes.get('Packages', {}))
             result = self._execute(pkg_loader)
+            self._session.system_attributes[
+                'Packages'] = pkg_loader.export_fixation_table()
         self._model['SystemData'] = self._session.system_attributes
         result['model'] = self._model
 
@@ -248,6 +252,7 @@ class TaskExecutor(object):
         except Exception as e:
             return self.exception_result(e, None, '<result>')
 
+        pkg_loader.compact_fixation_table()
         return {
             'action': {
                 'result': action_result,
