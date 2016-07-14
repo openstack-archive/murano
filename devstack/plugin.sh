@@ -454,6 +454,9 @@ function configure_local_settings_py() {
     # Install setting to Horizon
     ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/local_settings.d/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/local_settings.d/
 
+    # Install murano RBAC policy to Horizon
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/conf/murano_policy.json $HORIZON_DIR/openstack_dashboard/conf/
+
     # Change Murano dashboard settings
     sed -e "s/\(^\s*MURANO_USE_GLARE\s*=\).*$/\1 $murano_use_glare/" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
     sed -e "s%\(^\s*MURANO_REPO_URL\s*=\).*$%\1 '$MURANO_REPOSITORY_URL'%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
@@ -499,6 +502,8 @@ function cleanup_murano_dashboard() {
     rm $HORIZON_DIR/openstack_dashboard/local/enabled/_50_murano.py
 
     rm $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+
+    rm $HORIZON_DIR/openstack_dashboard/conf/murano_policy.json
 }
 
 # Main dispatcher
