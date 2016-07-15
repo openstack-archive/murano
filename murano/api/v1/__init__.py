@@ -22,6 +22,7 @@ SUPPORTED_PARAMS = {'id', 'order_by', 'category', 'marker', 'tag',
                     'search', 'include_disabled', 'sort_dir', 'name'}
 LIST_PARAMS = {'id', 'category', 'tag', 'class', 'order_by'}
 ORDER_VALUES = {'fqn', 'name', 'created'}
+OPERATOR_VALUES = {'id', 'category', 'tag'}
 PKG_PARAMS_MAP = {'display_name': 'name',
                   'full_name': 'fully_qualified_name',
                   'ui': 'ui_definition',

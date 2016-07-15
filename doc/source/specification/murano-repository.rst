@@ -39,6 +39,11 @@ Methods for application package management
 - ``enabled``: determines whether the package is browsed in the Application Catalog
 - ``owner_id``: id of a project that owns the package
 
+.. note::
+
+    It is possible to use ``in`` operator for properties ``id``, ``category`` and ``tag``.
+    For example to get packages with ``id1, id2, id3`` use ``id=in:id1,id2,id3``.
+
 List packages
 -------------
 

@@ -1,0 +1,9 @@
+---
+
+features:
+  - Added an ability to filter operator values 'id', 'category', 'tag',
+    using the 'in' operator among the provided values.
+    An example of using the 'in' operator for 'id' is
+    'id=in:id1,id2,id3'.
+    This filter is added using syntax that conforms to the latest
+    guidelines from the OpenStack API-WG.

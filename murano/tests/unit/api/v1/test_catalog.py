@@ -203,6 +203,175 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
 
         self.assertEqual(expected_package.id, found_package['id'])
 
+    def test_packages_filter_by_in_category(self):
+        """Test that packages are filtered by in:cat1,cat2,cat3
+
+        GET /catalog/packages with parameter "category=in:cat1,cat2,cat3"
+        returns packages filtered by category.
+        """
+        names = ['cat1', 'cat2', 'cat3', 'cat4']
+        for name in names:
+            db_catalog_api.category_add(name)
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        _, package1_data = self._test_package()
+        _, package2_data = self._test_package()
+        _, package3_data = self._test_package()
+
+        package1_data['fully_qualified_name'] += '_1'
+        package1_data['name'] += '_1'
+        package1_data['class_definitions'] = (u'test.mpl.v1.app.Thing1',)
+        package1_data['categories'] = ('cat1', 'cat2')
+
+        package2_data['fully_qualified_name'] += '_2'
+        package2_data['name'] += '_2'
+        package2_data['class_definitions'] = (u'test.mpl.v1.app.Thing2',)
+        package2_data['categories'] = ('cat2', 'cat3')
+
+        package3_data['fully_qualified_name'] += '_3'
+        package3_data['name'] += '_3'
+        package3_data['class_definitions'] = (u'test.mpl.v1.app.Thing3',)
+        package3_data['categories'] = ('cat2', 'cat4')
+
+        expected_packages = [db_catalog_api.package_upload(package1_data, ''),
+                             db_catalog_api.package_upload(package2_data, '')]
+        db_catalog_api.package_upload(package3_data, '')
+
+        categories_in = "in:cat1,cat3"
+
+        req = self._get('/catalog/packages',
+                        params={'category': categories_in})
+        self.expect_policy_check('get_package')
+        self.expect_policy_check('manage_public_package')
+
+        res = req.get_response(self.api)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(2, len(res.json['packages']))
+
+        found_packages = res.json['packages']
+
+        self.assertEqual([pack.id for pack in expected_packages],
+                         [pack['id'] for pack in found_packages])
+
+    def test_packages_filter_by_in_tag(self):
+        """Test that packages are filtered by in:tag1,tag2,tag3
+
+        GET /catalog/packages with parameter "tag=in:tag1,tag2,tag3"
+        returns packages filtered by category.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        _, package1_data = self._test_package()
+        _, package2_data = self._test_package()
+        _, package3_data = self._test_package()
+
+        package1_data['fully_qualified_name'] += '_1'
+        package1_data['name'] += '_1'
+        package1_data['class_definitions'] = (u'test.mpl.v1.app.Thing1',)
+        package1_data['tags'] = ('tag1', 'tag2')
+
+        package2_data['fully_qualified_name'] += '_2'
+        package2_data['name'] += '_2'
+        package2_data['class_definitions'] = (u'test.mpl.v1.app.Thing2',)
+        package2_data['tags'] = ('tag2', 'tag3')
+
+        package3_data['fully_qualified_name'] += '_3'
+        package3_data['name'] += '_3'
+        package3_data['class_definitions'] = (u'test.mpl.v1.app.Thing3',)
+        package3_data['tags'] = ('tag2', 'tag4')
+
+        expected_packages = [db_catalog_api.package_upload(package1_data, ''),
+                             db_catalog_api.package_upload(package2_data, '')]
+        db_catalog_api.package_upload(package3_data, '')
+
+        tag_in = "in:tag1,tag3"
+
+        req = self._get('/catalog/packages',
+                        params={'tag': tag_in})
+        self.expect_policy_check('get_package')
+        self.expect_policy_check('manage_public_package')
+
+        res = req.get_response(self.api)
+        self.assertEqual(200, res.status_code)
+        self.assertEqual(2, len(res.json['packages']))
+
+        found_packages = res.json['packages']
+
+        self.assertEqual([pack.id for pack in expected_packages],
+                         [pack['id'] for pack in found_packages])
+
+    def test_packages_filter_by_in_id(self):
+        """Test that packages are filtered by in:id1,id2,id3
+
+        GET /catalog/packages with parameter "id=in:id1,id2" returns packages
+        filtered by id.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        _, package1_data = self._test_package()
+        _, package2_data = self._test_package()
+        _, package3_data = self._test_package()
+
+        package1_data['fully_qualified_name'] += '_1'
+        package1_data['name'] += '_1'
+        package1_data['class_definitions'] = (u'test.mpl.v1.app.Thing1',)
+        package2_data['fully_qualified_name'] += '_2'
+        package2_data['name'] += '_2'
+        package2_data['class_definitions'] = (u'test.mpl.v1.app.Thing2',)
+        package3_data['fully_qualified_name'] += '_3'
+        package3_data['name'] += '_3'
+        package3_data['class_definitions'] = (u'test.mpl.v1.app.Thing3',)
+
+        expected_packages = [db_catalog_api.package_upload(package1_data, ''),
+                             db_catalog_api.package_upload(package2_data, '')]
+        db_catalog_api.package_upload(package3_data, '')
+
+        id_in = "in:" + ",".join(pack.id for pack in expected_packages)
+
+        req = self._get('/catalog/packages',
+                        params={'id': id_in})
+        self.expect_policy_check('get_package')
+        self.expect_policy_check('manage_public_package')
+
+        res = req.get_response(self.api)
+        self.assertEqual(200, res.status_code)
+
+        self.assertEqual(2, len(res.json['packages']))
+
+        found_packages = res.json['packages']
+
+        self.assertEqual([pack.id for pack in expected_packages],
+                         [pack['id'] for pack in found_packages])
+
+    def test_packages_filter_by_in_id_empty(self):
+        """Test that packages are filtered by "id=in:"
+
+        GET /catalog/packages with parameter "id=in:" returns packages
+        filtered by id, in this case no packages should be returned.
+        """
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        _, package1_data = self._test_package()
+
+        db_catalog_api.package_upload(package1_data, '')
+
+        req = self._get('/catalog/packages', params={'id': "in:"})
+        self.expect_policy_check('get_package')
+        self.expect_policy_check('manage_public_package')
+
+        res = req.get_response(self.api)
+        self.assertEqual(200, res.status_code)
+
+        self.assertEqual(0, len(res.json['packages']))
+
     def test_packages_filter_by_name(self):
         """Test that packages are filtered by name
 
