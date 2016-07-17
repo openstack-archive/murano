@@ -4,7 +4,7 @@
 pbr>=1.6 # Apache-2.0
 Babel>=2.3.4 # BSD
 SQLAlchemy<1.1.0,>=1.0.10 # MIT
-stevedore>=1.10.0 # Apache-2.0
+stevedore>=1.16.0 # Apache-2.0
 alembic>=0.8.4 # MIT
 eventlet!=0.18.3,>=0.18.2 # MIT
 PasteDeploy>=1.5.0 # MIT
