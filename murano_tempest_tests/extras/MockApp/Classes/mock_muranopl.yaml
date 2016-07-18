@@ -2,9 +2,6 @@ Namespaces:
   =: io.murano.apps
   std: io.murano
 
-# Write name into next line
-Name: test_repository_class_xxxxxxxx
-
 Extends: std:Application
 
 Properties:

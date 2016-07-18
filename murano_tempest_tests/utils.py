@@ -46,11 +46,15 @@ def compose_package(app_name, manifest, package_dir,
 
     if add_class_name:
         class_file = os.path.join(package_dir, 'Classes', 'mock_muranopl.yaml')
-        with open(class_file, 'r+') as f:
-            line = ''
-            while line != '# Write name into next line\n':
-                line = f.readline()
-            f.write('Name: {0}'.format(app_name))
+        with open(class_file, 'r') as f:
+            contents = f.readlines()
+
+        contents = ''.join(contents)
+        index = contents.index('Extends')
+        contents = "{0}Name: {1}\n\n{2}".format(contents[:index], app_name,
+                                                contents[index:])
+        with open(class_file, 'w') as f:
+            f.write(contents)
 
     name = app_name + '.zip'
 
