@@ -38,3 +38,10 @@ class TestConstruction(test_case.DslTestCase):
         self.assertIsNotNone('string', obj.get('xxx'))
         self.assertEqual('STR', obj['xxx'].get('property1'))
         self.assertEqual('QQQ', obj['xxx']['?'].get('name'))
+
+    def test_new_with_dict(self):
+        self._runner.testNewWithDict()
+        self.assertEqual(
+            ['CreatingClass::.init', 'CreatedClass1::.init',
+             'string', 'STRING', 123],
+            self.traces)

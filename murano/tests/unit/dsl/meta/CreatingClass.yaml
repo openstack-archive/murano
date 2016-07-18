@@ -19,3 +19,10 @@ Methods:
     Body:
       - $.yyy: new(CreatedClass1, property1 => string, property2 => 123)
       - Return: $.yyy.createClass2($this)
+
+  testNewWithDict:
+    Body:
+      - $dict:
+          property1: string
+          property2: 123
+      - Return: new(CreatedClass1, $dict, owner=>$this)

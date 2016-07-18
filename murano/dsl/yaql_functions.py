@@ -61,7 +61,8 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
 @specs.parameter('type_name', dsl.MuranoTypeParameter())
 @specs.parameter('parameters', utils.MappingType)
 @specs.parameter('extra', utils.MappingType)
-@specs.parameter('owner', dsl.MuranoObjectParameter(nullable=True))
+@specs.parameter('owner', dsl.MuranoObjectParameter(
+    nullable=True, decorate=False))
 @specs.parameter('object_name', yaqltypes.String(True))
 @specs.name('new')
 def new_from_dict(type_name, context, parameters,
