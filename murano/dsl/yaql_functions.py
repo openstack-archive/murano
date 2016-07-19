@@ -24,6 +24,7 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
 from murano.dsl import reflection
+from murano.dsl import serializer
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameter())
@@ -216,6 +217,11 @@ def is_instance_of(obj, type_):
     return type_.type.is_compatible(obj)
 
 
+def is_object(value):
+    return isinstance(value, (dsl_types.MuranoObject,
+                              dsl_types.MuranoTypeReference))
+
+
 @specs.name('call')
 @specs.parameter('name', yaqltypes.String())
 @specs.parameter('args', yaqltypes.Sequence())
@@ -235,6 +241,19 @@ def call_func(context, op_dot, base, name, args, kwargs,
         return op_dot(context, receiver, function)
     else:
         return base(context, name, args, kwargs, receiver)
+
+
+@specs.parameter('obj', dsl.MuranoObjectParameter(decorate=False))
+@specs.parameter('serialization_type', yaqltypes.String())
+@specs.parameter('ignore_upcasts', bool)
+def dump(obj, serialization_type=serializer.DumpTypes.Serializable,
+         ignore_upcasts=True):
+    if serialization_type not in serializer.DumpTypes.All:
+        raise ValueError('Invalid Serialization Type')
+    executor = helpers.get_executor()
+    if ignore_upcasts:
+        obj = obj.real_this
+    return serializer.serialize(obj, executor, serialization_type)
 
 
 def register(context, runtime_version):
@@ -272,5 +291,6 @@ def register(context, runtime_version):
                 context.register_function(spec)
 
     context.register_function(type_from_name)
-
+    context.register_function(is_object)
+    context.register_function(dump)
     return context

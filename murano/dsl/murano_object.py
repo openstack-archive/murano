@@ -19,6 +19,7 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
+from murano.dsl import serializer
 from murano.dsl import yaql_integration
 
 
@@ -244,24 +245,48 @@ class MuranoObject(dsl_types.MuranoObject):
         return '<{0}/{1} {2} ({3})>'.format(
             self.type.name, self.type.version, self.object_id, id(self))
 
-    def to_dictionary(self, include_hidden=False):
+    def to_dictionary(self, include_hidden=False,
+                      serialization_type=serializer.DumpTypes.Serializable,
+                      allow_refs=False):
+        context = helpers.get_context()
         result = {}
         for parent in self.__parents.values():
-            result.update(parent.to_dictionary(include_hidden))
-        result.update({'?': {
-            'type': self.type.name,
-            'id': self.object_id,
-            'name': self.name,
-            'classVersion': str(self.type.version),
-            'package': self.type.package.name
-        }})
-        if include_hidden:
-            result.update(self.__properties)
+            result.update(parent.to_dictionary(
+                include_hidden, serializer.DumpTypes.Serializable,
+                allow_refs))
+        for property_name in self.type.properties:
+            if property_name in self.__properties:
+                spec = self.type.properties[property_name]
+                if (spec.usage != dsl_types.PropertyUsages.Runtime or
+                        include_hidden):
+                    prop_value = self.__properties[property_name]
+                    if isinstance(prop_value, MuranoObject) and allow_refs:
+                        meta = [m for m in spec.get_meta(context)
+                                if m.type.name == ('io.murano.metadata.'
+                                                   'engine.Serialize')]
+                        if meta and meta[0].get_property(
+                                'as', context) == 'reference':
+                            prop_value = prop_value.object_id
+                    result[property_name] = prop_value
+        if serialization_type == serializer.DumpTypes.Inline:
+            result.pop('?')
+            result = {
+                self.type: result,
+                'id': self.object_id,
+                'name': self.name
+            }
+        elif serialization_type == serializer.DumpTypes.Mixed:
+            result.update({'?': {
+                'type': self.type,
+                'id': self.object_id,
+                'name': self.name,
+            }})
         else:
-            for property_name in self.type.properties:
-                if property_name in self.__properties:
-                    spec = self.type.properties[property_name]
-                    if spec.usage != dsl_types.PropertyUsages.Runtime:
-                        result[property_name] = self.__properties[
-                            property_name]
+            result.update({'?': {
+                'type': self.type.name,
+                'id': self.object_id,
+                'name': self.name,
+                'classVersion': str(self.type.version),
+                'package': self.type.package.name
+            }})
         return result
