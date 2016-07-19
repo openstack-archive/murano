@@ -1,0 +1,124 @@
+#    Licensed under the Apache License, Version 2.0 (the "License"); you may
+#    not use this file except in compliance with the License. You may obtain
+#    a copy of the License at
+#
+#         http://www.apache.org/licenses/LICENSE-2.0
+#
+#    Unless required by applicable law or agreed to in writing, software
+#    distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#    License for the specific language governing permissions and limitations
+#    under the License.
+
+Namespaces:
+  std: io.murano
+  m: io.murano.metadata.engine
+
+Name: TestConcurrency
+
+Methods:
+  isolated:
+    Arguments:
+      - call:
+          Contract: $.string()
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+  isolatedWithDefault:
+    Meta:
+      - m:Synchronize:
+    Arguments:
+      - call:
+          Contract: $.string()
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+  concurrentExplicit:
+    Meta:
+      - m:Synchronize:
+          onThis: false
+    Arguments:
+      - call:
+          Contract: $.string()
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+  isolatedExplicit:
+    Meta:
+      - m:Synchronize:
+          onThis: true
+    Arguments:
+      - call:
+          Contract: $.string()
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+  argbasedPrimitive:
+    Meta:
+      - m:Synchronize:
+          onArgs: flag
+    Arguments:
+      - call:
+          Contract: $.string()
+      - flag:
+          Contract: $.string()
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+  argBasedWithObject:
+    Meta:
+      - m:Synchronize:
+          onArgs: flag
+    Arguments:
+      - call:
+          Contract: $.string()
+      - flag:
+          Contract: $.class(std:Object)
+    Body:
+      - trace(format('call-{0}-before', $call))
+      - yield()
+      - trace(format('call-{0}-after', $call))
+
+
+  testCallIsolated:
+    Body:
+      - list(1, 2, 3).pselect($this.isolated($))
+
+  testCallIsolatedWithDefault:
+    Body:
+      - list(1, 2, 3).pselect($this.isolatedWithDefault($))
+
+  testCallConcurrentExplicit:
+    Body:
+      - list(1, 2, 3).pselect($this.concurrentExplicit($))
+
+  testCallIsolatedExplicit:
+    Body:
+      - list(1, 2, 3).pselect($this.isolatedExplicit($))
+
+  testCallArgbasedPrimitiveIsolated:
+    Body:
+      - list(1, 2, 3).pselect($this.argbasedPrimitive($, same))
+
+  testCallArgbasedPrimitiveConcurrent:
+    Body:
+      - list(1, 2, 3).pselect($this.argbasedPrimitive($, $))
+
+  testCallArgbasedWithObjectIsolated:
+    Body:
+      - $o: new(std:Object)
+      - list(1, 2, 3).pselect($this.argBasedWithObject($, $o))
+
+  testCallArgbasedWithObjectConcurrent:
+    Body:
+      - list(1, 2, 3).pselect($this.argBasedWithObject($, new(std:Object)))

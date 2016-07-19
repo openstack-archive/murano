@@ -112,7 +112,25 @@ class MuranoDslExecutor(object):
             args, kwargs = self._canonize_parameters(
                 method.arguments_scheme, args, kwargs, method.name, this)
 
-        with self._acquire_method_lock(method, this):
+        this_lock = this
+        arg_values_for_lock = {}
+        method_meta = [m for m in method.get_meta(context)
+                       if m.type.name == ('io.murano.metadata.'
+                                          'engine.Synchronize')]
+        if method_meta:
+            method_meta = method_meta[0]
+
+        if method_meta:
+            if not method_meta.get_property('onThis', context):
+                this_lock = None
+            for arg_name in method_meta.get_property('onArgs', context):
+                arg_val = kwargs.get(arg_name)
+                if arg_val is not None:
+                    arg_values_for_lock[arg_name] = arg_val
+
+        arg_values_for_lock = utils.filter_parameters_dict(arg_values_for_lock)
+
+        with self._acquire_method_lock(method, this_lock, arg_values_for_lock):
             for i, arg in enumerate(args, 2):
                 context[str(i)] = arg
             for key, value in six.iteritems(kwargs):
@@ -143,31 +161,70 @@ class MuranoDslExecutor(object):
                 return call()
 
     @contextlib.contextmanager
-    def _acquire_method_lock(self, method, this):
-        method_id = id(method)
-        if method.is_static:
-            this_id = id(method.declaring_type)
+    def _acquire_method_lock(self, method, this, arg_val_dict):
+        if this is None:
+            if not arg_val_dict:
+                # if neither "this" nor argument values are set then no
+                # locking is needed
+                key = None
+            else:
+                # if only the argument values are passed then find the lock
+                # list only by the method
+                key = (None, id(method))
         else:
-            this_id = this.object_id
+            if method.is_static:
+                # find the lock list by the type and method
+                key = (id(method.declaring_type), id(method))
+            else:
+                # find the lock list by the object and method
+                key = (this.object_id, id(method))
         thread_id = helpers.get_current_thread_id()
         while True:
-            event, event_owner = self._locks.get(
-                (method_id, this_id), (None, None))
+            event, event_owner = None, None
+            if key is None:  # no locking needed
+                break
+
+            lock_list = self._locks.setdefault(key, [])
+            # lock list contains a list of tuples:
+            # first item of each tuple is a dict with the values of locking
+            # arguments (it is used for argument values comparison),
+            # second item is an event to wait on,
+            # third one is the owner thread id
+
+            # If this lock list is empty it means no locks on this object and
+            # method at all.
+            for arg_vals, l_event, l_event_owner in lock_list:
+                if arg_vals == arg_val_dict:
+                    event = l_event
+                    event_owner = l_event_owner
+                    break
+
             if event:
                 if event_owner == thread_id:
+                    # this means a re-entrant lock: the tuple with the same
+                    # value of the first element exists in the list, but it was
+                    # acquired by the same green thread. We may proceed with
+                    # the call in this case
                     event = None
                     break
                 else:
                     event.wait()
             else:
+                # this means either the lock list was empty or didn't contain a
+                # tuple with the first element equal to arg_val_dict.
+                # Then let's acquire a lock, i.e. create a new tuple and place
+                # it into the list
                 event = eventlet.event.Event()
-                self._locks[(method_id, this_id)] = (event, thread_id)
+                event_owner = thread_id
+                lock_list.append((arg_val_dict, event, event_owner))
                 break
         try:
             yield
         finally:
             if event is not None:
-                del self._locks[(method_id, this_id)]
+                lock_list.remove((arg_val_dict, event, event_owner))
+                if len(lock_list) == 0:
+                    del self._locks[key]
                 event.send()
 
     @contextlib.contextmanager
