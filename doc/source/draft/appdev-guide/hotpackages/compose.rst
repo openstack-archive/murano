@@ -25,6 +25,7 @@ Note, that optional parameters could be specified:
 :--author: a name of an application author
 :--output: a name of an output file archive to save locally
 :--full-name:  a fully qualified domain name that specifies exact application location
+:--resources-dir: a path to the directory containing application resources
 
 .. note::
     To performing this command python-muranoclient should be installed in the system
