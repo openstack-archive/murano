@@ -48,10 +48,10 @@ class TestRepositorySanity(base.BaseApplicationCatalogTest):
             application_name, archive_name, dir_with_archive,
             {"categories": [], "tags": [], 'is_public': False})
         package_list = self.application_catalog_client.get_list_packages()
-        self.assertIn(package, package_list)
+        self.assertIn(package['id'], {pkg['id'] for pkg in package_list})
         self.application_catalog_client.delete_package(package['id'])
         package_list = self.application_catalog_client.get_list_packages()
-        self.assertNotIn(package, package_list)
+        self.assertNotIn(package['id'], {pkg['id'] for pkg in package_list})
 
 
 class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):

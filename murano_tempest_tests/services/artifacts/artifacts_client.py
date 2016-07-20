@@ -14,9 +14,13 @@
 #    under the License.
 
 import json
+import os
 
 from tempest import config
 from tempest.lib.common import rest_client
+
+from murano_tempest_tests import utils
+import six
 
 CONF = config.CONF
 
@@ -39,7 +43,8 @@ class ArtifactsClient(rest_client.RestClient):
         uri = 'v0.1/artifacts/murano/v1'
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
-        return self._parse_resp(body)
+        parsed = self._parse_resp(body)
+        return parsed['artifacts']
 
     def list_drafts(self):
         uri = 'v0.1/artifacts/murano/v1/creating'
@@ -54,7 +59,7 @@ class ArtifactsClient(rest_client.RestClient):
         return self._parse_resp(body)
 
     def create_artifact_draft(self, name, version, **kwargs):
-        uri = 'v0.1/artifacts/murano/v1/creating'
+        uri = 'v0.1/artifacts/murano/v1/drafts'
         kwargs.update({'name': name, 'version': version})
         resp, body = self.post(uri, body=json.dumps(kwargs))
         self.expected_success(201, resp.status)
@@ -62,7 +67,7 @@ class ArtifactsClient(rest_client.RestClient):
 
     def publish_artifact(self, artifact_id):
         uri = 'v0.1/artifacts/murano/v1/{0}/publish'.format(artifact_id)
-        resp, body = self.post(uri)
+        resp, body = self.post(uri, body='')
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
@@ -83,7 +88,7 @@ class ArtifactsClient(rest_client.RestClient):
     def delete_artifact(self, artifact_id):
         uri = 'v0.1/artifacts/murano/v1/{0}'.format(artifact_id)
         resp, body = self.delete(uri)
-        self.expected_success(200, resp.status)
+        self.expected_success(204, resp.status)
         return self._parse_resp(body)
 
     def upload_blob(self, artifact_id, blob_type, data):
@@ -91,7 +96,7 @@ class ArtifactsClient(rest_client.RestClient):
         uri = 'v0.1/artifacts/murano/v1/{0}/{1}'.format(
             artifact_id, blob_type)
         resp, body = self.put(uri, data, headers=headers)
-        self.expected_success(201, resp.status)
+        self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
     def download_blob(self, artifact_id, blob_type):
@@ -100,3 +105,54 @@ class ArtifactsClient(rest_client.RestClient):
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
+
+# -----------------------------Packages methods-------------------------------
+
+    def get_list_packages(self):
+        return self.list_artifacts()
+
+    def delete_package(self, package_id):
+        return self.delete_artifact(package_id)
+
+    def upload_package(self, package_name, package_path, top_dir, body):
+        files = {package_name: open(os.path.join(top_dir, package_path), 'rb')}
+        is_public = body.pop('is_public', None)
+        if is_public is not None:
+            body['visibility'] = 'public' if is_public else 'private'
+        fqn = list(files.keys())[0]
+        package = utils.Package.from_file(files[fqn])
+        manifest = package.manifest
+        package_draft = {
+            'name': manifest.get('FullName', fqn),
+            'version': manifest.get('Version', '0.0.0'),
+            'description': manifest.get('Description'),
+            'display_name': manifest.get('Name', fqn),
+            'type': manifest.get('Type', 'Application'),
+            'author': manifest.get('Author'),
+            'tags': manifest.get('Tags', []),
+            'class_definitions': package.classes.keys()
+        }
+        for k, v in six.iteritems(body):
+            package_draft[k] = v
+
+        inherits = utils.get_local_inheritance(package.classes)
+
+        # TODO(kzaitsev): add local and global inheritance information tests
+        package_draft['inherits'] = inherits
+
+        keywords = package_draft['tags']
+        package_draft['keywords'] = keywords
+
+        draft = self.create_artifact_draft(**package_draft)
+        self.upload_blob(draft['id'], 'archive', package.file())
+
+        # TODO(kzaitsev): add logo upload code, currently it's failing for me
+        # with io.UnsupportedOperation: fileno
+
+        # if package.logo is not None:
+        #     self.upload_blob(draft['id'], 'logo', package.logo)
+        # if package.ui is not None:
+        #     self.client.artifacts.upload_blob(draft['id'], 'ui_definition',
+        #                                       package.ui)
+        self.publish_artifact(draft['id'])
+        return draft
