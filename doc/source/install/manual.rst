@@ -223,8 +223,7 @@ Install the API service and Engine
           --config-file ./etc/murano/murano.conf upgrade
     ..
 
-#.  Open a new console and launch Murano API. A separate terminal is
-    required because the console will be locked by a running process.
+#.  Launch the murano API in a separate terminal:
 
     .. code-block:: console
 
@@ -232,7 +231,14 @@ Install the API service and Engine
         tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
     ..
 
-#.  Import Core Murano Library.
+    .. note::
+
+        Run the command in a new terminal as the process will be running in
+        the terminal until you terminate it, therefore, blocking the current
+        terminal.
+
+#.  Leaving the API process running, return to the previous console and
+    import murano core library:
 
     .. code-block:: console
 
@@ -244,14 +250,19 @@ Install the API service and Engine
           package-import --is-public io.murano.zip
     ..
 
-#.  Open a new console and launch Murano Engine. A separate terminal is
-    required because the console will be locked by a running process.
+#.  Launch the murano engine in a separate terminal:
 
     .. code-block:: console
 
         cd ~/murano/murano
         tox -e venv -- murano-engine --config-file ./etc/murano/murano.conf
     ..
+
+    .. note::
+
+        Run the command in a new terminal as the process will be running in
+        the terminal until you terminate it, therefore, blocking the current
+        terminal.
 
 Register in Keystone
 --------------------
