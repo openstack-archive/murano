@@ -86,6 +86,7 @@ class BaseApplicationCatalogTest(base.BaseTestCase):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
             cls.os = clients.Manager(credentials=creds)
         cls.application_catalog_client = cls.os.application_catalog_client
+        cls.artifacts_client = cls.os.artifacts_client
 
     @classmethod
     def resource_cleanup(cls):

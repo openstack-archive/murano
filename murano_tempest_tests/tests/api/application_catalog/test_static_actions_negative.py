@@ -28,17 +28,18 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
 
     @classmethod
     def resource_setup(cls):
-        if CONF.application_catalog.glare_backend:
-            msg = ("Murano using GLARE backend. "
-                   "Static actions tests will be skipped.")
-            raise cls.skipException(msg)
-
         super(TestStaticActionsNegative, cls).resource_setup()
 
         application_name = utils.generate_name('test_repository_class')
         cls.abs_archive_path, dir_with_archive, archive_name = \
             utils.prepare_package(application_name, add_class_name=True)
-        cls.package = cls.application_catalog_client.upload_package(
+
+        if CONF.application_catalog.glare_backend:
+            client = cls.artifacts_client
+        else:
+            client = cls.application_catalog_client
+
+        cls.package = client.upload_package(
             application_name, archive_name, dir_with_archive,
             {"categories": [], "tags": [], 'is_public': False})
 
@@ -46,7 +47,11 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
     def resource_cleanup(cls):
         super(TestStaticActionsNegative, cls).resource_cleanup()
         os.remove(cls.abs_archive_path)
-        cls.application_catalog_client.delete_package(cls.package['id'])
+        if CONF.application_catalog.glare_backend:
+            client = cls.artifacts_client
+        else:
+            client = cls.application_catalog_client
+        client.delete_package(cls.package['id'])
 
     @testtools.testcase.attr('negative')
     def test_call_static_action_no_args(self):
