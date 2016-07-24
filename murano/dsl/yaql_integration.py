@@ -240,11 +240,10 @@ def _build_native_stub_function_definitions(murano_method):
     @specs.parameter('__receiver', yaqltypes.NotOfType(
         dsl_types.MuranoTypeReference))
     def payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         return helpers.evaluate(murano_method.invoke(
-            executor, __receiver, args, kwargs, __context, True), __context)
+            __receiver, args, kwargs, __context, True), __context)
 
     @specs.method
     @specs.name(murano_method.name)
@@ -252,23 +251,21 @@ def _build_native_stub_function_definitions(murano_method):
     @specs.parameter('__receiver', yaqltypes.NotOfType(
         dsl_types.MuranoTypeReference))
     def extension_payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         return helpers.evaluate(murano_method.invoke(
-            executor, murano_method.declaring_type,
-            (__receiver,) + args, kwargs, __context, True), __context)
+            murano_method.declaring_type, (__receiver,) + args, kwargs,
+            __context, True), __context)
 
     @specs.method
     @specs.name(murano_method.name)
     @specs.meta(constants.META_MURANO_METHOD, murano_method)
     @specs.parameter('__receiver', dsl_types.MuranoTypeReference)
     def static_payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         return helpers.evaluate(murano_method.invoke(
-            executor, __receiver, args, kwargs, __context, True), __context)
+            __receiver, args, kwargs, __context, True), __context)
 
     if murano_method.usage in dsl_types.MethodUsages.InstanceMethods:
         return specs.get_function_definition(payload), None
@@ -297,9 +294,7 @@ def _build_mpl_stub_function_definitions(murano_method):
 
 def _create_instance_mpl_stub(murano_method):
     def payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
-        return murano_method.invoke(
-            executor, __receiver, args, kwargs, __context, True)
+        return murano_method.invoke(__receiver, args, kwargs, __context, True)
     fd = _create_basic_mpl_stub(murano_method, 1, payload, False)
 
     receiver_type = dsl.MuranoObjectParameter(
@@ -310,9 +305,7 @@ def _create_instance_mpl_stub(murano_method):
 
 def _create_static_mpl_stub(murano_method):
     def payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
-        return murano_method.invoke(
-            executor, __receiver, args, kwargs, __context, True)
+        return murano_method.invoke(__receiver, args, kwargs, __context, True)
     fd = _create_basic_mpl_stub(murano_method, 1, payload, False)
 
     receiver_type = dsl.MuranoTypeParameter(
@@ -323,10 +316,9 @@ def _create_static_mpl_stub(murano_method):
 
 def _create_extension_mpl_stub(murano_method):
     def payload(__context, __receiver, *args, **kwargs):
-        executor = helpers.get_executor(__context)
         return murano_method.invoke(
-            executor, murano_method.declaring_type,
-            (__receiver,) + args, kwargs, __context, True)
+            murano_method.declaring_type, (__receiver,) + args, kwargs,
+            __context, True)
     return _create_basic_mpl_stub(murano_method, 0, payload, True)
 
 

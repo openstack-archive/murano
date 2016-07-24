@@ -261,9 +261,9 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             raise exceptions.AmbiguousPropertyNameError(name)
         return result[0]
 
-    def invoke(self, name, executor, this, args, kwargs, context=None):
+    def invoke(self, name, this, args, kwargs, context=None):
         method = self.find_single_method(name)
-        return method.invoke(executor, this, args, kwargs, context)
+        return method.invoke(this, args, kwargs, context)
 
     def is_compatible(self, obj):
         if isinstance(obj, (murano_object.MuranoObject,
@@ -274,16 +274,16 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             return True
         return any(cls is self for cls in obj.ancestors())
 
-    def new(self, owner, object_store, executor, **kwargs):
+    def new(self, owner, **kwargs):
         obj = murano_object.MuranoObject(
-            self, helpers.weak_proxy(owner), object_store, executor, **kwargs)
+            self, helpers.weak_proxy(owner), **kwargs)
 
         def initializer(__context, **params):
             if __context is None:
-                __context = executor.create_object_context(obj)
+                __context = helpers.get_executor().create_object_context(obj)
             init_context = __context.create_child_context()
             init_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
-            obj.initialize(init_context, object_store, params)
+            obj.initialize(init_context, params)
             return obj
 
         initializer.object = obj
@@ -430,7 +430,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
 
     def get_meta(self, context):
         if self._meta_values is None:
-            executor = helpers.get_executor(context)
+            executor = helpers.get_executor()
             context = executor.create_type_context(
                 self, caller_context=context)
             self._meta_values = dslmeta.merge_providers(

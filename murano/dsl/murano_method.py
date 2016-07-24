@@ -202,7 +202,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
             return method._meta
 
         if self._meta_values is None:
-            executor = helpers.get_executor(context)
+            executor = helpers.get_executor()
             context = executor.create_type_context(
                 self.declaring_type, caller_context=context)
             self._meta_values = meta.merge_providers(
@@ -213,8 +213,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
         return 'MuranoMethod({0}::{1})'.format(
             self.declaring_type.name, self.name)
 
-    def invoke(self, executor, this, args, kwargs, context=None,
-               skip_stub=False):
+    def invoke(self, this, args, kwargs, context=None, skip_stub=False):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
         if this and not self.declaring_type.is_compatible(this):
@@ -226,6 +225,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
             this = this.cast(self.declaring_type)
         else:
             this = self.declaring_type
+        executor = helpers.get_executor()
         return executor.invoke_method(
             self, this, context, args, kwargs, skip_stub)
 
@@ -278,7 +278,7 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
         return self._usage
 
     def get_meta(self, context):
-        executor = helpers.get_executor(context)
+        executor = helpers.get_executor()
         context = executor.create_type_context(
             self.murano_method.declaring_type, caller_context=context)
 

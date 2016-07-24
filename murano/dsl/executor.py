@@ -15,7 +15,6 @@
 import collections
 import contextlib
 import itertools
-import weakref
 
 import eventlet
 import eventlet.event
@@ -54,6 +53,10 @@ class MuranoDslExecutor(object):
         return self._object_store
 
     @property
+    def execution_session(self):
+        return self._session
+
+    @property
     def attribute_store(self):
         return self._attribute_store
 
@@ -67,12 +70,6 @@ class MuranoDslExecutor(object):
 
     def invoke_method(self, method, this, context, args, kwargs,
                       skip_stub=False):
-        with helpers.execution_session(self._session):
-            return self._invoke_method(
-                method, this, context, args, kwargs, skip_stub=skip_stub)
-
-    def _invoke_method(self, method, this, context, args, kwargs,
-                       skip_stub=False):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
         kwargs = utils.filter_parameters_dict(kwargs)
@@ -127,7 +124,7 @@ class MuranoDslExecutor(object):
                         native_this = this.get_reference()
                     else:
                         native_this = dsl.MuranoObjectInterface(this.cast(
-                            method.declaring_type), self)
+                            method.declaring_type))
                     return method.body(
                         yaql_engine, context, native_this)(*args, **kwargs)
                 else:
@@ -246,7 +243,7 @@ class MuranoDslExecutor(object):
         return tuple(), parameter_values
 
     def load(self, data):
-        with helpers.execution_session(self._session):
+        with helpers.with_object_store(self.object_store):
             return self._load(data)
 
     def _load(self, data):
@@ -256,33 +253,29 @@ class MuranoDslExecutor(object):
         result = self._object_store.load(data.get(constants.DM_OBJECTS), None)
         if result is None:
             return None
-        return dsl.MuranoObjectInterface(result, executor=self)
+        return dsl.MuranoObjectInterface(result)
 
     def cleanup(self, data):
-        with helpers.execution_session(self._session):
-            return self._cleanup(data)
-
-    def _cleanup(self, data):
         objects_copy = data.get(constants.DM_OBJECTS_COPY)
         if not objects_copy:
             return
         gc_object_store = object_store.ObjectStore(self)
-        gc_object_store.load(objects_copy, None)
-        objects_to_clean = []
-        for object_id in self._list_potential_object_ids(objects_copy):
-            if (gc_object_store.has(object_id) and
-                    not self._object_store.has(object_id)):
-                obj = gc_object_store.get(object_id)
-                objects_to_clean.append(obj)
-        if objects_to_clean:
-            for obj in objects_to_clean:
-                self._destroy_object(obj)
+        with helpers.with_object_store(gc_object_store):
+            gc_object_store.load(objects_copy, None)
+            objects_to_clean = []
+            for object_id in self._list_potential_object_ids(objects_copy):
+                if (gc_object_store.has(object_id) and
+                        not self._object_store.has(object_id)):
+                    obj = gc_object_store.get(object_id)
+                    objects_to_clean.append(obj)
+            if objects_to_clean:
+                for obj in objects_to_clean:
+                    self._destroy_object(obj)
 
     def cleanup_orphans(self, alive_object_ids):
-        with helpers.execution_session(self._session):
-            orphan_ids = self._collect_orphans(alive_object_ids)
-            self._destroy_orphans(orphan_ids)
-            return len(orphan_ids)
+        orphan_ids = self._collect_orphans(alive_object_ids)
+        self._destroy_orphans(orphan_ids)
+        return len(orphan_ids)
 
     def _collect_orphans(self, alive_object_ids):
         orphan_ids = []
@@ -292,15 +285,16 @@ class MuranoDslExecutor(object):
         return orphan_ids
 
     def _destroy_orphans(self, orphan_ids):
-        for obj_id in orphan_ids:
-            self._destroy_object(self._object_store.get(obj_id))
-            self._object_store.remove(obj_id)
+        with helpers.with_object_store(self.object_store):
+            for obj_id in orphan_ids:
+                self._destroy_object(self._object_store.get(obj_id))
+                self._object_store.remove(obj_id)
 
     def _destroy_object(self, obj):
         methods = obj.type.find_methods(lambda m: m.name == '.destroy')
         for method in methods:
             try:
-                method.invoke(self, obj, (), {}, None)
+                method.invoke(obj, (), {}, None)
             except Exception as e:
                 LOG.warning(_LW(
                     'Muted exception during execution of .destroy '
@@ -325,13 +319,6 @@ class MuranoDslExecutor(object):
         context = self._root_context_cache.get(runtime_version)
         if not context:
             context = self.context_manager.create_root_context(runtime_version)
-            context = context.create_child_context()
-            context[constants.CTX_EXECUTOR] = weakref.ref(self)
-            context[constants.CTX_PACKAGE_LOADER] = weakref.ref(
-                self._package_loader)
-            context[constants.CTX_EXECUTION_SESSION] = self._session
-            context[constants.CTX_ATTRIBUTE_STORE] = weakref.ref(
-                self._attribute_store)
             self._root_context_cache[runtime_version] = context
         return context
 
@@ -394,3 +381,7 @@ class MuranoDslExecutor(object):
         context = object_context.create_child_context()
         context[constants.CTX_CURRENT_METHOD] = method
         return context
+
+    def run(self, cls, method_name, this, args, kwargs):
+        with helpers.with_object_store(self.object_store):
+            return cls.invoke(method_name, this, args, kwargs)

@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import weakref
-
 import six
 
 from murano.dsl import constants
@@ -25,8 +23,8 @@ from murano.dsl import yaql_integration
 
 
 class MuranoObject(dsl_types.MuranoObject):
-    def __init__(self, murano_class, owner, object_store, executor,
-                 object_id=None, name=None, known_classes=None, this=None):
+    def __init__(self, murano_class, owner, object_id=None, name=None,
+                 known_classes=None, this=None):
         if known_classes is None:
             known_classes = {}
         self.__owner = owner.real_this if owner else None
@@ -37,9 +35,6 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__this = this
         self.__name = name
         self.__extension = None
-        self.__object_store = \
-            None if object_store is None else weakref.ref(object_store)
-        self.__executor = weakref.ref(executor)
         self.__config = murano_class.package.get_class_config(
             murano_class.name)
         if not isinstance(self.__config, dict):
@@ -49,7 +44,7 @@ class MuranoObject(dsl_types.MuranoObject):
             name = parent_class.name
             if name not in known_classes:
                 obj = parent_class.new(
-                    owner, object_store, executor, object_id=self.__object_id,
+                    owner, object_id=self.__object_id,
                     known_classes=known_classes, this=self.real_this).object
 
                 self.__parents[name] = known_classes[name] = obj
@@ -69,17 +64,10 @@ class MuranoObject(dsl_types.MuranoObject):
     def extension(self, value):
         self.__extension = value
 
-    @property
-    def object_store(self):
-        return None if self.__object_store is None else self.__object_store()
-
-    @property
-    def executor(self):
-        return self.__executor()
-
-    def initialize(self, context, object_store, params):
+    def initialize(self, context, params):
         if self.__initialized:
             return
+        object_store = helpers.get_object_store()
         for property_name in self.__type.properties:
             spec = self.__type.properties[property_name]
             if spec.usage == dsl_types.PropertyUsages.Config:
@@ -137,7 +125,6 @@ class MuranoObject(dsl_types.MuranoObject):
                 raise exceptions.CircularExpressionDependenciesError()
             last_errors = errors
 
-        executor = helpers.get_executor(context)
         if ((object_store is None or not object_store.initializing) and
                 self.__extension is None):
             method = self.type.methods.get('__init__')
@@ -146,15 +133,14 @@ class MuranoObject(dsl_types.MuranoObject):
                     method.body, **params)
 
                 self.__extension = method.invoke(
-                    executor, self, filtered_params[0],
-                    filtered_params[1], context)
+                    self, filtered_params[0], filtered_params[1], context)
 
         for parent in self.__parents.values():
-            parent.initialize(context, object_store, params)
+            parent.initialize(context, params)
 
         if (object_store is None or not object_store.initializing) and init:
             context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            init.invoke(executor, self.real_this, (), init_args, context)
+            init.invoke(self.real_this, (), init_args, context)
             self.__initialized = True
 
         if object_store is not None and not object_store.initializing:
@@ -215,7 +201,7 @@ class MuranoObject(dsl_types.MuranoObject):
         declared_properties = start_type.find_properties(
             lambda p: p.name == name)
         if context is None:
-            context = self.executor.create_object_context(self)
+            context = helpers.get_executor().create_object_context(self)
         if len(declared_properties) > 0:
             declared_properties = self.type.find_properties(
                 lambda p: p.name == name)

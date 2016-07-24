@@ -91,8 +91,7 @@ class ThisParameter(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
                 *args, **kwargs):
         this = helpers.get_this(context)
         if isinstance(this, dsl_types.MuranoObject):
-            executor = helpers.get_executor(context)
-            return MuranoObjectInterface(this, executor)
+            return MuranoObjectInterface(this)
         return this
 
 
@@ -161,18 +160,17 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             oi[key] = value
 
     class CallInterface(object):
-        def __init__(self, mpl_object, executor):
+        def __init__(self, mpl_object, object_store):
             self.__object = mpl_object
-            self.__executor = executor
+            self.__object_store = object_store
 
         def __getattr__(self, item):
-            executor = self.__executor or helpers.get_executor()
-
             def func(*args, **kwargs):
                 self._insert_instruction()
-                return self.__object.type.invoke(
-                    item, executor, self.__object, args, kwargs,
-                    helpers.get_context())
+                with helpers.with_object_store(self.__object_store):
+                    return self.__object.type.invoke(
+                        item, self.__object, args, kwargs,
+                        helpers.get_context())
             return func
 
         @staticmethod
@@ -186,9 +184,9 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
                 context[constants.CTX_CURRENT_INSTRUCTION] = NativeInstruction(
                     frame[4][0].strip(), location)
 
-    def __init__(self, mpl_object, executor=None):
+    def __init__(self, mpl_object, object_store=None):
         self.__object = mpl_object
-        self.__executor = executor
+        self.__object_store = object_store or helpers.get_object_store()
 
     @property
     def object(self):
@@ -203,7 +201,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         owner = self.__object.owner
         if owner is None:
             return None
-        return MuranoObjectInterface(owner, self.__executor)
+        return MuranoObjectInterface(owner)
 
     def find_owner(self, type, optional=False):
         if isinstance(type, six.string_types):
@@ -213,7 +211,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         p = self.__object.owner
         while p is not None:
             if type.is_compatible(p):
-                return MuranoObjectInterface(p, self.__executor)
+                return MuranoObjectInterface(p)
             p = p.owner
         if not optional:
             raise ValueError('Object is not owned by any instance of type '
@@ -244,8 +242,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         return MuranoObjectInterface(
             helpers.cast(
                 self.__object, murano_class,
-                version_spec or helpers.get_type()),
-            self.__executor)
+                version_spec or helpers.get_type()))
 
     def is_instance_of(self, murano_class, version_spec=None):
         return helpers.is_instance_of(
@@ -268,7 +265,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
     def __call__(self):
         return MuranoObjectInterface.CallInterface(
-            self.object, self.__executor)
+            self.object, self.__object_store)
 
     def __repr__(self):
         return '<{0}>'.format(repr(self.object))

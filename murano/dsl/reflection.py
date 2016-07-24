@@ -18,7 +18,6 @@ from yaql import yaqlization
 
 from murano.dsl import dsl
 from murano.dsl import dsl_types
-from murano.dsl import helpers
 from murano.dsl import meta
 
 
@@ -154,8 +153,7 @@ def method_owner(murano_method):
 @specs.name('invoke')
 @specs.method
 def method_invoke(context, method, __object, *args, **kwargs):
-    executor = helpers.get_executor(context)
-    return method.invoke(executor, __object, args, kwargs, context)
+    return method.invoke(__object, args, kwargs, context)
 
 
 @specs.yaql_property(dsl_types.MuranoPackage)

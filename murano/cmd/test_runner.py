@@ -162,7 +162,7 @@ class MuranoTestRunner(object):
             method = obj.type.find_single_method(name)
             method.scope = dsl_types.MethodScopes.Public
             LOG.debug('Executing: {0}.{1}'.format(obj.type.name, name))
-            obj.type.invoke(name, exc, obj, (), {})
+            exc.run(obj.type, name, obj, (), {})
 
     def _validate_keystone_opts(self, args):
         ks_opts_to_config = {
@@ -254,8 +254,10 @@ class MuranoTestRunner(object):
                         pkg_loader,
                         mock_context_manager.MockContextManager(),
                         test_session)
-                    obj = package.find_class(pkg_class, False).new(
-                        None, dsl_executor.object_store, dsl_executor)(None)
+                    with helpers.with_object_store(dsl_executor.object_store):
+                        obj = helpers.instantiate(
+                            {}, None, None, None,
+                            package.find_class(pkg_class, False))
 
                     test_name = "{0}.{1}".format(obj.type.name, m)
                     dots_number = max_length - len(test_name)
@@ -267,7 +269,7 @@ class MuranoTestRunner(object):
                     test_session.start()
                     try:
                         run_count += 1
-                        obj.type.invoke(m, dsl_executor, obj, (), {})
+                        dsl_executor.run(obj.type, m, obj, (), {})
                         self._call_service_method(
                             'tearDown', dsl_executor, obj)
                         msg = '{0}{1}{2}\n'.format(OK_COLOR, 'OK', END_COLOR)

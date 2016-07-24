@@ -289,7 +289,7 @@ class TaskExecutor(object):
         method_name, kwargs = self.action['method'], self.action['args']
 
         if obj is not None:
-            return obj.type.invoke(method_name, mpl_executor, obj, (), kwargs)
+            return mpl_executor.run(obj.type, method_name, obj, (), kwargs)
 
     def _create_trust(self):
         if not CONF.engine.use_trusts:
@@ -352,4 +352,4 @@ class StaticActionExecutor(object):
         cls = package.find_class(class_name, search_requirements=False)
         method_name, kwargs = self.action['method'], self.action['args']
 
-        return cls.invoke(method_name, mpl_executor, None, (), kwargs)
+        return mpl_executor.run(cls, method_name, None, (), kwargs)

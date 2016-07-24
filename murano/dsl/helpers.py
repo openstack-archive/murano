@@ -116,13 +116,12 @@ def parallel_select(collection, func, limit=1000):
     # workaround for eventlet issue 232
     # https://github.com/eventlet/eventlet/issues/232
     context = get_context()
-    session = get_execution_session()
+    object_store = get_object_store()
 
     def wrapper(element):
         try:
-            with contextual(context):
-                with execution_session(session):
-                    return func(element), False, None
+            with with_object_store(object_store), contextual(context):
+                return func(element), False, None
         except Exception as e:
             return e, True, sys.exc_info()[2]
 
@@ -145,10 +144,9 @@ def get_context():
     return getattr(current_thread, constants.TL_CONTEXT, None)
 
 
-def get_executor(context=None):
-    context = context or get_context()
-    result = context[constants.CTX_EXECUTOR]
-    return None if not result else result()
+def get_executor():
+    store = get_object_store()
+    return None if store is None else store.executor
 
 
 def get_type(context=None):
@@ -156,28 +154,19 @@ def get_type(context=None):
     return context[constants.CTX_TYPE]
 
 
-def get_execution_session(context=None):
-    context = context or get_context()
-    session = None
-    if context is not None:
-        session = context[constants.CTX_EXECUTION_SESSION]
-    if session is None:
-        current_thread = eventlet.greenthread.getcurrent()
-        session = getattr(current_thread, constants.TL_SESSION, None)
-    return session
+def get_execution_session():
+    executor = get_executor()
+    return None if executor is None else executor.execution_session
 
 
-def get_object_store(context=None):
-    context = context or get_context()
-    this = context[constants.CTX_THIS]
-    return this.object_store if isinstance(
-        this, dsl_types.MuranoObject) else None
+def get_object_store():
+    current_thread = eventlet.greenthread.getcurrent()
+    return getattr(current_thread, constants.TL_OBJECT_STORE, None)
 
 
-def get_package_loader(context=None):
-    context = context or get_context()
-    result = context[constants.CTX_PACKAGE_LOADER]
-    return None if not result else result()
+def get_package_loader():
+    executor = get_executor()
+    return None if executor is None else executor.package_loader
 
 
 def get_this(context=None):
@@ -190,10 +179,9 @@ def get_caller_context(context=None):
     return context[constants.CTX_CALLER_CONTEXT]
 
 
-def get_attribute_store(context=None):
-    context = context or get_context()
-    store = context[constants.CTX_ATTRIBUTE_STORE]
-    return None if not store else store()
+def get_attribute_store():
+    executor = get_executor()
+    return None if executor is None else executor.attribute_store
 
 
 def get_current_instruction(context=None):
@@ -266,8 +254,8 @@ def contextual(ctx):
     return thread_local_attribute(constants.TL_CONTEXT, ctx)
 
 
-def execution_session(session):
-    return thread_local_attribute(constants.TL_SESSION, session)
+def with_object_store(object_store):
+    return thread_local_attribute(constants.TL_OBJECT_STORE, object_store)
 
 
 def parse_version_spec(version_spec):
@@ -513,8 +501,7 @@ def resolve_type(value, scope_type, return_reference=False):
     return result
 
 
-def instantiate(data, owner, object_store, context, scope_type,
-                default_type=None):
+def instantiate(data, owner, context, scope_type, default_type=None):
     if data is None:
         data = {}
     if not isinstance(data, yaqlutils.MappingType):
@@ -528,9 +515,7 @@ def instantiate(data, owner, object_store, context, scope_type,
             type_obj = resolve_type(key, scope_type)
             props = yaqlutils.filter_parameters_dict(data[key] or {})
             props = evaluate(props, context, freeze=False)
-            return type_obj.new(
-                owner, object_store, object_store.executor)(
-                context, **props)
+            return type_obj.new(owner)(context, **props)
 
     data = evaluate(data, context, freeze=False)
     if '?' not in data:
@@ -543,7 +528,7 @@ def instantiate(data, owner, object_store, context, scope_type,
     if 'id' not in data['?']:
         data['?']['id'] = uuid.uuid4().hex
 
-    return object_store.load(data, owner, context)
+    return get_object_store().load(data, owner, context)
 
 
 def function(c):

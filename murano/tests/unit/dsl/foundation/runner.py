@@ -101,9 +101,9 @@ class Runner(object):
             cls = obj if isinstance(obj, dsl_types.MuranoType) else obj.type
             runtime_version = cls.package.runtime_version
             yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
-            return dsl.to_mutable(cls.invoke(
-                name, self.executor, obj, tuple(final_args), final_kwargs),
-                yaql_engine)
+            with helpers.with_object_store(self.executor.object_store):
+                return dsl.to_mutable(cls.invoke(
+                    name, obj, tuple(final_args), final_kwargs), yaql_engine)
         except dsl_exception.MuranoPlException as e:
             if not self.preserve_exception:
                 original_exception = getattr(e, 'original_exception', None)
@@ -145,3 +145,6 @@ class Runner(object):
     @preserve_exception.setter
     def preserve_exception(self, value):
         self._preserve_exception = value
+
+    def session(self):
+        return helpers.with_object_store(self.executor.object_store)

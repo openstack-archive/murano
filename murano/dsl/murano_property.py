@@ -70,7 +70,7 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
             return prop._meta
 
         if self._meta_values is None:
-            executor = helpers.get_executor(context)
+            executor = helpers.get_executor()
             context = executor.create_type_context(
                 self.declaring_type, caller_context=context)
 

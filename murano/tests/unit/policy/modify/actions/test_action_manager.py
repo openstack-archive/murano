@@ -45,10 +45,12 @@ class TestActionManager(tda.ModifyActionTestCase):
         self.assertRaises(ValueError, manager.load_action, 'no-such-action')
 
     def test_action_apply(self):
-        manager = am.ModifyActionManager()
-        action_spec = 'remove-object: {object_id: %s}' % self._dict_member.id
-        manager.apply_action(self._obj,
-                             action_spec)
+        with self._runner.session():
+            manager = am.ModifyActionManager()
+            obj_id = self._dict_member.id
+            action_spec = 'remove-object: {object_id: %s}' % obj_id
+            manager.apply_action(self._obj,
+                                 action_spec)
 
     def test_action_apply_invalid_spec(self):
         manager = am.ModifyActionManager()

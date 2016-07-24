@@ -104,7 +104,7 @@ def with_original(context, **kwargs):
 @specs.parameter('mock_name', yaqltypes.String())
 def inject_method_with_str(context, target, target_method,
                            mock_object, mock_name):
-    ctx_manager = helpers.get_executor(context).context_manager
+    ctx_manager = helpers.get_executor().context_manager
 
     current_class = helpers.get_type(context)
     mock_func = current_class.find_single_method(mock_name)
@@ -114,9 +114,8 @@ def inject_method_with_str(context, target, target_method,
     result_fd = original_function.instance_stub.clone()
 
     def payload_adapter(__context, __sender, *args, **kwargs):
-        executor = helpers.get_executor(__context)
         return mock_func.invoke(
-            executor, mock_object, args, kwargs, __context, True)
+            mock_object, args, kwargs, __context, True)
 
     result_fd.payload = payload_adapter
     existing_mocks = ctx_manager.class_mock_ctx.setdefault(
@@ -130,7 +129,7 @@ def inject_method_with_str(context, target, target_method,
 @specs.parameter('target_method', yaqltypes.String())
 @specs.parameter('expr', yaqltypes.Lambda(with_context=True))
 def inject_method_with_yaql_expr(context, target, target_method, expr):
-    ctx_manager = helpers.get_executor(context).context_manager
+    ctx_manager = helpers.get_executor().context_manager
     original_class = target.type
 
     original_function = original_class.find_single_method(target_method)

@@ -29,7 +29,7 @@ class Spec(object):
     def transform(self, value, this, owner, context, default=None):
         if default is None:
             default = self.default
-        executor = helpers.get_executor(context)
+        executor = helpers.get_executor()
         if isinstance(this, dsl_types.MuranoTypeReference):
             this = this.type
         if isinstance(this, dsl_types.MuranoType):

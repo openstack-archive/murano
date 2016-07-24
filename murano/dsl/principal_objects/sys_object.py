@@ -25,7 +25,7 @@ class SysObject(object):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(context))
 
-        attribute_store = helpers.get_attribute_store(context)
+        attribute_store = helpers.get_attribute_store()
         attribute_store.set(this.object, owner, name, value)
 
     @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
@@ -33,7 +33,7 @@ class SysObject(object):
         if owner is None:
             owner = helpers.get_type(helpers.get_caller_context(context))
 
-        attribute_store = helpers.get_attribute_store(context)
+        attribute_store = helpers.get_attribute_store()
 
         result = attribute_store.get(this.object, owner, name)
         return default if result is None else result
