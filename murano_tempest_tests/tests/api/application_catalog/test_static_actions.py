@@ -27,17 +27,18 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
 
     @classmethod
     def resource_setup(cls):
-        if CONF.application_catalog.glare_backend:
-            msg = ("Murano using GLARE backend. "
-                   "Static actions tests will be skipped.")
-            raise cls.skipException(msg)
-
         super(TestStaticActions, cls).resource_setup()
 
         application_name = utils.generate_name('test_repository_class')
         cls.abs_archive_path, dir_with_archive, archive_name = \
             utils.prepare_package(application_name, add_class_name=True)
-        cls.package = cls.application_catalog_client.upload_package(
+
+        if CONF.application_catalog.glare_backend:
+            client = cls.artifacts_client
+        else:
+            client = cls.application_catalog_client
+
+        cls.package = client.upload_package(
             application_name, archive_name, dir_with_archive,
             {"categories": [], "tags": [], 'is_public': False})
 
@@ -45,7 +46,11 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
     def resource_cleanup(cls):
         super(TestStaticActions, cls).resource_cleanup()
         os.remove(cls.abs_archive_path)
-        cls.application_catalog_client.delete_package(cls.package['id'])
+        if CONF.application_catalog.glare_backend:
+            client = cls.artifacts_client
+        else:
+            client = cls.application_catalog_client
+        client.delete_package(cls.package['id'])
 
     @testtools.testcase.attr('smoke')
     def test_call_static_action_basic(self):
@@ -57,9 +62,14 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
 
     @testtools.testcase.attr('smoke')
     def test_call_static_action_full(self):
+        if CONF.application_catalog.glare_backend:
+            name_attr = 'name'
+        else:
+            name_attr = 'fully_qualified_name'
+
         action_result = self.application_catalog_client.call_static_action(
             class_name=self.package['class_definitions'][0],
             method_name='staticAction',
-            package_name=self.package['fully_qualified_name'],
+            package_name=self.package[name_attr],
             class_version="<1", args={'myName': 'John'})
         self.assertEqual('"Hello, John"', action_result)
