@@ -19,6 +19,7 @@ from tempest.lib import auth
 
 from murano_tempest_tests.services.application_catalog \
     import application_catalog_client
+from murano_tempest_tests.services.artifacts import artifacts_client
 from murano_tempest_tests.services.service_broker import service_broker_client
 
 CONF = config.CONF
@@ -31,6 +32,11 @@ class Manager(object):
         self.auth_provider = get_auth_provider(credentials)
         self.service_broker_client = service_broker_client.ServiceBrokerClient(
             self.auth_provider)
+        if CONF.application_catalog.glare_backend:
+            self.artifacts_client = artifacts_client.ArtifactsClient(
+                self.auth_provider)
+        else:
+            self.artifacts_client = None
         self.application_catalog_client = \
             application_catalog_client.ApplicationCatalogClient(
                 self.auth_provider)
