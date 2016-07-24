@@ -1,3 +1,6 @@
+Namespaces:
+  std: io.murano
+
 Name: CreatingClass
 
 Properties:
@@ -26,3 +29,50 @@ Methods:
           property1: string
           property2: 123
       - Return: new(CreatedClass1, $dict, owner=>$this)
+
+  testLoadCompexModel:
+    Body:
+      - $model:
+          :Node:
+            value: rootNode
+            nodes:
+              - :Node:
+                  value: childNode1
+                  nodes: [node0, node2]
+                id: node1
+              - '?':
+                  id: node2
+                  type: Node
+                value: childNode2
+                nodes: [node1, node2]
+              - node2
+          id: node0
+      - $obj: new($model, $this)
+      - Return:
+        - id($obj)
+        - id($obj.nodes[0])
+        - id($obj.nodes[1])
+        - id($obj.find(std:Object))
+        - $obj.value
+        - $obj.nodes.select($.value)
+        - $obj.nodes[0].nodes[0] = $obj
+        - $obj.nodes[0].nodes[1] = $obj.nodes[1]
+        - $obj.nodes[2] = $obj.nodes[1]
+        - $obj.nodes[1].nodes[0] = $obj.nodes[0]
+        - $obj.nodes[1].nodes[1] = $obj.nodes[1]
+        - $obj.nodes[0].nodes[0].value
+        - $obj.nodes[0].nodes[1].value
+        - $obj.nodes[1].nodes[0].value
+
+
+
+---
+
+Name: Node
+
+Properties:
+  nodes:
+    Contract:
+      - $.class(Node)
+  value:
+    Contract: $.string()

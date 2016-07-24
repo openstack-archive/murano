@@ -16,11 +16,11 @@ from murano.dsl import helpers
 
 
 class Object(object):
-    def __init__(self, __name, **kwargs):
+    def __init__(self, __name, __id=None, **kwargs):
         self.data = {
             '?': {
                 'type': __name,
-                'id': helpers.generate_id()
+                'id': __id or helpers.generate_id()
             }
         }
         self.data.update(kwargs)

@@ -47,12 +47,18 @@ def cast(context, object_, type__, version_spec=None):
 @specs.parameter('__object_name', yaqltypes.String(True))
 def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         **parameters):
-    new_context = __context.create_child_context()
-    for key, value in six.iteritems(parameters):
-        if utils.is_keyword(key):
-            new_context[key] = value
-    return __type_name.type.new(
-        __owner, name=__object_name)(new_context, **parameters)
+
+    data = {
+        __type_name: parameters,
+        'name': __object_name
+    }
+    for key, value in six.iteritems(__extra or {}):
+        if key.startswith('_'):
+            data[key] = value
+
+    object_store = helpers.get_object_store()
+    return object_store.load(data, __owner, context=__context,
+                             scope_type=helpers.get_names_scope(__context))
 
 
 @specs.parameter('type_name', dsl.MuranoTypeParameter())
@@ -66,6 +72,16 @@ def new_from_dict(type_name, context, parameters,
                   owner=None, object_name=None, extra=None):
     return new(context, type_name, owner, object_name, extra,
                **utils.filter_parameters_dict(parameters))
+
+
+@specs.name('new')
+@specs.parameter('owner', dsl.MuranoObjectParameter(
+    nullable=True, decorate=False))
+@specs.parameter('model', utils.MappingType)
+def new_from_model(context, model, owner=None):
+    object_store = helpers.get_object_store()
+    return object_store.load(model, owner, context=context,
+                             scope_type=helpers.get_names_scope(context))
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))
@@ -225,6 +241,7 @@ def register(context, runtime_version):
     context.register_function(cast)
     context.register_function(new)
     context.register_function(new_from_dict)
+    context.register_function(new_from_model)
     context.register_function(id_)
     context.register_function(super_)
     context.register_function(psuper)

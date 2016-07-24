@@ -155,6 +155,8 @@ class TypeScheme(object):
             if not default_name:
                 default_name = name
             murano_class = name.type
+            if isinstance(value, TypeScheme.ObjRef):
+                value = value.object_id
             if value is None:
                 return None
             if isinstance(value, dsl_types.MuranoObject):
@@ -162,9 +164,10 @@ class TypeScheme(object):
             elif isinstance(value, dsl_types.MuranoObjectInterface):
                 obj = value.object
             elif isinstance(value, utils.MappingType):
-                obj = helpers.instantiate(
-                    value, owner, root_context, calling_type, default_name)
-            elif isinstance(value, six.string_types) and object_store:
+                obj = object_store.load(
+                    value, owner, context=root_context,
+                    default_type=default_name, scope_type=calling_type)
+            elif isinstance(value, six.string_types):
                 obj = object_store.get(value)
                 if obj is None:
                     if not object_store.initializing:

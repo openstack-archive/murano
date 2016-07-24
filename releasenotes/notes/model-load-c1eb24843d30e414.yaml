@@ -1,0 +1,9 @@
+---
+features:
+  - Another overload of the new function was added - new($model, $owner)
+    that loads complete object graph in a single call. Objects in the model
+    can have cross references. In that case this is the only way to instantiate
+    the graph. Objects might be specified either in object model format (with
+    '?' attribute or in MuranoPL format (used for Meta definitions).
+  - class() contract now uses the same approach to load classes from
+    dictionaries. Thus the same two syntaxes apply there as well.

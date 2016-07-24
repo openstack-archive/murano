@@ -57,7 +57,7 @@ class MetaData(MetaProvider):
 
             used_types.add(type_obj)
             factory_maker = lambda template: \
-                lambda context: helpers.instantiate(
+                lambda context: helpers.get_object_store().load(
                     template, owner=None,
                     context=context, scope_type=scope_type())
 

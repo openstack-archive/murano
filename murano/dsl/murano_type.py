@@ -274,21 +274,6 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             return True
         return any(cls is self for cls in obj.ancestors())
 
-    def new(self, owner, **kwargs):
-        obj = murano_object.MuranoObject(
-            self, helpers.weak_proxy(owner), **kwargs)
-
-        def initializer(__context, **params):
-            if __context is None:
-                __context = helpers.get_executor().create_object_context(obj)
-            init_context = __context.create_child_context()
-            init_context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
-            obj.initialize(init_context, params)
-            return obj
-
-        initializer.object = obj
-        return initializer
-
     def __repr__(self):
         return 'MuranoClass({0}/{1})'.format(self.name, self.version)
 

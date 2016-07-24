@@ -26,13 +26,14 @@ from murano.tests.unit.dsl.foundation import test_case
 class TestResultsSerializer(test_case.DslTestCase):
     def setUp(self):
         super(TestResultsSerializer, self).setUp()
-        self._class2 = om.Object('SampleClass2', class2Property='string2')
+        self._class2 = om.Object('SampleClass2',
+                                 class2Property='string2')
         self._class1 = om.Object(
-            'SampleClass1',
+            'SampleClass1', 'def',
             stringProperty='string1',
             arbitraryProperty={'a': [1, 2]},
             classProperty=self._class2)
-        self._root_class = om.Object('ContractExamples',
+        self._root_class = om.Object('ContractExamples', 'abc',
                                      sampleClass=self._class1)
 
         self._runner = self.new_runner(self._root_class)
@@ -48,12 +49,12 @@ class TestResultsSerializer(test_case.DslTestCase):
            :param serialized: serialized Object Model
         """
 
-        self.assertEqual(self._root_class.id,
+        self.assertEqual('abc',
                          serialized[name]['?']['id'])
         self.assertEqual('ContractExamples',
                          serialized['Objects']['?']['type'])
         self.assertIsInstance(serialized[name]['sampleClass'], dict)
-        self.assertEqual(self._class1.id,
+        self.assertEqual('def',
                          serialized[name][
                              'sampleClass']['?']['id'])
         self.assertEqual('SampleClass1',

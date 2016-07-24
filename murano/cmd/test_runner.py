@@ -254,10 +254,9 @@ class MuranoTestRunner(object):
                         pkg_loader,
                         mock_context_manager.MockContextManager(),
                         test_session)
-                    with helpers.with_object_store(dsl_executor.object_store):
-                        obj = helpers.instantiate(
-                            {}, None, None, None,
-                            package.find_class(pkg_class, False))
+                    obj = dsl_executor.object_store.load(
+                        {}, None,
+                        default_type=package.find_class(pkg_class, False))
 
                     test_name = "{0}.{1}".format(obj.type.name, m)
                     dots_number = max_length - len(test_name)
