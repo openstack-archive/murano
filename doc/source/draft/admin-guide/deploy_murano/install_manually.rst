@@ -241,10 +241,19 @@ This section describes how to install and run the murano dashboard.
     the ``muranodashboard`` plug-in file to
     the ``openstack_dashboard/local/enabled/`` directory:
 
-    .. code-block:: console
+    * For the OpenStack installations prior to the Newton release, run::
 
-       cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
-       openstack_dashboard/local/enabled/
+      .. code-block:: console
+
+         cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
+         openstack_dashboard/local/enabled/
+
+    * For the Newton (and later) OpenStack installations, run::
+
+      .. code-block:: console
+
+         cp ../murano-dashboard/muranodashboard/local/enabled/_50_murano.py \
+         openstack_dashboard/local/enabled/
 
 #.  Prepare local settings.
 
@@ -274,6 +283,14 @@ This section describes how to install and run the murano dashboard.
         ...
 
         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
+
+#. For the OpenStack installations of the Newton (and later) version,
+   copy murano dashboard specific settings file to horizon dashboard:
+
+    .. code-block:: console
+
+       cp ../murano-dashboard/muranodashboard/local/local_settings.d/_50_murano.py \
+       openstack_dashboard/local/local_settings.d/
 
 #. Change the default session back end from browser cookies to database
    to avoid issues with forms during the applications creation:
