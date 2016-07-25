@@ -76,11 +76,12 @@ FormatVersion property
 That is why it is very important to specify it correctly.
 
 FormatVersion 1.0.0 (default) is still used by Windows murano-agent.
-New features that are introduced in Kilo, such as Chef or Puppet,
-and downloadable files require version 2.1.0, while nearly all the applications
-in murano-apps repository work with FormatVersion 2.0.0. And if you omit
-the ``FormatVersion`` property or put something like ``<2.0.0``, it will
-lead to the incorrect behaviour. The same happens if, for example,
+Almost all the applications in murano-apps repository work with FormatVersion
+2.0.0. New features that are introduced in Kilo, such as Chef or Puppet,
+and downloadable files require version 2.1.0 or greater. Since FormatVersion
+2.2.0 it is possible to enable Berkshelf. It requires Mitaka version of agent.
+If you omit the ``FormatVersion`` property or put something like ``<2.0.0``,
+it will lead to the incorrect behaviour. The same happens if, for example,
 ``FormatVersion=2.1.0``, and a VM has the pre-Kilo agent.
 
 
