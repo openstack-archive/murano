@@ -19,6 +19,7 @@ from tempest import config
 from tempest.lib import base
 
 from murano_tempest_tests import clients
+from murano_tempest_tests import utils
 
 CONF = config.CONF
 
@@ -85,6 +86,7 @@ class BaseArtifactsTest(base.BaseTestCase):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
             cls.os = clients.Manager(credentials=creds)
         cls.artifacts_client = cls.os.artifacts_client
+        cls.application_catalog_client = cls.os.application_catalog_client
 
     @classmethod
     def resource_cleanup(cls):
@@ -94,3 +96,24 @@ class BaseArtifactsTest(base.BaseTestCase):
     def clear_isolated_creds(cls):
         if hasattr(cls, "dynamic_cred"):
             cls.dynamic_cred.clear_creds()
+
+    @classmethod
+    def upload_package(cls, application_name, version=None, require=None):
+        abs_archive_path, dir_with_archive, archive_name = \
+            utils.prepare_package(application_name, version=version,
+                                  add_class_name=True, require=require)
+        package = cls.artifacts_client.upload_package(
+            application_name, archive_name, dir_with_archive,
+            {"categories": [], "tags": [], 'is_public': False})
+        return package, abs_archive_path
+
+    @staticmethod
+    def create_obj_model(package):
+        return {
+            "name": package['display_name'],
+            "?": {
+                "type": package['name'],
+                "id": utils.generate_uuid(),
+                "classVersion": package['version']
+            }
+        }

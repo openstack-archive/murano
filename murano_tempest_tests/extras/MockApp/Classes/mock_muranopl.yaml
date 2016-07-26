@@ -26,7 +26,7 @@ Methods:
           credentials:
             uri: localhost
   deploy:
-     Body:
+    Body:
       - $this.find(std:Environment).reporter.report($this, 'Follow the white rabbit')
 
   staticAction:
