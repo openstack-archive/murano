@@ -34,7 +34,7 @@ To upload an application to the catalog:
 
    * Specify the URL in the :guilabel:`Package URL` field. Lets upload
      the Apache HTTP Server package using
-     http://storage.apps.openstack.org/apps/io.murano.apps.apache.ApacheHttpServer.zip;
+     http://storage.apps.openstack.org/apps/com.example.apache.ApacheHttpServer.zip;
 
    * Click :guilabel:`Next` to continue:
 

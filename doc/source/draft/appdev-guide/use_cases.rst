@@ -31,8 +31,8 @@ MySql has a number of methods:
 * ``assignUser``
 * ``getConnectionString``
 
-In the ``io.murano.apps.WordPress`` class definition the database property is a
-contact for the ``io.murano.databases.MySql`` class. So, the database
+In the ``com.example.WordPress`` class definition the database property is a
+contact for the ``com.example.databases.MySql`` class. So, the database
 configuration methods can be called with the parameters passed by the user
 in the main method:
 
@@ -87,7 +87,7 @@ instruction template (object model) in the ``Application`` section:
 
    Application:
    ?:
-     type: io.murano.apps.HDPSandbox
+     type: com.example.HDPSandbox
    name: $.appConfiguration.name
    instance:
      ?:

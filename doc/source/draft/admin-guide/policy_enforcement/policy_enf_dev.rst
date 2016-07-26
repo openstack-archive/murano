@@ -35,12 +35,12 @@ of rules that are as follows:
       name: wordpress-env
       '?': {type: io.murano.Environment, id: 83bff5ac}
       applications:
-      - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
+      - '?': {id: e7a13d3c, type: com.example.databases.MySql}
 
   The model above transforms to the following rules:
 
   * ``murano:objects+("83bff5ac", "tenant_id", "io.murano.Environment")``
-  * ``murano:objects+("83bff5ac", "e7a13d3c", "io.murano.databases.MySql")``
+  * ``murano:objects+("83bff5ac", "e7a13d3c", "com.example.databases.MySql")``
 
   .. note::
 
@@ -54,7 +54,7 @@ of rules that are as follows:
   .. code-block:: yaml
 
       applications:
-      - '?': {id: e7a13d3c, type: io.murano.databases.MySql}
+      - '?': {id: e7a13d3c, type: com.example.databases.MySql}
       database: wordpress
 
   The model above transforms to the following rule:
@@ -100,10 +100,10 @@ of rules that are as follows:
       applications:
       - '?':
           id: 0aafd67e
-          type: io.murano.databases.MySql
+          type: com.example.databases.MySql
       - '?':
           id: 50fa68ff
-          type: io.murano.apps.WordPress
+          type: com.example.WordPress
         database: 0aafd67e
 
   The model above transforms to the following rule:
@@ -123,7 +123,7 @@ of rules that are as follows:
       applications:
       - '?':
           id: 0aafd67e
-          type: io.murano.databases.MySql
+          type: com.example.databases.MySql
         instance:
           '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
 
@@ -145,12 +145,12 @@ of rules that are as follows:
       applications:
       - '?':
           id: 0aafd67e
-          type: io.murano.databases.MySql
+          type: com.example.databases.MySql
         instance:
           '?': {id: ed8df2b0, type: io.murano.resources.LinuxMuranoInstance}
       - '?':
           id: 50fa68ff
-          type: io.murano.apps.WordPress
+          type: com.example.WordPress
         database: 0aafd67e
 
   The model above transforms to the following rules:

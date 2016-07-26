@@ -235,7 +235,7 @@ an application:
 
     Application:
       ?:
-        type: io.murano.apps.exampleApp
+        type: com.example.exampleApp
       instance:
         ?:
           type: io.murano.resources.LinuxMuranoInstance

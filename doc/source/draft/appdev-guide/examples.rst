@@ -51,8 +51,8 @@ Examples
 
          ...
          type: 
-         - io.murano.apps.docker.kubernetes.KubernetesPod
-         - io.murano.apps.docker.DockerStandaloneHost
+         - com.mirantis.docker.kubernetes.KubernetesPod
+         - com.mirantis.docker.DockerStandaloneHost
 
        Information about the application itself (docker image and port that is
        needed to be opened) is contained in the getContainer method. All other

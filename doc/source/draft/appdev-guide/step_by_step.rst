@@ -81,7 +81,7 @@ The ApacheHTTPServer's manifest file:
 
     Format: 1.0
     Type: Application
-    FullName: io.murano.apps.apache.ApacheHttpServer
+    FullName: com.example.apache.ApacheHttpServer
     Name: Apache HTTP Server
     Description: |
      The Apache HTTP Server Project is an effort to develop and maintain an
@@ -91,7 +91,7 @@ The ApacheHTTPServer's manifest file:
     Author: Mirantis, Inc
     Tags: [HTTP, Server, WebServer, HTML, Apache]
     Classes:
-     io.murano.apps.apache.ApacheHttpServer: ApacheHttpServer.yaml
+     com.example.apache.ApacheHttpServer: ApacheHttpServer.yaml
 
 Now, let's inspect ``manifest.yaml`` line-by-line.
 
@@ -131,20 +131,28 @@ application methods by this name.
 
 To ensure the global uniqueness, the same naming
 convention as the naming convention of Java packages and
-classes is followed. The ``io.murano.apps.apache.`` part
-is the "package" part of the name, while ``ApacheHttpServer``
-stands for the "class" part of the name:
+classes is followed.
+
+The examples of such class names may include:
+
+* ``com.example.Foo`` - for demo applications and packages
+
+* ``org.openstack.projectName.Foo`` - for applications and packages developed
+  and maintained by the teams of official OpenStack projects
+
+* ``com.companyname.Foo`` - for applications and packages developed and
+  maintained by a third party controlling the "companyname.com" domain name
+
+* ``io.murano.Foo`` - for applications and packages developed and maintained by
+  the core murano team as part of the murano project. So, io.murano is a
+  preferred alias for longer ``org.openstack.murano`` FQN prefix.
+
+In the following example the ``com.example.apache.`` part is the "package" part
+of the name, while ``ApacheHttpServer`` stands for the "class" part of the name:
 
 .. code-block:: yaml
 
-   FullName: io.murano.apps.apache.ApacheHttpServer
-
-.. note::
-
-   It is not necessary that all applications belong to one domain.
-   This naming allows to determine an application group by its name.
-   OpenStack-related applications may have full names, started with
-   ``org.openstack.apps``, for example, ``org.openstack.apps.Rally``
+   FullName: com.example.apache.ApacheHttpServer
 
 
 Name
@@ -234,12 +242,12 @@ Is a mapping between all classes present in ApacheHttpServer application
 and the file names where these classes are defined in. This is one-to-one relationship,
 which means that there is one and the only class per a single file.
 
-The line ``io.murano.apps.apache.ApacheHttpServer: ApacheHttpServer.yaml`` says that the class ``io.murano.apps.apache.ApacheHttpServer`` is defined in the file ``ApacheHttpServer.yaml``:
+The line ``com.example.apache.ApacheHttpServer: ApacheHttpServer.yaml`` says that the class ``com.example.apache.ApacheHttpServer`` is defined in the file ``ApacheHttpServer.yaml``:
 
 .. code-block:: yaml
 
    Classes:
-    io.murano.apps.apache.ApacheHttpServer: ApacheHttpServer.yaml
+    com.example.apache.ApacheHttpServer: ApacheHttpServer.yaml
 
 
 Step 3. Create the execution plan template
@@ -296,7 +304,7 @@ ApacheHTTPServer's ui.yaml source code:
 
    Application:
      ?:
-       type: io.murano.apps.apache.ApacheHttpServer
+       type: com.example.apache.ApacheHttpServer
      name: $.appConfiguration.name
      enablePHP: $.appConfiguration.enablePHP
      instance:
@@ -366,7 +374,7 @@ symbol. This indicates system information:
 
     Application:
      ?:
-       type: io.murano.apps.apache.ApacheHttpServer
+       type: com.example.apache.ApacheHttpServer
 
 For ApacheHTTPServer application it is defined that the user should input the application name,
 some instance parameters and decide whether PHP should be enabled or not:
@@ -437,7 +445,7 @@ Here is how it looks like:
    :linenos:
 
    Namespaces:
-     =: io.murano.apps.apache
+     =: com.example.apache
      std: io.murano
      res: io.murano.resources
      sys: io.murano.system
@@ -490,7 +498,7 @@ which enables short names instead of the long ones:
    :linenos:
 
    Namespaces:
-     =: io.murano.apps.apache
+     =: com.example.apache
      std: io.murano
      res: io.murano.resources
      sys: io.murano.system
@@ -502,7 +510,7 @@ Name
 ----
 
 Contains the class name that is defined in this file.
-So full class name will be current namespace and name, provided by corresponding key:  ``io.murano.apps.apache.ApacheHttpServer``:
+So full class name will be current namespace and name, provided by corresponding key:  ``com.example.apache.ApacheHttpServer``:
 
 .. code-block:: yaml
 
@@ -521,7 +529,7 @@ This class has defined deploy method and only instances of that class can be use
 Environment class, in its turn, is responsible for the deployment configurations. Definition of both
 classes are located at meta/io.murano folder of murano repository.
 
-Thus, if you want to have some modifications of ApacheHttpServer, you can set io.murano.apps.apache.ApacheHttpServer
+Thus, if you want to have some modifications of ApacheHttpServer, you can set com.example.apache.ApacheHttpServer
 in the Extends section of a new Application class:
 
 .. code-block:: yaml

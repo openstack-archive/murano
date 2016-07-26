@@ -107,7 +107,7 @@ Below is an example of the :file:`object_model_patch.json` file content:
                 "name": "ApacheHttpServer",
                 "enablePHP": true,
                 "?": {
-                    "type": "io.murano.apps.apache.ApacheHttpServer",
+                    "type": "com.example.apache.ApacheHttpServer",
                     "id": "===id2==="
                 }
             }
@@ -149,7 +149,7 @@ running the :command:`environment-show` command with the
         },
         "?": {
           "status": "pending",
-          "type": "io.murano.apps.apache.ApacheHttpServer",
+          "type": "com.example.apache.ApacheHttpServer",
           "id": "69cdf10d31e64196b4de894e7ea4f1be"
         },
         "enablePHP": true,

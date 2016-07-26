@@ -66,7 +66,7 @@ Application package could be composed manually. Follow the 5 steps below.
 
         Format: Heat.HOT/1.0
         Type: Application
-        FullName: io.murano.apps.Chef-Server
+        FullName: com.example.Chef-Server
         Name: Chef Server
         Description: "Heat template to deploy Open Source CHEF server on a VM"
         Author: Kate
