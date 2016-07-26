@@ -235,6 +235,13 @@ access it. The following usages are available:
      - | Property is defined on a class rather than on an instance.
          See :ref:`static_methods_and_properties` for details.
 
+   * - | Config
+     - | A property allows to have per-class configuration. A value is obtained
+         from the config file rather than from the object model. These config
+         files are stored in a special folder that is configured in the
+         ``[engine]`` section of the Murano config file under the
+         ``class_configs`` key.
+
 The usage attribute is optional and can be omitted (which implies ``In``).
 
 If the workflow tries to write to a property that is not declared with
