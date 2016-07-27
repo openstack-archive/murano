@@ -26,6 +26,7 @@ from murano.common import auth_utils  # noqa
 from murano.common import wsgi
 from murano.db.services import cf_connections as db_cf
 import muranoclient.client as muranoclient
+from muranoclient.common import exceptions
 from muranoclient.glance import client as glare_client
 
 
@@ -116,16 +117,37 @@ class Controller(object):
 
         token = req.headers['X-Auth-Token']
         m_cli = _get_muranoclient(token, req)
-        try:
-            environment_id = db_cf.get_environment_for_space(space_guid)
-        except AttributeError:
+
+        def _set_new_environment_for_space(space_guid, log_msg):
             body = {'name': 'my_{uuid}'.format(uuid=uuid.uuid4().hex)}
             env = m_cli.environments.create(body)
-            environment_id = env.id
-            db_cf.set_environment_for_space(space_guid, environment_id)
-            LOG.info(_LI("Cloud Foundry {space_id} mapped to {environment_id}")
-                     .format(space_id=space_guid,
-                             environment_id=environment_id))
+            db_cf.set_environment_for_space(space_guid, env.id)
+            LOG.info(log_msg.format(space_id=space_guid,
+                                    environment_id=env.id))
+            return env.id
+
+        try:
+            environment_id = db_cf.get_environment_for_space(space_guid)
+            # NOTE: Check that environment which was previously linked with
+            # CF space still exist, reset a new environment for space.
+            try:
+                env = m_cli.environments.get(environment_id)
+            except exceptions.HTTPNotFound:
+                msg = (_LI("Can not find environment_id {environment_id}, "
+                           "will create a new one."
+                           ).format(environment_id=environment_id))
+                LOG.info(msg)
+                env = {}
+            if not env:
+                log_msg = (_LI("Cloud Foundry {space_id} remapped to "
+                               "{environment_id}"))
+                environment_id = _set_new_environment_for_space(
+                    space_guid, log_msg)
+        except AttributeError:
+            log_msg = (_LI("Cloud Foundry {space_id} mapped to "
+                           "{environment_id}"))
+            environment_id = _set_new_environment_for_space(
+                space_guid, log_msg)
 
         package = m_cli.packages.get(service_id)
         LOG.debug('Adding service {name}'.format(name=package.name))

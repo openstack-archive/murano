@@ -219,6 +219,20 @@ function set_packages_service_backend() {
     fi
 }
 
+# configure_murano_cfapi() - Set config files
+function configure_murano_cfapi {
+
+    # Generate Murano configuration file and configure common parameters.
+    oslo-config-generator --namespace keystonemiddleware.auth_token \
+                          --namespace murano.cfapi \
+                          --namespace oslo.db \
+                          > $MURANO_CFAPI_CONF_FILE
+    cp $MURANO_DIR/etc/murano/murano-cfapi-paste.ini $MURANO_CONF_DIR
+
+    configure_service_broker
+
+}
+
 # install_murano_apps() - Install Murano apps from repository murano-apps, if required
 function install_murano_apps() {
     if [[ -z $MURANO_APPS ]]; then
@@ -256,11 +270,29 @@ function install_murano_apps() {
 
 # configure_service_broker() - set service broker specific options to config
 function configure_service_broker {
-    #Add needed options to murano.conf
-    iniset $MURANO_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
-    iniset $MURANO_CONF_FILE cfapi bind_host "$MURANO_SERVICE_HOST"
-    iniset $MURANO_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
-    iniset $MURANO_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
+
+    iniset $MURANO_CFAPI_CONF_FILE DEFAULT debug $MURANO_DEBUG
+    iniset $MURANO_CFAPI_CONF_FILE DEFAULT use_syslog $SYSLOG
+
+    #Add needed options to murano-cfapi.conf
+    iniset $MURANO_CFAPI_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
+    iniset $MURANO_CFAPI_CONF_FILE cfapi bind_host "$MURANO_SERVICE_HOST"
+    iniset $MURANO_CFAPI_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
+    iniset $MURANO_CFAPI_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
+
+    # configure the database.
+    iniset $MURANO_CFAPI_CONF_FILE database connection `database_connection_url murano_cfapi`
+
+    # Setup keystone_authtoken section
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
+
 }
 
 function prepare_core_library() {
@@ -279,6 +311,15 @@ function init_murano() {
     recreate_database murano utf8
 
     $MURANO_BIN_DIR/murano-db-manage --config-file $MURANO_CONF_FILE upgrade
+}
+
+# init_murano_cfapi() - Initialize databases, etc.
+function init_murano_cfapi() {
+
+    # (re)create Murano database
+    recreate_database murano_cfapi utf8
+
+    $MURANO_BIN_DIR/murano-cfapi-db-manage --config-file $MURANO_CFAPI_CONF_FILE upgrade
 }
 
 function setup_core_library() {
@@ -341,7 +382,7 @@ function stop_murano() {
 
 # start_service_broker() - start murano CF service broker
 function start_service_broker() {
-    screen_it murano-cfapi "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-cfapi --config-file $MURANO_CONF_DIR/murano.conf"
+    screen_it murano-cfapi "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-cfapi --config-file $MURANO_CONF_DIR/murano-cfapi.conf"
 }
 
 
@@ -523,7 +564,7 @@ if is_service_enabled murano; then
             configure_murano_dashboard
         fi
         if is_service_enabled murano-cfapi; then
-            configure_service_broker
+            configure_murano_cfapi
         fi
     elif [[ "$1" == "stack" && "$2" == "extra" ]]; then
         echo_summary "Initializing Murano"
@@ -536,6 +577,7 @@ if is_service_enabled murano; then
             restart_glare_service
         fi
         if is_service_enabled murano-cfapi; then
+            init_murano_cfapi
             start_service_broker
         fi
         setup_core_library
