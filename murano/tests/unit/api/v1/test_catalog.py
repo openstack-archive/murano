@@ -769,7 +769,7 @@ This is a fake zip archive
         processed_result = jsonutils.loads(result.body)
         self.assertIn('id', processed_result.keys())
         expected['id'] = processed_result['id']
-        self.assertDictEqual(expected, processed_result)
+        self.assertEqual(expected, processed_result)
 
     def test_delete_category(self):
         """Check that category deleted successfully"""
