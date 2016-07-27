@@ -207,7 +207,7 @@ unit tests:
             - $.env: $this.load($.appJson)
             - $.env.deploy()
 
-            - $isDeployed: $.env.applications[0].getAttr(deployed, false, 'io.murano.apps.apache.Tomcat')
+            - $isDeployed: $.env.applications[0].getAttr(deployed, false, 'com.example.apache.Tomcat')
             - $.assertEqual(true, $isDeployed)
 
 Provided methods are test cases for the Tomcat application. Object model and

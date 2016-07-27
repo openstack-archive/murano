@@ -21,9 +21,9 @@ When importing a bundle by name, the client appends ``.bundle`` file extension t
 
     {"Packages":
         [
-            {"Name": "io.murano.apps.ApacheHttpServer"},
-            {"Version": "", "Name": "io.murano.apps.Nginx"},
-            {"Version": "0.0.1", "Name": "io.murano.apps.Lighttpd"}
+            {"Name": "com.example.ApacheHttpServer"},
+            {"Version": "", "Name": "com.example.Nginx"},
+            {"Version": "0.0.1", "Name": "com.example.Lighttpd"}
         ]
     }
 

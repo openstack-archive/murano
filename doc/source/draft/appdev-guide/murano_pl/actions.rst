@@ -73,7 +73,7 @@ Response:
         "_26411a1861294160833743e45d0eaad9": {
           "name": "SimpleApp"
         },
-        "type": "io.murano.apps.Simple",
+        "type": "com.example.Simple",
         "id": "e34c317a-f5ee-4f3d-ad2f-d07421b13d67",
         "_actions": {
           "e34c317a-f5ee-4f3d-ad2f-d07421b13d67_exportConfig": {

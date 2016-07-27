@@ -26,11 +26,11 @@ in the bundle and bundle version. Here is the example:
        {
            "Packages": [
                {
-                   "Name": "io.murano.apps.apache.ApacheHttpServer",
+                   "Name": "com.example.apache.ApacheHttpServer",
                    "Version": ""
                },
                {
-                   "Name": "io.murano.apps.apache.Tomcat",
+                   "Name": "com.example.apache.Tomcat",
                    "Version": ""
                }
            ],
@@ -43,9 +43,9 @@ in the bundle and bundle version. Here is the example:
 ``Version``     is not a mandatory parameter. Version for package entry specifies the
 version of the package to look into :ref:`Murano package repository <repository>`.
 If it is specified, murano client would look for a file with that version
-specification in murano repository (for example ``io.murano.apps.MyApp.0.0.1.zip``
-for io.murano.apps.MyApp of version 0.0.1). If the version is omitted or left
-blank client would search for ``io.murano.apps.MyApp.zip``.
+specification in murano repository (for example ``com.example.MyApp.0.0.1.zip``
+for com.example.MyApp of version 0.0.1). If the version is omitted or left
+blank client would search for ``com.example.MyApp.zip``.
 
 Create local bundle
 ~~~~~~~~~~~~~~~~~~~

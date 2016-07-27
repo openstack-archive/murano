@@ -48,7 +48,7 @@ with murano, proceed with the following steps:
 
    .. code-block:: ini
 
-      MURANO_APPS=io.murano.apps.apache.Tomcat,io.murano.apps.Guacamole
+      MURANO_APPS=com.example.apache.Tomcat,com.example.Guacamole
 
    To configure the git repository that will be used as the source for
    the imported packages, configure the ``MURANO_APPS_REPO`` and

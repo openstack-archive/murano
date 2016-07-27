@@ -122,12 +122,12 @@ For example:
 .. code-block:: console
 
   $ murano package-import /home/downloads/mysql.zip
-  Importing package io.murano.databases.MySql
-  +---------------------------------+------+--------------------------+--------------+---------+
-  | ID                              | Name | FQN                      | Author       |Is Public|
-  +---------------------------------+------+--------------------------+--------------+---------+
-  | 83e4038885c248e3a758f8217ff8241f| MySQL| io.murano.databases.MySql| Mirantis, Inc|         |
-  +---------------------------------+------+--------------------------+--------------+---------+
+  Importing package com.example.databases.MySql
+  +---------------------------------+------+----------------------------+--------------+---------+
+  | ID                              | Name | FQN                        | Author       |Is Public|
+  +---------------------------------+------+----------------------------+--------------+---------+
+  | 83e4038885c248e3a758f8217ff8241f| MySQL| com.example.databases.MySql| Mirantis, Inc|         |
+  +---------------------------------+------+----------------------------+--------------+---------+
 
 To make the package available for users from other projects (tenants), use the
 ``--is-public`` parameter. For example:
@@ -166,7 +166,7 @@ murano applications repository:
 .. code-block:: console
 
    $ murano --murano-repo-url=http://storage.apps.openstack.org \
-   package-import io.murano.databases.MySql
+   package-import com.example.databases.MySql
 
 This command supports an optional ``--package-version`` parameter that instructs
 murano client to download a specified package version.
@@ -204,14 +204,14 @@ murano applications repository using the package URL:
 
 .. code-block:: console
 
-  $ murano package-import http://storage.apps.openstack.org/apps/io.murano.databases.MySql.zip
+  $ murano package-import http://storage.apps.openstack.org/apps/com.example.databases.MySql.zip
   Inspecting required images
-  Importing package io.murano.databases.MySql
-  +----------------------------------+-------+--------------------------+--------------+--------+----------+------------+
-  | ID                               | Name  | FQN                      | Author       | Active | Is Public| Type       |
-  +----------------------------------+-------+-----------------------------------------+--------+----------+------------+
-  | 1aa62196595f411399e4e48cc2f6a512 | MySQL | io.murano.databases.MySql| Mirantis, Inc| True   |          | Application|
-  +----------------------------------+-------+-----------------------------------------+--------+----------+------------+
+  Importing package com.example.databases.MySql
+  +----------------------------------+-------+----------------------------+--------------+--------+----------+------------+
+  | ID                               | Name  | FQN                        | Author       | Active | Is Public| Type       |
+  +----------------------------------+-------+----------------------------+--------------+--------+----------+------------+
+  | 1aa62196595f411399e4e48cc2f6a512 | MySQL | com.example.databases.MySql| Mirantis, Inc| True   |          | Application|
+  +----------------------------------+-------+----------------------------+--------------+--------+----------+------------+
 
 .. _cli_bundles:
 
@@ -252,14 +252,14 @@ The following example shows the import of a monitoring bundle:
 
  $ murano bundle-import /home/downloads/monitoring.bundle
  Inspecting required images
- Importing package io.murano.apps.ZabbixServer
- Importing package io.murano.apps.ZabbixAgent
- +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
- | ID                               | Name          | FQN                         | Author        | Active | Is Public| Type       |
- +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
- | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent  | io.murano.apps.ZabbixAgent  | Mirantis, Inc | True   |          | Application|
- | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server | io.murano.apps.ZabbixServer | Mirantis, Inc | True   |          | Application|
- +----------------------------------+---------------+-----------------------------+---------------+--------+----------+------------+
+ Importing package com.example.ZabbixServer
+ Importing package com.example.ZabbixAgent
+ +----------------------------------+---------------+--------------------------+---------------+--------+----------+------------+
+ | ID                               | Name          | FQN                      | Author        | Active | Is Public| Type       |
+ +----------------------------------+---------------+--------------------------+---------------+--------+----------+------------+
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent  | com.example.ZabbixAgent  | Mirantis, Inc | True   |          | Application|
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server | com.example.ZabbixServer | Mirantis, Inc | True   |          | Application|
+ +----------------------------------+---------------+--------------------------+---------------+--------+----------+------------+
 
 .. note::
 
@@ -324,16 +324,16 @@ ID, name, author and if it is public or not. For example:
 .. code-block:: console
 
  $ murano package-list
- +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
- | ID                               | Name               | FQN                                    | Author        | Active | Is Public| Type       |
- +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
- | daa46cfd78c74c11bcbe66d3239e546e | Apache HTTP Server | io.murano.apps.apache.ApacheHttpServer | Mirantis, Inc | True   |          | Application|
- | 5252c9897e864c9f940e08500056f155 | Cloud Foundry      | io.murano.apps.paas.CloudFoundry       | Mirantis, Inc | True   |          | Application|
- | 1aa62196595f411399e4e48cc2f6a512 | MySQL              | io.murano.databases.MySql              | Mirantis, Inc | True   |          | Application|
- | 11d73cfdc6d7447a910984d95090463b | SQL Library        | io.murano.databases                    | Mirantis, Inc | True   |          | Application|
- | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent       | io.murano.apps.ZabbixAgent             | Mirantis, Inc | True   |          | Application|
- | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server      | io.murano.apps.ZabbixServer            | Mirantis, Inc | True   |          | Application|
- +----------------------------------+--------------------+----------------------------------------+---------------+--------+----------+------------+
+ +----------------------------------+--------------------+-------------------------------------+---------------+--------+----------+------------+
+ | ID                               | Name               | FQN                                 | Author        | Active | Is Public| Type       |
+ +----------------------------------+--------------------+-------------------------------------+---------------+--------+----------+------------+
+ | daa46cfd78c74c11bcbe66d3239e546e | Apache HTTP Server | com.example.apache.ApacheHttpServer | Mirantis, Inc | True   |          | Application|
+ | 5252c9897e864c9f940e08500056f155 | Cloud Foundry      | com.example.paas.CloudFoundry       | Mirantis, Inc | True   |          | Application|
+ | 1aa62196595f411399e4e48cc2f6a512 | MySQL              | com.example.databases.MySql         | Mirantis, Inc | True   |          | Application|
+ | 11d73cfdc6d7447a910984d95090463b | SQL Library        | com.example.databases               | Mirantis, Inc | True   |          | Application|
+ | fb0b35359e384fe18158ff3ed8f969b5 | Zabbix Agent       | com.example.ZabbixAgent             | Mirantis, Inc | True   |          | Application|
+ | 00a77e302a65420c8080dc97cc0f2723 | Zabbix Server      | com.example.ZabbixServer            | Mirantis, Inc | True   |          | Application|
+ +----------------------------------+--------------------+-------------------------------------+---------------+--------+----------+------------+
 
 .. _cli_display:
 
@@ -350,13 +350,13 @@ command. For example:
  | Property             | Value                                               |
  +----------------------+-----------------------------------------------------+
  | categories           |                                                     |
- | class_definitions    | io.murano.databases.MySql                           |
+ | class_definitions    | com.example.databases.MySql                         |
  | description          | MySql is a relational database management system    |
  |                      | (RDBMS), and ships with no GUI tools to administer  |
  |                      | MySQL databases or manage data contained within the |
  |                      | databases.                                          |
  | enabled              | True                                                |
- | fully_qualified_name | io.murano.databases.MySql                           |
+ | fully_qualified_name | com.example.databases.MySql                         |
  | id                   | 1aa62196595f411399e4e48cc2f6a512                    |
  | is_public            | False                                               |
  | name                 | MySQL                                               |
@@ -419,7 +419,7 @@ Example:
 .. code-block:: console
 
   $ murano package-create -c Downloads/Folder1/Classes -r Downloads/Folder2/Resources \
-  -n mysql -f io.murano.MySQL -d Package -o MySQL.zip --type Library
+  -n mysql -f com.example.MySQL -d Package -o MySQL.zip --type Library
   Application package is available at /home/Downloads/MySQL.zip
 
 After this, the package is ready to be imported to the application
