@@ -226,7 +226,7 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
 
     def get_meta(self, context):
         if six.callable(self._meta):
-            executor = helpers.get_executor(context)
+            executor = helpers.get_executor()
             context = executor.create_package_context(self)
             self._meta = self._meta().get_meta(context)
         return self._meta

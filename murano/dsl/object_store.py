@@ -87,9 +87,7 @@ class ObjectStore(object):
                     return factory
             else:
                 factory = class_obj.new(
-                    owner, self, self.executor,
-                    name=system_key.get('name'),
-                    object_id=object_id)
+                    owner, name=system_key.get('name'), object_id=object_id)
                 self._store[object_id] = factory
                 system_value = ObjectStore._get_designer_attributes(system_key)
                 self._designer_attributes_store[object_id] = system_value

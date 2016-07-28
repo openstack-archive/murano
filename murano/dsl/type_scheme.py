@@ -151,7 +151,7 @@ class TypeScheme(object):
         @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
         def class_(value, name, default_name=None, version_spec=None):
-            object_store = None if this is None else this.object_store
+            object_store = helpers.get_object_store()
             if not default_name:
                 default_name = name
             murano_class = name.type
@@ -163,8 +163,7 @@ class TypeScheme(object):
                 obj = value.object
             elif isinstance(value, utils.MappingType):
                 obj = helpers.instantiate(
-                    value, owner, object_store, root_context,
-                    calling_type, default_name)
+                    value, owner, root_context, calling_type, default_name)
             elif isinstance(value, six.string_types) and object_store:
                 obj = object_store.get(value)
                 if obj is None:

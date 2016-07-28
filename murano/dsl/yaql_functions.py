@@ -47,15 +47,12 @@ def cast(context, object_, type__, version_spec=None):
 @specs.parameter('__object_name', yaqltypes.String(True))
 def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         **parameters):
-    object_store = helpers.get_object_store(__context)
-    executor = helpers.get_executor(__context)
     new_context = __context.create_child_context()
     for key, value in six.iteritems(parameters):
         if utils.is_keyword(key):
             new_context[key] = value
     return __type_name.type.new(
-        __owner, object_store, executor, name=__object_name)(
-        new_context, **parameters)
+        __owner, name=__object_name)(new_context, **parameters)
 
 
 @specs.parameter('type_name', dsl.MuranoTypeParameter())
@@ -160,7 +157,7 @@ def obj_attribution_static(context, cls, property_name):
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
 def op_dot(context, receiver, expr, operator):
-    executor = helpers.get_executor(context)
+    executor = helpers.get_executor()
     type_context = executor.context_manager.create_type_context(receiver.type)
     obj_context = executor.context_manager.create_object_context(receiver)
     ctx2 = helpers.link_contexts(
@@ -174,7 +171,7 @@ def op_dot(context, receiver, expr, operator):
 @specs.inject('operator', yaqltypes.Super(with_context=True))
 @specs.name('#operator_.')
 def op_dot_static(context, receiver, expr, operator):
-    executor = helpers.get_executor(context)
+    executor = helpers.get_executor()
     type_context = executor.context_manager.create_type_context(
         receiver.type)
     ctx2 = helpers.link_contexts(context, type_context)

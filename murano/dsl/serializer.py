@@ -18,6 +18,7 @@ from yaql import utils
 
 from murano.dsl import dsl
 from murano.dsl import dsl_types
+from murano.dsl import helpers
 
 
 class ObjRef(object):
@@ -26,7 +27,8 @@ class ObjRef(object):
 
 
 def serialize(obj, executor):
-    return serialize_model(obj, executor, True)[0]['Objects']
+    with helpers.with_object_store(executor.object_store):
+        return serialize_model(obj, executor, True)[0]['Objects']
 
 
 def _serialize_object(root_object, designer_attributes, allow_refs,
@@ -53,11 +55,12 @@ def serialize_model(root_object, executor, allow_refs=False):
         attributes = []
         serialized_objects = set()
     else:
-        tree, serialized_objects = _serialize_object(
-            root_object, designer_attributes, allow_refs, executor)
-        tree_copy, _ = _serialize_object(root_object, None, allow_refs,
-                                         executor)
-        attributes = executor.attribute_store.serialize(serialized_objects)
+        with helpers.with_object_store(executor.object_store):
+            tree, serialized_objects = _serialize_object(
+                root_object, designer_attributes, allow_refs, executor)
+            tree_copy, _ = _serialize_object(root_object, None, allow_refs,
+                                             executor)
+            attributes = executor.attribute_store.serialize(serialized_objects)
 
     return {
         'Objects': tree,

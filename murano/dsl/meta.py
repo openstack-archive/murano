@@ -20,7 +20,6 @@ import six
 
 from murano.dsl import dsl_types
 from murano.dsl import helpers
-from murano.dsl import object_store
 
 
 class MetaProvider(object):
@@ -58,8 +57,8 @@ class MetaData(MetaProvider):
 
             used_types.add(type_obj)
             factory_maker = lambda template: \
-                lambda context, store: helpers.instantiate(
-                    template, owner=None, object_store=store,
+                lambda context: helpers.instantiate(
+                    template, owner=None,
                     context=context, scope_type=scope_type())
 
             factories.append(factory_maker({type_obj: props}))
@@ -68,11 +67,7 @@ class MetaData(MetaProvider):
 
     def get_meta(self, context):
         if self._meta is None:
-            executor = helpers.get_executor(context)
-            store = object_store.ObjectStore(executor)
-            self._meta = list(map(
-                lambda x: x(context, store),
-                self._meta_factories))
+            self._meta = list(map(lambda x: x(context), self._meta_factories))
         return self._meta
 
 

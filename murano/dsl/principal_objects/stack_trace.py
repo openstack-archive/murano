@@ -106,6 +106,4 @@ def create_stack_trace(context, include_native_frames=True):
         stacktrace = yaql_integration.call_func(
             context, 'new', 'io.murano.StackTrace',
             includeNativeFrames=include_native_frames)
-        executor = helpers.get_executor(context)
-        return dsl.MuranoObjectInterface(
-            stacktrace, executor)
+        return dsl.MuranoObjectInterface(stacktrace)
