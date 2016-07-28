@@ -78,6 +78,8 @@ Classes:
   io.murano.metadata.forms.Hidden: metadata/forms/Hidden.yaml
   io.murano.metadata.forms.Section: metadata/forms/Section.yaml
   io.murano.metadata.engine.Serialize: metadata/engine/Serialize.yaml
+  io.murano.metadata.engine.Synchronize: metadata/engine/Synchronize.yaml
+
 
   io.murano.test.TestFixture: test/TestFixture.yaml
   io.murano.test.TestFixtureWithEnvironment: test/TestFixture.yaml
