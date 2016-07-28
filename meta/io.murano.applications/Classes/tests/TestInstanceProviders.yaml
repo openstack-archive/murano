@@ -1,0 +1,127 @@
+Namespaces:
+  =: io.murano.applications.tests
+  tst: io.murano.test
+  apps: io.murano.applications
+  sys: io.murano.system
+  res: io.murano.resources
+
+--- # ------------------------------------------------------------------ # ---
+Name: TestMockedInstanceFactory
+Extends: tst:TestFixtureWithEnvironment
+
+Methods:
+
+  heatPushInjection:
+    Body:
+      - $this.currentTemplate: $this.environment.stack.current()
+      - $this.pushCalled: $this.pushCalled + 1
+
+
+  heatOutputInjection:
+    Body:
+      # generate simulated output
+      - $outputKeys: $this.currentTemplate.outputs.keys()
+      - $idIndex: 1000
+      - $ipIndex: 100
+      - $ipPrefix: '10.0.0.'
+      - $defaultNetworkName: testNetwork
+      - $output: {}
+      - For: key
+        In: $outputKeys
+        Do:
+          # if output name ends with -id then it is some openstack-id of a resource
+          - If: $key.endsWith('-id')
+            Then:
+              - $output[$key]: $idIndex
+              - $idIndex: $idIndex + 1
+
+          # if output name ends with -assigned-ips then it is some ip of a vm
+          - If: $key.endsWith('-assigned-ips')
+            Then:
+              - $output[$key]:
+                  $defaultNetworkName: list(format('{0}{1}', $ipPrefix, $ipIndex))
+              - $ipIndex: $ipIndex + 1
+      - Return: $output
+
+  neutronListExtensionsInjection:
+    Body:
+      - Return:
+           - alias: 'security-group'
+
+
+  setUp:
+    Body:
+      - $this.currentTemplate: {}
+      - inject(sys:NetworkExplorer, listNeutronExtensions, $this, neutronListExtensionsInjection)
+      - inject(sys:NetworkExplorer, getDefaultRouter, '42')
+      - inject(sys:NetworkExplorer, getAvailableCidr, '10.0.0.0/24')
+      - super($this, $.setUp())
+      - inject($this.environment.stack, push, $this, heatPushInjection)
+      - inject($this.environment.stack, output, $this, heatOutputInjection)
+      - inject($this.environment.stack, delete, '')
+      - inject(sys:Agent, prepare, '')
+      - inject($this.environment.instanceNotifier, trackCloudInstance, '')
+      - inject($this.environment.instanceNotifier, untrackCloudInstance, '')
+
+      - $this.pushCalled: 0
+
+
+      - $instanceTemplate: new(res:LinuxMuranoInstance, $this.environment,
+                               name=>'whatever',
+                               image=>'murano-latest',
+                               flavor=>'t1.medium')
+      - $this.provider: new(apps:InstanceProvider, source=>$instanceTemplate,
+                            instanceNamePattern=>'testNode-{0}')
+
+  testCreateSingleServer:
+    Body:
+      - $ssg: new(apps:InstanceGroup, provider=>$this.provider)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(1)
+
+  testInstancesHaveProperName:
+    Body:
+      - $model:
+          apps:InstanceGroup:
+            numItems: 2
+            provider:
+              apps:InstanceProvider:
+                source: $this.provider.source
+                instanceNamePattern: 'testNode-{0}'
+          name: testGroup
+      - $namedSsg: new($model)
+      - $namedSsg.deploy()
+      - $this.assertEqual('Group testGroup instance 1', name($namedSsg.items[0]))
+      - $this.assertEqual('Group testGroup instance 2', name($namedSsg.items[1]))
+
+
+  testCreateMultipleServers:
+    Body:
+      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>5)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(5)
+
+  testCreateScaleUp:
+    Body:
+      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>3)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(3)
+      - $ssg.scale(4)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(7)
+
+  testCreateScaleDown:
+    Body:
+      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>3)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(3)
+      - $ssg.scale(-2)
+      - $ssg.deploy()
+      - $this.assertInstanceCount(1)
+
+  assertInstanceCount:
+    Arguments:
+      - count:
+          Contract: $.int()
+    Body:
+      - $this.assertEqual($count, $this.currentTemplate.resources.values().where($.type='OS::Nova::Server').len())
