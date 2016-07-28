@@ -501,34 +501,59 @@ def resolve_type(value, scope_type, return_reference=False):
     return result
 
 
-def instantiate(data, owner, context, scope_type, default_type=None):
-    if data is None:
-        data = {}
-    if not isinstance(data, yaqlutils.MappingType):
-        raise ValueError('Incorrect object initialization format')
-    default_type = resolve_type(default_type, scope_type)
-    if len(data) == 1:
-        key = next(iter(data.keys()))
-        ns_resolver = scope_type.namespace_resolver
-        if ns_resolver.is_typename(key, False) or isinstance(
-                key, (dsl_types.MuranoTypeReference, dsl_types.MuranoType)):
+def parse_object_definition(spec, scope_type, context):
+    if not isinstance(spec, yaqlutils.MappingType):
+        return None
+
+    if context:
+        spec = evaluate(spec, context, freeze=False)
+    else:
+        spec = spec.copy()
+    system_data = None
+    type_obj = None
+    props = {}
+    ns_resolver = scope_type.namespace_resolver if scope_type else None
+    for key in spec:
+        if (ns_resolver and ns_resolver.is_typename(key, False) or
+                isinstance(key, (dsl_types.MuranoTypeReference,
+                                 dsl_types.MuranoType))):
             type_obj = resolve_type(key, scope_type)
-            props = yaqlutils.filter_parameters_dict(data[key] or {})
-            props = evaluate(props, context, freeze=False)
-            return type_obj.new(owner)(context, **props)
+            props = spec.pop(key) or {}
+            system_data = spec
+            break
+    if system_data is None:
+        props = spec
+        if '?' in spec:
+            system_data = spec.pop('?')
+            obj_type = system_data.get('type')
+            if isinstance(obj_type, dsl_types.MuranoTypeReference):
+                type_obj = obj_type.type
+            elif isinstance(obj_type, dsl_types.MuranoType):
+                type_obj = obj_type
+            elif obj_type:
+                version_spec = parse_version_spec(
+                    system_data.get('classVersion'))
+                package_loader = get_package_loader()
+                if 'package' in system_data:
+                    package = package_loader.load_package(
+                        system_data['package'], version_spec)
+                else:
+                    package = package_loader.load_class_package(
+                        obj_type, version_spec)
+                type_obj = package.find_class(obj_type, False)
+        else:
+            system_data = {}
 
-    data = evaluate(data, context, freeze=False)
-    if '?' not in data:
-        if not default_type:
-            raise ValueError('Type information is missing')
-        data.update({'?': {
-            'type': default_type.name,
-            'classVersion': str(default_type.version)
-        }})
-    if 'id' not in data['?']:
-        data['?']['id'] = uuid.uuid4().hex
-
-    return get_object_store().load(data, owner, context)
+    return {
+        'type': type_obj,
+        'properties': yaqlutils.filter_parameters_dict(props),
+        'id': system_data.get('id'),
+        'name': system_data.get('name'),
+        'extra': {
+            key: value for key, value in six.iteritems(system_data)
+            if key.startswith('_')
+        }
+    }
 
 
 def function(c):

@@ -102,7 +102,7 @@ class TestContracts(test_case.DslTestCase):
     def test_class_contract_by_ref(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
         result = self._runner.testClassContract(arg)
-        self.assertEqual(arg.id, result.id)
+        self.assertNotEqual(arg.id, result.id)
 
     def test_class_contract_failure(self):
         self.assertRaises(

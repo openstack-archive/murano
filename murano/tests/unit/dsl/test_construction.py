@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from testtools import matchers
 
 from murano.dsl import serializer
-
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
 
@@ -45,3 +45,16 @@ class TestConstruction(test_case.DslTestCase):
             ['CreatingClass::.init', 'CreatedClass1::.init',
              'string', 'STRING', 123],
             self.traces)
+
+    def test_model_load(self):
+        res = self._runner.testLoadCompexModel()
+        for i in range(3):
+            self.assertThat(res[i], matchers.Not(matchers.Contains('node')))
+        self.assertEqual(self._runner.root.object_id, res[3])
+        self.assertEqual(
+            [
+                'rootNode',
+                ['childNode1', 'childNode2', 'childNode2'],
+                True, True, True, True, True,
+                'rootNode', 'childNode2', 'childNode1'
+            ], res[4:])

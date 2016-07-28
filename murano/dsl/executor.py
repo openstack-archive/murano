@@ -250,9 +250,10 @@ class MuranoDslExecutor(object):
         if not isinstance(data, dict):
             raise TypeError()
         self._attribute_store.load(data.get(constants.DM_ATTRIBUTES) or [])
-        result = self._object_store.load(data.get(constants.DM_OBJECTS), None)
-        if result is None:
+        model = data.get(constants.DM_OBJECTS)
+        if model is None:
             return None
+        result = self._object_store.load(model, None, keep_ids=True)
         return dsl.MuranoObjectInterface(result)
 
     def cleanup(self, data):
@@ -261,7 +262,7 @@ class MuranoDslExecutor(object):
             return
         gc_object_store = object_store.ObjectStore(self)
         with helpers.with_object_store(gc_object_store):
-            gc_object_store.load(objects_copy, None)
+            gc_object_store.load(objects_copy, None, keep_ids=True)
             objects_to_clean = []
             for object_id in self._list_potential_object_ids(objects_copy):
                 if (gc_object_store.has(object_id) and

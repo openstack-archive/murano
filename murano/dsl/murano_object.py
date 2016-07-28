@@ -43,9 +43,10 @@ class MuranoObject(dsl_types.MuranoObject):
         for parent_class in murano_class.parents(self.real_this.type):
             name = parent_class.name
             if name not in known_classes:
-                obj = parent_class.new(
-                    owner, object_id=self.__object_id,
-                    known_classes=known_classes, this=self.real_this).object
+                obj = MuranoObject(
+                    parent_class, owner,
+                    object_id=self.__object_id,
+                    known_classes=known_classes, this=self.real_this)
 
                 self.__parents[name] = known_classes[name] = obj
             else:
@@ -67,6 +68,8 @@ class MuranoObject(dsl_types.MuranoObject):
     def initialize(self, context, params):
         if self.__initialized:
             return
+        context = context.create_child_context()
+        context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
         object_store = helpers.get_object_store()
         for property_name in self.__type.properties:
             spec = self.__type.properties[property_name]
@@ -138,13 +141,11 @@ class MuranoObject(dsl_types.MuranoObject):
         for parent in self.__parents.values():
             parent.initialize(context, params)
 
-        if (object_store is None or not object_store.initializing) and init:
+        if not object_store.initializing and init:
             context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            init.invoke(self.real_this, (), init_args, context)
+            init.invoke(self.real_this, (), init_args,
+                        context.create_child_context())
             self.__initialized = True
-
-        if object_store is not None and not object_store.initializing:
-            object_store.put(self.real_this)
 
     @property
     def object_id(self):
@@ -218,7 +219,6 @@ class MuranoObject(dsl_types.MuranoObject):
                     classes_for_static_properties.append(spec.declaring_type)
                 else:
                     default = self.__config.get(name, spec.default)
-                    # default = helpers.evaluate(default, context)
 
                     obj = self.cast(spec.declaring_type)
                     values_to_assign.append((obj, spec.transform(
