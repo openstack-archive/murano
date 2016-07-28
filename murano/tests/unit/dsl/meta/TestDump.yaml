@@ -1,0 +1,107 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+
+Namespaces:
+  =: dumptests
+  std: io.murano
+  m: io.murano.metadata.engine
+--- # ------------------------------------------------------------------ # ---
+
+Name: DumpTarget1
+
+Properties:
+  foo:
+    Contract: $.string()
+
+  bar:
+    Contract:
+      - $.int()
+
+  baz:
+    Contract:
+      $.string(): $.int()
+
+
+Methods:
+  getOwner:
+    Body:
+      - Return: $.find(DumpTarget2).require()
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: DumpTarget2
+
+Properties:
+  nested:
+    Usage: InOut
+    Contract: $.class(std:Object)
+
+  another:
+    Contract: $.class(DumpTarget1)
+
+  ref:
+    Usage: InOut
+    Contract: $.class(std:Object)
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: DumpTarget3
+
+Properties:
+  a:
+    Meta:
+      - m:Serialize:
+          as: copy
+    Contract: $.class(DumpTarget1)
+  b:
+    Meta:
+      - m:Serialize:
+          as: reference
+    Contract: $.class(DumpTarget1)
+
+--- # ------------------------------------------------------------------ # ---
+Name: DumpTarget4
+Extends: DumpTarget1
+Properties:
+  qux:
+    Contract: $.string().notNull()
+
+--- # ------------------------------------------------------------------ # ---
+
+
+Name: TestDump
+
+Methods:
+  testDump:
+    Arguments:
+      - object:
+          Contract: $.class(std:Object).notNull()
+      - serializationType:
+          Contract: $.string().check($ in [Serializable, Mixed, Inline])
+          Default: 'Inline'
+    Body:
+      - Return: dump($object, $serializationType, true)
+
+  testDumpWithUpcast:
+    Arguments:
+      - object:
+          Contract: $.class(std:Object).notNull()
+      - doUpcast:
+          Contract: $.bool().notNull()
+      - passIgnoreUpcast:
+          Contract: $.bool().notNull()
+    Body:
+      - If: $doUpcast
+        Then:
+          - $object: $object.cast(DumpTarget1)
+      - Return: dump($object, Inline, $passIgnoreUpcast)
