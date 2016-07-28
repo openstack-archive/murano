@@ -1,0 +1,91 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  =: io.murano.applications.tests
+  tst: io.murano.test
+  apps: io.murano.applications
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Replica
+
+Properties:
+  name:
+    Contract: $.string()
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: DummyReplicaProvider
+Extends: apps:ReplicaProvider
+
+Properties:
+  allocated:
+    Usage: InOut
+    Contract: $.int()
+    Default: 0
+
+Methods:
+  createReplica:
+    Arguments:
+      index:
+        Contract: $.int()
+    Body:
+      - $replica: new(Replica, name=>format('replica-{0}', $index))
+      - $this.allocated: $this.allocated + 1
+      - Return: $replica
+
+  releaseReplica:
+    Arguments:
+      replica:
+        Contract: $
+    Body:
+      - $this.allocated: $this.allocated - 1
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestReplication
+Extends: tst:TestFixture
+
+Methods:
+  setUp:
+    Body:
+      - $this.provider: new(DummyReplicaProvider)
+
+  testCreateDefault:
+    Body:
+      - $group: new(apps:ReplicationGroup, provider=>$this.provider)
+      - $group.deploy()
+      - $.assertEqual(1, len($group.items))
+      - $.assertEqual(1, $this.provider.allocated)
+      - $.assertEqual('replica-1', $group.items[0].name)
+
+  testCreateMultiple:
+    Body:
+      - $group: new(apps:ReplicationGroup, provider=>$this.provider, numItems=>5)
+      - $group.deploy()
+      - $.assertEqual(5, len($group.items))
+
+
+  testScale:
+    Body:
+      - $group: new(apps:ReplicationGroup, provider=>$this.provider)
+      - $group.deploy()
+      - $.assertEqual(1, len($group.items))
+      - $group.scale(1)
+      - $.assertEqual(2, len($group.items))
+      - $.assertEqual(2, $this.provider.allocated)
+      - $group.scale(-1)
+      - $.assertEqual(1, len($group.items))
+      - $.assertEqual(1, $this.provider.allocated)
+

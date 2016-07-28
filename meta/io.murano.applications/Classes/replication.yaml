@@ -1,0 +1,149 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+
+Namespaces:
+  =: io.murano.applications
+  std: io.murano
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: ReplicationGroup
+
+Properties:
+  provider:
+    Contract: $.class(ReplicaProvider).notNull()
+
+  minItems:
+    Contract: $.int().notNull()
+    Default: 0
+
+  maxItems:
+    Contract: $.int()
+    Default: null
+
+  numItems:
+    Usage: InOut
+    Contract: $.int().notNull()
+    Default: 1
+
+  items:
+    Usage: InOut
+    Contract:
+      - $.class(std:Object)
+
+Methods:
+  deploy:
+    Body:
+      # release excessive replicas
+      - $newItems: $this.items.take($this.numItems)
+      - $itemsToRelease: $this.items.skip($this.numItems)
+      - $itemsToRelease.select($this.provider.releaseReplica($))
+      - $this.items: $newItems
+
+      - $delta: $this.numItems - len($this.items)
+      - $startIndex: len($this.items) + 1
+      - $endIndex: $startIndex + $delta
+      - $createdItems: range($startIndex, $endIndex).select(
+                             $this.provider.createReplica($))
+      - $this.items: $this.items + $createdItems
+
+  scale:
+    Arguments:
+      - delta:
+          Contract: $.int().notNull()
+          Default: 1
+    Body:
+      - $this.numItems: max($this.numItems + $delta, $this.minItems)
+      - If: $this.maxItems != null
+        Then:
+          - $this.numItems: min($this.numItems, $this.maxItems)
+      - $this.deploy()
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: ReplicaProvider
+
+Methods:
+  createReplica:
+    Arguments:
+      index:
+        Contract: $.int().notNull()
+
+  releaseReplica:
+    Arguments:
+      replica:
+        Contract: $.class(std:Object)
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: BaseTemplateReplicaProvider
+Extends: ReplicaProvider
+
+Methods:
+  createReplica:
+    Arguments:
+      index:
+        Contract: $.int().notNull()
+    Body:
+      - $owner: $this.getReplicaOwner()
+      - $template: $this.getTemplate()
+      - $customizedTemplate: $this.customizeTemplate($template, $index)
+      - Return: new($customizedTemplate, owner => $owner)
+
+  getReplicaOwner:
+    Body:
+      - Return: $this
+
+  getTemplate:
+
+  customizeTemplate:
+    Arguments:
+      - template:
+          Contract: {}
+      - index:
+           Contract: $.int().notNull()
+    Body:
+      - Return: $template
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TemplateReplicaProvider
+Extends: BaseTemplateReplicaProvider
+
+Properties:
+  template:
+    Contract: {}
+
+Methods:
+  getTemplate:
+    Body:
+      - Return: $this.template
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: CloneReplicaProvider
+Extends: BaseTemplateReplicaProvider
+
+Properties:
+  source:
+    Contract: $.class(std:Object).notNull()
+
+Methods:
+  getTemplate:
+    Body:
+      - Return: dump($this.source, serializationType=>Mixed,
+                     ignoreUpcasts=>true)
+
+  getReplicaOwner:
+    Body:
+      - Return: $this.source.find(std:Object)
