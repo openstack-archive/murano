@@ -248,14 +248,16 @@ Method arguments
      - `True` if argument has default value, `False` otherwise
    * - ``declaringMethod``
      - method - owner of argument
+   * - ``usage``
+     - argument's usage type.  See :ref:`method_arguments` for details
 
 .. code-block:: yaml
 
     - $firstArgument: $selectedMethod.arguments.first()
     # store argument's name
-    - $argName = $firstArgument.name
+    - $argName: $firstArgument.name
     # store owner's name
-    - $methodName = $firstArgument.declaringMethod.name
+    - $methodName: $firstArgument.declaringMethod.name
     - $log.info("Hi, my name is {a_name} ! My owner is {m_name}",
         a_name => $argName,
         m_name => $methodName)

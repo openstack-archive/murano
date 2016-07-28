@@ -195,6 +195,12 @@ def argument_has_default(method_argument):
 
 
 @specs.yaql_property(dsl_types.MuranoMethodArgument)
+@specs.name('usage')
+def argument_usage(method_argument):
+    return method_argument.usage
+
+
+@specs.yaql_property(dsl_types.MuranoMethodArgument)
 @specs.name('declaring_method')
 def argument_owner(method_argument):
     return method_argument.murano_method
@@ -236,6 +242,7 @@ def register(context):
         method_name, arguments, method_owner, method_invoke,
         types, package_name, package_version,
         argument_name, argument_has_default, argument_owner,
+        argument_usage,
         cardinality, targets, inherited,
         get_meta
     )
