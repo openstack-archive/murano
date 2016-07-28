@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import eventlet
 import greenlet
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -21,7 +20,6 @@ from oslo_log import log as logging
 from murano.common import exceptions
 from murano.common.i18n import _LE
 from murano.dsl import dsl
-from murano.dsl import helpers
 from murano.engine.system import common
 
 LOG = logging.getLogger(__name__)
@@ -66,9 +64,11 @@ class AgentListener(object):
             return
 
         if self._receive_thread is None:
-            helpers.get_execution_session().on_session_finish(
+            dsl.get_execution_session().on_session_finish(
                 lambda: self.stop())
-            self._receive_thread = eventlet.spawn(self._receive)
+            self._receive_thread = dsl.spawn(
+                self._receive,
+                dsl.get_this().find_owner('io.murano.Environment'))
 
     def stop(self):
         if CONF.engine.disable_murano_agent:
@@ -94,8 +94,8 @@ class AgentListener(object):
         self._check_enabled()
         self._subscriptions.pop(message_id)
 
-    def _receive(self):
-        with common.create_rmq_client() as client:
+    def _receive(self, environment):
+        with common.create_rmq_client(environment) as client:
             client.declare(self._results_queue, enable_ha=True, ttl=86400000)
             with client.open(self._results_queue) as subscription:
                 while True:

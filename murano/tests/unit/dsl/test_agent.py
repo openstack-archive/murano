@@ -16,6 +16,10 @@
 import mock
 
 from murano.common import exceptions as exc
+from murano.dsl import constants
+from murano.dsl import dsl
+from murano.dsl import helpers
+from murano.dsl import yaql_integration
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
 from murano.tests.unit.dsl.foundation import object_model as om
@@ -32,12 +36,15 @@ class TestAgentListener(test_case.DslTestCase):
         model = om.Object(
             'AgentListenerTests')
         self.runner = self.new_runner(model)
+        self.context = yaql_integration.create_empty_context()
+        self.context[constants.CTX_THIS] = mock.MagicMock(
+            dsl.MuranoObjectInterface)
 
     def test_listener_enabled(self):
         self.override_config('disable_murano_agent', False, 'engine')
         al = self.runner.testAgentListener().extension
         self.assertTrue(al.enabled)
-        with self.runner.session():
+        with self.runner.session(), helpers.contextual(self.context):
             try:
                 al.subscribe('msgid', 'event')
                 self.assertEqual({'msgid': 'event'}, al._subscriptions)

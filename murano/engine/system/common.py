@@ -20,16 +20,10 @@ from murano.common.messaging import mqclient
 CONF = cfg.CONF
 
 
-def create_rmq_client():
-    rabbitmq = CONF.rabbitmq
-    connection_params = {
-        'login': rabbitmq.login,
-        'password': rabbitmq.password,
-        'host': rabbitmq.host,
-        'port': rabbitmq.port,
-        'virtual_host': rabbitmq.virtual_host,
-        'ssl': rabbitmq.ssl,
-        'ca_certs': rabbitmq.ca_certs.strip() or None,
-        'insecure': rabbitmq.insecure
-    }
-    return mqclient.MqClient(**connection_params)
+def create_rmq_client(environment):
+    region_name = environment['region']
+    region_configs = environment['regionConfigs']
+    region_config = region_configs.get(region_name, region_configs[None])
+    rmq_settings = region_config['agentRabbitMq'].copy()
+    rmq_settings['ca_certs'] = CONF.rabbitmq.ca_certs.strip() or None
+    return mqclient.MqClient(**rmq_settings)

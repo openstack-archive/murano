@@ -311,7 +311,7 @@ class MuranoDslExecutor(object):
         if model is None:
             return None
         result = self._object_store.load(model, None, keep_ids=True)
-        return dsl.MuranoObjectInterface(result)
+        return dsl.MuranoObjectInterface.create(result)
 
     def cleanup(self, data):
         objects_copy = data.get(constants.DM_OBJECTS_COPY)

@@ -12,5 +12,5 @@ Properties:
 Methods:
   testAgentListener:
     Body:
-      - $.agentListener: new(sys:AgentListener, name => 'hello')
+      - $.agentListener: new(sys:AgentListener, $this, name => 'hello')
       - Return: $.agentListener

@@ -63,7 +63,7 @@ class Agent(object):
                       'by the server configuration')
             return
 
-        with common.create_rmq_client() as client:
+        with common.create_rmq_client(self._environment) as client:
             client.declare(self._queue, enable_ha=True, ttl=86400000)
 
     def queue_name(self):
@@ -90,7 +90,7 @@ class Agent(object):
             listener().subscribe(msg_id, event)
 
         msg = self._prepare_message(template, msg_id)
-        with common.create_rmq_client() as client:
+        with common.create_rmq_client(self._environment) as client:
             client.send(message=msg, key=self._queue)
 
         if wait_results:

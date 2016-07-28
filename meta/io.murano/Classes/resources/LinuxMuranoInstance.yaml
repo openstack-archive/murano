@@ -59,7 +59,8 @@ Methods:
   generateUserData:
     Body:
         - $environment: $.find(std:Environment).require()
-        - $rabbitMqParams: $environment.regionConfigs.get($environment.region).agentRabbitMq
+        - $rabbitMqParams: $environment.regionConfigs.get($environment.region,
+            $environment.regionConfigs.get(null)).agentRabbitMq
         - $resources: new(sys:Resources)
         - $configFile: $resources.string('Agent-v2.template')
         - $initScript: $resources.string('linux-init.sh')

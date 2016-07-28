@@ -15,6 +15,7 @@
 import inspect
 import os.path
 
+import eventlet
 import six
 from yaql.language import expressions as yaql_expressions
 from yaql.language import specs
@@ -71,16 +72,12 @@ class MuranoObjectParameter(yaqltypes.PythonType):
                 *args, **kwargs):
         result = super(MuranoObjectParameter, self).convert(
             value, sender, context, function_spec, engine, *args, **kwargs)
-        if result is None:
-            return None
         if self.decorate:
-            if isinstance(result, MuranoObjectInterface):
-                return result
-            return MuranoObjectInterface(result)
+            return MuranoObjectInterface.create(result)
         else:
             if isinstance(result, dsl_types.MuranoObject):
                 return result
-            return result.object
+            return None if result is None else result.object
 
 
 class ThisParameter(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
@@ -89,10 +86,7 @@ class ThisParameter(yaqltypes.HiddenParameterType, yaqltypes.SmartType):
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
-        this = helpers.get_this(context)
-        if isinstance(this, dsl_types.MuranoObject):
-            return MuranoObjectInterface(this)
-        return this
+        return get_this(context)
 
 
 class InterfacesParameter(yaqltypes.HiddenParameterType,
@@ -188,6 +182,12 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         self.__object = mpl_object
         self.__object_store = object_store or helpers.get_object_store()
 
+    @staticmethod
+    def create(mpl_object, object_store=None):
+        if mpl_object is None or isinstance(mpl_object, MuranoObjectInterface):
+            return mpl_object
+        return MuranoObjectInterface(mpl_object, object_store)
+
     @property
     def object(self):
         return self.__object
@@ -199,9 +199,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     @property
     def owner(self):
         owner = self.__object.owner
-        if owner is None:
-            return None
-        return MuranoObjectInterface(owner)
+        return MuranoObjectInterface.create(owner)
 
     def find_owner(self, type, optional=False):
         if isinstance(type, six.string_types):
@@ -239,7 +237,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         return self.__object.extension
 
     def cast(self, murano_class, version_spec=None):
-        return MuranoObjectInterface(
+        return MuranoObjectInterface.create(
             helpers.cast(
                 self.__object, murano_class,
                 version_spec or helpers.get_type()))
@@ -295,9 +293,7 @@ class Interfaces(object):
         return self.methods(self.__object)
 
     def methods(self, mpl_object):
-        if mpl_object is None:
-            return None
-        return MuranoObjectInterface(mpl_object)
+        return MuranoObjectInterface.create(mpl_object)
 
     @property
     def execution_session(self):
@@ -308,10 +304,7 @@ class Interfaces(object):
         caller_context = helpers.get_caller_context()
         if caller_context is None:
             return None
-        caller = helpers.get_this(caller_context)
-        if caller is None:
-            return None
-        return MuranoObjectInterface(caller)
+        return get_this(caller_context)
 
     @property
     def attributes(self):
@@ -343,7 +336,7 @@ def to_mutable(obj, yaql_engine=None):
 
     def converter(value, limit_func, engine, rec):
         if isinstance(value, dsl_types.MuranoObject):
-            return MuranoObjectInterface(value)
+            return MuranoObjectInterface.create(value)
         else:
             return utils.convert_output_data(value, limit_func, engine, rec)
 
@@ -358,3 +351,24 @@ def meta(type_name, value):
         mpl_meta.append({type_name: value})
         specs.meta(type_name, mpl_meta)(func)
     return wrapper
+
+
+def get_this(context=None):
+    this = helpers.get_this(context)
+    return MuranoObjectInterface.create(this)
+
+
+def get_execution_session():
+    return helpers.get_execution_session()
+
+
+def spawn(func, *args, **kwargs):
+    context = helpers.get_context()
+    object_store = helpers.get_object_store()
+
+    def wrapper():
+        with helpers.with_object_store(object_store):
+            with helpers.contextual(context):
+                return func(*args, **kwargs)
+
+    return eventlet.spawn(wrapper)
