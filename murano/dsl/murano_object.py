@@ -52,6 +52,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 self.__parents[name] = known_classes[name] = obj
             else:
                 self.__parents[name] = known_classes[name]
+        self.__dependencies = {}
 
     @property
     def extension(self):
@@ -171,6 +172,10 @@ class MuranoObject(dsl_types.MuranoObject):
     @property
     def initialized(self):
         return self.__initialized
+
+    @property
+    def dependencies(self):
+        return self.__dependencies
 
     def get_property(self, name, context=None):
         start_type, derived = self.__type, False

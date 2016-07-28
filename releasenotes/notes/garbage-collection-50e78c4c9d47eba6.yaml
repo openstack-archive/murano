@@ -1,0 +1,11 @@
+---
+features:
+  - Introduce new MuranoPL class ``io.murano.system.GC``.
+    For now MuranoPL garbage collector can be used for
+    setup destruction dependencies between murano objects.
+    If object Foo is subscribed to object Bar destruction
+    it will be notified with the specific handler. If both
+    Foo and Bar should be destroyed during one execution session
+    Foo will be destroyed after Bar. If you don't want to notify
+    subscriber about target destruction you may not specify handler.
+    Handler can be static or usual action.

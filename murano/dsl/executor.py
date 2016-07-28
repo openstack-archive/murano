@@ -69,14 +69,15 @@ class MuranoDslExecutor(object):
         return self._context_manager
 
     def invoke_method(self, method, this, context, args, kwargs,
-                      skip_stub=False):
+                      skip_stub=False, invoke_action=True):
         if isinstance(this, dsl.MuranoObjectInterface):
             this = this.object
         kwargs = utils.filter_parameters_dict(kwargs)
         runtime_version = method.declaring_type.package.runtime_version
         yaql_engine = yaql_integration.choose_yaql_engine(runtime_version)
         if context is None or not skip_stub:
-            actions_only = context is None and not method.name.startswith('.')
+            actions_only = (context is None and not method.name.startswith('.')
+                            and invoke_action)
             method_context = self.create_method_context(
                 self.create_object_context(this, context), method)
             method_context[constants.CTX_SKIP_FRAME] = True
@@ -324,11 +325,9 @@ class MuranoDslExecutor(object):
             for object_id in self._list_potential_object_ids(objects_copy):
                 if (gc_object_store.has(object_id, False) and
                         not self._object_store.has(object_id, False)):
-                    obj = gc_object_store.get(object_id)
-                    objects_to_clean.append(obj)
+                    objects_to_clean.append(object_id)
             if objects_to_clean:
-                for obj in objects_to_clean:
-                    self._destroy_object(obj)
+                self._clean_garbage(gc_object_store, objects_to_clean)
 
     def cleanup_orphans(self, alive_object_ids):
         orphan_ids = self._collect_orphans(alive_object_ids)
@@ -344,8 +343,9 @@ class MuranoDslExecutor(object):
 
     def _destroy_orphans(self, orphan_ids):
         with helpers.with_object_store(self.object_store):
-            for obj_id in orphan_ids:
-                self._destroy_object(self._object_store.get(obj_id))
+            list_of_destroyed = self._clean_garbage(self.object_store,
+                                                    orphan_ids)
+            for obj_id in list_of_destroyed:
                 self._object_store.remove(obj_id)
 
     def _destroy_object(self, obj):
@@ -355,8 +355,62 @@ class MuranoDslExecutor(object):
                 method.invoke(obj, (), {}, None)
             except Exception as e:
                 LOG.warning(_LW(
-                    'Muted exception during execution of .destroy '
+                    'Muted exception during execution of .destroy'
                     'on {0}: {1}').format(obj, e), exc_info=True)
+
+    def _clean_garbage(self, object_store, d_list):
+        d_set = set(d_list)
+        dd_graph = {}
+
+        # NOTE(starodubcevna): construct a graph which looks like:
+        # {
+        #   obj1_id: {subscriber1_id, subscriber2_id},
+        #   obj2_id: {subscriber2_id, subscriber3_id}
+        # }
+        for obj_id in d_set:
+            obj = object_store.get(obj_id)
+            dds = obj.dependencies.get('onDestruction', [])
+            subscribers_set = {dd['subscriber'] for dd in dds}
+            dd_graph[obj_id] = subscribers_set
+
+        def topological(graph):
+            """Topological sort implementation
+
+            This implementation will work even if we have cycle dependencies,
+            e.g. [a->b, b->c, c->a]. In this case the order of deletion will be
+            undified and it's okay.
+            """
+
+            result = []
+
+            def dfs(obj_id):
+                for subscriber_id in graph[obj_id]:
+                    if subscriber_id in graph:
+                        dfs(subscriber_id)
+                result.append(obj_id)
+                del graph[obj_id]
+            while graph:
+                dfs(next(iter(graph)))
+            return result
+
+        deletion_order = topological(dd_graph)
+        destroyed = set()
+        for obj_id in deletion_order:
+            obj = object_store.get(obj_id)
+            dependencies = obj.dependencies.get('onDestruction', [])
+            for dependency in dependencies:
+                subscriber_id = dependency['subscriber']
+                if object_store.has(subscriber_id):
+                    subscriber = object_store.get(subscriber_id)
+                    handler = dependency['handler']
+                    if handler:
+                        method = subscriber.type.find_single_method(handler)
+                        self.invoke_method(method, subscriber, None, [], {},
+                                           invoke_action=False)
+            self._destroy_object(obj)
+            destroyed.add(obj_id)
+
+        return destroyed
 
     def _list_potential_object_ids(self, data):
         if isinstance(data, dict):

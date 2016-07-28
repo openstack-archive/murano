@@ -15,6 +15,7 @@
 
 from murano.engine.system import agent
 from murano.engine.system import agent_listener
+from murano.engine.system import garbage_collector
 from murano.engine.system import heat_stack
 from murano.engine.system import instance_reporter
 from murano.engine.system import logger
@@ -36,3 +37,4 @@ def register(package):
     package.register_class(logger.Logger)
     package.register_class(test_fixture.TestFixture)
     package.register_class(workflowclient.MistralClient)
+    package.register_class(garbage_collector.GarbageCollector)
