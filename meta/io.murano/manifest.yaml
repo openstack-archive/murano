@@ -80,3 +80,5 @@ Classes:
   io.murano.metadata.engine.Serialize: metadata/engine/Serialize.yaml
 
   io.murano.test.TestFixture: test/TestFixture.yaml
+  io.murano.test.TestFixtureWithEnvironment: test/TestFixture.yaml
+  io.murano.test.DummyNetwork: test/TestFixture.yaml
