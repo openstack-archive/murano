@@ -20,7 +20,7 @@ class TraverseHelperTests(base.MuranoTestCase):
     def test_root_get_with_dict(self):
         source = {'attr': True}
         value = utils.TraverseHelper.get('/', source)
-        self.assertDictEqual(value, source)
+        self.assertEqual(value, source)
 
     def test_root_get_with_list(self):
         source = [{'attr': True}]
@@ -104,13 +104,13 @@ class TraverseHelperTests(base.MuranoTestCase):
         source = {'attr1': False, 'attr2': True}
         utils.TraverseHelper.remove('/attr1', source)
         value = utils.TraverseHelper.get('/', source)
-        self.assertDictEqual(value, {'attr2': True})
+        self.assertEqual(value, {'attr2': True})
 
     def test_nested_attribute_remove_from_dict(self):
         source = {'obj': {'attr1': False, 'attr2': True}}
         utils.TraverseHelper.remove('/obj/attr1', source)
         value = utils.TraverseHelper.get('/obj', source)
-        self.assertDictEqual(value, {'attr2': True})
+        self.assertEqual(value, {'attr2': True})
 
     def test_nested_attribute_remove_from_list_by_id(self):
         source = {'obj': [{'?': {'id': 'id1'}}, {'?': {'id': 'id2'}}]}
