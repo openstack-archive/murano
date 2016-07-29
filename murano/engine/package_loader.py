@@ -66,6 +66,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         self._mem_locks = []
         self._ipc_locks = []
         self._downloaded = []
+        self._fixations = collections.defaultdict(set)
+        self._new_fixations = collections.defaultdict(set)
 
     def _get_glare_client(self):
         glare_settings = CONF.glare
@@ -140,6 +142,11 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._get_package_by_definition(package_definition))
 
     def load_package(self, package_name, version_spec):
+        fixed_versions = self._fixations[package_name]
+        version = version_spec.select(fixed_versions)
+        if version:
+            version_spec = helpers.parse_version_spec(version)
+
         packages = self._package_cache.get(package_name)
         if packages:
             version = version_spec.select(six.iterkeys(packages))
@@ -157,8 +164,10 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             six.reraise(exceptions.NoPackageFound(package_name),
                         None, exc_info[2])
         else:
-            return self._to_dsl_package(
-                self._get_package_by_definition(package_definition))
+            package = self._get_package_by_definition(package_definition)
+            self._fixations[package_name].add(package.version)
+            self._new_fixations[package_name].add(package.version)
+            return self._to_dsl_package(package)
 
     def register_package(self, package):
         for name in package.classes:
@@ -402,6 +411,15 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         self._mem_locks.append(mem_lock)
         self._ipc_locks.append(ipc_lock)
 
+    def import_fixation_table(self, fixations):
+        self._fixations = deserialize_package_fixations(fixations)
+
+    def export_fixation_table(self):
+        return serialize_package_fixations(self._fixations)
+
+    def compact_fixation_table(self):
+        self._fixations = self._new_fixations.copy()
+
     def cleanup(self):
         """Cleans up any lock we had acquired and removes any stale packages"""
 
@@ -430,6 +448,8 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         self._packages_by_name = {}
         self._loaded_packages = set()
         self._root_loader = root_loader or self
+        self._fixations = collections.defaultdict(set)
+        self._new_fixations = collections.defaultdict(set)
         self._build_index()
 
     def _build_index(self):
@@ -453,6 +473,15 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
                 continue
             LOG.info(_LI('Loaded package from path {0}').format(folder))
 
+    def import_fixation_table(self, fixations):
+        self._fixations = deserialize_package_fixations(fixations)
+
+    def export_fixation_table(self):
+        return serialize_package_fixations(self._fixations)
+
+    def compact_fixation_table(self):
+        self._fixations = self._new_fixations.copy()
+
     def load_class_package(self, class_name, version_spec):
         packages = self._packages_by_class.get(class_name)
         if not packages:
@@ -463,12 +492,18 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         return packages[version]
 
     def load_package(self, package_name, version_spec):
+        fixed_versions = self._fixations[package_name]
+        version = version_spec.select(fixed_versions)
+        if version:
+            version_spec = helpers.parse_version_spec(version)
         packages = self._packages_by_name.get(package_name)
         if not packages:
             raise exceptions.NoPackageFound(package_name)
         version = version_spec.select(six.iterkeys(packages))
         if not version:
             raise exceptions.NoPackageFound(package_name)
+        self._fixations[package_name].add(version)
+        self._new_fixations[package_name].add(version)
         return packages[version]
 
     def register_package(self, package):
@@ -543,6 +578,26 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
     def register_package(self, package):
         self.api_loader.register_package(package)
 
+    def export_fixation_table(self):
+        result = deserialize_package_fixations(
+            self.api_loader.export_fixation_table())
+        for loader in self.directory_loaders:
+            fixations = deserialize_package_fixations(
+                loader.export_fixation_table())
+            for key, value in six.iteritems(fixations):
+                result[key].update(value)
+        return serialize_package_fixations(result)
+
+    def import_fixation_table(self, fixations):
+        self.api_loader.import_fixation_table(fixations)
+        for loader in self.directory_loaders:
+            loader.import_fixation_table(fixations)
+
+    def compact_fixation_table(self):
+        self.api_loader.compact_fixation_table()
+        for loader in self.directory_loaders:
+            loader.compact_fixation_table()
+
     def __enter__(self):
         return self
 
@@ -568,3 +623,18 @@ def _with_to_generator(context_obj):
     with context_obj as obj:
         yield obj
     yield
+
+
+def deserialize_package_fixations(fixations):
+    result = collections.defaultdict(set)
+    for name, versions in six.iteritems(fixations):
+        for version in versions:
+            result[name].add(helpers.parse_version(version))
+    return result
+
+
+def serialize_package_fixations(fixations):
+    return {
+        name: list(str(v) for v in versions)
+        for name, versions in six.iteritems(fixations)
+    }

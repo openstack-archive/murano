@@ -30,3 +30,15 @@ class MuranoPackageLoader(object):
     @abc.abstractmethod
     def register_package(self, package):
         pass
+
+    @abc.abstractmethod
+    def import_fixation_table(self, fixations):
+        pass
+
+    @abc.abstractmethod
+    def export_fixation_table(self):
+        pass
+
+    @abc.abstractmethod
+    def compact_fixation_table(self):
+        pass

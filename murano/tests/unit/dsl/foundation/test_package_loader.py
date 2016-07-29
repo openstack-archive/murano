@@ -77,6 +77,15 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         else:
             raise KeyError(class_name)
 
+    def export_fixation_table(self):
+        return {}
+
+    def import_fixation_table(self, fixations):
+        pass
+
+    def compact_fixation_table(self):
+        pass
+
     def _build_index(self, directory):
         yamls = [
             os.path.join(dirpath, f)
