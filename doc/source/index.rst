@@ -68,24 +68,29 @@ Introduction to Murano
 .. toctree::
    :maxdepth: 2
 
-   draft/intro/key_features
-   draft/intro/target_users
-   draft/intro/architecture
-   draft/intro/use_cases
+   intro/key_features
+   intro/target_users
+   intro/architecture
+   intro/use_cases
 
 
 Using Murano
 ~~~~~~~~~~~~
 
+This guide provides murano end users with information on how they can use the
+Application Catalog directly from the Dashboard and through the command-line
+interface (CLI). The screenshots provided in this guide are of the Liberty
+release.
+
 .. toctree::
    :maxdepth: 2
 
-   draft/enduser-guide/quickstart
-   draft/enduser-guide/manage_environments
-   draft/enduser-guide/manage_applications
-   draft/enduser-guide/log_in_to_murano_instance
-   draft/enduser-guide/use_cli
-   draft/enduser-guide/deploying_using_cli
+   enduser-guide/quickstart
+   enduser-guide/manage_environments
+   enduser-guide/manage_applications
+   enduser-guide/log_in_to_murano_instance
+   enduser-guide/use_cli
+   enduser-guide/deploying_using_cli
    articles/multi_region
 
 
@@ -95,16 +100,19 @@ Developing Applications
 .. toctree::
    :maxdepth: 2
 
-   draft/appdev-guide/step_by_step
-   draft/appdev-guide/exec_plan
-   draft/appdev-guide/hot_packages
-   draft/appdev-guide/murano_pl
-   draft/appdev-guide/murano_packages
-   draft/appdev-guide/app_migrating
-   draft/appdev-guide/app_unit_tests
-   draft/appdev-guide/examples
-   draft/appdev-guide/use_cases
-   draft/appdev-guide/faq
+   appdev-guide/step_by_step
+   appdev-guide/exec_plan
+   appdev-guide/hot_packages
+   appdev-guide/murano_pl
+   appdev-guide/murano_packages
+   appdev-guide/murano_bundles
+   appdev-guide/app_migrating
+   appdev-guide/app_unit_tests
+   appdev-guide/cinder_volume_supporting
+   appdev-guide/examples
+   appdev-guide/use_cases
+   appdev-guide/app_debugging
+   appdev-guide/faq
 
 
 Miscellaneous

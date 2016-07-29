@@ -29,35 +29,6 @@ to manage applications and environments.
 And of course, it provides information on how to contribute
 to the project.
 
-Introduction to Murano
-~~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-
-   intro/key_features
-   intro/target_users
-   intro/architecture
-   intro/use_cases
-
-Using Murano
-~~~~~~~~~~~~
-
-This guide provides murano end users with information on how they can use the
-Application Catalog directly from the Dashboard and through the command-line
-interface (CLI). The screenshots provided in this guide are of the Liberty
-release.
-
-.. toctree::
-   :maxdepth: 2
-
-   enduser-guide/quickstart
-   enduser-guide/manage_environments
-   enduser-guide/manage_applications
-   enduser-guide/log_in_to_murano_instance
-   enduser-guide/use_cli
-   enduser-guide/deploying_using_cli
-
 Deploying Murano
 ~~~~~~~~~~~~~~~~
 
@@ -76,26 +47,6 @@ Deploying Murano
    admin-guide/configure_cloud_foundry_service_broker
    admin-guide/using_glare.rst
    admin-guide/admin_troubleshooting
-
-Developing Applications
-~~~~~~~~~~~~~~~~~~~~~~~
-
-.. toctree::
-   :maxdepth: 2
-
-   appdev-guide/step_by_step
-   appdev-guide/exec_plan
-   appdev-guide/hot_packages
-   appdev-guide/murano_pl
-   appdev-guide/murano_packages
-   appdev-guide/murano_bundles
-   appdev-guide/app_migrating
-   appdev-guide/app_unit_tests
-   appdev-guide/cinder_volume_supporting
-   appdev-guide/examples
-   appdev-guide/use_cases
-   appdev-guide/app_debugging
-   appdev-guide/faq
 
 Contributing
 ~~~~~~~~~~~~
