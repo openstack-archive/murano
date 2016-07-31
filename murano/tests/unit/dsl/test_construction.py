@@ -14,6 +14,7 @@
 
 from testtools import matchers
 
+from murano.dsl import dsl
 from murano.dsl import serializer
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -62,3 +63,7 @@ class TestConstruction(test_case.DslTestCase):
     def test_single_contract_instantiation(self):
         self._runner.testSingleContractInstantiation()
         self.assertEqual(1, self.traces.count('ConstructionSample::init'))
+
+    def test_nested_new_loads_in_separate_store(self):
+        res = self._runner.testNestedNewLoadsInSeparateStore()
+        self.assertIsInstance(res, dsl.MuranoObjectInterface)

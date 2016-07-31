@@ -80,6 +80,10 @@ class ObjectStore(object):
     def initializing(self):
         return False
 
+    @property
+    def parent_store(self):
+        return self._parent_store
+
 
 # Temporary ObjectStore to load object graphs. Does 2-phase load
 # and maintains internal state on what phase is currently running
