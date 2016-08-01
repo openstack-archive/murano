@@ -17,3 +17,8 @@ Name: Hidden
 Usage: Meta
 Applies: [Property, Argument]
 Inherited: true
+
+Properties:
+  visible:
+    Contract: $.bool().notNull()
+    Default: false

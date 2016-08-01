@@ -20,6 +20,7 @@ from murano.api.v1 import deployments
 from murano.api.v1 import environments
 from murano.api.v1 import instance_statistics
 from murano.api.v1 import request_statistics
+from murano.api.v1 import schemas
 from murano.api.v1 import services
 from murano.api.v1 import sessions
 from murano.api.v1 import static_actions
@@ -274,6 +275,15 @@ class API(wsgi.Router):
         mapper.connect('/stats',
                        controller=req_stats_resource,
                        action='get',
+                       conditions={'method': ['GET']})
+        schemas_resource = schemas.create_resource()
+        mapper.connect('/schemas/{class_name}/{method_names}',
+                       controller=schemas_resource,
+                       action='get_schema',
+                       conditions={'method': ['GET']})
+        mapper.connect('/schemas/{class_name}',
+                       controller=schemas_resource,
+                       action='get_schema',
                        conditions={'method': ['GET']})
 
         super(API, self).__init__(mapper)

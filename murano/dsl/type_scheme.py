@@ -31,6 +31,10 @@ class TypeScheme(object):
     def __init__(self, spec):
         self._spec = spec
 
+    @property
+    def spec(self):
+        return self._spec
+
     @staticmethod
     def prepare_transform_context(root_context, this, owner, default,
                                   calling_type):

@@ -29,8 +29,8 @@ class MetaProvider(object):
 
 
 class MetaData(MetaProvider):
-    def __init__(self, definition, target, scope_type):
-        scope_type = weakref.ref(scope_type)
+    def __init__(self, definition, target, declaring_type):
+        declaring_type = weakref.proxy(declaring_type)
         definition = helpers.list_value(definition)
         factories = []
         used_types = set()
@@ -43,7 +43,7 @@ class MetaData(MetaProvider):
             else:
                 name = d
                 props = {}
-            type_obj = helpers.resolve_type(name, scope_type())
+            type_obj = helpers.resolve_type(name, declaring_type)
             if type_obj.usage != dsl_types.ClassUsages.Meta:
                 raise ValueError('Only Meta classes can be attached')
             if target not in type_obj.targets:
@@ -56,10 +56,15 @@ class MetaData(MetaProvider):
                                  'with cardinality One')
 
             used_types.add(type_obj)
-            factory_maker = lambda template: \
-                lambda context: helpers.get_object_store().load(
-                    template, owner=None,
-                    context=context, scope_type=scope_type())
+
+            def factory_maker(template):
+                def instantiate(context):
+                    obj = helpers.get_object_store().load(
+                        template, owner=None,
+                        context=context, scope_type=declaring_type)
+                    obj.declaring_type = declaring_type
+                    return obj
+                return instantiate
 
             factories.append(factory_maker({type_obj: props}))
         self._meta_factories = factories
@@ -107,3 +112,15 @@ def merge_providers(initial_class, producer, context):
 
     meta = merger([initial_class], set())
     return list(six.moves.map(operator.itemgetter(1), meta))
+
+
+def aggregate_meta(provider, context, group_by_name=True):
+    key_func = lambda m: m.type.name if group_by_name else m.type
+    meta = provider.get_meta(context)
+    result = {}
+    for item in meta:
+        if item.type.cardinality == dsl_types.MetaCardinality.One:
+            result[key_func(item)] = item
+        else:
+            result.setdefault(key_func(item), []).append(item)
+    return result

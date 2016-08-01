@@ -28,7 +28,7 @@ import six
 from webob import exc
 
 import murano.api.v1
-from murano.api.v1 import schemas
+from murano.api.v1 import validation_schemas
 from murano.common import exceptions
 from murano.common import policy
 import murano.common.utils as murano_utils
@@ -235,7 +235,8 @@ class Controller(object):
         file_obj, package_meta = _validate_body(body)
         if package_meta:
             try:
-                jsonschema.validate(package_meta, schemas.PKG_UPLOAD_SCHEMA)
+                jsonschema.validate(package_meta,
+                                    validation_schemas.PKG_UPLOAD_SCHEMA)
             except jsonschema.ValidationError as e:
                 msg = _("Package schema is not valid: {reason}").format(
                     reason=e)

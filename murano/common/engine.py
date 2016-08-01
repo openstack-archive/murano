@@ -33,6 +33,7 @@ from murano.dsl import context_manager
 from murano.dsl import dsl_exception
 from murano.dsl import executor as dsl_executor
 from murano.dsl import helpers
+from murano.dsl import schema_generator
 from murano.dsl import serializer
 from murano.engine import execution_session
 from murano.engine import package_loader
@@ -57,7 +58,11 @@ class EngineService(service.Service):
         self.server = None
 
     def start(self):
-        endpoints = [TaskProcessingEndpoint(), StaticActionEndpoint()]
+        endpoints = [
+            TaskProcessingEndpoint(),
+            StaticActionEndpoint(),
+            SchemaEndpoint()
+        ]
 
         transport = messaging.get_transport(CONF)
         s_target = target.Target('murano', 'tasks', server=str(uuid.uuid4()))
@@ -101,6 +106,17 @@ class ContextManager(context_manager.ContextManager):
             context = helpers.link_contexts(
                 context, yaql_functions.get_restricted_context())
         return context
+
+
+class SchemaEndpoint(object):
+    @classmethod
+    def generate_schema(cls, context, *args, **kwargs):
+        session = execution_session.ExecutionSession()
+        session.token = context['token']
+        session.project_id = context['project_id']
+        with package_loader.CombinedPackageLoader(session) as pkg_loader:
+            return schema_generator.generate_schema(
+                pkg_loader, ContextManager(), *args, **kwargs)
 
 
 class TaskProcessingEndpoint(object):
