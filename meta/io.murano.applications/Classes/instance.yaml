@@ -34,11 +34,30 @@ Properties:
       - $.class(res:Instance)
 
 Methods:
+  .init:
+    Body:
+      - $env: $.find(std:Environment)
+      - If: $env
+        Then:
+          - $this._reporter: $env.reporter
+        Else:
+          - $this._reporter: null
+
   deploy:
     Body:
       - cast($this, ReplicationGroup).deploy()
-      - $this.items.select($.beginDeploy())
+      - $this.items.select($this._deployInstance($))
       - $this.items.select($.endDeploy())
+
+  _deployInstance:
+    Arguments:
+      - instance:
+          Contract: $.class(res:Instance)
+    Body:
+      - If: $this._reporter and name($instance) and not $instance.openstackId
+        Then:
+          - $this._reporter.report($this, 'Provisioning VM for ' + name($instance))
+      - $instance.beginDeploy()
 
   .destroy:
     Body:
@@ -46,8 +65,7 @@ Methods:
       - $this.items.select($.endReleaseResources())
 
 --- # ------------------------------------------------------------------ # ---
-# A replication provider acting as a default factory class for
-# LinuxMuranoInstance (LMI)
+# A replication provider acting as a default factory class for Instances
 
 Name: InstanceProvider
 Extends: CloneReplicaProvider

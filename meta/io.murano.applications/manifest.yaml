@@ -34,6 +34,12 @@ Classes:
   io.murano.applications.InstanceGroup: instance.yaml
   io.murano.applications.InstanceProvider: instance.yaml
 
+  io.murano.applications.BaseSoftwareComponent: component.yaml
+  io.murano.applications.Installable: component.yaml
+  io.murano.applications.Configurable: component.yaml
+  io.murano.applications.SoftwareComponent: component.yaml
+
+
   # Tests
   io.murano.applications.tests.TestReplication: tests/TestReplication.yaml
   io.murano.applications.tests.TestCloneReplicaProvider: tests/TestCloneReplicaProvider.yaml
@@ -42,3 +48,4 @@ Classes:
   io.murano.applications.tests.NestedReplicationTarget: tests/TestTemplateReplicaProvider.yaml
   io.murano.applications.tests.TestEvents: tests/TestEvents.yaml
   io.murano.applications.tests.TestMockedInstanceFactory: tests/TestInstanceProviders.yaml
+  io.murano.applications.tests.TestSoftwareComponent: tests/TestSoftwareComponent.yaml

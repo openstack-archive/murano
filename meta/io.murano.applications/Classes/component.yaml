@@ -1,0 +1,367 @@
+Namespaces:
+  =: io.murano.applications
+  std: io.murano
+  res: io.murano.resources
+  m: io.murano.metadata.engine
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: BaseSoftwareComponent
+
+Properties:
+  allowedFailures:
+    Contract: $.check($ in ['none', 'one', 'any', 'quorum'])
+    Default: 'none'
+
+  componentName:
+    Contract: $.string()
+    Usage: Runtime
+
+Methods:
+  .init:
+    Body:
+      - $this._env: $.find(std:Environment).require()
+      - $this.componentName: name($this)
+
+  deployAt:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $servers.deploy()
+
+  report:
+    Arguments:
+      - message:
+          Contract: $.string().notNull()
+    Body:
+      - $this._env.reporter.report($this, $message)
+
+  _detect_success:
+    Arguments:
+      - numServers:
+          Contract: $.int()
+      - numFailures:
+          Contract: $.int()
+    Body:
+      - Switch:
+          $this.allowedFailures = none:
+            - Return: $numFailures = 0
+          $this.allowedFailures = one:
+            - Return: $numFailures <= 1
+          $this.allowedFailures = any:
+            - Return: true
+          $this.allowedFailures = quorum:
+            - $maxFailures: $numServers - ($numServers/2 + 1)
+            - Return: $numFailures <= $maxFailures
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Installable
+Extends: BaseSoftwareComponent
+
+Properties:
+  beforeInstallEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: beforeInstall
+
+  installServerEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: installServer
+
+  completeInstallationEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: completeInstallation
+
+Methods:
+  install:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $serversToInstall: $servers.items.where($this.checkServerNeedsInstallation($))
+      - If: any($serversToInstall)
+        Then:
+          - $.beforeInstall($servers)
+          - $results: $serversToInstall.pselect($this.installServer($))
+          - $.completeInstallation($servers, $results.where(not $).len())
+
+  checkServerNeedsInstallation:
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance)
+    Body:
+      - Return: not $.getAttr(format('installed_at_{0}', id($server)), false)
+
+  beforeInstall:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $this.report(format('Installing {0}', $this.componentName))
+      - $this.onBeforeInstall($servers)
+
+  onBeforeInstall:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $this.beforeInstallEvent.notify($this, $servers)
+
+  installServer:
+    Meta:
+      - m:Synchronize:
+          onArgs: server
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      Try:
+        - $this.report(format('Began installing {0} on {1}', $this.componentName,
+                              $server.name))
+        - $this.onInstallServer($server)
+
+      Catch:
+        - As: e
+          Do:
+            - $this.report(format('Unable to install {0} on {1} due to {2}',
+                                  $this.componentName, $server.name, $e.message))
+            - Return: False
+      Else:
+        - $this.report(format('{0} is installed on {1}',
+                              $this.componentName,
+                              $server.name))
+        - $.setAttr(format('installed_at_{0}', id($server)), true)
+        - Return: True
+
+  onInstallServer:
+    Meta:
+      - m:Synchronize:
+          onArgs: server
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - $this.installServerEvent.notify($this, $server)
+
+
+  completeInstallation:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+      - numFailures:
+          Contract: $.int()
+    Body:
+      - $success: $this._detect_success($servers.items.len(), $numFailures)
+      - If: $success
+        Then:
+          - $this.onCompleteInstallation($servers)
+
+          - $this.report(format('Finished installing {0} ({1} errors encountered)',
+                                $this.componentName, $numFailures or 'no'))
+        Else:
+          - Throw: TooManyInstallationErrors
+            Message: format('Too many errors ({0}) encountered while installing {1}',
+                            $numFailures, $this.componentName)
+
+  onCompleteInstallation:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $this.completeInstallationEvent.notify($this, $servers)
+
+  deployAt:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - super($this, $.deployAt($servers))
+      - $this.install($servers)
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: Configurable
+Extends: BaseSoftwareComponent
+
+Properties:
+  preConfigureEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: preConfigure
+
+  configureServerEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: configureServer
+
+  completeConfigurationEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: completeConfiguration
+
+Methods:
+  .init:
+    Body:
+      - $this._randomName: randomName()
+
+  configure:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - If: not $this.checkClusterNeedsReconfiguration($servers)
+        Then:
+          - Return:
+      - $this.preConfigure($servers)
+      - $serversToConfigure: $servers.items.where($this.checkServerNeedsConfiguration($))
+      - $results: $serversToConfigure.pselect($this.configureServer($))
+      - $.completeConfiguration($servers, $results.where(not $).len())
+
+  checkClusterNeedsReconfiguration:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $key: $this.getKey()
+      - $state: $this.getAttr(format('configuration_of_cluster_{0}', id($servers)), null)
+      - Return: $key!=$state
+
+  checkServerNeedsConfiguration:
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - $key: $this.getKey()
+      - $state: $this.getAttr(format('configuration_of_server_{0}', id($server)), null)
+      - Return: $key!=$state
+
+  getKey:
+    Body:
+      # should be redefined in subclasses to contain semantical signature
+      # of the object's configuration
+      - Return: $this._randomName
+
+  preConfigure:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $this.report(format('Applying configuration of {0}', $this.componentName))
+      - $this.onPreConfigure($servers)
+
+  onPreConfigure:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $sr: $this.getSecurityRules()
+      - If: $sr
+        Then:
+          - $this._env.securityGroupManager.addGroupIngress($sr)
+          - $this._env.stack.push()
+      - $this.preConfigureEvent.notify($this, $servers)
+
+  configureServer:
+    Meta:
+      - m:Synchronize:
+          onArgs: server
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - Try:
+          - $this.report(format('Began configuring {0} on {1}',
+                         $this.componentName, $server.name))
+          - $this.onConfigureServer($server)
+
+        Catch:
+          - As: e
+            Do:
+              - $this.report(format('Unable to configure {0} on {1} due to {2}',
+                                    $this.componentName, $server.name, $e.message))
+              - Return: False
+        Else:
+          - $key: $this.getKey()
+          - $this.setAttr(format('configuration_of_server_{0}', id($server)), $key)
+          - $this.report(format('{0} is configured at {1}',
+                                $this.componentName, $server.name))
+          - Return: True
+
+  onConfigureServer:
+    Meta:
+      - m:Synchronize:
+          onArgs: server
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - $this.configureServerEvent.notify($this, $server)
+
+
+  completeConfiguration:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+      - numFailures:
+          Contract: $.int()
+    Body:
+      - $success: $this._detect_success($servers.items.len(), $numFailures)
+      - If: $success
+        Then:
+          - $this.onCompleteConfiguration($servers)
+          - $key: $this.getKey()
+          - $this.setAttr(format('configuration_of_cluster_{0}', id($servers)),
+                          $key)
+          - $this.report(format('Finished configuring {0} ({1} errors encountered)',
+                         $this.componentName, $numFailures or 'no'))
+        Else:
+          - Throw: TooManyConfigurationErrors
+            Message: format('Too many errors ({0}) encountered while configuring {1}',
+                            $numFailures, $this.componentName)
+
+  onCompleteConfiguration:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - $this.completeConfigurationEvent.notify($this, $servers)
+
+
+  getSecurityRules:
+    Body:
+      - Return: {}
+
+  deployAt:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - super($this, $.deployAt($servers))
+      - $this.configure($servers)
+
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: SoftwareComponent
+Extends:
+  - Installable
+  - Configurable
+
+Methods:
+  deployAt:
+    Arguments:
+      - servers:
+          Contract: $.class(InstanceGroup).notNull()
+    Body:
+      - cast($this, Installable).deployAt($servers)
+      - cast($this, Configurable).deployAt($servers)
