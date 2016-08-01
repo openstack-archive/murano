@@ -111,10 +111,10 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         result = enforcer._parse_simulation_result(
             'predeploy_errors', 'env1', congress_response)
 
-        self.assertFalse("unexpected response" in result)
-        self.assertTrue("Instance 1 has problem" in result)
-        self.assertTrue("Instance 2 has problem" in result)
-        self.assertFalse("Instance 3 has problem" in result)
+        self.assertNotIn("unexpected response", result)
+        self.assertIn("Instance 1 has problem", result)
+        self.assertIn("Instance 2 has problem", result)
+        self.assertNotIn("Instance 3 has problem", result)
 
     def test_none_model(self):
         executor = engine.TaskExecutor(self.task)

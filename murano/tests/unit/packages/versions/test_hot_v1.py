@@ -27,7 +27,7 @@ class TestHotV1(test_base.MuranoTestCase):
         )
         package = load_utils.load_from_dir(package_dir)
 
-        self.assertNotEqual(package.supplier, None)
+        self.assertIsNotNone(package.supplier)
         self.assertEqual('Supplier Name', package.supplier['Name'])
         self.assertEqual({'Link': 'http://example.com',
                           'Text': 'Example Company'},
