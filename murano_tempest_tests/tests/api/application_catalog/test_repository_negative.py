@@ -103,9 +103,9 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
 
     @classmethod
     def resource_cleanup(cls):
-        super(TestRepositoryNegativeForbidden, cls).resource_cleanup()
         os.remove(cls.abs_archive_path)
         cls.application_catalog_client.delete_package(cls.package['id'])
+        super(TestRepositoryNegativeForbidden, cls).resource_cleanup()
 
     @testtools.testcase.attr('negative')
     def test_update_package_from_another_tenant(self):

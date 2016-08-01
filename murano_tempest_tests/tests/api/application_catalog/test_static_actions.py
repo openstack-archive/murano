@@ -44,13 +44,13 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
 
     @classmethod
     def resource_cleanup(cls):
-        super(TestStaticActions, cls).resource_cleanup()
         os.remove(cls.abs_archive_path)
         if CONF.application_catalog.glare_backend:
             client = cls.artifacts_client
         else:
             client = cls.application_catalog_client
         client.delete_package(cls.package['id'])
+        super(TestStaticActions, cls).resource_cleanup()
 
     @testtools.testcase.attr('smoke')
     def test_call_static_action_basic(self):

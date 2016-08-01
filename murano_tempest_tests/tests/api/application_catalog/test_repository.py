@@ -74,9 +74,9 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
 
     @classmethod
     def resource_cleanup(cls):
-        super(TestRepository, cls).resource_cleanup()
         os.remove(cls.abs_archive_path)
         cls.application_catalog_client.delete_package(cls.package['id'])
+        super(TestRepository, cls).resource_cleanup()
 
     @testtools.testcase.attr('smoke')
     def test_get_package(self):
