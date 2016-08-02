@@ -134,8 +134,8 @@ class MuranoPackage(murano_package.MuranoPackage):
                                 "ignored") %
                             dict(class_name=class_name,
                             name=getattr(clazz, "_murano_class_name")))
-            LOG.debug("Registering '%s' from '%s' in class loader"
-                      % (class_name, package_definition.name))
+            LOG.debug("Registering '%s' from '%s' in class loader",
+                      class_name, package_definition.name)
             self.register_class(clazz, class_name)
 
     def get_resource(self, name):
