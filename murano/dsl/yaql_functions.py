@@ -90,8 +90,7 @@ def new_from_model(context, model, owner=None):
 def super_(context, object_, func=None):
     cast_type = helpers.get_type(context)
     if func is None:
-        return [object_.cast(type) for type in cast_type.parents(
-            object_.real_this.type)]
+        return [object_.cast(type) for type in cast_type.parents]
     return six.moves.map(func, super_(context, object_))
 
 
