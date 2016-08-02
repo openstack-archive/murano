@@ -370,9 +370,9 @@ def get_class_factory_definition(cls, murano_class):
         args = tuple(dsl.to_mutable(arg, engine) for arg in args)
         kwargs = dsl.to_mutable(kwargs, engine)
         with helpers.contextual(__context):
-            __context[constants.CTX_NAMES_SCOPE] = \
-                murano_class
-            return helpers.evaluate(cls(*args, **kwargs), __context)
+            __context[constants.CTX_NAMES_SCOPE] = murano_class
+            result = helpers.evaluate(cls(*args, **kwargs), __context)
+            __receiver.object.extension = result
 
     try:
         fd = specs.get_function_definition(
