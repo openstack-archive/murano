@@ -201,7 +201,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             packages = list(self.client.packages.filter(
                 **filter_opts))
             if len(packages) > 1:
-                LOG.debug('Ambiguous package resolution: more then 1 package '
+                LOG.debug('Ambiguous package resolution: more than 1 package '
                           'found for query "{opts}", will resolve based on the'
                           ' ownership'.format(opts=filter_opts))
                 return self._get_best_package_match(packages)
