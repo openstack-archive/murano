@@ -28,27 +28,92 @@ Manual installation
 If you use local murano installation, you can configure and run murano service
 broker in a few simple steps:
 
-#.  Add new entry to the murano configuration file.
+#. Change into the murano directory:
 
-    .. code-block:: ini
+   .. code-block:: console
 
-        [cfapi]
-        tenant = %TENANT_NAME%
-        bind_host = %HOST_IP%
-        bind_port = 8083
-        auth_url = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'
+       cd ~/murano/murano
 
-    .. note::
+#. Generate the murano service broker config file.
+   Murano service broker has a common config file for service broker API services.
+   Using tox, generate a sample configuration file:
 
-        bind_host IP should be in the same network as Cloud Foundry instance
+   .. code-block:: console
+
+       tox -e gencfconfig
+
+#. Copy the configuration file for further modifications:
+
+   .. code-block:: console
+
+       cd ~/murano/murano/etc/murano
+       ln -s murano-cfapi.conf.sample murano-cfapi.conf
+
+#. Edit ``murano-cfapi.conf``. Below is an example of the basic
+   settings you may need to configure.
+
+   .. note::
+
+       The example below uses the SQLite database. Edit the **[database]**
+       section to use another database.
+
+   .. code-block:: ini
+
+       [DEFAULT]
+       debug = true
+       verbose = true
+
+       ...
+
+       [database]
+       backend = sqlalchemy
+       connection = sqlite:///murano_cfapi.sqlite
+
+       ...
+
+       [keystone_authtoken]
+       auth_uri = 'http://%OPENSTACK_HOST_IP%:5000/v3'
+       auth_host = '%OPENSTACK_HOST_IP%'
+       auth_port = 5000
+       auth_protocol = http
+       admin_tenant_name = %OPENSTACK_ADMIN_TENANT%
+       admin_user = %OPENSTACK_ADMIN_USER%
+       admin_password = %OPENSTACK_ADMIN_PASSWORD%
+
+       ...
+
+       [cfapi]
+       tenant = %TENANT_NAME%
+       bind_host = %HOST_IP%
+       bind_port = 8083
+       auth_url = 'http://%OPENSTACK_HOST_IP%:5000/v3'
 
 
-#.  Open a new console and launch service broker.
+   .. note::
 
-    .. code-block:: console
+       The ``bind_host`` IP should be in the same network as the
+       Cloud Foundry instance.
 
-        cd ~/murano/murano
-        tox -e venv -- murano-cfapi --config-file ./etc/murano/murano.conf
+#. Create database tables for murano service broker:
+
+   .. code-block:: console
+
+       cd ~/murano/murano
+       tox -e venv -- murano-cfapi-db-manage \
+         --config-file ./etc/murano/murano-cfapi.conf upgrade
+
+#. Launch the murano service broker API in a separate terminal:
+
+   .. code-block:: console
+
+       cd ~/murano/murano
+       tox -e venv -- murano-cfapi --config-file ./etc/murano/murano-cfapi.conf
+
+   .. note::
+
+       Run the command in a new terminal as the process will be running in
+       the terminal until you terminate it, therefore, blocking the current
+       terminal.
 
 Devstack installation
 ~~~~~~~~~~~~~~~~~~~~~
