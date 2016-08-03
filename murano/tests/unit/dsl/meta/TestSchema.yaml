@@ -42,6 +42,9 @@ Properties:
   classProperty:
     Contract: $.class(SampleClass1)
 
+  templateProperty:
+    Contract: $.template(SampleClass1, excludeProperties => [stringProperty])
+
   defaultProperty:
     Contract: $.int()
     Default: 999

@@ -71,6 +71,13 @@ class MethodArgumentUsages(object):
     All = {Standard, VarArgs, KwArgs}
 
 
+class DumpTypes(object):
+    Serializable = 'Serializable'
+    Inline = 'Inline'
+    Mixed = 'Mixed'
+    All = {Serializable, Inline, Mixed}
+
+
 class MuranoType(object):
     pass
 

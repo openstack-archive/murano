@@ -128,10 +128,11 @@ def prepare_context(exc, cls):
     context.register_function(bool_)
     context.register_function(not_null)
     context.register_function(check)
-    context.register_function(class_factory(context))
     context.register_function(owned)
     context.register_function(not_owned)
     context.register_function(finalize)
+    for fn in class_factory(context):
+        context.register_function(fn)
     return context
 
 
@@ -295,7 +296,24 @@ def class_factory(context):
             'muranoType': name.type.name
         })
 
-    return class_
+    @specs.parameter('schema', Schema)
+    @specs.parameter('type_', dsl.MuranoTypeParameter(
+        nullable=False, context=context))
+    @specs.parameter('default_type', dsl.MuranoTypeParameter(
+        nullable=True, context=context))
+    @specs.parameter('version_spec', yaqltypes.String(True))
+    @specs.parameter(
+        'exclude_properties', yaqltypes.Sequence(nullable=True))
+    @specs.method
+    def template(schema, type_, exclude_properties=None,
+                 default_type=None, version_spec=None):
+        result = class_(schema, type_, default_type, version_spec)
+        result.data['owned'] = True
+        if exclude_properties:
+            result.data['excludedProperties'] = exclude_properties
+        return result
+
+    return class_, template
 
 
 @specs.parameter('schema', Schema)

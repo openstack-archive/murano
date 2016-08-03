@@ -245,9 +245,9 @@ def call_func(context, op_dot, base, name, args, kwargs,
 @specs.parameter('obj', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('serialization_type', yaqltypes.String())
 @specs.parameter('ignore_upcasts', bool)
-def dump(obj, serialization_type=serializer.DumpTypes.Serializable,
+def dump(obj, serialization_type=dsl_types.DumpTypes.Serializable,
          ignore_upcasts=True):
-    if serialization_type not in serializer.DumpTypes.All:
+    if serialization_type not in dsl_types.DumpTypes.All:
         raise ValueError('Invalid Serialization Type')
     executor = helpers.get_executor()
     if ignore_upcasts:

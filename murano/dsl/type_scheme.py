@@ -17,10 +17,12 @@ from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
 
+from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
+from murano.dsl import serializer
 
 
 class TypeScheme(object):
@@ -187,8 +189,68 @@ class TypeScheme(object):
                     version_spec or helpers.get_type(root_context)):
                 raise exceptions.ContractViolationException(
                     'Object of type {0} is not compatible with '
-                    'requested type {1}'.format(obj.type.name, name))
+                    'requested type {1}'.format(obj.type.name, murano_class))
             return obj
+
+        @specs.parameter('type_', dsl.MuranoTypeParameter(
+            nullable=False, context=root_context))
+        @specs.parameter('default_type', dsl.MuranoTypeParameter(
+            nullable=True, context=root_context))
+        @specs.parameter('value', nullable=True)
+        @specs.parameter('version_spec', yaqltypes.String(True))
+        @specs.parameter(
+            'exclude_properties', yaqltypes.Sequence(nullable=True))
+        @specs.method
+        def template(engine, value, type_, exclude_properties=None,
+                     default_type=None, version_spec=None):
+            object_store = helpers.get_object_store()
+            passkey = None
+            if not default_type:
+                default_type = type_
+            murano_class = type_.type
+            if value is None:
+                return None
+            if isinstance(value, dsl_types.MuranoObject):
+                obj = value
+            elif isinstance(value, dsl_types.MuranoObjectInterface):
+                obj = value.object
+            elif isinstance(value, utils.MappingType):
+                passkey = utils.create_marker('<Contract Passkey>')
+                if exclude_properties:
+                    parsed = helpers.parse_object_definition(
+                        value, calling_type, context)
+                    props = dsl.to_mutable(parsed['properties'], engine)
+                    for p in exclude_properties:
+                        helpers.patch_dict(props, p, passkey)
+                    parsed['properties'] = props
+                    value = helpers.assemble_object_definition(parsed)
+                with helpers.thread_local_attribute(
+                        constants.TL_CONTRACT_PASSKEY, passkey):
+                    with helpers.thread_local_attribute(
+                            constants.TL_OBJECTS_DRY_RUN, True):
+                        obj = object_store.load(
+                            value, owner, context=context,
+                            default_type=default_type, scope_type=calling_type)
+            else:
+                raise exceptions.ContractViolationException(
+                    'Value {0} cannot be represented as class {1}'.format(
+                        format_scalar(value), type_))
+            if not helpers.is_instance_of(
+                    obj, murano_class.name,
+                    version_spec or helpers.get_type(root_context)):
+                raise exceptions.ContractViolationException(
+                    'Object of type {0} is not compatible with '
+                    'requested type {1}'.format(obj.type.name, type_))
+
+            with helpers.thread_local_attribute(
+                    constants.TL_CONTRACT_PASSKEY, passkey):
+                result = serializer.serialize(
+                    obj.real_this, object_store.executor,
+                    dsl_types.DumpTypes.Mixed)
+                if exclude_properties:
+                    for p in exclude_properties:
+                        helpers.patch_dict(result, p, utils.NO_VALUE)
+                return result
 
         context = root_context.create_child_context()
         context.register_function(int_)
@@ -198,6 +260,7 @@ class TypeScheme(object):
         context.register_function(not_null)
         context.register_function(error)
         context.register_function(class_)
+        context.register_function(template)
         context.register_function(owned_ref)
         context.register_function(owned)
         context.register_function(not_owned_ref)
@@ -249,8 +312,29 @@ class TypeScheme(object):
         @specs.parameter('version_spec', yaqltypes.String(True))
         @specs.method
         def class_(value, type, version_spec=None):
-            if helpers.is_instance_of(
+            if value is None or helpers.is_instance_of(
                     value, type.type.name,
+                    version_spec or helpers.get_names_scope(root_context)):
+                return value
+            raise exceptions.ContractViolationException()
+
+        @specs.parameter('type_', dsl.MuranoTypeParameter(
+            nullable=False, context=root_context))
+        @specs.parameter('default_type', dsl.MuranoTypeParameter(
+            nullable=True, context=root_context))
+        @specs.parameter('value', nullable=True)
+        @specs.parameter('version_spec', yaqltypes.String(True))
+        @specs.parameter(
+            'exclude_properties', yaqltypes.Sequence(nullable=True))
+        @specs.method
+        def template(value, type_, exclude_properties=None,
+                     default_type=None, version_spec=None):
+
+            if value is None or isinstance(value, utils.MappingType):
+                return value
+
+            if helpers.is_instance_of(
+                    value, type_.type.name,
                     version_spec or helpers.get_names_scope(root_context)):
                 return value
             raise exceptions.ContractViolationException()
@@ -262,6 +346,7 @@ class TypeScheme(object):
         context.register_function(check)
         context.register_function(not_null)
         context.register_function(class_)
+        context.register_function(template)
         return context
 
     def _map_dict(self, data, spec, context, path):
@@ -351,6 +436,8 @@ class TypeScheme(object):
             return data
 
     def _map(self, data, spec, context, path):
+        if is_passkey(data):
+            return data
         child_context = context.create_child_context()
         if isinstance(spec, dsl_types.YaqlExpression):
             child_context[''] = data
@@ -375,6 +462,9 @@ class TypeScheme(object):
         if data is dsl.NO_VALUE:
             data = helpers.evaluate(default, context)
 
+        if is_passkey(data):
+            return data
+
         context = self.prepare_transform_context(
             context, this, owner, default, calling_type)
         return self._map(data, self._spec, context, '')
@@ -382,6 +472,9 @@ class TypeScheme(object):
     def validate(self, data, context, default):
         if data is dsl.NO_VALUE:
             data = helpers.evaluate(default, context)
+
+        if is_passkey(data):
+            return True
 
         context = self.prepare_validate_context(context)
         try:
@@ -395,3 +488,8 @@ def format_scalar(value):
     if isinstance(value, six.string_types):
         return "'{0}'".format(value)
     return six.text_type(value)
+
+
+def is_passkey(value):
+    passkey = helpers.get_contract_passkey()
+    return passkey is not None and value is passkey
