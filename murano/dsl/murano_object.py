@@ -129,23 +129,23 @@ class MuranoObject(dsl_types.MuranoObject):
                 raise exceptions.CircularExpressionDependenciesError()
             last_errors = errors
 
-        if ((object_store is None or not object_store.initializing) and
-                self.__extension is None):
+        if not object_store.initializing and self.__extension is None:
             method = self.type.methods.get('__init__')
             if method:
                 filtered_params = yaql_integration.filter_parameters(
                     method.body, **params)
-
-                self.__extension = method.invoke(
-                    self, filtered_params[0], filtered_params[1], context)
+                with helpers.with_object_store(object_store.parent_store):
+                    self.__extension = method.invoke(
+                        self, filtered_params[0], filtered_params[1], context)
 
         for parent in self.__parents.values():
             parent.initialize(context, params, used_names)
 
         if not object_store.initializing and init:
             context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            init.invoke(self.real_this, (), init_args,
-                        context.create_child_context())
+            with helpers.with_object_store(object_store.parent_store):
+                init.invoke(self.real_this, (), init_args,
+                            context.create_child_context())
             self.__initialized = True
 
     @property

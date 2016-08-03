@@ -70,6 +70,10 @@ Methods:
           :ConstructionSample:
       - new(:ConstructionChild, prop => $model)
 
+  testNestedNewLoadsInSeparateStore:
+    Body:
+      Return: new(:ConstructionFromInit).out.nodes[1]
+
 ---
 
 Name: Node
@@ -102,3 +106,27 @@ Extends: ConstructionParent
 Properties:
   prop:
     Contract: $.class(ConstructionSample)
+
+---
+
+Name: ConstructionFromInit
+Properties:
+  out:
+    Contract: $.class(Node)
+    Usage: Out
+Methods:
+  .init:
+    Body:
+      - $model:
+          :Node:
+            value: rootNode
+            nodes:
+              - :Node:
+                  value: childNode1
+                  nodes: [childNode2]
+                id: childNode1
+              - :Node:
+                  value: childNode2
+                  nodes: [childNode1]
+                id: childNode2
+      - $.out: new($model, $this)
