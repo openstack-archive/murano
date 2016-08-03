@@ -252,14 +252,14 @@ This section describes how to install and run the murano dashboard.
     the ``muranodashboard`` plug-in file to
     the ``openstack_dashboard/local/enabled/`` directory:
 
-    * For the OpenStack installations prior to the Newton release, run::
+    * For the OpenStack installations prior to the Newton release, run:
 
       .. code-block:: console
 
          cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
          openstack_dashboard/local/enabled/
 
-    * For the Newton (and later) OpenStack installations, run::
+    * For the Newton (and later) OpenStack installations, run:
 
       .. code-block:: console
 
