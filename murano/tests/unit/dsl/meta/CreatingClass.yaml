@@ -64,7 +64,11 @@ Methods:
         - $obj.nodes[0].nodes[1].value
         - $obj.nodes[1].nodes[0].value
 
-
+  testSingleContractInstantiation:
+    Body:
+      - $model:
+          :ConstructionSample:
+      - new(:ConstructionChild, prop => $model)
 
 ---
 
@@ -76,3 +80,25 @@ Properties:
       - $.class(Node)
   value:
     Contract: $.string()
+
+---
+
+Name: ConstructionSample
+Methods:
+  .init:
+    Body: trace('ConstructionSample::init')
+
+---
+
+Name: ConstructionParent
+Properties:
+  prop:
+    Contract: $.class(ConstructionSample)
+
+---
+
+Name: ConstructionChild
+Extends: ConstructionParent
+Properties:
+  prop:
+    Contract: $.class(ConstructionSample)

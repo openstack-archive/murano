@@ -66,7 +66,7 @@ class MuranoObject(dsl_types.MuranoObject):
     def extension(self, value):
         self.__extension = value
 
-    def initialize(self, context, params):
+    def initialize(self, context, params, used_names=None):
         if self.__initialized:
             return
         context = context.create_child_context()
@@ -82,7 +82,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 self.set_property(property_name, property_value)
 
         init = self.type.methods.get('.init')
-        used_names = set()
+        used_names = used_names or set()
         names = set(self.__type.properties)
         if init:
             names.update(six.iterkeys(init.arguments_scheme))
@@ -140,7 +140,7 @@ class MuranoObject(dsl_types.MuranoObject):
                     self, filtered_params[0], filtered_params[1], context)
 
         for parent in self.__parents.values():
-            parent.initialize(context, params)
+            parent.initialize(context, params, used_names)
 
         if not object_store.initializing and init:
             context[constants.CTX_ARGUMENT_OWNER] = self.real_this
@@ -205,11 +205,10 @@ class MuranoObject(dsl_types.MuranoObject):
         if context is None:
             context = helpers.get_executor().create_object_context(self)
         if len(declared_properties) > 0:
-            declared_properties = self.type.find_properties(
-                lambda p: p.name == name)
             values_to_assign = []
             classes_for_static_properties = []
-            for spec in declared_properties:
+            first = True
+            for spec in self._list_properties(name):
                 if (caller_class is not None and not
                         helpers.are_property_modifications_allowed(context) and
                         (spec.usage not in dsl_types.PropertyUsages.Writable or
@@ -222,9 +221,13 @@ class MuranoObject(dsl_types.MuranoObject):
                     default = self.__config.get(name, spec.default)
 
                     obj = self.cast(spec.declaring_type)
-                    values_to_assign.append((obj, spec.transform(
+                    res = spec.transform(
                         value, self.real_this,
-                        self.real_this, context, default=default)))
+                        self.real_this, context, default=default)
+                    if first:
+                        value = res
+                        first = False
+                    values_to_assign.append((obj, res))
             for obj, value in values_to_assign:
                 obj.__properties[name] = value
             for cls in classes_for_static_properties:
@@ -240,6 +243,11 @@ class MuranoObject(dsl_types.MuranoObject):
             if p.type is cls:
                 return p
         raise TypeError('Cannot cast {0} to {1}'.format(self.type, cls))
+
+    def _list_properties(self, name):
+        for p in helpers.traverse(self, lambda t: t.__parents.values()):
+            if name in p.type.properties:
+                yield p.type.properties[name]
 
     def __repr__(self):
         return '<{0}/{1} {2} ({3})>'.format(

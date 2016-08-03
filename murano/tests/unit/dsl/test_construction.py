@@ -58,3 +58,7 @@ class TestConstruction(test_case.DslTestCase):
                 True, True, True, True, True,
                 'rootNode', 'childNode2', 'childNode1'
             ], res[4:])
+
+    def test_single_contract_instantiation(self):
+        self._runner.testSingleContractInstantiation()
+        self.assertEqual(1, self.traces.count('ConstructionSample::init'))
