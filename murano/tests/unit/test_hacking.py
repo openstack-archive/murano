@@ -74,6 +74,19 @@ class HackingTestCase(base.MuranoTestCase):
     def _assert_has_no_errors(self, code, checker, filename=None):
         self._assert_has_errors(code, checker, filename=filename)
 
+    def test_assert_equal_none(self):
+        errors = [(1, 0, "M318")]
+        check = checks.assert_equal_none
+
+        code = "self.assertEqual(A, None)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertEqual(None, A)"
+        self._assert_has_errors(code, check, errors)
+
+        code = "self.assertIsNone()"
+        self._assert_has_no_errors(code, check)
+
     def test_no_mutable_default_args(self):
         self.assertEqual(1, len(list(checks.no_mutable_default_args(
             "def get_info_from_bdm(virt_type, bdm, mapping=[])"))))

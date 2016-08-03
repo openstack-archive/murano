@@ -29,6 +29,23 @@ Guidelines for writing new hacking checks
 """
 
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
+assert_equal_end_with_none_re = re.compile(
+    r"(.)*assertEqual\((\w|\.|\'|\"|\[|\])+, None\)")
+assert_equal_start_with_none_re = re.compile(
+    r"(.)*assertEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
+
+
+def assert_equal_none(logical_line):
+    """Check for assertEqual(A, None) or assertEqual(None, A) sentences
+
+    M318
+    """
+    msg = ("M318: assertEqual(A, None) or assertEqual(None, A) "
+           "sentences not allowed")
+    res = (assert_equal_start_with_none_re.match(logical_line) or
+           assert_equal_end_with_none_re.match(logical_line))
+    if res:
+        yield (0, msg)
 
 
 def no_mutable_default_args(logical_line):
@@ -63,6 +80,7 @@ def check_no_basestring(logical_line):
 
 
 def factory(register):
+    register(assert_equal_none)
     register(no_mutable_default_args)
     register(check_python3_no_iteritems)
     register(check_python3_no_iterkeys)
