@@ -45,7 +45,7 @@ Telnet Example
         Body:
           # Determine the environment to which the application belongs.
           # This message will be stored in deployment logs and available in UI
-          - $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet instace.')
+          - $this.find(std:Environment).reporter.report($this, 'Creating VM for Telnet Instance.')
           # Deploy VM
           - $.instance.deploy()
           - $this.find(std:Environment).reporter.report($this, 'Instance is created. Setup Telnet service.')
