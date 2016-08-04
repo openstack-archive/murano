@@ -198,7 +198,7 @@ def get_current_method(context=None):
 
 def get_yaql_engine(context=None):
     context = context or get_context()
-    return context[constants.CTX_YAQL_ENGINE]
+    return None if context is None else context[constants.CTX_YAQL_ENGINE]
 
 
 def get_current_exception(context=None):

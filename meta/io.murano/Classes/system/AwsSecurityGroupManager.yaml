@@ -19,6 +19,11 @@ Name: AwsSecurityGroupManager
 Extends: SecurityGroupManager
 
 Methods:
+  .init:
+    Body:
+      - $._environment: $.find(std:Environment)
+      - $._region: $.find(std:CloudRegion).require()
+
   addGroupIngress:
     Arguments:
       - rules:
@@ -82,19 +87,19 @@ Methods:
             Message: $msg
       - $groupDirection: dict(egress => SecurityGroupEgress).get($direction, SecurityGroupIngress)
 
-      - $stack: $.environment.stack
+      - $stack: $._region.stack
       - $template:
           resources:
             $groupName:
               type: 'AWS::EC2::SecurityGroup'
               properties:
-                GroupDescription: format('Composite security group of Murano environment {0}', $.environment.name)
+                GroupDescription: format('Composite security group of Murano environment {0}', $._environment.name)
                 $groupDirection:
                   - FromPort: '-1'
                     ToPort: '-1'
                     IpProtocol: icmp
                     CidrIp: '0.0.0.0/0'
-      - $.environment.stack.updateTemplate($template)
+      - $._region.stack.updateTemplate($template)
 
       - $rulesList: $rules.select(dict(
             FromPort => str($.FromPort),
@@ -109,4 +114,4 @@ Methods:
               type: 'AWS::EC2::SecurityGroup'
               properties:
                 $groupDirection: $rulesList
-      - $.environment.stack.updateTemplate($template)
+      - $._region.stack.updateTemplate($template)

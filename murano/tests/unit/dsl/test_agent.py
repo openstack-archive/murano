@@ -60,36 +60,20 @@ class TestAgentListener(test_case.DslTestCase):
 
 
 class TestAgent(test_case.DslTestCase):
-    def setUp(self):
-        super(TestAgent, self).setUp()
-
-        # Register Agent class
-        self.package_loader.load_package('io.murano', None).register_class(
-            agent.Agent)
-        model = om.Object(
-            'AgentTests')
-        self.runner = self.new_runner(model)
-
     def test_agent_enabled(self):
         self.override_config('disable_murano_agent', False, 'engine')
-        m = mock.MagicMock()
-        # Necessary because otherwise there'll be an Environment lookup
         agent_cls = 'murano.engine.system.agent.Agent'
-        obj_if_cls = 'murano.dsl.dsl.MuranoObjectInterface'
-        with mock.patch(obj_if_cls + '.find_owner') as f:
-            f.return_value = m
-            a = self.runner.testAgent().extension
-            self.assertTrue(a.enabled)
-            self.assertEqual(m, a._environment)
+        a = agent.Agent(mock.MagicMock())
+        self.assertTrue(a.enabled)
 
-            with mock.patch(agent_cls + '._send') as s:
-                s.return_value = mock.MagicMock()
-                a.send_raw({})
-                s.assert_called_with({}, False, 0)
+        with mock.patch(agent_cls + '._send') as s:
+            s.return_value = mock.MagicMock()
+            a.send_raw({})
+            s.assert_called_with({}, False, 0)
 
     def test_agent_disabled(self):
         self.override_config('disable_murano_agent', True, 'engine')
-        a = self.runner.testAgent().extension
+        a = agent.Agent(mock.MagicMock())
         self.assertFalse(a.enabled)
         self.assertRaises(exc.PolicyViolationException, a.call, {}, None)
         self.assertRaises(exc.PolicyViolationException, a.send, {}, None)

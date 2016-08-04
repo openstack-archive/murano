@@ -29,8 +29,9 @@ Properties:
 Methods:
   initialize:
     Body:
-      - $.environment: $.find(Environment).require()
-      - $.network: $.environment.defaultNetworks.environment
+      - $._environment: $.find(Environment).require()
+      - $._region: $.getRegion()
+      - $.network: $._environment.defaultNetworks.environment
       - $.instances: []
 
 
@@ -38,10 +39,10 @@ Methods:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
-          - $reporter: $.environment.reporter
+          - $reporter: $._environment.reporter
           - $.network.deploy()
           - $networkData: $.network.describe()
-          - $aapPortName: format('AllowedAddressPairsPort-{0}', $.id())
+          - $aapPortName: format('AllowedAddressPairsPort-{0}', id($))
           - $template:
               resources:
                 $aapPortName:
@@ -55,12 +56,12 @@ Methods:
                 $aapPortName+'-virtualIp':
                   value:
                     get_attr: [$aapPortName, fixed_ips, 0, ip_address]
-                  description: format('SharedIP Address of SharedIp group {0}', $.id())
-          - $.environment.stack.updateTemplate($template)
+                  description: format('SharedIP Address of SharedIp group {0}', id($))
+          - $._region.stack.updateTemplate($template)
           - If: $.assignFloatingIp
             Then:
               - $extNetId: $networkData.floatingIpNetId
-              - $fipName: format('Shared-Floating-ip-{0}', $.id())
+              - $fipName: format('Shared-Floating-ip-{0}', id($))
 
               - $template:
                   resources:
@@ -75,13 +76,13 @@ Methods:
                       value:
                         get_attr: [$fipName, floating_ip_address]
                       description: Shared Floating IP assigned
-              - $.environment.stack.updateTemplate($template)
+              - $._region.stack.updateTemplate($template)
 
           - $reporter.report($this, 'Allocating shared ip address')
-          - $.environment.stack.push()
-          - $outputs: $.environment.stack.output()
-          - $.virtualIp: $outputs.get(format('AllowedAddressPairsPort-{0}-virtualIp', $.id()))
-          - $.floatingIpAddress: $outputs.get(format('Shared-Floating-ip-{0}-val', $.id()))
+          - $._region.stack.push()
+          - $outputs: $._region.stack.output()
+          - $.virtualIp: $outputs.get(format('AllowedAddressPairsPort-{0}-virtualIp', id($)))
+          - $.floatingIpAddress: $outputs.get(format('Shared-Floating-ip-{0}-val', id($)))
           - $reporter.report($this, format('Shared IP allocated at {0}', $.virtualIp))
           - If: $.assignFloatingIp
             Then:
@@ -91,21 +92,21 @@ Methods:
 
   getSharedIpRef:
     Body:
-      - $aapPortName: format('AllowedAddressPairsPort-{0}', $.id())
+      - $aapPortName: format('AllowedAddressPairsPort-{0}', id($))
       - Return:
           get_attr: [$aapPortName, fixed_ips, 0, ip_address]
 
 
   releaseResources:
     Body:
-      - $template: $.environment.stack.current()
+      - $template: $._region.stack.current()
       - $template.resources: $template.resources.delete(format('AllowedAddressPairsPort-{0}', id($)))
       - $template.outputs: $template.outputs.delete(format('AllowedAddressPairsPort-{0}-virtualIp', id($)))
       - If: $.assignFloatingIp
         Then:
           - $template.resources: $template.resources.delete(format('Shared-Floating-ip-{0}', id($)))
           - $template.outputs: $template.outputs.delete(format('Shared-Floating-ip-{0}-val', id($)))
-      - $._environment.stack.setTemplate($template)
-      - $._environment.stack.push()
+      - $._region.stack.setTemplate($template)
+      - $._region.stack.push()
       - $.floatingIpAddress: null
       - $.virtualIp: null

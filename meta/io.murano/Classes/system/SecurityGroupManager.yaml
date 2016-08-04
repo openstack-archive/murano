@@ -17,12 +17,9 @@ Namespaces:
 Name: SecurityGroupManager
 
 Properties:
-  environment:
-    Contract: $.class(std:Environment).notNull()
-
   defaultGroupName:
     Contract: $.string()
-    Default: format('MuranoSecurityGroup-{0}', $.environment.id())
+    Default: id($.find(std:CloudRegion))
 
 Methods:
   addGroupIngress:

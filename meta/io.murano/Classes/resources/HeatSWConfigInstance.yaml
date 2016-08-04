@@ -124,7 +124,6 @@ Methods:
       instanceTemplate:
         Contract: {}
     Body:
-      - $environment: $.find(std:Environment)
       - For: fragment
         In: $.softwareConfigs
         Do:
@@ -139,13 +138,13 @@ Methods:
 
   releaseResources:
     Body:
-      - $environment: $.find(std:Environment)
-      - $template: $environment.stack.current()
-      - If: bool($template.resources) and bool($template.outputs)
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
+      - If: $template.get(resources) and $template.get(outputs)
         Then:
           - $template.resources: $template.resources.deleteAll($.getAttr(scResources, []))
           - $template.outputs: $template.outputs.deleteAll($.getAttr(scOutputs, []))
-          - $environment.stack.setTemplate($template)
-      - $.super($.releaseResources())
+          - $region.stack.setTemplate($template)
+      - super($, $.releaseResources())
       - $.setAttr(scResources, [])
       - $.setAttr(scOutputs, [])

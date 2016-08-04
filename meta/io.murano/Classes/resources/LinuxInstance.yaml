@@ -24,11 +24,11 @@ Methods:
       - groupName:
           Contract: $.string().notNull()
     Body:
-      - $environment: $.find(std:Environment).require()
+      - $region: $.getRegion()
       - $rules:
         - ToPort: 22
           IpProtocol: tcp
           FromPort: 22
           External: true
-      - $environment.securityGroupManager.addGroupIngress(
+      - $region.securityGroupManager.addGroupIngress(
           rules => $rules, groupName => $groupName)

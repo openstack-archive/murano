@@ -19,6 +19,11 @@ Name: NeutronSecurityGroupManager
 Extends: SecurityGroupManager
 
 Methods:
+  .init:
+    Body:
+      - $._environment: $.find(std:Environment)
+      - $._region: $.find(std:CloudRegion).require()
+
   addGroupIngress:
     Arguments:
       - rules:
@@ -71,17 +76,18 @@ Methods:
             ext_key: remote_mode
             ext_val: remote_group_id
 
-      - $stack: $.environment.stack
       - $template:
           resources:
             $groupName:
               type: 'OS::Neutron::SecurityGroup'
               properties:
-                description: format('Composite security group of Murano environment {0}', $.environment.name)
+                description: format(
+                  'Composite security group of Murano environment {0}',
+                  $._environment.name)
                 rules:
                   - protocol: icmp
                     remote_ip_prefix: '0.0.0.0/0'
-      - $.environment.stack.updateTemplate($template)
+      - $._region.stack.updateTemplate($template)
 
       - $rulesList: $rules.select(dict(
             port_range_min => $.FromPort,
@@ -98,4 +104,4 @@ Methods:
               type: 'OS::Neutron::SecurityGroup'
               properties:
                 rules: $rulesList
-      - $.environment.stack.updateTemplate($template)
+      - $._region.stack.updateTemplate($template)

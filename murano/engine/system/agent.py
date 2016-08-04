@@ -47,10 +47,10 @@ class Agent(object):
                       'by the server configuration')
             return
 
-        self._environment = host.find_owner('io.murano.Environment')
+        self._host = host
         self._enabled = True
-        self._queue = str('e%s-h%s' % (
-            self._environment.id, host.id)).lower()
+        env = host.find_owner('io.murano.Environment')
+        self._queue = str('e%s-h%s' % (env.id, host.id)).lower()
 
     @property
     def enabled(self):
@@ -63,7 +63,8 @@ class Agent(object):
                       'by the server configuration')
             return
 
-        with common.create_rmq_client(self._environment) as client:
+        region = dsl.MuranoObjectInterface.create(self._host().getRegion())
+        with common.create_rmq_client(region) as client:
             client.declare(self._queue, enable_ha=True, ttl=86400000)
 
     def queue_name(self):
@@ -83,14 +84,15 @@ class Agent(object):
 
     def _send(self, template, wait_results, timeout):
         """Send a message over the MQ interface."""
+        region = self._host().getRegion()
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
             event = eventlet.event.Event()
-            listener = self._environment['agentListener']
+            listener = region['agentListener']
             listener().subscribe(msg_id, event)
 
         msg = self._prepare_message(template, msg_id)
-        with common.create_rmq_client(self._environment) as client:
+        with common.create_rmq_client(region) as client:
             client.send(message=msg, key=self._queue)
 
         if wait_results:
