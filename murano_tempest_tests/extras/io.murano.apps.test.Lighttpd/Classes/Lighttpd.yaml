@@ -1,0 +1,55 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  =: io.murano.apps.test
+  std: io.murano
+  sys: io.murano.system
+
+Name: Lighttpd
+
+Extends: std:Application
+
+Properties:
+  updater:
+    Contract: $.class(UpdateExecutor).notNull()
+
+Methods:
+  initialize:
+    Body:
+      - $._environment: $.find(std:Environment).require()
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+          - $securityGroupIngress:
+            - ToPort: 80
+              FromPort: 80
+              IpProtocol: tcp
+              External: true
+            - ToPort: 443
+              FromPort: 443
+              IpProtocol: tcp
+              External: true
+          - $._environment.securityGroupManager.addGroupIngress($securityGroupIngress)
+          - $._environment.reporter.report($this, 'Ensuring Updater is deployed.')
+          - $.updater.deploy()
+          - $resources: new(sys:Resources)
+          - $template: $resources.yaml('DeployLighttpd.template')
+          - $.updater.instance.agent.call($template, $resources)
+
+          - If: $.updater.instance.assignFloatingIp
+            Then:
+              - $address: $.updater.instance.floatingIpAddress
+              - $._environment.reporter.report($this, format('Running at http://{0}', $address))
+          - $.setAttr(deployed, true)

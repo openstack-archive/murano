@@ -49,6 +49,10 @@ ApplicationCatalogGroup = [
                     "If no such region is found in the service catalog, "
                     "the first found one is used."),
 
+    cfg.StrOpt("linux_image",
+               default="debian-8-m-agent.qcow2",
+               help="Image for linux services"),
+
     cfg.StrOpt("catalog_type",
                default="application-catalog",
                help="Catalog type of Application Catalog."),
@@ -70,7 +74,14 @@ ApplicationCatalogGroup = [
     cfg.BoolOpt("glare_backend",
                 default=False,
                 help="Tells tempest about murano glare backend "
-                     "configuration.")
+                     "configuration."),
+    cfg.BoolOpt("cinder_volume_tests",
+                default=False,
+                help="Whether or not cinder volumes attachment tests "
+                     "are expected to run"),
+    cfg.BoolOpt("deployment_tests",
+                default=False,
+                help="Whether or not deployment tests are expected to run")
 ]
 
 ServiceBrokerGroup = [

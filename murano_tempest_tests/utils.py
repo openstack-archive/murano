@@ -34,7 +34,8 @@ MANIFEST = {'Format': 'MuranoPL/1.0',
 
 
 def compose_package(app_name, manifest, package_dir,
-                    require=None, archive_dir=None, add_class_name=False):
+                    require=None, archive_dir=None, add_class_name=False,
+                    manifest_required=True):
     """Composes a murano package
 
     Composes package `app_name` with `manifest` file as a template for the
@@ -43,15 +44,16 @@ def compose_package(app_name, manifest, package_dir,
     Puts the resulting .zip file into `acrhive_dir` if present or in the
     `package_dir`.
     """
-    with open(manifest, 'w') as f:
-        fqn = 'io.murano.apps.' + app_name
-        mfest_copy = MANIFEST.copy()
-        mfest_copy['FullName'] = fqn
-        mfest_copy['Name'] = app_name
-        mfest_copy['Classes'] = {fqn: 'mock_muranopl.yaml'}
-        if require:
-            mfest_copy['Require'] = require
-        f.write(yaml.dump(mfest_copy, default_flow_style=False))
+    if manifest_required:
+        with open(manifest, 'w') as f:
+            fqn = 'io.murano.apps.' + app_name
+            mfest_copy = MANIFEST.copy()
+            mfest_copy['FullName'] = fqn
+            mfest_copy['Name'] = app_name
+            mfest_copy['Classes'] = {fqn: 'mock_muranopl.yaml'}
+            if require:
+                mfest_copy['Require'] = require
+            f.write(yaml.dump(mfest_copy, default_flow_style=False))
 
     if add_class_name:
         class_file = os.path.join(package_dir, 'Classes', 'mock_muranopl.yaml')
@@ -82,7 +84,8 @@ def compose_package(app_name, manifest, package_dir,
     return archive_path, name
 
 
-def prepare_package(name, require=None, add_class_name=False):
+def prepare_package(name, require=None, add_class_name=False,
+                    app='MockApp', manifest_required=True):
     """Prepare package.
 
     :param name: Package name to compose
@@ -90,13 +93,13 @@ def prepare_package(name, require=None, add_class_name=False):
     :param add_class_name: Option to write class name to class file
     :return: Path to archive, directory with archive, filename of archive
     """
-    app_dir = acquire_package_directory()
-    target_arc_path = app_dir.rsplit('MockApp', 1)[0]
+    app_dir = acquire_package_directory(app=app)
+    target_arc_path = app_dir.rsplit(app, 1)[0]
 
     arc_path, filename = compose_package(
         name, os.path.join(app_dir, 'manifest.yaml'),
         app_dir, require=require, archive_dir=target_arc_path,
-        add_class_name=add_class_name)
+        add_class_name=add_class_name, manifest_required=manifest_required)
     return arc_path, target_arc_path, filename
 
 
@@ -111,7 +114,7 @@ def generate_name(prefix):
     return '{0}_{1}'.format(prefix, suffix)
 
 
-def acquire_package_directory():
+def acquire_package_directory(app='MockApp'):
     """Obtain absolutely directory with package files.
 
     Should be called inside tests dir.
@@ -119,7 +122,7 @@ def acquire_package_directory():
     """
     top_plugin_dir = os.path.realpath(os.path.join(os.getcwd(),
                                                    os.path.dirname(__file__)))
-    expected_package_dir = '/extras/MockApp'
+    expected_package_dir = '/extras/' + app
     app_dir = top_plugin_dir + expected_package_dir
     return app_dir
 

@@ -1,0 +1,81 @@
+#  Licensed under the Apache License, Version 2.0 (the "License"); you may
+#  not use this file except in compliance with the License. You may obtain
+#  a copy of the License at
+#
+#       http://www.apache.org/licenses/LICENSE-2.0
+#
+#  Unless required by applicable law or agreed to in writing, software
+#  distributed under the License is distributed on an "AS IS" BASIS, WITHOUT
+#  WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
+#  License for the specific language governing permissions and limitations
+#  under the License.
+
+Namespaces:
+  =: io.murano.apps.test
+  std: io.murano
+  res: io.murano.resources
+  sys: io.murano.system
+  conf: io.murano.configuration
+
+
+Name: ApacheHttpServerCustom
+
+Extends: std:Application
+
+Properties:
+  name:
+    Contract: $.string().notNull()
+
+  instance:
+    Contract: $.class(res:Instance).notNull()
+
+  userName:
+    Contract: $.string()
+
+Methods:
+  initialize:
+    Body:
+      - $._environment: $.find(std:Environment).require()
+
+  deploy:
+    Body:
+      - If: not $.getAttr(deployed, false)
+        Then:
+          - $._environment.reporter.report($this, 'Creating VM for Apache Server.')
+          - $securityGroupIngress:
+            - ToPort: 80
+              FromPort: 80
+              IpProtocol: tcp
+              External: true
+            - ToPort: 443
+              FromPort: 443
+              IpProtocol: tcp
+              External: true
+          - $._environment.securityGroupManager.addGroupIngress($securityGroupIngress)
+          - $.instance.deploy()
+          - $._environment.reporter.report($this, 'Instance is created. Deploying Apache')
+
+          - $resources: new(sys:Resources)
+          - $linux: new(conf:Linux)
+
+          - $linux.runCommand($.instance.agent, 'apt-get -y install apache2')
+          - $linux.runCommand($.instance.agent, 'iptables -I INPUT 1 -p tcp --dport 443 -j ACCEPT')
+          - $linux.runCommand($.instance.agent, 'iptables -I INPUT 1 -p tcp --dport 80 -j ACCEPT')
+          - $._environment.reporter.report($this, 'Apache is installed.')
+
+          - If: $.userName != ''
+            Then:
+              - $linux.runCommand($.instance.agent, 'service apache2 stop')
+              - $fileReplacements:
+                  "%USER_NAME%": $.userName
+              - $fileContent: $resources.string('index.html').replace($fileReplacements)
+              - $linux.putFile($.instance.agent, $fileContent, '/var/www/html/index.html')
+              - $linux.runCommand($.instance.agent, 'service apache2 start')
+
+          - If: $.instance.assignFloatingIp
+            Then:
+              - $host: $.instance.floatingIpAddress
+            Else:
+              - $host: $.instance.ipAddresses[0]
+          - $._environment.reporter.report($this, format('Apache is available at http://{0}', $host))
+          - $.setAttr(deployed, true)
