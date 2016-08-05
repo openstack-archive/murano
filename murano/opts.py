@@ -55,6 +55,7 @@ _opt_lists = [
 
 _cfapi_opt_lists = [
     ('cfapi', murano.common.cf_config.cfapi_opts),
+    ('glare', murano.common.config.glare_opts),
 ]
 
 _opt_lists.extend(oslo_service.sslutils.list_opts())

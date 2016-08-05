@@ -78,6 +78,9 @@ function configure_murano_rpc_backend() {
 function configure_murano_glare_backend() {
     # Configure Murano to use GlARe application storage backend
     iniset $MURANO_CONF_FILE engine packages_service 'glare'
+    if is_service_enabled murano-cfapi; then
+        iniset $MURANO_CFAPI_CONF_FILE cfapi packages_service 'glare'
+    fi
     iniset $MURANO_CONF_FILE glare url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT
     iniset $MURANO_CONF_FILE glare endpoint_type $GLARE_ENDPOINT_TYPE
     echo -e $"\nexport MURANO_PACKAGES_SERVICE='glare'" | sudo tee -a $TOP_DIR/openrc

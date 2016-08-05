@@ -299,7 +299,7 @@ class Controller(object):
 def _get_muranoclient(token_id, req):
 
     artifacts_client = None
-    if CONF.engine.packages_service in ['glance', 'glare']:
+    if CONF.cfapi.packages_service in ['glance', 'glare']:
         artifacts_client = _get_glareclient(token_id, req)
 
     murano_url = CONF.murano.url or req.endpoints.get('murano')
