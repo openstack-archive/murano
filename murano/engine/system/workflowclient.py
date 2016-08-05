@@ -18,16 +18,19 @@ import json
 
 import eventlet
 try:
-    import mistralclient.api.client as mistralclient
+    from mistralclient.api import client as mistralcli
 except ImportError as mistral_import_error:
-    mistralclient = None
+    mistralcli = None
 from oslo_config import cfg
+from oslo_log import log as logging
 
 from murano.common import auth_utils
+from murano.common.i18n import _LW
 from murano.dsl import dsl
 from murano.dsl import session_local_storage
 
 CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 class MistralError(Exception):
@@ -47,7 +50,8 @@ class MistralClient(object):
     @staticmethod
     @session_local_storage.execution_session_memoize
     def _create_client(region):
-        if not mistralclient:
+        if not mistralcli:
+            LOG.warning(_LW("Mistral client is not available"))
             raise mistral_import_error
 
         mistral_settings = CONF.mistral
@@ -62,7 +66,7 @@ class MistralClient(object):
             region_name=region)
         auth_ref = session.auth.get_access(session)
 
-        return mistralclient.client(
+        return mistralcli.client(
             mistral_url=mistral_url,
             project_id=auth_ref.project_id,
             endpoint_type=endpoint_type,
@@ -78,7 +82,7 @@ class MistralClient(object):
 
     def run(self, name, timeout=600, inputs=None, params=None):
         execution = self._client.executions.create(
-            workflow_name=name, workflow_input=inputs, params=params)
+            workflow_identifier=name, workflow_input=inputs, params=params)
         # For the fire and forget functionality - when we do not want to wait
         # for the result of the run.
         if timeout == 0:

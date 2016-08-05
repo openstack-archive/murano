@@ -30,7 +30,7 @@ class TempestDeployTestMixin(common_utils.DeployTestMixin):
     def keystone_client():
         return ksclient.Client(username=CONF.auth.admin_username,
                                password=CONF.auth.admin_password,
-                               tenant_name=CONF.auth.admin_tenant_name,
+                               tenant_name=CONF.auth.admin_project_name,
                                auth_url=CONF.identity.uri)
 
     @staticmethod
@@ -40,7 +40,7 @@ class TempestDeployTestMixin(common_utils.DeployTestMixin):
             auth_url=CONF.identity.uri,
             username=CONF.auth.admin_username,
             password=CONF.auth.admin_password,
-            tenant_name=CONF.auth.admin_tenant_name)
+            tenant_name=CONF.auth.admin_project_name)
         session = keystoneclient.session.Session(auth=auth)
         return cclient.Client(session=session,
                               service_type='policy')
