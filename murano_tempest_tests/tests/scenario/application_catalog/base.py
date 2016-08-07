@@ -94,6 +94,7 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
             cls.os = clients.Manager(credentials=creds)
             cls.services_manager = services_manager(creds)
+
         cls.linux_image = CONF.application_catalog.linux_image
         cls.application_catalog_client = cls.os.application_catalog_client
         cls.artifacts_client = cls.os.artifacts_client
@@ -102,6 +103,13 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         cls.snapshots_client = cls.services_manager.snapshots_client
         cls.volumes_client = cls.services_manager.volumes_client
         cls.backups_client = cls.services_manager.backups_client
+        cls.images_client = cls.services_manager.image_client_v2
+        cls.cirros_image = cls.get_required_image_name()
+
+    @classmethod
+    def get_required_image_name(cls):
+        image = cls.images_client.show_image(CONF.compute.image_ref)
+        return image['name']
 
     @classmethod
     def resource_cleanup(cls):
@@ -152,8 +160,8 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
             if name in instance['name']:
                 return instance['id']
 
-    def apache_cinder(
-            self, attributes=None, userName=None, flavor='m1.medium'):
+    def apache(
+            self, attributes=None, userName=None, flavor='m1.small'):
         post_body = {
             "instance": {
                 "flavor": flavor,
@@ -179,7 +187,34 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         }
         return post_body
 
-    def update_executor(self, flavor='m1.medium'):
+    def vm_cinder(
+            self, attributes=None, userName=None, flavor='m1.small'):
+        post_body = {
+            "instance": {
+                "flavor": flavor,
+                "image": self.cirros_image,
+                "assignFloatingIp": True,
+                "availabilityZone": "nova",
+                "volumes": attributes,
+                "?": {
+                    "type": "io.murano.resources.LinuxMuranoInstance",
+                    "id": utils.generate_uuid()
+                },
+                "name": utils.generate_name("testMurano")
+            },
+            "name": utils.generate_name("VM"),
+            "userName": userName,
+            "?": {
+                "_{id}".format(id=utils.generate_uuid()): {
+                    "name": "VM"
+                },
+                "type": "io.murano.apps.test.VM",
+                "id": utils.generate_uuid()
+            }
+        }
+        return post_body
+
+    def update_executor(self, flavor='m1.small'):
         post_body = {
             "instance": {
                 "flavor": flavor,
@@ -203,8 +238,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         self.application_catalog_client.deploy_session(environment['id'],
                                                        session['id'])
         timeout = 1800
-        deployed_env = utils.wait_for_environment_deploy(environment,
-                                                         timeout=timeout)
+        deployed_env = utils.wait_for_environment_deploy(
+            self.application_catalog_client, environment['id'],
+            timeout=timeout)
         if deployed_env['status'] == 'ready':
             return deployed_env
         elif deployed_env['status'] == 'deploying':
@@ -257,8 +293,8 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         self.assertEqual(0, result, '%s port is closed on instance' % port)
 
     @classmethod
-    def create_volume(cls):
-        volume = cls.volumes_client.create_volume()['volume']
+    def create_volume(cls, **kwargs):
+        volume = cls.volumes_client.create_volume(**kwargs)['volume']
         waiters.wait_for_volume_status(cls.volumes_client,
                                        volume['id'], 'available')
         return volume['id']
@@ -291,12 +327,13 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         backup = self.backups_client.create_backup(
             volume_id=volume_id,
             force=True)['backup']
-        self.backups_client.wait_for_backup_status(backup['id'], 'available')
+        waiters.wait_for_backup_status(self.backups_client,
+                                       backup['id'], 'available')
         return backup['id']
 
     def delete_backup(self, backup_id):
         self.backups_client.delete_backup(backup_id)
-        return self.backups_client.wait_for_backup_deletion(backup_id)
+        return self.backups_client.wait_for_resource_deletion(backup_id)
 
     def get_volume(self, environment_id):
         stack = self.get_stack_id(environment_id)
