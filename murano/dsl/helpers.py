@@ -38,6 +38,8 @@ from murano.dsl import dsl_types
 from murano.dsl import exceptions
 
 _threads_sequencer = 0
+# type string: ns.something.MyApp[/1.2.3-alpha][@my.package.fqn]
+TYPE_RE = re.compile(r'([a-zA-Z0-9_.]+)(?:/([^@]+))?(?:@([a-zA-Z0-9_.]+))?$')
 
 
 def evaluate(value, context, freeze=True):
@@ -531,16 +533,20 @@ def parse_object_definition(spec, scope_type, context):
             elif isinstance(obj_type, dsl_types.MuranoType):
                 type_obj = obj_type
             elif obj_type:
-                version_spec = parse_version_spec(
-                    system_data.get('classVersion'))
+                type_str, version_str, package_str = parse_type_string(
+                    obj_type,
+                    system_data.get('classVersion'),
+                    system_data.get('package')
+                )
+                version_spec = parse_version_spec(version_str)
                 package_loader = get_package_loader()
-                if 'package' in system_data:
+                if package_str:
                     package = package_loader.load_package(
-                        system_data['package'], version_spec)
+                        package_str, version_spec)
                 else:
                     package = package_loader.load_class_package(
-                        obj_type, version_spec)
-                type_obj = package.find_class(obj_type, False)
+                        type_str, version_spec)
+                type_obj = package.find_class(type_str, False)
         else:
             system_data = {}
 
@@ -576,3 +582,27 @@ def weak_proxy(obj):
     if isinstance(obj, weakref.ReferenceType):
         obj = obj()
     return weakref.proxy(obj)
+
+
+def parse_type_string(type_str, default_version, default_package):
+    res = TYPE_RE.match(type_str)
+    if res is None:
+        return None
+    parsed_type = res.group(1)
+    parsed_version = res.group(2)
+    parsed_package = res.group(3)
+    return (
+        parsed_type,
+        default_version if parsed_version is None else parsed_version,
+        default_package if parsed_package is None else parsed_package
+    )
+
+
+def format_type_string(type_obj):
+    if isinstance(type_obj, dsl_types.MuranoTypeReference):
+        type_obj = type_obj.type
+    if isinstance(type_obj, dsl_types.MuranoType):
+        return '{0}/{1}@{2}'.format(
+            type_obj.name, type_obj.version, type_obj.package.name)
+    else:
+        raise ValueError('Invalid argument')

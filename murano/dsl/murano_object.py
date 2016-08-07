@@ -291,10 +291,8 @@ class MuranoObject(dsl_types.MuranoObject):
             }})
         else:
             result.update({'?': {
-                'type': self.type.name,
+                'type': helpers.format_type_string(self.type),
                 'id': self.object_id,
-                'name': self.name,
-                'classVersion': str(self.type.version),
-                'package': self.type.package.name
+                'name': self.name
             }})
         return result

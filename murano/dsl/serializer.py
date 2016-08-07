@@ -135,8 +135,10 @@ def _pass12_serialize(value, parent, serialized_objects,
             value = value.ref_obj
         else:
             return value, False
+    if isinstance(value, (dsl_types.MuranoType,
+                          dsl_types.MuranoTypeReference)):
+        return helpers.format_type_string(value), False
     if isinstance(value, dsl_types.MuranoObject):
-
         result = value.to_dictionary(
             serialization_type=serialization_type, allow_refs=allow_refs)
         if designer_attributes_getter is not None:

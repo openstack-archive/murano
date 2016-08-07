@@ -39,9 +39,8 @@ class TestDump(test_case.DslTestCase):
                            foo='FOO', bar=[40, 41, 42], baz={'BAZ': 99})
         result = self._runner.testDump(source, 'Serializable')
         self.assertIn('?', result)
-        self.assertIn('classVersion', result['?'])
-        self.assertIn('package', result['?'])
-        self.assertEqual('dumptests.DumpTarget1', result['?']['type'])
+        self.assertEqual('dumptests.DumpTarget1/0.0.0@tests',
+                         result['?']['type'])
 
     def test_dump_simple_full_mixed(self):
         source = om.Object('dumptests.DumpTarget1',

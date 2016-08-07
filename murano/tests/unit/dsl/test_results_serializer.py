@@ -51,18 +51,15 @@ class TestResultsSerializer(test_case.DslTestCase):
 
         self.assertEqual('abc',
                          serialized[name]['?']['id'])
-        self.assertEqual('ContractExamples',
+        self.assertEqual('ContractExamples/0.0.0@tests',
                          serialized['Objects']['?']['type'])
         self.assertIsInstance(serialized[name]['sampleClass'], dict)
         self.assertEqual('def',
-                         serialized[name][
-                             'sampleClass']['?']['id'])
-        self.assertEqual('SampleClass1',
-                         serialized[name][
-                             'sampleClass']['?']['type'])
+                         serialized[name]['sampleClass']['?']['id'])
+        self.assertEqual('SampleClass1/0.0.0@tests',
+                         serialized[name]['sampleClass']['?']['type'])
         self.assertEqual('string1',
-                         serialized[name][
-                             'sampleClass']['stringProperty'])
+                         serialized[name]['sampleClass']['stringProperty'])
 
     def test_results_serialize(self):
         """Test that serialized contains same values and headers
