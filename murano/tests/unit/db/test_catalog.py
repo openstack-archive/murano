@@ -380,7 +380,7 @@ class CatalogDBTestCase(base.MuranoWithDBTestCase):
         self.assertEqual(2, len(res))
 
         for cat in res:
-            self.assertTrue(cat.id is not None)
+            self.assertIsNotNone(cat.id)
             self.assertTrue(cat.name.startswith('cat'))
 
     def test_package_upload(self):
