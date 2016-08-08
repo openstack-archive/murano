@@ -99,6 +99,7 @@ class InitializationObjectStore(ObjectStore):
         self._initializing = False
         self._root_owner = root_owner
         self._keep_ids = keep_ids
+        self._initializers = []
 
     @property
     def initializing(self):
@@ -136,11 +137,19 @@ class InitializationObjectStore(ObjectStore):
 
             if context is None:
                 context = self.executor.create_object_context(obj)
-            obj.initialize(context, parsed['properties'])
+
+            def run_initialize():
+                self._initializers.extend(
+                    obj.initialize(context, parsed['properties']))
+
+            run_initialize()
             if owner is self._root_owner:
                 self._initializing = False
-                obj.initialize(context, parsed['properties'])
+                run_initialize()
         finally:
             if owner is self._root_owner:
-                self._initializing = False
+                with helpers.with_object_store(self.parent_store):
+                    for fn in self._initializers:
+                        fn()
+
         return obj

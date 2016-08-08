@@ -74,6 +74,19 @@ Methods:
     Body:
       Return: new(:ConstructionFromInit).out.nodes[1]
 
+  testReferenceAccessFromInit:
+    Body:
+      - $model:
+          :Node:
+            value: rootNode
+            nodes:
+              - childNode
+              - :NodeWithReferenceAccess:
+                  value: childNode
+                id: childNode
+      - $.out: new($model, $this)
+
+
 ---
 
 Name: Node
@@ -130,3 +143,12 @@ Methods:
                   nodes: [childNode1]
                 id: childNode2
       - $.out: new($model, $this)
+
+---
+
+Name: NodeWithReferenceAccess
+Extends: Node
+
+Methods:
+  .init:
+    Body: $.find(Node).nodes.select(trace($.value))

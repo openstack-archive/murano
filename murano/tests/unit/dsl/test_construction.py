@@ -67,3 +67,7 @@ class TestConstruction(test_case.DslTestCase):
     def test_nested_new_loads_in_separate_store(self):
         res = self._runner.testNestedNewLoadsInSeparateStore()
         self.assertIsInstance(res, dsl.MuranoObjectInterface)
+
+    def test_reference_access_from_init(self):
+        self._runner.testReferenceAccessFromInit()
+        self.assertEqual(2, self.traces.count('childNode'))

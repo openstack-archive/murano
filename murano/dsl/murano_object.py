@@ -52,7 +52,6 @@ class MuranoObject(dsl_types.MuranoObject):
                 self.__parents[name] = known_classes[name] = obj
             else:
                 self.__parents[name] = known_classes[name]
-        self.__initialized = False
 
     @property
     def extension(self):
@@ -67,8 +66,6 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__extension = value
 
     def initialize(self, context, params, used_names=None):
-        if self.__initialized:
-            return
         context = context.create_child_context()
         context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
         object_store = helpers.get_object_store()
@@ -134,19 +131,20 @@ class MuranoObject(dsl_types.MuranoObject):
             if method:
                 filtered_params = yaql_integration.filter_parameters(
                     method.body, **params)
-                with helpers.with_object_store(object_store.parent_store):
-                    self.__extension = method.invoke(
-                        self, filtered_params[0], filtered_params[1], context)
+                yield lambda: method.invoke(
+                    self, filtered_params[0], filtered_params[1], context)
 
         for parent in self.__parents.values():
-            parent.initialize(context, params, used_names)
+            for t in parent.initialize(context, params, used_names):
+                yield t
+
+        def run_init():
+            context[constants.CTX_ARGUMENT_OWNER] = self.real_this
+            init.invoke(self.real_this, (), init_args,
+                        context.create_child_context())
 
         if not object_store.initializing and init:
-            context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            with helpers.with_object_store(object_store.parent_store):
-                init.invoke(self.real_this, (), init_args,
-                            context.create_child_context())
-            self.__initialized = True
+            yield run_init
 
     @property
     def object_id(self):
