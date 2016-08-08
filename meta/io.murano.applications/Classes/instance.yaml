@@ -36,12 +36,7 @@ Properties:
 Methods:
   .init:
     Body:
-      - $env: $.find(std:Environment)
-      - If: $env
-        Then:
-          - $this._reporter: $env.reporter
-        Else:
-          - $this._reporter: null
+      - $this._env: $.find(std:Environment)
 
   deploy:
     Body:
@@ -54,9 +49,9 @@ Methods:
       - instance:
           Contract: $.class(res:Instance)
     Body:
-      - If: $this._reporter and name($instance) and not $instance.openstackId
+      - If: $this._env and name($instance) and not $instance.openstackId
         Then:
-          - $this._reporter.report($this, 'Provisioning VM for ' + name($instance))
+          - $this._env.reporter.report($this, 'Provisioning VM for ' + $instance.name)
       - $instance.beginDeploy()
 
   .destroy:

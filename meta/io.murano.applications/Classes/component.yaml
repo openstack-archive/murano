@@ -17,6 +17,10 @@ Properties:
     Contract: $.string()
     Usage: Runtime
 
+  _env:
+    Contract: $.class(std:Environment)
+    Usage: Runtime
+
 Methods:
   .init:
     Body:
