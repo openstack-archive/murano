@@ -43,6 +43,13 @@ Classes:
   io.murano.applications.OpenstackSecurityConfigurable: component.yaml
   io.murano.applications.SoftwareComponent: component.yaml
 
+  io.murano.applications.SingleServerApplication: baseapps.yaml
+  io.murano.applications.MultiServerApplication: baseapps.yaml
+  io.murano.applications.MultiServerApplicationWithScaling: baseapps.yaml
+  io.murano.applications.MasterSlaveApplication: baseapps.yaml
+  io.murano.applications.MasterSlaveApplicationWithMasterScaling: baseapps.yaml
+  io.murano.applications.MasterSlaveApplicationWithSlaveScaling: baseapps.yaml
+
 
   # Tests
   io.murano.applications.tests.TestReplication: tests/TestReplication.yaml

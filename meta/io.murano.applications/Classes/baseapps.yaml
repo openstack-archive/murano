@@ -1,0 +1,189 @@
+Namespaces:
+  =: io.murano.applications
+  res: io.murano.resources
+  std: io.murano
+
+--- # ------------------------------------------------------------------ # ---
+# A base class for applications running a single software component on a single
+# server only
+
+Name: SingleServerApplication
+Extends:
+  - std:Application
+  - SoftwareComponent
+
+Properties:
+  server:
+    Contract: $.class(res:Instance).notNull()
+
+  # this is "private output" property. It is not part of the class interface
+  # and should not be used from outside or by inheritors. It may be removed in
+  # future in favor of attributes
+  _serverGroup:
+    Usage: Out
+    Contract: $.class(SingleServerGroup)
+
+Methods:
+  .init:
+    Body:
+      - If: not $this._serverGroup
+        Then:
+          - $this._serverGroup: new(SingleServerGroup, $this, server => $this.server)
+        Else:
+          - If: $this.server != $this._serverGroup.server
+            Then:
+              - $this._serverGroup.setServer($this.server)
+  deploy:
+    Body:
+      - $this.deployAt($this._serverGroup)
+
+--- # ------------------------------------------------------------------ # ---
+# A base class for applications running a single software component on multiple
+# servers
+
+Name: MultiServerApplication
+Extends:
+  - std:Application
+  - SoftwareComponent
+
+Properties:
+  servers:
+    Contract: $.class(ServerGroup).notNull()
+
+Methods:
+  deploy:
+    Body:
+      - $this.deployAt($this.servers)
+
+--- # ------------------------------------------------------------------ # ---
+# A base class for applications running a single software component on multiple
+# servers which should support scale-out and scale-in scenarios
+
+Name: MultiServerApplicationWithScaling
+Extends: MultiServerApplication
+
+Properties:
+  servers:
+    Contract: $.class(ServerReplicationGroup).notNull()
+
+  scaleFactor:
+    Contract: $.int().check($ > 0)
+    Default: 1
+
+
+Methods:
+  scaleOut:
+    Scope: Public
+    Body:
+      - $this.servers.scale($this.scaleFactor)
+      - $this.deploy()
+
+  scaleIn:
+    Scope: Public
+    Body:
+      - $this.servers.scale(-1 * $this.scaleFactor)
+      - $this.deploy()
+
+--- # ------------------------------------------------------------------ # ---
+# A base class for applications which consist of two software components, each
+# of them installed and configured on its own group of servers. The first
+# component serves as "master", the second as "slave"
+# If the ServerGroup for slave is not specified, slave components are installed
+# on the same nodes with master
+
+
+Name: MasterSlaveApplication
+Extends: std:Application
+
+Properties:
+  master:
+    Contract: $.class(SoftwareComponent).notNull()
+
+  slave:
+    Contract: $.class(SoftwareComponent).notNull()
+
+  masterServers:
+    Contract: $.class(ServerGroup).notNull()
+
+  slaveServers:
+    Contract: $.class(ServerGroup)
+
+  masterReadyEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: masterReady
+
+  slaveReadyEvent:
+    Contract: $.class(Event).notNull()
+    Usage: Runtime
+    Default:
+      name: slaveReady
+
+Methods:
+  deploy:
+    Body:
+      - $this.master.deployAt($this.masterServers)
+      - $this.masterReadyEvent.notify($this)
+      - $this.onMasterReady()
+      - $slaveServers: $this.slaveServers or $this.masterServers
+      - $this.slave.deployAt($slaveServers)
+      - $this.slaveReadyEvent.notify($this)
+      - $this.onSlaveReady($this.slave, $slaveServers)
+
+  onMasterReady:
+
+  onSlaveReady:
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: MasterSlaveApplicationWithMasterScaling
+Extends: MasterSlaveApplication
+
+Properties:
+  masterServers:
+    Contract: $.class(ServerReplicationGroup).notNull()
+
+  masterScaleFactor:
+    Contract: $.int().check($>0)
+    Default: 1
+
+Methods:
+  scaleOutMaster:
+    Scope: Public
+    Body:
+      - $this.masterServers.scale($this.masterScaleFactor)
+      - $this.deploy()
+
+  scaleInMaster:
+    Scope: Public
+    Body:
+      - $this.masterServers.scale(-1 * $this.masterScaleFactor)
+      - $this.deploy()
+
+--- # ------------------------------------------------------------------ # ---
+
+
+Name: MasterSlaveApplicationWithSlaveScaling
+Extends: MasterSlaveApplication
+
+Properties:
+  slaveServers:
+    Contract: $.class(ServerReplicationGroup).notNull()
+
+  slaveScaleFactor:
+    Contract: $.int().check($ > 0)
+    Default: 1
+
+Methods:
+  scaleOutSlave:
+    Scope: Public
+    Body:
+      - $this.slaveServers.scale($this.slaveScaleFactor)
+      - $this.deploy()
+
+  scaleInMaster:
+    Scope: Public
+    Body:
+      - $this.slaveServers.scale(-1 * $this.slaveScaleFactor)
+      - $this.deploy()
