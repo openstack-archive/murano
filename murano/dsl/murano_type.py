@@ -14,6 +14,7 @@
 
 import abc
 import collections
+import copy
 import weakref
 
 import semantic_version
@@ -83,20 +84,57 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                 raise exceptions.InvalidInheritanceError(
                     u'Type {0} cannot have parent with Usage {1}'.format(
                         self.name, p.usage))
+        remappings = self._build_parent_remappings()
+        self._parents = self._adjusted_parents(remappings)
         self._context = None
         self._exported_context = None
-        self._parent_mappings = self._build_parent_remappings()
         self._property_values = {}
         self._meta = dslmeta.MetaData(meta, dsl_types.MetaTargets.Type, self)
         self._meta_values = None
         self._imports = list(self._resolve_imports(imports))
+
+    def _adjusted_parents(self, remappings):
+        seen = {}
+
+        def altered_clone(class_):
+            seen_class = seen.get(class_)
+            if seen_class is not None:
+                return seen_class
+
+            cls_remapping = remappings.get(class_)
+
+            if cls_remapping is not None:
+                return altered_clone(cls_remapping)
+
+            new_parents = [altered_clone(p) for p in class_._parents]
+            if all(a is b for a, b in zip(class_._parents, new_parents)):
+                return class_
+            res = copy.copy(class_)
+            res._parents = new_parents
+            res._meta_values = None
+            res._context = None
+            res._exported_context = None
+            seen[class_] = res
+            return res
+        return [altered_clone(p) for p in self._parents]
+
+    def __eq__(self, other):
+        if not isinstance(other, MuranoType):
+            return False
+        return self.name == other.name and self.version == other.version
+
+    def __ne__(self, other):
+        return not self == other
+
+    def __hash__(self):
+        return hash((self.name, self.version))
 
     @property
     def usage(self):
         return dsl_types.ClassUsages.Class
 
     @property
-    def declared_parents(self):
+    def parents(self):
         return self._parents
 
     @property
@@ -109,10 +147,6 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         for c in self.ancestors():
             names.update(c.methods.keys())
         return tuple(names)
-
-    @property
-    def parent_mappings(self):
-        return self._parent_mappings
 
     @property
     def extension_class(self):
@@ -147,14 +181,14 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             raise TypeError('property_typespec')
         self._properties[property_typespec.name] = property_typespec
 
-    def _find_symbol_chains(self, func, origin):
+    def _find_symbol_chains(self, func):
         queue = collections.deque([(self, ())])
         while queue:
             cls, path = queue.popleft()
             symbol = func(cls)
             segment = (symbol,) if symbol is not None else ()
             leaf = True
-            for p in cls.parents(origin):
+            for p in cls.parents:
                 leaf = False
                 queue.append((p, path + segment))
             if leaf:
@@ -176,7 +210,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
 
     def _choose_symbol(self, func):
         chains = sorted(
-            self._find_symbol_chains(func, self),
+            self._find_symbol_chains(func),
             key=lambda t: len(t))
         result = []
         for i in range(len(chains)):
@@ -270,9 +304,9 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                             dsl.MuranoObjectInterface,
                             dsl_types.MuranoTypeReference)):
             obj = obj.type
-        if obj is self:
+        if obj == self:
             return True
-        return any(cls is self for cls in obj.ancestors())
+        return any(cls == self for cls in obj.ancestors())
 
     def __repr__(self):
         return 'MuranoClass({0}/{1})'.format(self.name, self.version)
@@ -305,7 +339,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         }
         for cls, parent in helpers.traverse(
                 ((self, parent) for parent in self._parents),
-                lambda cp: ((cp[1], anc) for anc in cp[1].declared_parents)):
+                lambda cp: ((cp[1], anc) for anc in cp[1].parents)):
             if cls.package != parent.package:
                 requirement = cls.package.requirements[parent.package.name]
                 aggregation.setdefault(parent.package.name, set()).add(
@@ -316,8 +350,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
             mappings = self._remap_package(versions)
             package_bindings.update(mappings)
 
-        for cls in helpers.traverse(
-                self.declared_parents, lambda c: c.declared_parents):
+        for cls in helpers.traverse(self.parents, lambda c: c.parents):
             if cls.package in package_bindings:
                 package2 = package_bindings[cls.package]
                 cls2 = package2.classes[cls.name]
@@ -350,17 +383,8 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                 i += 1
         return result
 
-    def parents(self, origin):
-        mappings = origin.parent_mappings
-        yielded = set()
-        for p in self._parents:
-            parent = mappings.get(p, p)
-            if parent not in yielded:
-                yielded.add(parent)
-                yield parent
-
     def ancestors(self):
-        for c in helpers.traverse(self, lambda t: t.parents(self)):
+        for c in helpers.traverse(self, lambda t: t.parents):
             if c is not self:
                 yield c
 
@@ -553,6 +577,6 @@ def weigh_type_hierarchy(cls):
     result = {}
     for c, w in helpers.traverse(
             [(cls, 0)], lambda t: six.moves.map(
-                lambda p: (p, t[1] + 1), t[0].parents(cls))):
+                lambda p: (p, t[1] + 1), t[0].parents)):
         result.setdefault(c.name, w)
     return result

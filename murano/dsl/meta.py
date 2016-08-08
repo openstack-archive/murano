@@ -87,18 +87,18 @@ def merge_providers(initial_class, producer, context):
             for item in meta:
                 cardinality = item.type.cardinality
                 inherited = item.type.inherited
-                if cls is not initial_class and (
+                if cls != initial_class and (
                         not inherited or item.type in skip_list):
                     continue
                 if cardinality == dsl_types.MetaCardinality.One:
                     cls_skip_list.add(item.type)
                 all_meta.append((cls, item))
-            all_meta.extend(merger(cls.parents(initial_class), cls_skip_list))
+            all_meta.extend(merger(cls.parents, cls_skip_list))
         meta_types = {}
         for cls, item in all_meta:
             entry = meta_types.get(item.type)
             if entry is not None:
-                if entry is not cls:
+                if entry != cls:
                     raise ValueError(
                         u'Found more than one instance of Meta {} '
                         u'with Cardinality One'.format(item.type.name))

@@ -41,7 +41,7 @@ class MuranoObject(dsl_types.MuranoObject):
         if not isinstance(self.__config, dict):
             self.__config = {}
         known_classes[murano_class.name] = self
-        for parent_class in murano_class.parents(self.real_this.type):
+        for parent_class in murano_class.parents:
             name = parent_class.name
             if name not in known_classes:
                 obj = MuranoObject(
@@ -196,6 +196,8 @@ class MuranoObject(dsl_types.MuranoObject):
                 name, self.__type)
 
     def set_property(self, name, value, context=None):
+        if self is not self.real_this:
+            return self.real_this.set_property(name, value, context)
         start_type, derived = self.__type, False
         caller_class = None if not context else helpers.get_type(context)
         if caller_class is not None and caller_class.is_compatible(self):
@@ -240,7 +242,7 @@ class MuranoObject(dsl_types.MuranoObject):
 
     def cast(self, cls):
         for p in helpers.traverse(self, lambda t: t.__parents.values()):
-            if p.type is cls:
+            if p.type == cls:
                 return p
         raise TypeError('Cannot cast {0} to {1}'.format(self.type, cls))
 
