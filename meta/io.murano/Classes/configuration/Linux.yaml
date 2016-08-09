@@ -14,11 +14,15 @@ Namespaces:
   =: io.murano.configuration
   std: io.murano
   sys: io.murano.system
+  m: io.murano.metadata.engine
 
 Name: Linux
 
 Methods:
   runCommand:
+    Meta:
+      - m:Synchronize:
+          onArgs: agent
     Usage: Static
     Arguments:
       - agent:
@@ -59,6 +63,9 @@ Methods:
 
   putFile:
     Usage: Static
+    Meta:
+      - m:Synchronize:
+          onArgs: agent
     Arguments:
       - agent:
           Contract: $.class(sys:Agent)
