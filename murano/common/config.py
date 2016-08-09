@@ -166,6 +166,9 @@ murano_opts = [
                     'pagination request',
                deprecated_group='packages_opts'),
 
+    cfg.IntOpt('api_workers',
+               help=_('Number of API workers')),
+
 ]
 
 networking_opts = [
@@ -220,8 +223,10 @@ engine_opts = [
     cfg.IntOpt('agent_timeout', default=3600,
                help=_('Time for waiting for a response from murano agent '
                       'during the deployment')),
-    cfg.IntOpt('workers',
-               help=_('Number of workers')),
+    cfg.IntOpt('engine_workers',
+               deprecated_opts=[cfg.DeprecatedOpt('workers',
+                                                  group='engine')],
+               help=_('Number of engine workers')),
 
     cfg.ListOpt('load_packages_from', default=[],
                 help=_('List of directories to load local packages from. '
