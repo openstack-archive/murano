@@ -1,0 +1,4 @@
+---
+fixes:
+  - Helper methods of Linux class now can be run concurrently if executed for
+    different VM agents.
