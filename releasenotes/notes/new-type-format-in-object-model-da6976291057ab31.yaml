@@ -1,0 +1,7 @@
+---
+critical:
+  - Type representation in object model was changed. Previous format was
+    to have three attributes in "?" section of the object - type, classVersion
+    and package where only the "type" is mandatory. Now they are merged into
+    single attribute "type" that has a format typeName/version@package.
+    Version and package parts are still optional.
