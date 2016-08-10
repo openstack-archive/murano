@@ -58,9 +58,8 @@ def compose_package(app_name, manifest, package_dir,
     if add_class_name:
         class_file = os.path.join(package_dir, 'Classes', 'mock_muranopl.yaml')
         with open(class_file, 'r') as f:
-            contents = f.readlines()
+            contents = f.read()
 
-        contents = ''.join(contents)
         index = contents.index('Extends')
         contents = "{0}Name: {1}\n\n{2}".format(contents[:index], app_name,
                                                 contents[index:])
