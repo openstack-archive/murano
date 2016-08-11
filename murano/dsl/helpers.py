@@ -73,12 +73,7 @@ def evaluate(value, context, freeze=True):
 def merge_lists(list1, list2):
     result = []
     for item in list1 + list2:
-        exists = False
-        for old_item in result:
-            if item == old_item:
-                exists = True
-                break
-        if not exists:
+        if item not in result:
             result.append(item)
     return result
 
