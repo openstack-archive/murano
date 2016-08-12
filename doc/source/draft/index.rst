@@ -37,7 +37,7 @@ Deploying Murano
 
    admin-guide/deploy_murano
    admin-guide/prepare_lab
-   admin-guide/installation
+   admin-guide/configuration
    admin-guide/manage_packages
    admin-guide/manage_images
    admin-guide/manage_categories

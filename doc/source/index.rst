@@ -118,13 +118,6 @@ Developing Applications
 Miscellaneous
 ~~~~~~~~~~~~~
 
-**Installation**
-
-.. toctree::
-   :maxdepth: 1
-
-   install/index
-
 **Background Concepts for Murano**
 
 .. toctree::

@@ -14,7 +14,7 @@
       under the License.
 
 ========================
-Prepare A Lab For Murano
+Prepare a lab for murano
 ========================
 This section provides basic information about lab's system requirements.
 It also contains a description of a test which you may use to check if
@@ -27,7 +27,7 @@ compare the results with baseline data provided.
 System prerequisites
 ~~~~~~~~~~~~~~~~~~~~
 
-Supported Operating Systems
+Supported operating systems
 ---------------------------
 
 * Ubuntu Server 12.04 LTS
@@ -89,7 +89,7 @@ Install all the requirements on CentOS by running::
 
 .. _lab_requirements:
 
-Lab Requirements
+Lab requirements
 ----------------
 
 +------------+--------------------------------+-----------------------+
@@ -119,7 +119,7 @@ All of them were tested and were working well.
 * 1x HDD (15000 rpm) 500+ GB
 
 
-Test Your Lab Host Performance
+Test your lab host performance
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 We have measured time required to boot 1 to 5 instances of Windows
@@ -189,7 +189,7 @@ Steps to reproduce test:
        sudo killall kvm
 
 
-Baseline Data
+Baseline data
 ~~~~~~~~~~~~~
 
 The table below provides baseline data which we've got in our
@@ -207,7 +207,7 @@ environment.
 while ``Max. Time`` refers to minimal hardware configuration.
 
 
-Host Optimizations
+Host optimizations
 ~~~~~~~~~~~~~~~~~~
 
 Default KVM installation could be improved to provide better
