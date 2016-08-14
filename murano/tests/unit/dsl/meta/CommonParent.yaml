@@ -4,6 +4,9 @@ Properties:
   rootProperty:
     Contract: $.string()
 
+  templateProperty:
+    Contract: $.template('io.murano.Object')
+
 Methods:
   testRootMethod:
     Body:
@@ -18,3 +21,11 @@ Methods:
   virtualMethod:
     Body:
       - trace('CommonParent::virtualMethod')
+
+---
+
+Name: TemplateTestParent
+
+Properties:
+  foo:
+    Contract: $.int().notNull()

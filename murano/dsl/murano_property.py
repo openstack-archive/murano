@@ -51,10 +51,6 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
                         sys.exc_info()[2])
 
     @property
-    def declaring_type(self):
-        return self._declaring_type()
-
-    @property
     def name(self):
         return self._property_name
 

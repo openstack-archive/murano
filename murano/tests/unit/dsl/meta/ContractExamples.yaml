@@ -9,6 +9,9 @@ Properties:
   ordinaryProperty:
     Contract: $.string()
 
+  templateProperty:
+    Contract: $.template(TemplateTestChild, excludeProperties => [bar])
+
 Methods:
   testStringContract:
     Arguments:
@@ -262,3 +265,10 @@ Methods:
       - $.target: new(TestedTarget, $this)
       - Return: $.target.dictArgs({'a' => [1, 2, 4].where($)})
 
+---
+
+Name: TemplateTestChild
+
+Properties:
+  bar:
+    Contract: $.int().notNull()

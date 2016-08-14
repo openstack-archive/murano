@@ -1,0 +1,37 @@
+---
+features:
+  - New framework for MuranoPL contracts was written. Now instead of several
+    independent implementations of the same yaql methods (string(), class()
+    etc.) all implementations of the same method are combined into single
+    class so no we have class per contract method. This also simplifies
+    development of new contracts. Each such class can provide methods for
+    data transformation (default contract usqage), validation that is used
+    to decide if the method can be considered an extension method for the
+    value, and json schema generation method that were moved from the schema
+    generator script.
+  - Previously for when the class used to override property from the parent
+    class assigned value were stored separately for both of them transformed
+    by each of the contracts. Thus each class saw the value by its contract.
+    In absolute majority of the cases the observed value was the same. However
+    if the contracts were compatible on the provided value (say int() and
+    string() contracts on the value "123") they were different. This is
+    considered to be a bad pattern.
+    Now the value is stored only once per object and transformed by the
+    contract defined in the actual object type. All base contracts are used
+    to validate the transformed object thus the this pattern will not work
+    anymore.
+  - The value that is stored in the object's properties is obtained by
+    executing special "finalize" contract implementation which usually
+    returns the input value unmodified. Because validation happens on
+    the transformed value before it gets finalized it is possible for
+    transformation to return a value that will pass the validation though
+    the final value won't. This is used to relax the template() contract
+    limitation that prevented child class to exclude additional properties
+    from the template.
+  - string() contracts is no longer converts to string anythin possible but
+    only the scalar values. Previous behavior caused string() property
+    accept lists and convert them to their Python string representation which
+    is clearly not what developers expected.
+  - Due to the refactoring contracts work a little bit faster because there is
+    no more need to generate yaql function definition of each contract method
+    on each call.

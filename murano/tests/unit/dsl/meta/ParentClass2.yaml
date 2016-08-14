@@ -3,11 +3,8 @@ Name: ParentClass2
 Extends: CommonParent
 
 Properties:
-  ambiguousProperty1:
-    Contract: $.int()
-
-  ambiguousProperty2:
-    Contract: $.int()
+  ambiguousProperty:
+    Contract: $.string()
     Usage: InOut
 
 Methods:
@@ -15,9 +12,9 @@ Methods:
     Body:
       - trace('ParentClass2::method2')
 
-  getAmbiguousProperty2:
+  getAmbiguousProperty:
     Body:
-      Return: $.ambiguousProperty2
+      Return: $.ambiguousProperty
 
   virtualMethod:
     Body:

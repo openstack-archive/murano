@@ -91,7 +91,7 @@ class ContractedValue(yaqltypes.GenericType):
                 context)
 
         def checker(value, context, *args, **kwargs):
-            return value_spec.validate(value, context)
+            return value_spec.check_type(value, context)
 
         super(ContractedValue, self).__init__(
             True, checker if with_check else None, converter)

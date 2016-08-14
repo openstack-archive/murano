@@ -132,7 +132,7 @@ def _pass12_serialize(value, parent, serialized_objects,
     if isinstance(value, (dsl_types.MuranoType,
                           dsl_types.MuranoTypeReference)):
         return helpers.format_type_string(value), False
-    if value is helpers.get_contract_passkey():
+    if helpers.is_passkey(value):
         return value, False
     if isinstance(value, dsl_types.MuranoObject):
         result = value.to_dictionary(
