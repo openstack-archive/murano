@@ -21,19 +21,13 @@ from murano.dsl import dsl_types
 from murano.dsl import helpers
 
 
-class DumpTypes(object):
-    Serializable = 'Serializable'
-    Inline = 'Inline'
-    Mixed = 'Mixed'
-    All = {Serializable, Inline, Mixed}
-
-
 class ObjRef(object):
     def __init__(self, obj):
         self.ref_obj = obj
 
 
-def serialize(obj, executor, serialization_type=DumpTypes.Serializable):
+def serialize(obj, executor,
+              serialization_type=dsl_types.DumpTypes.Serializable):
     with helpers.with_object_store(executor.object_store):
         return serialize_model(
             obj, executor, True,
@@ -45,7 +39,7 @@ def serialize(obj, executor, serialization_type=DumpTypes.Serializable):
 
 def _serialize_object(root_object, designer_attributes, allow_refs,
                       executor, serialize_actions=True,
-                      serialization_type=DumpTypes.Serializable):
+                      serialization_type=dsl_types.DumpTypes.Serializable):
     serialized_objects = set()
 
     obj = root_object
@@ -65,7 +59,7 @@ def serialize_model(root_object, executor,
                     make_copy=True,
                     serialize_attributes=True,
                     serialize_actions=True,
-                    serialization_type=DumpTypes.Serializable):
+                    serialization_type=dsl_types.DumpTypes.Serializable):
     designer_attributes = executor.object_store.designer_attributes
 
     if root_object is None:
@@ -138,11 +132,13 @@ def _pass12_serialize(value, parent, serialized_objects,
     if isinstance(value, (dsl_types.MuranoType,
                           dsl_types.MuranoTypeReference)):
         return helpers.format_type_string(value), False
+    if value is helpers.get_contract_passkey():
+        return value, False
     if isinstance(value, dsl_types.MuranoObject):
         result = value.to_dictionary(
             serialization_type=serialization_type, allow_refs=allow_refs)
         if designer_attributes_getter is not None:
-            if serialization_type == DumpTypes.Inline:
+            if serialization_type == dsl_types.DumpTypes.Inline:
                 system_data = result
             else:
                 system_data = result['?']
@@ -161,13 +157,13 @@ def _pass12_serialize(value, parent, serialized_objects,
 
         for d_key, d_value in six.iteritems(value):
             if (isinstance(d_key, dsl_types.MuranoType) and
-                    serialization_type == DumpTypes.Serializable):
+                    serialization_type == dsl_types.DumpTypes.Serializable):
                 result_key = str(d_key)
             else:
                 result_key = d_key
             if (result_key == 'type' and
                     isinstance(d_value, dsl_types.MuranoType) and
-                    serialization_type == DumpTypes.Mixed):
+                    serialization_type == dsl_types.DumpTypes.Mixed):
                 result_value = d_value, False
             else:
                 result_value = _pass12_serialize(

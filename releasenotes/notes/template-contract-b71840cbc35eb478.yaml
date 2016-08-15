@@ -1,0 +1,11 @@
+---
+features:
+  - New contract function ``template`` was introduced. ``template`` works
+    similar to the ``class`` in regards to the data validation but does not
+    instantiate objects. Instead the data is left in the object model
+    in dictionary format so that it could be instantiated later with the new()
+    function. In addition it allows to exclude specified properties from
+    validation and resulting template so that they could be provided later.
+    Objects that are assigned to the property or argument with ``template``
+    contract will be automatically converted to their object model
+    representation.

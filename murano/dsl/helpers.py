@@ -223,6 +223,16 @@ def get_class(name, context=None):
     return murano_type.package.find_class(name)
 
 
+def get_contract_passkey():
+    current_thread = eventlet.greenthread.getcurrent()
+    return getattr(current_thread, constants.TL_CONTRACT_PASSKEY, None)
+
+
+def is_objects_dry_run_mode():
+    current_thread = eventlet.greenthread.getcurrent()
+    return bool(getattr(current_thread, constants.TL_OBJECTS_DRY_RUN, False))
+
+
 def get_current_thread_id():
     global _threads_sequencer
 
@@ -562,6 +572,34 @@ def parse_object_definition(spec, scope_type, context):
     }
 
 
+def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
+    if model_format == dsl_types.DumpTypes.Inline:
+        result = {
+            parsed['type']: parsed['properties'],
+            'id': parsed['id'],
+            'name': parsed['name']
+        }
+        result.update(parsed['extra'])
+        return result
+    result = parsed['properties']
+    header = {
+        'id': parsed['id'],
+        'name': parsed['name']
+    }
+    header.update(parsed['extra'])
+    result['?'] = header
+    if model_format == dsl_types.DumpTypes.Mixed:
+        header['type'] = parsed['type']
+        return result
+    elif model_format == dsl_types.DumpTypes.Serializable:
+        cls = parsed['type']
+        if cls:
+            header['type'] = format_type_string(cls)
+        return result
+    else:
+        raise ValueError('Invalid Serialization Type')
+
+
 def function(c):
     if hasattr(c, 'im_func'):
         return c.im_func
@@ -606,3 +644,17 @@ def format_type_string(type_obj):
             type_obj.name, type_obj.version, type_obj.package.name)
     else:
         raise ValueError('Invalid argument')
+
+
+def patch_dict(dct, path, value):
+    parts = path.split('.')
+    for i in range(len(parts) - 1):
+        if not isinstance(dct, dict):
+            dct = None
+            break
+        dct = dct.get(parts[i])
+    if isinstance(dct, dict):
+        if value is yaqlutils.NO_VALUE:
+            dct.pop(parts[-1])
+        else:
+            dct[parts[-1]] = value

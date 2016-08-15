@@ -58,7 +58,8 @@ class ObjectStore(object):
              scope_type=None, context=None, keep_ids=False):
         # do the object model load in a temporary object store and copy
         # loaded objects here after that
-        model_store = InitializationObjectStore(owner, self, keep_ids)
+        model_store = InitializationObjectStore(
+            owner, self, keep_ids)
         with helpers.with_object_store(model_store):
             result = model_store.load(
                 value, owner, scope_type=scope_type,
@@ -111,45 +112,44 @@ class InitializationObjectStore(ObjectStore):
         if not parsed:
             raise ValueError('Invalid object representation format')
 
-        try:
-            if owner is self._root_owner:
-                self._initializing = True
+        if owner is self._root_owner:
+            self._initializing = True
 
-            class_obj = parsed['type'] or default_type
-            if not class_obj:
-                raise ValueError(
-                    'Invalid object representation: '
-                    'no type information was provided')
-            if isinstance(class_obj, dsl_types.MuranoTypeReference):
-                class_obj = class_obj.type
-            object_id = parsed['id']
-            obj = None if object_id is None else self._store.get(object_id)
-            if not obj:
-                obj = murano_object.MuranoObject(
-                    class_obj, helpers.weak_proxy(owner),
-                    name=parsed['name'],
-                    object_id=object_id if self._keep_ids else None)
-                self.put(obj, object_id or obj.object_id)
+        class_obj = parsed['type'] or default_type
+        if not class_obj:
+            raise ValueError(
+                'Invalid object representation: '
+                'no type information was provided')
+        if isinstance(class_obj, dsl_types.MuranoTypeReference):
+            class_obj = class_obj.type
+        object_id = parsed['id']
+        obj = None if object_id is None else self._store.get(object_id)
+        if not obj:
+            obj = murano_object.MuranoObject(
+                class_obj, helpers.weak_proxy(owner),
+                name=parsed['name'],
+                object_id=object_id if self._keep_ids else None)
+            self.put(obj, object_id or obj.object_id)
 
-                system_value = ObjectStore._get_designer_attributes(
-                    parsed['extra'])
-                self._designer_attributes_store[object_id] = system_value
+            system_value = ObjectStore._get_designer_attributes(
+                parsed['extra'])
+            self._designer_attributes_store[object_id] = system_value
 
-            if context is None:
-                context = self.executor.create_object_context(obj)
+        if context is None:
+            context = self.executor.create_object_context(obj)
 
-            def run_initialize():
-                self._initializers.extend(
-                    obj.initialize(context, parsed['properties']))
+        def run_initialize():
+            self._initializers.extend(
+                obj.initialize(context, parsed['properties']))
 
+        run_initialize()
+        if owner is self._root_owner:
+            self._initializing = False
             run_initialize()
-            if owner is self._root_owner:
-                self._initializing = False
-                run_initialize()
-        finally:
-            if owner is self._root_owner:
-                with helpers.with_object_store(self.parent_store):
-                    for fn in self._initializers:
-                        fn()
+
+        if owner is self._root_owner:
+            with helpers.with_object_store(self.parent_store):
+                for fn in self._initializers:
+                    fn()
 
         return obj

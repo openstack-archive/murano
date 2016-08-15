@@ -19,7 +19,6 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
-from murano.dsl import serializer
 from murano.dsl import yaql_integration
 
 
@@ -143,7 +142,8 @@ class MuranoObject(dsl_types.MuranoObject):
             init.invoke(self.real_this, (), init_args,
                         context.create_child_context())
 
-        if not object_store.initializing and init:
+        if (not object_store.initializing and init
+                and not helpers.is_objects_dry_run_mode()):
             yield run_init
 
     @property
@@ -254,13 +254,13 @@ class MuranoObject(dsl_types.MuranoObject):
             self.type.name, self.type.version, self.object_id, id(self))
 
     def to_dictionary(self, include_hidden=False,
-                      serialization_type=serializer.DumpTypes.Serializable,
+                      serialization_type=dsl_types.DumpTypes.Serializable,
                       allow_refs=False):
         context = helpers.get_context()
         result = {}
         for parent in self.__parents.values():
             result.update(parent.to_dictionary(
-                include_hidden, serializer.DumpTypes.Serializable,
+                include_hidden, dsl_types.DumpTypes.Serializable,
                 allow_refs))
         for property_name in self.type.properties:
             if property_name in self.__properties:
@@ -276,14 +276,14 @@ class MuranoObject(dsl_types.MuranoObject):
                                 'as', context) == 'reference':
                             prop_value = prop_value.object_id
                     result[property_name] = prop_value
-        if serialization_type == serializer.DumpTypes.Inline:
+        if serialization_type == dsl_types.DumpTypes.Inline:
             result.pop('?')
             result = {
                 self.type: result,
                 'id': self.object_id,
                 'name': self.name
             }
-        elif serialization_type == serializer.DumpTypes.Mixed:
+        elif serialization_type == dsl_types.DumpTypes.Mixed:
             result.update({'?': {
                 'type': self.type,
                 'id': self.object_id,

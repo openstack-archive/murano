@@ -14,6 +14,7 @@
 
 import semantic_version
 
+
 EXPRESSION_MEMORY_QUOTA = 512 * 1024
 ITERATORS_LIMIT = 2000
 
@@ -49,6 +50,9 @@ TL_CONTEXT = '__murano_context'
 TL_ID = '__thread_id'
 TL_OBJECT_STORE = '__murano_object_store'
 TL_SESSION = '__murano_execution_session'
+TL_CONTRACT_PASSKEY = '__murano_contract_passkey'
+TL_OBJECTS_DRY_RUN = '__murano_objects_dry_run'
+
 
 RUNTIME_VERSION_1_0 = semantic_version.Version('1.0.0')
 RUNTIME_VERSION_1_1 = semantic_version.Version('1.1.0')

@@ -38,6 +38,28 @@ Methods:
     Body:
       Return: $arg
 
+  testTemplateContract:
+    Arguments:
+      arg:
+        Contract: $.template(CreatedClass2)
+    Body:
+      Return: $arg
+
+  testTemplateContractExcludePropertyFromMpl:
+    Body:
+      - $model:
+          :CreatedClass2:
+            property1: qwerty
+            property2: 'not integer'
+      - Return: $.testTemplateContractExcludeProperty($model)
+
+  testTemplateContractExcludeProperty:
+    Arguments:
+      arg:
+        Contract: $.template(CreatedClass2, excludeProperties => [property2])
+    Body:
+      Return: $arg
+
   testClassFromIdContract:
     Arguments:
       arg:

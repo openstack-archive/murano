@@ -75,6 +75,15 @@ class TestSchemaGeneration(test_case.DslTestCase):
             'classProperty', ['null', 'muranoObject'])
         self.assertEqual('SampleClass1', schema.get('muranoType'))
 
+    def test_template_property(self):
+        schema = self._test_simple_property(
+            'templateProperty', ['null', 'muranoObject'])
+        self.assertEqual('SampleClass1', schema.get('muranoType'))
+        self.assertTrue(schema.get('owned'))
+        self.assertItemsEqual(
+            ['stringProperty'],
+            schema.get('excludedProperties'))
+
     def test_default_property(self):
         schema = self._test_simple_property(
             'defaultProperty', ['null', 'integer'])
