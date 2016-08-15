@@ -29,6 +29,7 @@ else:
 
 import sys
 
+from oslo_concurrency import processutils
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import service
@@ -59,14 +60,14 @@ def main():
         policy.init()
 
         logging.setup(CONF, 'murano')
-        launcher = service.ServiceLauncher(CONF)
+        workers = CONF.murano.api_workers
+        if not workers:
+            workers = processutils.get_worker_count()
+        launcher = service.launch(CONF, server.ApiService(), workers=workers)
 
         app = app_loader.load_paste_app('murano')
         port, host = (CONF.bind_port, CONF.bind_host)
-
         launcher.launch_service(wsgi.Service(app, port, host))
-
-        launcher.launch_service(server.ApiService())
         launcher.launch_service(server.NotificationService())
         launcher.launch_service(stats.StatsCollectingService())
 

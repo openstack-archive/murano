@@ -50,7 +50,7 @@ def main():
         config.parse_args()
 
         logging.setup(CONF, 'murano')
-        workers = CONF.engine.workers
+        workers = CONF.engine.engine_workers
         if not workers:
             workers = processutils.get_worker_count()
         launcher = service.launch(CONF,

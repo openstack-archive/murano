@@ -204,9 +204,14 @@ function configure_murano {
     # Configure Murano API URL
     iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
 
+    # Configure the number of api workers
+    if [[ -n "$MURANO_API_WORKERS" ]]; then
+        iniset $MURANO_CONF_FILE murano api_workers $MURANO_API_WORKERS
+    fi
+
     # Configure the number of engine workers
     if [[ -n "$MURANO_ENGINE_WORKERS" ]]; then
-        iniset $MURANO_CONF_FILE engine workers $MURANO_ENGINE_WORKERS
+        iniset $MURANO_CONF_FILE engine engine_workers $MURANO_ENGINE_WORKERS
     fi
     if is_murano_backend_glare; then
         configure_murano_glare_backend
