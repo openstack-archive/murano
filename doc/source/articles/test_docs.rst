@@ -33,8 +33,9 @@ Murano CI url: https://murano-ci.mirantis.com/jenkins/ Anyone can login to that 
 
 There you can find each job for each repository: one for the **murano** and another one for **murano-dashboard**.
 
-* "gate-murano-dashboard-selenium\*" verifies each commit to murano-dashboard repository
-* "gate-murano-integration\*" verifies each commit to murano repository
+* "gate-murano-dashboard-ubuntu\*" verifies each commit to murano-dashboard
+  repository
+* "gate-murano-ubuntu\*" verifies each commit to murano repository
 
 Other jobs allow to build and test Murano documentation and perform another useful work to support Murano CI infrastructure.
 All jobs are run on fresh installation of operating system and all components are installed on each run.
@@ -52,9 +53,49 @@ For more information please visit https://selenium-python.readthedocs.org/
 Prerequisites:
 ++++++++++++++
 
-* Install Python module, called nose performing one of the following commands **easy_install nose** or **pip install nose**
-  This will install the nose libraries, as well as the nosetests script, which you can use to automatically discover and run tests.
-* Install external Python libraries, which are required for Murano Web UI tests: **testtools** and **selenium**
+* Install the Python module called nose by performing **easy_install nose**
+  or **pip install nose**. This will install the nose libraries, as well as
+  the nosetests script, which you can use to automatically discover and run tests.
+* Install external Python libraries, which are required for Murano Web UI
+  tests: **testtools** and **selenium**.
+* Verify that you have one of the following web browsers installed:
+
+  * Mozilla Firefox 46.0
+
+    .. note::
+
+       If you do not have firefox package out of the box,
+       install and remove it. Otherwise, you will need to install
+       dependant libraries manually. To downgrade Firefox:
+
+       .. code-block:: console
+
+          apt-get remove firefox
+          wget https://ftp.mozilla.org/pub/firefox/releases/46.0/linux-x86_64/en-US/firefox-46.0.tar.bz2
+          tar -xjf firefox-46.0.tar.bz2
+          rm -rf /opt/firefox
+          mv firefox /opt/firefox46
+          ln -s /opt/firefox46/firefox /usr/bin/firefox
+
+  * Google Chrome
+
+* To run the tests on a remote server, configure the remote X server.  Use VNC Software to see the test results in real-time.
+
+  #. Specify the display environment variable:
+
+     .. code-block:: console
+
+        $DISPLAY=: <value>
+
+  #. Configure remote X server and VNC Software by typing:
+
+     .. code-block:: console
+
+        apt-get install xvfb xfonts-100dpi xfonts-75dpi xfonts-cyrillic xorg dbus-x11
+        "Xvfb -fp "/usr/share/fonts/X11/misc/" :$DISPLAY -screen 0 "1280x1024x16" &"
+        apt-get install --yes x11vnc
+        x11vnc -bg -forever -nopw -display :$DISPLAY -ncache 10
+        sudo iptables -I INPUT 1 -p tcp --dport 5900 -j ACCEPT
 
 Download and run tests:
 +++++++++++++++++++++++
@@ -64,21 +105,29 @@ First of all make sure that all additional components are installed.
 * Clone murano-dashboard git repository:
 
   * git clone git://git.openstack.org/openstack/murano-dashboard*
-* Change default settings:
 
-  * Copy muranodashboard/tests/functional/config/config.conf.example to config.conf
-  * Set appropriate urls and credentials for your OpenStack lab. Only admin users are appropriate.
+* To change the default settings:
+
+  #. Specify the Murano Repository URL variable for Horizon local settings in ``murano_dashboard/muranodashboard/local/local_settings.d/_50_murano.py``:
+     .. code-block:: console
+
+       MURANO_REPO_URL = 'http://localhost:8099'
+
+  #. Copy ``muranodashboard/tests/functional/config/config.conf.sample`` to``config.conf``.
+
+  #. Set appropriate urls and credentials for your OpenStack lab. Only admin users are appropriate.
+
 
 ::
 
     [murano]
 
-    horizon_url = http://localhost/horizon
+    horizon_url = http://localhost/dashboard
     murano_url = http://localhost:8082
     user = ***
     password = ***
     tenant = ***
-    keystone_url = http://localhost:5000/v2.0/
+    keystone_url = http://localhost:5000/v3
 
 
 
