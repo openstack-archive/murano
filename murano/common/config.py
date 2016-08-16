@@ -201,7 +201,11 @@ networking_opts = [
 
     cfg.StrOpt('network_config_file', default='netconfig.yaml',
                help='If provided networking configuration will be taken '
-                    'from this file')
+                    'from this file'),
+
+    cfg.StrOpt('driver', default=None, choices=['neutron', 'nova'],
+               help='Network driver to use. Options are neutron or nova.'
+                    'If not provided, the driver will be detected.'),
 ]
 
 stats_opts = [

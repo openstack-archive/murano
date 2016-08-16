@@ -1,0 +1,4 @@
+---
+features:
+  - Configuration option added to explicitly select a
+    networking driver rather than auto-detect.

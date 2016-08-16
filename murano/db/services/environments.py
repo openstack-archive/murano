@@ -264,6 +264,11 @@ class EnvironmentServices(object):
 
     @staticmethod
     def get_network_driver(context):
+        driver = CONF.networking.driver
+        if driver:
+            LOG.debug("Will use {} as a network driver".format(driver))
+            return driver
+
         session = auth_utils.get_token_client_session(
             context.auth_token, context.tenant)
         try:
