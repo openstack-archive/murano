@@ -84,6 +84,7 @@ function configure_murano_glare_backend() {
     iniset $MURANO_CONF_FILE glare url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT
     iniset $MURANO_CONF_FILE glare endpoint_type $GLARE_ENDPOINT_TYPE
     echo -e $"\nexport MURANO_PACKAGES_SERVICE='glare'" | sudo tee -a $TOP_DIR/openrc
+    echo -e $"\nexport GLARE_URL='$GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT'" | sudo tee -a $TOP_DIR/openrc
 }
 
 function restart_glare_service() {
@@ -259,6 +260,7 @@ function install_murano_apps() {
                        --os-tenant-name $OS_PROJECT_NAME \
                        --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
                        --murano-url http://127.0.0.1:8082 \
+                       --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
                        --murano-packages-service $MURANO_PACKAGES_SERVICE \
                        package-import \
                        --is-public \
@@ -336,6 +338,7 @@ function setup_core_library() {
            --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
            --os-region-name $REGION_NAME \
            --murano-url http://127.0.0.1:8082 \
+           --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
            --murano-packages-service $MURANO_PACKAGES_SERVICE \
            package-import $MURANO_DIR/meta/io.murano/io.murano.zip \
            --is-public
@@ -506,6 +509,7 @@ function configure_local_settings_py() {
     sed -e "s%\(^\s*MURANO_REPO_URL\s*=\).*$%\1 '$MURANO_REPOSITORY_URL'%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
     sed -e "s%\(^\s*'NAME':\).*$%\1 os.path.join('$MURANO_DASHBOARD_DIR', 'openstack-dashboard.sqlite')%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
     echo -e $"\nMETADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'" | sudo tee -a $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+    echo -e $"\nGLARE_API_URL = '$GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT'" | sudo tee -a $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
 
 }
 
