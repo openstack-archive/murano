@@ -25,6 +25,7 @@ from murano.dsl import yaql_integration
 class MuranoObject(dsl_types.MuranoObject):
     def __init__(self, murano_class, owner, object_id=None, name=None,
                  known_classes=None, this=None):
+        self.__initialized = False
         if known_classes is None:
             known_classes = {}
         self.__owner = owner.real_this if owner else None
@@ -138,11 +139,13 @@ class MuranoObject(dsl_types.MuranoObject):
                 yield t
 
         def run_init():
-            context[constants.CTX_ARGUMENT_OWNER] = self.real_this
-            init.invoke(self.real_this, (), init_args,
-                        context.create_child_context())
+            if init:
+                context[constants.CTX_ARGUMENT_OWNER] = self.real_this
+                init.invoke(self.real_this, (), init_args,
+                            context.create_child_context())
+            self.__initialized = True
 
-        if (not object_store.initializing and init
+        if (not object_store.initializing
                 and not helpers.is_objects_dry_run_mode()):
             yield run_init
 
@@ -161,6 +164,10 @@ class MuranoObject(dsl_types.MuranoObject):
     @property
     def real_this(self):
         return self.__this or self
+
+    @property
+    def initialized(self):
+        return self.__initialized
 
     def get_property(self, name, context=None):
         start_type, derived = self.__type, False

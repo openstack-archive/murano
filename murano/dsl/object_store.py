@@ -66,7 +66,8 @@ class ObjectStore(object):
                 default_type=default_type, context=context)
             for obj_id in model_store.iterate():
                 obj = model_store.get(obj_id)
-                self.put(obj)
+                if obj.initialized:
+                    self.put(obj)
             return result
 
     @staticmethod
