@@ -269,11 +269,12 @@ class MuranoObject(dsl_types.MuranoObject):
             result.update(parent.to_dictionary(
                 include_hidden, dsl_types.DumpTypes.Serializable,
                 allow_refs))
+        skip_usages = (dsl_types.PropertyUsages.Runtime,
+                       dsl_types.PropertyUsages.Config)
         for property_name in self.type.properties:
             if property_name in self.__properties:
                 spec = self.type.properties[property_name]
-                if (spec.usage != dsl_types.PropertyUsages.Runtime or
-                        include_hidden):
+                if spec.usage not in skip_usages or include_hidden:
                     prop_value = self.__properties[property_name]
                     if isinstance(prop_value, MuranoObject) and allow_refs:
                         meta = [m for m in spec.get_meta(context)
