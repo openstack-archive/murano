@@ -202,26 +202,17 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
     def deploy_environment(self, environment, session):
         self.application_catalog_client.deploy_session(environment['id'],
                                                        session['id'])
-        return self.wait_for_environment_deploy(environment)
-
-    def wait_for_environment_deploy(self, environment):
-        start_time = time.time()
-        status = self.application_catalog_client.\
-            get_environment(environment['id'])['status']
-        while status != 'ready':
-            status = self.application_catalog_client.\
-                get_environment(environment['id'])['status']
-            if time.time() - start_time > 1800:
-                time.sleep(60)
-                self.fail(
-                    'Environment deployment is not finished in 1200 seconds')
-            elif status == 'deploy failure':
-                time.sleep(60)
-                self.fail('Environment has incorrect status {0}'.
-                          format(status))
-            time.sleep(5)
-        return self.application_catalog_client.\
-            get_environment(environment['id'])
+        timeout = 1800
+        deployed_env = utils.wait_for_environment_deploy(environment,
+                                                         timeout=timeout)
+        if deployed_env['status'] == 'ready':
+            return deployed_env
+        elif deployed_env['status'] == 'deploying':
+            self.fail('Environment deployment is not finished in {} seconds'.
+                      format(timeout))
+        else:
+            self.fail('Environment has status {}'.format(
+                deployed_env['status']))
 
     def status_check(self, environment_id, configurations):
         for configuration in configurations:
