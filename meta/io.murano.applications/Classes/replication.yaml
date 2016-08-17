@@ -37,7 +37,7 @@ Properties:
     Default: 1
 
   items:
-    Usage: InOut
+    Usage: Out
     Contract:
       - $.class(std:Object)
 
