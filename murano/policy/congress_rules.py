@@ -13,7 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import semantic_version
 import six
 
 from murano.dsl import helpers
@@ -119,14 +118,13 @@ class CongressRulesManager(object):
                                                     obj_rule.obj_id,
                                                     "services"))
             self._rules.extend(
-                self._create_propety_rules(obj_rule.obj_id, obj))
+                self._create_property_rules(obj_rule.obj_id, obj))
 
             cls = obj['?']['type']
             if 'classVersion' in obj['?']:
-                version_spec = helpers.parse_version_spec(
-                    semantic_version.Version(obj['?']['classVersion']))
+                version_spec = obj['?']['classVersion']
             else:
-                version_spec = semantic_version.Spec('*')
+                version_spec = '*'
             types = self._get_parent_types(
                 cls, self._package_loader, version_spec)
             self._rules.extend(self._create_parent_type_rules(obj['?']['id'],
@@ -145,7 +143,7 @@ class CongressRulesManager(object):
     def _create_object_rule(self, app, owner_id):
         return ObjectRule(app['?']['id'], owner_id, app['?']['type'])
 
-    def _create_propety_rules(self, obj_id, obj, prefix=""):
+    def _create_property_rules(self, obj_id, obj, prefix=""):
         rules = []
 
         # Skip when inside properties of other object.
@@ -161,7 +159,7 @@ class CongressRulesManager(object):
             if value is not None:
                 value = self._to_dict(value)
                 if isinstance(value, dict):
-                    rules.extend(self._create_propety_rules(
+                    rules.extend(self._create_property_rules(
                         obj_id, value, prefix + key + "."))
                 elif isinstance(value, list) or isinstance(obj, tuple):
                     for v in value:
@@ -191,6 +189,9 @@ class CongressRulesManager(object):
 
     @staticmethod
     def _get_parent_types(type_name, package_loader, version_spec):
+        type_name, version_spec, _ = helpers.parse_type_string(
+            type_name, version_spec, None)
+        version_spec = helpers.parse_version_spec(version_spec)
         result = {type_name}
         if package_loader:
             pkg = package_loader.load_class_package(type_name, version_spec)
@@ -211,7 +212,7 @@ class ObjectRule(object):
     def __init__(self, obj_id, owner_id, type_name):
         self.obj_id = obj_id
         self.owner_id = owner_id
-        self.type_name = type_name
+        self.type_name = helpers.parse_type_string(type_name, None, None)[0]
 
     def __str__(self):
         return 'murano:objects+("{0}", "{1}", "{2}")'.format(self.obj_id,

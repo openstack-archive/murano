@@ -225,7 +225,7 @@ class TaskExecutor(object):
 
         if obj is not None:
             try:
-                self._validate_model(obj.object, pkg_loader)
+                self._validate_model(obj.object, pkg_loader, executor)
             except Exception as e:
                 return self.exception_result(e, obj, '<validate>')
 
@@ -298,12 +298,13 @@ class TaskExecutor(object):
             }
         }
 
-    def _validate_model(self, obj, pkg_loader):
+    def _validate_model(self, obj, pkg_loader, executor):
         if CONF.engine.enable_model_policy_enforcer:
             if obj is not None:
-                self._model_policy_enforcer.modify(obj, pkg_loader)
-                self._model_policy_enforcer.validate(obj.to_dictionary(),
-                                                     pkg_loader)
+                with helpers.with_object_store(executor.object_store):
+                    self._model_policy_enforcer.modify(obj, pkg_loader)
+                    self._model_policy_enforcer.validate(obj.to_dictionary(),
+                                                         pkg_loader)
 
     def _invoke(self, mpl_executor):
         obj = mpl_executor.object_store.get(self.action['object_id'])
