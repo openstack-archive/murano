@@ -36,7 +36,7 @@ Properties:
 Methods:
   report:
     Arguments:
-      - instance:
+      - server:
           Contract: $
       - message:
           Contract: $.string()
@@ -48,13 +48,13 @@ Methods:
       - super($this, $.setUp())
       - inject(res:LinuxMuranoInstance, beginDeploy, '')
       - inject(res:LinuxMuranoInstance, endDeploy, '')
-      - $instance: new(res:LinuxMuranoInstance, $this.environment,
-                       name=>'noop',
-                       image=>'noop',
-                       flavor=>'noop')
-      - $provider: new(apps:InstanceProvider, $this.environment,
-                       source=>$instance, instanceNamePattern=>'testNode-{0}')
-      - $this.group: new(apps:InstanceGroup, provider=>$provider, numItems=>5)
+      - $server: new(res:LinuxMuranoInstance, $this.environment,
+                     name=>'noop',
+                     image=>'noop',
+                     flavor=>'noop')
+      - $provider: new(apps:ServerProvider, $this.environment,
+                       source=>$server, serverNamePattern=>'testNode-{0}')
+      - $this.group: new(apps:ServerGroup, provider=>$provider, numItems=>5)
       - $this.group.deploy()
       - $this.reports: []
       - inject($this.environment.reporter, report, $this, report)

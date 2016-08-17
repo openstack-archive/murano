@@ -30,7 +30,7 @@ Methods:
   deployAt:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $servers.deploy()
 
@@ -87,7 +87,7 @@ Methods:
   install:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $serversToInstall: $servers.items.where($this.checkServerNeedsInstallation($))
       - If: any($serversToInstall)
@@ -106,7 +106,7 @@ Methods:
   beforeInstall:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $this.report(format('Installing {0}', $this.componentName))
       - $this.onBeforeInstall($servers)
@@ -114,7 +114,7 @@ Methods:
   onBeforeInstall:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $this.beforeInstallEvent.notify($this, $servers)
 
@@ -158,7 +158,7 @@ Methods:
   completeInstallation:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
       - numFailures:
           Contract: $.int()
     Body:
@@ -177,14 +177,14 @@ Methods:
   onCompleteInstallation:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $this.completeInstallationEvent.notify($this, $servers)
 
   deployAt:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - super($this, $.deployAt($servers))
       - $this.install($servers)
@@ -221,7 +221,7 @@ Methods:
   configure:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - If: not $this.checkClusterNeedsReconfiguration($servers)
         Then:
@@ -234,7 +234,7 @@ Methods:
   checkClusterNeedsReconfiguration:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $key: $this.getKey()
       - $state: $this.getAttr(format('configuration_of_cluster_{0}', id($servers)), null)
@@ -258,7 +258,7 @@ Methods:
   preConfigure:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $this.report(format('Applying configuration of {0}', $this.componentName))
       - $this.onPreConfigure($servers)
@@ -266,7 +266,7 @@ Methods:
   onPreConfigure:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $sr: $this.getSecurityRules()
       - If: $sr
@@ -315,7 +315,7 @@ Methods:
   completeConfiguration:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
       - numFailures:
           Contract: $.int()
     Body:
@@ -336,7 +336,7 @@ Methods:
   onCompleteConfiguration:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - $this.completeConfigurationEvent.notify($this, $servers)
 
@@ -348,7 +348,7 @@ Methods:
   deployAt:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - super($this, $.deployAt($servers))
       - $this.configure($servers)
@@ -365,7 +365,7 @@ Methods:
   deployAt:
     Arguments:
       - servers:
-          Contract: $.class(InstanceGroup).notNull()
+          Contract: $.class(ServerGroup).notNull()
     Body:
       - cast($this, Installable).deployAt($servers)
       - cast($this, Configurable).deployAt($servers)

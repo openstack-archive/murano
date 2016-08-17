@@ -17,11 +17,11 @@ Namespaces:
   std: io.murano
 
 --- # ------------------------------------------------------------------ # ---
-# A replication group aggregating Instances
-# Adds a logic to concurrently provision and unprovision instances
+# A replication group aggregating Servers
+# Adds a logic to concurrently provision and unprovision servers
 
 
-Name: InstanceGroup
+Name: ServerGroup
 Extends:
   - ReplicationGroup
 
@@ -54,18 +54,18 @@ Methods:
 
 
       - cast($this, ReplicationGroup).deploy()
-      - $this.items.select($this._deployInstance($))
+      - $this.items.select($this._deployServer($))
       - $this.items.select($.endDeploy())
 
-  _deployInstance:
+  _deployServer:
     Arguments:
-      - instance:
+      - server:
           Contract: $.class(res:Instance)
     Body:
-      - If: $this._env and name($instance) and not $instance.openstackId
+      - If: $this._env and name($server) and not $server.openstackId
         Then:
-          - $this._env.reporter.report($this, 'Provisioning VM for ' + $instance.name)
-      - $instance.beginDeploy()
+          - $this._env.reporter.report($this, 'Provisioning VM for ' + $server.name)
+      - $server.beginDeploy()
 
   .destroy:
     Body:
@@ -73,16 +73,16 @@ Methods:
       - $this.items.select($.endReleaseResources())
 
 --- # ------------------------------------------------------------------ # ---
-# A replication provider acting as a default factory class for Instances
+# A replication provider acting as a default factory class for Servers
 
-Name: InstanceProvider
+Name: ServerProvider
 Extends: CloneReplicaProvider
 
 Properties:
   source:
     Contract: $.class(res:Instance).notNull()
 
-  instanceNamePattern:
+  serverNamePattern:
     Contract: $.string().notNull()
 
 
@@ -94,11 +94,11 @@ Methods:
       - index:
            Contract: $.int().notNull()
     Body:
-      - $template[name]: $this.instanceNamePattern.format($index)
-      - $ownerGroup: $this.find(InstanceGroup)
+      - $template[name]: $this.serverNamePattern.format($index)
+      - $ownerGroup: $this.find(ServerGroup)
       - If: $ownerGroup
         Then:
-          - $template['?'][name]: format('Group {0} instance {1}', name($ownerGroup), $index)
+          - $template['?'][name]: format('Group {0} server {1}', name($ownerGroup), $index)
       - Return: $template
 
   releaseReplica:

@@ -6,7 +6,7 @@ Namespaces:
   res: io.murano.resources
 
 --- # ------------------------------------------------------------------ # ---
-Name: TestMockedInstanceFactory
+Name: TestMockedServerFactory
 Extends: tst:TestFixtureWithEnvironment
 
 Properties:
@@ -19,7 +19,7 @@ Properties:
 Methods:
   report:
     Arguments:
-      - instance:
+      - server:
           Contract: $
       - message:
           Contract: $.string()
@@ -82,62 +82,62 @@ Methods:
       - $this.pushCalled: 0
 
 
-      - $instanceTemplate: new(res:LinuxMuranoInstance, $this.environment,
+      - $serverTemplate: new(res:LinuxMuranoInstance, $this.environment,
                                name=>'whatever',
                                image=>'murano-latest',
                                flavor=>'t1.medium')
-      - $this.provider: new(apps:InstanceProvider, source=>$instanceTemplate,
-                            instanceNamePattern=>'testNode-{0}')
+      - $this.provider: new(apps:ServerProvider, source=>$serverTemplate,
+                            serverNamePattern=>'testNode-{0}')
 
   testCreateSingleServer:
     Body:
-      - $ssg: new(apps:InstanceGroup, provider=>$this.provider)
+      - $ssg: new(apps:ServerGroup, provider=>$this.provider)
       - $ssg.deploy()
-      - $this.assertInstanceCount(1)
+      - $this.assertServerCount(1)
 
-  testInstancesHaveProperName:
+  testServersHaveProperName:
     Body:
       - $model:
-          apps:InstanceGroup:
+          apps:ServerGroup:
             numItems: 2
             provider:
-              apps:InstanceProvider:
+              apps:ServerProvider:
                 source: $this.provider.source
-                instanceNamePattern: 'testNode-{0}'
+                serverNamePattern: 'testNode-{0}'
           name: testGroup
       - $namedSsg: new($model)
       - $namedSsg.deploy()
-      - $this.assertEqual('Group testGroup instance 1', name($namedSsg.items[0]))
-      - $this.assertEqual('Group testGroup instance 2', name($namedSsg.items[1]))
+      - $this.assertEqual('Group testGroup server 1', name($namedSsg.items[0]))
+      - $this.assertEqual('Group testGroup server 2', name($namedSsg.items[1]))
 
 
   testCreateMultipleServers:
     Body:
-      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>5)
+      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>5)
       - $ssg.deploy()
-      - $this.assertInstanceCount(5)
+      - $this.assertServerCount(5)
 
   testCreateScaleUp:
     Body:
-      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>3)
       - $ssg.deploy()
-      - $this.assertInstanceCount(3)
+      - $this.assertServerCount(3)
       - $ssg.scale(4)
       - $ssg.deploy()
-      - $this.assertInstanceCount(7)
+      - $this.assertServerCount(7)
 
   testCreateScaleDown:
     Body:
-      - $ssg: new(apps:InstanceGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>3)
       - $ssg.deploy()
-      - $this.assertInstanceCount(3)
+      - $this.assertServerCount(3)
       - $ssg.scale(-2)
       - $ssg.deploy()
-      - $this.assertInstanceCount(1)
+      - $this.assertServerCount(1)
 
   testMultipleServersReporting:
     Body:
-      - $ssg: new(apps:InstanceGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>3)
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers for TestGroup', $this.reports[0])
       - $ssg.scale(-2)
@@ -145,7 +145,7 @@ Methods:
 
   testMultipleServersReportingNoGroupName:
     Body:
-      - $ssg: new(apps:InstanceGroup, $this.environment, null, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerGroup, $this.environment, null, provider=>$this.provider, numItems=>3)
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers', $this.reports[0])
       - $ssg.scale(-2)
@@ -153,12 +153,12 @@ Methods:
 
   testNoReportingIfSingleServer:
     Body:
-      - $ssg: new(apps:InstanceGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>1)
+      - $ssg: new(apps:ServerGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>1)
       - $ssg.deploy()
       - $this.assertEqual([], $this.reports)
 
 
-  assertInstanceCount:
+  assertServerCount:
     Arguments:
       - count:
           Contract: $.int()
