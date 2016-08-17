@@ -62,9 +62,9 @@ Methods:
       - server:
           Contract: $.class(res:Instance)
     Body:
-      - If: $this._env and name($server) and not $server.openstackId
+      - If: $this._env and not $server.openstackId
         Then:
-          - $this._env.reporter.report($this, 'Provisioning VM for ' + $server.name)
+          - $this._env.reporter.report($this, 'Provisioning VM for ' + name($server) or $server.name)
       - $server.beginDeploy()
 
   .destroy:
@@ -94,11 +94,14 @@ Methods:
       - index:
            Contract: $.int().notNull()
     Body:
-      - $template[name]: $this.serverNamePattern.format($index)
+      - $template.name: $this.serverNamePattern.format($index)
       - $ownerGroup: $this.find(ServerGroup)
-      - If: $ownerGroup
+      - If: $ownerGroup and name($ownerGroup)
         Then:
-          - $template['?'][name]: format('Group {0} server {1}', name($ownerGroup), $index)
+          - $groupName: format(' ({0})', name($ownerGroup))
+        Else:
+          - $groupName: ''
+      - $template['?'].name: format('Server {0}{1}', $index, $groupName)
       - Return: $template
 
   releaseReplica:

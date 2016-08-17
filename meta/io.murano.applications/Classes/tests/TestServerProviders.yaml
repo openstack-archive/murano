@@ -107,8 +107,8 @@ Methods:
           name: testGroup
       - $namedSsg: new($model)
       - $namedSsg.deploy()
-      - $this.assertEqual('Group testGroup server 1', name($namedSsg.items[0]))
-      - $this.assertEqual('Group testGroup server 2', name($namedSsg.items[1]))
+      - $this.assertEqual('Server 1 (testGroup)', name($namedSsg.items[0]))
+      - $this.assertEqual('Server 2 (testGroup)', name($namedSsg.items[1]))
 
 
   testCreateMultipleServers:
@@ -141,7 +141,7 @@ Methods:
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers for TestGroup', $this.reports[0])
       - $ssg.scale(-2)
-      - $this.assertEqual('Removing 2 servers from TestGroup', $this.reports[1])
+      - $this.assertEqual('Removing 2 servers from TestGroup', $this.reports[4])
 
   testMultipleServersReportingNoGroupName:
     Body:
@@ -149,13 +149,13 @@ Methods:
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers', $this.reports[0])
       - $ssg.scale(-2)
-      - $this.assertEqual('Removing 2 servers', $this.reports[1])
+      - $this.assertEqual('Removing 2 servers', $this.reports[4])
 
   testNoReportingIfSingleServer:
     Body:
       - $ssg: new(apps:ServerGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>1)
       - $ssg.deploy()
-      - $this.assertEqual([], $this.reports)
+      - $this.assertEqual(1, len($this.reports))
 
 
   assertServerCount:
