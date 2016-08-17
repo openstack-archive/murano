@@ -34,9 +34,9 @@ Classes:
   io.murano.applications.ServerGroup: servers.yaml
   io.murano.applications.ServerProvider: servers.yaml
 
-  io.murano.applications.BaseSoftwareComponent: component.yaml
   io.murano.applications.Installable: component.yaml
   io.murano.applications.Configurable: component.yaml
+  io.murano.applications.OpenstackSecurityConfigurable: component.yaml
   io.murano.applications.SoftwareComponent: component.yaml
 
 
