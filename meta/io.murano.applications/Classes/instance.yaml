@@ -40,6 +40,19 @@ Methods:
 
   deploy:
     Body:
+      - $delta: $this.numItems - len($this.items)
+      - If: abs($delta) > 1 and $this._env
+        Then:
+          - $verb: switch($delta > 0 => Creating, $delta < 0 => Removing)
+          - $target: switch($delta > 0 => for, $delta < 0 => from)
+          - If: name($this)
+            Then:
+              - $target: format(' {0} {1}', $target, name($this))
+            Else:
+              - $target: ''
+          - $this._env.reporter.report($this, format('{0} {1} servers{2}', $verb, abs($delta), $target))
+
+
       - cast($this, ReplicationGroup).deploy()
       - $this.items.select($this._deployInstance($))
       - $this.items.select($.endDeploy())

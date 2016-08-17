@@ -9,7 +9,22 @@ Namespaces:
 Name: TestMockedInstanceFactory
 Extends: tst:TestFixtureWithEnvironment
 
+Properties:
+  reports:
+    Contract:
+      - $.string()
+    Usage: Out
+    Default: []
+
 Methods:
+  report:
+    Arguments:
+      - instance:
+          Contract: $
+      - message:
+          Contract: $.string()
+    Body:
+      - $this.reports: $this.reports.append($message)
 
   heatPushInjection:
     Body:
@@ -62,7 +77,8 @@ Methods:
       - inject(sys:Agent, prepare, '')
       - inject($this.environment.instanceNotifier, trackCloudInstance, '')
       - inject($this.environment.instanceNotifier, untrackCloudInstance, '')
-
+      - $this.reports: []
+      - inject($this.environment.reporter, report, $this, report)
       - $this.pushCalled: 0
 
 
@@ -118,6 +134,29 @@ Methods:
       - $ssg.scale(-2)
       - $ssg.deploy()
       - $this.assertInstanceCount(1)
+
+  testMultipleServersReporting:
+    Body:
+      - $ssg: new(apps:InstanceGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>3)
+      - $ssg.deploy()
+      - $this.assertEqual('Creating 3 servers for TestGroup', $this.reports[0])
+      - $ssg.scale(-2)
+      - $this.assertEqual('Removing 2 servers from TestGroup', $this.reports[1])
+
+  testMultipleServersReportingNoGroupName:
+    Body:
+      - $ssg: new(apps:InstanceGroup, $this.environment, null, provider=>$this.provider, numItems=>3)
+      - $ssg.deploy()
+      - $this.assertEqual('Creating 3 servers', $this.reports[0])
+      - $ssg.scale(-2)
+      - $this.assertEqual('Removing 2 servers', $this.reports[1])
+
+  testNoReportingIfSingleServer:
+    Body:
+      - $ssg: new(apps:InstanceGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>1)
+      - $ssg.deploy()
+      - $this.assertEqual([], $this.reports)
+
 
   assertInstanceCount:
     Arguments:
