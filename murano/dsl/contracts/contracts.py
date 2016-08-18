@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+
 import six
 from yaql.language import specs
 from yaql.language import utils
@@ -109,6 +111,21 @@ class Contract(object):
     def _prepare_check_type_context(runtime_version):
         return Contract._prepare_context(
             runtime_version, lambda c: c.check_type())
+
+    @staticmethod
+    @helpers.memoize
+    def _prepare_schema_generation_context(runtime_version):
+        context = Contract._prepare_context(
+            runtime_version, lambda c: c.generate_schema())
+
+        @specs.name('#finalize')
+        def finalize(obj):
+            if isinstance(obj, dict):
+                obj.pop('_notNull', None)
+            return obj
+
+        context.register_function(finalize)
+        return context
 
     @staticmethod
     @helpers.memoize
@@ -267,3 +284,20 @@ class Contract(object):
         return self._execute(
             self._prepare_finalize_context,
             data, context, None, calling_type=calling_type)
+
+    @staticmethod
+    def generate_expression_schema(expression, context, runtime_version,
+                                   initial_schema=None):
+        if initial_schema is None:
+            initial_schema = {}
+        else:
+            initial_schema = copy.deepcopy(initial_schema)
+
+        contract_context = Contract._prepare_schema_generation_context(
+            runtime_version).create_child_context()
+
+        contract_context['root_context'] = context
+        contract_context[constants.CTX_NAMES_SCOPE] = \
+            context[constants.CTX_NAMES_SCOPE]
+        contract_context['$'] = initial_schema
+        return expression(context=contract_context)

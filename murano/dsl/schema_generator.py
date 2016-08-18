@@ -14,14 +14,8 @@
 # limitations under the License.
 
 import six
-from yaql.language import exceptions as yaql_exceptions
-from yaql.language import expressions
-from yaql.language import specs
-from yaql.language import utils
-from yaql.language import yaqltypes
 
-from murano.dsl import constants
-from murano.dsl import dsl
+from murano.dsl.contracts import contracts
 from murano.dsl import dsl_types
 from murano.dsl import executor
 from murano.dsl import helpers
@@ -51,7 +45,7 @@ def generate_schema(pkg_loader, context_manager,
     cls = package.find_class(class_name, search_requirements=False)
     exc = executor.MuranoDslExecutor(pkg_loader, context_manager)
     with helpers.with_object_store(exc.object_store):
-        context = prepare_context(exc, cls)
+        context = exc.create_object_context(cls)
         model_builders = set(list_model_builders(cls, context))
         method_names = model_builders.intersection(
             method_names or model_builders)
@@ -117,23 +111,6 @@ def get_properties(entity):
             result[prop_name] = prop
         return result
     return entity.arguments_scheme
-
-
-def prepare_context(exc, cls):
-    """Registers alternative implementations of contract YAQL functions"""
-    context = exc.create_object_context(cls).create_child_context()
-    context[constants.CTX_NAMES_SCOPE] = cls
-    context.register_function(string_)
-    context.register_function(int_)
-    context.register_function(bool_)
-    context.register_function(not_null)
-    context.register_function(check)
-    context.register_function(owned)
-    context.register_function(not_owned)
-    context.register_function(finalize)
-    for fn in class_factory(context):
-        context.register_function(fn)
-    return context
 
 
 def generate_entity_schema(entity, context, declaring_type, meta):
@@ -207,7 +184,8 @@ def generate_sections(meta, type_weights):
 
 def generate_property_schema(prop, context, type_weights):
     """Generate schema for single property/argument"""
-    schema = translate(prop.contract.spec, context)
+    schema = translate(prop.contract.spec, context,
+                       prop.declaring_type.package.runtime_version)
     if prop.has_default:
         schema['default'] = prop.default
     schema.update(generate_ui_hints(prop, context, type_weights))
@@ -255,247 +233,26 @@ def sort_by_index(meta, type_weights, property_name='index'):
         has_no_index)
 
 
-class Schema(object):
-    """Container object to define YAQL contracts on"""
-    def __init__(self, data):
-        self.data = data
-
-    def __repr__(self):
-        return repr(self.data)
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def string_(schema):
-    """Implementation of string() contract that generates schema instead"""
-    types = 'string'
-    if '_notNull' not in schema.data:
-        types = [types] + ['null']
-
-    return Schema({
-        'type': types
-    })
-
-
-def class_factory(context):
-    """Factory for class() contract function that generates schema instead"""
-    @specs.parameter('schema', Schema)
-    @specs.parameter('name', dsl.MuranoTypeParameter(
-        nullable=False, context=context))
-    @specs.parameter('default_name', dsl.MuranoTypeParameter(
-        nullable=True, context=context))
-    @specs.parameter('version_spec', yaqltypes.String(True))
-    @specs.method
-    def class_(schema, name, default_name=None, version_spec=None):
-        types = 'muranoObject'
-        if '_notNull' not in schema.data:
-            types = [types] + ['null']
-
-        return Schema({
-            'type': types,
-            'muranoType': name.type.name
-        })
-
-    @specs.parameter('schema', Schema)
-    @specs.parameter('type_', dsl.MuranoTypeParameter(
-        nullable=False, context=context))
-    @specs.parameter('default_type', dsl.MuranoTypeParameter(
-        nullable=True, context=context))
-    @specs.parameter('version_spec', yaqltypes.String(True))
-    @specs.parameter(
-        'exclude_properties', yaqltypes.Sequence(nullable=True))
-    @specs.method
-    def template(schema, type_, exclude_properties=None,
-                 default_type=None, version_spec=None):
-        result = class_(schema, type_, default_type, version_spec)
-        result.data['owned'] = True
-        if exclude_properties:
-            result.data['excludedProperties'] = exclude_properties
-        return result
-
-    return class_, template
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def not_owned(schema):
-    """Implementation of notOwned() contract that generates schema instead"""
-    schema.data['owned'] = False
-    return schema
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def owned(schema):
-    """Implementation of owned() contract that generates schema instead"""
-    schema.data['owned'] = True
-    return schema
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def int_(schema):
-    """Implementation of int() contract that generates schema instead"""
-    types = 'integer'
-    if '_notNull' not in schema.data:
-        types = [types] + ['null']
-
-    return Schema({
-        'type': types
-    })
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def bool_(schema):
-    """Implementation of bool() contract that generates schema instead"""
-    types = 'boolean'
-    if '_notNull' not in schema.data:
-        types = [types] + ['null']
-
-    return Schema({
-        'type': types
-    })
-
-
-@specs.parameter('schema', Schema)
-@specs.method
-def not_null(schema):
-    """Implementation of notNull() contract that generates schema instead"""
-    types = schema.data.get('type')
-    if isinstance(types, list) and 'null' in types:
-        types.remove('null')
-        if len(types) == 1:
-            types = types[0]
-        schema.data['type'] = types
-    schema.data['_notNull'] = True
-    return schema
-
-
-@specs.inject('up', yaqltypes.Super())
-@specs.name('#finalize')
-def finalize(obj, up):
-    """Wrapper around YAQL contracts that removes temporary schema data"""
-    res = up(obj)
-    if isinstance(res, Schema):
-        res = res.data
-    if isinstance(res, dict):
-        res.pop('_notNull', None)
-    return res
-
-
-@specs.parameter('expr', yaqltypes.YaqlExpression())
-@specs.parameter('schema', Schema)
-@specs.method
-def check(schema, expr, engine, context):
-    """Implementation of check() contract that generates schema instead"""
-    rest = [True]
-    while rest:
-        if (isinstance(expr, expressions.BinaryOperator) and
-                expr.operator == 'and'):
-            rest = expr.args[1]
-            expr = expr.args[0]
-        else:
-            rest = []
-        res = extract_pattern(expr, engine, context)
-        if res is not None:
-            schema.data.update(res)
-        expr = rest
-    return schema
-
-
-def extract_pattern(expr, engine, context):
-    """Translation of certain known patterns of check() contract expressions"""
-    if isinstance(expr, expressions.BinaryOperator):
-        ops = ('>', '<', '>=', '<=')
-        if expr.operator in ops:
-            op_index = ops.index(expr.operator)
-            if is_dollar(expr.args[0]):
-                constant = evaluate_constant(expr.args[1], engine, context)
-                if constant is None:
-                    return None
-            elif is_dollar(expr.args[1]):
-                constant = evaluate_constant(expr.args[0], engine, context)
-                if constant is None:
-                    return None
-                op_index = -1 - op_index
-            else:
-                return None
-            op = ops[op_index]
-            if op == '>':
-                return {'minimum': constant, 'exclusiveMinimum': True}
-            elif op == '>=':
-                return {'minimum': constant, 'exclusiveMinimum': False}
-            if op == '<':
-                return {'maximum': constant, 'exclusiveMaximum': True}
-            elif op == '<=':
-                return {'maximum': constant, 'exclusiveMaximum': False}
-        elif expr.operator == 'in' and is_dollar(expr.args[0]):
-            lst = evaluate_constant(expr.args[1], engine, context)
-            if isinstance(lst, tuple):
-                return {'enum': list(lst)}
-
-        elif (expr.operator == '.' and is_dollar(expr.args[0]) and
-                isinstance(expr.args[1], expressions.Function)):
-            func = expr.args[1]
-            if func.name == 'matches':
-                constant = evaluate_constant(func.args[0], engine, context)
-                if constant is not None:
-                    return {'pattern': constant}
-
-
-def is_dollar(expr):
-    """Check $-expressions in YAQL AST"""
-    return (isinstance(expr, expressions.GetContextValue) and
-            expr.path.value in ('$', '$1'))
-
-
-def evaluate_constant(expr, engine, context):
-    """Evaluate yaql expression into constant value if possible"""
-    if isinstance(expr, expressions.Constant):
-        return expr.value
-    context = context.create_child_context()
-    trap = utils.create_marker('trap')
-    context['$'] = trap
-
-    @specs.parameter('name', yaqltypes.StringConstant())
-    @specs.name('#get_context_data')
-    def get_context_data(name, context):
-        res = context[name]
-        if res is trap:
-            raise yaql_exceptions.ResolutionError()
-        return res
-
-    context.register_function(get_context_data)
-
-    try:
-        return expressions.Statement(expr, engine).evaluate(context=context)
-    except yaql_exceptions.YaqlException:
-        return None
-
-
-def translate(contract, context):
+def translate(contract, context, runtime_version):
     """Translates contracts into json-schema equivalents"""
     if isinstance(contract, dict):
-        return translate_dict(contract, context)
+        return translate_dict(contract, context, runtime_version)
     elif isinstance(contract, list):
-        return translate_list(contract, context)
-    elif isinstance(contract, (dsl_types.YaqlExpression,
-                               expressions.Statement)):
-        context = context.create_child_context()
-        context['$'] = Schema({})
-        return contract(context=context)
+        return translate_list(contract, context, runtime_version)
+    elif isinstance(contract, dsl_types.YaqlExpression):
+        return contracts.Contract.generate_expression_schema(
+            contract, context, runtime_version)
 
 
-def translate_dict(contract, context):
+def translate_dict(contract, context, runtime_version):
     """Translates dictionary contracts into json-schema objects"""
     properties = {}
     additional_properties = False
     for key, value in six.iteritems(contract):
         if isinstance(key, dsl_types.YaqlExpression):
-            additional_properties = translate(value, context)
+            additional_properties = translate(value, context, runtime_version)
         else:
-            properties[key] = translate(value, context)
+            properties[key] = translate(value, context, runtime_version)
     return {
         'type': 'object',
         'properties': properties,
@@ -503,14 +260,14 @@ def translate_dict(contract, context):
     }
 
 
-def translate_list(contract, context):
+def translate_list(contract, context, runtime_version):
     """Translates list contracts into json-schema arrays"""
     items = []
     for value in contract:
         if isinstance(value, int):
             pass
         else:
-            items.append(translate(value, context))
+            items.append(translate(value, context, runtime_version))
     if len(items) == 0:
         return {'type': 'array'}
     elif len(items) == 1:
