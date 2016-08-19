@@ -13,6 +13,7 @@
 Namespaces:
   =: io.murano.applications.tests
   tst: io.murano.test
+  std: io.murano
   apps: io.murano.applications
 
 --- # ------------------------------------------------------------------ # ---
@@ -37,19 +38,22 @@ Properties:
 Methods:
   createReplica:
     Arguments:
-      index:
-        Contract: $.int()
+      - index:
+         Contract: $.int()
+      - owner:
+         Contract: $.class(std:Object)
     Body:
-      - $replica: new(Replica, name=>format('replica-{0}', $index))
+      - $replica: new(Replica, name => format('replica-{0}', $index))
       - $this.allocated: $this.allocated + 1
       - Return: $replica
 
-  releaseReplica:
+  releaseReplicas:
     Arguments:
-      replica:
-        Contract: $
+      replicas:
+        Contract:
+          - $
     Body:
-      - $this.allocated: $this.allocated - 1
+      - $this.allocated: $this.allocated - len($replicas)
 
 
 --- # ------------------------------------------------------------------ # ---
@@ -64,7 +68,7 @@ Methods:
 
   testCreateDefault:
     Body:
-      - $group: new(apps:ReplicationGroup, provider=>$this.provider)
+      - $group: new(apps:ReplicationGroup, provider => $this.provider)
       - $group.deploy()
       - $.assertEqual(1, len($group.items))
       - $.assertEqual(1, $this.provider.allocated)
@@ -72,14 +76,14 @@ Methods:
 
   testCreateMultiple:
     Body:
-      - $group: new(apps:ReplicationGroup, provider=>$this.provider, numItems=>5)
+      - $group: new(apps:ReplicationGroup, provider => $this.provider, numItems => 5)
       - $group.deploy()
       - $.assertEqual(5, len($group.items))
 
 
   testScale:
     Body:
-      - $group: new(apps:ReplicationGroup, provider=>$this.provider)
+      - $group: new(apps:ReplicationGroup, provider => $this.provider)
       - $group.deploy()
       - $.assertEqual(1, len($group.items))
       - $group.scale(1)

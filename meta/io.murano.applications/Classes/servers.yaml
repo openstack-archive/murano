@@ -26,13 +26,14 @@ Methods:
   deployServers:
     Usage: Static
     Arguments:
+      - serverGroup:
+          Contract: $.class(ServerGroup)
       - servers:
           Contract:
             - $.class(res:Instance).notNull()
-      - environment:
-          Contract: $.class(std:Environment)
     Body:
-      - $servers.select($this._deployServer($, $environment))
+      - $environment: $serverGroup.find(std:Environment)
+      - $servers.select($this._deployServer($, $environment, $serverGroup))
       - $servers.select($.endDeploy())
 
   releaseServers:
@@ -52,10 +53,12 @@ Methods:
           Contract: $.class(res:Instance).notNull()
       - environment:
           Contract: $.class(std:Environment)
+      - serverGroup:
+          Contract: $.class(ServerGroup)
     Body:
       - If: $environment and not $server.openstackId
         Then:
-          - $environment.reporter.report($this, 'Provisioning VM for ' + name($server) or $server.name)
+          - $environment.reporter.report($serverGroup, 'Provisioning VM for ' + name($server) or $server.name)
       - $server.beginDeploy()
 
 --- # ------------------------------------------------------------------ # ---
@@ -70,13 +73,9 @@ Properties:
       - $.class(res:Instance).notNull()
 
 Methods:
-  .init:
-    Body:
-      - $this._env: $.find(std:Environment)
-
   deploy:
     Body:
-      - $this.deployServers($this.servers, $this._env)
+      - $this.deployServers($this, $this.servers)
 
   .destroy:
     Body:
@@ -106,7 +105,7 @@ Methods:
 
   deploy:
     Body:
-      - $this.deployServers([$this.server], $this._env)
+      - $this.deployServers($this, [$this.server])
 
   .destroy:
     Body:
@@ -138,12 +137,12 @@ Properties:
 Methods:
   .init:
     Body:
-      - $this._env: $.find(std:Environment)
+      - $this._env: $.find(std:Environment).require()
 
   deploy:
     Body:
       - $delta: $this.numItems - len($this.items)
-      - If: abs($delta) > 1 and $this._env
+      - If: abs($delta) > 1
         Then:
           - $verb: switch($delta > 0 => Creating, $delta < 0 => Removing)
           - $target: switch($delta > 0 => for, $delta < 0 => from)
@@ -155,7 +154,7 @@ Methods:
           - $this._env.reporter.report($this, format('{0} {1} servers{2}',
               $verb, abs($delta), $target))
       - cast($this, ReplicationGroup).deploy()
-      - $this.deployServers($this.items, $this._env)
+      - $this.deployServers($this, $this.items)
 
   .destroy:
     Body:
@@ -188,25 +187,25 @@ Methods:
 --- # ------------------------------------------------------------------ # ---
 # A replication provider acting as a default factory class for Servers
 
-Name: ServerProvider
-Extends: CloneReplicaProvider
+Name: TemplateServerProvider
+Extends: ReplicaProvider
 
 Properties:
-  source:
-    Contract: $.class(res:Instance).notNull()
+  template:
+    Contract: $.template(res:Instance, excludeProperties => [name]).notNull()
 
   serverNamePattern:
     Contract: $.string().notNull()
 
-
 Methods:
-  customizeTemplate:
+  createReplica:
     Arguments:
-      - template:
-          Contract: {}
       - index:
-           Contract: $.int().notNull()
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
     Body:
+      - $template: $this.template
       - $template.name: $this.serverNamePattern.format($index)
       - $ownerGroup: $this.find(ServerGroup)
       - If: $ownerGroup and name($ownerGroup)
@@ -215,11 +214,13 @@ Methods:
         Else:
           - $groupName: ''
       - $template['?'].name: format('Server {0}{1}', $index, $groupName)
-      - Return: $template
+      - Return: new($template, $owner)
 
-  releaseReplica:
+  releaseReplicas:
     Arguments:
-      - replica:
-          Contract: $.class(res:Instance)
+      replicas:
+        Contract:
+          - $.class(std:Object)
     Body:
-      - $replica.beginReleaseResources()
+      - $replicas.select($.beginReleaseResources())
+      - $replicas.select($.endReleaseResources())

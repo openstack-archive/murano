@@ -82,16 +82,17 @@ Methods:
       - $this.pushCalled: 0
 
 
-      - $serverTemplate: new(res:LinuxMuranoInstance, $this.environment,
-                               name => 'whatever',
-                               image => 'murano-latest',
-                               flavor => 't1.medium')
-      - $this.provider: new(apps:ServerProvider, source => $serverTemplate,
-                            serverNamePattern => 'testNode-{0}')
+      - $serverTemplate:
+          image: 'murano-latest'
+          flavor: 't1.medium'
+      - $this.provider: new(apps:TemplateServerProvider,
+          template => $serverTemplate,
+          serverNamePattern => 'testNode-{0}')
 
   testCreateSingleServer:
     Body:
-      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment,
+          provider => $this.provider)
       - $ssg.deploy()
       - $this.assertServerCount(1)
 
@@ -101,11 +102,11 @@ Methods:
           apps:ServerReplicationGroup:
             numItems: 2
             provider:
-              apps:ServerProvider:
-                source: $this.provider.source
+              apps:TemplateServerProvider:
+                template: $this.provider.template
                 serverNamePattern: 'testNode-{0}'
           name: testGroup
-      - $namedSsg: new($model)
+      - $namedSsg: new($model, $this.environment)
       - $namedSsg.deploy()
       - $this.assertEqual('Server 1 (testGroup)', name($namedSsg.items[0]))
       - $this.assertEqual('Server 2 (testGroup)', name($namedSsg.items[1]))
@@ -113,13 +114,15 @@ Methods:
 
   testCreateMultipleServers:
     Body:
-      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 5)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment,
+          provider => $this.provider, numItems => 5)
       - $ssg.deploy()
       - $this.assertServerCount(5)
 
   testCreateScaleUp:
     Body:
-      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 3)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment,
+          provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertServerCount(3)
       - $ssg.scale(4)
@@ -128,7 +131,7 @@ Methods:
 
   testCreateScaleDown:
     Body:
-      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 3)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment, provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertServerCount(3)
       - $ssg.scale(-2)
