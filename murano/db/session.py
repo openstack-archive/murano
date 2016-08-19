@@ -21,7 +21,7 @@ from oslo_db import options
 from oslo_db.sqlalchemy import session as db_session
 from oslo_utils import timeutils
 
-from murano.db.models import Lock
+from murano.db import models
 
 CONF = cfg.CONF
 
@@ -68,11 +68,11 @@ def _get_or_create_lock(name, session, nested, retry=0):
         session.begin_nested()
     else:
         session.begin()
-    existing = session.query(Lock).get(name)
+    existing = session.query(models.Lock).get(name)
     if existing is None:
         try:
             # no lock found, creating a new one
-            lock = Lock(id=name, ts=timeutils.utcnow())
+            lock = models.Lock(id=name, ts=timeutils.utcnow())
             lock.save(session)
             return session.transaction
             # lock created and acquired
