@@ -62,13 +62,13 @@ Methods:
   testInstallReportingSequence:
     Body:
       - $cmp: new(InstallableToTest, $this.environment, testComp)
-      - $cmp.deployAt($this.group)
+      - $cmp.install($this.group)
       - $this.assertInstallingSequence(0)
 
   testConfigureReportingSequence:
     Body:
       - $cmp: new(ConfigurableToTest, $this.environment, testComp)
-      - $cmp.deployAt($this.group)
+      - $cmp.configure($this.group)
       - $this.assertConfiguringSequence(0)
 
   testCombinedSequence:
