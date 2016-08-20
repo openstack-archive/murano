@@ -52,7 +52,7 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = False
-        executor._validate_model(self.obj, self.package_loader)
+        executor._validate_model(self.obj, self.package_loader, None)
 
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
@@ -61,7 +61,8 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = True
-        executor._validate_model(self.obj, self.package_loader)
+        dsl_executor = mock.Mock()
+        executor._validate_model(self.obj, self.package_loader, dsl_executor)
 
         executor._model_policy_enforcer \
             .validate.assert_called_once_with(self.model_dict,
@@ -121,13 +122,14 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
         executor._model_policy_enforcer = mock.Mock()
 
         CONF.engine.enable_model_policy_enforcer = True
+        dsl_executor = mock.Mock()
 
-        executor._validate_model(None, self.package_loader)
+        executor._validate_model(None, self.package_loader, dsl_executor)
 
         self.assertFalse(executor._model_policy_enforcer.modify.called)
         self.assertFalse(executor._model_policy_enforcer.validate.called)
 
-        executor._validate_model(self.obj, self.package_loader)
+        executor._validate_model(self.obj, self.package_loader, dsl_executor)
 
         self.assertTrue(executor._model_policy_enforcer.modify.called)
         self.assertTrue(executor._model_policy_enforcer.validate.called)
