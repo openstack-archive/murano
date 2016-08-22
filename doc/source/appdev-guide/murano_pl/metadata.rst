@@ -13,26 +13,29 @@ keyword for every new feature.
 
 Work with metadata includes the following cases:
 
-* Defining your own meta-classes
+* Defining your own metadata classes
 * Attaching metadata to various parts of MuranoPL code
 * Obtaining metadata and its usage
 
-Define meta-classes
--------------------
+Define metadata classes
+-----------------------
 
-Define meta-class with the description of arbitrary metadata. Meta-class and
-regular class have two differences. The ``Usage`` attribute of meta-class
-equals to ``Meta``, while the ``Usage`` attribute of regular class equals to
-``Class``. The default value of the ``Usage`` attribute is ``Class``.
-Meta-class also has additional attributes (``Cardinality``, ``Applies`` and
-``Inherited``) to control how and where instances of that meta-class can
-be attached.
+Define MuranoPL class with the description of arbitrary metadata. The class
+that can be used as metadata differs from the regular class:
+
+* The ``Usage`` attribute of the former equals to ``Meta``, while the ``Usage``
+  attribute of the latter equals to ``Class``. The default value of the
+  ``Usage`` attribute is ``Class``.
+
+* Metadata class has additional attributes (``Cardinality``, ``Applies`` and
+  ``Inherited``) to control how and where instances of that class can be
+  attached.
 
 Cardinality
 +++++++++++
 
 The ``Cardinality`` attribute can be set to either ``One`` or ``Many`` and
-indicates the possibility to attach two or more instances of meta-class to a
+indicates the possibility to attach two or more instances of metadata to a
 single language entity. The default value is ``One``.
 
 Applies
@@ -40,7 +43,7 @@ Applies
 
 The ``Applies`` attribute can be set to one of ``Package``, ``Type``,
 ``Method``, ``Property``, ``Argument`` or ``All`` and controls the possible
-language entities which instances of meta-class can be attached to. It is
+language entities which instances of metadata class can be attached to. It is
 possible to specify several values using YAML list notation. The default value
 is ``All``.
 
@@ -86,7 +89,7 @@ The following example shows a simple meta-class implementation:
         Contract: $.int().check($ >= 0)
         Default: 0
 
-``MetaClassOne`` is defined as a meta-class by setting the ``Usage``
+``MetaClassOne`` is defined as a metadata class by setting the ``Usage``
 attribute to ``Meta``. The ``Cardinality`` and ``Applies`` attributes determine
 that only one instance of ``MetaClassOne`` can be attached to object of any
 type. The ``Inherited`` attribute is omitted so there is no metadata
@@ -95,7 +98,7 @@ example above, ``Cardinality`` and ``Applies`` can be omitted as well, as
 their values are set to default but in this case the author wants to be
 explicit.
 
-The following example shows meta-class with different values of attributes:
+The following example shows metadata class with different values of attributes:
 
 .. code-block:: yaml
 
@@ -123,9 +126,9 @@ Attach metadata to a MuranoPL entity
 
 To attach metadata to MuranoPL class, package, property, method or method
 argument, add the ``Meta`` keyword to its description. Under the
-description, specify a list of meta-class instances which you want to attach
-to the entity. To attach only one meta-class instance, use a single scalar
-instead of a list.
+description, specify a list of metadata class instances which you want to
+attach to the entity. To attach only one metadata class instance, use a single
+scalar instead of a list.
 
 Consider the example of attaching previously defined metadata to different
 entities in a class definition:
@@ -177,8 +180,8 @@ entities in a class definition:
               - $._environment.reporter.report($this, 'Deploy finished')
               - $.setAttr(deployed, true)
 
-The ``Bar`` class has an instance of meta-class ``MetaClassOne`` attached. For
-this, the ``Meta`` keyword is added to the ``Bar`` class description and
+The ``Bar`` class has an instance of metadata class ``MetaClassOne`` attached.
+For this, the ``Meta`` keyword is added to the ``Bar`` class description and
 the instance of the ``MetaClassOne`` class is specified under it. This
 instance's properties are ``description`` and ``count``.
 
@@ -272,8 +275,7 @@ Capabilities can include version of software, information for use in UI or
 CLI, permissions, and any other. Metadata can also be used in requirements as
 a part of the contract.
 
-The following example demonstrates the possible use cases for the
-meta-classes:
+The following example demonstrates the possible use cases for the metadata:
 
 .. code-block:: yaml
 
@@ -302,15 +304,15 @@ meta-classes:
 Note, that the classes in the example do not exist as of Murano Mitaka, and
 therefore the example is not a real working code.
 
-The ``SomeFeatureSupport`` meta-class with ``support: true`` says that the
-``BlogApp`` application supports some feature. The ``Deprecated`` meta-class
+The ``SomeFeatureSupport`` metadata with ``support: true`` says that the
+``BlogApp`` application supports some feature. The ``Deprecated`` metadata
 attached to the ``volumeName`` property informs that this
 property has a better alternative and it will not be used in the future
-versions anymore. The ``CallerMustBeAdmin`` meta-class attached to the
+versions anymore. The ``CallerMustBeAdmin`` metadata attached to the
 ``importantAction`` method sets permission to execute this method to the
 admin users only.
 
 In the contract of the ``server`` property it is specified that the server
 application must be of the ``srv:CoolServer`` class and must have the
-attached meta-object of the ``m:SomeFeatureSupport`` meta-class with the
+attached meta-object of the ``m:SomeFeatureSupport`` class with the
 ``support`` property set to ``true``.
