@@ -296,12 +296,15 @@ This section describes how to install and run the murano dashboard.
         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
 
 #. For the OpenStack installations of the Newton (and later) version,
-   copy murano dashboard specific settings file to horizon dashboard:
+   copy murano dashboard specific settings and policy files
+   to horizon dashboard:
 
     .. code-block:: console
 
        cp ../murano-dashboard/muranodashboard/local/local_settings.d/_50_murano.py \
        openstack_dashboard/local/local_settings.d/
+
+       cp ../murano-dashboard/conf/* openstack_dashboard/conf/
 
 #. Change the default session back end from browser cookies to database
    to avoid issues with forms during the applications creation:
