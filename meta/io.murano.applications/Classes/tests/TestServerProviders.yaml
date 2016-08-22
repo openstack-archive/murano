@@ -83,22 +83,22 @@ Methods:
 
 
       - $serverTemplate: new(res:LinuxMuranoInstance, $this.environment,
-                               name=>'whatever',
-                               image=>'murano-latest',
-                               flavor=>'t1.medium')
-      - $this.provider: new(apps:ServerProvider, source=>$serverTemplate,
-                            serverNamePattern=>'testNode-{0}')
+                               name => 'whatever',
+                               image => 'murano-latest',
+                               flavor => 't1.medium')
+      - $this.provider: new(apps:ServerProvider, source => $serverTemplate,
+                            serverNamePattern => 'testNode-{0}')
 
   testCreateSingleServer:
     Body:
-      - $ssg: new(apps:ServerGroup, provider=>$this.provider)
+      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider)
       - $ssg.deploy()
       - $this.assertServerCount(1)
 
   testServersHaveProperName:
     Body:
       - $model:
-          apps:ServerGroup:
+          apps:ServerReplicationGroup:
             numItems: 2
             provider:
               apps:ServerProvider:
@@ -113,13 +113,13 @@ Methods:
 
   testCreateMultipleServers:
     Body:
-      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>5)
+      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 5)
       - $ssg.deploy()
       - $this.assertServerCount(5)
 
   testCreateScaleUp:
     Body:
-      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertServerCount(3)
       - $ssg.scale(4)
@@ -128,7 +128,7 @@ Methods:
 
   testCreateScaleDown:
     Body:
-      - $ssg: new(apps:ServerGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerReplicationGroup, provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertServerCount(3)
       - $ssg.scale(-2)
@@ -137,7 +137,8 @@ Methods:
 
   testMultipleServersReporting:
     Body:
-      - $ssg: new(apps:ServerGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment, TestGroup,
+          provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers for TestGroup', $this.reports[0])
       - $ssg.scale(-2)
@@ -145,7 +146,8 @@ Methods:
 
   testMultipleServersReportingNoGroupName:
     Body:
-      - $ssg: new(apps:ServerGroup, $this.environment, null, provider=>$this.provider, numItems=>3)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment, null,
+          provider => $this.provider, numItems => 3)
       - $ssg.deploy()
       - $this.assertEqual('Creating 3 servers', $this.reports[0])
       - $ssg.scale(-2)
@@ -153,7 +155,8 @@ Methods:
 
   testNoReportingIfSingleServer:
     Body:
-      - $ssg: new(apps:ServerGroup, $this.environment, TestGroup, provider=>$this.provider, numItems=>1)
+      - $ssg: new(apps:ServerReplicationGroup, $this.environment, TestGroup,
+          provider => $this.provider, numItems => 1)
       - $ssg.deploy()
       - $this.assertEqual(1, len($this.reports))
 
@@ -163,4 +166,5 @@ Methods:
       - count:
           Contract: $.int()
     Body:
-      - $this.assertEqual($count, $this.currentTemplate.resources.values().where($.type='OS::Nova::Server').len())
+      - $this.assertEqual($count, $this.currentTemplate.resources.values().where(
+        $.type = 'OS::Nova::Server').len())

@@ -17,19 +17,121 @@ Namespaces:
   std: io.murano
 
 --- # ------------------------------------------------------------------ # ---
+# A group of Servers
+
+Name: ServerGroup
+Methods:
+  getServers:
+
+  deployServers:
+    Usage: Static
+    Arguments:
+      - servers:
+          Contract:
+            - $.class(res:Instance).notNull()
+      - environment:
+          Contract: $.class(std:Environment)
+    Body:
+      - $servers.select($this._deployServer($, $environment))
+      - $servers.select($.endDeploy())
+
+  releaseServers:
+    Usage: Static
+    Arguments:
+      - servers:
+          Contract:
+            - $.class(res:Instance).notNull()
+    Body:
+      - $servers.select($.beginReleaseResources())
+      - $servers.select($.endReleaseResources())
+
+  _deployServer:
+    Usage: Static
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+      - environment:
+          Contract: $.class(std:Environment)
+    Body:
+      - If: $environment and not $server.openstackId
+        Then:
+          - $environment.reporter.report($this, 'Provisioning VM for ' + name($server) or $server.name)
+      - $server.beginDeploy()
+
+--- # ------------------------------------------------------------------ # ---
+# A group of prepopulated servers
+
+Name: ServerList
+Extends: ServerGroup
+
+Properties:
+  servers:
+    Contract:
+      - $.class(res:Instance).notNull()
+
+Methods:
+  .init:
+    Body:
+      - $this._env: $.find(std:Environment)
+
+  deploy:
+    Body:
+      - $this.deployServers($this.servers, $this._env)
+
+  .destroy:
+    Body:
+      - $this.releaseServers($this.items)
+
+  getServers:
+    Body:
+      Return: $.servers
+
+--- # ------------------------------------------------------------------ # ---
+# Degenrate case of a server group which consists of a single server
+
+Name: SingleServerGroup
+Extends: ServerGroup
+
+Properties:
+  server:
+    Contract: $.class(res:Instance).notNull()
+
+Methods:
+  setServer:
+    Arguments:
+      - server:
+          Contract: $.class(res:Instance).notNull()
+    Body:
+      - $this.items: $server
+
+  deploy:
+    Body:
+      - $this.deployServers([$this.server], $this._env)
+
+  .destroy:
+    Body:
+      - $this.releaseServers([$this.server])
+
+  getServers:
+    Body:
+      Return: [$.server]
+
+--- # ------------------------------------------------------------------ # ---
 # A replication group aggregating Servers
 # Adds a logic to concurrently provision and unprovision servers
 
 
-Name: ServerGroup
+Name: ServerReplicationGroup
 Extends:
   - ReplicationGroup
+  - ServerGroup
 
 Properties:
   provider:
     Contract: $.class(ReplicaProvider).notNull()
+
   items:
-    Usage: InOut
+    Usage: Out
     Contract:
       - $.class(res:Instance)
 
@@ -50,27 +152,38 @@ Methods:
               - $target: format(' {0} {1}', $target, name($this))
             Else:
               - $target: ''
-          - $this._env.reporter.report($this, format('{0} {1} servers{2}', $verb, abs($delta), $target))
-
-
+          - $this._env.reporter.report($this, format('{0} {1} servers{2}',
+              $verb, abs($delta), $target))
       - cast($this, ReplicationGroup).deploy()
-      - $this.items.select($this._deployServer($))
-      - $this.items.select($.endDeploy())
-
-  _deployServer:
-    Arguments:
-      - server:
-          Contract: $.class(res:Instance)
-    Body:
-      - If: $this._env and not $server.openstackId
-        Then:
-          - $this._env.reporter.report($this, 'Provisioning VM for ' + name($server) or $server.name)
-      - $server.beginDeploy()
+      - $this.deployServers($this.items, $this._env)
 
   .destroy:
     Body:
-      - $this.items.select($.beginReleaseResources())
-      - $this.items.select($.endReleaseResources())
+      - $this.releaseServers($this.items)
+
+  getServers:
+    Body:
+      Return: $.items
+
+--- # ------------------------------------------------------------------ # ---
+# A server group that composed of other server groups
+
+Name: CompositeServerGroup
+Extends: ServerGroup
+
+Properties:
+  serverGroups:
+    Contract:
+      - $.class(ServerGroup).notNull()
+
+Methods:
+  deploy:
+    Body:
+      - $this.serverGroups.pselect($.deploy())
+
+  getServers:
+    Body:
+      Return: $this.serverGroups.selectMany($.getServers())
 
 --- # ------------------------------------------------------------------ # ---
 # A replication provider acting as a default factory class for Servers

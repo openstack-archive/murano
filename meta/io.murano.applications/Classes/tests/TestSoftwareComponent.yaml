@@ -54,7 +54,7 @@ Methods:
                      flavor=>'noop')
       - $provider: new(apps:ServerProvider, $this.environment,
                        source=>$server, serverNamePattern=>'testNode-{0}')
-      - $this.group: new(apps:ServerGroup, provider=>$provider, numItems=>5)
+      - $this.group: new(apps:ServerReplicationGroup, provider=>$provider, numItems=>5)
       - $this.group.deploy()
       - $this.reports: []
       - inject($this.environment.reporter, report, $this, report)
