@@ -501,10 +501,10 @@ function configure_local_settings_py() {
     fi
 
     # Install Murano as plugin for Horizon
-    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/enabled/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/enabled/
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/enabled/*.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 
     # Install setting to Horizon
-    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/local_settings.d/_50_murano.py $HORIZON_DIR/openstack_dashboard/local/local_settings.d/
+    ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/local_settings.d/*.py $HORIZON_DIR/openstack_dashboard/local/local_settings.d/
 
     # Install murano RBAC policy to Horizon
     ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/conf/murano_policy.json $HORIZON_DIR/openstack_dashboard/conf/

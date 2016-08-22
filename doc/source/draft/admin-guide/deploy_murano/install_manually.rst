@@ -248,24 +248,6 @@ This section describes how to install and run the murano dashboard.
         cd horizon
         tox -e venv -- pip install -e ../murano-dashboard
 
-#.  Enable the murano panel in the OpenStack Dashboard by copying
-    the ``muranodashboard`` plug-in file to
-    the ``openstack_dashboard/local/enabled/`` directory:
-
-    * For the OpenStack installations prior to the Newton release, run:
-
-      .. code-block:: console
-
-         cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
-         openstack_dashboard/local/enabled/
-
-    * For the Newton (and later) OpenStack installations, run:
-
-      .. code-block:: console
-
-         cp ../murano-dashboard/muranodashboard/local/enabled/_50_murano.py \
-         openstack_dashboard/local/enabled/
-
 #.  Prepare local settings.
 
     .. code-block:: console
@@ -276,49 +258,57 @@ This section describes how to install and run the murano dashboard.
      For more information, check out the official
      `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
 
-#.  Customize local settings according to your OpenStack installation:
+#.  Enable and configure Murano dashboard in the OpenStack Dashboard:
 
-    .. code-block:: ini
+    * For the Newton (and later) OpenStack installations, copy plug-in file
+      local settings files, and policy files:
 
-        ...
-        ALLOWED_HOSTS = '*'
+      .. code-block:: console
 
-        # Provide OpenStack Lab credentials
-        OPENSTACK_HOST = '%OPENSTACK_HOST_IP%'
+         cp ../murano-dashboard/muranodashboard/local/enabled/*.py \
+         openstack_dashboard/local/enabled/
 
-        ...
+         cp ../murano-dashboard/muranodashboard/local/local_settings.d/*.py \
+         openstack_dashboard/local/local_settings.d/
 
-        # Set secret key to prevent it's generation
-        SECRET_KEY = 'random_string'
+         cp ../murano-dashboard/muranodashboard/conf/* openstack_dashboard/conf/
 
-        ...
+    * For the OpenStack installations prior to the Newton release, run:
 
-        DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
+      .. code-block:: console
 
-#. For the OpenStack installations of the Newton (and later) version,
-   copy murano dashboard specific settings and policy files
-   to horizon dashboard:
+         cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
+         openstack_dashboard/local/enabled/
 
-    .. code-block:: console
+      Customize local settings of your horizon installation, by editing the
+      ``openstack_dashboard/local/local_settings.py`` file:
 
-       cp ../murano-dashboard/muranodashboard/local/local_settings.d/_50_murano.py \
-       openstack_dashboard/local/local_settings.d/
+      .. code-block:: python
 
-       cp ../murano-dashboard/conf/* openstack_dashboard/conf/
+         ...
+         ALLOWED_HOSTS = '*'
 
-#. Change the default session back end from browser cookies to database
-   to avoid issues with forms during the applications creation:
+         # Provide your OpenStack Lab credentials
+         OPENSTACK_HOST = '%OPENSTACK_HOST_IP%'
 
-    .. code-block:: python
+         ...
 
-       DATABASES = {
+         DEBUG_PROPAGATE_EXCEPTIONS = DEBUG
+
+      Change the default session back end from browser cookies to database
+      to avoid issues with forms during the applications creation:
+
+      .. code-block:: python
+
+         DATABASES = {
            'default': {
            'ENGINE': 'django.db.backends.sqlite3',
            'NAME': 'murano-dashboard.sqlite',
            }
-       }
+         }
 
-       SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+         SESSION_ENGINE = 'django.contrib.sessions.backends.db'
+
 
 #. (Optional) If you do not plan to get the murano service from the keystone
    application catalog, specify where the ``murano-api`` service is running:
@@ -327,8 +317,9 @@ This section describes how to install and run the murano dashboard.
 
        MURANO_API_URL = 'http://localhost:8082'
 
-#. (Optional) If you have set up the database as a session back end,
-   perform the database synchronization:
+#. (Optional) If you have set up the database as a session back end (this is
+   done by default with murano local_settings file starting with Newton),
+   perform database migration:
 
    .. code-block:: console
 
@@ -348,7 +339,7 @@ This section describes how to install and run the murano dashboard.
 
        The development server restarts automatically on every code change.
 
-**Result:** The murano dashboard is available at ``http://localhost:8000``.
+**Result:** The murano dashboard is available at ``http://IP:PORT``.
 
 Import murano applications
 ~~~~~~~~~~~~~~~~~~~~~~~~~~
