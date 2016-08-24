@@ -22,7 +22,7 @@ from murano.common.i18n import _, _LE
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
-from murano.db.models import EnvironmentTemplate
+from murano.db import models
 from murano.db.services import core_services
 from murano.db.services import environment_templates as env_temps
 from murano.db.services import environments as envs
@@ -59,8 +59,8 @@ class Controller(object):
                 get_env_templates_by(filters)
 
         else:
-            filters = (EnvironmentTemplate.is_public,
-                       EnvironmentTemplate.tenant_id == tenant_id)
+            filters = (models.EnvironmentTemplate.is_public,
+                       models.EnvironmentTemplate.tenant_id == tenant_id)
             list_templates = env_temps.EnvTemplateServices.\
                 get_env_templates_or_by(filters)
 

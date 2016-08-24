@@ -13,9 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from mock import ANY
-from mock import MagicMock
-from mock.mock import call
+import mock
 
 from murano.dsl import helpers
 from murano.engine.system import logger
@@ -26,12 +24,12 @@ from murano.tests.unit.dsl.foundation import test_case
 class TestLogger(test_case.DslTestCase):
 
     FORMAT_CALLS = [
-        call(ANY, 'str', (), {}),
-        call(ANY, u'тест', (), {}),
-        call(ANY, 'str', (1,), {}),
-        call(ANY, 'str {0}', ('message',), {}),
-        call(ANY, 'str {message}', (), {'message': 'message'}),
-        call(ANY, 'str {message}{0}', (), {})]
+        mock.call(mock.ANY, 'str', (), {}),
+        mock.call(mock.ANY, u'тест', (), {}),
+        mock.call(mock.ANY, 'str', (1,), {}),
+        mock.call(mock.ANY, 'str {0}', ('message',), {}),
+        mock.call(mock.ANY, 'str {message}', (), {'message': 'message'}),
+        mock.call(mock.ANY, 'str {message}{0}', (), {})]
 
     LOG_CALLS = FORMAT_CALLS
 
@@ -51,14 +49,14 @@ class TestLogger(test_case.DslTestCase):
         logger_instance = self._runner.testCreate()
         logger_ext = logger_instance.extension
 
-        underlying_logger_mock = MagicMock()
+        underlying_logger_mock = mock.MagicMock()
         logger_ext._underlying_logger = underlying_logger_mock
         logger_ext._underlying_logger.return_value = None
 
-        format_mock = MagicMock(return_value='format_mock')
+        format_mock = mock.MagicMock(return_value='format_mock')
         # do not verify number of conversions to string
-        format_mock.__str__ = MagicMock(return_value='format_mock')
-        format_mock.__unicode__ = MagicMock(return_value='format_mock')
+        format_mock.__str__ = mock.MagicMock(return_value='format_mock')
+        format_mock.__unicode__ = mock.MagicMock(return_value='format_mock')
 
         logger_ext._format_without_exceptions = format_mock
 
@@ -67,7 +65,7 @@ class TestLogger(test_case.DslTestCase):
     def test_trace(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.trace = log_method
         self._runner.testTrace(logger_instance)
@@ -78,7 +76,7 @@ class TestLogger(test_case.DslTestCase):
     def test_debug(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.debug = log_method
         self._runner.testDebug(logger_instance)
@@ -89,7 +87,7 @@ class TestLogger(test_case.DslTestCase):
     def test_info(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.info = log_method
         self._runner.testInfo(logger_instance)
@@ -100,7 +98,7 @@ class TestLogger(test_case.DslTestCase):
     def test_warning(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.warning = log_method
         self._runner.testWarning(logger_instance)
@@ -111,7 +109,7 @@ class TestLogger(test_case.DslTestCase):
     def test_error(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.error = log_method
         self._runner.testError(logger_instance)
@@ -122,7 +120,7 @@ class TestLogger(test_case.DslTestCase):
     def test_critical(self):
         logger_instance, format_mock, underlying_logger_mock \
             = self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.critical = log_method
         self._runner.testCritical(logger_instance)
@@ -133,7 +131,7 @@ class TestLogger(test_case.DslTestCase):
     def test_exception(self):
         logger_instance, format_mock, underlying_logger_mock = \
             self._create_logger_mock()
-        log_method = MagicMock()
+        log_method = mock.MagicMock()
 
         underlying_logger_mock.error = log_method
         self._runner.testException(logger_instance)
