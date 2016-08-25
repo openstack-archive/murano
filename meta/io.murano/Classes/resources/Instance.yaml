@@ -17,7 +17,7 @@ Namespaces:
 
 
 Name: Instance
-
+Extends: std:CloudResource
 
 Properties:
   name:
@@ -80,7 +80,7 @@ Properties:
 Methods:
   initialize:
     Body:
-      - $.environment: $.find(std:Environment).require()
+      - $._environment: $.find(std:Environment).require()
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
       - $.instanceTemplate: {}
@@ -106,26 +106,28 @@ Methods:
   beginDeploy:
     Body:
       - $.validateBootSource()
+      - $region: $.getRegion()
       - $securityGroupName: coalesce(
             $.securityGroupName,
-            $.environment.securityGroupManager.defaultGroupName
+            $region.securityGroupManager.defaultGroupName
           )
       - $.createDefaultInstanceSecurityGroupRules($securityGroupName)
       - $.detectPrimaryNetwork()
       - $.ensureSharedIpsDeployed()
       - $.ensureNetworksDeployed()
-      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
+      - If: $.networks.useEnvironmentNetwork and $region.defaultNetworks.environment!=null
         Then:
-          $.joinNet($.environment.defaultNetworks.environment, $securityGroupName)
-      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
+          $.joinNet($region.defaultNetworks.environment, $securityGroupName)
+      - If: $.networks.useFlatNetwork and $region.defaultNetworks.flat!=null
         Then:
-          $.joinNet($.environment.defaultNetworks.flat, $securityGroupName)
+          $.joinNet($region.defaultNetworks.flat, $securityGroupName)
       - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
 
       - $preparedUserData: $.prepareUserData()
       # Create MQ queue to communicate with the VM
       - $.agent.prepare()
       - $properties:
+          name: $.name
           flavor: $.flavor
           availability_zone: $.availabilityZone
           user_data: $preparedUserData.data
@@ -161,12 +163,13 @@ Methods:
 
       # Any additional template preparation
       - $.instanceTemplate: $.prepareStackTemplate($.instanceTemplate)
-      - $.environment.stack.updateTemplate($.instanceTemplate)
+      - $region.stack.updateTemplate($.instanceTemplate)
 
   endDeploy:
     Body:
-      - $.environment.stack.push()
-      - $outputs: $.environment.stack.output()
+      - $region: $.getRegion()
+      - $region.stack.push()
+      - $outputs: $region.stack.output()
       - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten().distinct()
       - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
@@ -174,7 +177,7 @@ Methods:
           - $.floatingIpAddress: $outputs.get($._floatingIpOutputName)
           - If: $.floatingIpAddress != null
             Then: $.setAttr(fipAssigned, true)
-      - $.environment.instanceNotifier.trackCloudInstance($this)
+      - $._environment.instanceNotifier.trackCloudInstance($this)
 
   deploy:
     Body:
@@ -183,18 +186,19 @@ Methods:
 
   detectPrimaryNetwork:
     Body:
+      - $region: $.getRegion()
       - $._primaryNetwork: null
       - If: $.networks.primaryNetwork != null
         Then:
           - $._primaryNetwork: $.networks.primaryNetwork
         Else:
-          - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
+          - If: $.networks.useEnvironmentNetwork and $region.defaultNetworks.environment!=null
             Then:
-              - $._primaryNetwork: $.environment.defaultNetworks.environment
+              - $._primaryNetwork: $region.defaultNetworks.environment
             Else:
-              - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
+              - If: $.networks.useFlatNetwork and $region.defaultNetworks.flat!=null
                 Then:
-                  - $._primaryNetwork: $.environment.defaultNetworks.flat
+                  - $._primaryNetwork: $region.defaultNetworks.flat
                 Else:
                   - If: $.networks.customNetworks!= null
                     Then:
@@ -202,12 +206,13 @@ Methods:
 
   ensureNetworksDeployed:
     Body:
-      - If: $.networks.useEnvironmentNetwork and $.environment.defaultNetworks.environment!=null
+      - $region: $.getRegion()
+      - If: $.networks.useEnvironmentNetwork and $region.defaultNetworks.environment!=null
         Then:
-          - $.environment.defaultNetworks.environment.deploy()
-      - If: $.networks.useFlatNetwork and $.environment.defaultNetworks.flat!=null
+          - $region.defaultNetworks.environment.deploy()
+      - If: $.networks.useFlatNetwork and $region.defaultNetworks.flat!=null
         Then:
-          - $.environment.defaultNetworks.flat.deploy()
+          - $region.defaultNetworks.flat.deploy()
       - $.networks.customNetworks.pselect($.deploy())
 
   ensureSharedIpsDeployed:
@@ -250,7 +255,7 @@ Methods:
                       - port:
                           $joinResult.portRef
           - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
-      - If: $joinResult.secGroupName != null
+      - If: $joinResult.get(secGroupName) != null
         Then:
           - $template:
               resources:
@@ -293,29 +298,31 @@ Methods:
 
   beginReleaseResources:
     Body:
-      - $template: $.environment.stack.current()
-      - If: bool($template.resources) and bool($template.outputs)
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
+      - If: $template.get(resources) and $template.get(outputs)
         Then:
           - $resourcesToDelete: list($.name).concat($.getAttr(instanceResources, []))
           - $lenBefore: len($template.resources)
           - $template.resources: $template.resources.deleteAll($resourcesToDelete)
           - If: $lenBefore > len($template.resources)
             Then:
-              - $.environment.instanceNotifier.untrackCloudInstance($this)
+              - $._environment.instanceNotifier.untrackCloudInstance($this)
 
           - $outputsToDelete: list(
               '{0}-assigned-ips'.format($.name),
               '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
           - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
 
-          - $.environment.stack.setTemplate($template)
+          - $region.stack.setTemplate($template)
 
   endReleaseResources:
     Body:
-      - $template: $.environment.stack.current()
-      - If: bool($template.resources) and bool($template.outputs)
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
+      - If: $template.get(resources) and $template.get(outputs)
         Then:
-          - $.environment.stack.push()
+          - $region.stack.push()
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
       - $.setAttr(fipAssigned, false)
@@ -360,8 +367,9 @@ Methods:
 
   isDeployed:
     Body:
-      - $template: $.environment.stack.current()
-      - Return: $template.resources != null and $.name in $template.resources
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
+      - Return: $template.get(resources, {}).containsKey($.name)
 
   getRef:
     Body:

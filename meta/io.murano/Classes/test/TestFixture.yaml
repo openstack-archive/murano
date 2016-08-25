@@ -46,11 +46,8 @@ Methods:
       - Return: {}
 
   generateSecurityGroupManager:
-    Arguments:
-      - environment:
-          Contract: $.class(std:Environment).notNull()
     Body:
-      - Return: new(sys:SecurityGroupManager, environment => $environment)
+      - Return: new(sys:DummySecurityGroupManager)
 
   describe:
     Body:

@@ -69,11 +69,8 @@ Methods:
 
 
   generateSecurityGroupManager:
-    Arguments:
-      - environment:
-          Contract: $.class(std:Environment).notNull()
     Body:
-      - Return: new(sys:AwsSecurityGroupManager, environment => $environment)
+      - Return: new(sys:AwsSecurityGroupManager)
 
 
   describe:

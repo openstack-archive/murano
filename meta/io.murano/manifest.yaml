@@ -10,7 +10,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 
-Format: 1.1
+Format: 1.4
 
 Type: Library
 
@@ -28,6 +28,8 @@ Tags: [MuranoPL]
 Classes:
   io.murano.Object: Object.yaml
   io.murano.Environment: Environment.yaml
+  io.murano.CloudRegion: CloudRegion.yaml
+  io.murano.CloudResource: CloudResource.yaml
   io.murano.Application: Application.yaml
   io.murano.Exception: Exception.yaml
   io.murano.StackTrace: StackTrace.yaml

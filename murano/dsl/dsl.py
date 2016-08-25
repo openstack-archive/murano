@@ -162,9 +162,10 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             def func(*args, **kwargs):
                 self._insert_instruction()
                 with helpers.with_object_store(self.__object_store):
-                    return self.__object.type.invoke(
+                    context = helpers.get_context()
+                    return to_mutable(self.__object.type.invoke(
                         item, self.__object, args, kwargs,
-                        helpers.get_context())
+                        context), helpers.get_yaql_engine(context))
             return func
 
         @staticmethod

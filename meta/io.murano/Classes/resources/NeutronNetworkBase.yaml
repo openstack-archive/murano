@@ -20,8 +20,10 @@ Name: NeutronNetworkBase
 Extends: Network
 
 Methods:
-  initialize:
+  .init:
     Body:
+      - $._environment: $.find(std:Environment)
+      - $._region: $.getRegion()
       - $._netExplorer: new(sys:NetworkExplorer, $this)
       - $._securityGroupsEnabled: $._netExplorer.listNeutronExtensions().alias.contains('security-group')
 
@@ -43,7 +45,7 @@ Methods:
       - floatingIpNetRef:
           Contract: $
     Body:
-      - $portName: format('port-{0}-{1}', $.id(), $instance.name)
+      - $portName: format('port-{0}-{1}', id($), $instance.name)
       - $patchTemplate:
           resources:
             $portName:
@@ -108,13 +110,10 @@ Methods:
 
 
   generateSecurityGroupManager:
-    Arguments:
-      - environment:
-          Contract: $.class(std:Environment).notNull()
     Body:
       - If: $this._securityGroupsEnabled
         Then:
-          - Return: new(sys:NeutronSecurityGroupManager, environment => $environment)
+          - Return: new(sys:NeutronSecurityGroupManager, $._region)
         Else:
-          - $environment.reporter.report($this, "Warning! Security groups are disabled!")
-          - Return: new(sys:DummySecurityGroupManager, environment => $environment)
+          - $._environment.reporter.report($this, "Warning! Security groups are disabled!")
+          - Return: new(sys:DummySecurityGroupManager, $._region)

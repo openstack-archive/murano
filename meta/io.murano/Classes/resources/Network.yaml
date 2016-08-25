@@ -15,6 +15,7 @@ Namespaces:
   std: io.murano
 
 Name: Network
+Extends: std:CloudResource
 
 Methods:
   deploy:
@@ -32,8 +33,5 @@ Methods:
             - $.class(std:SharedIp)
 
   generateSecurityGroupManager:
-    Arguments:
-      - environment:
-          Contract: $.class(std:Environment).notNull()
 
   describe:

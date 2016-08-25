@@ -20,10 +20,8 @@ from murano.common.messaging import mqclient
 CONF = cfg.CONF
 
 
-def create_rmq_client(environment):
-    region_name = environment['region']
-    region_configs = environment['regionConfigs']
-    region_config = region_configs.get(region_name, region_configs[None])
-    rmq_settings = region_config['agentRabbitMq'].copy()
+def create_rmq_client(region):
+    region_config = region().getConfig()
+    rmq_settings = dict(region_config['agentRabbitMq'])
     rmq_settings['ca_certs'] = CONF.rabbitmq.ca_certs.strip() or None
     return mqclient.MqClient(**rmq_settings)

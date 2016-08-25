@@ -21,7 +21,7 @@ Methods:
     - userData:
         Contract: $.string().notNull()
     Body:
-    - $environment: $.find(std:Environment).require()
+    - $region: $.getRegion()
     - $cloudInitConf: $.generateCloudConfig()
     - $bootConfigResourceName: format('boot_config_{0}', $.name)
     - $bootScriptResourceName: format('boot_script_{0}', $.name)
@@ -44,14 +44,13 @@ Methods:
                 - config: {get_resource: $bootConfigResourceName}
                 - config: {get_resource: $bootScriptResourceName}
 
-    - $environment.stack.updateTemplate($template)
+    - $region.stack.updateTemplate($template)
     - Return: {get_resource: $userDataResourceName}
 
 
  generateCloudConfig:
     Body:
-        - $resources: new(sys:Resources)
-        - $cloudConfigData: $.cast(LinuxMuranoInstance).generateCloudConfig()
-        - $confLang: $resources.yaml('conflang.conf')
-        - $cloudInitConf: $cloudConfigData.mergeWith($confLang)
-        - Return: $cloudInitConf
+    - $cloudConfigData: cast($, LinuxMuranoInstance).generateCloudConfig()
+    - $confLang: sys:Resources.yaml('conflang.conf')
+    - $cloudInitConf: $cloudConfigData.mergeWith($confLang)
+    - Return: $cloudInitConf

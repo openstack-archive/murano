@@ -1,0 +1,29 @@
+Namespaces:
+    =: io.murano
+
+Name: CloudResource
+
+Properties:
+  regionName:
+    Contract: $.string()
+
+Methods:
+  .init:
+    Body:
+      $._region: null
+
+  getRegion:
+    Meta:
+      'io.murano.metadata.engine.Synchronize':
+        onThis: false
+    Body:
+      - If: $._region = null
+        Then:
+        - $env: $.find(Environment).require()
+        - $regionName: generate($this, $ != null, $.find(CloudResource)).
+            select($.regionName).where($ != null).first($env.region)
+        - $._region: $.find(CloudRegion)
+        - If: $._region = null or $._region.name != $regionName
+          Then:
+            $._region: $env.regions[$regionName]
+      - Return: $._region

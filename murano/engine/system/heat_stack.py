@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import copy
+import json
 
 import eventlet
 import heatclient.client as hclient
@@ -50,7 +51,7 @@ class HeatStack(object):
         self._description = description
         self._last_stack_timestamps = (None, None)
         self._tags = ''
-        self._owner = this.find_owner('io.murano.Environment')
+        self._owner = this.find_owner('io.murano.CloudRegion')
 
     @staticmethod
     def _create_client(session, region_name):
@@ -61,7 +62,7 @@ class HeatStack(object):
 
     @property
     def _client(self):
-        region = None if self._owner is None else self._owner['region']
+        region = None if self._owner is None else self._owner['name']
         return self._get_client(region)
 
     @staticmethod
@@ -72,7 +73,7 @@ class HeatStack(object):
 
     def _get_token_client(self):
         ks_session = auth_utils.get_token_client_session(conf=CONF.heat)
-        region = None if self._owner is None else self._owner['region']
+        region = None if self._owner is None else self._owner['name']
         return self._create_client(ks_session, region)
 
     def current(self):
@@ -212,7 +213,7 @@ class HeatStack(object):
             self._template['description'] = self._description
 
         template = copy.deepcopy(self._template)
-        LOG.debug('Pushing: {template}'.format(template=template))
+        LOG.debug('Pushing: {template}'.format(template=json.dumps(template)))
 
         while True:
             try:

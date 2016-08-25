@@ -1,0 +1,14 @@
+---
+features:
+  - Support for application deployment across OpenStack regions was added.
+    Now all OpenStack resource classes inherit CloudResource that provides
+    getRegion method and regionName property. This allows to assign resources
+    to different regions. getRegion() returns CloudRegion instance that
+    resource or it parent belong to. CloudRegion has the similar interface
+    to Environment class and is the correct way to get HeatStack instance
+    associated with the regoin, default network configuration, security
+    group manager and agent listener instances. Environment acts as the
+    default region so backward compatibility is not broken. However new
+    applications should not use environment to set security group rules but
+    rather a region(s) of their instance(s) in order to work correctly when
+    their instances were configured to use region other then the default.

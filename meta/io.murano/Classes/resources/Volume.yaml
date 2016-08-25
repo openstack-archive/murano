@@ -12,9 +12,11 @@
 
 Namespaces:
   =: io.murano.resources
+  std: io.murano
 
 
 Name: Volume
+Extends: std:CloudResource
 
 
 Properties:

@@ -52,6 +52,7 @@ Methods:
   .init:
     Body:
     - $._environment: $.find(std:Environment).require()
+    - $._region: $.getRegion()
 
   buildResourceDefinition:
     Body:
@@ -111,11 +112,11 @@ Methods:
     - $snippet: $.buildResourceDefinition()
     - If: $.getAttr(lastTemplate) != $snippet
       Then:
-      - $template: $._environment.stack.current()
+      - $template: $._region.stack.current()
       - $template: $template.mergeWith($snippet, maxLevels => 2)
-      - $._environment.stack.setTemplate($template)
-      - $._environment.stack.push()
-      - $outputs: $._environment.stack.output()
+      - $._region.stack.setTemplate($template)
+      - $._region.stack.push()
+      - $outputs: $._region.stack.output()
       - $.openstackId: $outputs.get(format('vol-{0}-id', id($)))
       - $.setAttr(lastTemplate, $snippet)
 
@@ -123,11 +124,11 @@ Methods:
     Body:
     - If: $.getAttr(lastTemplate) != null
       Then:
-      - $template: $._environment.stack.current()
+      - $template: $._region.stack.current()
       - $template.resources: $template.resources.delete(format('vol-{0}', id($)))
       - $template.outputs: $template.outputs.delete(format('vol-{0}-id', id($)))
-      - $._environment.stack.setTemplate($template)
-      - $._environment.stack.push()
+      - $._region.stack.setTemplate($template)
+      - $._region.stack.push()
       - $.setAttr(lastTemplate, null)
       - $.openstackId: null
 

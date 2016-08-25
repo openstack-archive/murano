@@ -40,7 +40,7 @@ class NetworkExplorer(object):
         self._project_id = session.project_id
         self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
-        self._owner = this.find_owner('io.murano.Environment')
+        self._region = this.find_owner('io.murano.CloudRegion')
 
     @staticmethod
     @session_local_storage.execution_session_memoize
@@ -52,7 +52,7 @@ class NetworkExplorer(object):
 
     @property
     def _client(self):
-        region = None if self._owner is None else self._owner['region']
+        region = None if self._region is None else self._region['name']
         return self._get_client(region)
 
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
