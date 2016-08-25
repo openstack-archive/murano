@@ -362,7 +362,7 @@ class Controller(object):
                 if key not in valid_query_params:
                     raise exc.HTTPBadRequest(
                         _('Bad value passed to filter. '
-                          'Got {key}, exected:{valid}').format(
+                          'Got {key}, expected:{valid}').format(
                             key=key, valid=', '.join(valid_query_params)))
                 if key == 'sort_keys':
                     available_sort_keys = ['name', 'created',

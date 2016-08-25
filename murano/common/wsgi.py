@@ -921,7 +921,7 @@ class JSONPatchDeserializer(TextDeserializer):
             jsonschema.validate(property_to_update,
                                 validation_schemas.PKG_UPDATE_SCHEMA)
         except jsonschema.ValidationError as e:
-            LOG.error(_LE("Schema validation error occured: {error}")
+            LOG.error(_LE("Schema validation error occurred: {error}")
                       .format(error=e))
             raise webob.exc.HTTPBadRequest(explanation=e.message)
 
