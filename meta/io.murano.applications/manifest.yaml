@@ -10,7 +10,7 @@
 #  License for the specific language governing permissions and limitations
 #  under the License.
 
-Format: 1.3
+Format: 1.4
 
 Type: Library
 
@@ -27,6 +27,10 @@ Classes:
   io.murano.applications.ReplicaProvider: replication.yaml
   io.murano.applications.ReplicationGroup: replication.yaml
   io.murano.applications.CloneReplicaProvider: replication.yaml
+  io.murano.applications.CompositeReplicaProvider: replication.yaml
+  io.murano.applications.PoolReplicaProvider: replication.yaml
+  io.murano.applications.RoundrobinReplicaProvider: replication.yaml
+
   io.murano.applications.Event: events.yaml
 
   io.murano.applications.ServerGroup: servers.yaml
@@ -51,6 +55,9 @@ Classes:
 
   # Tests
   io.murano.applications.tests.TestReplication: tests/TestReplication.yaml
+  io.murano.applications.tests.TestPoolReplicaProvider: tests/TestReplication.yaml
+  io.murano.applications.tests.TestRoundrobinReplicaProvider: tests/TestReplication.yaml
+  io.murano.applications.tests.TestCompositeReplicaProvider: tests/TestReplication.yaml
   io.murano.applications.tests.TestEvents: tests/TestEvents.yaml
   io.murano.applications.tests.TestMockedServerFactory: tests/TestServerProviders.yaml
   io.murano.applications.tests.TestSoftwareComponent: tests/TestSoftwareComponent.yaml

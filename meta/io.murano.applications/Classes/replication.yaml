@@ -45,17 +45,16 @@ Methods:
   deploy:
     Body:
       # release excessive replicas
-      - $newItems: $this.items.take($this.numItems)
+      - $oldItems: $this.items.take($this.numItems)
       - $itemsToRelease: $this.items.skip($this.numItems)
       - $this.provider.releaseReplicas($itemsToRelease)
-      - $this.items: $newItems
 
       - $delta: $this.numItems - len($this.items)
       - $startIndex: len($this.items) + 1
       - $endIndex: $startIndex + $delta
       - $createdItems: range($startIndex, $endIndex).select(
-                             $this.provider.createReplica($, $this))
-      - $this.items: $this.items + $createdItems
+          $this.provider.createReplica($, $this)).takeWhile($ != null)
+      - $this.items: $oldItems + $createdItems
 
   scale:
     Arguments:
@@ -69,11 +68,10 @@ Methods:
           - $this.numItems: min($this.numItems, $this.maxItems)
       - $this.deploy()
 
-  releaseItems:
-    Arguments:
-      items:
-        Contract:
-          - $.class(std:Object)
+    .destroy:
+      Body:
+        - $this.numItems: 0
+        - $this.deploy()
 
 --- # ------------------------------------------------------------------ # ---
 
@@ -92,6 +90,8 @@ Methods:
       replicas:
         Contract:
           - $.class(std:Object)
+    Body:
+      Return: $replicas
 
 
 --- # ------------------------------------------------------------------ # ---
@@ -114,3 +114,105 @@ Methods:
 
     Body:
       - Return: new($this.template, $owner)
+
+--- # ------------------------------------------------------------------ # ---
+# Replica provider that is a composition of other replica providers
+
+Name: CompositeReplicaProvider
+Extends: ReplicaProvider
+
+Properties:
+  providers:
+    Contract:
+      - $.class(ReplicaProvider).notNull()
+
+Methods:
+  createReplica:
+    Arguments:
+      - index:
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
+    Body:
+      - Return: $this.providers.select($.createReplica($index, $owner)).where($ != null).first(null)
+
+  releaseReplicas:
+    Arguments:
+      replicas:
+        Contract:
+          - $.class(std:Object)
+    Body:
+      - For: provider
+        In: $this.providers
+        Do:
+          - $replicas: $provider.releaseReplicas($replicas)
+          - If: $replicas = null or not $replicas.any()
+            Then:
+              Break:
+      - Return: $replicas
+
+--- # ------------------------------------------------------------------ # ---
+# A replica provider from the prepopulated pool
+
+Name: PoolReplicaProvider
+Extends: ReplicaProvider
+
+Properties:
+  pool:
+    Contract:
+      - $.class(std:Object).notNull()
+
+  consumedItems:
+    Usage: Out
+    Contract:
+      - $.class(std:Object).notNull()
+
+Methods:
+  createReplica:
+    Arguments:
+      - index:
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
+    Body:
+      - $item: $this.pool.where(not $this.consumedItems.contains($)).first(null)
+      - If: $item != null
+        Then:
+          - $this.consumedItems: $this.consumedItems.append($item)
+      - Return: $item
+
+  releaseReplicas:
+    Arguments:
+      replicas:
+        Contract:
+          - $.class(std:Object)
+    Body:
+      - $poolReplicas: $replicas.where($this.consumedItems.contains($))
+      - $this.consumedItems: $this.consumedItems.where(not $poolReplicas.contains($))
+      - Return: $replicas.where(not $poolReplicas.contains($))
+
+--- # ------------------------------------------------------------------ # ---
+# Replica provider with a load balancing that returns instance from the
+# prepopulated list. Once the provider runs out of free items it goes to
+# beginning of the list and returns the same instances again.
+
+Name: RoundrobinReplicaProvider
+Extends: ReplicaProvider
+
+Properties:
+  items:
+    Contract:
+      - $.class(std:Object).notNull()
+      - 1
+
+Methods:
+  createReplica:
+    Arguments:
+      - index:
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
+    Body:
+      - $index: $.getAttr(lastIndex, 0)
+      - $.setAttr(lastIndex, ($index + 1) mod len($this.items))
+      - Return: $this.items[$index]

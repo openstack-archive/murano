@@ -79,7 +79,7 @@ Methods:
 
   .destroy:
     Body:
-      - $this.releaseServers($this.items)
+      - $this.releaseServers($this.servers)
 
   getServers:
     Body:
@@ -156,10 +156,6 @@ Methods:
       - cast($this, ReplicationGroup).deploy()
       - $this.deployServers($this, $this.items)
 
-  .destroy:
-    Body:
-      - $this.releaseServers($this.items)
-
   getServers:
     Body:
       Return: $.items
@@ -197,6 +193,14 @@ Properties:
   serverNamePattern:
     Contract: $.string().notNull()
 
+  allocated:
+    Usage: Out
+    Contract: $.int().notNull()
+    Default: 0
+
+  capacity:
+    Contract: $.int()
+
 Methods:
   createReplica:
     Arguments:
@@ -205,22 +209,31 @@ Methods:
       - owner:
           Contract: $.class(std:Object)
     Body:
-      - $template: $this.template
-      - $template.name: $this.serverNamePattern.format($index)
-      - $ownerGroup: $this.find(ServerGroup)
-      - If: $ownerGroup and name($ownerGroup)
+      - If: $this.capacity = null or $this.allocated < $this.capacity
         Then:
+        - $template: $this.template
+        - $template.name: $this.serverNamePattern.format($index)
+        - $ownerGroup: $this.find(ServerGroup)
+        - If: $ownerGroup and name($ownerGroup)
+          Then:
           - $groupName: format(' ({0})', name($ownerGroup))
-        Else:
+          Else:
           - $groupName: ''
-      - $template['?'].name: format('Server {0}{1}', $index, $groupName)
-      - Return: new($template, $owner)
+        - $template['?'].name: format('Server {0}{1}', $index, $groupName)
+        - $this.allocated: $this.allocated + 1
+        - Return: new($template, $owner)
+        Else:
+        - Return: null
 
   releaseReplicas:
     Arguments:
       replicas:
         Contract:
-          - $.class(std:Object)
+          - $.class(res:Instance)
     Body:
       - $replicas.select($.beginReleaseResources())
       - $replicas.select($.endReleaseResources())
+      - $this.allocated: max(0, $this.allocated - len($replicas))
+      - Return: []
+
+

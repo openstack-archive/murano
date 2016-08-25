@@ -93,3 +93,91 @@ Methods:
       - $.assertEqual(1, len($group.items))
       - $.assertEqual(1, $this.provider.allocated)
 
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestPoolReplicaProvider
+Extends: tst:TestFixture
+
+Methods:
+  setUp:
+    Body:
+      - $this.object1: new(std:Object)
+      - $this.object2: new(std:Object)
+      - $this.provider: new(apps:PoolReplicaProvider, pool => [$this.object1, $this.object2])
+
+  testReplicas:
+    Body:
+      - $.assertEqual(2, len($this.provider.pool))
+      - $.assertEqual(0, len($this.provider.consumedItems))
+      - $obj: $this.provider.createReplica(1, $this)
+      - $.assertEqual($this.object1, $obj)
+      - $.assertEqual(2, len($this.provider.pool))
+      - $.assertEqual(1, len($this.provider.consumedItems))
+      - $obj: $this.provider.createReplica(2, $this)
+      - $.assertEqual($this.object2, $obj)
+      - $.assertEqual(2, len($this.provider.pool))
+      - $.assertEqual(2, len($this.provider.consumedItems))
+      - $obj: $this.provider.createReplica(3, $this)
+      - $.assertEqual(null, $obj)
+      - $.assertEqual(2, len($this.provider.pool))
+      - $.assertEqual(2, len($this.provider.consumedItems))
+
+  testReleaseReplicas:
+    Body:
+      - $obj: $this.provider.createReplica(1, $this)
+      - $.assertEqual(1, len($this.provider.consumedItems))
+      - $foreignObj: new(std:Object)
+      - $res: $this.provider.releaseReplicas([$obj, $this.object1, $this.object2, $foreignObj])
+      - $.assertEqual(0, len($this.provider.consumedItems))
+      - $.assertEqual([$this.object2, $foreignObj], $res)
+      - $this.testReplicas()
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestRoundrobinReplicaProvider
+Extends: tst:TestFixture
+
+Methods:
+  setUp:
+    Body:
+      - $this.object1: new(std:Object)
+      - $this.object2: new(std:Object)
+      - $this.provider: new(apps:RoundrobinReplicaProvider, items => [$this.object1, $this.object2])
+
+  testReplicas:
+    Body:
+      - $obj: $this.provider.createReplica(1, $this)
+      - $.assertEqual($this.object1, $obj)
+      - $obj: $this.provider.createReplica(2, $this)
+      - $.assertEqual($this.object2, $obj)
+      - $obj: $this.provider.createReplica(3, $this)
+      - $.assertEqual($this.object1, $obj)
+      - $obj: $this.provider.createReplica(4, $this)
+      - $.assertEqual($this.object2, $obj)
+
+--- # ------------------------------------------------------------------ # ---
+
+Name: TestCompositeReplicaProvider
+Extends: tst:TestFixture
+
+Methods:
+  setUp:
+    Body:
+      - $this.objects: range(4).select(new(std:Object))
+      - $this.object2: new(std:Object)
+      - $this.provider1: new(apps:PoolReplicaProvider, pool => [$this.objects[0], $this.objects[1]])
+      - $this.provider2: new(apps:RoundrobinReplicaProvider, items => [$this.objects[2], $this.objects[3]])
+      - $this.provider: new(apps:CompositeReplicaProvider, providers => [$this.provider1, $this.provider2])
+
+  testReplicas:
+    Body:
+      - $obj: $this.provider.createReplica(1, $this)
+      - $.assertEqual($this.objects[0], $obj)
+      - $obj: $this.provider.createReplica(2, $this)
+      - $.assertEqual($this.objects[1], $obj)
+      - $obj: $this.provider.createReplica(3, $this)
+      - $.assertEqual($this.objects[2], $obj)
+      - $obj: $this.provider.createReplica(4, $this)
+      - $.assertEqual($this.objects[3], $obj)
+      - $obj: $this.provider.createReplica(5, $this)
+      - $.assertEqual($this.objects[2], $obj)
