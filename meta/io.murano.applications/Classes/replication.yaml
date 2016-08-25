@@ -47,14 +47,14 @@ Methods:
       # release excessive replicas
       - $newItems: $this.items.take($this.numItems)
       - $itemsToRelease: $this.items.skip($this.numItems)
-      - $itemsToRelease.select($this.provider.releaseReplica($))
+      - $this.provider.releaseReplicas($itemsToRelease)
       - $this.items: $newItems
 
       - $delta: $this.numItems - len($this.items)
       - $startIndex: len($this.items) + 1
       - $endIndex: $startIndex + $delta
       - $createdItems: range($startIndex, $endIndex).select(
-                             $this.provider.createReplica($))
+                             $this.provider.createReplica($, $this))
       - $this.items: $this.items + $createdItems
 
   scale:
@@ -69,6 +69,12 @@ Methods:
           - $this.numItems: min($this.numItems, $this.maxItems)
       - $this.deploy()
 
+  releaseItems:
+    Arguments:
+      items:
+        Contract:
+          - $.class(std:Object)
+
 --- # ------------------------------------------------------------------ # ---
 
 Name: ReplicaProvider
@@ -76,74 +82,35 @@ Name: ReplicaProvider
 Methods:
   createReplica:
     Arguments:
-      index:
-        Contract: $.int().notNull()
+      - index:
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
 
-  releaseReplica:
+  releaseReplicas:
     Arguments:
-      replica:
-        Contract: $.class(std:Object)
+      replicas:
+        Contract:
+          - $.class(std:Object)
+
 
 --- # ------------------------------------------------------------------ # ---
 
-Name: BaseTemplateReplicaProvider
+
+Name: CloneReplicaProvider
 Extends: ReplicaProvider
+
+Properties:
+  template:
+    Contract: $.template(std:Object).notNull()
 
 Methods:
   createReplica:
     Arguments:
-      index:
-        Contract: $.int().notNull()
-    Body:
-      - $owner: $this.getReplicaOwner()
-      - $template: $this.getTemplate()
-      - $customizedTemplate: $this.customizeTemplate($template, $index)
-      - Return: new($customizedTemplate, owner => $owner)
-
-  getReplicaOwner:
-    Body:
-      - Return: $this
-
-  getTemplate:
-
-  customizeTemplate:
-    Arguments:
-      - template:
-          Contract: {}
       - index:
-           Contract: $.int().notNull()
+          Contract: $.int().notNull()
+      - owner:
+          Contract: $.class(std:Object)
+
     Body:
-      - Return: $template
-
---- # ------------------------------------------------------------------ # ---
-
-Name: TemplateReplicaProvider
-Extends: BaseTemplateReplicaProvider
-
-Properties:
-  template:
-    Contract: {}
-
-Methods:
-  getTemplate:
-    Body:
-      - Return: $this.template
-
---- # ------------------------------------------------------------------ # ---
-
-Name: CloneReplicaProvider
-Extends: BaseTemplateReplicaProvider
-
-Properties:
-  source:
-    Contract: $.class(std:Object).notNull()
-
-Methods:
-  getTemplate:
-    Body:
-      - Return: dump($this.source, serializationType=>Mixed,
-                     ignoreUpcasts=>true)
-
-  getReplicaOwner:
-    Body:
-      - Return: $this.source.find(std:Object)
+      - Return: new($this.template, $owner)

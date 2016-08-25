@@ -49,12 +49,12 @@ Methods:
       - inject(res:LinuxMuranoInstance, beginDeploy, '')
       - inject(res:LinuxMuranoInstance, endDeploy, '')
       - $server: new(res:LinuxMuranoInstance, $this.environment,
-                     name=>'noop',
-                     image=>'noop',
-                     flavor=>'noop')
-      - $provider: new(apps:ServerProvider, $this.environment,
-                       source=>$server, serverNamePattern=>'testNode-{0}')
-      - $this.group: new(apps:ServerReplicationGroup, provider=>$provider, numItems=>5)
+                     name => 'noop',
+                     image => 'noop',
+                     flavor => 'noop')
+      - $provider: new(apps:TemplateServerProvider, $this.environment,
+                       template => $server, serverNamePattern => 'testNode-{0}')
+      - $this.group: new(apps:ServerReplicationGroup, $this.environment, provider => $provider, numItems => 5)
       - $this.group.deploy()
       - $this.reports: []
       - inject($this.environment.reporter, report, $this, report)
@@ -75,8 +75,19 @@ Methods:
     Body:
       - $cmp: new(SoftwareComponentToTest, $this.environment, testComp)
       - $cmp.deployAt($this.group)
-      - $this.assertInstallingSequence(0)
-      - $this.assertConfiguringSequence(2*$this.group.numItems+2)
+      - $this.assertProvisioningSequence(0)
+      - $this.assertInstallingSequence($this.group.numItems)
+      - $this.assertConfiguringSequence(3 * $this.group.numItems + 2)
+
+  assertProvisioningSequence:
+    Arguments:
+      - offset:
+          Contract: $.int().notNull()
+    Body:
+      - $this.assertEqual(
+          $this.reports.skip($offset).take($this.group.numItems),
+          range(1, $this.group.numItems + 1).select('Provisioning VM for Server {0}'.format($)))
+
 
   assertInstallingSequence:
     Arguments:
@@ -84,23 +95,25 @@ Methods:
           Contract: $.int().notNull()
     Body:
       - $this.assertEqual('Installing testComp', $this.reports[$offset])
-      - $nodeReports: range(0, $this.group.numItems*2).select($this.reports[$offset+1+$])
-      - range(1, $this.group.numItems+1).select(
+      - $nodeReports: range(0, $this.group.numItems * 2).select($this.reports[$offset + 1 + $])
+      - range(1, $this.group.numItems + 1).select(
           $this.assertTrue(format('Began installing testComp on testNode-{0}', $) in $nodeReports))
-      - range(1, $this.group.numItems+1).select(
+      - range(1, $this.group.numItems + 1).select(
           $this.assertTrue(format('testComp is installed on testNode-{0}', $) in $nodeReports))
-      - $this.assertEqual('Finished installing testComp (no errors encountered)', $this.reports[$offset+2*$this.group.numItems+1])
+      - $this.assertEqual('Finished installing testComp (no errors encountered)',
+          $this.reports[$offset + 2 * $this.group.numItems + 1])
 
   assertConfiguringSequence:
     Arguments:
       - offset:
           Contract: $.int().notNull()
     Body:
-      - $this.assertEqual('Applying configuration of testComp', $this.reports[$offset+0])
-      - $nodeReports: range(0, $this.group.numItems*2).select($this.reports[$offset+1+$])
-      - range(1, $this.group.numItems+1).select(
+      - $this.assertEqual('Applying configuration of testComp', $this.reports[$offset])
+      - $nodeReports: range(0, $this.group.numItems * 2).select($this.reports[$offset + 1 + $])
+      - range(1, $this.group.numItems + 1).select(
           $this.assertTrue(format('Began configuring testComp on testNode-{0}', $) in $nodeReports))
-      - range(1, $this.group.numItems+1).select(
+      - range(1, $this.group.numItems + 1).select(
           $this.assertTrue(format('testComp is configured at testNode-{0}', $) in $nodeReports))
-      - $this.assertEqual('Finished configuring testComp (no errors encountered)', $this.reports[$offset+2*$this.group.numItems+1])
+      - $this.assertEqual('Finished configuring testComp (no errors encountered)',
+          $this.reports[$offset + 2 * $this.group.numItems + 1])
 
