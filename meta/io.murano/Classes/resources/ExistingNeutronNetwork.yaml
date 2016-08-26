@@ -81,8 +81,7 @@ Workflow:
               $.device_id in $routerCandidates and $.network_id != $this._internalNetworkId).
               select($.network_id)
           - $externalNetwork: $._getNetworks().where(
-              $.get('router:external') = true and $.id in $networkCandidates).
-              firstOrDefault()
+              $.get('router:external') = true and $.id in $networkCandidates).first(null)
           - If: $externalNetwork != null
             Then:
               - $.externalNetworkName: $externalNetwork.name
@@ -91,7 +90,7 @@ Workflow:
       - If: $.externalNetworkName = null
         Then:
           $.externalNetworkName: $._getNetworks().where(
-            $.get('router:external') = true).select($.name).firstOrDefault()
+            $.get('router:external') = true).select($.name).first(null)
       - If: $._externalNetworkId = null and $.externalNetworkName != null
         Then:
           $._externalNetworkId: $._getNetworks().where(

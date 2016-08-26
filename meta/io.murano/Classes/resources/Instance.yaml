@@ -202,7 +202,7 @@ Methods:
                 Else:
                   - If: $.networks.customNetworks!= null
                     Then:
-                      - $._primaryNetwork: $.networks.customNetworks.firstOrDefault()
+                      - $._primaryNetwork: $.networks.customNetworks.first(null)
 
   ensureNetworksDeployed:
     Body:
