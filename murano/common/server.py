@@ -174,8 +174,7 @@ def report_notification(report):
     LOG.debug('Got report from orchestration '
               'engine:\n{report}'.format(report=report))
 
-    report['entity_id'] = report['id']
-    del report['id']
+    report['entity_id'] = report.pop('id')
 
     status = models.Status()
     if 'timestamp' in report:
