@@ -35,17 +35,17 @@ class LanguageSupportTest(core.MuranoTestsCore):
                            'ExampleChef', {"tags": ["tag"]})
             cls.upload_app('io.murano.conflang.puppet.ExamplePuppet',
                            'ExamplePuppet', {"tags": ["tag"]})
-        except Exception as e:
+        except Exception:
             cls.tearDownClass()
-            raise e
+            raise
 
     @classmethod
     def tearDownClass(cls):
         with common_utils.ignored(Exception):
             try:
                 cls.purge_uploaded_packages()
-            except Exception as e:
-                raise e
+            except Exception:
+                raise
 
     def _test_deploy(self, environment_name, package_name, port):
         post_body = {
