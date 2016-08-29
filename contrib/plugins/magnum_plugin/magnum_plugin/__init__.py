@@ -30,12 +30,14 @@ CONF = config.CONF
 
 
 class MagnumClient(object):
-    def __init__(self, this):
+    def __init__(self, this, region_name=None):
+        self._region_name = region_name
         self._owner = this.find_owner('io.murano.Environment')
 
     @property
     def _client(self):
-        region = None if self._owner is None else self._owner['region']
+        region = self._region_name or (
+            None if self._owner is None else self._owner['region'])
         return self._create_magnum_client(region)
 
     @classmethod
