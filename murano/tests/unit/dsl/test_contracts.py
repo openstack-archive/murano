@@ -132,6 +132,13 @@ class TestContracts(test_case.DslTestCase):
         self.assertIsInstance(result, dict)
         self.assertItemsEqual(['?', 'property1', 'property2'], result.keys())
 
+    def test_template_property_contract(self):
+        template = {
+            'foo': 123
+        }
+        self.new_runner(
+            om.Object('ContractExamples', templateProperty=template))
+
     def test_template_contract_fail_on_type(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
         self.assertRaises(

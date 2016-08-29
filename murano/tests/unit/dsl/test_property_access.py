@@ -23,7 +23,7 @@ class TestPropertyAccess(test_case.DslTestCase):
         self._multi_derived = om.Object(
             'DerivedFrom2Classes',
             rootProperty='ROOT',
-            ambiguousProperty2=321)
+            ambiguousProperty=321)
         model = om.Object(
             'SampleClass3',
             multiClassProperty=self._multi_derived
@@ -63,26 +63,17 @@ class TestPropertyAccess(test_case.DslTestCase):
 
     def test_access_ambiguous_property_with_resolver(self):
         self.assertEqual(
-            321,
+            '321',
             self._runner.on(self._multi_derived).
             testAccessAmbiguousPropertyWithResolver())
 
-    def test_access_ambiguous_property_without_resolver(self):
-        e = self.assertRaises(
-            exceptions.AmbiguousPropertyNameError,
-            self._runner.on(self._multi_derived).
-            testAccessAmbiguousPropertyWithoutResolver)
-        self.assertEqual(
-            'Found more that one property "ambiguousProperty1"',
-            str(e))
-
     def test_property_merge(self):
         self.assertEqual(
-            555,
+            '555',
             self._runner.on(self._multi_derived).
             testPropertyMerge())
         self.assertEqual(
-            [321, 555, 555, '555', 555],
+            ['321', '555', '555', '555', '555'],
             self.traces)
 
     def test_property_usage(self):

@@ -3,8 +3,8 @@ Name: DerivedFrom2Classes
 Extends: [ParentClass1, ParentClass2]
 
 Properties:
-  ambiguousProperty2:
-    Contract: $.int()
+  ambiguousProperty:
+    Contract: $.string()
     Usage: InOut
 
   usageTestProperty1:
@@ -34,23 +34,19 @@ Methods:
     Body:
       - $.privateProperty: 99
 
-  testAccessAmbiguousPropertyWithoutResolver:
-    Body:
-      Return: $.ambiguousProperty1
-
   testAccessAmbiguousPropertyWithResolver:
     Body:
-      Return: $.ambiguousProperty2
+      Return: $.ambiguousProperty
 
   testPropertyMerge:
     Body:
-      - trace($.ambiguousProperty2)
-      - $.setAmbiguousProperty2()
-      - trace($.ambiguousProperty2)
-      - trace($.getAmbiguousProperty2())
-      - trace($.cast(ParentClass1).ambiguousProperty2)
-      - trace($.cast(ParentClass2).ambiguousProperty2)
-      - Return: $.ambiguousProperty2
+      - trace($.ambiguousProperty)
+      - $.setAmbiguousProperty()
+      - trace($.ambiguousProperty)
+      - trace($.getAmbiguousProperty())
+      - trace($.cast(ParentClass1).ambiguousProperty)
+      - trace($.cast(ParentClass2).ambiguousProperty)
+      - Return: $.ambiguousProperty
 
   testModifyUsageTestProperty1:
     Body:

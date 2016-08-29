@@ -350,6 +350,9 @@ def cast(obj, murano_class, pov_or_version_spec=None):
 
 
 def is_instance_of(obj, class_name, pov_or_version_spec=None):
+    if not isinstance(obj, (dsl_types.MuranoObject,
+                            dsl_types.MuranoObjectInterface)):
+        return False
     try:
         cast(obj, class_name, pov_or_version_spec)
         return True
@@ -653,3 +656,14 @@ def patch_dict(dct, path, value):
             dct.pop(parts[-1])
         else:
             dct[parts[-1]] = value
+
+
+def format_scalar(value):
+    if isinstance(value, six.string_types):
+        return "'{0}'".format(value)
+    return six.text_type(value)
+
+
+def is_passkey(value):
+    passkey = get_contract_passkey()
+    return passkey is not None and value is passkey

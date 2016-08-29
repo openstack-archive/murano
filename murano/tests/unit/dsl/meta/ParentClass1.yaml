@@ -3,10 +3,7 @@ Name: ParentClass1
 Extends: CommonParent
 
 Properties:
-  ambiguousProperty1:
-    Contract: $.int()
-
-  ambiguousProperty2:
+  ambiguousProperty:
     Contract: $.string()
     Usage: InOut
 
@@ -22,6 +19,6 @@ Methods:
       - trace($.privateName)
 
 
-  setAmbiguousProperty2:
+  setAmbiguousProperty:
     Body:
-      $.ambiguousProperty2: '555'
+      $.ambiguousProperty: '555'

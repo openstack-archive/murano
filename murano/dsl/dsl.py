@@ -102,10 +102,11 @@ class InterfacesParameter(yaqltypes.HiddenParameterType,
 
 class MuranoTypeParameter(yaqltypes.PythonType):
     def __init__(self, base_type=None, nullable=False, context=None,
-                 resolve_strings=True):
+                 resolve_strings=True, lazy=False):
         self._context = context
         self._base_type = base_type
         self._resolve_strings = resolve_strings
+        self._lazy = lazy
         super(MuranoTypeParameter, self).__init__(
             (dsl_types.MuranoTypeReference,
              six.string_types), nullable)
@@ -126,18 +127,26 @@ class MuranoTypeParameter(yaqltypes.PythonType):
 
     def convert(self, value, sender, context, function_spec, engine,
                 *args, **kwargs):
-        context = self._context or context
-        if isinstance(value, yaql_expressions.Expression):
-            value = value(utils.NO_VALUE, context, engine)
-        value = super(MuranoTypeParameter, self).convert(
-            value, sender, context, function_spec, engine)
-        if isinstance(value, six.string_types):
-            value = helpers.get_class(value, context).get_reference()
-        if self._base_type and not self._base_type.is_compatible(value):
-            raise ValueError('Value must be subtype of {0}'.format(
-                self._base_type.name
-            ))
-        return value
+
+        def implementation(ctx=None):
+            value2 = value
+            if ctx is None:
+                ctx = self._context or context
+            if isinstance(value2, yaql_expressions.Expression):
+                value2 = value2(utils.NO_VALUE, ctx, engine)
+            value2 = super(MuranoTypeParameter, self).convert(
+                value2, sender, ctx, function_spec, engine)
+            if isinstance(value2, six.string_types):
+                value2 = helpers.get_class(value2, ctx).get_reference()
+            if self._base_type and not self._base_type.is_compatible(value):
+                raise ValueError('Value must be subtype of {0}'.format(
+                    self._base_type.name
+                ))
+            return value2
+
+        if self._lazy:
+            return implementation
+        return implementation()
 
 
 class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
