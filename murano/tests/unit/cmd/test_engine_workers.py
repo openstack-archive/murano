@@ -15,14 +15,11 @@
 import mock
 
 from oslo_concurrency import processutils
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.cmd import engine
 from murano.common import config
 from murano.tests.unit import base
-
-CONF = cfg.CONF
 
 
 class TestEngineWorkers(base.MuranoTestCase):

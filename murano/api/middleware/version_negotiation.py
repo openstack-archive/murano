@@ -18,14 +18,12 @@ and/or Accept headers and attempts to negotiate an API controller to
 return
 """
 
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.api import versions
 from murano.common.i18n import _LW
 from murano.common import wsgi
 
-CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
 
 
