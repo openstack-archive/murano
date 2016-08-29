@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_config import cfg
 from oslo_db import api as oslo_db_api
 from oslo_db import exception as db_exceptions
 from oslo_db.sqlalchemy import utils
@@ -28,8 +27,6 @@ from murano.db import models
 from murano.db import session as db_session
 from murano.common.i18n import _, _LW
 
-
-CONF = cfg.CONF
 
 SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
                   'name': 'name',

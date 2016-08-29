@@ -13,15 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-from oslo_config import cfg
-
 import testtools
 
 from murano.dsl import dsl
 from murano.dsl import helpers
-
-
-CONF = cfg.CONF
 
 
 @dsl.name('io.murano.test.TestFixture')

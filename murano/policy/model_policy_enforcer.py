@@ -20,7 +20,6 @@ try:
     import congressclient.v1.client as congress_client
 except ImportError as congress_client_import_error:
     congress_client = None
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common import auth_utils
@@ -30,7 +29,6 @@ from murano.policy.modify.actions import action_manager as am
 
 
 LOG = logging.getLogger(__name__)
-CONF = cfg.CONF
 
 
 class ValidationError(Exception):

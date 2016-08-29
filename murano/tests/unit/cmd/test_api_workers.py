@@ -14,7 +14,6 @@ import mock
 import sys
 
 from oslo_concurrency import processutils
-from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.cmd import api
@@ -22,8 +21,6 @@ from murano.common import app_loader
 from murano.common import config
 from murano.common import policy
 from murano.tests.unit import base
-
-CONF = cfg.CONF
 
 
 class TestAPIWorkers(base.MuranoTestCase):
