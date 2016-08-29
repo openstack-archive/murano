@@ -432,10 +432,12 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         value = cls._property_values.get(name, prop.default)
         return prop.transform(value, cls, None, context)
 
-    def set_property(self, name, value, context):
+    def set_property(self, name, value, context, dry_run=False):
         prop = self.find_static_property(name)
         cls = prop.declaring_type
-        cls._property_values[name] = prop.transform(value, cls, None, context)
+        value = prop.transform(value, cls, None, context)
+        if not dry_run:
+            cls._property_values[name] = value
 
     def get_meta(self, context):
         if self._meta_values is None:

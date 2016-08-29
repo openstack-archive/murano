@@ -1,0 +1,24 @@
+Name: TestObjectsCopyMergeSampleClass
+Extends: Node
+
+Methods:
+  .init:
+    Body:
+      - $.testValue: null
+
+  .destroy:
+    Body:
+      - trace($.value)
+      - $.nodes.select(trace($.value))
+      - $.nodes.first().setValue('It works!')
+
+  setValue:
+    Arguments:
+      - arg:
+          Contract: $.string().notNull()
+    Body:
+      - $.testValue: $arg
+
+  testMethod:
+    Body:
+      Return: $.testValue

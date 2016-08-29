@@ -317,13 +317,13 @@ class MuranoDslExecutor(object):
         objects_copy = data.get(constants.DM_OBJECTS_COPY)
         if not objects_copy:
             return
-        gc_object_store = object_store.ObjectStore(self)
+        gc_object_store = object_store.ObjectStore(self, self.object_store)
         with helpers.with_object_store(gc_object_store):
             gc_object_store.load(objects_copy, None, keep_ids=True)
             objects_to_clean = []
             for object_id in self._list_potential_object_ids(objects_copy):
-                if (gc_object_store.has(object_id) and
-                        not self._object_store.has(object_id)):
+                if (gc_object_store.has(object_id, False) and
+                        not self._object_store.has(object_id, False)):
                     obj = gc_object_store.get(object_id)
                     objects_to_clean.append(obj)
             if objects_to_clean:

@@ -84,6 +84,8 @@ class Runner(object):
             package_loader, TestContextManager(functions),
             execution_session.ExecutionSession())
         self._root = self.executor.load(model).object
+        if 'ObjectsCopy' in model:
+            self.executor.cleanup(model)
 
     def _execute(self, name, obj, *args, **kwargs):
         try:

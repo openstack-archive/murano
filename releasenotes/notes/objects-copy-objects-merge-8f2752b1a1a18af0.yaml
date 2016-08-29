@@ -1,0 +1,18 @@
+---
+features:
+  - When pre-deployment garbage collection occurred it executed ``.destroy``
+    method for objects that were present in the ``ObjectsCopy`` section of the
+    object model (which is the the snapshot of the model after last deployment)
+    and not present in the current model anymore (because they were deleted
+    through the API between deployments). If the destroyed objects was to
+    access another object that wasn't deleted it was accessing its copy from
+    the ``ObjectsCopy``. Thus any changes to the internal state made by that
+    object were lost after the garbage collection finished (i.e. before the
+    ``deploy`` method call) and couldn't affect the deployment.
+    Now if the object is present in both ``Objects`` and ``ObjectsCopy`` a
+    single instance (the one, from ``Objects``) is used for both garbage
+    collection and deployment.
+    As a consequence, instances (in their ``.destroy`` method) now may observe
+    changes made to other objects they refer, if they were not deleted, but
+    modified through the API. In some rare cases it may break existing
+    applications.
