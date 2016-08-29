@@ -43,11 +43,14 @@ Methods:
           Contract:
             - $.class(std:SharedIp)
     Body:
-      - Return: {}
+      - Return:
+          template: {}
+          portRef:
+          instanceFipOutput:
 
   generateSecurityGroupManager:
     Body:
-      - Return: new(sys:DummySecurityGroupManager)
+      - Return: new(sys:DummySecurityGroupManager, $this)
 
   describe:
     Body:
