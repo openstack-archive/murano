@@ -362,11 +362,26 @@ Methods:
           Contract: $.class(ServerGroup).notNull()
     Body:
       - $sr: $this.getSecurityRules()
-      - $env: $this.find(std:Environment)
-      - If: $sr and $env
+      - If: $sr
         Then:
-          - $env.securityGroupManager.addGroupIngress($sr)
-          - $env.stack.push()
+          - $regions: $servers.select($.getRegion()).distinct()
+          - $regions.pselect($this._configureSecurityGroup($, $sr))
+
+  _configureSecurityGroup:
+    Usage: Static
+    Arguments:
+      - region:
+          Contract: $.class(std:CloudRegion).notNull()
+      - rules:
+          Contract:
+            - FromPort: $.int().notNull()
+              ToPort: $.int().notNull()
+              IpProtocol: $.string().notNull()
+              External: $.bool().notNull()
+              Ethertype: $.string().check($ in list(null, 'IPv4', 'IPv6'))
+    Body:
+      - $region.securityGroupManager.addGroupIngress($rules)
+      - $region.stack.push()
 
   getSecurityRules:
     Body:
