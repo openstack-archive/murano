@@ -91,7 +91,7 @@ Methods:
             $netName:
               type: 'OS::Neutron::Net'
               properties:
-                name: format('{0}-{1}', $.name, id($))
+                name: $._getHeatName()
           outputs:
             format('{0}-id', $.name):
               description: format('ID of {0} network', $.name)
@@ -166,6 +166,16 @@ Methods:
                     - $._getRouterInterfaceName()
           - $result.template: $result.template.mergeWith($template)
 
+      - $addressOutputName: format('adresses-{0}-in-{1}', $instance.name, $this.name)
+      - $ipsOutputTemplate:
+          outputs:
+            $addressOutputName:
+              description: format('Addresses for  {0} in {1}', $instance.name, $this.name)
+              value:
+                get_attr: [$instance.name, 'addresses', $._getHeatName()]
+      - $result.template: $result.template.mergeWith($ipsOutputTemplate)
+      - $result.instanceOutputs: $result.instanceOutputs.append($addressOutputName)
+
       - Return: $result
 
 
@@ -188,7 +198,7 @@ Methods:
     Body:
       - $template: $._region.stack.current()
 
-      - $template.resources: $template.resources.delete(format('{0}-{1}', $.name, id($)))
+      - $template.resources: $template.resources.delete($._getHeatName())
       - $template.resources: $template.resources.delete($._getSubnetName())
 
       - $template.outputs: $template.outputs.delete(format('{0}-id', $.name))
@@ -200,6 +210,13 @@ Methods:
       - $._regiont.stack.setTemplate($template)
       - $._region.stack.push()
       - $.openstackId: null
+
+  getInstanceIpList:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+    Body:
+      - Return: $._region.stack.output().get(format('adresses-{0}-in-{1}', $instance.name, $this.name)).select($["addr"]).distinct()
 
 
   _getRouterInterfaceName:
@@ -220,3 +237,7 @@ Methods:
   _getExternalNetId:
     Body:
       Return: $._netExplorer.getExternalNetworkIdForRouter($.externalRouterId)
+
+  _getHeatName:
+    Body:
+      Return: format('{0}-{1}', $.name, id($))

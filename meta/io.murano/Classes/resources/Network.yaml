@@ -35,3 +35,9 @@ Methods:
   generateSecurityGroupManager:
 
   describe:
+
+  getInstanceIpList:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+    Body:

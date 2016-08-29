@@ -76,6 +76,11 @@ Properties:
         deviceType: $.string().check($ in list(disk, cdrom, null))
         bootIndex: $.int()
     Default: []
+  joinedNetworks:
+    Contract:
+      - network: $.class(Network).notNull()
+        ipList: [$.string().notNull()]
+    Usage: Out
 
 Methods:
   initialize:
@@ -170,7 +175,8 @@ Methods:
       - $region: $.getRegion()
       - $region.stack.push()
       - $outputs: $region.stack.output()
-      - $.ipAddresses: $outputs.get(format('{0}-assigned-ips', $this.name)).values().flatten().distinct()
+      - $netIdToIpsMap: $outputs.get(format('{0}-assigned-ips', $this.name))
+      - $.ipAddresses: $netIdToIpsMap.values().flatten().distinct()
       - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
         Then:
@@ -178,6 +184,9 @@ Methods:
           - If: $.floatingIpAddress != null
             Then: $.setAttr(fipAssigned, true)
       - $._environment.instanceNotifier.trackCloudInstance($this)
+      - $.joinedNetworks: $this.joinedNetworks.distinct().select({
+          'network' => $['network'],
+          'ipList' => $['network'].getInstanceIpList($this)})
 
   deploy:
     Body:
@@ -266,6 +275,7 @@ Methods:
           - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
 
       - $._floatingIpOutputName: coalesce($._floatingIpOutputName, $joinResult.instanceFipOutput)
+      - $this.joinedNetworks: $this.joinedNetworks.append({network => $net})
 
   attachVolume:
     Arguments:
