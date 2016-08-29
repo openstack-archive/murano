@@ -31,6 +31,7 @@ from murano import version
 from murano.common.i18n import _, _LE
 from murano.common import config
 from murano.common import engine
+from murano.dsl import dsl_exception
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import executor
@@ -277,11 +278,20 @@ class MuranoTestRunner(object):
                         sys.stdout.flush()
                     except Exception as e:
                         error_count += 1
-                        msg = '{0}{1}: {2}{3}\n'.format(FAIL_COLOR,
-                                                        'FAIL!',
-                                                        e,
-                                                        END_COLOR)
+                        msg = ''.join((
+                            FAIL_COLOR, 'FAIL!', END_COLOR, '\n'))
                         sys.stdout.write(msg)
+                        if isinstance(e, dsl_exception.MuranoPlException):
+                            tb = e.format()
+                        else:
+                            tb = traceback.format_exc()
+
+                        sys.stdout.write(''.join((
+                            FAIL_COLOR,
+                            tb,
+                            END_COLOR,
+                            '\n'
+                        )))
                         sys.stdout.flush()
 
                         LOG.exception('Test {0} failed'.format(test_name))
@@ -364,7 +374,10 @@ def main():
         exit_code = test_runner.run_tests()
         sys.exit(exit_code)
     except Exception as e:
-        tb = traceback.format_exc()
+        if isinstance(e, dsl_exception.MuranoPlException):
+            tb = e.format()
+        else:
+            tb = traceback.format_exc()
         err_msg = _LE("Command failed: {0}\n{1}").format(e, tb)
         LOG.error(err_msg)
         sys.exit(err_msg)
