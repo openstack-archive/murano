@@ -36,13 +36,13 @@ class Class(contracts.ContractMethod):
         nullable=True, lazy=True))
     @specs.parameter('version_spec', yaqltypes.String(True))
     def __init__(self, name, default_name=None, version_spec=None):
-        self.type = name(self.context)
+        self.type = name(self.context).type
         self.default_type = default_name(self.context) or self.type
         self.version_spec = version_spec
 
     def validate(self):
         if self.value is None or helpers.is_instance_of(
-                self.value, self.type.type.name,
+                self.value, self.type.name,
                 self.version_spec or helpers.get_names_scope(
                     self.root_context)):
             return self.value
@@ -84,6 +84,20 @@ class Class(contracts.ContractMethod):
         self.value = obj
         return self.validate()
 
+    def generate_schema(self):
+        return self.generate_class_schema(self.value, self.type)
+
+    @staticmethod
+    def generate_class_schema(value, type_):
+        types = 'muranoObject'
+        if '_notNull' not in value:
+            types = [types] + ['null']
+
+        return {
+            'type': types,
+            'muranoType': type_.name
+        }
+
 
 class Template(contracts.ContractMethod):
     name = 'template'
@@ -97,7 +111,7 @@ class Template(contracts.ContractMethod):
         'exclude_properties', yaqltypes.Sequence(nullable=True))
     def __init__(self, engine, type_, default_type=None, version_spec=None,
                  exclude_properties=None):
-        self.type = type_(self.context)
+        self.type = type_(self.context).type
         self.default_type = default_type(self.context) or self.type
         self.version_spec = version_spec
         self.exclude_properties = exclude_properties
@@ -105,7 +119,7 @@ class Template(contracts.ContractMethod):
 
     def validate(self):
         if self.value is None or helpers.is_instance_of(
-                self.value, self.type.type.name,
+                self.value, self.type.name,
                 self.version_spec or helpers.get_names_scope(
                     self.root_context)):
             return self.value
@@ -173,6 +187,13 @@ class Template(contracts.ContractMethod):
                     helpers.patch_dict(result, p, utils.NO_VALUE)
             return result
 
+    def generate_schema(self):
+        result = Class.generate_class_schema(self.value, self.type)
+        result['owned'] = True
+        if self.exclude_properties:
+            result['excludedProperties'] = self.exclude_properties
+        return result
+
 
 class Owned(contracts.ContractMethod):
     name = 'owned'
@@ -193,6 +214,10 @@ class Owned(contracts.ContractMethod):
 
     def transform(self):
         return self.validate()
+
+    def generate_schema(self):
+        self.value['owned'] = True
+        return self.value
 
 
 class NotOwned(contracts.ContractMethod):
@@ -215,3 +240,7 @@ class NotOwned(contracts.ContractMethod):
 
     def transform(self):
         return self.validate()
+
+    def generate_schema(self):
+        self.value['owned'] = False
+        return self.value

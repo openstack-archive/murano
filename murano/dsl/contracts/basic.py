@@ -44,6 +44,15 @@ class String(contracts.ContractMethod):
             return self.value
         raise exceptions.ContractViolationException()
 
+    def generate_schema(self):
+        types = 'string'
+        if '_notNull' not in self.value:
+            types = [types] + ['null']
+
+        return {
+            'type': types
+        }
+
 
 class Bool(contracts.ContractMethod):
     name = 'bool'
@@ -57,6 +66,15 @@ class Bool(contracts.ContractMethod):
         if self.value is None:
             return None
         return True if self.value else False
+
+    def generate_schema(self):
+        types = 'boolean'
+        if '_notNull' not in self.value:
+            types = [types] + ['null']
+
+        return {
+            'type': types
+        }
 
 
 class Int(contracts.ContractMethod):
@@ -78,6 +96,15 @@ class Int(contracts.ContractMethod):
                 'Value {0} violates int() contract'.format(
                     helpers.format_scalar(self.value)))
 
+    def generate_schema(self):
+        types = 'integer'
+        if '_notNull' not in self.value:
+            types = [types] + ['null']
+
+        return {
+            'type': types
+        }
+
 
 class NotNull(contracts.ContractMethod):
     name = 'not_null'
@@ -90,3 +117,13 @@ class NotNull(contracts.ContractMethod):
 
     def transform(self):
         return self.validate()
+
+    def generate_schema(self):
+        types = self.value.get('type')
+        if isinstance(types, list) and 'null' in types:
+            types.remove('null')
+            if len(types) == 1:
+                types = types[0]
+            self.value['type'] = types
+        self.value['_notNull'] = True
+        return self.value

@@ -30,6 +30,9 @@ class ContractMethod(object):
     def check_type(self):
         return self.validate()
 
+    def generate_schema(self):
+        return self.value
+
     def __getattr__(self, item):
         return self.context[item]
 
