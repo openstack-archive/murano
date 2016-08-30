@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from murano.dsl import helpers
 
 
@@ -32,6 +34,18 @@ class Object(object):
     @property
     def type_name(self):
         return self.data['?']['type']
+
+    def __getitem__(self, item):
+        return self.data[item]
+
+    def __setitem__(self, key, value):
+        self.data[key] = value
+
+    def __contains__(self, item):
+        return item in self.data
+
+    def __delitem__(self, key):
+        del self.data[key]
 
 
 class Attribute(object):
@@ -55,7 +69,10 @@ class Attribute(object):
 
 class Ref(object):
     def __init__(self, obj):
-        self._id = obj.id
+        if isinstance(obj, six.string_types):
+            self._id = obj
+        else:
+            self._id = obj.id
 
     @property
     def id(self):

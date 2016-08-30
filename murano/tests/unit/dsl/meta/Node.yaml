@@ -1,0 +1,8 @@
+Name: Node
+
+Properties:
+  nodes:
+    Contract:
+      - $.class(Node)
+  value:
+    Contract: $.string()

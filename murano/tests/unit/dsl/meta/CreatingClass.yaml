@@ -86,18 +86,6 @@ Methods:
                 id: childNode
       - $.out: new($model, $this)
 
-
----
-
-Name: Node
-
-Properties:
-  nodes:
-    Contract:
-      - $.class(Node)
-  value:
-    Contract: $.string()
-
 ---
 
 Name: ConstructionSample

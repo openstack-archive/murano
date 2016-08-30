@@ -33,17 +33,17 @@ class ObjectStore(object):
         return self._executor()
 
     def get(self, object_id):
-        if object_id in self._store:
-            result = self._store[object_id]
-            if not isinstance(result, dsl_types.MuranoObject):
-                result = result.object
-            return result
-        if self._parent_store:
+        result = self._store.get(object_id)
+        if not result and self._parent_store:
             return self._parent_store.get(object_id)
-        return None
+        return result
 
-    def has(self, object_id):
-        return object_id in self._store
+    def has(self, object_id, check_parent_store=True):
+        if object_id in self._store:
+            return True
+        if check_parent_store and self._parent_store:
+            return self._parent_store.has(object_id, check_parent_store)
+        return False
 
     def put(self, murano_object, object_id=None):
         self._store[object_id or murano_object.object_id] = murano_object
@@ -124,7 +124,7 @@ class InitializationObjectStore(ObjectStore):
         if isinstance(class_obj, dsl_types.MuranoTypeReference):
             class_obj = class_obj.type
         object_id = parsed['id']
-        obj = None if object_id is None else self._store.get(object_id)
+        obj = None if object_id is None else self.get(object_id)
         if not obj:
             obj = murano_object.MuranoObject(
                 class_obj, helpers.weak_proxy(owner),

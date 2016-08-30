@@ -113,7 +113,8 @@ class MuranoObject(dsl_types.MuranoObject):
                         init_args[property_name] = property_value
                     else:
                         self.set_property(
-                            property_name, property_value, context)
+                            property_name, property_value, context,
+                            dry_run=self.__initialized)
                     used_names.add(property_name)
                 except exceptions.UninitializedPropertyAccessError:
                     errors += 1
@@ -126,7 +127,8 @@ class MuranoObject(dsl_types.MuranoObject):
                 raise exceptions.CircularExpressionDependenciesError()
             last_errors = errors
 
-        if not object_store.initializing and self.__extension is None:
+        if (not object_store.initializing and self.__extension is None and
+                not self.__initialized):
             method = self.type.methods.get('__init__')
             if method:
                 filtered_params = yaql_integration.filter_parameters(
@@ -146,7 +148,8 @@ class MuranoObject(dsl_types.MuranoObject):
             self.__initialized = True
 
         if (not object_store.initializing
-                and not helpers.is_objects_dry_run_mode()):
+                and not helpers.is_objects_dry_run_mode()
+                and not self.__initialized):
             yield run_init
 
     @property
@@ -195,7 +198,7 @@ class MuranoObject(dsl_types.MuranoObject):
             raise exceptions.UninitializedPropertyAccessError(
                 name, self.__type)
 
-    def set_property(self, name, value, context=None):
+    def set_property(self, name, value, context=None, dry_run=False):
         start_type, derived = self.real_this.type, False
         caller_class = None if not context else helpers.get_type(context)
         if caller_class is not None and caller_class.is_compatible(self):
@@ -229,12 +232,14 @@ class MuranoObject(dsl_types.MuranoObject):
             if len(property_list) > 1:
                 value = ultimate_spec.finalize(value, context)
             if ultimate_spec.usage == dsl_types.PropertyUsages.Static:
-                ultimate_spec.declaring_type.set_property(name, value, context)
-            else:
+                ultimate_spec.declaring_type.set_property(name, value, context,
+                                                          dry_run=dry_run)
+            elif not dry_run:
                 self.real_this.__properties[name] = value
         elif derived:
-            obj = self.cast(caller_class)
-            obj.__properties[name] = value
+            if not dry_run:
+                obj = self.cast(caller_class)
+                obj.__properties[name] = value
         else:
             raise exceptions.PropertyWriteError(name, start_type)
 
