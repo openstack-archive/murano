@@ -35,12 +35,13 @@ LOG = logging.getLogger(__name__)
 
 @dsl.name('io.murano.system.NetworkExplorer')
 class NetworkExplorer(object):
-    def __init__(self, this):
+    def __init__(self, this, region_name=None):
         session = helpers.get_execution_session()
         self._project_id = session.project_id
         self._settings = CONF.networking
         self._available_cidrs = self._generate_possible_cidrs()
         self._region = this.find_owner('io.murano.CloudRegion')
+        self._region_name = region_name
 
     @staticmethod
     @session_local_storage.execution_session_memoize
@@ -52,7 +53,8 @@ class NetworkExplorer(object):
 
     @property
     def _client(self):
-        region = None if self._region is None else self._region['name']
+        region = self._region_name or (
+            None if self._region is None else self._region['name'])
         return self._get_client(region)
 
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
