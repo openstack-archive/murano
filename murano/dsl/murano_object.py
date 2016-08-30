@@ -28,7 +28,7 @@ class MuranoObject(dsl_types.MuranoObject):
         self.__initialized = False
         if known_classes is None:
             known_classes = {}
-        self.__owner = owner.real_this if owner else None
+        self.__owner = helpers.weak_ref(owner.real_this if owner else None)
         self.__object_id = object_id or helpers.generate_id()
         self.__type = murano_class
         self.__properties = {}
@@ -129,8 +129,10 @@ class MuranoObject(dsl_types.MuranoObject):
                 raise exceptions.CircularExpressionDependenciesError()
             last_errors = errors
 
-        if (not object_store.initializing and self.__extension is None and
-                not self.__initialized):
+        if (not object_store.initializing and
+                self.__extension is None and
+                not self.__initialized and
+                not helpers.is_objects_dry_run_mode()):
             method = self.type.methods.get('__init__')
             if method:
                 filtered_params = yaql_integration.filter_parameters(
@@ -164,7 +166,9 @@ class MuranoObject(dsl_types.MuranoObject):
 
     @property
     def owner(self):
-        return self.__owner
+        if self.__owner is None:
+            return None
+        return self.__owner()
 
     @property
     def real_this(self):

@@ -163,17 +163,18 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             oi[key] = value
 
     class CallInterface(object):
-        def __init__(self, mpl_object, object_store):
-            self.__object = mpl_object
-            self.__object_store = object_store
+        def __init__(self, object_interface):
+            self.__object_interface = object_interface
 
         def __getattr__(self, item):
             def func(*args, **kwargs):
                 self._insert_instruction()
-                with helpers.with_object_store(self.__object_store):
+                with helpers.with_object_store(
+                        self.__object_interface.object_store):
                     context = helpers.get_context()
-                    return to_mutable(self.__object.type.invoke(
-                        item, self.__object, args, kwargs,
+                    obj = self.__object_interface.object
+                    return to_mutable(obj.type.invoke(
+                        item, obj, args, kwargs,
                         context), helpers.get_yaql_engine(context))
             return func
 
@@ -188,27 +189,31 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
                 context[constants.CTX_CURRENT_INSTRUCTION] = NativeInstruction(
                     frame[4][0].strip(), location)
 
-    def __init__(self, mpl_object, object_store=None):
+    def __init__(self, mpl_object):
         self.__object = mpl_object
-        self.__object_store = object_store or helpers.get_object_store()
+        self.__object_store = helpers.get_object_store()
 
     @staticmethod
-    def create(mpl_object, object_store=None):
+    def create(mpl_object):
         if mpl_object is None or isinstance(mpl_object, MuranoObjectInterface):
             return mpl_object
-        return MuranoObjectInterface(mpl_object, object_store)
+        return MuranoObjectInterface(mpl_object)
 
     @property
     def object(self):
         return self.__object
 
     @property
+    def object_store(self):
+        return self.__object_store
+
+    @property
     def id(self):
-        return self.__object.object_id
+        return self.object.object_id
 
     @property
     def owner(self):
-        owner = self.__object.owner
+        owner = self.object.owner
         return MuranoObjectInterface.create(owner)
 
     def find_owner(self, type, optional=False):
@@ -216,7 +221,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             type = helpers.get_class(type)
         elif isinstance(type, dsl_types.MuranoTypeReference):
             type = type.type
-        p = self.__object.owner
+        p = self.object.owner
         while p is not None:
             if type.is_compatible(p):
                 return MuranoObjectInterface(p)
@@ -228,7 +233,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
     @property
     def type(self):
-        return self.__object.type
+        return self.object.type
 
     @property
     def package(self):
@@ -244,17 +249,17 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
     @property
     def extension(self):
-        return self.__object.extension
+        return self.object.extension
 
     def cast(self, murano_class, version_spec=None):
         return MuranoObjectInterface.create(
             helpers.cast(
-                self.__object, murano_class,
+                self.object, murano_class,
                 version_spec or helpers.get_type()))
 
     def is_instance_of(self, murano_class, version_spec=None):
         return helpers.is_instance_of(
-            self.__object, murano_class,
+            self.object, murano_class,
             version_spec or helpers.get_type())
 
     def ancestors(self):
@@ -263,17 +268,16 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
     def __getitem__(self, item):
         context = helpers.get_context()
         return to_mutable(
-            self.__object.get_property(item, context),
+            self.object.get_property(item, context),
             helpers.get_yaql_engine(context))
 
     def __setitem__(self, key, value):
         context = helpers.get_context()
         value = helpers.evaluate(value, context)
-        self.__object.set_property(key, value, context)
+        self.object.set_property(key, value, context)
 
     def __call__(self):
-        return MuranoObjectInterface.CallInterface(
-            self.object, self.__object_store)
+        return MuranoObjectInterface.CallInterface(self)
 
     def __repr__(self):
         return '<{0}>'.format(repr(self.object))

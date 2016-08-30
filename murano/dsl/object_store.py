@@ -128,7 +128,7 @@ class InitializationObjectStore(ObjectStore):
             object_id, self._keep_ids)
         if not obj:
             obj = murano_object.MuranoObject(
-                class_obj, helpers.weak_proxy(owner),
+                class_obj, owner,
                 name=parsed['name'],
                 object_id=object_id if self._keep_ids else None)
             self.put(obj, object_id or obj.object_id)

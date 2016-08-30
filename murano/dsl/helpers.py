@@ -620,6 +620,12 @@ def weak_proxy(obj):
     return weakref.proxy(obj)
 
 
+def weak_ref(obj):
+    if obj is None or isinstance(obj, weakref.ReferenceType):
+        return obj
+    return weakref.ref(obj)
+
+
 def parse_type_string(type_str, default_version, default_package):
     res = TYPE_RE.match(type_str)
     if res is None:
