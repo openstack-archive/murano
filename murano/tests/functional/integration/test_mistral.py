@@ -30,9 +30,9 @@ class MistralTest(core.MistralIntegration):
             # Upload the Murano test package.
             cls.upload_mistral_showcase_app()
 
-        except Exception as e:
+        except Exception:
             cls.tearDownClass()
-            raise e
+            raise
 
     @classmethod
     def tearDownClass(cls):
