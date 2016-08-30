@@ -1,0 +1,50 @@
+Name: TestGCNode
+Extends: Node
+
+Methods:
+  .init:
+    Body:
+      - $.find(Node)
+
+  .destroy:
+    Body:
+      - trace($.value)
+
+---
+Namespaces:
+  sys: io.murano.system
+
+Name: TestGC
+
+Methods:
+  testObjectsCollect:
+    Body:
+      - $model:
+          :TestGCNode:
+            value: A
+            nodes:
+              - :TestGCNode:
+                  value: B
+      - new($model)
+      - sys:GC.collect()
+
+  testObjectsCollectWithSubscription:
+    Body:
+      - $model:
+          :TestGCNode:
+            value: A
+            nodes:
+              :TestGCNode:
+                value: B
+      - $x: new($model)
+      - sys:GC.subscribeDestruction($x, _handler)
+      - sys:GC.subscribeDestruction($x.nodes[0], _handler)
+      - $x: null
+      - sys:GC.collect()
+
+  _handler:
+    Arguments:
+      - obj:
+          Contract: $.class(TestGCNode).notNull()
+    Body:
+      - trace('Destroy ' + $obj.value)

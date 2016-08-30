@@ -23,6 +23,7 @@ from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
+from murano.dsl import helpers
 from murano.dsl import yaql_functions
 from murano.dsl import yaql_integration
 
@@ -62,7 +63,8 @@ def _prepare_context():
                     mc = src.type
                 else:
                     mc = src
-                mc.set_property(key, value, context['#root_context'])
+                helpers.get_executor().set_static_property(
+                    mc, key, value, context['#root_context'])
             else:
                 raise ValueError(
                     'attribution may only be applied to '
@@ -76,7 +78,15 @@ def _prepare_context():
                     return src.get_property(key, context['#root_context'])
                 except exceptions.UninitializedPropertyAccessError:
                     return {}
-
+            elif isinstance(src, (
+                    dsl_types.MuranoTypeReference,
+                    dsl_types.MuranoType)):
+                if isinstance(src, dsl_types.MuranoTypeReference):
+                    mc = src.type
+                else:
+                    mc = src
+                return helpers.get_executor().get_static_property(
+                    mc, key, context['#root_context'])
             else:
                 raise ValueError(
                     'attribution may only be applied to '

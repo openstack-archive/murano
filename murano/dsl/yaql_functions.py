@@ -165,7 +165,8 @@ def obj_attribution(context, obj, property_name):
 @specs.parameter('property_name', yaqltypes.Keyword())
 @specs.name('#operator_.')
 def obj_attribution_static(context, cls, property_name):
-    return cls.type.get_property(property_name, context)
+    return helpers.get_executor().get_static_property(
+        cls.type, property_name, context)
 
 
 @specs.parameter('receiver', dsl.MuranoObjectParameter(decorate=False))

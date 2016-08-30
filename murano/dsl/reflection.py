@@ -18,6 +18,7 @@ from yaql import yaqlization
 
 from murano.dsl import dsl
 from murano.dsl import dsl_types
+from murano.dsl import helpers
 from murano.dsl import meta
 
 
@@ -109,8 +110,8 @@ def property_owner(murano_property):
 @specs.method
 def property_get_value(context, property_, object_):
     if object_ is None:
-        return property_.declaring_type.get_property(
-            name=property_.name, context=context)
+        return helpers.get_executor().get_static_property(
+            property_.declaring_type, name=property_.name, context=context)
     return object_.cast(property_.declaring_type).get_property(
         name=property_.name, context=context)
 
@@ -122,7 +123,8 @@ def property_get_value(context, property_, object_):
 @specs.method
 def property_set_value(context, property_, object_, value):
     if object_ is None:
-        property_.declaring_type.set_property(
+        helpers.get_executor().set_static_property(
+            property_.declaring_type,
             name=property_.name, value=value, context=context)
     else:
         object_.cast(property_.declaring_type).set_property(

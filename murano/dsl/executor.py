@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import collections
 import contextlib
 import itertools
+import traceback
 
 import eventlet
 import eventlet.event
@@ -28,11 +28,13 @@ from murano.common.i18n import _LW
 from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
+from murano.dsl import dsl_exception
 from murano.dsl import dsl_types
 from murano.dsl import exceptions as dsl_exceptions
 from murano.dsl import helpers
 from murano.dsl import object_store
 from murano.dsl.principal_objects import stack_trace
+from murano.dsl import serializer
 from murano.dsl import yaql_integration
 
 LOG = logging.getLogger(__name__)
@@ -47,6 +49,7 @@ class MuranoDslExecutor(object):
         self._object_store = object_store.ObjectStore(self)
         self._locks = {}
         self._root_context_cache = {}
+        self._static_properties = {}
 
     @property
     def object_store(self):
@@ -310,122 +313,66 @@ class MuranoDslExecutor(object):
         self._attribute_store.load(data.get(constants.DM_ATTRIBUTES) or [])
         model = data.get(constants.DM_OBJECTS)
         if model is None:
-            return None
-        result = self._object_store.load(model, None, keep_ids=True)
+            result = None
+        else:
+            result = self._object_store.load(model, None, keep_ids=True)
+        model_copy = data.get(constants.DM_OBJECTS_COPY)
+        if model_copy:
+            self._object_store.load(model_copy, None, keep_ids=True)
         return dsl.MuranoObjectInterface.create(result)
 
-    def cleanup(self, data):
-        objects_copy = data.get(constants.DM_OBJECTS_COPY)
-        if not objects_copy:
+    def signal_destruction_dependencies(self, *objects):
+        if not objects:
             return
-        gc_object_store = object_store.ObjectStore(self, self.object_store)
-        with helpers.with_object_store(gc_object_store):
-            gc_object_store.load(objects_copy, None, keep_ids=True)
-            objects_to_clean = []
-            for object_id in self._list_potential_object_ids(objects_copy):
-                if (gc_object_store.has(object_id, False) and
-                        not self._object_store.has(object_id, False)):
-                    objects_to_clean.append(object_id)
-            if objects_to_clean:
-                self._clean_garbage(gc_object_store, objects_to_clean)
+        elif len(objects) > 1:
+            return helpers.parallel_select(
+                objects, self.signal_destruction_dependencies)
 
-    def cleanup_orphans(self, alive_object_ids):
-        orphan_ids = self._collect_orphans(alive_object_ids)
-        self._destroy_orphans(orphan_ids)
-        return len(orphan_ids)
+        obj = objects[0]
+        if obj.destroyed:
+            return
+        for dependency in obj.dependencies.get('onDestruction', []):
+            try:
+                handler = dependency['handler']
+                if handler:
+                    subscriber = dependency['subscriber']
+                    if subscriber:
+                        subscriber = subscriber()
+                    if (subscriber and
+                            subscriber.initialized and
+                            not subscriber.destroyed):
+                        method = subscriber.type.find_single_method(handler)
+                        self.invoke_method(
+                            method, subscriber, None, [obj], {},
+                            invoke_action=False)
+            except Exception as e:
+                LOG.warning(_LW(
+                    'Muted exception during destruction dependency '
+                    'execution in {0}: {1}').format(obj, e), exc_info=True)
+        obj.dependencies.pop('onDestruction', None)
 
-    def _collect_orphans(self, alive_object_ids):
-        orphan_ids = []
-        for obj_id in self._object_store.iterate():
-            if obj_id not in alive_object_ids:
-                orphan_ids.append(obj_id)
-        return orphan_ids
+    def destroy_objects(self, *objects):
+        if not objects:
+            return
+        elif len(objects) > 1:
+            return helpers.parallel_select(
+                objects, self.destroy_objects)
 
-    def _destroy_orphans(self, orphan_ids):
-        with helpers.with_object_store(self.object_store):
-            list_of_destroyed = self._clean_garbage(self.object_store,
-                                                    orphan_ids)
-            for obj_id in list_of_destroyed:
-                self._object_store.remove(obj_id)
-
-    def _destroy_object(self, obj):
+        obj = objects[0]
+        if obj.destroyed:
+            return
         methods = obj.type.find_methods(lambda m: m.name == '.destroy')
         for method in methods:
             try:
                 method.invoke(obj, (), {}, None)
             except Exception as e:
+                if isinstance(e, dsl_exception.MuranoPlException):
+                    tb = e.format(prefix='  ')
+                else:
+                    tb = traceback.format_exc()
                 LOG.warning(_LW(
-                    'Muted exception during execution of .destroy'
-                    'on {0}: {1}').format(obj, e), exc_info=True)
-
-    def _clean_garbage(self, object_store, d_list):
-        d_set = set(d_list)
-        dd_graph = {}
-
-        # NOTE(starodubcevna): construct a graph which looks like:
-        # {
-        #   obj1_id: {subscriber1_id, subscriber2_id},
-        #   obj2_id: {subscriber2_id, subscriber3_id}
-        # }
-        for obj_id in d_set:
-            obj = object_store.get(obj_id)
-            dds = obj.dependencies.get('onDestruction', [])
-            subscribers_set = {dd['subscriber'] for dd in dds}
-            dd_graph[obj_id] = subscribers_set
-
-        def topological(graph):
-            """Topological sort implementation
-
-            This implementation will work even if we have cycle dependencies,
-            e.g. [a->b, b->c, c->a]. In this case the order of deletion will be
-            undified and it's okay.
-            """
-
-            result = []
-
-            def dfs(obj_id):
-                for subscriber_id in graph[obj_id]:
-                    if subscriber_id in graph:
-                        dfs(subscriber_id)
-                result.append(obj_id)
-                del graph[obj_id]
-            while graph:
-                dfs(next(iter(graph)))
-            return result
-
-        deletion_order = topological(dd_graph)
-        destroyed = set()
-        for obj_id in deletion_order:
-            obj = object_store.get(obj_id)
-            dependencies = obj.dependencies.get('onDestruction', [])
-            for dependency in dependencies:
-                subscriber_id = dependency['subscriber']
-                if object_store.has(subscriber_id):
-                    subscriber = object_store.get(subscriber_id)
-                    handler = dependency['handler']
-                    if handler:
-                        method = subscriber.type.find_single_method(handler)
-                        self.invoke_method(method, subscriber, None, [], {},
-                                           invoke_action=False)
-            self._destroy_object(obj)
-            destroyed.add(obj_id)
-
-        return destroyed
-
-    def _list_potential_object_ids(self, data):
-        if isinstance(data, dict):
-            for val in six.itervalues(data):
-                for res in self._list_potential_object_ids(val):
-                    yield res
-            sys_dict = data.get('?')
-            if (isinstance(sys_dict, dict) and
-                    sys_dict.get('id') and sys_dict.get('type')):
-                yield sys_dict['id']
-        elif isinstance(data, collections.Iterable) and not isinstance(
-                data, six.string_types):
-            for val in data:
-                for res in self._list_potential_object_ids(val):
-                    yield res
+                    'Muted exception during execution of .destroy '
+                    'on {0}: {1}').format(obj, tb), exc_info=True)
 
     def create_root_context(self, runtime_version):
         context = self._root_context_cache.get(runtime_version)
@@ -497,3 +444,31 @@ class MuranoDslExecutor(object):
     def run(self, cls, method_name, this, args, kwargs):
         with helpers.with_object_store(self.object_store):
             return cls.invoke(method_name, this, args, kwargs)
+
+    def get_static_property(self, murano_type, name, context):
+        prop = murano_type.find_static_property(name)
+        cls = prop.declaring_type
+        value = self._static_properties.get(prop, prop.default)
+        return prop.transform(value, cls, None, context)
+
+    def set_static_property(self, murano_type, name, value,
+                            context, dry_run=False):
+        prop = murano_type.find_static_property(name)
+        cls = prop.declaring_type
+        value = prop.transform(value, cls, None, context)
+        if not dry_run:
+            self._static_properties[prop] = prop.finalize(
+                value, cls, context)
+
+    def finalize(self, model_root=None):
+        if model_root:
+            used_objects = serializer.collect_objects(model_root)
+            self.object_store.prepare_finalize(used_objects)
+            model = serializer.serialize_model(model_root, self)
+            self.object_store.finalize()
+        else:
+            model = None
+            self.object_store.prepare_finalize(None)
+            self.object_store.finalize()
+        self._static_properties.clear()
+        return model

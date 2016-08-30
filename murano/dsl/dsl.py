@@ -170,7 +170,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             def func(*args, **kwargs):
                 self._insert_instruction()
                 with helpers.with_object_store(
-                        self.__object_interface.object_store):
+                        self.__object_interface._object_store):
                     context = helpers.get_context()
                     obj = self.__object_interface.object
                     return to_mutable(obj.type.invoke(
@@ -190,8 +190,8 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
                     frame[4][0].strip(), location)
 
     def __init__(self, mpl_object):
-        self.__object = mpl_object
-        self.__object_store = helpers.get_object_store()
+        self._object = mpl_object
+        self._object_store = helpers.get_object_store()
 
     @staticmethod
     def create(mpl_object):
@@ -201,11 +201,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
 
     @property
     def object(self):
-        return self.__object
-
-    @property
-    def object_store(self):
-        return self.__object_store
+        return self._object
 
     @property
     def id(self):
@@ -221,11 +217,10 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
             type = helpers.get_class(type)
         elif isinstance(type, dsl_types.MuranoTypeReference):
             type = type.type
-        p = self.object.owner
-        while p is not None:
-            if type.is_compatible(p):
-                return MuranoObjectInterface(p)
-            p = p.owner
+        owner = helpers.find_object_owner(
+            self.object, lambda t: type.is_compatible(t))
+        if owner:
+            return MuranoObjectInterface(owner)
         if not optional:
             raise ValueError('Object is not owned by any instance of type '
                              '{0}'.format(type.name))

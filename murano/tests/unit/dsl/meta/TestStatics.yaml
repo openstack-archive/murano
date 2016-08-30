@@ -33,6 +33,10 @@ Properties:
     Usage: Static
     Default: xxx
 
+  staticDictProperty:
+    Contract: {}
+    Usage: Static
+
   conflictingStaticProperty:
     Contract: $.string()
     Default: 'conflictingStaticProperty-child'
@@ -171,6 +175,16 @@ Methods:
     Body:
       - type('test.TestStatics').staticProperty: qq
       - Return: type('test.TestStatics').staticProperty
+
+  testModifyStaticDictProperty:
+    Body:
+      Return: $.modifyStaticDictProperty()
+
+  modifyStaticDictProperty:
+    Usage: Static
+    Body:
+      - :TestStatics.staticDictProperty.key: value
+      - Return: $.staticDictProperty
 
   testPropertyIsStatic:
     Body:

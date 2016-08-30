@@ -1,0 +1,13 @@
+---
+features:
+  - New on-request garbage collector for MuranoPL objects were implemented.
+    Garbage collection is triggered by io.murano.system.GC.collect()
+    static method. Garbage collector destroys all object that are not
+    reachable anymore. GC can handle objects with cross-references and
+    isolated object graphs. When portion of object model becomes not
+    reachable it destroyed in predictable order such that child objects get
+    destroyed before their parents and, when possible, before objects
+    that are subscribed to their destruction notifications.
+  - Internally, both pre-deployment garbage collection (that was done by
+    comparision of ``Objects`` and ``ObjectsCopy``) and post-deployment
+    orphan object collection are now done through the new GC.

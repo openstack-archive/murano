@@ -88,7 +88,6 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         self._parents = self._adjusted_parents(remappings)
         self._context = None
         self._exported_context = None
-        self._property_values = {}
         self._meta = dslmeta.MetaData(meta, dsl_types.MetaTargets.Type, self)
         self._meta_values = None
         self._imports = list(self._resolve_imports(imports))
@@ -425,19 +424,6 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                         self._exported_context.register_function(
                             m.static_stub, name=m.static_stub.name)
         return self._exported_context
-
-    def get_property(self, name, context):
-        prop = self.find_static_property(name)
-        cls = prop.declaring_type
-        value = cls._property_values.get(name, prop.default)
-        return prop.transform(value, cls, None, context)
-
-    def set_property(self, name, value, context, dry_run=False):
-        prop = self.find_static_property(name)
-        cls = prop.declaring_type
-        value = prop.transform(value, cls, None, context)
-        if not dry_run:
-            cls._property_values[name] = value
 
     def get_meta(self, context):
         if self._meta_values is None:

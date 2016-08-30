@@ -34,7 +34,7 @@ def serialize(obj, executor,
             make_copy=False,
             serialize_attributes=False,
             serialize_actions=False,
-            serialization_type=serialization_type)[0]['Objects']
+            serialization_type=serialization_type)['Objects']
 
 
 def _serialize_object(root_object, designer_attributes, allow_refs,
@@ -66,7 +66,6 @@ def serialize_model(root_object, executor,
         tree = None
         tree_copy = None
         attributes = []
-        serialized_objects = set()
     else:
         with helpers.with_object_store(executor.object_store):
             tree, serialized_objects = _serialize_object(
@@ -84,7 +83,7 @@ def serialize_model(root_object, executor,
         'Objects': tree,
         'ObjectsCopy': tree_copy,
         'Attributes': attributes
-    }, serialized_objects
+    }
 
 
 def _serialize_available_action(obj, current_actions, executor):
@@ -223,3 +222,27 @@ def is_nested_in(obj, ancestor):
         if obj is None:
             return False
         obj = obj.owner
+
+
+def collect_objects(root_object):
+    visited = set()
+
+    def rec(obj):
+        if utils.is_sequence(obj) or isinstance(obj, utils.SetType):
+            for value in obj:
+                for t in rec(value):
+                    yield t
+        elif isinstance(obj, utils.MappingType):
+            for value in six.itervalues(obj):
+                for t in rec(value):
+                    yield t
+        elif isinstance(obj, dsl_types.MuranoObjectInterface):
+                for t in rec(obj.object):
+                    yield t
+        elif isinstance(obj, dsl_types.MuranoObject) and obj not in visited:
+            visited.add(obj)
+            yield obj
+            for t in rec(obj.to_dictionary()):
+                yield t
+
+    return rec(root_object)

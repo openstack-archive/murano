@@ -202,11 +202,8 @@ class Owned(contracts.ContractMethod):
         if self.value is None or isinstance(self.value, contracts.ObjRef):
             return self.value
         if isinstance(self.value, dsl_types.MuranoObject):
-            p = self.value.owner
-            while p is not None:
-                if p is self.this:
-                    return self.value
-                p = p.owner
+            if helpers.find_object_owner(self.value, lambda t: t is self.this):
+                return self.value
             raise exceptions.ContractViolationException(
                 'Object {0} violates owned() contract'.format(self.value))
         raise exceptions.ContractViolationException(
@@ -227,13 +224,10 @@ class NotOwned(contracts.ContractMethod):
         if self.value is None or isinstance(self.value, contracts.ObjRef):
             return self.value
         if isinstance(self.value, dsl_types.MuranoObject):
-            p = self.value.owner
-            while p is not None:
-                if p is self.this:
-                    raise exceptions.ContractViolationException(
-                        'Object {0} violates notOwned() contract'.format(
-                            self.value))
-                p = p.owner
+            if helpers.find_object_owner(self.value, lambda t: t is self.this):
+                raise exceptions.ContractViolationException(
+                    'Object {0} violates notOwned() contract'.format(
+                        self.value))
             return self.value
         raise exceptions.ContractViolationException(
             'Value {0} is not an object'.format(self.value))

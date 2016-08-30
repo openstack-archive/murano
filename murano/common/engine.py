@@ -221,19 +221,22 @@ class TaskExecutor(object):
         try:
             obj = executor.load(self.model)
         except Exception as e:
+            executor.finalize()
             return self.exception_result(e, None, '<load>')
 
         if obj is not None:
             try:
                 self._validate_model(obj.object, pkg_loader, executor)
             except Exception as e:
+                executor.finalize()
                 return self.exception_result(e, obj, '<validate>')
 
         try:
             LOG.debug('Invoking pre-cleanup hooks')
             self.session.start()
-            executor.cleanup(self._model)
+            executor.object_store.cleanup()
         except Exception as e:
+            executor.finalize()
             return self.exception_result(e, obj, '<GC>')
         finally:
             LOG.debug('Invoking post-cleanup hooks')
@@ -249,15 +252,11 @@ class TaskExecutor(object):
                     action_result = self._invoke(executor)
                 finally:
                     try:
-                        self._model, alive_object_ids = \
-                            serializer.serialize_model(obj, executor)
-                        LOG.debug('Cleaning up orphan objects')
-                        n = executor.cleanup_orphans(alive_object_ids)
-                        LOG.debug('{} orphan objects were destroyed'.format(n))
-
+                        self._model = executor.finalize(obj)
                     except Exception as e:
                         return self.exception_result(e, None, '<model>')
             except Exception as e:
+                executor.finalize()
                 return self.exception_result(e, obj, self.action['method'])
             finally:
                 LOG.debug('Invoking post-execution hooks')

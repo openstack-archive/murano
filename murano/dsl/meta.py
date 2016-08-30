@@ -61,7 +61,8 @@ class MetaData(MetaProvider):
                 def instantiate(context):
                     obj = helpers.get_object_store().load(
                         template, owner=None,
-                        context=context, scope_type=declaring_type)
+                        context=context, scope_type=declaring_type,
+                        bypass_store=True)
                     obj.declaring_type = declaring_type
                     return obj
                 return instantiate

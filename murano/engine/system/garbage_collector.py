@@ -30,30 +30,51 @@ class GarbageCollector(object):
     @specs.parameter('handler', yaqltypes.String(nullable=True))
     def subscribe_destruction(target, handler=None):
         caller_context = helpers.get_caller_context()
-        target_this = target.object
+        target_this = target.object.real_this
         receiver = helpers.get_this(caller_context)
 
         if handler:
             receiver.type.find_single_method(handler)
 
-        dependency = {'subscriber': receiver.object_id,
-                      'handler': handler}
-        target_this.dependencies.setdefault(
-            'onDestruction', []).append(dependency)
+        dependency = GarbageCollector._find_dependency(
+            target_this, receiver, handler)
+
+        if not dependency:
+            dependency = {'subscriber': helpers.weak_ref(receiver),
+                          'handler': handler}
+            target_this.dependencies.setdefault(
+                'onDestruction', []).append(dependency)
 
     @staticmethod
     @specs.parameter('target', dsl.MuranoObjectParameter())
     @specs.parameter('handler', yaqltypes.String(nullable=True))
-    def unsubscibe_destruction(target, handler=None):
+    def unsubscribe_destruction(target, handler=None):
         caller_context = helpers.get_caller_context()
-        target_this = target.object
+        target_this = target.object.real_this
         receiver = helpers.get_this(caller_context)
 
         if handler:
             receiver.type.find_single_method(handler)
 
-        dependency = {'subscriber': receiver.object_id,
-                      'handler': handler}
         dds = target_this.dependencies.get('onDestruction', [])
-        if dependency in dds:
+        dependency = GarbageCollector._find_dependency(
+            target_this, receiver, handler)
+
+        if dependency:
             dds.remove(dependency)
+
+    @staticmethod
+    def _find_dependency(target, subscriber, handler):
+        dds = target.dependencies.get('onDestruction', [])
+        for dd in dds:
+            if dd['handler'] != handler:
+                continue
+            d_subscriber = dd['subscriber']
+            if d_subscriber:
+                d_subscriber = d_subscriber()
+            if d_subscriber == subscriber:
+                return dd
+
+    @staticmethod
+    def collect():
+        helpers.get_executor().object_store.cleanup()
