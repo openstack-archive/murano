@@ -32,9 +32,9 @@ class ObjectStore(object):
     def executor(self):
         return self._executor()
 
-    def get(self, object_id):
+    def get(self, object_id, check_parent_store=True):
         result = self._store.get(object_id)
-        if not result and self._parent_store:
+        if not result and self._parent_store and check_parent_store:
             return self._parent_store.get(object_id)
         return result
 
@@ -124,7 +124,8 @@ class InitializationObjectStore(ObjectStore):
         if isinstance(class_obj, dsl_types.MuranoTypeReference):
             class_obj = class_obj.type
         object_id = parsed['id']
-        obj = None if object_id is None else self.get(object_id)
+        obj = None if object_id is None else self.get(
+            object_id, self._keep_ids)
         if not obj:
             obj = murano_object.MuranoObject(
                 class_obj, helpers.weak_proxy(owner),
