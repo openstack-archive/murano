@@ -77,7 +77,8 @@ class MuranoObject(dsl_types.MuranoObject):
                     property_value = self.__config[property_name]
                 else:
                     property_value = dsl.NO_VALUE
-                self.set_property(property_name, property_value)
+                self.set_property(property_name, property_value,
+                                  dry_run=self.__initialized)
 
         init = self.type.methods.get('.init')
         used_names = used_names or set()
