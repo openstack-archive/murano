@@ -233,9 +233,9 @@ class MuranoObject(dsl_types.MuranoObject):
                         self.real_this, context, default=default,
                         finalize=len(property_list) == 1)
                 else:
-                    spec.validate(value, context, default)
+                    spec.validate(value, self.real_this, context, default)
             if len(property_list) > 1:
-                value = ultimate_spec.finalize(value, context)
+                value = ultimate_spec.finalize(value, self.real_this, context)
             if ultimate_spec.usage == dsl_types.PropertyUsages.Static:
                 ultimate_spec.declaring_type.set_property(name, value, context,
                                                           dry_run=dry_run)
