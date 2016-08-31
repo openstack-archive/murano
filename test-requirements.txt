@@ -18,7 +18,7 @@ requests>=2.10.0 # Apache-2.0
 os-testr>=0.7.0 # Apache-2.0
 
 # Some of the tests use real MySQL and Postgres databases
-PyMySQL>=0.6.2 # MIT License
+PyMySQL!=0.7.7,>=0.6.2 # MIT License
 psycopg2>=2.5 # LGPL/ZPL
 
 # doc build requirements
