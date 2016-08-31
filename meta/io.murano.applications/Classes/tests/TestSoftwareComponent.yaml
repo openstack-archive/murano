@@ -85,8 +85,8 @@ Methods:
           Contract: $.int().notNull()
     Body:
       - $this.assertEqual(
-          $this.reports.skip($offset).take($this.group.numItems),
-          range(1, $this.group.numItems + 1).select('Provisioning VM for Server {0}'.format($)))
+          range(1, $this.group.numItems + 1).select('Provisioning VM for Server {0}'.format($)),
+          $this.reports.skip($offset).take($this.group.numItems))
 
 
   assertInstallingSequence:

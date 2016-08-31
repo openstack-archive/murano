@@ -58,7 +58,7 @@ Methods:
     Body:
       - If: $environment and not $server.openstackId
         Then:
-          - $environment.reporter.report($serverGroup, 'Provisioning VM for ' + name($server) or $server.name)
+          - $environment.reporter.report($serverGroup, 'Provisioning VM for ' + (name($server) or $server.name))
       - $server.beginDeploy()
 
 --- # ------------------------------------------------------------------ # ---
