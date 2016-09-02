@@ -51,15 +51,15 @@ DevStack installation
    .. note:: You also can use ``glance`` as a value of the
              ``packages_service`` option for the same behaviour
 
-#. Enable Glare in ``murano-dashboard``. For this, add the following line
-   to the ``local_settings.py`` file
+#. Enable Glare in ``murano-dashboard``. For this, modify the following line
+   in the ``_50_murano.py`` file
 
    .. code-block:: python
 
       MURANO_USE_GLARE = True
 
-   By default, the ``local_settings.py`` file is located in
-   ``$DEST/horizon/openstack_dashboard/local/``.
+   By default, the ``_50_murano.py`` file is located in
+   ``$HORIZON_DIR/openstack_dashboard/local/local_settings.d/``.
 
 #. Restart the ``apache2`` service.
    Now ``murano-dashboard`` will retrieve packages from Glare.
@@ -119,7 +119,7 @@ specify where g-glare service is running.
 
       url = http://<GLARE_API_URL>:<GLARE_API_PORT>
 
-#. Specify Glare URL in the Dashboard settings file:
+#. Specify Glare URL in the Dashboard settings file, ``_50_murano.py`` :
 
    .. code-block:: python
 
