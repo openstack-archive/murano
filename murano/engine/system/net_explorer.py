@@ -20,7 +20,7 @@ import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import uuidutils
-import retrying
+import tenacity
 
 from murano.common import auth_utils
 from murano.common import exceptions as exc
@@ -60,10 +60,11 @@ class NetworkExplorer(object):
     # NOTE(starodubcevna): to avoid simultaneous router requests we use retry
     # decorator with random delay 1-10 seconds between attempts and maximum
     # delay time 30 seconds.
-    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
-                    exc.RouterInfoException),
-                    wait_random_min=1000, wait_random_max=10000,
-                    stop_max_delay=30000)
+    @tenacity.retry(
+        retry=tenacity.retry_if_exception_type(exc.RouterInfoException),
+        stop=tenacity.stop_after_delay(30),
+        wait=tenacity.wait_random(min=1, max=10),
+        reraise=True)
     def get_default_router(self):
         router_name = self._settings.router_name
 

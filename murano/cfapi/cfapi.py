@@ -17,8 +17,8 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import retrying
 import six
+import tenacity
 from webob import response
 
 from murano.common.i18n import _LI, _LW
@@ -224,11 +224,11 @@ class Controller(object):
             for action_id in list(actions):
                 if 'getCredentials' in action_id:
 
-                    @retrying.retry(retry_on_exception=lambda e: isinstance(e,
-                                    TypeError),
-                                    wait_random_min=1000,
-                                    wait_random_max=10000,
-                                    stop_max_delay=30000)
+                    @tenacity.retry(
+                        retry=tenacity.retry_if_exception_type(TypeError),
+                        wait=tenacity.wait_random(min=1, max=10),
+                        stop=tenacity.stop_after_delay(30),
+                        reraise=True)
                     def _get_creds(client, task_id, environment_id):
                         result = m_cli.actions.get_result(environment_id,
                                                           task_id)['result']
