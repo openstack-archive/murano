@@ -112,6 +112,7 @@ Developing Applications
    appdev-guide/examples
    appdev-guide/use_cases
    appdev-guide/app_debugging
+   appdev-guide/garbage_collection
    appdev-guide/faq
 
 
