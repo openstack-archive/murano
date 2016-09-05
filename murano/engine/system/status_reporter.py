@@ -31,7 +31,8 @@ class StatusReporter(object):
 
     def __init__(self, environment):
         if StatusReporter.transport is None:
-            StatusReporter.transport = messaging.get_transport(CONF)
+            StatusReporter.transport = messaging.get_notification_transport(
+                CONF)
         self._notifier = messaging.Notifier(
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),

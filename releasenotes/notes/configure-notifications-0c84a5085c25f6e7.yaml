@@ -1,0 +1,6 @@
+features:
+  - It is now possible to configure the notifications to use a different
+    transport URL than the RPCs. These could potentially be completely
+    different message broker hosts (though they doesn't need to be). If the
+    notification-specific configuration is not provided, the notifier will use
+    the same transport as the RPCs.
