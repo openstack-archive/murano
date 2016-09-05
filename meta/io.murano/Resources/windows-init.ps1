@@ -17,6 +17,7 @@ $WindowsAgentConfigBase64 = '%AGENT_CONFIG_BASE64%'
 $WindowsAgentConfigFile = "C:\Murano\Agent\WindowsAgent.exe.config"
 $WindowsAgentLogFile = "C:\Murano\Agent\log.txt"
 
+$CurrentComputerName = HOSTNAME
 $NewComputerName = '%INTERNAL_HOSTNAME%'
 $MuranoFileShare = '\\%MURANO_SERVER_ADDRESS%\share'
 
@@ -63,13 +64,14 @@ Write-Log "Service has been updated."
 Write-Log "Adding environment variable 'MuranoFileShare' = '$MuranoFileShare' ..."
 [Environment]::SetEnvironmentVariable('MuranoFileShare', $MuranoFileShare, [EnvironmentVariableTarget]::Machine)
 Write-Log "Environment variable added."
+# (jose-phillips) If the Master Image or CloudBase-Init is already set the hostname this procedure fail.
+if ($CurrentComputerName -ne $NewComputerName){
+  Write-Log "Renaming computer to '$NewComputerName' ..."
+  $null = Rename-Computer -NewName $NewComputerName -Force
 
-Write-Log "Renaming computer to '$NewComputerName' ..."
-$null = Rename-Computer -NewName $NewComputerName -Force
-
-Write-Log "New name assigned, restart required."
-$RestartRequired = $true
-
+  Write-Log "New name assigned, restart required."
+  $RestartRequired = $true
+}
 
 Write-Log 'All done!'
 if ( $RestartRequired ) {

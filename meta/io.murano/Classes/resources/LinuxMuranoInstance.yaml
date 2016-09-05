@@ -53,7 +53,9 @@ Methods:
   generateCloudConfig:
     Body:
         - $resources: new(sys:Resources)
-        - $muranoInitConf: $resources.yaml('murano-init.conf')
+        - $muranoInitConf: $resources.yaml('murano-init.conf').bind(dict(
+                instanceHostname  => $.name
+              ))
         - Return: $muranoInitConf
 
   generateUserData:
@@ -93,7 +95,7 @@ Methods:
 
         - $userData: $muranoScript.replace($muranoReplacements) + $initScript.replace($scriptReplacements)
         - Return: $userData
-  
+
   releaseResources:
     Body:
       - $region: $.getRegion()
