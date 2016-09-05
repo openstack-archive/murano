@@ -126,6 +126,9 @@ class MuranoTypeReference(object):
             return False
         return self.type == other.type
 
+    def __ne__(self, other):
+        return not self.__eq__(other)
+
     def __hash__(self):
         return hash(self.type)
 
