@@ -52,7 +52,7 @@ class HeatStack(object):
         self._last_stack_timestamps = (None, None)
         self._tags = ''
         self._owner = this.find_owner('io.murano.CloudRegion')
-        self._region_name = None
+        self._region_name = region_name
 
     @staticmethod
     def _create_client(session, region_name):
