@@ -27,6 +27,7 @@ import keystoneclient.v2_0 as keystoneclientv2
 import keystoneclient.v3 as keystoneclientv3
 from muranoclient import client as mclient
 import muranoclient.common.exceptions as exceptions
+from muranoclient.glance import client as glare_client
 from oslo_log import log as logging
 import yaml
 
@@ -104,7 +105,17 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
     @memoize
     def murano_client(cls):
         murano_url = cls.get_murano_url()
+        if CONF.murano.packages_service == "glare":
+            glare_endpoint = "http://127.0.0.1:9494"
+            artifacts_client = glare_client.Client(
+                endpoint=glare_endpoint,
+                token=cls.keystone_client().auth_token,
+                insecure=False, key_file=None, ca_file=None, cert_file=None,
+                type_name="murano", type_version=1)
+        else:
+            artifacts_client = None
         return mclient.Client('1',
+                              artifacts_client=artifacts_client,
                               endpoint=murano_url,
                               token=cls.keystone_client().auth_token)
 
