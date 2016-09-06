@@ -20,7 +20,7 @@ pylint==1.4.4 # GNU GPL v2
 requests!=2.8.0,!=2.9.0,>=2.5.2
 
 # Some of the tests use real MySQL and Postgres databases
-PyMySQL>=0.6.2 # MIT License
+PyMySQL!=0.7.7,>=0.6.2 # MIT License
 psycopg2>=2.5
 
 # doc build requirements
