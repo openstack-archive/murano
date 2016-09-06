@@ -51,7 +51,6 @@ class TestPackageCache(base.MuranoTestCase):
         fqn = 'io.murano.apps.test'
         path, name = utils.compose_package(
             'test',
-            os.path.join(self.location, 'manifest.yaml'),
             self.location, archive_dir=self.location)
         with open(path, 'rb') as f:
             package_data = f.read()

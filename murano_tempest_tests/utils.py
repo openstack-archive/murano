@@ -34,25 +34,22 @@ MANIFEST = {'Format': 'MuranoPL/1.0',
             'Author': 'Mirantis, Inc'}
 
 
-def compose_package(app_name, manifest, package_dir,
+def compose_package(app_name, package_dir,
                     require=None, archive_dir=None, add_class_name=False,
                     manifest_required=True, version=None):
     """Composes a murano package
 
-    Composes package `app_name` with `manifest` file as a template for the
-    manifest and files from `package_dir`.
+    Composes package `app_name` manifest and files from `package_dir`.
     Includes `require` section if any in the manifest file.
-    Puts the resulting .zip file into `acrhive_dir` if present or in the
+    Puts the resulting .zip file into `archive_dir` if present or in the
     `package_dir`.
     """
-    class_file_changes = add_class_name or require
-    # store class file before changes
-    if class_file_changes:
-        class_path = os.path.join(package_dir, 'Classes', 'mock_muranopl.yaml')
-        with open(class_path, 'r') as f:
-            class_store = f.read()
+    tmp_package_dir = os.path.join(archive_dir, os.path.basename(package_dir))
+    shutil.copytree(package_dir, tmp_package_dir)
+    package_dir = tmp_package_dir
 
     if manifest_required:
+        manifest = os.path.join(package_dir, "manifest.yaml")
         with open(manifest, 'w') as f:
             fqn = 'io.murano.apps.' + app_name
             mfest_copy = MANIFEST.copy()
@@ -105,11 +102,6 @@ def compose_package(app_name, manifest, package_dir,
                     arcname=os.path.join(os.path.relpath(root, package_dir), f)
                 )
 
-    # restore class file after changes
-    if class_file_changes:
-        with open(class_path, 'w') as f:
-            f.write(class_store)
-
     return archive_path, name
 
 
@@ -124,11 +116,10 @@ def prepare_package(name, require=None, add_class_name=False,
     :return: Path to archive, directory with archive, filename of archive
     """
     app_dir = acquire_package_directory(app=app)
-    target_arc_path = app_dir.rsplit(app, 1)[0]
+    target_arc_path = tempfile.mkdtemp()
 
     arc_path, filename = compose_package(
-        name, os.path.join(app_dir, 'manifest.yaml'),
-        app_dir, require=require, archive_dir=target_arc_path,
+        name, app_dir, require=require, archive_dir=target_arc_path,
         add_class_name=add_class_name, manifest_required=manifest_required,
         version=version)
     return arc_path, target_arc_path, filename
