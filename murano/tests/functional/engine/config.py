@@ -62,7 +62,10 @@ MuranoGroup = [
     cfg.StrOpt('kubernetes_image',
                default="ubuntu14.04-x64-kubernetes",
                help="image for kubernetes"),
-    cfg.StrOpt('region_name', help="region name for services")
+    cfg.StrOpt('region_name', help="region name for services"),
+    cfg.StrOpt('packages_service',
+               default='murano',
+               help='murano packages service, either "murano" or "glare"')
 ]
 
 CONF = cfg.CONF
