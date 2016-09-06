@@ -14,3 +14,4 @@ and requirements.
 .. include:: app_migrating/app_migrate_to_juno.rst
 .. include:: app_migrating/app_migrate_to_kilo.rst
 .. include:: app_migrating/app_migrate_to_liberty.rst
+.. include:: app_migrating/app_migrate_to_newton.rst
