@@ -17,12 +17,11 @@ import weakref
 import mock
 from testtools import matchers
 
-from murano.dsl import dsl
 from murano.dsl import exceptions
 from murano.dsl import murano_method
 from murano.dsl import murano_object
 from murano.dsl import murano_type
-from murano.engine.system import garbage_collector
+from murano.dsl.principal_objects import garbage_collector
 from murano.tests.unit import base
 
 
@@ -30,8 +29,8 @@ class TestGarbageCollector(base.MuranoTestCase):
     def setUp(self):
         super(TestGarbageCollector, self).setUp()
 
-        subscriber = mock.MagicMock(spec=murano_object.MuranoObject)
-        subscriber.real_this = subscriber
+        self.subscriber = mock.MagicMock(spec=murano_object.MuranoObject)
+        self.subscriber.real_this = self.subscriber
 
         mock_class = mock.MagicMock(spec=murano_type.MuranoClass)
         mock_method = mock.MagicMock(spec=murano_method.MuranoMethod)
@@ -44,36 +43,30 @@ class TestGarbageCollector(base.MuranoTestCase):
                 raise exceptions.NoMethodFound(name)
 
         mock_class.find_single_method = find_single_method
-        subscriber.type = mock_class
-        self.subscriber = mock.MagicMock(spec=dsl.MuranoObjectInterface)
-        self.subscriber.object = subscriber
-        self.subscriber.type = subscriber.type
+        self.subscriber.type = mock_class
 
-        publisher = mock.MagicMock(spec=murano_object.MuranoObject)
-        publisher.real_this = publisher
-        self.publisher = mock.MagicMock(spec=dsl.MuranoObjectInterface)
-        self.publisher.object = publisher
+        self.publisher = mock.MagicMock(spec=murano_object.MuranoObject)
+        self.publisher.real_this = self.publisher
 
     def test_set_dd(self):
-        self.publisher.object.dependencies = {}
+        self.publisher.destruction_dependencies = []
         garbage_collector.GarbageCollector.subscribe_destruction(
             self.publisher, self.subscriber, handler="mockHandler")
-        dep = self.publisher.object.dependencies["onDestruction"]
+        dep = self.publisher.destruction_dependencies
         self.assertThat(dep, matchers.HasLength(1))
         dep = dep[0]
         self.assertEqual("mockHandler", dep["handler"])
-        self.assertEqual(self.subscriber.object, dep["subscriber"]())
+        self.assertEqual(self.subscriber, dep["subscriber"]())
 
     def test_unset_dd(self):
-        self.publisher.object.dependencies = (
-            {"onDestruction": [{
-                "subscriber": weakref.ref(self.subscriber.object),
-                "handler": "mockHandler"
-            }]})
+        self.publisher.destruction_dependencies = [{
+            "subscriber": weakref.ref(self.subscriber),
+            "handler": "mockHandler"
+        }]
         garbage_collector.GarbageCollector.unsubscribe_destruction(
             self.publisher, self.subscriber, handler="mockHandler")
         self.assertEqual(
-            [], self.publisher.object.dependencies["onDestruction"])
+            [], self.publisher.destruction_dependencies)
 
     def test_set_wrong_handler(self):
         self.assertRaises(

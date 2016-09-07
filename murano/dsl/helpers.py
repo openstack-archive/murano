@@ -565,6 +565,7 @@ def parse_object_definition(spec, scope_type, context):
         'id': system_data.get('id'),
         'name': system_data.get('name'),
         'destroyed': system_data.get('destroyed', False),
+        'dependencies': system_data.get('dependencies', {}),
         'extra': {
             key: value for key, value in six.iteritems(system_data)
             if key.startswith('_')
@@ -577,11 +578,11 @@ def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
         result = {
             parsed['type']: parsed['properties'],
             'id': parsed['id'],
-            'name': parsed['name']
+            'name': parsed['name'],
+            'dependencies': parsed['dependencies'],
+            'destroyed': parsed['destroyed']
         }
         result.update(parsed['extra'])
-        if parsed['destroyed']:
-            result['destroyed'] = True
         return result
     result = parsed['properties']
     header = {

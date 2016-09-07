@@ -13,6 +13,7 @@
 #    under the License.
 
 from murano.dsl.principal_objects import exception
+from murano.dsl.principal_objects import garbage_collector
 from murano.dsl.principal_objects import stack_trace
 from murano.dsl.principal_objects import sys_object
 
@@ -21,3 +22,4 @@ def register(package):
     package.register_class(sys_object.SysObject)
     package.register_class(stack_trace.StackTrace)
     package.register_class(exception.DslException)
+    package.register_class(garbage_collector.GarbageCollector)

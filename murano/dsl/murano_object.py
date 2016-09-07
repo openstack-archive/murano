@@ -19,6 +19,7 @@ from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
+from murano.dsl.principal_objects import garbage_collector
 from murano.dsl import yaql_integration
 
 
@@ -55,7 +56,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 self._parents[name] = known_classes[name] = obj
             else:
                 self._parents[name] = known_classes[name]
-        self._dependencies = {}
+        self._destruction_dependencies = []
 
     @property
     def extension(self):
@@ -189,8 +190,22 @@ class MuranoObject(dsl_types.MuranoObject):
         return self._initialized
 
     @property
-    def dependencies(self):
-        return self._dependencies
+    def destruction_dependencies(self):
+        return self._destruction_dependencies
+
+    def load_dependencies(self, dependencies):
+        self._destruction_dependencies = []
+        if not dependencies:
+            return
+        destruction_dependencies = dependencies.get('onDestruction', [])
+        object_store = helpers.get_object_store()
+        for record in destruction_dependencies:
+            subscriber_id = record['subscriber']
+            subscriber = object_store.get(subscriber_id)
+            if not subscriber:
+                continue
+            garbage_collector.GarbageCollector.subscribe_destruction(
+                self, subscriber, record.get('handler'))
 
     def get_property(self, name, context=None):
         start_type, derived = self.type, False
@@ -283,7 +298,7 @@ class MuranoObject(dsl_types.MuranoObject):
 
     def to_dictionary(self, include_hidden=False,
                       serialization_type=dsl_types.DumpTypes.Serializable,
-                      allow_refs=False):
+                      allow_refs=False, with_destruction_dependencies=False):
         context = helpers.get_context()
         result = {}
         for parent in self._parents.values():
@@ -312,8 +327,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 'id': self.object_id,
                 'name': self.name
             }
-            if self.destroyed:
-                result['destroyed'] = True
+            header = result
         else:
             if serialization_type == dsl_types.DumpTypes.Mixed:
                 result.update({'?': {
@@ -327,8 +341,22 @@ class MuranoObject(dsl_types.MuranoObject):
                     'id': self.object_id,
                     'name': self.name
                 }})
-            if self.destroyed:
-                result['?']['destroyed'] = True
+            header = result['?']
+        if self.destroyed:
+            header['destroyed'] = True
+        if with_destruction_dependencies:
+            dds = []
+            for record in self.destruction_dependencies:
+                subscriber = record['subscriber']()
+                if not subscriber or self.executor.object_store.is_doomed(
+                        subscriber):
+                    continue
+                dds.append({
+                    'subscriber': subscriber.object_id,
+                    'handler': record['handler']
+                })
+            if dds:
+                header.setdefault('dependencies', {})['onDestruction'] = dds
         return result
 
     def mark_destroyed(self, clear_data=False):
@@ -338,6 +366,7 @@ class MuranoObject(dsl_types.MuranoObject):
             self._extension = None
             self._properties = None
             self._owner = None
+            self._destruction_dependencies = None
             self._this = None
         for p in six.itervalues(self._parents):
             p.mark_destroyed(clear_data)
