@@ -564,6 +564,7 @@ def parse_object_definition(spec, scope_type, context):
         'properties': yaqlutils.filter_parameters_dict(props),
         'id': system_data.get('id'),
         'name': system_data.get('name'),
+        'destroyed': system_data.get('destroyed', False),
         'extra': {
             key: value for key, value in six.iteritems(system_data)
             if key.startswith('_')
@@ -579,12 +580,16 @@ def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
             'name': parsed['name']
         }
         result.update(parsed['extra'])
+        if parsed['destroyed']:
+            result['destroyed'] = True
         return result
     result = parsed['properties']
     header = {
         'id': parsed['id'],
         'name': parsed['name']
     }
+    if parsed['destroyed']:
+        header['destroyed'] = True
     header.update(parsed['extra'])
     result['?'] = header
     if model_format == dsl_types.DumpTypes.Mixed:

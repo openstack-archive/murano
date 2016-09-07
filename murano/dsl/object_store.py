@@ -271,6 +271,8 @@ class InitializationObjectStore(ObjectStore):
                 class_obj, owner,
                 name=parsed['name'],
                 object_id=object_id if self._keep_ids else None)
+            if parsed['destroyed']:
+                obj.mark_destroyed()
             self.put(obj, object_id or obj.object_id)
 
             system_value = ObjectStore._get_designer_attributes(
