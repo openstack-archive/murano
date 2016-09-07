@@ -38,6 +38,9 @@ Before you install Murano, verify that you completed the following tasks:
 
    #. Create an empty database:
 
+      Replace %MURANO_DB_PASSWORD% with the actual password. For example,
+      'admin'.
+
       .. code-block:: console
 
          mysql -u root -p
@@ -87,6 +90,10 @@ Install the API service and engine
 
        The example uses MySQL database. If you want to use another
        database type, edit the ``[database]`` section correspondingly.
+
+       Replace items in "%" with the actual values. For example, replace
+       %RABBITMQ_SERVER_IP% with 127.0.0.1. So, the complete row with the
+       replaced value will be rabbit_host = 127.0.0.1
 
     .. code-block:: ini
 
@@ -177,7 +184,11 @@ Install the API service and engine
           pushd ./meta/io.murano
           zip -r ../../io.murano.zip *
           popd
-          tox -e venv -- murano --murano-url http://localhost:8082 \
+          tox -e venv -- murano --os-username %OPENSTACK_ADMIN_USER% \
+          --os-password %OPENSTACK_ADMIN_PASSWORD% \
+          --os-auth-url http://%OPENSTACK_HOST_IP%:5000 \
+          --os-project-name %OPENSTACK_ADMIN_TENANT% \
+          --murano-url http://%MURANO_IP%:8082 \
           package-import --is-public io.murano.zip
 
    #.  Launch the murano engine in a separate terminal:
@@ -210,9 +221,9 @@ the Application Catalog service within the Identity service.
 
    .. code-block:: console
 
-      openstack endpoint create --region RegionOne --publicurl 'http://MURANO_IP:8082/' \
-      --adminurl 'http://MURANO_IP:8082/' --internalurl 'http://http://MURANO_IP:8082/' \
-      MURANO_SERVICE_ID
+      openstack endpoint create --region RegionOne --publicurl 'http://%MURANO_IP%:8082/' \
+      --adminurl 'http://%MURANO_IP%:8082/' --internalurl 'http://%MURANO_IP%:8082/' \
+      %MURANO_SERVICE_ID%
 
    where ``MURANO-SERVICE-ID`` is the unique service number that can be found
    in the :command:`openstack service create` output.
@@ -315,7 +326,7 @@ This section describes how to install and run the murano dashboard.
 
     .. code-block:: python
 
-       MURANO_API_URL = 'http://localhost:8082'
+       MURANO_API_URL = 'http://%MURANO_IP%:8082'
 
 #. (Optional) If you have set up the database as a session back end (this is
    done by default with murano local_settings file starting with Newton),
@@ -366,7 +377,7 @@ To import applications using CLI, complete the following tasks:
       pushd ../murano-apps/Docker/Applications/%APP-NAME%/package
       zip -r ~/murano/murano/app.zip *
       popd
-      tox -e venv -- murano --murano-url http://localhost:8082 package-import app.zip
+      tox -e venv -- murano --murano-url http://%MURANO_IP%:8082 package-import app.zip
 
 **Result:** The applications are imported and available from the application
 catalog.
