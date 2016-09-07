@@ -60,3 +60,20 @@ Methods:
           Contract: $.class(TestGCNode).notNull()
     Body:
       - trace('Destroy ' + $obj.value)
+
+  testCallOnDestroyedObject:
+    Body:
+      - $val: new(TestGCNode, value => X)
+      - sys:GC.subscribeDestruction($val, $this, _handler2)
+      - $val: null
+      - sys:GC.collect()
+      - $this.destroyed.foo()
+
+  _handler2:
+    Arguments:
+      - obj:
+          Contract: $.class(TestGCNode).notNull()
+    Body:
+      - $obj.foo()
+      - $this.destroyed: $obj
+

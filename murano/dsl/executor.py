@@ -110,6 +110,8 @@ class MuranoDslExecutor(object):
         context = self.create_method_context(obj_context, method)
 
         if isinstance(this, dsl_types.MuranoObject):
+            if this.destroyed:
+                raise dsl_exceptions.ObjectDestroyedError(this)
             this = this.real_this
 
         if method.arguments_scheme is not None:

@@ -174,3 +174,9 @@ class InvalidLhsTargetError(Exception):
 
 class InvalidInheritanceError(Exception):
     pass
+
+
+class ObjectDestroyedError(Exception):
+    def __init__(self, obj):
+        super(ObjectDestroyedError, self).__init__(
+            'Object {0} is already destroyed'.format(obj))

@@ -119,10 +119,6 @@ Methods:
     Body:
       - $.applications.pselect($.deploy())
 
-  destroy:
-    Body:
-      - $.stack.delete()
-
   _assignRegions:
     Body:
       - If: $.region = null
