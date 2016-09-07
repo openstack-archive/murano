@@ -53,4 +53,6 @@ class TestGC(test_case.DslTestCase):
 
     def test_collect_with_subscription(self):
         self.runner.testObjectsCollectWithSubscription()
-        self.assertEqual(['Destroy A', 'Destroy B', 'B', 'A'], self.traces)
+        self.assertEqual(
+            ['Destroy A', 'Destroy B', 'Destruction of B', 'B', 'A'],
+            self.traces)

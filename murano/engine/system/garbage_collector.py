@@ -12,60 +12,56 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from oslo_log import log as logging
 from yaql.language import specs
 from yaql.language import yaqltypes
 
 from murano.dsl import dsl
 from murano.dsl import helpers
 
-LOG = logging.getLogger(__name__)
-
 
 @dsl.name('io.murano.system.GC')
 class GarbageCollector(object):
-
     @staticmethod
-    @specs.parameter('target', dsl.MuranoObjectParameter())
+    @specs.parameter('publisher', dsl.MuranoObjectParameter())
+    @specs.parameter('subscriber', dsl.MuranoObjectParameter())
     @specs.parameter('handler', yaqltypes.String(nullable=True))
-    def subscribe_destruction(target, handler=None):
-        caller_context = helpers.get_caller_context()
-        target_this = target.object.real_this
-        receiver = helpers.get_this(caller_context)
+    def subscribe_destruction(publisher, subscriber, handler=None):
+        publisher_this = publisher.object.real_this
+        subscriber_this = subscriber.object.real_this
 
         if handler:
-            receiver.type.find_single_method(handler)
+            subscriber.type.find_single_method(handler)
 
         dependency = GarbageCollector._find_dependency(
-            target_this, receiver, handler)
+            publisher_this, subscriber_this, handler)
 
         if not dependency:
-            dependency = {'subscriber': helpers.weak_ref(receiver),
+            dependency = {'subscriber': helpers.weak_ref(subscriber_this),
                           'handler': handler}
-            target_this.dependencies.setdefault(
+            publisher_this.dependencies.setdefault(
                 'onDestruction', []).append(dependency)
 
     @staticmethod
-    @specs.parameter('target', dsl.MuranoObjectParameter())
+    @specs.parameter('publisher', dsl.MuranoObjectParameter())
+    @specs.parameter('subscriber', dsl.MuranoObjectParameter())
     @specs.parameter('handler', yaqltypes.String(nullable=True))
-    def unsubscribe_destruction(target, handler=None):
-        caller_context = helpers.get_caller_context()
-        target_this = target.object.real_this
-        receiver = helpers.get_this(caller_context)
+    def unsubscribe_destruction(publisher, subscriber, handler=None):
+        publisher_this = publisher.object.real_this
+        subscriber_this = subscriber.object.real_this
 
         if handler:
-            receiver.type.find_single_method(handler)
+            subscriber.type.find_single_method(handler)
 
-        dds = target_this.dependencies.get('onDestruction', [])
+        dds = publisher_this.dependencies.get('onDestruction', [])
         dependency = GarbageCollector._find_dependency(
-            target_this, receiver, handler)
+            publisher_this, subscriber_this, handler)
 
         if dependency:
             dds.remove(dependency)
 
     @staticmethod
-    def _find_dependency(target, subscriber, handler):
-        dds = target.dependencies.get('onDestruction', [])
+    def _find_dependency(publisher, subscriber, handler):
+        dds = publisher.dependencies.get('onDestruction', [])
         for dd in dds:
             if dd['handler'] != handler:
                 continue
