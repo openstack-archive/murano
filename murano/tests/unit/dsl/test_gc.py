@@ -13,7 +13,6 @@
 #    under the License.
 
 from murano.dsl import exceptions
-
 from murano.engine.system import garbage_collector
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -64,3 +63,11 @@ class TestGC(test_case.DslTestCase):
             exceptions.ObjectDestroyedError,
             self.runner.testCallOnDestroyedObject)
         self.assertEqual(['foo', 'X'], self.traces)
+
+    def test_is_doomed(self):
+        self.runner.testIsDoomed()
+        self.assertEqual([[], True, 'B', [True], False, 'A'], self.traces)
+
+    def test_is_destroyed(self):
+        self.runner.testIsDestroyed()
+        self.assertEqual([False, True], self.traces)

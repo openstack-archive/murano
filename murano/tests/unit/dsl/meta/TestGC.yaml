@@ -1,11 +1,11 @@
+Namespaces:
+  sys: io.murano.system
+  std: io.murano
+
 Name: TestGCNode
 Extends: Node
 
 Methods:
-  .init:
-    Body:
-      - $.find(Node)
-
   foo:
     Body:
       - trace(foo)
@@ -22,8 +22,18 @@ Methods:
       - trace($.value)
 
 ---
-Namespaces:
-  sys: io.murano.system
+
+Name: TestGCNode2
+Extends: TestGCNode
+
+Methods:
+  .destroy:
+    Body:
+      - trace(list($.nodes.select(sys:GC.isDoomed($))))
+      - $owner: $.find(std:Object)
+      - trace(sys:GC.isDoomed($owner))
+
+---
 
 Name: TestGC
 
@@ -77,3 +87,29 @@ Methods:
       - $obj.foo()
       - $this.destroyed: $obj
 
+  testIsDoomed:
+    Body:
+      - $model:
+          :TestGCNode2:
+            value: A
+            nodes:
+              - :TestGCNode2:
+                  value: B
+      - new($model, $this)
+      - sys:GC.collect()
+
+  testIsDestroyed:
+    Body:
+      - $val: new(Node, value => X)
+      - sys:GC.subscribeDestruction($val, $this, _handler3)
+      - $val: null
+      - sys:GC.collect()
+      - trace(sys:GC.isDestroyed($this.destroyed))
+
+  _handler3:
+    Arguments:
+      - obj:
+          Contract: $.class(Node).notNull()
+    Body:
+      - trace(sys:GC.isDestroyed($obj))
+      - $this.destroyed: $obj

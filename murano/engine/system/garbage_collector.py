@@ -74,3 +74,13 @@ class GarbageCollector(object):
     @staticmethod
     def collect():
         helpers.get_executor().object_store.cleanup()
+
+    @staticmethod
+    @specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))
+    def is_doomed(object_):
+        return helpers.get_object_store().is_doomed(object_)
+
+    @staticmethod
+    @specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))
+    def is_destroyed(object_):
+        return object_.destroyed

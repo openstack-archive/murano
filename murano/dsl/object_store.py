@@ -114,6 +114,7 @@ class ObjectStore(object):
         ]
         with helpers.with_object_store(self):
             if sentenced_objects:
+                self._pending_destruction.update(sentenced_objects)
                 for __ in self._destroy_garbage(sentenced_objects):
                     pass
 
@@ -148,6 +149,9 @@ class ObjectStore(object):
                         self._pending_destruction.remove(obj)
                         count += 1
         return count
+
+    def is_doomed(self, obj):
+        return obj.destroyed or obj in self._pending_destruction
 
     def _destroy_garbage(self, sentenced_objects):
         dd_graph = {}
