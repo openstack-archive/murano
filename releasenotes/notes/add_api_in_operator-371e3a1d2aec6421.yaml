@@ -1,8 +1,7 @@
 ---
-
 features:
-  - Added an ability to filter operator values 'id', 'category', 'tag',
-    using the 'in' operator among the provided values.
+  - Implemented the capability for API endpoint ``/catalog/packages``
+    to filter 'id', 'category', 'tag' properties using the 'in' operator.
     An example of using the 'in' operator for 'id' is
     'id=in:id1,id2,id3'.
     This filter is added using syntax that conforms to the latest

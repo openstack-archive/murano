@@ -1,6 +1,5 @@
 ---
 features:
-  - >
-    Instance.deploy() can now be split into two phases: beginDeploy() and
-    endDeploy(). This allows the application developer to provision multiple
+  - Split ``Instance``'s ``.deploy()`` method into two phases - ``beginDeploy()``
+    and ``endDeploy()``. This allows the application developer to provision multiple
     instances at once without the need to push the stack for each instance.
