@@ -8,7 +8,7 @@ Use-cases
 =========
 
 Performing application interconnections
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Murano can handle application interconnections installed on virtual machines.
 The decision of how to combine applications is made by the author of
@@ -46,6 +46,42 @@ Any other methods of any other class can be invoked the same way to
 make the proposal application installation algorithm clear and
 constructive. Also, it allows not to duplicate the code in new applications.
 
+Abstract dependencies between applications
+------------------------------------------
+In the example above it is also possible to specify a generic class in the
+contract ``com.example.databases.SqlDatabase`` instead of
+``com.example.databases.MySql``. It means that an object of any class inherited
+from ``com.example.databases.SqlDatabase`` can be passed to a parameter. In
+this case you should also use this generic class as a type for a field in
+the file ``ui.yaml``:
+
+.. code-block:: yaml
+
+   Forms:
+     - appConfiguration:
+         fields:
+           - name: database
+             type: com.example.databases.SqlDatabase
+             label: Database Server
+             description: >-
+               Select a database server to host the application`s database
+
+After that you can choose any database package in a drop-down box.
+The last place, which should be changed in the WordPress package to enable this
+feature, is manifest file. It should contain the full name of SQL Library
+package and optionally packages inherited from SQL library if you want them to
+be downloaded as dependencies. For example:
+
+.. code-block:: yaml
+
+   Require:
+     com.example.databases:
+     com.example.databases.MySql:
+     com.example.databases.PostgreSql:
+
+.. note::
+   To use this feature you have to enable Glare as a storage for your packages
+   and a version of your murano-dashboard should be not older than newton.
 
 Using application already installed on the image
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
