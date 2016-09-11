@@ -1,0 +1,7 @@
+---
+fixes:
+  - Core Library's init scripts used to have various problems detecting
+    pre-installed (by DIB) murano-agent on non-ubuntu images.
+    Agent setup script now checks wider list of directories before attempting
+    to install murano-agnet and service script now does not impose strict script
+    location.

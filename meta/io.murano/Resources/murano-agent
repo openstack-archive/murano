@@ -1,6 +1,6 @@
 #!/bin/sh
 ### BEGIN INIT INFO
-# Provides:          murano-agent 
+# Provides:          murano-agent
 # Required-Start:    $local_fs $network $named $time $syslog
 # Required-Stop:     $local_fs $network $named $time $syslog
 # Default-Start:     2 3 4 5
@@ -8,7 +8,10 @@
 # Description:       murano-agent service
 ### END INIT INFO
 
-SCRIPT="/usr/local/bin/muranoagent --config-dir /etc/murano"
+# NOTE(kzaitsev): not using fullpath to allow different locations
+# of muranoagent binary on different OS images. muranoagent just needs
+# to be in PATH. Up to image to decide where exactly.
+SCRIPT="muranoagent --config-dir /etc/murano"
 RUNAS=root
 
 PIDFILE=/var/run/murano.pid
@@ -20,6 +23,7 @@ start() {
     return 1
   fi
   echo 'Starting service' >&2
+  PATH="/usr/local/bin:/usr/local/sbin:/usr/bin:/usr/sbin:/bin:/sbin:$PATH"
   local CMD="$SCRIPT &> \"$LOGFILE\" & echo \$!"
   su -c "$CMD" $RUNAS > "$PIDFILE"
   echo 'Service started' >&2
