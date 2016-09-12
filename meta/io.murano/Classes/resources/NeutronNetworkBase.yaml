@@ -24,7 +24,7 @@ Methods:
     Body:
       - $._environment: $.find(std:Environment)
       - $._region: $.getRegion()
-      - $._netExplorer: new(sys:NetworkExplorer, $this)
+      - $._netExplorer: new(sys:NetworkExplorer, $this._region)
       - $._securityGroupsEnabled: $._netExplorer.listNeutronExtensions().alias.contains('security-group')
 
   joinInstanceToNetwork:
