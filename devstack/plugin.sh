@@ -121,10 +121,10 @@ function configure_murano_networking {
     --os-region-name="$REGION_NAME" network list \
     --external | grep " $ext_net " | get_field 1)
 
-    # Try to select first available external network
-    if [[ -n "$ext_net_id" ]]; then
+    # Try to select first available external network if ext_net_id is null
+    if [[ ! -n "$ext_net_id" ]]; then
         ext_net_id=$(openstack --os-cloud=devstack-admin \
-        --os-region-name="$REGION_NAME" network list \ 
+        --os-region-name="$REGION_NAME" network list \
         --external -f csv -c ID | tail -n +2 | tail -n 1)
     fi
 
