@@ -100,6 +100,10 @@ class TestStatics(test_case.DslTestCase):
         self.assertEqual(
             'qq', self._runner.testModifyStaticPropertyUsingTypeFunc())
 
+    def test_modify_static_dict_property(self):
+        self.assertEqual(
+            {'key': 'value'}, self._runner.testModifyStaticDictProperty())
+
     def test_property_is_static(self):
         self.assertEqual('qq', self._runner.testPropertyIsStatic())
 

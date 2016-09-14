@@ -12,7 +12,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import _weakref
+
 import mock
+from testtools import matchers
 import unittest
 
 from murano.dsl import dsl
@@ -42,25 +45,33 @@ class TestGarbageCollector(base.MuranoTestCase):
     def test_set_dd(self, this, caller_context):
         this.return_value = self.mock_subscriber
         target_0 = mock.MagicMock(spec=dsl.MuranoObjectInterface)
-        target_0.object = mock.MagicMock(murano_object.MuranoObject)
+        target_0.object = self.mock_subscriber
+        target_0.object.real_this = self.mock_subscriber
         target_0.object.dependencies = {}
         garbage_collector.GarbageCollector.subscribe_destruction(
             target_0, handler="mockHandler")
-        self.assertEqual([{"subscriber": "1234", "handler": "mockHandler"}],
-                         target_0.object.dependencies["onDestruction"])
+        dep = self.mock_subscriber.dependencies["onDestruction"]
+        self.assertThat(dep, matchers.HasLength(1))
+        dep = dep[0]
+        self.assertEqual("mockHandler", dep["handler"])
+        self.assertEqual(self.mock_subscriber, dep["subscriber"]())
 
     @mock.patch("murano.dsl.helpers.get_caller_context")
     @mock.patch("murano.dsl.helpers.get_this")
     def test_unset_dd(self, this, caller_context):
         this.return_value = self.mock_subscriber
         target_1 = mock.MagicMock(spec=dsl.MuranoObjectInterface)
-        target_1.object = mock.MagicMock(murano_object.MuranoObject)
+        target_1.object = self.mock_subscriber
+        target_1.object.real_this = self.mock_subscriber
         target_1.object.dependencies = (
-            {"onDestruction": [{"subscriber": "1234",
-                                "handler": "mockHandler"}]})
-        garbage_collector.GarbageCollector.unsubscibe_destruction(
+            {"onDestruction": [{
+                "subscriber": _weakref.ref(self.mock_subscriber),
+                "handler": "mockHandler"
+            }]})
+        garbage_collector.GarbageCollector.unsubscribe_destruction(
             target_1, handler="mockHandler")
-        self.assertEqual([], target_1.object.dependencies["onDestruction"])
+        self.assertEqual(
+            [], self.mock_subscriber.dependencies["onDestruction"])
 
     @unittest.skip("WIP")
     @mock.patch("murano.dsl.helpers.get_caller_context")

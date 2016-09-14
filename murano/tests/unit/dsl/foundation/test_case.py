@@ -39,10 +39,18 @@ class DslTestCase(base.MuranoTestCase):
         self.register_function(
             lambda data: self._traces.append(data), 'trace')
         self._traces = []
+        self._runners = []
         eventlet.debug.hub_exceptions(False)
 
     def new_runner(self, model):
-        return runner.Runner(model, self.package_loader, self._functions)
+        r = runner.Runner(model, self.package_loader, self._functions)
+        self._runners.append(r)
+        return r
+
+    def tearDown(self):
+        super(DslTestCase, self).tearDown()
+        for r in self._runners:
+            r.executor.finalize(r.root)
 
     @property
     def traces(self):

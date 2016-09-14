@@ -25,64 +25,67 @@ from murano.dsl import yaql_integration
 class MuranoObject(dsl_types.MuranoObject):
     def __init__(self, murano_class, owner, object_id=None, name=None,
                  known_classes=None, this=None):
-        self.__initialized = False
+        self._initialized = False
+        self._destroyed = False
         if known_classes is None:
             known_classes = {}
-        self.__owner = helpers.weak_ref(owner.real_this if owner else None)
-        self.__object_id = object_id or helpers.generate_id()
-        self.__type = murano_class
-        self.__properties = {}
-        self.__parents = {}
-        self.__this = this
-        self.__name = name
-        self.__extension = None
-        self.__config = murano_class.package.get_class_config(
+        if this is None:
+            self._owner = owner
+        self._object_id = object_id or helpers.generate_id()
+        self._type = murano_class
+        self._properties = {}
+        self._parents = {}
+        self._this = this
+        self._name = name
+        self._extension = None
+        self._executor = helpers.weak_ref(helpers.get_executor())
+        self._config = murano_class.package.get_class_config(
             murano_class.name)
-        if not isinstance(self.__config, dict):
-            self.__config = {}
+        if not isinstance(self._config, dict):
+            self._config = {}
         known_classes[murano_class.name] = self
         for parent_class in murano_class.parents:
             name = parent_class.name
             if name not in known_classes:
                 obj = MuranoObject(
                     parent_class, owner,
-                    object_id=self.__object_id,
+                    object_id=self._object_id,
                     known_classes=known_classes, this=self.real_this)
 
-                self.__parents[name] = known_classes[name] = obj
+                self._parents[name] = known_classes[name] = obj
             else:
-                self.__parents[name] = known_classes[name]
-        self.__dependencies = {}
+                self._parents[name] = known_classes[name]
+        self._dependencies = {}
 
     @property
     def extension(self):
-        return self.__extension
+        return self._extension
 
     @property
     def name(self):
-        return self.real_this.__name
+        return self.real_this._name
 
     @extension.setter
     def extension(self, value):
-        self.__extension = value
+        self._extension = value
 
     def initialize(self, context, params, used_names=None):
         context = context.create_child_context()
         context[constants.CTX_ALLOW_PROPERTY_WRITES] = True
         object_store = helpers.get_object_store()
-        for property_name in self.__type.properties:
-            spec = self.__type.properties[property_name]
+        for property_name in self.type.properties:
+            spec = self.type.properties[property_name]
             if spec.usage == dsl_types.PropertyUsages.Config:
-                if property_name in self.__config:
-                    property_value = self.__config[property_name]
+                if property_name in self._config:
+                    property_value = self._config[property_name]
                 else:
                     property_value = dsl.NO_VALUE
                 self.set_property(property_name, property_value,
-                                  dry_run=self.__initialized)
+                                  dry_run=self._initialized)
 
         init = self.type.methods.get('.init')
         used_names = used_names or set()
-        names = set(self.__type.properties)
+        names = set(self.type.properties)
         if init:
             names.update(six.iterkeys(init.arguments_scheme))
         last_errors = len(names)
@@ -94,7 +97,7 @@ class MuranoObject(dsl_types.MuranoObject):
                     spec = init.arguments_scheme[property_name]
                     is_init_arg = True
                 else:
-                    spec = self.__type.properties[property_name]
+                    spec = self.type.properties[property_name]
                     is_init_arg = False
 
                 if property_name in used_names:
@@ -116,7 +119,7 @@ class MuranoObject(dsl_types.MuranoObject):
                     else:
                         self.set_property(
                             property_name, property_value, context,
-                            dry_run=self.__initialized)
+                            dry_run=self._initialized)
                     used_names.add(property_name)
                 except exceptions.UninitializedPropertyAccessError:
                     errors += 1
@@ -130,8 +133,8 @@ class MuranoObject(dsl_types.MuranoObject):
             last_errors = errors
 
         if (not object_store.initializing and
-                self.__extension is None and
-                not self.__initialized and
+                self._extension is None and
+                not self._initialized and
                 not helpers.is_objects_dry_run_mode()):
             method = self.type.methods.get('__init__')
             if method:
@@ -140,7 +143,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 yield lambda: method.invoke(
                     self, filtered_params[0], filtered_params[1], context)
 
-        for parent in self.__parents.values():
+        for parent in self._parents.values():
             for t in parent.initialize(context, params, used_names):
                 yield t
 
@@ -149,41 +152,46 @@ class MuranoObject(dsl_types.MuranoObject):
                 context[constants.CTX_ARGUMENT_OWNER] = self.real_this
                 init.invoke(self.real_this, (), init_args,
                             context.create_child_context())
-            self.__initialized = True
+            self._initialized = True
 
         if (not object_store.initializing
                 and not helpers.is_objects_dry_run_mode()
-                and not self.__initialized):
+                and not self._initialized):
             yield run_init
 
     @property
     def object_id(self):
-        return self.__object_id
+        return self._object_id
 
     @property
     def type(self):
-        return self.__type
+        return self._type
 
     @property
     def owner(self):
-        if self.__owner is None:
-            return None
-        return self.__owner()
+        if self._this is None:
+            return self._owner
+        else:
+            return self.real_this.owner
 
     @property
     def real_this(self):
-        return self.__this or self
+        return self._this or self
+
+    @property
+    def executor(self):
+        return self._executor()
 
     @property
     def initialized(self):
-        return self.__initialized
+        return self._initialized
 
     @property
     def dependencies(self):
-        return self.__dependencies
+        return self._dependencies
 
     def get_property(self, name, context=None):
-        start_type, derived = self.__type, False
+        start_type, derived = self.type, False
         caller_class = None if not context else helpers.get_type(context)
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
@@ -193,7 +201,8 @@ class MuranoObject(dsl_types.MuranoObject):
         if len(declared_properties) > 0:
             spec = self.real_this.type.find_single_property(name)
             if spec.usage == dsl_types.PropertyUsages.Static:
-                return spec.declaring_type.get_property(name, context)
+                return self.executor.get_static_property(
+                    spec.declaring_type, name, context)
             else:
                 return self.real_this._get_property_value(name)
         elif derived:
@@ -203,10 +212,10 @@ class MuranoObject(dsl_types.MuranoObject):
 
     def _get_property_value(self, name):
         try:
-            return self.__properties[name]
+            return self._properties[name]
         except KeyError:
             raise exceptions.UninitializedPropertyAccessError(
-                name, self.__type)
+                name, self.type)
 
     def set_property(self, name, value, context=None, dry_run=False):
         start_type, derived = self.real_this.type, False
@@ -214,7 +223,7 @@ class MuranoObject(dsl_types.MuranoObject):
         if caller_class is not None and caller_class.is_compatible(self):
             start_type, derived = caller_class, True
         if context is None:
-            context = helpers.get_executor().create_object_context(self)
+            context = self.executor.create_object_context(self)
         declared_properties = start_type.find_properties(
             lambda p: p.name == name)
         if len(declared_properties) > 0:
@@ -230,7 +239,7 @@ class MuranoObject(dsl_types.MuranoObject):
                 if spec.usage == dsl_types.PropertyUsages.Static:
                     default = None
                 else:
-                    default = self.__config.get(name, spec.default)
+                    default = self._config.get(name, spec.default)
 
                 if spec is ultimate_spec:
                     value = spec.transform(
@@ -242,26 +251,27 @@ class MuranoObject(dsl_types.MuranoObject):
             if len(property_list) > 1:
                 value = ultimate_spec.finalize(value, self.real_this, context)
             if ultimate_spec.usage == dsl_types.PropertyUsages.Static:
-                ultimate_spec.declaring_type.set_property(name, value, context,
-                                                          dry_run=dry_run)
+                self.executor.set_static_property(
+                    ultimate_spec.declaring_type, name, value, context,
+                    dry_run=dry_run)
             elif not dry_run:
-                self.real_this.__properties[name] = value
+                self.real_this._properties[name] = value
         elif derived:
             if not dry_run:
                 obj = self.cast(caller_class)
-                obj.__properties[name] = value
+                obj._properties[name] = value
         else:
             raise exceptions.PropertyWriteError(name, start_type)
 
     def cast(self, cls):
-        for p in helpers.traverse(self, lambda t: t.__parents.values()):
+        for p in helpers.traverse(self, lambda t: t._parents.values()):
             if p.type == cls:
                 return p
         raise TypeError('Cannot cast {0} to {1}'.format(self.type, cls))
 
     def _list_properties(self, name):
         for p in helpers.traverse(
-                self.real_this, lambda t: t.__parents.values()):
+                self.real_this, lambda t: t._parents.values()):
             if name in p.type.properties:
                 yield p.type.properties[name]
 
@@ -274,17 +284,17 @@ class MuranoObject(dsl_types.MuranoObject):
                       allow_refs=False):
         context = helpers.get_context()
         result = {}
-        for parent in self.__parents.values():
+        for parent in self._parents.values():
             result.update(parent.to_dictionary(
                 include_hidden, dsl_types.DumpTypes.Serializable,
                 allow_refs))
         skip_usages = (dsl_types.PropertyUsages.Runtime,
                        dsl_types.PropertyUsages.Config)
         for property_name in self.type.properties:
-            if property_name in self.real_this.__properties:
+            if property_name in self.real_this._properties:
                 spec = self.type.properties[property_name]
                 if spec.usage not in skip_usages or include_hidden:
-                    prop_value = self.real_this.__properties[property_name]
+                    prop_value = self.real_this._properties[property_name]
                     if isinstance(prop_value, MuranoObject) and allow_refs:
                         meta = [m for m in spec.get_meta(context)
                                 if m.type.name == ('io.murano.metadata.'
@@ -313,3 +323,49 @@ class MuranoObject(dsl_types.MuranoObject):
                 'name': self.name
             }})
         return result
+
+    def mark_destroyed(self, clear_data=False):
+        self._destroyed = True
+        self._suppress__del__ = None
+        if clear_data or not self.initialized:
+            self._extension = None
+            self._properties = None
+            self._owner = None
+            self._this = None
+        for p in six.itervalues(self._parents):
+            p.mark_destroyed(clear_data)
+
+    @property
+    def destroyed(self):
+        return self._destroyed
+
+
+class RecyclableMuranoObject(MuranoObject):
+    def __init__(self, *args, **kwargs):
+        # Create self-reference to prevent __del__ from being called
+        # automatically when there are no other objects referring to this one.
+        # Without this reference __del__ will get called immediately after
+        # reference counter will go to 0 and the object will put itself into
+        # pending list creating another reference to itself and thus preventing
+        # its child objects from being deleted. After the .destroy method
+        # child objects will become eligible for destruction but will be
+        # unable to use find() method since their owner will be destroyed
+        # and collected at that point. With this reference gc.collect()
+        # will collect the whole object graph at once and then we could
+        # sort it and destroy in the correct order so that child objects
+        # will be destroyed first.
+
+        self._suppress__del__ = self
+        super(RecyclableMuranoObject, self).__init__(*args, **kwargs)
+
+    def __del__(self):
+        # For Py2 the purpose of __del__ (in combination with _suppress__del__)
+        # method is just to prevent object from being released automatically.
+        # In Py3 the gc.collect list will be empty and __del__ will be called
+        # for objects that were not destroyed yet.
+        if self._this is None and self._initialized and not self._destroyed:
+            self.executor.object_store.schedule_object_destruction(self)
+
+    def mark_destroyed(self, clear_data=False):
+        self.executor.attribute_store.forget_object(self)
+        super(RecyclableMuranoObject, self).mark_destroyed(clear_data)

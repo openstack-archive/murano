@@ -15,6 +15,7 @@
 import collections
 import contextlib
 import functools
+import gc
 import inspect
 import itertools
 import re
@@ -621,8 +622,26 @@ def weak_proxy(obj):
 
 
 def weak_ref(obj):
+    class MuranoObjectWeakRef(weakref.ReferenceType):
+        def __init__(self, murano_object):
+            self.ref = weakref.ref(murano_object)
+            self.object_id = murano_object.object_id
+
+        def __call__(self):
+            res = self.ref()
+            if not res:
+                object_store = get_object_store()
+                if object_store:
+                    res = object_store.get(self.object_id)
+                    if res:
+                        self.ref = weakref.ref(res)
+            return res
+
     if obj is None or isinstance(obj, weakref.ReferenceType):
         return obj
+
+    if isinstance(obj, dsl_types.MuranoObject):
+        return MuranoObjectWeakRef(obj)
     return weakref.ref(obj)
 
 
@@ -673,3 +692,38 @@ def format_scalar(value):
 def is_passkey(value):
     passkey = get_contract_passkey()
     return passkey is not None and value is passkey
+
+
+def find_object_owner(obj, predicate):
+    p = obj.owner
+    while p:
+        if predicate(p):
+            return p
+        p = p.owner
+    return None
+
+
+# This function is not intended to be used in the code but is very useful
+# for debugging object reference leaks
+def walk_gc(obj, towards, handler):
+    visited = set()
+    queue = collections.deque([(obj, [])])
+    while queue:
+        item, trace = queue.popleft()
+        if id(item) in visited:
+            continue
+        if handler(item):
+            if towards:
+                yield trace + [item]
+            else:
+                yield [item] + trace
+
+        visited.add(id(item))
+        if towards:
+            queue.extend(
+                [(t, trace + [item]) for t in gc.get_referrers(item)]
+            )
+        else:
+            queue.extend(
+                [(t, [item] + trace) for t in gc.get_referents(item)]
+            )

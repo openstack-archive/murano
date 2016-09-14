@@ -83,9 +83,11 @@ class Runner(object):
         self.executor = executor.MuranoDslExecutor(
             package_loader, TestContextManager(functions),
             execution_session.ExecutionSession())
-        self._root = self.executor.load(model).object
+        self._root = self.executor.load(model)
+        if self._root:
+            self._root = self._root.object
         if 'ObjectsCopy' in model:
-            self.executor.cleanup(model)
+            self.executor.object_store.cleanup()
 
     def _execute(self, name, obj, *args, **kwargs):
         try:
@@ -137,7 +139,7 @@ class Runner(object):
 
     @property
     def serialized_model(self):
-        return serializer.serialize_model(self._root, self.executor)[0]
+        return serializer.serialize_model(self._root, self.executor)
 
     @property
     def preserve_exception(self):
