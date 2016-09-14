@@ -254,7 +254,7 @@ Methods:
         Then:
           - $.instanceTemplate: $.instanceTemplate.mergeWith($joinResult.template)
 
-      - If: $joinResult.portRef != null
+      - If: $joinResult.get(portRef) != null
         Then:
           - $template:
               resources:
