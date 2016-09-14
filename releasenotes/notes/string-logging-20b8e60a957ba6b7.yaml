@@ -1,0 +1,5 @@
+---
+fixes:
+  - Murano engine no longer logs methods ``string()``, ``json()``, and ``yaml()``
+    of the 'io.murano.system.Resources' class. This is done to prevent UnicodeDecodeError's
+    when transferring binary files to murano agent.
