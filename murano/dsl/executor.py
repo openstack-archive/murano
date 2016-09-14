@@ -24,7 +24,7 @@ from yaql.language import exceptions as yaql_exceptions
 from yaql.language import specs
 from yaql.language import utils
 
-from murano.common.i18n import _LW
+from murano.common.i18n import _LW, _LE
 from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
@@ -463,14 +463,27 @@ class MuranoDslExecutor(object):
                 value, cls, context)
 
     def finalize(self, model_root=None):
-        if model_root:
-            used_objects = serializer.collect_objects(model_root)
-            self.object_store.prepare_finalize(used_objects)
-            model = serializer.serialize_model(model_root, self)
-            self.object_store.finalize()
-        else:
-            model = None
-            self.object_store.prepare_finalize(None)
-            self.object_store.finalize()
-        self._static_properties.clear()
-        return model
+        # NOTE(ksnihyr): should be no-except
+        try:
+            if model_root:
+                used_objects = serializer.collect_objects(model_root)
+                self.object_store.prepare_finalize(used_objects)
+                model = serializer.serialize_model(model_root, self)
+                self.object_store.finalize()
+            else:
+                model = None
+                self.object_store.prepare_finalize(None)
+                self.object_store.finalize()
+            self._static_properties.clear()
+            return model
+        except Exception as e:
+            LOG.exception(
+                _LE("Exception %s occurred"
+                    " during MuranoDslExecutor finalization"), e)
+            return None
+
+    def __enter__(self):
+        return self
+
+    def __exit__(self, exc_type, exc_val, exc_tb):
+        self.finalize()

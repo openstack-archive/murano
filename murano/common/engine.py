@@ -214,58 +214,50 @@ class TaskExecutor(object):
         return result
 
     def _execute(self, pkg_loader):
+
         get_plugin_loader().register_in_loader(pkg_loader)
-
-        executor = dsl_executor.MuranoDslExecutor(
-            pkg_loader, ContextManager(), self.session)
-        try:
-            obj = executor.load(self.model)
-        except Exception as e:
-            executor.finalize()
-            return self.exception_result(e, None, '<load>')
-
-        if obj is not None:
+        with dsl_executor.MuranoDslExecutor(
+                pkg_loader, ContextManager(), self.session) as executor:
             try:
-                self._validate_model(obj.object, pkg_loader, executor)
+                obj = executor.load(self.model)
             except Exception as e:
-                executor.finalize()
-                return self.exception_result(e, obj, '<validate>')
+                return self.exception_result(e, None, '<load>')
 
-        try:
-            LOG.debug('Invoking pre-cleanup hooks')
-            self.session.start()
-            executor.object_store.cleanup()
-        except Exception as e:
-            executor.finalize()
-            return self.exception_result(e, obj, '<GC>')
-        finally:
-            LOG.debug('Invoking post-cleanup hooks')
-            self.session.finish()
-        self._model['ObjectsCopy'] = copy.deepcopy(self._model.get('Objects'))
-
-        action_result = None
-        if self.action:
-            try:
-                LOG.debug('Invoking pre-execution hooks')
-                self.session.start()
+            if obj is not None:
                 try:
-                    action_result = self._invoke(executor)
-                finally:
-                    try:
-                        self._model = executor.finalize(obj)
-                    except Exception as e:
-                        return self.exception_result(e, None, '<model>')
+                    self._validate_model(obj.object, pkg_loader, executor)
+                except Exception as e:
+                    return self.exception_result(e, obj, '<validate>')
+            try:
+                LOG.debug('Invoking pre-cleanup hooks')
+                self.session.start()
+                executor.object_store.cleanup()
             except Exception as e:
-                executor.finalize()
-                return self.exception_result(e, obj, self.action['method'])
+                return self.exception_result(e, obj, '<GC>')
             finally:
-                LOG.debug('Invoking post-execution hooks')
+                LOG.debug('Invoking post-cleanup hooks')
                 self.session.finish()
+            self._model['ObjectsCopy'] = \
+                copy.deepcopy(self._model.get('Objects'))
 
-        try:
-            action_result = serializer.serialize(action_result, executor)
-        except Exception as e:
-            return self.exception_result(e, None, '<result>')
+            action_result = None
+            if self.action:
+                try:
+                    LOG.debug('Invoking pre-execution hooks')
+                    self.session.start()
+                    try:
+                        action_result = self._invoke(executor)
+                    finally:
+                        self._model = executor.finalize(obj)
+
+                except Exception as e:
+                    return self.exception_result(e, obj, self.action['method'])
+                    LOG.debug('Invoking post-execution hooks')
+                    self.session.finish()
+            try:
+                action_result = serializer.serialize(action_result, executor)
+            except Exception as e:
+                return self.exception_result(e, None, '<result>')
 
         pkg_loader.compact_fixation_table()
         return {
