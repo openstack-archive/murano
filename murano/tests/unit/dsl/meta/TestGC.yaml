@@ -6,6 +6,17 @@ Methods:
     Body:
       - $.find(Node)
 
+  foo:
+    Body:
+      - trace(foo)
+
+  destructionHandler:
+    Arguments:
+      - obj:
+          Contract: $.class(TestGCNode).notNull()
+    Body:
+      - trace('Destruction of {0}'.format($obj.value))
+
   .destroy:
     Body:
       - trace($.value)
@@ -37,8 +48,9 @@ Methods:
               :TestGCNode:
                 value: B
       - $x: new($model)
-      - sys:GC.subscribeDestruction($x, _handler)
-      - sys:GC.subscribeDestruction($x.nodes[0], _handler)
+      - sys:GC.subscribeDestruction($x, $this, _handler)
+      - sys:GC.subscribeDestruction($x.nodes[0], $this, _handler)
+      - sys:GC.subscribeDestruction($x.nodes[0], $x, destructionHandler)
       - $x: null
       - sys:GC.collect()
 
