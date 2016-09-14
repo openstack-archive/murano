@@ -19,6 +19,7 @@ import yaml as yamllib
 from yaql.language import specs
 from yaql.language import yaqltypes
 
+from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
 from murano.dsl import helpers
@@ -52,6 +53,7 @@ class ResourceManager(object):
     @staticmethod
     @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
+    @specs.meta(constants.META_NO_TRACE, True)
     def string(receiver, name, owner=None, binary=False):
         path = ResourceManager._get_package(owner, receiver).get_resource(name)
         mode = 'rb' if binary else 'rU'
@@ -61,12 +63,14 @@ class ResourceManager(object):
     @classmethod
     @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
+    @specs.meta(constants.META_NO_TRACE, True)
     def json(cls, receiver, name, owner=None):
         return jsonlib.loads(cls.string(receiver, name, owner))
 
     @classmethod
     @specs.parameter('owner', dsl.MuranoTypeParameter(nullable=True))
     @specs.inject('receiver', yaqltypes.Receiver())
+    @specs.meta(constants.META_NO_TRACE, True)
     def yaml(cls, receiver, name, owner=None):
         return yamllib.load(
             cls.string(receiver, name, owner), Loader=yaml_loader)
