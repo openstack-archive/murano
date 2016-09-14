@@ -135,6 +135,7 @@ class MuranoObject(dsl_types.MuranoObject):
         if (not object_store.initializing and
                 self._extension is None and
                 not self._initialized and
+                not self._destroyed and
                 not helpers.is_objects_dry_run_mode()):
             method = self.type.methods.get('__init__')
             if method:
@@ -154,9 +155,10 @@ class MuranoObject(dsl_types.MuranoObject):
                             context.create_child_context())
             self._initialized = True
 
-        if (not object_store.initializing
-                and not helpers.is_objects_dry_run_mode()
-                and not self._initialized):
+        if (not object_store.initializing and
+                not helpers.is_objects_dry_run_mode() and
+                not self._initialized and
+                not self._destroyed):
             yield run_init
 
     @property
@@ -310,18 +312,23 @@ class MuranoObject(dsl_types.MuranoObject):
                 'id': self.object_id,
                 'name': self.name
             }
-        elif serialization_type == dsl_types.DumpTypes.Mixed:
-            result.update({'?': {
-                'type': self.type,
-                'id': self.object_id,
-                'name': self.name,
-            }})
+            if self.destroyed:
+                result['destroyed'] = True
         else:
-            result.update({'?': {
-                'type': helpers.format_type_string(self.type),
-                'id': self.object_id,
-                'name': self.name
-            }})
+            if serialization_type == dsl_types.DumpTypes.Mixed:
+                result.update({'?': {
+                    'type': self.type,
+                    'id': self.object_id,
+                    'name': self.name,
+                }})
+            else:
+                result.update({'?': {
+                    'type': helpers.format_type_string(self.type),
+                    'id': self.object_id,
+                    'name': self.name
+                }})
+            if self.destroyed:
+                result['?']['destroyed'] = True
         return result
 
     def mark_destroyed(self, clear_data=False):
