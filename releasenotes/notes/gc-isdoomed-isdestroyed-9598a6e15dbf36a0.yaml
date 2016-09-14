@@ -1,0 +1,8 @@
+---
+features:
+  - io.murano.system.GC.isDoomed() static method was added. It can be used
+    within the ``.destroy`` method to test if other object is also going to be
+    destroyed.
+  - io.murano.system.GC.isDestroyed() static method was added. It checks if
+    the object is destroyed and thus no methods can be invoked on it.
+
