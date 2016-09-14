@@ -1,2 +1,3 @@
 fixes:
-  - Fix delete application in environment template
+  - API call for deleting a service from environment template did not return
+    result of its operation. The issue is fixed.

@@ -1,6 +1,9 @@
 ---
 features:
-  - Add multiple api workers.
-issues:
-  - Now too many server launch with api server at the same time, We should
-    refactor this to make API using the real specified workers.
+  - Added the ``api_workers`` option to ``murano`` config group. It controls
+    the number of API workers launched by murano. If not set, it would default to
+    the number of CPUs available.
+
+deprecations:
+  - Renamed the ``workers`` option from the ``engine`` group
+    to ``engine_workers`` to reduce ambiguity with the ``api_workers`` option.

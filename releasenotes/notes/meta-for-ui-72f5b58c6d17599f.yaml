@@ -1,4 +1,12 @@
 ---
 features:
-  - The meta-classes Title, Description, HelpText, Hidden, Section, Position,
-    ModelBuilder are implemented and placed to the core library .
+  - Added the following meta-classes to the core library -
+      ``Title``
+      ``Description``
+      ``HelpText``
+      ``Hidden``
+      ``Section``
+      ``Position``
+      ``ModelBuilder``.
+    These classes will later be used to implement dynamic object model
+    generation.

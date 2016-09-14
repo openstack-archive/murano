@@ -1,5 +1,4 @@
 ---
 features:
-  - Separate murano service broker from murano. Create separate db
-    and paste.ini for service broker. And move service broker api
-    to the top level.
+  - Separated murano service broker from murano-api into a murano-cfapi service.
+    Created a separate database and ``paste.ini`` for service broker.
