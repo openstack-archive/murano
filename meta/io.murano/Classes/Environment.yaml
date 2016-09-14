@@ -87,7 +87,7 @@ Methods:
           where($ and not $this.regions.containsKey($)).
           select($this._createRegion($)).
           toDict($.name)
-      - If: not $.regions.containsKey(null)
+      - If: not $.regions.containsKey('')
         Then:
         - If: $.homeRegionName
           Then:

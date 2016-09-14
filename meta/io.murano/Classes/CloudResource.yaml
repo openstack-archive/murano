@@ -1,5 +1,6 @@
 Namespaces:
     =: io.murano
+    sys: io.murano.system
 
 Name: CloudResource
 
@@ -26,4 +27,7 @@ Methods:
         - If: $._region = null or $._region.name != $regionName
           Then:
             $._region: $env.regions[$regionName]
+        - If: $._region != null
+          Then:
+            - sys:GC.subscribeDestruction($this, $._region)
       - Return: $._region
