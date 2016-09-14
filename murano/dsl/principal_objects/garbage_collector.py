@@ -22,12 +22,12 @@ from murano.dsl import helpers
 @dsl.name('io.murano.system.GC')
 class GarbageCollector(object):
     @staticmethod
-    @specs.parameter('publisher', dsl.MuranoObjectParameter())
-    @specs.parameter('subscriber', dsl.MuranoObjectParameter())
+    @specs.parameter('publisher', dsl.MuranoObjectParameter(decorate=False))
+    @specs.parameter('subscriber', dsl.MuranoObjectParameter(decorate=False))
     @specs.parameter('handler', yaqltypes.String(nullable=True))
     def subscribe_destruction(publisher, subscriber, handler=None):
-        publisher_this = publisher.object.real_this
-        subscriber_this = subscriber.object.real_this
+        publisher_this = publisher.real_this
+        subscriber_this = subscriber.real_this
 
         if handler:
             subscriber.type.find_single_method(handler)
@@ -38,21 +38,20 @@ class GarbageCollector(object):
         if not dependency:
             dependency = {'subscriber': helpers.weak_ref(subscriber_this),
                           'handler': handler}
-            publisher_this.dependencies.setdefault(
-                'onDestruction', []).append(dependency)
+            publisher_this.destruction_dependencies.append(dependency)
 
     @staticmethod
-    @specs.parameter('publisher', dsl.MuranoObjectParameter())
-    @specs.parameter('subscriber', dsl.MuranoObjectParameter())
+    @specs.parameter('publisher', dsl.MuranoObjectParameter(decorate=False))
+    @specs.parameter('subscriber', dsl.MuranoObjectParameter(decorate=False))
     @specs.parameter('handler', yaqltypes.String(nullable=True))
     def unsubscribe_destruction(publisher, subscriber, handler=None):
-        publisher_this = publisher.object.real_this
-        subscriber_this = subscriber.object.real_this
+        publisher_this = publisher.real_this
+        subscriber_this = subscriber.real_this
 
         if handler:
             subscriber.type.find_single_method(handler)
 
-        dds = publisher_this.dependencies.get('onDestruction', [])
+        dds = publisher_this.destruction_dependencies
         dependency = GarbageCollector._find_dependency(
             publisher_this, subscriber_this, handler)
 
@@ -61,7 +60,7 @@ class GarbageCollector(object):
 
     @staticmethod
     def _find_dependency(publisher, subscriber, handler):
-        dds = publisher.dependencies.get('onDestruction', [])
+        dds = publisher.destruction_dependencies
         for dd in dds:
             if dd['handler'] != handler:
                 continue

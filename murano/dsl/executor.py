@@ -333,7 +333,7 @@ class MuranoDslExecutor(object):
         obj = objects[0]
         if obj.destroyed:
             return
-        for dependency in obj.dependencies.get('onDestruction', []):
+        for dependency in obj.destruction_dependencies:
             try:
                 handler = dependency['handler']
                 if handler:
@@ -351,7 +351,7 @@ class MuranoDslExecutor(object):
                 LOG.warning(_LW(
                     'Muted exception during destruction dependency '
                     'execution in {0}: {1}').format(obj, e), exc_info=True)
-        obj.dependencies.pop('onDestruction', None)
+        obj.load_dependencies(None)
 
     def destroy_objects(self, *objects):
         if not objects:

@@ -164,8 +164,7 @@ class ObjectStore(object):
         for obj in sentenced_objects:
             obj_subscribers = [obj.owner]
 
-            dds = obj.dependencies.get('onDestruction', [])
-            for dd in dds:
+            for dd in obj.destruction_dependencies:
                 subscriber = dd['subscriber']
                 if subscriber:
                     subscriber = subscriber()
@@ -275,6 +274,7 @@ class InitializationObjectStore(ObjectStore):
                 class_obj, owner,
                 name=parsed['name'],
                 object_id=object_id if self._keep_ids else None)
+            obj.load_dependencies(parsed['dependencies'])
             if parsed['destroyed']:
                 obj.mark_destroyed()
             self.put(obj, object_id or obj.object_id)

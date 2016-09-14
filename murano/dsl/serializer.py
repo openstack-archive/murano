@@ -34,19 +34,22 @@ def serialize(obj, executor,
             make_copy=False,
             serialize_attributes=False,
             serialize_actions=False,
-            serialization_type=serialization_type)['Objects']
+            serialization_type=serialization_type,
+            with_destruction_dependencies=False)['Objects']
 
 
 def _serialize_object(root_object, designer_attributes, allow_refs,
                       executor, serialize_actions=True,
-                      serialization_type=dsl_types.DumpTypes.Serializable):
+                      serialization_type=dsl_types.DumpTypes.Serializable,
+                      with_destruction_dependencies=True):
     serialized_objects = set()
 
     obj = root_object
     while True:
         obj, need_another_pass = _pass12_serialize(
             obj, None, serialized_objects, designer_attributes, executor,
-            serialize_actions, serialization_type, allow_refs)
+            serialize_actions, serialization_type, allow_refs,
+            with_destruction_dependencies)
         if not need_another_pass:
             break
     tree = [obj]
@@ -59,7 +62,8 @@ def serialize_model(root_object, executor,
                     make_copy=True,
                     serialize_attributes=True,
                     serialize_actions=True,
-                    serialization_type=dsl_types.DumpTypes.Serializable):
+                    serialization_type=dsl_types.DumpTypes.Serializable,
+                    with_destruction_dependencies=True):
     designer_attributes = executor.object_store.designer_attributes
 
     if root_object is None:
@@ -70,11 +74,13 @@ def serialize_model(root_object, executor,
         with helpers.with_object_store(executor.object_store):
             tree, serialized_objects = _serialize_object(
                 root_object, designer_attributes, allow_refs, executor,
-                serialize_actions, serialization_type)
+                serialize_actions, serialization_type,
+                with_destruction_dependencies)
 
             tree_copy = _serialize_object(
                 root_object, None, allow_refs, executor, serialize_actions,
-                serialization_type)[0] if make_copy else None
+                serialization_type,
+                with_destruction_dependencies)[0] if make_copy else None
 
             attributes = executor.attribute_store.serialize(
                 serialized_objects) if serialize_attributes else None
@@ -113,7 +119,8 @@ def _serialize_available_action(obj, current_actions, executor):
 
 def _pass12_serialize(value, parent, serialized_objects,
                       designer_attributes_getter, executor,
-                      serialize_actions, serialization_type, allow_refs):
+                      serialize_actions, serialization_type, allow_refs,
+                      with_destruction_dependencies):
     if isinstance(value, dsl.MuranoObjectInterface):
         value = value.object
     if isinstance(value, (six.string_types,
@@ -135,7 +142,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         return value, False
     if isinstance(value, dsl_types.MuranoObject):
         result = value.to_dictionary(
-            serialization_type=serialization_type, allow_refs=allow_refs)
+            serialization_type=serialization_type, allow_refs=allow_refs,
+            with_destruction_dependencies=with_destruction_dependencies)
         if designer_attributes_getter is not None:
             if serialization_type == dsl_types.DumpTypes.Inline:
                 system_data = result
@@ -149,7 +157,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         serialized_objects.add(value.object_id)
         return _pass12_serialize(
             result, value, serialized_objects, designer_attributes_getter,
-            executor, serialize_actions, serialization_type, allow_refs)
+            executor, serialize_actions, serialization_type, allow_refs,
+            with_destruction_dependencies)
     elif isinstance(value, utils.MappingType):
         result = {}
         need_another_pass = False
@@ -168,7 +177,8 @@ def _pass12_serialize(value, parent, serialized_objects,
                 result_value = _pass12_serialize(
                     d_value, parent, serialized_objects,
                     designer_attributes_getter, executor, serialize_actions,
-                    serialization_type, allow_refs)
+                    serialization_type, allow_refs,
+                    with_destruction_dependencies)
             result[result_key] = result_value[0]
             if result_value[1]:
                 need_another_pass = True
@@ -179,7 +189,8 @@ def _pass12_serialize(value, parent, serialized_objects,
         for t in value:
             v, nmp = _pass12_serialize(
                 t, parent, serialized_objects, designer_attributes_getter,
-                executor, serialize_actions, serialization_type, allow_refs)
+                executor, serialize_actions, serialization_type, allow_refs,
+                with_destruction_dependencies)
             if nmp:
                 need_another_pass = True
             result.append(v)

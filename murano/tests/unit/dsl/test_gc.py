@@ -13,7 +13,7 @@
 #    under the License.
 
 from murano.dsl import exceptions
-from murano.engine.system import garbage_collector
+from murano.dsl.principal_objects import garbage_collector
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
 
@@ -63,6 +63,28 @@ class TestGC(test_case.DslTestCase):
             exceptions.ObjectDestroyedError,
             self.runner.testCallOnDestroyedObject)
         self.assertEqual(['foo', 'X'], self.traces)
+
+    def test_destruction_dependencies_serialization(self):
+        self.runner.testDestructionDependencySerialization()
+        node1 = self.runner.serialized_model['Objects']['outNode']
+        node2 = node1['nodes'][0]
+
+        deps = {
+            'onDestruction': [{
+                'subscriber': self.runner.root.object_id,
+                'handler': '_handler'
+            }]
+        }
+        self.assertEqual(deps, node1['?'].get('dependencies'))
+
+        self.assertEqual(
+            node1['?'].get('dependencies'),
+            node2['?'].get('dependencies'))
+
+        model = self.runner.serialized_model
+        model['Objects']['outNode'] = None
+        self.new_runner(model)
+        self.assertEqual(['Destroy A', 'Destroy B', 'B', 'A'], self.traces)
 
     def test_is_doomed(self):
         self.runner.testIsDoomed()
