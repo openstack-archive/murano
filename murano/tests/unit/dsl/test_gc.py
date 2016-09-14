@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from murano.dsl import exceptions
+
 from murano.engine.system import garbage_collector
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -56,3 +58,9 @@ class TestGC(test_case.DslTestCase):
         self.assertEqual(
             ['Destroy A', 'Destroy B', 'Destruction of B', 'B', 'A'],
             self.traces)
+
+    def test_call_on_destroyed_object(self):
+        self.assertRaises(
+            exceptions.ObjectDestroyedError,
+            self.runner.testCallOnDestroyedObject)
+        self.assertEqual(['foo', 'X'], self.traces)
