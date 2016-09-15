@@ -245,16 +245,13 @@ class TaskExecutor(object):
                 try:
                     LOG.debug('Invoking pre-execution hooks')
                     self.session.start()
-                    try:
-                        action_result = self._invoke(executor)
-                    finally:
-                        self._model = executor.finalize(obj)
-
+                    action_result = self._invoke(executor)
                 except Exception as e:
                     return self.exception_result(e, obj, self.action['method'])
                 finally:
                     LOG.debug('Invoking post-execution hooks')
                     self.session.finish()
+                    self._model = executor.finalize(obj)
             try:
                 action_result = serializer.serialize(action_result, executor)
             except Exception as e:
