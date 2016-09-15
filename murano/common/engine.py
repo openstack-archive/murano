@@ -252,6 +252,7 @@ class TaskExecutor(object):
 
                 except Exception as e:
                     return self.exception_result(e, obj, self.action['method'])
+                finally:
                     LOG.debug('Invoking post-execution hooks')
                     self.session.finish()
             try:
