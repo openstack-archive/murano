@@ -203,7 +203,7 @@ networking_opts = [
                help='If provided networking configuration will be taken '
                     'from this file'),
 
-    cfg.StrOpt('driver', default=None, choices=['neutron', 'nova'],
+    cfg.StrOpt('driver', choices=['neutron', 'nova'],
                help='Network driver to use. Options are neutron or nova.'
                     'If not provided, the driver will be detected.'),
 ]
@@ -296,7 +296,7 @@ file_server = [
 ]
 
 home_region = cfg.StrOpt(
-    'home_region', default=None,
+    'home_region',
     help="Default region name used to get services endpoints.")
 
 
