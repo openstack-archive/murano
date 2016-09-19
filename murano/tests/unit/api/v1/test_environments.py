@@ -1,4 +1,4 @@
-# coding: utf-8
+#
 # Copyright (c) 2014 Hewlett-Packard Development Company, L.P.
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
@@ -19,6 +19,7 @@ from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 
 from murano.api.v1 import environments
+from murano.api.v1 import sessions
 from murano.db import models
 from murano.services import states
 import murano.tests.unit.api.base as tb
@@ -29,6 +30,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
     def setUp(self):
         super(TestEnvironmentApi, self).setUp()
         self.controller = environments.Controller()
+        self.sessions_controller = sessions.Controller()
         self.fixture = self.useFixture(config_fixture.Config())
         self.fixture.conf(args=[])
 
@@ -193,6 +195,29 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result_msg = result.text.replace('\n', '')
         self.assertIn('The server could not comply with the request since it '
                       'is either malformed or otherwise incorrect.',
+                      result_msg)
+
+    def test_create_environment_duplicate_name(self):
+        """Check that duplicate names results in HTTPConflict"""
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        body = {'name': u'my_env_dup'}
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+
+        self.expect_policy_check('create_environment')
+        body = {'name': u'my_env_dup'}
+        req = self._post('/environments', jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        self.assertEqual(409, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        self.assertIn('Environment with specified name already exists',
                       result_msg)
 
     def test_missing_environment(self):
@@ -475,3 +500,87 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         return result
+
+    def test_last_status_session(self):
+        CREDENTIALS = {'tenant': 'test_tenant_1', 'user': 'test_user_1'}
+
+        self._set_policy_rules({'create_environment': '@'})
+        self.expect_policy_check('create_environment')
+
+        # Create environment
+        request = self._post(
+            '/environments',
+            jsonutils.dump_as_bytes({'name': 'test_environment_1'}),
+            **CREDENTIALS
+        )
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        self.assertEqual(CREDENTIALS['tenant'],
+                         response_body['tenant_id'])
+        ENVIRONMENT_ID = response_body['id']
+
+        # Create session
+        request = self._post(
+            '/environments/{environment_id}/configure'
+            .format(environment_id=ENVIRONMENT_ID),
+            b'',
+            **CREDENTIALS
+        )
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        SESSION_ID = response_body['id']
+
+        # Test getting last status doesn't error
+        request = self._get(
+            '/environments/{environment_id}/lastStatus'
+            .format(environment_id=ENVIRONMENT_ID),
+            **CREDENTIALS
+        )
+        request.headers['X-Configuration-Session'] = str(SESSION_ID)
+        request.context.session = SESSION_ID
+
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        self.assertIsNot(response_body, None)
+
+    def test_show_environments_session(self):
+        CREDENTIALS = {'tenant': 'test_tenant_1', 'user': 'test_user_1'}
+
+        self._set_policy_rules(
+            {'create_environment': '@',
+             'list_environments': '@',
+             'show_environment': '@'}
+        )
+        self.expect_policy_check('create_environment')
+
+        # Create environment
+        request = self._post(
+            '/environments',
+            jsonutils.dump_as_bytes({'name': 'test_environment_1'}),
+            **CREDENTIALS
+        )
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        self.assertEqual(CREDENTIALS['tenant'],
+                         response_body['tenant_id'])
+        ENVIRONMENT_ID = response_body['id']
+
+        # Create session
+        self.expect_policy_check(
+            'show_environment', {'environment_id': ENVIRONMENT_ID})
+        request = self._post(
+            '/environments/{environment_id}/configure'
+            .format(environment_id=ENVIRONMENT_ID),
+            b'',
+            **CREDENTIALS
+        )
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        SESSION_ID = response_body['id']
+
+        # Show the environment and test that it is correct.
+        request = self._get(
+            '/environments/{environment_id}'
+            .format(environment_id=ENVIRONMENT_ID),
+            **CREDENTIALS
+        )
+        request.headers['X-Configuration-Session'] = str(SESSION_ID)
+        request.context.session = SESSION_ID
+
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        self.assertEqual(ENVIRONMENT_ID, response_body['id'])
