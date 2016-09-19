@@ -226,7 +226,7 @@ class NotificationService(Service):
     def start(self):
         endpoints = [report_notification, track_instance, untrack_instance]
 
-        transport = messaging.get_transport(CONF)
+        transport = messaging.get_notification_transport(CONF)
         s_target = target.Target(topic='murano', server=str(uuid.uuid4()))
 
         self.server = messaging.get_notification_listener(
