@@ -180,20 +180,21 @@ Install the API service and engine
           terminal.
 
    #.  Leaving the API process running, return to the previous console and
-       import murano core library:
+       import murano core library and other libraries from the `meta`
+       directory:
 
        .. code-block:: console
 
-          cd ~/murano/murano
-          pushd ./meta/io.murano
-          zip -r ../../io.murano.zip *
-          popd
+          cd ~/murano/murano/meta/
+          for i in */; do pushd ./"$i"; zip -r ../../"${i%/}.zip" *; popd; done
+          cd ..
           tox -e venv -- murano --os-username %OPENSTACK_ADMIN_USER% \
           --os-password %OPENSTACK_ADMIN_PASSWORD% \
           --os-auth-url http://%OPENSTACK_HOST_IP%:5000 \
           --os-project-name %OPENSTACK_ADMIN_TENANT% \
           --murano-url http://%MURANO_IP%:8082 \
-          package-import --is-public io.murano.zip
+          package-import --is-public *.zip
+          rm *.zip
 
    #.  Launch the murano engine in a separate terminal:
 
