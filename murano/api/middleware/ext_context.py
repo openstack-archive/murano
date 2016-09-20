@@ -91,7 +91,7 @@ class ExternalContextMiddleware(wsgi.Middleware):
         try:
             credentials = base64.b64decode(
                 req.headers['Authorization'].split(' ')[1])
-            user, password = credentials.split(':', 2)
+            user, password = credentials.decode('utf-8').split(':', 2)
             req.headers['X-Auth-Token'] = self.get_keystone_token(user,
                                                                   password)
             req.endpoints = self.get_endpoints()
