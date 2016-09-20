@@ -57,7 +57,7 @@ class EngineClient(object):
 def api():
     global TRANSPORT
     if TRANSPORT is None:
-        TRANSPORT = messaging.get_transport(CONF)
+        TRANSPORT = messaging.get_notification_transport(CONF)
 
     return ApiClient(TRANSPORT)
 
@@ -65,6 +65,6 @@ def api():
 def engine():
     global TRANSPORT
     if TRANSPORT is None:
-        TRANSPORT = messaging.get_transport(CONF)
+        TRANSPORT = messaging.get_notification_transport(CONF)
 
     return EngineClient(TRANSPORT)

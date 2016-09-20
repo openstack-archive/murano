@@ -64,7 +64,7 @@ class EngineService(service.Service):
             SchemaEndpoint()
         ]
 
-        transport = messaging.get_transport(CONF)
+        transport = messaging.get_notification_transport(CONF)
         s_target = target.Target('murano', 'tasks', server=str(uuid.uuid4()))
         self.server = messaging.get_rpc_server(
             transport, s_target, endpoints, 'eventlet')
