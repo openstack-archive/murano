@@ -12,37 +12,6 @@ possible to extend Murano with support for other formats of application
 definitions. TOSCA CSARs and HOT templates are the two examples of alternate
 ways to define applications.
 
-Package structure
------------------
-
-The only assumptions Murano makes about package format are:
-
-* It is a ZIP archive
-* There is a ``manifest.yaml`` file in the root folder of that archive
-* Manifest must be a valid YAML file representing key-value associative array
-* There should be a "Format" key in manifest - format identifier. If it is
-  not present, "MuranoPL/1.0" is used.
-
-Murano uses the "Format" attribute of the manifest file to find an appropriate
-plug-in for a particular package type. All interactions between the rest of
-Murano and package file contents are done through the plug-in interface alone.
-
-Because Murano never directly accesses files inside the packages, it is
-possible for plug-ins to dynamically generate MuranoPL classes on the fly.
-Those classes will be served as adapters between Murano and 3rd party systems
-responsible for deployment of particular package types. Thus for Murano all
-packages remain to be of MuranoPL type though some of them are "virtual".
-
-The format identifier has the following format: `Name/Version`.
-For example, "Heat.HOT/1.0". If name is not present, it is assumed to be
-"MuranoPL" (thus "1.0" becomes "MuranoPL/1.0"). Version strings are in SemVer
-3-component format (major.minor.patch). Missing version components are assumed
-to be zero (thus 1.0 becomes 1.0.0).
-
-
-Package type plug-ins
----------------------
-
 Package types plug-ins are normal Python packages that can be distributed
 through PyPI and installed using :command:`pip` or its alternatives. It is
 important that the plug-in be installed to the same Python instance that is
