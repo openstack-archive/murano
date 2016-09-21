@@ -18,6 +18,7 @@ Classes included in the Murano core library are as follows:
 - :ref:`application`
 - :ref:`security-group-manager`
 - :ref:`environment`
+- :ref:`cloud-region`
 
 **io.murano.resources**
 
@@ -76,6 +77,48 @@ Manages security groups during an application deployment.
    file.
 
 
+.. _cloud-region:
+
+Class: CloudRegion
+------------------
+
+Defines a CloudRegion and groups region-local properties
+
+.. list-table:: **CloudRegion class properties**
+   :widths: 10 35 7
+   :header-rows: 1
+
+   * - Property
+     - Description
+     - Default usage
+   * - ``name``
+     - A region name.
+     - ``In``
+   * - ``agentListener``
+     - A property containing the ``io.murano.system.AgentListener`` object
+       that can be used to interact with Murano Agent.
+     - ``Runtime``
+   * - ``stack``
+     - A property containing a HeatStack object that can be used to interact
+       with Heat.
+     - ``Runtime``
+   * - ``defaultNetworks``
+     - A property containing user-defined Networks
+       (``io.murano.resources.Network``) that can be used as default networks
+       for the instances in this environment.
+     - ``In``
+   * - ``securityGroupManager``
+     - A property containing the ``SecurityGroupManager`` object that can
+       be used to construct a security group associated with this environment.
+     - ``Runtime``
+
+
+.. seealso::
+
+   Source `CloudRegion.yaml
+   <https://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Classes/CloudRegion.yaml>`_
+   file.
+
 .. _environment:
 
 Class: Environment
@@ -105,22 +148,30 @@ Environments is intent to group applications to manage them easily.
        that can be used to interact with Murano Agent.
      - ``Runtime``
    * - ``stack``
-     - A property containing a HeatStack object that can be used to interact
-       with Heat.
+     - A property containing a HeatStack object in default region that can
+       be used to interact with Heat.
      - ``Runtime``
    * - ``instanceNotifier``
      - A property containing the ``io.murano.system.InstanceNotifier`` object
        that can be used to keep track of the amount of deployed instances.
      - ``Runtime``
    * - ``defaultNetworks``
-     - A property containing user-defined Networks
-       (``io.murano.resources.Network``) that can be used as default networks
-       for the instances in this environment.
+     - A property containing templates for user-defined Networks in regions
+       (``io.murano.resources.Network``).
      - ``In``
    * - ``securityGroupManager``
-     - A property containing the ``SecurityGroupManager`` object that can
-       be used to construct a security group associated with this environment.
+     - A property containing the ``SecurityGroupManager`` object from default region
+       that can be used to construct a security group associated with this environment.
      - ``Runtime``
+   * - ``homeRegionName``
+     - A property containing the name of home region from `murano` config
+     - ``Runtime``
+   * - ``regions``
+     - A property containing the map `regionName` -> `CloudRegion` instance.
+     - ``InOut``
+   * - ``regionConfigs``
+     - A property containing the map `regionName` -> `CloudRegion` config
+     - ``Config``
 
 .. seealso::
 
@@ -144,6 +195,9 @@ deploying, joining to the network, applying security group, and deleting.
    * - Property
      - Description
      - Default usage
+   * - ``regionName``
+     - Inherited from ``CloudResource``. Describe region for instance deployment
+     - ``In``
    * - ``name``
      - An instance name.
      - ``In``
