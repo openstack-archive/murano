@@ -49,11 +49,6 @@ Properties:
     Contract: $.class(CinderVolumeBackup)
 
 Methods:
-  .init:
-    Body:
-    - $._environment: $.find(std:Environment).require()
-    - $._region: $.getRegion()
-
   buildResourceDefinition:
     Body:
     - $properties:
@@ -99,6 +94,7 @@ Methods:
 
   deploy:
     Body:
+    - $._region: $.getRegion()
     - If: $.sourceSnapshot != null
       Then:
         $.sourceSnapshot.validate()
