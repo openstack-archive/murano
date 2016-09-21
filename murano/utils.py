@@ -166,7 +166,7 @@ else:
 
         def _do_open(self):
             # the file has to be open in read mode, therefore this method has
-            # to be overriden
+            # to be overridden
             basedir = os.path.dirname(self.path)
             if basedir:
                 made_basedir = ensure_tree(basedir)
