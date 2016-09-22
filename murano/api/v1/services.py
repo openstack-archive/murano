@@ -92,10 +92,7 @@ class Controller(object):
     @normalize_path
     def put(self, request, environment_id, path, body=None):
         if not body:
-            msg = _('Request body is empty: please, provide '
-                    'application object model')
-            LOG.error(msg)
-            raise exc.HTTPBadRequest(msg)
+            body = []
         LOG.debug('Services:Put <EnvId: {0}, Path: {2}, '
                   'Body: {1}>'.format(environment_id, body, path))
 

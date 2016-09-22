@@ -159,6 +159,32 @@ class TestServicesNegative(base.BaseApplicationCatalogTest):
                           session['id'],
                           service['?']['id'])
 
+    @testtools.testcase.attr('negative')
+    def test_put_services_without_env_id(self):
+        session = self.application_catalog_client.\
+            create_session(self.environment['id'])
+        self.addCleanup(self.application_catalog_client.delete_session,
+                        self.environment['id'], session['id'])
+        put_body = [self._get_demo_app()]
+        self.assertRaises(exceptions.NotFound,
+                          self.application_catalog_client.update_services,
+                          None,
+                          session['id'],
+                          put_body)
+
+    @testtools.testcase.attr('negative')
+    def test_put_services_without_sess_id(self):
+        session = self.application_catalog_client.\
+            create_session(self.environment['id'])
+        self.addCleanup(self.application_catalog_client.delete_session,
+                        self.environment['id'], session['id'])
+        put_body = [self._get_demo_app()]
+        self.assertRaises(exceptions.BadRequest,
+                          self.application_catalog_client.update_services,
+                          self.environment['id'],
+                          "",
+                          put_body)
+
 
 class TestServicesNegativeTenantIsolation(base.BaseApplicationCatalogTest):
 

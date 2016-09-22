@@ -1,0 +1,6 @@
+---
+fixes:
+  - It is now possible to make a PUT request with body equal to '[]' to
+    '/environments/<env_id>/services' endpoint. This will result in removing
+    all apps from current session. This allows deleting the last application
+    from environment from CLI.
