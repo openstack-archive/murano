@@ -1,4 +1,5 @@
 # Copyright (c) 2014 Hewlett-Packard Development Company, L.P.
+# Copyright (c) 2016 AT&T Corp
 #
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
@@ -16,10 +17,13 @@
 
 import mock
 from oslo_utils import timeutils
+from webob import exc
 
 from murano.api.v1 import actions
 from murano.common import policy
 from murano.db import models
+from murano.db import session as db_session
+from murano.services import states
 import murano.tests.unit.api.base as tb
 import murano.tests.unit.utils as test_utils
 
@@ -94,6 +98,127 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.mock_engine_rpc.handle_task.assert_called_once_with(rpc_task)
 
         self.assertIn('task_id', result)
+
+    def _create_session_with_state(self, environment, user_id, state):
+        unit = db_session.get_session()
+        session = models.Session()
+        session.environment_id = environment.id
+        session.user_id = user_id
+        session.state = state
+        session.version = environment.version
+        with unit.begin():
+            unit.add(session)
+
+    def test_execute_action_with_session_in_deploying_state(self, _):
+        """Test whether session in the deploying state throws error."""
+        self._set_policy_rules(
+            {'execute_action': '@'}
+        )
+
+        fake_now = timeutils.utcnow()
+        expected = dict(
+            id='12345',
+            name='my-env',
+            version=0,
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '12345',
+                          '_actions': {
+                              'actionsID_action': {
+                                  'enabled': True,
+                                  'name': 'Testaction'
+                              }
+                          }}
+                },
+                'Attributes': {}
+            }
+        )
+        environment = models.Environment(**expected)
+        test_utils.save_models(environment)
+        req = self._post('/environments/12345/actions/actionID_action', b'{}')
+        user_id = req.context.user
+
+        self._create_session_with_state(environment, user_id,
+                                        states.SessionState.DEPLOYING)
+        self.assertRaises(exc.HTTPForbidden, self.controller.execute,
+                          req, '12345', 'actionsID_action', {})
+
+    def test_execute_action_with_session_in_deleting_state(self, _):
+        """Test whether session in deleting state throws error."""
+        self._set_policy_rules(
+            {'execute_action': '@'}
+        )
+
+        fake_now = timeutils.utcnow()
+        expected = dict(
+            id='12345',
+            name='my-env',
+            version=0,
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '12345',
+                          '_actions': {
+                              'actionsID_action': {
+                                  'enabled': True,
+                                  'name': 'Testaction'
+                              }
+                          }}
+                },
+                'Attributes': {}
+            }
+        )
+        environment = models.Environment(**expected)
+        test_utils.save_models(environment)
+        req = self._post('/environments/12345/actions/actionID_action', b'{}')
+        user_id = req.context.user
+
+        self._create_session_with_state(environment, user_id,
+                                        states.SessionState.DELETING)
+        self.assertRaises(exc.HTTPForbidden, self.controller.execute,
+                          req, '12345', 'actionsID_action', {})
+
+    @mock.patch('murano.db.services.sessions.SessionServices.validate')
+    def test_execute_action_with_invalid_session_version(self, mocked_function,
+                                                         _):
+        """Test whether validate session function throws error."""
+        self._set_policy_rules(
+            {'execute_action': '@'}
+        )
+
+        fake_now = timeutils.utcnow()
+        expected = dict(
+            id='12345',
+            name='my-env',
+            version=0,
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant,
+            description={
+                'Objects': {
+                    '?': {'id': '12345',
+                          '_actions': {
+                              'actionsID_action': {
+                                  'enabled': True,
+                                  'name': 'Testaction'
+                              }
+                          }}
+                },
+                'Attributes': {}
+            }
+        )
+        environment = models.Environment(**expected)
+        test_utils.save_models(environment)
+        req = self._post('/environments/12345/actions/actionID_action', b'{}')
+
+        mocked_function.return_value = False
+        self.assertRaises(exc.HTTPForbidden, self.controller.execute,
+                          req, '12345', 'actionsID_action', {})
 
     def test_get_result(self, _):
         """Result of task with given id and environment id is returned."""
