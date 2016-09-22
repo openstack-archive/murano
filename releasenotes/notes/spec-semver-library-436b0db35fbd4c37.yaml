@@ -1,0 +1,5 @@
+---
+fixes:
+  - It is now possible to use version specifications like '=0.0.0' when
+    ``semantic_version`` library version '2.3.1' is installed. Previously
+    such specifications caused an error and '==0.0.0' had to be used.
