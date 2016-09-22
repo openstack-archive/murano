@@ -307,12 +307,17 @@ function configure_service_broker {
 
 }
 
-function prepare_core_library() {
-    cd $MURANO_DIR/meta/io.murano && zip -r io.murano.zip .
+function prepare_core_apps() {
+    cd $MURANO_DIR/meta
+    for i in */
+        do pushd ./"$i"
+        zip -r ../"${i%/}.zip" *
+        popd
+    done
 }
 
-function remove_core_library_zip() {
-    rm -f $MURANO_DIR/meta/io.murano/io.murano.zip
+function remove_core_apps_zip() {
+    rm -f $MURANO_DIR/meta/*.zip
 }
 
 # init_murano() - Initialize databases, etc.
@@ -335,7 +340,7 @@ function init_murano_cfapi() {
 }
 
 function setup_core_library() {
-    prepare_core_library
+    prepare_core_apps
 
     set_packages_service_backend
 
@@ -347,9 +352,10 @@ function setup_core_library() {
            --murano-url http://127.0.0.1:8082 \
            --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
            --murano-packages-service $MURANO_PACKAGES_SERVICE \
-           package-import $MURANO_DIR/meta/io.murano/io.murano.zip \
+           package-import $MURANO_DIR/meta/*.zip \
            --is-public
-    remove_core_library_zip
+
+    remove_core_apps_zip
 
 }
 # install_murano() - Collect source and prepare
