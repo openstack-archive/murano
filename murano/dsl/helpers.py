@@ -275,6 +275,12 @@ def parse_version_spec(version_spec):
     if not version_spec:
         version_spec = '0'
     version_spec = re.sub('\s+', '', str(version_spec))
+
+    # NOTE(kzaitsev): semantic_version 2.3.X thinks that '=0' is not
+    # a valid version spec and only accepts '==0', this regexp adds
+    # an extra '=' before such specs
+    version_spec = re.sub(r'^=(\d)', r'==\1', version_spec)
+
     if version_spec[0].isdigit():
         version_spec = '==' + str(version_spec)
     version_spec = semantic_version.Spec(version_spec)
