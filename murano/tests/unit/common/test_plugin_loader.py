@@ -21,9 +21,6 @@ CONF = cfg.CONF
 
 class PluginLoaderTest(base.MuranoTestCase):
 
-    def setUp(self):
-        super(PluginLoaderTest, self).setUp()
-
     @mock.patch('stevedore.extension.Extension')
     def test_load_extension(self, ext):
         """Test PluginLoader.load_extension.

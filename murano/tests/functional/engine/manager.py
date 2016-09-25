@@ -41,9 +41,6 @@ class MuranoTestsCore(testtools.TestCase, testtools.testcase.WithAttributes,
         cfg.load_config()
         cls._environments = []
 
-    def setUp(self):
-        super(MuranoTestsCore, self).setUp()
-
     def tearDown(self):
         super(MuranoTestsCore, self).tearDown()
         self.purge_environments()

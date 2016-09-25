@@ -17,9 +17,6 @@ from murano.tests.unit import base
 
 
 class TestActionFinder(base.MuranoTestCase):
-    def setUp(self):
-        super(TestActionFinder, self).setUp()
-
     def test_simple_root_level_search(self):
         model = {
             '?': {

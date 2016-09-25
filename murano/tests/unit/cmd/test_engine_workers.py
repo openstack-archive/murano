@@ -24,9 +24,6 @@ from murano.tests.unit import base
 
 class TestEngineWorkers(base.MuranoTestCase):
 
-    def setUp(self):
-        super(TestEngineWorkers, self).setUp()
-
     @mock.patch.object(config, 'parse_args')
     @mock.patch.object(logging, 'setup')
     @mock.patch('oslo_service.service.launch')
