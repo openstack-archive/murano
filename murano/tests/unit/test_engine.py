@@ -32,9 +32,6 @@ ROOT_CLASS = 'io.murano.Object'
 
 
 class TestNamespaceResolving(base.MuranoTestCase):
-    def setUp(self):
-        super(TestNamespaceResolving, self).setUp()
-
     def test_fails_w_empty_name(self):
         resolver = ns_resolver.NamespaceResolver({'=': 'com.example.murano'})
 
@@ -95,9 +92,6 @@ class TestNamespaceResolving(base.MuranoTestCase):
 
 
 class TestHelperFunctions(base.MuranoTestCase):
-    def setUp(self):
-        super(TestHelperFunctions, self).setUp()
-
     def test_generate_id(self):
         generated_id = helpers.generate_id()
 
