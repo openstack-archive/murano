@@ -165,7 +165,7 @@ To access and use murano packages through Cloud Foundry, you need to perform fol
 
    .. note::
 
-      You can use `service-access` command to see human-readable list of packages.
+      You can use :command:`service-access` command to see human-readable list of packages.
 
 #. Provision murano service through Cloud Foundry.
 
