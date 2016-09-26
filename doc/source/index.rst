@@ -111,6 +111,7 @@ Developing Applications
    appdev-guide/cinder_volume_supporting
    appdev-guide/examples
    appdev-guide/use_cases
+   appdev-guide/app_development_framework
    appdev-guide/app_debugging
    appdev-guide/faq
 
