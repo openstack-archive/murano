@@ -125,6 +125,9 @@ The following contracts are available:
 | | $.class(ns:ClassName)                                   | | value must be a reference to an instance of specified class name                              |
 | | $.class(ns:ClassName).notNull()                         |                                                                                                 |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
+| | $.template(ns:ClassName)                                | | value must be a dictionary with object-model representation of specified class name           |
+| | $.template(ns:ClassName).notNull()                      |                                                                                                 |
++-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 | | $.class(ns:ClassName, ns:DefaultClassName)              | | create instance of the ``ns:DefaultClassName`` class if no instance provided                  |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 | | $.class(ns:Name).check($.p = 12)                        | |  the value must be of the ``ns:Name`` type and have the ``p`` property equal to 12            |
@@ -159,7 +162,7 @@ The following contracts are available:
 | | $.check($this.myStaticMethod($))                        | | the static method of the class must return true for the value                                 |
 +-----------------------------------------------------------+-------------------------------------------------------------------------------------------------+
 
-In the example above property ``port`` must be int value greater than 0 and
+In the example below property ``port`` must be int value greater than 0 and
 less than 65536; ``scope`` must be a string value and one of 'public', 'cloud',
 'host' or 'internal', and ``protocol`` must be a string value and either
 'TCP' or 'UDP'. When user passes some values to these properties it will be checked
@@ -193,6 +196,59 @@ that values confirm to the contracts.
             scope: $.scope
             protocol: $.protocol
 
+
+The ``template`` contract does the same validation as the ``class`` contract,
+but does not require the actual object to be passed as a property or argument.
+Instead it allows to create an object from the given template later. Also you
+can exclude some of the properties from validation and provide them later in
+the body of the method.
+
+Consider the following example:
+
+.. code-block:: yaml
+
+    Namespaces:
+      =: io.murano.applications
+      res: io.murano.resources
+      std: io.murano
+
+    Name: TemplateServerProvider
+
+    Properties:
+      template:
+        Contract: $.template(res:Instance, excludeProperties => [name]).notNull()
+      serverNamePattern:
+        Contract: $.string().notNull()
+      threshold:
+        Contract: $.int().check($ > 0)
+
+    Methods:
+      createReplica:
+        Arguments:
+          - index:
+              Contract: $.int().notNull()
+          - owner:
+              Contract: $.class(std:Object)
+        Body:
+          - If: $index < $this.threshold
+            Then:
+              - $template: $this.template
+              - $template.name: $this.serverNamePattern.format($index)
+              - $template['?'].name: format('Server {0}', $index)
+              - Return: new($template, $owner)
+            Else:
+              - Return: null
+
+In the example above the class has the ``template`` property that is validated
+by the ``template`` contract. It holds the template of the object of the
+``Instance`` class or its inheritor. In the ``createReplica`` method
+``template`` is used to dynamically create instances in runtime considering
+some conditions and customizing the ``name`` property of an instance, as it
+was excluded from validation.
+
+You still can pass an actual object to the property or argument with the
+``template`` contract, but it will be automatically converted to its object
+model representation.
 
 .. _property_usage:
 
