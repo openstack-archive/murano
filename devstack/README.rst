@@ -7,18 +7,18 @@ Enabling in Devstack
     git clone https://git.openstack.org/openstack-dev/devstack
     cd devstack
 
-#. Edit local.conf to enable murano devstack plugin::
+#. Edit ``local.conf`` to enable murano devstack plugin::
 
      > cat local.conf
      [[local|localrc]]
      enable_plugin murano git://git.openstack.org/openstack/murano
 
 #. If you want Murano Cloud Foundry Broker API service enabled, add the
-   following line to local.conf::
+   following line to ``local.conf``::
 
      enable_service murano-cfapi
 
-#. If you want to use Glare Artifact Repository as a strorage for packages,
+#. If you want to use Glare Artifact Repository as a storage for packages,
    add the following line to ``local.conf``:
 
    .. code-block:: ini
