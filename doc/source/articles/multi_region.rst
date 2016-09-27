@@ -37,6 +37,10 @@ Each region has a copy of murano services and its own RabbitMQ for api to
 engine communication. In this case application will be deployed to the same
 region that murano run in.
 
+.. seealso::
+
+    :ref:`multi_region`
+
 Associate environments with regions
 ===================================
 Murano services are in one region but environments can be associated with

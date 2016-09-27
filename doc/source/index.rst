@@ -109,6 +109,7 @@ Developing Applications
    appdev-guide/app_migrating
    appdev-guide/app_unit_tests
    appdev-guide/cinder_volume_supporting
+   appdev-guide/multi_region
    appdev-guide/examples
    appdev-guide/use_cases
    appdev-guide/app_development_framework
