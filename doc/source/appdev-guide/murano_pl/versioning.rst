@@ -58,7 +58,7 @@ If you do not want to specify the package version, leave this value empty:
   .. code-block:: yaml
 
    Require:
-     package1_FQN: >=0.0.3
+     package1_FQN: '>=0.0.3'
      package2_FQN:
 
   ..
