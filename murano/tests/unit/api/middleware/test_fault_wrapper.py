@@ -20,12 +20,9 @@ from murano.common import wsgi
 from murano.packages import exceptions
 from murano.tests.unit import base
 
-from oslo_config import cfg
 from oslo_serialization import jsonutils
 
 from webob import exc
-
-CONF = cfg.CONF
 
 
 class FaultWrapperTest(base.MuranoTestCase):

@@ -23,10 +23,7 @@ from keystoneauth1 import exceptions
 from murano.api.middleware import ext_context
 from murano.tests.unit import base
 
-from oslo_config import cfg
 from oslo_serialization import base64
-
-CONF = cfg.CONF
 
 
 class MiddlewareExtContextTest(base.MuranoTestCase):

@@ -21,10 +21,6 @@ from murano.api.middleware import version_negotiation
 
 from murano.tests.unit import base
 
-from oslo_config import cfg
-
-CONF = cfg.CONF
-
 
 class MiddlewareVersionNegotiationTest(base.MuranoTestCase):
 
