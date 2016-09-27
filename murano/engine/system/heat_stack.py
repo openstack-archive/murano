@@ -52,6 +52,19 @@ class HeatStack(object):
         self._last_stack_timestamps = (None, None)
         self._tags = ''
         self._region_name = region_name
+        self._push_thread = None
+
+    def _is_push_thread_alive(self):
+        return self._push_thread is not None and not self._push_thread.dead
+
+    def _kill_push_thread(self):
+        if self._is_push_thread_alive():
+            self._push_thread.kill()
+
+    def _wait_push_thread(self):
+        if not self._is_push_thread_alive():
+            return
+        self._push_thread.wait()
 
     @staticmethod
     def _create_client(session, region_name):
@@ -142,14 +155,12 @@ class HeatStack(object):
         def status_func(state_value):
             status[0] = state_value
             return True
-
         self._wait_state(status_func)
         return status[0]
 
     def _wait_state(self, status_func, wait_progress=False):
         tries = 4
         delay = 1
-
         while tries > 0:
             while True:
                 try:
@@ -197,9 +208,57 @@ class HeatStack(object):
         return {}
 
     def output(self):
+        self._wait_push_thread()
         return self._wait_state(lambda status: True)
 
-    def push(self):
+    def _push(self, object_store=None):
+        template = copy.deepcopy(self._template)
+        LOG.debug('Pushing: {template}'.format(template=json.dumps(template)))
+        object_store = object_store or helpers.get_object_store()
+        while True:
+            try:
+                with helpers.with_object_store(object_store):
+                    current_status = self._get_status()
+                    resources = template.get('Resources') or template.get(
+                        'resources')
+                    if current_status == 'NOT_FOUND':
+                        if resources is not None:
+                            token_client = self._get_token_client()
+                            token_client.stacks.create(
+                                stack_name=self._name,
+                                parameters=self._parameters,
+                                template=template,
+                                files=self._files,
+                                environment=self._hot_environment,
+                                disable_rollback=True,
+                                tags=self._tags)
+
+                            self._wait_state(
+                                lambda status: status == 'CREATE_COMPLETE')
+                    else:
+                        if resources is not None:
+                            self._client.stacks.update(
+                                stack_id=self._name,
+                                parameters=self._parameters,
+                                files=self._files,
+                                environment=self._hot_environment,
+                                template=template,
+                                disable_rollback=True,
+                                tags=self._tags)
+                            self._wait_state(
+                                lambda status: status == 'UPDATE_COMPLETE',
+                                True)
+                        else:
+                            self.delete()
+            except heat_exc.HTTPConflict as e:
+                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
+                eventlet.sleep(3)
+            else:
+                break
+
+        self._applied = self._template == template
+
+    def push(self, async=False):
         if self._applied or self._template is None:
             return
 
@@ -210,51 +269,16 @@ class HeatStack(object):
         if 'description' not in self._template and self._description:
             self._template['description'] = self._description
 
-        template = copy.deepcopy(self._template)
-        LOG.debug('Pushing: {template}'.format(template=json.dumps(template)))
-
-        while True:
-            try:
-                current_status = self._get_status()
-                resources = template.get('Resources') or template.get(
-                    'resources')
-                if current_status == 'NOT_FOUND':
-                    if resources is not None:
-                        token_client = self._get_token_client()
-                        token_client.stacks.create(
-                            stack_name=self._name,
-                            parameters=self._parameters,
-                            template=template,
-                            files=self._files,
-                            environment=self._hot_environment,
-                            disable_rollback=True,
-                            tags=self._tags)
-
-                        self._wait_state(
-                            lambda status: status == 'CREATE_COMPLETE')
-                else:
-                    if resources is not None:
-                        self._client.stacks.update(
-                            stack_id=self._name,
-                            parameters=self._parameters,
-                            files=self._files,
-                            environment=self._hot_environment,
-                            template=template,
-                            disable_rollback=True,
-                            tags=self._tags)
-                        self._wait_state(
-                            lambda status: status == 'UPDATE_COMPLETE', True)
-                    else:
-                        self.delete()
-            except heat_exc.HTTPConflict as e:
-                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
-                eventlet.sleep(3)
-            else:
-                break
-
-        self._applied = self._template == template
+        self._kill_push_thread()
+        if async:
+            self._push_thread =\
+                eventlet.greenthread.spawn_after_local(
+                    1, self._push, helpers.get_object_store())
+        else:
+            self._push()
 
     def delete(self):
+        self._kill_push_thread()
         while True:
             try:
                 if not self.current():

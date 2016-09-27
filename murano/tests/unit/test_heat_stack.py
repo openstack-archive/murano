@@ -168,6 +168,39 @@ class TestHeatStack(base.MuranoTestCase):
         )
         self.assertTrue(hs._applied)
 
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_heat_async_push(self, status_get, wait_st):
+        """Assert that if heat_template_version is omitted, it's added."""
+
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {"heatFile": "file"}
+        hs._hot_environment = 'environments'
+        hs._parameters = {}
+        hs._applied = False
+        hs.push(async=True)
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_not_called()
+        hs.output()
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={"heatFile": "file"},
+            environment='environments',
+            tags=self.mock_tag
+        )
+        self.assertTrue(hs._applied)
+
     @mock.patch(CLS_NAME + '.current')
     def test_update_wrong_template_version(self, current):
         """Template version other than expected should cause error."""
