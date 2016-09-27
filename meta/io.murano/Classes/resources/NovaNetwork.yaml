@@ -77,3 +77,10 @@ Methods:
     Body:
       - Return:
           provider: NovaNetwork
+
+  getInstanceIpList:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+    Body:
+      - Return: $instance.ipAddresses
