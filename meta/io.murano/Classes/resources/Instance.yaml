@@ -330,7 +330,7 @@ Methods:
     Body:
       - $region: $.getRegion()
       - $template: $region.stack.current()
-      - If: $template.get(resources) and $template.get(outputs)
+      - If: $template.get(resources) and $template.get(outputs) and not sys:GC.isDoomed($region)
         Then:
           - $region.stack.push()
       - $.setAttr(instanceResources, [])
