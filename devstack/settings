@@ -68,9 +68,5 @@ enable_service murano
 enable_service murano-api
 enable_service murano-engine
 
-# Disable nova-network service and enable neutron networking service
-disable_service n-net
-enable_service q-svc q-agt q-dhcp q-l3 q-meta q-metering
-
 # Enable heat orchestration engine and other heat services
 enable_service heat h-api h-api-cfn h-api-cw h-eng
