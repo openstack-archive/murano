@@ -153,10 +153,6 @@ Methods:
               properties: $properties
 
           outputs:
-            format('{0}-assigned-ips', $.name):
-              description: format('Network IPs assigned to {0} instance', $.name)
-              value:
-                get_attr: [ $.name, networks ]
             format('{0}-id', $.name):
               description: format('ID of {0} instance', $.name)
               value:
@@ -175,8 +171,6 @@ Methods:
       - $region: $.getRegion()
       - $region.stack.push()
       - $outputs: $region.stack.output()
-      - $netIdToIpsMap: $outputs.get(format('{0}-assigned-ips', $this.name))
-      - $.ipAddresses: $netIdToIpsMap.values().flatten().distinct()
       - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
         Then:
@@ -185,8 +179,12 @@ Methods:
             Then: $.setAttr(fipAssigned, true)
       - $._environment.instanceNotifier.trackCloudInstance($this)
       - $.joinedNetworks: $this.joinedNetworks.distinct().select({
-          'network' => $['network'],
-          'ipList' => $['network'].getInstanceIpList($this)})
+          network => $.network,
+          ipList => $.network.getInstanceIpList($this)})
+      - $.ipAddresses: $this.joinedNetworks.selectMany($.ipList).where($ != $this.floatingIpAddress).distinct()
+      - If: $.floatingIpAddress != null
+        Then:
+          - $.ipAddresses: $.ipAddresses.append($.floatingIpAddress)
 
   deploy:
     Body:
@@ -320,7 +318,6 @@ Methods:
               - $._environment.instanceNotifier.untrackCloudInstance($this)
 
           - $outputsToDelete: list(
-              '{0}-assigned-ips'.format($.name),
               '{0}-id'.format($.name)).concat($.getAttr(instanceOutputs, []))
           - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
 

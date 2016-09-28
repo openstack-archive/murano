@@ -215,7 +215,8 @@ deploying, joining to the network, applying security group, and deleting.
        ``io.murano.system.Agent``.
      - ``Runtime``
    * - ``ipAddresses``
-     - A list of all IP addresses assigned to an instance.
+     - A list of all IP addresses assigned to an instance. Floating ip address
+       is placed in the list tail if present.
      - ``Out``
    * - ``networks``
      - Specifies the networks that an instance will be joined to.
