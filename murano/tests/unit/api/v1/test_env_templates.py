@@ -1,5 +1,6 @@
 # Copyright (c) 2015 Telefonica I+D.
-
+# Copyright (c) 2016 AT&T Corp
+#
 # Licensed under the Apache License, Version 2.0 (the "License");
 # you may not use this file except in compliance with the License.
 # You may obtain a copy of the License at
@@ -13,7 +14,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import mock
+
 from oslo_config import fixture as config_fixture
+from oslo_db import exception as db_exc
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
 
@@ -24,6 +28,7 @@ import murano.tests.unit.utils as test_utils
 
 
 class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
+
     def setUp(self):
         super(TestEnvTemplateApi, self).setUp()
         self.controller = templates.Controller()
@@ -85,6 +90,21 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/templates/%s' % self.uuids[0])
         result = req.get_response(self.api)
         self.assertEqual(expected, jsonutils.loads(result.body))
+
+    @mock.patch('murano.db.services.environment_templates.EnvTemplateServices.'
+                'create')
+    def test_create_env_templates_handle_duplicate_exc(self, mock_function):
+        """Create an template, test template.show()."""
+        self._set_policy_rules(
+            {'create_env_template': '@'}
+        )
+        self.expect_policy_check('create_env_template')
+        mock_function.side_effect = db_exc.DBDuplicateEntry
+
+        body = {'name': 'mytemp', 'description_text': 'description'}
+        req = self._post('/templates', jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        self.assertEqual(409, result.status_code)
 
     def test_list_public_env_templates(self):
         """Create an template, test templates.public()."""
@@ -150,6 +170,30 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                          jsonutils.dump_as_bytes(body))
         result = req.get_response(self.api)
         self.assertEqual(result.status_code, 403)
+
+    @mock.patch('murano.db.services.environment_templates.EnvTemplateServices.'
+                'clone')
+    def test_clone_env_templates_handle_duplicate_exc(self, mock_function):
+        """Test whether clone duplication exception is handled correctly."""
+        mock_function.side_effect = db_exc.DBDuplicateEntry
+
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'clone_env_template': '@'}
+        )
+
+        self.expect_policy_check('create_env_template')
+        body = {'name': 'mytemp2', 'is_public': True}
+        req = self._post('/templates', jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        env_template_id = jsonutils.loads(result.body)['id']
+
+        self.expect_policy_check('clone_env_template')
+        body = {'name': 'clone', 'is_public': False}
+        req = self._post('/templates/%s/clone' % env_template_id,
+                         jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        self.assertEqual(409, result.status_code)
 
     def test_list_public_env_templates_default(self):
         """Test listing public templates when there aren't any
@@ -372,6 +416,46 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
 
         self.assertEqual(expected, jsonutils.loads(result.body))
+
+    def test_update_env_template_with_inappropriate_name(self):
+        """Check that environment rename works."""
+        self._set_policy_rules(
+            {'show_env_template': '@',
+             'update_env_template': '@'}
+        )
+        self.expect_policy_check('update_env_template',
+                                 {'env_template_id': '12345'})
+
+        fake_now = timeutils.utcnow()
+        timeutils.utcnow.override_time = fake_now
+
+        expected = dict(
+            id='12345',
+            is_public=False,
+            name='my-temp',
+            version=0,
+            created=fake_now,
+            updated=fake_now,
+            tenant_id=self.tenant
+        )
+        e = models.EnvironmentTemplate(**expected)
+        test_utils.save_models(e)
+
+        # Attempt to update the environment template with invalid name.
+        body = {'name': ''}
+        req = self._put('/templates/12345', jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        self.assertIn(b'EnvTemplate body is incorrect', result.body)
+
+        # Verify that the name was not changed.
+        self.expect_policy_check('show_env_template',
+                                 {'env_template_id': '12345'})
+        req = self._get('/templates/12345')
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        self.assertEqual(expected['name'],
+                         jsonutils.loads(result.body)['name'])
 
     def test_delete_env_templates(self):
         """Test that environment deletion results in the correct rpc call."""
@@ -644,6 +728,56 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         self.assertEqual(self.uuids[4], body_returned['session_id'])
         self.assertEqual(self.uuids[3], body_returned['environment_id'])
 
+    @mock.patch('murano.db.services.environments.EnvironmentServices.create')
+    def test_create_environment_handle_duplicate_exc(self, mock_function):
+        """Test that duplicate entry exception is correctly handled."""
+        mock_function.side_effect = db_exc.DBDuplicateEntry
+
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
+
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'create_environment': '@'}
+        )
+
+        self._create_env_template_no_service()
+        body_env = {'name': 'my_template'}
+
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': self.uuids[0]})
+        req = self._post('/templates/%s/create-environment' %
+                         self.uuids[0], jsonutils.dump_as_bytes(body_env))
+        session_result = req.get_response(self.api)
+        self.assertEqual(409, session_result.status_code)
+
+    def test_create_env_with_template_and_services(self):
+        """Test env and session creation with services
+
+        Test that environment is created and session with template
+        with services.
+        """
+        self.fixture = self.useFixture(config_fixture.Config())
+        self.fixture.conf(args=[])
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'create_environment': '@'}
+        )
+        self._create_env_template_services()
+
+        self.expect_policy_check('create_environment',
+                                 {'env_template_id': self.uuids[0]})
+        body = {'name': 'my_template'}
+        req = self._post('/templates/%s/create-environment' %
+                         self.uuids[0], jsonutils.dump_as_bytes(body))
+        result = req.get_response(self.api)
+
+        self.assertIsNotNone(result)
+        self.assertEqual(200, result.status_code)
+        body_returned = jsonutils.loads(result.body)
+        self.assertEqual(self.uuids[4], body_returned['session_id'])
+        self.assertEqual(self.uuids[3], body_returned['environment_id'])
+
     def test_create_env_with_template_no_services(self):
         """Test env and session creation without services
 
@@ -743,6 +877,37 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                                                                 "NO_EXIST"))
         result = req.get_response(self.api)
         self.assertEqual(404, result.status_code)
+
+    @mock.patch('murano.db.services.environment_templates.EnvTemplateServices.'
+                'get_env_template')
+    def test_validate_request_handle_forbidden_exc(self, mock_function):
+        """Test whether forbidden exception is thrown with different tenant."""
+        self._set_policy_rules(
+            {'create_env_template': '@',
+             'show_env_template': '@',
+             'show_env_template': '@'}
+        )
+
+        # If is_public is False, then exception should be thrown.
+        mock_env_template = mock.MagicMock(is_public=False, tenant_id=-1)
+        mock_function.return_value = mock_env_template
+
+        self._create_env_template_no_service()
+        self.expect_policy_check('show_env_template',
+                                 {'env_template_id': self.uuids[0]})
+        req = self._get('/templates/%s' % self.uuids[0])
+        result = req.get_response(self.api)
+        self.assertEqual(result.status_code, 403)
+
+        # If is_public is True, then no exception should be thrown.
+        mock_env_template = mock.MagicMock(is_public=True, tenant_id=-1)
+        mock_function.return_value = mock_env_template
+
+        self.expect_policy_check('show_env_template',
+                                 {'env_template_id': self.uuids[0]})
+        req = self._get('/templates/%s' % self.uuids[0])
+        result = req.get_response(self.api)
+        self.assertEqual(result.status_code, 200)
 
     def test_create_env_notexisting_templatebody(self):
         """Check that an illegal temp name results in an HTTPClientError."""
