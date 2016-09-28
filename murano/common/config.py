@@ -290,6 +290,28 @@ glare_opts = [
                deprecated_group='glance')
 ]
 
+glance_opts = [
+    cfg.StrOpt('url', help='Optional glance endpoint override'),
+
+    cfg.BoolOpt('insecure', default=False,
+                help='This option explicitly allows Murano to perform '
+                '"insecure" SSL connections and transfers with Glance API.'),
+
+    cfg.StrOpt('ca_file',
+               help='(SSL) Tells Murano to use the specified certificate file '
+                    'to verify the peer running Glance API.'),
+
+    cfg.StrOpt('cert_file',
+               help='(SSL) Tells Murano to use the specified client '
+                    'certificate file when communicating with Glance.'),
+
+    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
+                                'communicate with Glance API.'),
+
+    cfg.StrOpt('endpoint_type', default='publicURL',
+               help='Glance endpoint type.')
+]
+
 file_server = [
     cfg.StrOpt('file_server', default='',
                help='Set a file server.')
@@ -315,6 +337,7 @@ CONF.register_cli_opts(metadata_dir)
 CONF.register_opts(stats_opts, group='stats')
 CONF.register_opts(networking_opts, group='networking')
 CONF.register_opts(glare_opts, group='glare')
+CONF.register_opts(glance_opts, group='glance')
 
 
 def parse_args(args=None, usage=None, default_config_files=None):
