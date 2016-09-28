@@ -95,10 +95,6 @@ Install the API service and engine
        %RABBITMQ_SERVER_IP% with 127.0.0.1. So, the complete row with the
        replaced value will be rabbit_host = 127.0.0.1
 
-       Replace items in "%" with the actual values. For example, replace
-       %RABBITMQ_SERVER_IP% with 127.0.0.1. So, the complete row with the
-       replaced value will be rabbit_host = 127.0.0.1
-
     .. code-block:: ini
 
         [DEFAULT]
