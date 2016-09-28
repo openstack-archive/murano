@@ -1,0 +1,70 @@
+FullName: test
+resources: 
+parameters:
+  foo:
+    type: number
+    label: foo_label
+    description: foo_description
+    default: Default Value
+    constraints:
+      - length:
+          min: 0
+          max: 5
+      - range:
+          min: 0
+          max: 5
+          description: Range Description
+      - allowed_values: [0, 1, 2, 3, 4]
+        description: Allowed Values Description
+      - allowed_pattern: [A-Za-z0-9]
+        description: Allowed Pattern Description
+  bar:
+    type: boolean
+    constraints:
+      - length:
+          min: 0
+      - range:
+          min: 0
+  baz:
+    type: string
+    constraints:
+      - length:
+          max: 5
+      - range:
+          max: 5
+          description: Range Description
+parameter_groups:
+  - group1:
+    parameters:
+      foo:
+        type: number
+        label: foo_label
+        description: foo_description
+        default: Default Value
+        constraints:
+          - length:
+              min: 0
+              max: 5
+          - range:
+              min: 0
+              max: 5
+              description: Range Description
+          - allowed_values: [0, 1, 2, 3, 4]
+            description: Allowed Values Description
+          - allowed_pattern: [A-Za-z0-9]
+            description: Allowed Pattern Description
+      bar:
+        type: boolean
+        constraints:
+          - length:
+              min: 0
+          - range:
+              min: 0
+      baz:
+        type: string
+        constraints:
+          - length:
+              max: 5
+          - range:
+              max: 5
+              description: Range Description

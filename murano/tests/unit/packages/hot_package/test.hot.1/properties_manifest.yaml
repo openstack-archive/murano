@@ -1,0 +1,35 @@
+parameters:
+  param1:
+    type: boolean
+    constraints:
+      - allowed_values: [True, False]
+  param2:
+    type: string
+    constraints:
+      - allowed_values: [bar]
+      - length:
+          max: 50
+      - length: 
+          min: 0
+      - allowed_pattern: [A-Za-z0-9]
+  param3:
+    type: number
+    constraints:
+      - allowed_values: [0, 1, 2, 3, 4]
+      - length:
+          min: 0
+          max: 5
+      - range:
+          min: 0
+          max: 4
+  param4:
+    type: number
+    constraints:
+      - range:
+          min: -1000
+      - range:
+          max: 1000
+  param5:
+    type: json
+  param6:
+    type: comma_delimited_list
