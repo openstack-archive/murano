@@ -1,0 +1,4 @@
+---
+features:
+  - Added a MetadataAware mixin class capable to retrieve the metadata
+    attributes from the implementing objects and all its parents.

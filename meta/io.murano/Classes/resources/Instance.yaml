@@ -17,7 +17,9 @@ Namespaces:
 
 
 Name: Instance
-Extends: std:CloudResource
+Extends:
+  - std:CloudResource
+  - MetadataAware
 
 Properties:
   name:
@@ -138,6 +140,7 @@ Methods:
           user_data: $preparedUserData.data
           user_data_format: $preparedUserData.format
           key_name: $.keyname
+          metadata: $this.getMetadata($region)
 
       - If: len($.blockDevices) > 0
         Then:
@@ -149,7 +152,7 @@ Methods:
       - $template:
           resources:
             $.name:
-              type: 'OS::Nova::Server'
+              type: $this.getResourceType()
               properties: $properties
 
           outputs:
@@ -382,3 +385,7 @@ Methods:
     Body:
       Return:
         get_resource: $.name
+
+  getResourceType:
+    Body:
+      - Return: 'OS::Nova::Server'
