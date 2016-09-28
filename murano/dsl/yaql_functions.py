@@ -154,6 +154,11 @@ def name(object_):
     return None if object_ is None else object_.name
 
 
+@specs.parameter('object_', dsl.MuranoObjectParameter())
+def metadata(object_):
+    return object_.object.metadata
+
+
 @specs.parameter('obj', dsl.MuranoObjectParameter(decorate=False))
 @specs.parameter('property_name', yaqltypes.Keyword())
 @specs.name('#operator_.')
@@ -270,6 +275,7 @@ def register(context, runtime_version):
     context.register_function(typeinfo)
     context.register_function(typeinfo_for_class)
     context.register_function(name)
+    context.register_function(metadata)
     context.register_function(obj_attribution)
     context.register_function(obj_attribution_static)
     context.register_function(op_dot)

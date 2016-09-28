@@ -1,0 +1,6 @@
+---
+features:
+  - Added a ``metadata()`` yaql function to retrieve the meta information about the
+    object, stored in the "?/metadata" section of object model.
+other:
+  - Bumped the RUNTIME_VERSION attribute to 1.5

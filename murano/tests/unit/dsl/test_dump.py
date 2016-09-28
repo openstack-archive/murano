@@ -116,6 +116,7 @@ class TestDump(test_case.DslTestCase):
         self.assertNotIn('qux', res)
 
     def _get_body(self, obj):
-        body_key = [k for k in obj.keys() if k not in ('id', 'name')][0]
+        body_key = [k for k in obj.keys()
+                    if k not in ('id', 'name', 'metadata')][0]
         self.assertIsInstance(body_key, dsl_types.MuranoType)
         return obj[body_key]

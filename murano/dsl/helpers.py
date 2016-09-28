@@ -570,6 +570,7 @@ def parse_object_definition(spec, scope_type, context):
         'properties': yaqlutils.filter_parameters_dict(props),
         'id': system_data.get('id'),
         'name': system_data.get('name'),
+        'metadata': system_data.get('metadata'),
         'destroyed': system_data.get('destroyed', False),
         'dependencies': system_data.get('dependencies', {}),
         'extra': {
@@ -585,6 +586,7 @@ def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
             parsed['type']: parsed['properties'],
             'id': parsed['id'],
             'name': parsed['name'],
+            'metadata': parsed['metadata'],
             'dependencies': parsed['dependencies'],
             'destroyed': parsed['destroyed']
         }
@@ -593,7 +595,8 @@ def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
     result = parsed['properties']
     header = {
         'id': parsed['id'],
-        'name': parsed['name']
+        'name': parsed['name'],
+        'metadata': parsed['metadata']
     }
     if parsed['destroyed']:
         header['destroyed'] = True
