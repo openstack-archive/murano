@@ -87,7 +87,7 @@ that failed would have red color.
 **while scanning a simple key in "<string>", line 32, column 3: ...**
 
 There is an error in YAML file format.
-Before uploading a package, validate your file in an online yaml validator
+Before uploading a package, validate your file in an online YAML validator
 like `YAMLint <http://www.yamllint.com/>`_.
 Later `validation tool <https://blueprints.launchpad.net/murano/+spec/murano-package-verification-tool>`_
 to check package closely while uploading will be added.

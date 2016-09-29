@@ -88,8 +88,8 @@ Application and Templates
 -------------------------
 
 The Application section describes an *application object model*.
-This model will be translated into json, and an application will be
-deployed according to that json. The application section should
+This model will be translated into JSON, and an application will be
+deployed according to that JSON. The application section should
 contain all necessary keys that are required by the murano-engine to
 deploy an application. Note that the system section of the object model goes
 under the *?*. So murano recognizes that instead of simple value,
@@ -204,7 +204,7 @@ field attributes. The most common attributes are the following:
 * **label** - name, that will be displayed in the form; defaults to **name**
   being capitalized.
 * **description** - description, that will be displayed in the description area.
-  Use yaml line folding character ``>-`` to keep the correct formatting during
+  Use YAML line folding character ``>-`` to keep the correct formatting during
   data transferring.
 * **descriptionTitle** - title of the description, defaults to **label**;
   displayed in the description area

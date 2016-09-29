@@ -15,7 +15,7 @@ It is fairly easy to set up your own murano package repository. To do so you nee
 
 When importing an application by name, the client appends any version info, if present to the application name, ``.zip`` file extension and searches for that file in the ``apps`` directory.
 
-When importing a bundle by name, the client appends ``.bundle`` file extension to the bundle name and searches it in the bundles directory. A bundle file is a json or a yaml file with the following structure:
+When importing a bundle by name, the client appends ``.bundle`` file extension to the bundle name and searches it in the bundles directory. A bundle file is a JSON or a YAML file with the following structure:
 
 .. code-block:: json
 

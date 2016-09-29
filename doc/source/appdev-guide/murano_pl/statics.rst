@@ -128,7 +128,7 @@ at least one argument.
 
 Extension methods can also be written in Python just the same way as static
 methods. However one should be careful in method declaration and use precise
-yaql specification of the type of first method argument otherwise the method
+YAQL specification of the type of first method argument otherwise the method
 will become an extension of any type.
 
 To turn Python static method into extension method it must be decorated with
