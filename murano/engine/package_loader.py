@@ -29,6 +29,7 @@ import muranoclient.v1.client as muranoclient
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_log import versionutils
+from oslo_utils import fileutils
 import six
 
 from murano.common import auth_utils
@@ -190,7 +191,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                                                      uuid.uuid4().hex))
 
         if not os.path.isdir(directory):
-            m_utils.ensure_tree(directory)
+            fileutils.ensure_tree(directory)
 
         LOG.debug('Cache for package loader is located at: {dir}'.format(
             dir=directory))
