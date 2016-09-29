@@ -1,0 +1,6 @@
+---
+fixes:
+  - added default rules to NeutronSecurityGroupManager to avoid
+    error if `createDefaultInstanceSecurityGroupRules()` method isn't
+    extended in inheritor and SecurityGroups isn't created in application
+    with call of `addGroupIngress()` method.

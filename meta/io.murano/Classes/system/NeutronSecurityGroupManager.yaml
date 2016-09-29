@@ -23,6 +23,7 @@ Methods:
     Body:
       - $._environment: $.find(std:Environment)
       - $._region: $.find(std:CloudRegion).require()
+      - $.addGroupIngress()
 
   addGroupIngress:
     Arguments:
