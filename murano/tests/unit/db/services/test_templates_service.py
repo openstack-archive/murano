@@ -97,3 +97,20 @@ class TestTemplateServices(base.MuranoWithDBTestCase,
         mock_uuid4 = mock.patch('uuid.uuid4').start()
         mock_uuid4.side_effect = [FakeUUID(v) for v in values]
         return mock_uuid4
+
+    def test_get_application_description(self):
+        fixture = self.useFixture(et.AppEnvTemplateFixture())
+        self.template_services.create(fixture.env_template_desc,
+                                      'tenant_id')
+        template_app_des = (self.template_services.
+                            get_application_description("template_id"))
+        self.assertEqual(template_app_des,
+                         fixture.env_template_desc['services'])
+
+        body = {
+            "name": "my_template"
+        }
+        self.template_services.create(body, 'tenant_id')
+        template_app_des_2 = (self.template_services.
+                              get_application_description("template_id2"))
+        self.assertEqual([], template_app_des_2)

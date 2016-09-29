@@ -122,3 +122,53 @@ class TestCoreServices(base.MuranoTestCase):
             self.core_services.get_template_data('any', '/services')
         self.assertEqual(fservices.applications_desc, template_des)
         template_services_mock.get_description.assert_called_with('any')
+
+    @mock.patch('murano.db.services.environment_templates.EnvTemplateServices')
+    def test_none_temp_description(self, template_services_mock):
+        fixture = self.useFixture(et.EmptyEnvironmentTemplateFixture())
+        template_services_mock.get_description.return_value = None
+        self.assertIsNone(self.core_services.
+                          get_template_data('any', '/services'))
+        self.assertRaises(exc.HTTPNotFound,
+                          self.core_services.post_env_template_data,
+                          'any', fixture.environment_template_desc,
+                          '/services')
+        self.assertRaises(exc.HTTPNotFound,
+                          self.core_services.post_application_data,
+                          'any', fixture.environment_template_desc,
+                          '/services')
+        self.assertRaises(exc.HTTPNotFound,
+                          self.core_services.delete_env_template_data,
+                          'any', '/services')
+        self.assertRaises(exc.HTTPNotFound,
+                          self.core_services.put_application_data,
+                          'any', fixture.environment_template_desc,
+                          '/services')
+
+    @mock.patch('murano.common.utils.TraverseHelper')
+    @mock.patch('murano.db.services.environments.EnvironmentServices')
+    def test_post_data(self, env_services_mock, source_mock):
+        fixture = self.useFixture(et.EmptyEnvironmentFixture())
+        env_services_mock.get_description.return_value = fixture.env_desc
+        session_id = None
+        ftomcat = self.useFixture(et.ApplicationTomcatFixture())
+        self.assertEqual(self.core_services.post_data('any', session_id,
+                         ftomcat.application_tomcat_desc,
+                         '/services'), ftomcat.application_tomcat_desc)
+        self.assertTrue(source_mock.insert.called)
+
+        self.assertEqual(self.core_services.put_data('any', session_id,
+                         ftomcat.application_tomcat_desc,
+                         '/services'), ftomcat.application_tomcat_desc)
+        self.assertTrue(source_mock.update.called)
+
+        self.core_services.delete_data('any', session_id, '/services')
+        self.assertTrue(source_mock.remove.called)
+
+    @mock.patch('murano.db.services.environments.EnvironmentServices')
+    def test_get_service_status(self, env_services_mock):
+        service_id = 12
+        fixture = self.useFixture(et.EmptyEnvironmentFixture())
+        env_services_mock.get_description.return_value = fixture.env_desc
+        self.core_services.get_service_status('any', service_id)
+        self.assertTrue(env_services_mock.get_status.called)
