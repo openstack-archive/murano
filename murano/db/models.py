@@ -357,7 +357,7 @@ class CFServiceInstance(Base):
     tenant = sa.Column(sa.String(255), nullable=False)
 
     def to_dict(self):
-        dictionary = super(CFSpace, self).to_dict()
+        dictionary = super(CFServiceInstance, self).to_dict()
         if 'environment' in dictionary:
             del dictionary['environment']
         return dictionary
