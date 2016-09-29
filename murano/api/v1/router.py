@@ -97,6 +97,14 @@ class API(wsgi.Router):
                        controller=environments_resource,
                        action='last',
                        conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/model/{path:.*?}',
+                       controller=environments_resource,
+                       action='get_model',
+                       conditions={'method': ['GET']})
+        mapper.connect('/environments/{environment_id}/model/',
+                       controller=environments_resource,
+                       action='update_model',
+                       conditions={'method': ['PATCH']})
 
         templates_resource = templates.create_resource()
         mapper.connect('/templates',

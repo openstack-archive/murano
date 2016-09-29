@@ -155,6 +155,28 @@ class ApplicationCatalogClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
+    def get_environment_model(self, environment_id, path='/', session_id=None):
+        headers = self.get_headers()
+        if session_id:
+            headers.update(
+                {'X-Configuration-Session': session_id}
+            )
+        uri = '/v1/environments/{id}/model/{path}'.format(
+            id=environment_id, path=path)
+        resp, body = self.get(uri, headers=headers)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
+    def update_environment_model(self, environment_id, data, session_id):
+        headers = self.get_headers(send_type='env-model-json-patch')
+        headers.update(
+            {'X-Configuration-Session': session_id}
+        )
+        uri = '/v1/environments/{id}/model/'.format(id=environment_id)
+        resp, body = self.patch(uri, json.dumps(data), headers=headers)
+        self.expected_success(200, resp.status)
+        return json.loads(body)
+
 # -----------------------Methods for session manage ---------------------------
     def create_session(self, environment_id):
         body = None

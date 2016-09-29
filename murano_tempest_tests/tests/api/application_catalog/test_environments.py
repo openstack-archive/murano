@@ -84,3 +84,42 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         environment = self.application_catalog_client.\
             update_environment(self.environment['id'])
         self.assertIsNot(self.environment['name'], environment['name'])
+
+    @testtools.testcase.attr('smoke')
+    def test_get_environment_model(self):
+        model = self.application_catalog_client.\
+            get_environment_model(self.environment['id'])
+        self.assertIsInstance(model, dict)
+        self.assertIn('defaultNetworks', model)
+        self.assertEqual(self.environment['name'], model['name'])
+        self.assertEqual(model['?']['type'], "io.murano.Environment")
+
+        net_name = self.application_catalog_client.\
+            get_environment_model(self.environment['id'],
+                                  path='/defaultNetworks/environment/name')
+        self.assertEqual("{0}-network".format(self.environment['name']),
+                         net_name)
+
+    @testtools.testcase.attr('smoke')
+    def test_update_environment_model(self):
+        session = self.application_catalog_client. \
+            create_session(self.environment['id'])
+        patch = [{
+            "op": "replace",
+            "path": "/defaultNetworks/flat",
+            "value": True
+        }]
+        new_model = self.application_catalog_client. \
+            update_environment_model(self.environment['id'], patch,
+                                     session['id'])
+        self.assertTrue(new_model['defaultNetworks']['flat'])
+
+        value_draft = self.application_catalog_client. \
+            get_environment_model(self.environment['id'],
+                                  '/defaultNetworks/flat',
+                                  session['id'])
+        self.assertTrue(value_draft)
+
+        model_current = self.application_catalog_client. \
+            get_environment_model(self.environment['id'])
+        self.assertIsNone(model_current['defaultNetworks']['flat'])

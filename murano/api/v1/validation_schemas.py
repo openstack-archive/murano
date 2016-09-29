@@ -12,16 +12,60 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-# TODO(all): write detailed schema.
 ENV_SCHEMA = {
     "$schema": "http://json-schema.org/draft-04/schema#",
 
     "type": "object",
     "properties": {
-        "id": {"type": "string"},
-        "name": {"type": "string"}
+        "?": {
+            "type": "object",
+            "properties": {
+                "id": {"type": "string"},
+                "name": {"type": "string"},
+                "type": {"type": "string"},
+                "_actions": {"type": "object"}
+            },
+            "required": ["id", "type"]
+        },
+        "name": {"type": "string"},
+        "region": {"type": ["string", "null"]},
+        "regions": {"type": "object"},
+        "defaultNetworks": {
+            "type": "object",
+            "properties": {
+                "environment": {
+                    "type": "object",
+                    "properties": {
+                        "name": {"type": "string"},
+                        "?": {
+                            "type": "object",
+                            "properties": {
+                                "type": {"type": "string"},
+                                "id": {"type": "string"},
+                                "name": {"type": "string"}
+                            },
+                        },
+                        "autoUplink": {"type": "boolean"},
+                        "externalRouterId": {"type": "string"},
+                        "dnsNameServers": {"type": "array"},
+                        "autogenerateSubnet": {"type": "boolean"},
+                        "subnetCidr": {"type": "string"},
+                        "openstackId": {"type": "string"},
+                        "regionName": {"type": "string"}
+                    },
+                    "required": ["name", "?"]
+                },
+                "flat": {"type": ["boolean", "null"]}
+            },
+            "required": ["environment", "flat"]
+        },
+        "services": {
+            "type": "array",
+            "minItems": 0,
+            "items": {"type": "object"}
+        }
     },
-    "required": ["id", "name"]
+    "required": ["?", "name", "region", "defaultNetworks"]
 }
 
 PKG_UPLOAD_SCHEMA = {
