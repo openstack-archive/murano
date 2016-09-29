@@ -339,7 +339,7 @@ Get application definition package
 
 * ``id`` (required)  Hexadecimal `id` (or fully qualified name) of the package
 
-**Response 200 (application/octetstream)**
+**Response 200 (application/octet-stream)**
 
 The sequence of bytes representing package content
 
