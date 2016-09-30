@@ -43,7 +43,7 @@ class ActionServices(object):
 
     @staticmethod
     def update_task(action, session, task, unit):
-        session.state = states.SessionState.deploying
+        session.state = states.SessionState.DEPLOYING
         task_info = models.Task()
         task_info.environment_id = session.environment_id
         task_info.description = dict(session.description.get('Objects'))
