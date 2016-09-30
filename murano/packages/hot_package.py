@@ -77,11 +77,12 @@ class HotPackage(package_base.PackageBase):
 
     def _translate_class(self):
         template_file = os.path.join(self._source_directory, 'template.yaml')
-        shutil.copy(template_file, self.get_resource(self.full_name))
 
         if not os.path.isfile(template_file):
             raise exceptions.PackageClassLoadError(
                 self.full_name, 'File with class definition not found')
+
+        shutil.copy(template_file, self.get_resource(self.full_name))
         with open(template_file) as stream:
             hot = yaml.safe_load(stream)
             if 'resources' not in hot:
