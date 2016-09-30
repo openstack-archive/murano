@@ -147,8 +147,8 @@ unit tests:
     Methods:
       initialize:
             Body:
-                # Object model can be loaded from json file, or provided
-                # directly in MuranoPL code as a yaml insertion.
+                # Object model can be loaded from JSON file, or provided
+                # directly in MuranoPL code as a YAML insertion.
                 - $.appJson: new(sys:Resources).json('tomcat-for-mock.json')
                 - $.heatOutput: new(sys:Resources).json('output.json')
                 - $.log: logger('test')

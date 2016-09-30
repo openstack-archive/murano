@@ -100,7 +100,7 @@ package.
 -------
 
 In Liberty, murano was updated to use `yaql 1.0.0`.
-The new version of yaql allows you to use a number of new functions and
+The new version of YAQL allows you to use a number of new functions and
 features that help to increase the speed of developing new applications.
 
 .. note::

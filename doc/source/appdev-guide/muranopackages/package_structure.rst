@@ -22,7 +22,7 @@ The application package root folder should contain the following:
  deployment located in it.
 
 **UI** folder
- contains the dynamic UI yaml definitions.
+ contains the dynamic UI YAML definitions.
 
 **logo.png** file (optional)
  is an image file associated to your application.

@@ -18,7 +18,7 @@ Specific information about *bundle-import* command can be found at
 Bundle structure
 ~~~~~~~~~~~~~~~~
 
-Bundle description is a json structure, that contains list of packages
+Bundle description is a JSON structure, that contains list of packages
 in the bundle and bundle version. Here is the example:
 
     .. code-block:: javascript

@@ -131,7 +131,7 @@ Upload a new package[POST]
 
 `/v1/catalog/packages`
 
-See the example of multipart/form-data request, It should contain two parts - text (json string) and file object
+See the example of multipart/form-data request, It should contain two parts - text (JSON string) and file object
 
 **Request (multipart/form-data)**
 
