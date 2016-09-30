@@ -37,6 +37,7 @@ Methods:
       - $instanceFipOutput: null
       - $instanceResources: []
       - $instanceOutputs: []
+      - $instanceNetworkOutput: format('{0}-assigned-ips', $instance.name)
       - If: $assignFloatingIp
         Then:
           - $instanceFipOutput: $instance.name + '-floatingIPaddress'
@@ -57,8 +58,12 @@ Methods:
                   value:
                     get_attr: [$fipName, ip]
                   description: format('Floating IP of {0}', $instance.name)
+                $instanceNetworkOutput:
+                  description: format('Network IPs assigned to {0} instance', $instance.name)
+                  value:
+                    get_attr: [ $instance.name, networks ]
           - $instanceResources: [$fipName, $fipName + 'Assignment']
-          - $instanceOutputs: [$instanceFipOutput]
+          - $instanceOutputs: [$instanceFipOutput, $instanceNetworkOutput]
       - Return:
           template: $template
           secGroupName:
@@ -83,4 +88,6 @@ Methods:
       - instance:
           Contract: $.class(Instance).notNull()
     Body:
-      - Return: $instance.ipAddresses
+      - Return: $instance.getRegion().stack.output().get(
+                    format('{0}-assigned-ips', $instance.name)
+                  ).values().flatten().distinct()
