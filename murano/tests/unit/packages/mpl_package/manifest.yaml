@@ -1,0 +1,12 @@
+Type: Application
+FullName: test.pl.v1.app
+Name: Test PL v1 App
+Description: Test PL v1 Application
+Author: Test Runner
+Tags: [Linux]
+Classes:
+  Class1: test.class1
+  Class2: test.class2
+UI: ui.yaml
+Meta: test.meta
+
