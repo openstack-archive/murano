@@ -360,3 +360,21 @@ class TestExecutionPlan(base.MuranoTestCase):
             filename = '<{0}>'.format(filename)
             body = self.agent._get_body(filename, resources, folder)
             self.assertEqual(encoded_text, body)
+
+    def test_queue_name(self):
+        self.assertEqual(self.agent.queue_name(), self.agent._queue)
+
+    def test_prepare_message(self):
+        template = {'test'}
+        msg_id = 12345
+        msg = self.agent._prepare_message(template, msg_id)
+        self.assertEqual(msg.id, msg_id)
+        self.assertEqual(msg._body, template)
+
+    def test_execution_plan_v1(self):
+        template = yamllib.load(
+            self._read('application.template'),
+            Loader=self.yaml_loader)
+        rtn_template = self.agent._build_v1_execution_plan(template,
+                                                           self.resources)
+        self.assertEqual(template, rtn_template)
