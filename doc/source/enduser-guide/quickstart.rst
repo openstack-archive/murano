@@ -102,8 +102,8 @@ and deploy the environment:
    It may take some time for the environment to deploy. Wait until the status
    is changed from ``Deploying`` to ``Ready``.
 
-#. Navigate to `Applications > Catalog > Environments` to view the
-   details.
+#. Navigate to :menuselection:`Applications > Catalog > Environments` to
+   view the details.
 
 
 Delete an application
