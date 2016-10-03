@@ -114,6 +114,7 @@ Developing Applications
    appdev-guide/use_cases
    appdev-guide/app_development_framework
    appdev-guide/app_debugging
+   appdev-guide/garbage_collection
    appdev-guide/faq
 
 
