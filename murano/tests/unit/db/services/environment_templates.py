@@ -17,6 +17,17 @@
 import fixtures
 
 
+class EmptyEnvironmentFixture(fixtures.Fixture):
+    def setUp(self):
+        super(EmptyEnvironmentFixture, self).setUp()
+        self.env_desc = {
+            "tenant_id": "tenant_id",
+            "name": "my_environment",
+            "id": "template_id"
+        }
+        self.addCleanup(delattr, self, 'env_desc')
+
+
 class EmptyEnvironmentTemplateFixture(fixtures.Fixture):
     def setUp(self):
         super(EmptyEnvironmentTemplateFixture, self).setUp()
