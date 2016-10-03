@@ -28,4 +28,4 @@ class MiddlewareVersionNegotiationTest(base.MuranoTestCase):
         middleware_vn = version_negotiation.VersionNegotiationFilter(None)
         request = webob.Request.blank('/environments')
         result = middleware_vn.process_request(request)
-        self.assertTrue(isinstance(result, versions.Controller))
+        self.assertIsInstance(result, versions.Controller)
