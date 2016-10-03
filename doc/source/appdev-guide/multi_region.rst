@@ -125,6 +125,24 @@ Example:
     murano environment-create --join-net-id <NETWORK-NAME> --join-subnet-id <SUBNET_NAME> <ENV_NAME>
 
 
+Additionally, consider the the ``[networking]`` section in the configuration
+file.
+Currently, ``[networking]`` settings are common for all regions.
+
+.. code-block:: ini
+
+   [networking]
+
+   external_network = %EXTERNAL_NETWORK_NAME%
+   router_name = %MURANO_ROUTER_NAME%
+   create_router = true
+
+If you choose an automatic neutron configuration, configure the external
+network with identical names in all regions.
+If you disable the automatic router creation, create routers with
+identical names in all regions.
+Also, the ``default_dns`` address must be reachable from all created networks.
+
 .. note::
 
     To use regions, first configure them as described in :ref:`multi-region`.
