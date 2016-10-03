@@ -538,7 +538,7 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         request.context.session = SESSION_ID
 
         response_body = jsonutils.loads(request.get_response(self.api).body)
-        self.assertIsNot(response_body, None)
+        self.assertIsNotNone(response_body)
 
     def test_show_environments_session(self):
         CREDENTIALS = {'tenant': 'test_tenant_1', 'user': 'test_user_1'}

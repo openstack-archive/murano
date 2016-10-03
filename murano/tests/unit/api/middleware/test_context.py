@@ -42,4 +42,4 @@ class MiddlewareContextTest(base.MuranoTestCase):
     def test_factory_returns_filter(self):
         middleware = context.ContextMiddleware(None)
         result = middleware.factory(CONF)
-        self.assertNotEqual(None, result)
+        self.assertIsNotNone(result)
