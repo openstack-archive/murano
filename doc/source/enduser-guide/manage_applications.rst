@@ -197,7 +197,7 @@ Delete an application package
 To delete an application package from the catalog, please perform
 the following steps:
 
-#. In OpenStack dashboard, navigate to :menuselection:`Applications > Manage > Packages.
+#. In OpenStack dashboard, navigate to :menuselection:`Applications > Manage > Packages`.
 
 #. Select a package or multiple packages you want to delete and click
    :guilabel:`Delete Packages`.
