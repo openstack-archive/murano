@@ -96,3 +96,42 @@ class HackingTestCase(base.MuranoTestCase):
 
         self.assertEqual(0, len(list(checks.no_mutable_default_args(
             "defined, undefined = [], {}"))))
+
+    def test_check_python3_no_iteritems(self):
+        self.assertEqual(1, len(list(checks.check_python3_no_iteritems(
+            "{'foo': 'bar'}.iteritems()"))))
+
+        self.assertEqual(0, len(list(checks.check_python3_no_iteritems(
+            "six.iteritems({'foo': 'bar'}"))))
+
+    def test_check_python3_no_iterkeys(self):
+        self.assertEqual(1, len(list(checks.check_python3_no_iterkeys(
+            "{'foo': 'bar'}.iterkeys()"))))
+
+        self.assertEqual(0, len(list(checks.check_python3_no_iterkeys(
+            "six.iterkeys({'foo': 'bar'}"))))
+
+    def test_check_python3_no_itervalues(self):
+        self.assertEqual(1, len(list(checks.check_python3_no_itervalues(
+            "{'foo': 'bar'}.itervalues()"))))
+
+        self.assertEqual(0, len(list(checks.check_python3_no_itervalues(
+            "six.itervalues({'foo': 'bar'}"))))
+
+    def test_check_no_basestring(self):
+        self.assertEqual(1, len(list(checks.check_no_basestring(
+            "isinstance('foo', basestring)"))))
+
+        self.assertEqual(0, len(list(checks.check_no_basestring(
+            "isinstance('foo', six.string_types)"))))
+
+    def test_factory(self):
+        mock_register = mock.MagicMock()
+        checks.factory(mock_register)
+        expected = [
+            mock.call(checks.no_mutable_default_args),
+            mock.call(checks.check_python3_no_iteritems),
+            mock.call(checks.check_python3_no_iterkeys),
+            mock.call(checks.check_python3_no_itervalues),
+            mock.call(checks.check_no_basestring)]
+        mock_register.assert_has_calls(expected)
