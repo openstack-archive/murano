@@ -1,0 +1,4 @@
+---
+fixes:
+  - Previously Cinder Volumes created in MuranoPL were not released correctly
+    on object destruction. The issue is now fixed.
