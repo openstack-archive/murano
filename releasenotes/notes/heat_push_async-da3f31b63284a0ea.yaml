@@ -1,0 +1,4 @@
+---
+features:
+  - io.murano.system.HeatStack.push can be called with
+    async => true flag for asynchronous push
