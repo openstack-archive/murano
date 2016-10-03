@@ -68,10 +68,10 @@ Methods:
           - $this.numItems: min($this.numItems, $this.maxItems)
       - $this.deploy()
 
-    .destroy:
-      Body:
-        - $this.numItems: 0
-        - $this.deploy()
+  .destroy:
+    Body:
+      - $this.numItems: 0
+      - $this.deploy()
 
 --- # ------------------------------------------------------------------ # ---
 
