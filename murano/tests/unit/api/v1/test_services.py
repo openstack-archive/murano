@@ -110,8 +110,10 @@ class TestServicesApi(tb.ControllerTest, tb.MuranoApiTestCase):
         request.headers['X-Configuration-Session'] = str(session_id)
         request.context.session = session_id
 
-        self.assertRaises(exc.HTTPBadRequest, self.services_controller.put,
-                          request, environment_id, path)
+        # Check that empty body can be put
+        response = self.services_controller.put(request, environment_id,
+                                                path, [])
+        self.assertEqual([], response)
 
         response = self.services_controller.put(request, environment_id,
                                                 path, "test service")

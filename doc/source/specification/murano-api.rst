@@ -716,6 +716,93 @@ Created application returned
 | 400            | Required header or body are not provided                  |
 +----------------+-----------------------------------------------------------+
 
+Update applications
+-------------------
+
+Applications list for environment can be updated.
+
+*Request*
+
+**Content-Type**
+  application/json
+
++----------------+-----------------------------------------------------------+------------------------------------+
+| Method         | URI                                                       | Header                             |
++================+===========================================================+====================================+
+| PUT            | /environments/<env_id>/services                           | X-Configuration-Session            |
++----------------+-----------------------------------------------------------+------------------------------------+
+
+::
+
+    [{
+        "instance": {
+            "availabilityZone": "nova",
+            "name": "apache-instance",
+            "assignFloatingIp": true,
+            "keyname": "",
+            "flavor": "m1.small",
+            "image": "146d5523-7b2d-4abc-b0d0-2041f920ce26",
+            "?": {
+                "type": "io.murano.resources.LinuxMuranoInstance",
+                "id": "25185cb6f29b415fa2e438309827a797"
+            }
+        },
+        "name": "ApacheHttpServer",
+        "enablePHP": true,
+        "?": {
+            "type": "com.example.apache.ApacheHttpServer",
+            "id": "6e66106d7dcb4748a5c570150a3df80f"
+        }
+    }]
+
+
+*Response*
+
+Updated applications list returned
+
+
+**Content-Type**
+  application/json
+
+::
+
+    [{
+        "instance": {
+            "availabilityZone": "nova",
+            "name": "apache-instance",
+            "assignFloatingIp": true,
+            "keyname": "",
+            "flavor": "m1.small",
+            "image": "146d5523-7b2d-4abc-b0d0-2041f920ce26",
+            "?": {
+                "type": "io.murano.resources.LinuxMuranoInstance",
+                "id": "25185cb6f29b415fa2e438309827a797"
+            }
+        },
+        "name": "ApacheHttpServer",
+        "enablePHP": true,
+        "?": {
+            "type": "com.example.apache.ApacheHttpServer",
+            "id": "6e66106d7dcb4748a5c570150a3df80f"
+        }
+    }]
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | Services are updated successfully                         |
++----------------+-----------------------------------------------------------+
+| 400            | Required header is not provided                           |
++----------------+-----------------------------------------------------------+
+| 401            | User is not authorized                                    |
++----------------+-----------------------------------------------------------+
+| 403            | Session is in deploying state and could not be updated    |
+|                | or user is not allowed to update services                 |
++----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified environment and/or session do not    |
+|                | exist                                                     |
++----------------+-----------------------------------------------------------+
+
 Delete application from environment
 -----------------------------------
 

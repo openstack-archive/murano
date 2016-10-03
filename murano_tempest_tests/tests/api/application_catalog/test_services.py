@@ -66,6 +66,44 @@ class TestServices(base.BaseApplicationCatalogTest):
         self.assertEqual(len(services_list), len(services_list_))
 
     @testtools.testcase.attr('smoke')
+    def test_update_services_via_put(self):
+        session = self.application_catalog_client.\
+            create_session(self.environment['id'])
+        self.addCleanup(self.application_catalog_client.delete_session,
+                        self.environment['id'], session['id'])
+        put_body = [self._get_demo_app()]
+        self.application_catalog_client.\
+            update_services(self.environment['id'], session['id'], put_body)
+        services_list = self.application_catalog_client.\
+            get_services_list(self.environment['id'], session['id'])
+        self.assertEqual(1, len(services_list))
+
+    @testtools.testcase.attr('smoke')
+    def test_clear_services_via_put(self):
+        session = self.application_catalog_client.\
+            create_session(self.environment['id'])
+        self.addCleanup(self.application_catalog_client.delete_session,
+                        self.environment['id'], session['id'])
+        services_list = self.application_catalog_client.\
+            get_services_list(self.environment['id'], session['id'])
+        post_body = self._get_demo_app()
+        self.application_catalog_client.\
+            create_service(self.environment['id'], session['id'], post_body)
+        services_list_ = self.application_catalog_client.\
+            get_services_list(self.environment['id'], session['id'])
+        self.assertEqual(len(services_list) + 1, len(services_list_))
+        self.application_catalog_client.\
+            update_services(self.environment['id'], session['id'])
+        services_list_ = self.application_catalog_client.\
+            get_services_list(self.environment['id'], session['id'])
+        self.assertEqual(0, len(services_list_))
+        self.application_catalog_client.\
+            create_service(self.environment['id'], session['id'], post_body)
+        services_list_ = self.application_catalog_client.\
+            get_services_list(self.environment['id'], session['id'])
+        self.assertEqual(1, len(services_list_))
+
+    @testtools.testcase.attr('smoke')
     def test_get_service(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
