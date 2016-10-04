@@ -127,7 +127,7 @@ def _get_tags(tag_names, session=None):
             tag_obj = _existing_tag(tag_name, session)
             if not tag_obj:
                 try:
-                    # Start a new SAVEPOINT transaction. If it fails only
+                    # Start a new SAVEPOINT transaction. If it fails
                     # only the savepoint will be roll backed, not the
                     # whole transaction.
                     with session.begin(nested=True):

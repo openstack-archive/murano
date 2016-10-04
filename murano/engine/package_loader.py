@@ -243,7 +243,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     _LE('Unable to load package from cache. Clean-up.'))
                 shutil.rmtree(package_directory, ignore_errors=True)
 
-        # the package is not yet in cache, let's try and download it.
+        # the package is not yet in cache, let's try to download it.
         download_lock_path = os.path.join(
             self._cache_directory, '{}_download.lock'.format(package_id))
         download_ipc_lock = m_utils.ExclusiveInterProcessLock(
