@@ -216,7 +216,7 @@ class Controller(object):
         LOG.debug('Got service {0}'.format(service))
 
         # NOTE(starodubcevna): Here we need to find an action which will return
-        # us needed credentials. By default we will looking for getCredentials
+        # us needed credentials. By default we will look for getCredentials
         # action.
         result = {}
         try:

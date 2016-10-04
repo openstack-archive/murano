@@ -80,7 +80,7 @@ show_authors = False
 # a list of builtin themes.
 
 if not on_rtd:
-    #TODO(efedorova): Change local theme to corresponds with the theme on rtd
+    #TODO(efedorova): Change local theme to correspond with the theme on rtd
     pass
 
 # If not '', a 'Last updated on:' timestamp is inserted at every page bottom,

@@ -566,7 +566,7 @@ class XMLDictSerializer(DictSerializer):
         self._add_xmlns(node, has_atom)
         return node.toprettyxml(indent='    ', encoding='UTF-8')
 
-    # NOTE (ameade): the has_atom should be removed after all of the
+    # NOTE (ameade): the has_atom should be removed after all the
     # xml serializers and view builders have been updated to the current
     # spec that required all responses include the xmlns:atom, the has_atom
     # flag is to prevent current tests from breaking
@@ -1025,14 +1025,14 @@ class XMLDeserializer(TextDeserializer):
             return result
 
     def find_first_child_named(self, parent, name):
-        """Search a nodes children for the first child with a given name."""
+        """Find first child which has the given name of a node."""
         for node in parent.childNodes:
             if node.nodeName == name:
                 return node
         return None
 
     def find_children_named(self, parent, name):
-        """Return all of a nodes children who have the given name."""
+        """Return all children of a node with the given name."""
         for node in parent.childNodes:
             if node.nodeName == name:
                 yield node

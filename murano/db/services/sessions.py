@@ -84,7 +84,7 @@ class SessionServices(object):
         # if other session is deploying now current session is invalid
         unit = db_session.get_session()
 
-        # if environment version is higher then version on which current
+        # if environment version is higher than version on which current
         #  session is created then other session was already deployed
         current_env = unit.query(models.Environment).\
             get(session.environment_id)
