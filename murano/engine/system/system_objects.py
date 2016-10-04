@@ -18,6 +18,7 @@ from murano.engine.system import agent_listener
 from murano.engine.system import heat_stack
 from murano.engine.system import instance_reporter
 from murano.engine.system import logger
+from murano.engine.system import metadef_browser
 from murano.engine.system import net_explorer
 from murano.engine.system import resource_manager
 from murano.engine.system import status_reporter
@@ -36,3 +37,4 @@ def register(package):
     package.register_class(logger.Logger)
     package.register_class(test_fixture.TestFixture)
     package.register_class(workflowclient.MistralClient)
+    package.register_class(metadef_browser.MetadefBrowser)

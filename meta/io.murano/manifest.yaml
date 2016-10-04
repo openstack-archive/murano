@@ -71,6 +71,7 @@ Classes:
   io.murano.system.AwsSecurityGroupManager: system/AwsSecurityGroupManager.yaml
   io.murano.system.DummySecurityGroupManager: system/DummySecurityGroupManager.yaml
   io.murano.system.MistralClient: system/MistralClient.yaml
+  io.murano.system.MetadefBrowser: system/MetadefBrowser.yaml
 
   io.murano.metadata.Description: metadata/Description.yaml
   io.murano.metadata.HelpText: metadata/HelpText.yaml
