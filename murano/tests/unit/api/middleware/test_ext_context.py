@@ -65,3 +65,50 @@ class MiddlewareExtContextTest(base.MuranoTestCase):
                                       headers=request_headers)
         self.assertRaises(webob.exc.HTTPUnauthorized,
                           middleware.process_request, request)
+
+    @mock.patch('murano.api.middleware.ext_context.ks_session')
+    @mock.patch('murano.api.middleware.ext_context.v3')
+    @mock.patch('murano.api.middleware.ext_context.CONF')
+    def test_get_keystone_token(self, mock_conf, mock_v3, mock_ks_session):
+        mock_ks_session.Session().get_token.return_value = 'test_token'
+        test_auth_urls = ['test_url', 'test_url/v2.0', 'test_url/v3']
+
+        for url in test_auth_urls:
+            mock_conf.cfapi = mock.MagicMock(auth_url=url,
+                                             tenant='test_tenant',
+                                             user_domain_name='test_udn',
+                                             project_domain_name='test_pdn')
+
+            middleware = ext_context.ExternalContextMiddleware(None)
+            token = middleware.get_keystone_token('test_user', 'test_password')
+            self.assertEqual('test_token', token)
+
+            expected_kwargs = {
+                'auth_url': 'test_url/v3',
+                'username': 'test_user',
+                'password': 'test_password',
+                'project_name': mock_conf.cfapi.tenant,
+                'user_domain_name': mock_conf.cfapi.user_domain_name,
+                'project_domain_name': mock_conf.cfapi.project_domain_name
+            }
+            mock_v3.Password.assert_called_once_with(**expected_kwargs)
+            mock_v3.Password.reset_mock()
+
+    def test_query_endpoints_except_endpoint_not_found(self):
+        middleware = ext_context.ExternalContextMiddleware(None)
+        if hasattr(middleware, '_murano_endpoint'):
+            setattr(middleware, '_murano_endpoint', None)
+        mock_auth = mock.MagicMock()
+        mock_auth.get_endpoint.side_effect = exceptions.EndpointNotFound
+
+        middleware._query_endpoints(mock_auth, 'test_session')
+        mock_auth.get_endpoint.assert_any_call('test_session',
+                                               'application-catalog')
+
+        if hasattr(middleware, '_glare_endpoint'):
+            setattr(middleware, '_glare_endpoint', None)
+        setattr(middleware, '_murano_endpoint', 'test_endpoint')
+
+        middleware._query_endpoints(mock_auth, 'test_session')
+        mock_auth.get_endpoint.assert_any_call('test_session',
+                                               'artifact')
