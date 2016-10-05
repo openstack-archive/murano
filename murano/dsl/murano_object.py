@@ -25,7 +25,7 @@ from murano.dsl import yaql_integration
 
 class MuranoObject(dsl_types.MuranoObject):
     def __init__(self, murano_class, owner, object_id=None, name=None,
-                 known_classes=None, this=None):
+                 known_classes=None, this=None, metadata=None):
         self._initialized = False
         self._destroyed = False
         if known_classes is None:
@@ -42,6 +42,7 @@ class MuranoObject(dsl_types.MuranoObject):
         self._executor = helpers.weak_ref(helpers.get_executor())
         self._config = murano_class.package.get_class_config(
             murano_class.name)
+        self._metadata = metadata
         if not isinstance(self._config, dict):
             self._config = {}
         known_classes[murano_class.name] = self
@@ -65,6 +66,10 @@ class MuranoObject(dsl_types.MuranoObject):
     @property
     def name(self):
         return self.real_this._name
+
+    @property
+    def metadata(self):
+        return self.real_this._metadata
 
     @extension.setter
     def extension(self, value):
@@ -325,7 +330,8 @@ class MuranoObject(dsl_types.MuranoObject):
             result = {
                 self.type: result,
                 'id': self.object_id,
-                'name': self.name
+                'name': self.name,
+                'metadata': self.metadata
             }
             header = result
         else:
@@ -334,12 +340,14 @@ class MuranoObject(dsl_types.MuranoObject):
                     'type': self.type,
                     'id': self.object_id,
                     'name': self.name,
+                    'metadata': self.metadata
                 }})
             else:
                 result.update({'?': {
                     'type': helpers.format_type_string(self.type),
                     'id': self.object_id,
-                    'name': self.name
+                    'name': self.name,
+                    'metadata': self.metadata
                 }})
             header = result['?']
         if self.destroyed:

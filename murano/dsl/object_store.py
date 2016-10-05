@@ -273,6 +273,7 @@ class InitializationObjectStore(ObjectStore):
             obj = mo_type(
                 class_obj, owner,
                 name=parsed['name'],
+                metadata=parsed['metadata'],
                 object_id=object_id if self._keep_ids else None)
             obj.load_dependencies(parsed['dependencies'])
             if parsed['destroyed']:
