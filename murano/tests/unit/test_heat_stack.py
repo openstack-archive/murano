@@ -269,3 +269,202 @@ class TestHeatStack(base.MuranoTestCase):
             tags=','.join(CONF.heat.stack_tags)
         )
         self.assertTrue(hs._applied)
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_parameters(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+
+        self.assertEqual(hs.parameters(), hs._parameters)
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_reload(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+
+        hs.reload()
+        stack_info = self.heat_client_mock.stacks.get(stack_id=hs._name)
+        self.assertEqual(hs._template, hs._client.stacks.template(
+            stack_id='{0}/{1}'.format(
+                stack_info.stack_name,
+                stack_info.id)))
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_delete(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+
+        hs.delete()
+        self.assertEqual({}, hs._template)
+        self.assertTrue(hs._applied)
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_set_template_and_params(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+
+        new_template = {'resources': {'test': 2}}
+        new_parameters = {'parameters': {'test': 1}}
+        hs.set_template(new_template)
+        self.assertEqual(new_template, hs._template)
+        hs.set_parameters(new_parameters)
+        self.assertEqual(new_parameters, hs._parameters)
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_set_hot_env_and_files(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = {'resources': {'test': 1}}
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = False
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        hs.push()
+
+        expected_template = {
+            'heat_template_version': '2013-05-23',
+            'resources': {'test': 1}
+        }
+        self.heat_client_mock.stacks.create.assert_called_with(
+            stack_name='test-stack',
+            disable_rollback=True,
+            parameters={},
+            template=expected_template,
+            files={},
+            environment='',
+            tags=','.join(CONF.heat.stack_tags)
+        )
+
+        new_hot_env = 'test'
+        new_files = {'files': {'test': 1}}
+        hs.set_hot_environment(new_hot_env)
+        self.assertEqual(new_hot_env, hs._hot_environment)
+        hs.set_files(new_files)
+        self.assertEqual(new_files, hs._files)
+
+    @mock.patch(CLS_NAME + '._wait_state')
+    @mock.patch(CLS_NAME + '._get_status')
+    def test_none_template(self, status_get, wait_st):
+        status_get.return_value = 'NOT_FOUND'
+        wait_st.return_value = {}
+        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
+                          enforce_type=True)
+        hs = heat_stack.HeatStack('test-stack', None)
+        hs._description = None
+        hs._template = None
+        hs._files = {}
+        hs._hot_environment = ''
+        hs._parameters = {}
+        hs._applied = True
+        hs._tags = ','.join(CONF.heat.stack_tags)
+        self.assertIsNone(hs.push())
