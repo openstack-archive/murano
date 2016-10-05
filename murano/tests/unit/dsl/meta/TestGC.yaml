@@ -5,7 +5,15 @@ Namespaces:
 Name: TestGCNode
 Extends: Node
 
+Properties:
+  runtimeProperty:
+    Usage: Runtime
+    Contract: $
+
 Methods:
+  .init:
+    Body:
+      - $this.runtimeProperty: new(Node)
   foo:
     Body:
       - trace(foo)
@@ -21,6 +29,7 @@ Methods:
     Body:
       - trace($.value)
 
+
 ---
 
 Name: TestGCNode2
@@ -35,11 +44,25 @@ Methods:
 
 ---
 
+Name: TestGCNode3
+Extends: TestGCNode
+
+Methods:
+  .init:
+    Body:
+      - $this.undeclaredProp: new(TestGCNode, value => C)
+
+---
+
 Name: TestGC
 
 Properties:
   outNode:
     Usage: Out
+    Contract: $.class(TestGCNode)
+
+  staticPropertyNode:
+    Usage: Static
     Contract: $.class(TestGCNode)
 
 Methods:
@@ -52,6 +75,7 @@ Methods:
               - :TestGCNode:
                   value: B
       - new($model)
+      - $localAssignedVariable: new($model)
       - sys:GC.collect()
 
   testObjectsCollectWithSubscription:
@@ -130,4 +154,27 @@ Methods:
       - $.outNode: new($model)
       - sys:GC.subscribeDestruction($.outNode, $this, _handler)
       - sys:GC.subscribeDestruction($.outNode.nodes[0], $this, _handler)
+
+  testStaticProperties:
+    Body:
+      - :TestGC.staticPropertyNode: new(TestGCNode, value => A)
+      - sys:GC.collect()
+
+  methodWithArgs:
+    Arguments:
+      - obj:
+          Contract: $.class(TestGCNode).notNull()
+    Body:
+      - sys:GC.collect()
+
+  testDestroyArgs:
+    Body:
+      - $.methodWithArgs(new(TestGCNode, value => A))
+
+  testReachableRuntimeProperties:
+    Body:
+      - $node: new(TestGCNode3, value => A)
+      - sys:GC.collect()
+      - trace(sys:GC.isDestroyed($node.runtimeProperty))
+
 
