@@ -13,10 +13,13 @@
 Namespaces:
   std: io.murano
   =: io.murano.resources
+  sys: io.murano.system
 
 Name: CinderVolume
 
-Extends: Volume
+Extends:
+  - Volume
+  - MetadataAware
 
 Properties:
   name:
@@ -53,6 +56,7 @@ Methods:
     Body:
     - $properties:
         size: $.size
+        metadata: $this.getMetadata($this.getRegion())
 
     - If: $.availabilityZone != null
       Then:
@@ -86,7 +90,7 @@ Methods:
     - Return:
         resources:
           format('vol-{0}', id($)):
-            type: 'OS::Cinder::Volume'
+            type: $this.getResourceType()
             properties: $properties
         outputs:
           format('vol-{0}-id', id($)):
@@ -133,3 +137,8 @@ Methods:
     Body:
       Return:
         get_resource: format('vol-{0}', id($))
+
+
+  getResourceType:
+    Body:
+      - Return: 'OS::Cinder::Volume'
