@@ -308,6 +308,7 @@ class Request(webob.Request):
     default_request_content_types = ('application/json',
                                      'application/xml',
                                      'application/murano-packages-json-patch',
+                                     'application/env-model-json-patch',
                                      'multipart/form-data')
     default_accept_types = ('application/json',
                             'application/xml',
@@ -737,7 +738,10 @@ class RequestDeserializer(object):
         self.body_deserializers = {
             'application/xml': XMLDeserializer(),
             'application/json': JSONDeserializer(),
-            'application/murano-packages-json-patch': JSONPatchDeserializer(),
+            'application/murano-packages-json-patch':
+                MuranoPackageJSONPatchDeserializer(),
+            'application/env-model-json-patch':
+                EnvModelJSONPatchDeserializer(),
             'multipart/form-data': FormDataDeserializer()
         }
         self.body_deserializers.update(body_deserializers or {})
@@ -846,12 +850,9 @@ class JSONDeserializer(TextDeserializer):
 
 
 class JSONPatchDeserializer(TextDeserializer):
-    allowed_operations = {"categories": ["add", "replace", "remove"],
-                          "tags": ["add", "replace", "remove"],
-                          "is_public": ["replace"],
-                          "enabled": ["replace"],
-                          "description": ["replace"],
-                          "name": ["replace"]}
+    allowed_operations = {}
+    schema = None
+    allow_unknown_path = False
 
     def _from_json_patch(self, datastring):
         try:
@@ -859,6 +860,10 @@ class JSONPatchDeserializer(TextDeserializer):
         except ValueError:
             msg = _("cannot understand JSON")
             raise exceptions.MalformedRequestBody(reason=msg)
+
+        if not isinstance(operations, list):
+            msg = _('JSON-patch must be a list.')
+            raise webob.exc.HTTPBadRequest(explanation=msg)
 
         changes = []
         for raw_change in operations:
@@ -898,32 +903,53 @@ class JSONPatchDeserializer(TextDeserializer):
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
     def _validate_change(self, change):
-        change_path = change['path'][0]
-        change_op = change['op']
-        allowed_methods = self.allowed_operations.get(change_path)
+        self._validate_allowed_methods(change, self.allow_unknown_path)
 
-        if not allowed_methods:
-            msg = _("Attribute '{0}' is invalid").format(change_path)
-            raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
+        if self.schema:
+            self._validate_schema(change)
+
+    def _validate_allowed_methods(self, change, allow_unknown_path=False):
+        full_path = '/'.join(change['path'])
+        change_op = change['op']
+        allowed_methods = self.allowed_operations.get(full_path)
+
+        if allowed_methods is None:
+            if allow_unknown_path:
+                allowed_methods = ['add', 'replace', 'remove']
+            else:
+                msg = _("Attribute '{0}' is invalid").format(full_path)
+                raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
 
         if change_op not in allowed_methods:
+            ops = ', '.join(allowed_methods) if allowed_methods\
+                else 'no operations'
             msg = _("Method '{method}' is not allowed for a path with name "
                     "'{name}'. Allowed operations are: "
-                    "'{ops}'").format(method=change_op,
-                                      name=change_path,
-                                      ops=', '.join(allowed_methods))
+                    "{ops}").format(method=change_op, name=full_path, ops=ops)
 
             raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
 
-        property_to_update = {change_path: change['value']}
-
-        try:
-            jsonschema.validate(property_to_update,
-                                validation_schemas.PKG_UPDATE_SCHEMA)
-        except jsonschema.ValidationError as e:
-            LOG.error(_LE("Schema validation error occurred: {error}")
-                      .format(error=e))
-            raise webob.exc.HTTPBadRequest(explanation=e.message)
+    def _validate_schema(self, change):
+        property_to_update = change['value']
+        can_validate = True
+        schema = self.schema
+        for p in change['path']:
+            if schema['type'] == 'array':
+                try:
+                    schema = schema['items']
+                except KeyError:
+                    can_validate = False
+            elif schema['type'] == 'object':
+                try:
+                    schema = schema['properties'][p]
+                except KeyError:
+                    can_validate = False
+        if can_validate:
+            try:
+                jsonschema.validate(property_to_update, schema)
+            except jsonschema.ValidationError as e:
+                LOG.error(_LE("Schema validation error occurred: %s"), e)
+                raise webob.exc.HTTPBadRequest(explanation=e.message)
 
     def _decode_json_pointer(self, pointer):
         """Parse a json pointer.
@@ -973,12 +999,41 @@ class JSONPatchDeserializer(TextDeserializer):
         return op, path_list
 
     def _validate_path(self, path):
+        pass
+
+    def default(self, request):
+        return {'body': self._from_json_patch(request.body)}
+
+
+class MuranoPackageJSONPatchDeserializer(JSONPatchDeserializer):
+    allowed_operations = {"categories": ["add", "replace", "remove"],
+                          "tags": ["add", "replace", "remove"],
+                          "is_public": ["replace"],
+                          "enabled": ["replace"],
+                          "description": ["replace"],
+                          "name": ["replace"]}
+    allow_unknown_path = False
+    schema = validation_schemas.PKG_UPDATE_SCHEMA
+
+    def _validate_path(self, path):
         if len(path) > 1:
             msg = _('Nested paths are not allowed')
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
-    def default(self, request):
-        return {'body': self._from_json_patch(request.body)}
+
+class EnvModelJSONPatchDeserializer(JSONPatchDeserializer):
+    allowed_operations = {"": [],
+                          "defaultNetworks": ["replace"],
+                          "defaultNetworks/environment": ["replace"],
+                          "defaultNetworks/environment/?/id": [],
+                          "defaultNetworks/flat": ["replace"],
+                          "name": ["replace"],
+                          "region": ["replace"],
+                          "?/type": ["replace"],
+                          "?/id": []
+                          }
+    allow_unknown_path = True
+    schema = validation_schemas.ENV_SCHEMA
 
 
 class XMLDeserializer(TextDeserializer):

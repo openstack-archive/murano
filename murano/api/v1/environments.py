@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import jsonpatch
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
 import six
@@ -191,6 +192,62 @@ class Controller(object):
             else:
                 result[service_id] = None
         return {'lastStatuses': result}
+
+    @request_statistics.stats_count(API_NAME, 'GetModel')
+    @verify_env
+    def get_model(self, request, environment_id, path):
+        LOG.debug('Environments:GetModel <Id: %(env_id)s>, Path: %(path)s',
+                  {'env_id': environment_id, 'path': path})
+        target = {"environment_id": environment_id}
+        policy.check('show_environment', request.context, target)
+
+        session_id = None
+        if hasattr(request, 'context') and request.context.session:
+            session_id = request.context.session
+
+        get_description = envs.EnvironmentServices.get_environment_description
+        env_model = get_description(environment_id, session_id)
+        try:
+            result = utils.TraverseHelper.get(path, env_model)
+        except (KeyError, ValueError):
+            raise exc.HTTPNotFound
+
+        return result
+
+    @request_statistics.stats_count(API_NAME, 'UpdateModel')
+    @verify_env
+    def update_model(self, request, environment_id, body=None):
+        if not body:
+            msg = _('Request body is empty: please, provide '
+                    'environment object model patch')
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(msg)
+        LOG.debug('Environments:UpdateModel <Id: %(env_id)s, Body: %(body)s>',
+                  {'env_id': environment_id, 'body': body})
+        target = {"environment_id": environment_id}
+        policy.check('update_environment', request.context, target)
+
+        session_id = None
+        if hasattr(request, 'context') and request.context.session:
+            session_id = request.context.session
+
+        get_description = envs.EnvironmentServices.get_environment_description
+        env_model = get_description(environment_id, session_id)
+
+        for change in body:
+            change['path'] = '/' + '/'.join(change['path'])
+
+        patch = jsonpatch.JsonPatch(body)
+        try:
+            patch.apply(env_model, in_place=True)
+        except jsonpatch.JsonPatchException as e:
+            raise exc.HTTPNotFound(str(e))
+
+        save_description = envs.EnvironmentServices. \
+            save_environment_description
+        save_description(session_id, env_model)
+
+        return env_model
 
 
 def create_resource():

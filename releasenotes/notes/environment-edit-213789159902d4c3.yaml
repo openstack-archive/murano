@@ -1,0 +1,7 @@
+---
+features:
+  - /environments/ENV_ID/model/PATH endpoint added.
+    GET request responds with the subsection of ENV_ID's object model
+    located in its PATH.
+    PATCH request applies json-patch from request body to ENV_ID's model. It
+    does not contain PATH in the URL.

@@ -584,3 +584,208 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
 
         response_body = jsonutils.loads(request.get_response(self.api).body)
         self.assertEqual(ENVIRONMENT_ID, response_body['id'])
+
+    def _create_env_and_session(self):
+        creds = {'tenant': 'test_tenant', 'user': 'test_user'}
+
+        self._set_policy_rules(
+            {'show_environment': '@',
+             'update_environment': '@'}
+        )
+
+        env_id = '123'
+        self._create_fake_environment(env_id=env_id)
+
+        # Create session
+        request = self._post('/environments/{environment_id}/configure'
+                             .format(environment_id=env_id), b'',
+                             **creds)
+        response_body = jsonutils.loads(request.get_response(self.api).body)
+        session_id = response_body['id']
+        return env_id, session_id
+
+    def test_get_and_update_environment_model(self):
+        """Test GET and PATCH requests of an environment object model"""
+        env_id, session_id = self._create_env_and_session()
+
+        # Get entire env's model
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '123'})
+        req = self._get('/environments/{0}/model/'.format(env_id))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        expected = {'?': {'id': '{0}'.format(env_id)}}
+        self.assertEqual(expected, jsonutils.loads(result.body))
+
+        # Add some data to the '?' section of env's model
+        self.expect_policy_check('update_environment',
+                                 {'environment_id': '123'})
+        data = [{
+            "op": "add",
+            "path": "/?/name",
+            "value": 'my_env'
+        }]
+
+        expected = {
+            'id': '{0}'.format(env_id),
+            'name': 'my_env'
+        }
+
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        observed = jsonutils.loads(result.body)['?']
+        self.assertEqual(expected, observed)
+
+        # Check that changes are stored in session
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '123'})
+        req = self._get('/environments/{0}/model/{1}'.format(
+            env_id, '/?'))
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        self.assertEqual(expected, jsonutils.loads(result.body))
+
+        # Check that actual model remains unchanged
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '123'})
+        req = self._get('/environments/{0}/model/{1}'.format(
+            env_id, '/?'))
+        result = req.get_response(self.api)
+        self.assertEqual(200, result.status_code)
+        expected = {'id': '{0}'.format(env_id)}
+        self.assertEqual(expected, jsonutils.loads(result.body))
+
+    def test_get_environment_model_non_existing_path(self):
+        env_id, session_id = self._create_env_and_session()
+
+        # Try to get non-existing section of env's model
+        self.expect_policy_check('show_environment',
+                                 {'environment_id': '123'})
+        path = 'foo/bar'
+        req = self._get('/environments/{0}/model/{1}'.format(
+            env_id, path))
+        result = req.get_response(self.api)
+        self.assertEqual(404, result.status_code)
+
+    def test_update_environment_model_empty_body(self):
+        env_id, session_id = self._create_env_and_session()
+        data = None
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = "JSON-patch must be a list."
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_no_patch(self):
+        env_id, session_id = self._create_env_and_session()
+        data = ["foo"]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = "Operations must be JSON objects."
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_no_op(self):
+        env_id, session_id = self._create_env_and_session()
+        data = [{
+            "path": "/?/name",
+            "value": 'my_env'
+        }]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = "Unable to find 'op' in JSON Schema change"
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_no_path(self):
+        env_id, session_id = self._create_env_and_session()
+        data = [{
+            "op": "add",
+            "value": 'my_env'
+        }]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = "Unable to find 'path' in JSON Schema change"
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_no_value(self):
+        env_id, session_id = self._create_env_and_session()
+        data = [{
+            "op": "add",
+            "path": "/?/name"
+        }]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = 'Operation "add" requires a member named "value".'
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_forbidden_operation(self):
+        env_id, session_id = self._create_env_and_session()
+        data = [{
+            "op": "add",
+            "path": "/?/id",
+            "value": "foo"
+        }]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(403, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = ("Method 'add' is not allowed for a path with name '?/id'. "
+               "Allowed operations are: no operations")
+        self.assertIn(msg, result_msg)
+
+    def test_update_environment_model_invalid_schema(self):
+        env_id, session_id = self._create_env_and_session()
+        data = [{
+            "op": "add",
+            "path": "/?/name",
+            "value": 111
+        }]
+        req = self._patch('/environments/{0}/model/'.format(env_id),
+                          jsonutils.dump_as_bytes(data),
+                          content_type='application/env-model-json-patch')
+        req.headers['X-Configuration-Session'] = str(session_id)
+        req.context.session = session_id
+        result = req.get_response(self.api)
+        self.assertEqual(400, result.status_code)
+        result_msg = result.text.replace('\n', '')
+        msg = "111 is not of type 'string'"
+        self.assertIn(msg, result_msg)
