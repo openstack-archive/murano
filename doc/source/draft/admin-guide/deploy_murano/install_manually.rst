@@ -267,8 +267,9 @@ This section describes how to install and run the murano dashboard.
         cp openstack_dashboard/local/local_settings.py.example \
         openstack_dashboard/local/local_settings.py
 
-     For more information, check out the official
-     `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
+
+    For more information, check out the official
+    `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
 
 #.  Enable and configure Murano dashboard in the OpenStack Dashboard:
 
