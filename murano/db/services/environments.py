@@ -107,6 +107,7 @@ class EnvironmentServices(object):
                 EnvironmentServices.generate_default_networks(objects['name'],
                                                               network_driver)
         objects['?']['type'] = 'io.murano.Environment'
+        objects['?']['metadata'] = {}
         environment_params['tenant_id'] = context.tenant
 
         data = {
