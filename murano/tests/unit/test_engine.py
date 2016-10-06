@@ -149,3 +149,15 @@ class TestYaqlExpression(base.MuranoTestCase):
         with mock.patch('murano.dsl.yaql_integration.parse') as parse_mock:
             parse_mock.side_effect = exceptions.YaqlLexicalException
             self.assertFalse(expr.is_expression('', self._version))
+
+    def test_property(self):
+        self.assertRaises(TypeError,
+                          yaql_expression.YaqlExpression,
+                          None, self._version)
+
+        expr = yaql_expression.YaqlExpression('string', self._version)
+        self.assertEqual(expr._version, expr.version)
+        self.assertIsNone(expr._file_position)
+
+        yaql_rep = expr.__repr__()
+        self.assertEqual('YAQL(%s)' % expr._expression, yaql_rep)
