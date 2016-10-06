@@ -378,3 +378,17 @@ class TestExecutionPlan(base.MuranoTestCase):
         rtn_template = self.agent._build_v1_execution_plan(template,
                                                            self.resources)
         self.assertEqual(template, rtn_template)
+
+    def test_get_array_item(self):
+        array = [1, 2, 3]
+        index = 2
+        self.assertEqual(array[2], self.agent._get_array_item(array, index))
+
+        index = 3
+        self.assertIsNone(self.agent._get_array_item(array, index))
+
+    def test_execution_plan_error(self):
+        template = None
+        self.assertRaises(ValueError,
+                          self.agent.build_execution_plan,
+                          template, self.resources)
