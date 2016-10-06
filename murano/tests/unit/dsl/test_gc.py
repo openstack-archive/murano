@@ -93,3 +93,15 @@ class TestGC(test_case.DslTestCase):
     def test_is_destroyed(self):
         self.runner.testIsDestroyed()
         self.assertEqual([False, True], self.traces)
+
+    def test_static_property_not_destroyed(self):
+        self.runner.testStaticProperties()
+        self.assertEqual([], self.traces)
+
+    def test_args_not_destroyed(self):
+        self.runner.testDestroyArgs()
+        self.assertEqual([], self.traces)
+
+    def test_runtime_property_not_destroyed(self):
+        self.runner.testReachableRuntimeProperties()
+        self.assertEqual([False, ], self.traces)
