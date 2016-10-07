@@ -58,6 +58,7 @@ Classes:
   io.murano.resources.CinderVolumeBackup: resources/CinderVolumeBackup.yaml
   io.murano.resources.CinderVolumeSnapshot: resources/CinderVolumeSnapshot.yaml
   io.murano.resources.MetadataAware: resources/MetadataAware.yaml
+  io.murano.resources.InstanceAffinityGroup: resources/InstanceAffinityGroup.yaml
 
   io.murano.system.Agent: system/Agent.yaml
   io.murano.system.AgentListener: system/AgentListener.yaml

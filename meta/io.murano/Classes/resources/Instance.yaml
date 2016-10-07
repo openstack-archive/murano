@@ -83,15 +83,26 @@ Properties:
       - network: $.class(Network).notNull()
         ipList: [$.string().notNull()]
     Usage: Out
+    #policies: anti-affinity, affinity
+  instanceAffinityGroup:
+    Contract: $.class(InstanceAffinityGroup)
 
 Methods:
-  initialize:
+  .init:
     Body:
       - $._environment: $.find(std:Environment).require()
       - $.agent: new(sys:Agent, host => $)
       - $.resources: new(sys:Resources)
       - $.instanceTemplate: {}
       - $._floatingIpOutputName: null
+
+      - $.volumes.values().concat($this.blockDevices.volume).select(
+          sys:GC.subscribeDestruction($, $this, _onReferencedResourceDelete))
+
+      - If: $.instanceAffinityGroup != null
+        Then: sys:GC.subscribeDestruction(
+          $this.instanceAffinityGroup, $this, _onReferencedResourceDelete)
+
 
   # Called after the Instance template pieces are in place. It
   # is at this stage alterations to the template should be made
@@ -148,7 +159,11 @@ Methods:
           - $properties.block_device_mapping_v2: $bdmDefinition
         Else:
           $properties.image: $.image
-
+      - If: $.instanceAffinityGroup != null
+        Then:
+          - $.instanceAffinityGroup.deploy()
+          - $properties.scheduler_hints:
+              group: $.instanceAffinityGroup.getRef()
       - $template:
           resources:
             $.name:
@@ -160,7 +175,6 @@ Methods:
               description: format('ID of {0} instance', $.name)
               value:
                 get_resource: $.name
-
       - $.instanceTemplate: $.instanceTemplate.mergeWith($template)
       - $.volumes.items().select(
           $.unpack(path, volume) -> $this.attachVolume($path, $volume))
@@ -325,6 +339,15 @@ Methods:
           - $template.outputs: $template.outputs.deleteAll($outputsToDelete)
 
           - $region.stack.setTemplate($template)
+
+  _onReferencedResourceDelete:
+    Arguments:
+      - resource:
+          Contract: $.class(std:CloudResource).notNull()
+    Body:
+      - If: sys:GC.isDoomed($this)
+        Then:
+          - $.beginReleaseResources()
 
   endReleaseResources:
     Body:
