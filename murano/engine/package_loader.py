@@ -161,8 +161,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
-            six.reraise(exceptions.NoPackageFound(package_name),
-                        None, exc_info[2])
+            six.reraise(exceptions.NoPackageFound,
+                        exceptions.NoPackageFound(package_name),
+                        exc_info[2])
         else:
             package = self._get_package_by_definition(package_definition)
             self._fixations[package_name].add(package.version)
