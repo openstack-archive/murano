@@ -1,0 +1,18 @@
+---
+
+features:
+    - |
+      Murano switched to using standard oslo middleware HTTPProxyToWSGI instead
+      of custom implementation. This middleware parses the X-Forwarded-Proto
+      HTTP header or the Proxy protocol in order to help murano respond with
+      the correct URL refs when it's put behind a TLS proxy (such as HAProxy).
+      This middleware is disabled by default, but can be enabled via a
+      configuration option in the oslo_middleware group.
+upgrade:
+    - |
+      File ``murano-paste.ini has been updated to use oslo HTTPProxyToWSGI middleware.
+      Config option ``secure_proxy_ssl_header`` has been removed. Please refer to
+      oslo_middleware configuration options if you wish deploy murano behind TLS proxy.
+      Most notably you would need to set ``enable_proxy_headers_parsing`` under group
+      ``oslo_middleware`` to True, to enable header parsing.
+
