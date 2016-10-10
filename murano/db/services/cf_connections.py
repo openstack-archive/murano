@@ -87,5 +87,4 @@ def get_service_for_instance(instance_id):
 def delete_environment_from_space(environment_id):
     unit = db_session.get_session()
     unit.query(models.CFSpace).filter(
-        models.CFSpace.environment_id == environment_id).delete(
-            synchronize=False)
+        models.CFSpace.environment_id == environment_id).delete()
