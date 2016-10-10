@@ -125,7 +125,7 @@ Example:
     murano environment-create --join-net-id <NETWORK-NAME> --join-subnet-id <SUBNET_NAME> <ENV_NAME>
 
 
-Additionally, consider the the ``[networking]`` section in the configuration
+Additionally, consider the ``[networking]`` section in the configuration
 file.
 Currently, ``[networking]`` settings are common for all regions.
 
