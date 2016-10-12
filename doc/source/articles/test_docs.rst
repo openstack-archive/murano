@@ -107,7 +107,7 @@ To download and run the tests:
 
    .. code-block:: console
 
-      git clone git://git.openstack.org/openstack/murano-dashboard*
+      git clone git://git.openstack.org/openstack/murano-dashboard
 
 #. Change the default settings:
 
@@ -155,30 +155,30 @@ All tests are kept in ``sanity_check.py`` and divided into 10 test suites:
 * TestSuiteMultipleEnvironments - verification of ability to apply action
   to multiple environments.
 
-To specify which tests/suite to run:
+To run the tests follow these instructions:
 
 * To run all tests:
 
-  .. code-block::
+.. code-block:: console
 
-     nosetests sanity_check.py
+   nosetests sanity_check.py
 
 * To run a single suite:
 
-  .. code-block::
+.. code-block:: console
 
-     nosetests sanity_check.py:<test suite name>
+   nosetests sanity_check.py:<test suite name>
 
 * To run a single test:
 
-  .. code-block::
+.. code-block:: console
 
-     nosetests sanity_check.py:<test suite name>.<test name>
+   nosetests sanity_check.py:<test suite name>.<test name>
 
 
 In case of successful execution, you should see something like this:
 
-.. code-block::
+.. code-block:: console
 
    .........................
    Ran 34 tests in 1.440s
@@ -186,13 +186,13 @@ In case of successful execution, you should see something like this:
 
 In case of failure, the folder with screenshots of the last operation of
 tests that finished with errors would be created.
-Itis located in ``muranodashboard/tests/functional`` folder.
+It is located in ``muranodashboard/tests/functional`` folder.
 
 There are also a number of command line options that can be used to control
 the test execution and generated outputs. For more details about ``nosetests``,
 type:
 
-.. code-block::
+.. code-block:: console
 
    nosetests -h
 
