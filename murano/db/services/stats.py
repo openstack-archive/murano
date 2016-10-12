@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import json
 
 from murano.db import models as m
 from murano.db import session as db_session
@@ -46,7 +47,7 @@ class Statistics(object):
         stats.request_count = request_count
         stats.error_count = error_count
         stats.average_response_time = average_response_time
-        stats.requests_per_tenant = requests_per_tenant
+        stats.requests_per_tenant = json.dumps(requests_per_tenant)
         stats.requests_per_second = 0.0
         stats.errors_per_second = 0.0
         stats.cpu_count = cpu_count
