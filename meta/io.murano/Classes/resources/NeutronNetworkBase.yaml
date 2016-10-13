@@ -22,10 +22,15 @@ Extends: Network
 Methods:
   .init:
     Body:
+      - $._netExplorer: null
       - $._environment: $.find(std:Environment)
-      - $._region: $.getRegion()
-      - $._netExplorer: new(sys:NetworkExplorer, $this._region)
-      - $._securityGroupsEnabled: $._netExplorer.listNeutronExtensions().alias.contains('security-group')
+
+  _getNetExplorer:
+    Body:
+      - If: $._netExplorer = null
+        Then:
+          - $._netExplorer: new(sys:NetworkExplorer, $this.getRegion())
+      - Return: $._netExplorer
 
   joinInstanceToNetwork:
     Arguments:
@@ -45,6 +50,8 @@ Methods:
       - floatingIpNetRef:
           Contract: $
     Body:
+      - $netExplorer: $._getNetExplorer()
+      - $securityGroupsEnabled: $netExplorer.listNeutronExtensions().alias.contains('security-group')
       - $portName: format('port-{0}-{1}', id($), $instance.name)
       - $patchTemplate:
           resources:
@@ -56,7 +63,7 @@ Methods:
                   - subnet: $subnetRef
                 replacement_policy: AUTO
 
-      - If: bool($securityGroupName) and $this._securityGroupsEnabled
+      - If: bool($securityGroupName) and $securityGroupsEnabled
         Then:
           - $template:
               resources:
@@ -111,9 +118,12 @@ Methods:
 
   generateSecurityGroupManager:
     Body:
-      - If: $this._securityGroupsEnabled
+      - $region: $.getRegion()
+      - $netExplorer: $._getNetExplorer()
+      - $securityGroupsEnabled: $netExplorer.listNeutronExtensions().alias.contains('security-group')
+      - If: $securityGroupsEnabled
         Then:
-          - Return: new(sys:NeutronSecurityGroupManager, $._region)
+          - Return: new(sys:NeutronSecurityGroupManager, $region)
         Else:
           - $._environment.reporter.report($this, "Warning! Security groups are disabled!")
-          - Return: new(sys:DummySecurityGroupManager, $._region)
+          - Return: new(sys:DummySecurityGroupManager, $region)
