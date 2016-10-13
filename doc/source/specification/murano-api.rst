@@ -486,6 +486,194 @@ Delete session
 | 404            | Not found. Specified session doesn`t exist                |
 +----------------+-----------------------------------------------------------+
 
+Environment model API
+=====================
+
+Get environment model
+---------------------
+
++----------+-------------------------------------+------------------------+--------------------------+
+| Method   | URI                                 | Header                 | Description              |
++==========+=====================================+========================+==========================+
+| GET      | /environments/<env_id>/model/<path> | X-Configuration-Session| Get an Environment model |
+|          |                                     | (optional)             |                          |
++----------+-------------------------------------+------------------------+--------------------------+
+
+Specifying <path> allows to get a specific section of the model, for example
+`defaultNetworks`, `region` or `?` or any of the subsections.
+
+*Response*
+
+**Content-Type**
+  application/json
+
+.. code-block:: javascript
+
+    {
+        "defaultNetworks": {
+            "environment": {
+                "internalNetworkName": "net_two",
+                "?": {
+                    "type": "io.murano.resources.ExistingNeutronNetwork",
+                    "id": "594e94fcfe4c48ef8f9b55edb3b9f177"
+                }
+            },
+            "flat": null
+        },
+        "region": "RegionTwo",
+        "name": "new_env",
+        "regions": {
+            "": {
+                "defaultNetworks": {
+                    "environment": {
+                        "autoUplink": true,
+                        "name": "new_env-network",
+                        "externalRouterId": null,
+                        "dnsNameservers": [],
+                        "autogenerateSubnet": true,
+                        "subnetCidr": null,
+                        "openstackId": null,
+                        "?": {
+                            "dependencies": {
+                                "onDestruction": [{
+                                    "subscriber": "c80e33dd67a44f489b2f04818b72f404",
+                                    "handler": null
+                                }]
+                            },
+                            "type": "io.murano.resources.NeutronNetwork/0.0.0@io.murano",
+                            "id": "e145b50623c04a68956e3e656a0568d3",
+                            "name": null
+                        },
+                        "regionName": "RegionOne"
+                    },
+                    "flat": null
+                },
+                "name": "RegionOne",
+                "?": {
+                    "type": "io.murano.CloudRegion/0.0.0@io.murano",
+                    "id": "c80e33dd67a44f489b2f04818b72f404",
+                    "name": null
+                }
+            },
+            "RegionOne": "c80e33dd67a44f489b2f04818b72f404",
+            "RegionTwo": {
+                "defaultNetworks": {
+                    "environment": {
+                        "autoUplink": true,
+                        "name": "new_env-network",
+                        "externalRouterId": "e449bdd5-228c-4747-a925-18cda80fbd6b",
+                        "dnsNameservers": ["8.8.8.8"],
+                        "autogenerateSubnet": true,
+                        "subnetCidr": "10.0.198.0/24",
+                        "openstackId": "00a695c1-60ff-42ec-acb9-b916165413da",
+                        "?": {
+                            "dependencies": {
+                                "onDestruction": [{
+                                    "subscriber": "f8cb28d147914850978edb35eca156e1",
+                                    "handler": null
+                                }]
+                            },
+                            "type": "io.murano.resources.NeutronNetwork/0.0.0@io.murano",
+                            "id": "72d2c13c600247c98e09e2e3c1cd9d70",
+                            "name": null
+                        },
+                        "regionName": "RegionTwo"
+                    },
+                    "flat": null
+                },
+                "name": "RegionTwo",
+                "?": {
+                    "type": "io.murano.CloudRegion/0.0.0@io.murano",
+                    "id": "f8cb28d147914850978edb35eca156e1",
+                    "name": null
+                }
+            }
+        },
+        services: []
+        "?": {
+            "type": "io.murano.Environment/0.0.0@io.murano",
+            "_actions": {
+                "f7f22c174070455c9cafc59391402bdc_deploy": {
+                    "enabled": true,
+                    "name": "deploy",
+                    "title": "deploy"
+                }
+            },
+            "id": "f7f22c174070455c9cafc59391402bdc",
+            "name": null
+        }
+    }
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | Environment model received successfully                   |
++----------------+-----------------------------------------------------------+
+| 403            | User is not authorized to access environment              |
++----------------+-----------------------------------------------------------+
+| 404            | Environment is not found or specified section of the      |
+|                | model does not exist                                      |
++----------------+-----------------------------------------------------------+
+
+Update environment model
+------------------------
+
+*Request*
+
++----------+--------------------------------+------------------------+-----------------------------+
+| Method   | URI                            | Header                 | Description                 |
++==========+================================+========================+=============================+
+| PATCH    | /environments/<env_id>/model/  | X-Configuration-Session| Update an Environment model |
++----------+--------------------------------+------------------------+-----------------------------+
+
+* **Content-Type**
+  application/env-model-json-patch
+
+  Allowed operations for paths:
+
+  * "" (model root): no operations
+  * "defaultNetworks": "replace"
+  * "defaultNetworks/environment": "replace"
+  * "defaultNetworks/environment/?/id": no operations
+  * "defaultNetworks/flat": "replace"
+  * "name": "replace"
+  * "region": "replace"
+  * "?/type": "replace"
+  * "?/id": no operations
+
+  For other paths any operation (add, replace or remove) is allowed.
+
+* **Example of request body with JSON-patch**
+
+.. code-block:: javascript
+
+   [{
+     "op": "replace",
+     "path": "/defaultNetworks/flat",
+     "value": true
+   }]
+
+*Response*
+
+**Content-Type**
+  application/json
+
+See *GET* request response.
+
++----------------+-----------------------------------------------------------+
+| Code           | Description                                               |
++================+===========================================================+
+| 200            | Environment is edited successfully                        |
++----------------+-----------------------------------------------------------+
+| 400            | Body format is invalid                                    |
++----------------+-----------------------------------------------------------+
+| 403            | User is not authorized to access environment or specified |
+|                | operation is forbidden for the given property             |
++----------------+-----------------------------------------------------------+
+| 404            | Environment is not found or specified section of the      |
+|                | model does not exist                                      |
++----------------+-----------------------------------------------------------+
+
 Environment deployments API
 ===========================
 
