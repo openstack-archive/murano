@@ -38,7 +38,6 @@ Properties:
 Workflow:
   initialize:
     Body:
-      - $._netExplorer: new(sys:NetworkExplorer, $this.getRegion())
       - $._networks: null
       - $._subnetworks: null
       - $._ports: null
@@ -48,6 +47,7 @@ Workflow:
 
   deploy:
     Body:
+      - $netExplorer: $._getNetExplorer()
       - If: $.internalNetworkName = null
         Then:
           $.internalNetworkName: $._getNetworks().where(
@@ -72,7 +72,7 @@ Workflow:
 
       - If: $.externalNetworkName = null and $._internalNetworkId != null
         Then:
-          - $ports: $._netExplorer.listPorts()
+          - $ports: $netExplorer.listPorts()
           - $routerCandidates: $ports.where(
               $.network_id = $this._internalNetworkId and $.device_owner = 'network:router_interface').
               select($.device_id)
@@ -100,14 +100,14 @@ Workflow:
     Body:
       - If: not $._networks
         Then:
-          $._networks: $._netExplorer.listNetworks()
+          $._networks: $._getNetExplorer().listNetworks()
       - Return: $._networks
 
   _getSubnetworks:
     Body:
       - If: $._subnetworks = null
         Then:
-          $._subnetworks : $._netExplorer.listSubnetworks()
+          $._subnetworks : $._getNetExplorer().listSubnetworks()
       - Return: $._subnetworks
 
   joinInstance:

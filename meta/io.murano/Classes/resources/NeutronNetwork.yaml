@@ -50,35 +50,32 @@ Properties:
     Usage: InOut
 
 Methods:
-  .init:
-    Body:
-      - $._region: $.getRegion()
-      - $._netExplorer: new(sys:NetworkExplorer, $this)
-
 
   deploy:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
+          - $netExplorer: $._getNetExplorer()
           - If: len($.dnsNameservers) = 0
             Then:
-              - $.dnsNameservers: $._netExplorer.getDefaultDns()
+              - $.dnsNameservers: $netExplorer.getDefaultDns()
           - $template: $._createNetwork()
           - If: $.autoUplink and (not bool($.externalRouterId))
             Then:
-              - $.externalRouterId: $._netExplorer.getDefaultRouter()
+              - $.externalRouterId: $netExplorer.getDefaultRouter()
           - If: $.autogenerateSubnet and (not bool($.subnetCidr))
             Then:
-              - $.subnetCidr: $._netExplorer.getAvailableCidr($.externalRouterId, id($))
+              - $.subnetCidr: $netExplorer.getAvailableCidr($.externalRouterId, id($))
 
           - $template: $template.mergeWith($._createSubnet())
           - If: $.externalRouterId != null
             Then:
               - $template: $template.mergeWith($._createRouterInterface())
 
-          - $._region.stack.updateTemplate($template)
-          - $._region.stack.push()
-          - $outputs: $._region.stack.output()
+          - $region: $.getRegion()
+          - $region.stack.updateTemplate($template)
+          - $region.stack.push()
+          - $outputs: $region.stack.output()
           - $.openstackId: $outputs.get(format('{0}-id', $this.name))
           - $.setAttr(deployed, true)
 
@@ -182,7 +179,7 @@ Methods:
   describe:
     Body:
       - $.deploy()
-      - $subnet: $._netExplorer.listSubnetworks().where(
+      - $subnet: $._getNetExplorer().listSubnetworks().where(
             $.network_id = $this.openstackId).first()
       - Return:
           provider: Neutron
@@ -196,7 +193,8 @@ Methods:
 
   releaseResources:
     Body:
-      - $template: $._region.stack.current()
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
 
       - $template.resources: $template.resources.delete($._getHeatName())
       - $template.resources: $template.resources.delete($._getSubnetName())
@@ -207,8 +205,8 @@ Methods:
         Then:
           $template.resources: $template.resources.delete($._getRouterInterfaceName())
 
-      - $._regiont.stack.setTemplate($template)
-      - $._region.stack.push()
+      - $regiont.stack.setTemplate($template)
+      - $region.stack.push()
       - $.openstackId: null
 
   getInstanceIpList:
@@ -216,7 +214,7 @@ Methods:
       - instance:
           Contract: $.class(Instance).notNull()
     Body:
-      - Return: $._region.stack.output().get(format('adresses-{0}-in-{1}', $instance.name, $this.name)).select($["addr"]).distinct()
+      - Return: $.getRegion().stack.output().get(format('adresses-{0}-in-{1}', $instance.name, $this.name)).select($["addr"]).distinct()
 
 
   _getRouterInterfaceName:
@@ -236,7 +234,7 @@ Methods:
 
   _getExternalNetId:
     Body:
-      Return: $._netExplorer.getExternalNetworkIdForRouter($.externalRouterId)
+      Return: $._getNetExplorer().getExternalNetworkIdForRouter($.externalRouterId)
 
   _getHeatName:
     Body:
