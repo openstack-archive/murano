@@ -155,7 +155,7 @@ class Agent(object):
     def wait_ready(self, timeout=100):
         self._check_enabled()
         template = {'Body': 'return', 'FormatVersion': '2.0.0', 'Scripts': {}}
-        self.call(template, False, timeout)
+        self.call_raw(template, timeout)
 
     def _process_v1_result(self, result):
         if result['IsException']:
