@@ -28,7 +28,7 @@ An environment is a single unit of deployment. This means that you deploy not
 an application but an environment that contains one or multiple applications.
 
 Using CLI, you can easily perform such actions with an environment as
-creating, renaming, viewing, and others.
+creating, renaming, editing, viewing, and others.
 
 Create an environment
 ---------------------
@@ -78,6 +78,75 @@ To get a list of all existing environments, run:
 .. code-block:: console
 
    $ murano environment-list
+
+Show environment object model
+-----------------------------
+
+To get a complete object model of the environment, run:
+
+.. code-block:: console
+
+   $ murano environment-model-show <ID>
+
+To get some part of the environment model, run:
+
+.. code-block:: console
+
+   $ murano environment-model-show <ID> --path <PATH>
+
+For example:
+
+   $ murano environment-model-show 534bcf2f2fc244f2b94ad55ff0f24a42 --path /defaultNetworks/environment
+
+To get a draft of an object model of environment in pending state, also
+specify id of the session:
+
+.. code-block:: console
+
+   $ murano environment-model-show <ID> --path <PATH> --session-id <SESSION_ID>
+
+Edit environment object model
+-----------------------------
+
+To edit an object model of the environment, run:
+
+.. code-block:: console
+
+   $ murano environment-model-edit <ID> <FILE> --session-id <SESSION_ID>
+
+<FILE> is the path to the file with the JSON-patch to modify the object model.
+
+JSON-patch is a valid JSON that contains a list of changes to be applied to
+the current object. Each change contains a dictionary with three keys: ``op``,
+``path`` and ``value``. ``op`` (operation) can be one of the three values:
+`add`, `replace` or remove`.
+
+Allowed operations for paths:
+
+* "" (model root): no operations
+* "defaultNetworks": "replace"
+* "defaultNetworks/environment": "replace"
+* "defaultNetworks/environment/?/id": no operations
+* "defaultNetworks/flat": "replace"
+* "name": "replace"
+* "region": "replace"
+* "?/type": "replace"
+* "?/id": no operations
+
+For other paths any operation (add, replace or remove) is allowed.
+
+Example of JSON-patch:
+
+.. code-block:: javascript
+
+   [{
+     "op": "replace",
+     "path": "/defaultNetworks/flat",
+     "value": true
+   }]
+
+The patch above changes the value of the ``flat`` property of the
+environment's ``defaultNetworks`` property to `true`.
 
 Manage packages
 ~~~~~~~~~~~~~~~
