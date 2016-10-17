@@ -27,7 +27,8 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
 
     @classmethod
     def resource_setup(cls):
-        if not CONF.application_catalog.deployment_tests:
+        if not CONF.application_catalog.deployment_tests or \
+                not CONF.application_catalog.linux_image:
             msg = "Application Catalog Scenario Deployment Tests will be " \
                   "skipped."
             raise cls.skipException(msg)
@@ -97,7 +98,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
             6. Delete environment
         """
 
-        post_body = self.apache_cinder()
+        post_body = self.apache()
         environment_name = utils.generate_name('Test_Murano')
         environment = self.application_catalog_client.create_environment(
             name=environment_name)
@@ -130,8 +131,8 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
             10. Delete environment
         """
 
-        app_1_post_body = self.apache_cinder()
-        app_2_post_body = self.apache_cinder()
+        app_1_post_body = self.apache()
+        app_2_post_body = self.apache()
 
         environment_name = utils.generate_name('Test_Murano')
         environment = self.application_catalog_client.create_environment(
@@ -231,7 +232,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
             7. Delete environment
         """
 
-        post_body = self.apache_cinder(userName=utils.generate_name('user'))
+        post_body = self.apache(userName=utils.generate_name('user'))
         username = post_body["userName"]
         environment_name = utils.generate_name('SSC-murano')
         environment = self.application_catalog_client.create_environment(

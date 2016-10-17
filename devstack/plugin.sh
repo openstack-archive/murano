@@ -176,7 +176,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE DEFAULT home_region $REGION_NAME
 
     # Murano Policy Enforcement Configuration
-    if [[ -n "$MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT" ]]; then
+    if [[ "$MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT" == "True" ]]; then
         iniset $MURANO_CONF_FILE engine enable_model_policy_enforcer $MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT
     fi
 
@@ -358,6 +358,7 @@ function setup_core_library() {
     remove_core_apps_zip
 
 }
+
 # install_murano() - Collect source and prepare
 function install_murano() {
     install_murano_pythonclient
@@ -442,6 +443,15 @@ function configure_murano_tempest_plugin() {
         fi
         if is_murano_backend_glare; then
             iniset $TEMPEST_CONFIG application_catalog glare_backend "True"
+        fi
+        if [[ "$TEMPEST_MURANO_SCENARIO_TESTS_ENABLED" == "True" ]]; then
+            if is_service_enabled cinder; then
+                iniset $TEMPEST_CONFIG application_catalog cinder_volume_tests "True"
+            fi
+            if [[ "$TEMPEST_MURANO_DEPLOYMENT_TESTS_ENABLED" == "True" ]]; then
+                iniset $TEMPEST_CONFIG application_catalog deployment_tests "True"
+                iniset $TEMPEST_CONFIG application_catalog linux_image "$CLOUD_IMAGE_NAME"
+            fi
         fi
     fi
 }

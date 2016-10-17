@@ -32,11 +32,11 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
             raise cls.skipException(msg)
         super(TestCinderVolumes, cls).resource_setup()
         cls.linux = CONF.application_catalog.linux_image
-        application_name = utils.generate_name('Apache_custom')
+        application_name = utils.generate_name('VM')
         cls.abs_archive_path, dir_with_archive, archive_name = \
             utils.prepare_package(
                 application_name,
-                app='io.murano.apps.test.ApacheHttpServerCustom',
+                app='io.murano.apps.test.VM',
                 manifest_required=False)
         if CONF.application_catalog.glare_backend:
             cls.client = cls.artifacts_client
@@ -45,7 +45,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         cls.package = cls.client.upload_package(
             application_name, archive_name, dir_with_archive,
             {"categories": ["Web"], "tags": ["test"]})
-        cls.volume = cls.create_volume()
+        cls.volume = cls.create_volume(size='1')
 
     @classmethod
     def resource_cleanup(cls):
@@ -62,7 +62,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to boot instance
+            2. Add VM application with ability to boot instance
             from Cinder volume
             3. Deploy environment
             4. Make sure that deployment finished successfully
@@ -79,14 +79,14 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
             create_session(environment['id'])
         post_body = {
             "instance": {
-                "flavor": "m1.medium",
+                "flavor": "m1.small",
                 "blockDevices": {
                     "volume": {
                         "?": {
                             "type": "io.murano.resources.CinderVolume"
                         },
                         "size": 4,
-                        "sourceImage": self.linux
+                        "sourceImage": self.cirros_image
                     },
                     "bootIndex": 0,
                     "deviceName": "vda",
@@ -100,12 +100,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 },
                 "name": utils.generate_name("testMurano")
             },
-            "name": utils.generate_name("ApacheHTTPServer"),
+            "name": utils.generate_name("VM"),
             "?": {
                 "_{id}".format(id=utils.generate_uuid()): {
-                    "name": "ApacheHTTPServer"
+                    "name": "VM"
                 },
-                "type": "io.murano.apps.test.ApacheHttpServerCustom",
+                "type": "io.murano.apps.test.VM",
                 "id": utils.generate_uuid()
             }
         }
@@ -114,12 +114,11 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 4)
         self.assertEqual(volume_data['volume_image_metadata']['image_name'],
-                         self.linux)
+                         self.cirros_image)
         server = self.get_instance_id('testMurano')
         self.assertFalse(
             self.servers_client.show_server(server)['server']['image'])
@@ -131,7 +130,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to attach existing
+            2. Add VM application with ability to attach existing
             Cinder volume to the instance
             3. Deploy environment
             4. Make sure that deployment finished successfully
@@ -153,13 +152,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 "openstackId": self.volume
             }
         }
-        post_body = self.apache_cinder(attributes=volume_attributes)
+        post_body = self.vm_cinder(attributes=volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         self.check_volume_attached('testMurano', self.volume)
 
     @testtools.testcase.attr('smoke')
@@ -169,7 +167,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to create and
+            2. Add VM application with ability to create and
             attach Cinder volume with size 1 GiB to the instance
             3. Deploy environment
             4. Make sure that deployment finished successfully
@@ -191,13 +189,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 "size": 1
             }
         }
-        post_body = self.apache_cinder(attributes=volume_attributes)
+        post_body = self.vm_cinder(attributes=volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
@@ -209,7 +206,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to create Cinder
+            2. Add VM application with ability to create Cinder
             volume with size 2 GiB from image and attach it to the instance
             3. Deploy environment
             4. Make sure that deployment finished successfully
@@ -230,21 +227,20 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                     "type": "io.murano.resources.CinderVolume"
                 },
                 "size": 4,
-                "sourceImage": self.linux
+                "sourceImage": self.cirros_image
             }
         }
-        post_body = self.apache_cinder(volume_attributes)
+        post_body = self.vm_cinder(volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 4)
         self.assertEqual(volume_data['volume_image_metadata']['image_name'],
-                         self.linux)
+                         self.cirros_image)
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
@@ -253,7 +249,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to create Cinder
+            2. Add VM application with ability to create Cinder
             volume with size 1 GiB from existing volume and attach it to the
             instance
             3. Deploy environment
@@ -283,13 +279,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 }
             }
         }
-        post_body = self.apache_cinder(volume_attributes)
+        post_body = self.vm_cinder(volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
@@ -303,7 +298,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         Scenario:
             1. Make snapshot from volume
             2. Create environment
-            3. Add ApacheHTTPServer application with ability to create
+            3. Add VM application with ability to create
             Cinder volume with size 1 GiB from existing volume snapshot and
             attach it to the instance
             4. Deploy environment
@@ -335,13 +330,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 }
             }
         }
-        post_body = self.apache_cinder(volume_attributes)
+        post_body = self.vm_cinder(volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
@@ -355,7 +349,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         Scenario:
             1. Make backup from volume
             2. Create environment
-            3. Add ApacheHTTPServer application with ability to create Cinder
+            3. Add VM application with ability to create Cinder
             volume with size 1 GiB from existing volume backup and attach it to
             the instance
             4. Deploy environment
@@ -395,13 +389,12 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 }
             }
         }
-        post_body = self.apache_cinder(volume_attributes)
+        post_body = self.vm_cinder(volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
@@ -417,11 +410,11 @@ class TestCinderVolumeIsolatedAdmin(
             msg = "Cinder volumes attachment tests will be skipped."
             raise cls.skipException(msg)
         super(TestCinderVolumeIsolatedAdmin, cls).resource_setup()
-        application_name = utils.generate_name('Apache_custom')
+        application_name = utils.generate_name('VM')
         cls.abs_archive_path, dir_with_archive, archive_name = \
             utils.prepare_package(
                 application_name,
-                app='io.murano.apps.test.ApacheHttpServerCustom',
+                app='io.murano.apps.test.VM',
                 manifest_required=False)
         if CONF.application_catalog.glare_backend:
             cls.client = cls.artifacts_client
@@ -445,7 +438,7 @@ class TestCinderVolumeIsolatedAdmin(
 
         Scenario:
             1. Create environment
-            2. Add ApacheHTTPServer application with ability to create and
+            2. Add VM application with ability to create and
             attach Cinder volume with size 1 GiB, multiattach and readonly
             properties to the instance
             3. Deploy environment
@@ -471,13 +464,12 @@ class TestCinderVolumeIsolatedAdmin(
                 "multiattach": True
             }
         }
-        post_body = self.apache_cinder(attributes=volume_attributes)
+        post_body = self.vm_cinder(attributes=volume_attributes)
         self.application_catalog_client.\
             create_service(environment['id'], session['id'],
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.status_check(environment['id'], [['testMurano', 22, 80]])
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
