@@ -1,4 +1,5 @@
 #    Copyright (c) 2015 Telefonica I+D
+#    Copyright (c) 2016 AT&T Corp
 #
 #    Licensed under the Apache License, Version 2.0 (the "License"); you may
 #    not use this file except in compliance with the License. You may obtain
@@ -12,19 +13,336 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import copy
+import datetime
+import json
 import os
 import tempfile
+import unittest
 
 import mock
+from oslo_config import cfg
 from oslo_serialization import base64
 import yaml as yamllib
 
+from murano.common import exceptions
+from murano.dsl import dsl
 from murano.dsl import murano_object
 from murano.dsl import murano_type
 from murano.dsl import object_store
 from murano.engine.system import agent
 from murano.engine.system import resource_manager
 from murano.tests.unit import base
+
+CONF = cfg.CONF
+
+
+class TestAgent(base.MuranoTestCase):
+    def setUp(self):
+        super(TestAgent, self).setUp()
+        if hasattr(yamllib, 'CSafeLoader'):
+            self.yaml_loader = yamllib.CSafeLoader
+        else:
+            self.yaml_loader = yamllib.SafeLoader
+
+        CONF.set_override('disable_murano_agent', False, group='engine',
+                          enforce_type=True)
+
+        mock_host = mock.MagicMock()
+        mock_host.id = '1234'
+        mock_host.find_owner = lambda *args, **kwargs: mock_host
+        mock_host().getRegion.return_value = mock.MagicMock(
+            __class__=dsl.MuranoObjectInterface)
+        self.rabbit_mq_settings = {
+            'agentRabbitMq': {'login': 'test_login',
+                              'password': 'test_password',
+                              'host': 'test_host',
+                              'port': 123,
+                              'virtual_host': 'test_virtual_host'}
+        }
+        mock_host().getRegion()().getConfig.return_value =\
+            self.rabbit_mq_settings
+
+        self.agent = agent.Agent(mock_host)
+        self.resources = mock.Mock(spec=resource_manager.ResourceManager)
+        self.resources.string.return_value = 'text'
+
+        self.addCleanup(mock.patch.stopall)
+
+    def _read(self, path):
+        execution_plan_dir = os.path.abspath(
+            os.path.join(__file__, '../execution_plans/')
+        )
+        with open(execution_plan_dir + "/" + path) as file:
+            return file.read()
+
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_prepare(self, mock_kombu):
+        self.agent.prepare()
+
+        # Verify that MQClient was instantiated, by checking whether
+        # kombu.Connection was called.
+        mock_kombu.Connection.assert_called_once_with(
+            'amqp://{login}:{password}@{host}:{port}/{virtual_host}'.format(
+                **self.rabbit_mq_settings['agentRabbitMq']
+            ), ssl=None)
+
+        # Verify that client.declare() was called by checking whether kombu
+        # functions were called.
+        self.assertEqual(1, mock_kombu.Exchange.call_count)
+        self.assertEqual(1, mock_kombu.Queue.call_count)
+
+    @mock.patch('murano.engine.system.agent.LOG')
+    def test_prepare_with_murano_agent_disabled(self, mock_log):
+        CONF.set_override('disable_murano_agent', True, group='engine',
+                          enforce_type=True)
+
+        self.agent.prepare()
+
+        mock_log.debug.assert_called_once_with(
+            'Use of murano-agent is disallowed by the server configuration')
+
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_send(self, mock_kombu):
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+
+        self.agent._queue = 'test_queue'
+        plan = self.agent.build_execution_plan(template, self.resources)
+        with mock.patch.object(self.agent, 'build_execution_plan',
+                               return_value=plan):
+            self.agent.send(template, self.resources)
+
+        self.assertEqual(1, mock_kombu.Producer.call_count)
+        mock_kombu.Producer().publish.assert_called_once_with(
+            exchange='',
+            routing_key='test_queue',
+            body=json.dumps(plan),
+            message_id=plan['ID'])
+
+    @unittest.skipIf(True, 'Skipping until bug #1633176 resolved.')
+    @mock.patch('murano.engine.system.agent.eventlet.event.Event')
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_is_ready(self, mock_kombu, mock_event):
+        v2_result = yamllib.load(
+            self._read('application.template'),
+            Loader=self.yaml_loader)
+
+        mock_event().wait.side_effect = None
+        mock_event().wait.return_value = v2_result
+
+        self.assertTrue(self.agent.is_ready(1))
+
+        mock_event().wait.side_effect = agent.eventlet.Timeout
+
+        self.assertFalse(self.agent.is_ready(1))
+
+    @mock.patch('murano.engine.system.agent.eventlet.event.Event')
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_call_with_v1_result(self, mock_kombu, mock_event):
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+
+        test_v1_result = {
+            'FormatVersion': '1.0.0',
+            'IsException': False,
+            'Result': [
+                {
+                    'IsException': False,
+                    'Result': 'test_result'
+                }
+            ]
+        }
+
+        mock_event().wait.side_effect = None
+        mock_event().wait.return_value = test_v1_result
+
+        self.agent._queue = 'test_queue'
+        plan = self.agent.build_execution_plan(template, self.resources)
+        mock.patch.object(
+            self.agent, 'build_execution_plan', return_value=plan).start()
+
+        result = self.agent.call(template, self.resources, None)
+        self.assertIsNotNone(result)
+        self.assertEqual('test_result', result)
+
+        self.assertEqual(1, mock_kombu.Producer.call_count)
+        mock_kombu.Producer().publish.assert_called_once_with(
+            exchange='',
+            routing_key='test_queue',
+            body=json.dumps(plan),
+            message_id=plan['ID'])
+
+    @mock.patch('murano.engine.system.agent.eventlet.event.Event')
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_call_with_v2_result(self, mock_kombu, mock_event):
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+
+        v2_result = yamllib.load(
+            self._read('application.template'),
+            Loader=self.yaml_loader)
+
+        mock_event().wait.side_effect = None
+        mock_event().wait.return_value = v2_result
+
+        self.agent._queue = 'test_queue'
+        plan = self.agent.build_execution_plan(template, self.resources)
+        mock.patch.object(
+            self.agent, 'build_execution_plan', return_value=plan).start()
+
+        result = self.agent.call(template, self.resources, None)
+        self.assertIsNotNone(result)
+        self.assertEqual(v2_result['Body'], result)
+
+        self.assertEqual(1, mock_kombu.Producer.call_count)
+        mock_kombu.Producer().publish.assert_called_once_with(
+            exchange='',
+            routing_key='test_queue',
+            body=json.dumps(plan),
+            message_id=plan['ID'])
+
+    @mock.patch('murano.engine.system.agent.eventlet.event.Event')
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_call_with_no_result(self, mock_kombu, mock_event):
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+
+        mock_event().wait.side_effect = None
+        mock_event().wait.return_value = None
+
+        result = self.agent.call(template, self.resources, None)
+        self.assertIsNone(result)
+
+    @mock.patch('murano.engine.system.agent.eventlet.event.Event')
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_call_except_timeout(self, mock_kombu, mock_event):
+        CONF.set_override('agent_timeout', 1, group='engine',
+                          enforce_type=True)
+
+        mock_event().wait.side_effect = agent.eventlet.Timeout
+
+        template = yamllib.load(
+            self._read('template_with_files.template'),
+            Loader=self.yaml_loader)
+
+        expected_error_msg = 'The murano-agent did not respond within 1 '\
+                             'seconds'
+        with self.assertRaisesRegexp(exceptions.TimeoutException,
+                                     expected_error_msg):
+            self.agent.call(template, self.resources, None)
+
+    @mock.patch('murano.engine.system.agent.datetime')
+    def test_process_v1_result_with_error_code(self, mock_datetime):
+        now = datetime.datetime.now().isoformat()
+        mock_datetime.datetime.now().isoformat.return_value = now
+
+        v1_result = {
+            'IsException': True,
+            'Result': [
+                'Error Type',
+                'Error Message',
+                'Error Command',
+                'Error Details'
+            ]
+        }
+
+        expected_error = {
+            'source': 'execution_plan',
+            'command': 'Error Command',
+            'details': 'Error Details',
+            'message': 'Error Message',
+            'type': 'Error Type',
+            'timestamp': now
+        }
+
+        self.assertTrue(self._are_exceptions_equal(
+            agent.AgentException, expected_error,
+            self.agent._process_v1_result, v1_result))
+
+        v1_result = {
+            'IsException': False,
+            'Result': [
+                'Error Type',
+                'Error Message',
+                'Error Command',
+                'Error Details',
+                {
+                    'IsException': True,
+                    'Result': [
+                        'Nested Error Type',
+                        'Nested Error Message',
+                        'Nested Error Command',
+                        'Nested Error Details'
+                    ]
+                }
+            ]
+        }
+
+        expected_error = {
+            'source': 'command',
+            'command': 'Nested Error Command',
+            'details': 'Nested Error Details',
+            'message': 'Nested Error Message',
+            'type': 'Nested Error Type',
+            'timestamp': now
+        }
+
+        self.assertTrue(self._are_exceptions_equal(
+            agent.AgentException, expected_error,
+            self.agent._process_v1_result, v1_result))
+
+    def test_process_v2_result_with_error_code(self):
+        v2_result = {
+            'Body': {
+                'Message': 'Test Error Message',
+                'AdditionalInfo': 'Test Additional Info',
+                'ExtraAttr': 'Test extra data'
+            },
+            'FormatVersion': '2.0.0',
+            'Name': 'TestApp',
+            'ErrorCode': 123,
+            'Time': 'Right now'
+        }
+
+        expected_error = {
+            'errorCode': 123,
+            'message': 'Test Error Message',
+            'details': 'Test Additional Info',
+            'time': 'Right now',
+            'extra': {'ExtraAttr': 'Test extra data'}
+        }
+
+        self.assertTrue(self._are_exceptions_equal(
+            agent.AgentException, expected_error,
+            self.agent._process_v2_result, v2_result))
+
+    def _are_exceptions_equal(self, exception, expected_error, function,
+                              result):
+        """Checks whether expected and returned dict from exception are equal.
+
+        Because casting dicts to strings changes the ordering of the keys,
+        manual comparison of the result and expected result is performed.
+        """
+        try:
+            # deepcopy must be performed because _process_v1_result
+            # deletes attrs from the original dict passed in.
+            self.assertRaises(exception, function, copy.deepcopy(result))
+            function(result)
+        except exception as e:
+            e_string = str(e).replace("'", "\"").replace('None', 'null')
+            e_dict = json.loads(e_string)
+            self.assertEqual(sorted(expected_error.keys()),
+                             sorted(e_dict.keys()))
+            for key, val in expected_error.items():
+                self.assertEqual(val, e_dict[key])
+        except Exception:
+            return False
+        return True
 
 
 class TestExecutionPlan(base.MuranoTestCase):
@@ -362,6 +680,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             self.assertEqual(encoded_text, body)
 
     def test_queue_name(self):
+        self.agent._queue = 'test_queue'
         self.assertEqual(self.agent.queue_name(), self.agent._queue)
 
     def test_prepare_message(self):
