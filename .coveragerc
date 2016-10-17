@@ -2,7 +2,6 @@
 branch = True
 source = murano
 omit =
- */openstack/common/*
  .tox/*
  murano/tests/*
 
