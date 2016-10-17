@@ -210,7 +210,7 @@ Methods:
       - serverGroup:
           Contract: $.class(ServerGroup).notNull()
     Body:
-      - $key: $this.getConfigurationKey()
+      - $key: list($this.getConfigurationKey()) + $serverGroup.getKey()
       - $state: $serverGroup.getAttr(configuration)
       - Return: $key = $state
 
@@ -317,7 +317,7 @@ Methods:
         Then:
           - $this.completeConfigurationEvent.notify($this, $servers, $serverGroup, $failedServers)
           - $this.onCompleteConfiguration($servers, $serverGroup, $failedServers)
-          - $key: $this.getConfigurationKey()
+          - $key: list($this.getConfigurationKey()) + $serverGroup.getKey()
           - $serverGroup.setAttr(configuration, $key)
           - $this.report(format('Finished configuring {0} ({1} errors encountered)',
                          name($this), $numFailures or 'no'))

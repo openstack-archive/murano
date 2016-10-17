@@ -23,6 +23,11 @@ Name: ServerGroup
 Methods:
   getServers:
 
+  getKey:
+    Body:
+      - Return: $this.getServers().select(id($)).orderBy($)
+
+
   deployServers:
     Usage: Static
     Arguments:
