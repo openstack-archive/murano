@@ -9,6 +9,10 @@ Meta:
       name: mySection
       title: Section Title
       index: 1
+  - mf:Section:
+      name: mySection
+      title: Another Section Title
+      index: 2
 
 Properties:
   stringProperty:
