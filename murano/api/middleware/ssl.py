@@ -47,8 +47,9 @@ class SSLMiddleware(wsgi.Middleware):
             cfg.CONF.secure_proxy_ssl_header.upper().replace('-', '_'))
 
     def process_request(self, req):
-        LOG.debug('Default url_scheme: {0}. {1}: {2}'.format(
-            req.environ['wsgi.url_scheme'], self.secure_proxy_ssl_header,
-            req.environ.get(self.secure_proxy_ssl_header)))
+        url_scheme = req.environ['wsgi.url_scheme']
         req.environ['wsgi.url_scheme'] = req.environ.get(
             self.secure_proxy_ssl_header, req.environ['wsgi.url_scheme'])
+        if url_scheme != req.environ['wsgi.url_scheme']:
+            LOG.debug('Changed url_scheme from {0} to {1}'.format(
+                url_scheme, req.environ['wsgi.url_scheme']))
