@@ -1,7 +1,7 @@
 .. _target_users:
 
 ============
-Target Users
+Target users
 ============
 
 Cloud end users want to simply use applications as

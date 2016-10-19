@@ -35,4 +35,3 @@ The external services used by Murano are:
 
 * the **Identity service** (Keystone) to make murano API available
   to all OpenStack users.
-

@@ -1,7 +1,4 @@
-.. _use-cases:
-
-.. toctree::
-   :maxdepth: 2
+.. _intro-use-cases:
 
 =========
 Use cases
