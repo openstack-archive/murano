@@ -21,16 +21,16 @@ from murano.tests.unit import base
 class TestExecutionPlan(base.MuranoTestCase):
     def setUp(self):
         super(TestExecutionPlan, self).setUp()
+        self.override_config("disable_murano_agent", False, "engine")
+        self.agent = agent_listener.AgentListener("test")
+        self.addCleanup(mock.patch.stopall)
 
-        name = "test"
-        results_queue = str('-execution-results-%s' % name.lower())
-        self.agent = agent_listener.AgentListener(name)
+    def test_agent_ready(self):
         self.assertEqual({}, self.agent._subscriptions)
+        results_queue = str('-execution-results-test')
         self.assertEqual(results_queue, self.agent._results_queue)
         self.assertTrue(self.agent._enabled)
         self.assertIsNone(self.agent._receive_thread)
-
-        self.addCleanup(mock.patch.stopall)
 
     def test_queue_name(self):
         self.assertEqual(self.agent._results_queue, self.agent.queue_name())

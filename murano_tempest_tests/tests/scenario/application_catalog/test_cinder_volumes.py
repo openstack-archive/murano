@@ -14,6 +14,7 @@
 
 import os
 import testtools
+import unittest2
 
 from tempest import config
 
@@ -343,6 +344,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
+    @unittest2.skip('Skipped due to bug #1634876')
     def test_deploy_app_with_volume_creation_from_backup(self):
         """Test app deployment with volume creation from volume backup
 
