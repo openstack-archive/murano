@@ -100,9 +100,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         cls.artifacts_client = cls.os.artifacts_client
         cls.servers_client = cls.services_manager.servers_client
         cls.orchestration_client = cls.services_manager.orchestration_client
-        cls.snapshots_client = cls.services_manager.snapshots_client
-        cls.volumes_client = cls.services_manager.volumes_client
-        cls.backups_client = cls.services_manager.backups_client
+        cls.snapshots_client = cls.services_manager.snapshots_v2_client
+        cls.volumes_client = cls.services_manager.volumes_v2_client
+        cls.backups_client = cls.services_manager.backups_v2_client
         cls.images_client = cls.services_manager.image_client_v2
         cls.cirros_image = cls.get_required_image_name()
 

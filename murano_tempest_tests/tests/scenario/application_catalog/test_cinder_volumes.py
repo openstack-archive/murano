@@ -14,7 +14,6 @@
 
 import os
 import testtools
-import unittest2
 
 from tempest import config
 
@@ -342,66 +341,6 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         self.assertEqual(volume_data['size'], 1)
         self.assertEqual(volume_data['snapshot_id'], snapshot)
 
-    @testtools.testcase.attr('smoke')
-    @testtools.testcase.attr('scenario')
-    @unittest2.skip('Skipped due to bug #1634876')
-    def test_deploy_app_with_volume_creation_from_backup(self):
-        """Test app deployment with volume creation from volume backup
-
-        Scenario:
-            1. Make backup from volume
-            2. Create environment
-            3. Add VM application with ability to create Cinder
-            volume with size 1 GiB from existing volume backup and attach it to
-            the instance
-            4. Deploy environment
-            5. Make sure that deployment finished successfully
-            6. Check that application is accessible
-            7. Check that volume is attached to the instance, has size 1GiB and
-            restored from existing volume backup
-            8. Delete environment, backup
-        """
-        if not (CONF.volume_feature_enabled.backup and
-                CONF.service_available.swift):
-            msg = ("Cinder backup driver and Swift are required. "
-                   "Deploy app with volume restoring from backup test "
-                   "will be skipped.")
-            raise self.skipException(msg)
-
-        backup = self.create_backup(self.volume)
-        self.addCleanup(self.delete_backup, backup)
-        name = utils.generate_name('testMurano')
-        environment = self.application_catalog_client.\
-            create_environment(name)
-        self.addCleanup(self.environment_delete, environment['id'])
-        session = self.application_catalog_client.\
-            create_session(environment['id'])
-        volume_attributes = {
-            "/dev/vdb": {
-                "?": {
-                    "type": "io.murano.resources.CinderVolume"
-                },
-                "size": 1,
-                "name": "restore_backup_" + backup,
-                "sourceVolumeBackup": {
-                    "?": {
-                        "type": "io.murano.resources.CinderVolumeBackup"
-                    },
-                    "openstackId": backup
-                }
-            }
-        }
-        post_body = self.vm_cinder(volume_attributes)
-        self.application_catalog_client.\
-            create_service(environment['id'], session['id'],
-                           post_body)
-        self.deploy_environment(environment, session)
-
-        volume_data = self.get_volume(environment['id'])
-        self.check_volume_attached('testMurano', volume_data['id'])
-        self.assertEqual(volume_data['size'], 1)
-        self.assertIn(backup, volume_data['display_name'])
-
 
 class TestCinderVolumeIsolatedAdmin(
         base.BaseApplicationCatalogScenarioIsolatedAdminTest):
@@ -425,10 +364,12 @@ class TestCinderVolumeIsolatedAdmin(
         cls.package = cls.client.upload_package(
             application_name, archive_name, dir_with_archive,
             {"categories": ["Web"], "tags": ["test"]})
+        cls.volume = cls.create_volume(size='1')
 
     @classmethod
     def resource_cleanup(cls):
         cls.purge_stacks()
+        cls.delete_volume(cls.volume)
         cls.client.delete_package(cls.package['id'])
         os.remove(cls.abs_archive_path)
         super(TestCinderVolumeIsolatedAdmin, cls).resource_cleanup()
@@ -476,4 +417,63 @@ class TestCinderVolumeIsolatedAdmin(
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
         self.assertEqual(volume_data['metadata']['readonly'], 'True')
-        self.assertEqual(volume_data['multiattach'], 'true')
+        self.assertTrue(volume_data['multiattach'])
+
+    @testtools.testcase.attr('smoke')
+    @testtools.testcase.attr('scenario')
+    def test_deploy_app_with_volume_creation_from_backup(self):
+        """Test app deployment with volume creation from volume backup
+
+        Scenario:
+            1. Make backup from volume
+            2. Create environment
+            3. Add VM application with ability to create Cinder
+            volume with size 1 GiB from existing volume backup and attach it to
+            the instance
+            4. Deploy environment
+            5. Make sure that deployment finished successfully
+            6. Check that application is accessible
+            7. Check that volume is attached to the instance, has size 1GiB and
+            restored from existing volume backup
+            8. Delete environment, backup
+        """
+        if not (CONF.volume_feature_enabled.backup and
+                CONF.service_available.swift):
+            msg = ("Cinder backup driver and Swift are required. "
+                   "Deploy app with volume restoring from backup test "
+                   "will be skipped.")
+            raise self.skipException(msg)
+
+        backup = self.create_backup(self.volume)
+        self.addCleanup(self.delete_backup, backup)
+        name = utils.generate_name('testMurano')
+        environment = self.application_catalog_client. \
+            create_environment(name)
+        self.addCleanup(self.environment_delete, environment['id'])
+        session = self.application_catalog_client. \
+            create_session(environment['id'])
+        volume_attributes = {
+            "/dev/vdb": {
+                "?": {
+                    "type": "io.murano.resources.CinderVolume"
+                },
+                "size": 1,
+                "name": "restore_backup_" + backup,
+                "sourceVolumeBackup": {
+                    "?": {
+                        "type": "io.murano.resources.CinderVolumeBackup"
+                    },
+                    "openstackId": backup
+                }
+            }
+        }
+        post_body = self.vm_cinder(volume_attributes)
+        self.application_catalog_client. \
+            create_service(environment['id'], session['id'],
+                           post_body)
+        self.deploy_environment(environment, session)
+
+        volume_data = self.get_volume(environment['id'])
+        self.check_volume_attached('testMurano', volume_data['id'])
+        self.assertEqual(volume_data['size'], 1)
+        self.assertIn(backup, volume_data['name'])
