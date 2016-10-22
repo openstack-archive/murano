@@ -182,3 +182,57 @@ class TestSchemaGeneration(test_case.DslTestCase):
         self._test_simple_property(args.get('arg2'), 'integer')
         arg1 = args['arg1']
         self.assertEqual('Arg1!', arg1.get('title'))
+
+    def test_generate_schema_with_extra_params(self):
+        schema = schema_generator.generate_schema(
+            self.package_loader, runner.TestContextManager({}),
+            'TestSchema', method_names='modelBuilder',
+            package_name='tests')
+        expected_schema = {
+            '$schema': 'http://json-schema.org/draft-04/schema#',
+            'additionalProperties': False,
+            'formSections': {},
+            'properties': {'arg1': {'title': 'Arg1!',
+                                    'type': 'string'},
+                           'arg2': {'type': 'integer'}},
+            'title': 'Model Builder!',
+            'type': 'object'
+        }
+
+        self.assertIn('modelBuilder', schema)
+        self.assertEqual(expected_schema, schema['modelBuilder'])
+
+    def test_translate_list(self):
+        contract = [1, 2, 3]
+        result = schema_generator.translate_list(contract, None, None)
+        self.assertEqual({'type': 'array'}, result)
+
+        contract = [1, 2, 3, {'foo': 'bar'}]
+        result = schema_generator.translate_list(contract, None, None)
+        expected = {
+            'items': {'additionalProperties': False,
+                      'properties': {'foo': None},
+                      'type': 'object'},
+            'type': 'array'
+        }
+        self.assertEqual(sorted(expected.keys()), sorted(result.keys()))
+        for key, val in expected.items():
+            self.assertEqual(val, result[key])
+
+        contract = [1, 2, 3, {'foo': 'bar'}, ['baz']]
+        result = schema_generator.translate_list(contract, None, None)
+        expected = {
+            'additionalItems': {'items': None, 'type': 'array'},
+            'items': [{'additionalProperties': False,
+                       'properties': {'foo': None},
+                       'type': 'object'},
+                      {'items': None, 'type': 'array'}],
+            'type': 'array'
+        }
+        self.assertEqual(sorted(expected.keys()), sorted(result.keys()))
+        for key, val in expected.items():
+            if isinstance(val, dict):
+                for key_, val_ in val.items():
+                    self.assertEqual(val_, val[key_])
+            else:
+                self.assertEqual(val, result[key])
