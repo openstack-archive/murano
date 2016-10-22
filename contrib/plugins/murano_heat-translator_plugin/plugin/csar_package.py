@@ -444,11 +444,11 @@ class CSARPackage(package_base.PackageBase):
                 spec = constraint['length']
                 if 'min' in spec:
                     translated['minLength'] = max(
-                        translated.get('minLength', -sys.maxint - 1),
+                        translated.get('minLength', -sys.maxsize - 1),
                         int(spec['min']))
                 if 'max' in spec:
                     translated['maxLength'] = min(
-                        translated.get('maxLength', sys.maxint),
+                        translated.get('maxLength', sys.maxsize),
                         int(spec['max']))
 
             elif 'range' in constraint:
