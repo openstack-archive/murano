@@ -8,7 +8,7 @@ Backporting to stable/branches
 ==============================
 
 Since murano is a big-tent OS project it largely follows the
-`openstack stable branch guide <http://docs.openstack.org/project-team-guide/stable-branches.html>`_
+`OpenStack stable branch guide <http://docs.openstack.org/project-team-guide/stable-branches.html>`_
 
 Upstream support phases
 ~~~~~~~~~~~~~~~~~~~~~~~

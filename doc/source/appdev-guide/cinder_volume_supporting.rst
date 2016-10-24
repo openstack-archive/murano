@@ -29,7 +29,7 @@ created by us).
 
 **Example**
 
-#. In the Openstack dashboard, go to :guilabel:`Volumes` to create a volume.
+#. In the OpenStack dashboard, go to :guilabel:`Volumes` to create a volume.
 
 #. Modify the ``ui.yaml`` file:
 
@@ -77,7 +77,7 @@ modified ``Forms`` section of the ``ui.yaml`` file:
 
 Therefore, create a ZIP archive of the built package and upload it to murano.
 Attach created application to the environment. Enter its openstackId (which
-can be found in Openstack dashboard) and path for mounting. For example, you
+can be found in OpenStack dashboard) and path for mounting. For example, you
 can fill the latter with ``/dev/vdb`` value.
 
 After the application is deployed, verify that the volume is attached to the
