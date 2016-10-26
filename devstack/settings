@@ -74,6 +74,3 @@ GLARE_ENDPOINT_TYPE=${GLARE_ENDPOINT_TYPE:-publicURL}
 enable_service murano
 enable_service murano-api
 enable_service murano-engine
-
-# Enable heat orchestration engine and other heat services
-enable_service heat h-api h-api-cfn h-api-cw h-eng
