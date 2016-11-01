@@ -22,7 +22,7 @@ Upload image into glance
 
 To deploy applications with murano, virtual machine images should be uploaded into glance in a special way - *murano_image_info* property should be set.
 
-1. Use the openstack client image create command to import your disk image to glance:
+1. Use the OpenStack client image create command to import your disk image to glance:
 
 .. code-block:: console
 

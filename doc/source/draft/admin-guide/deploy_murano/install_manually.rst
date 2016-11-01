@@ -138,7 +138,7 @@ Install the API service and engine
         virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
 
         [networking]
-        default_dns = 8.8.8.8 # In case openstack neutron has no default
+        default_dns = 8.8.8.8 # In case OpenStack neutron has no default
                               # DNS configured
 
         [oslo_messaging_notifications]
