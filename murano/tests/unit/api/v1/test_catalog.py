@@ -1289,7 +1289,7 @@ This is a fake zip archive
     def test_add_long_category(self):
         """Test that category name does not exceed 80 characters
 
-        Check that a category that contains more then 80 characters
+        Check that a category that contains more than 80 characters
         fails to be added
         """
 
