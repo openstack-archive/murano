@@ -34,14 +34,15 @@ def _get_keystone_auth(trust_id=None):
         kwargs = {
             'auth_url':
                 cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri.replace('v2.0', 'v3'),
-            'username': cfg.CONF[CFG_KEYSTONE_GROUP].admin_user,
-            'password': cfg.CONF[CFG_KEYSTONE_GROUP].admin_password,
-            'user_domain_name': "Default"
+            'username': cfg.CONF[CFG_KEYSTONE_GROUP].username,
+            'password': cfg.CONF[CFG_KEYSTONE_GROUP].password,
+            'user_domain_name': cfg.CONF[CFG_KEYSTONE_GROUP].user_domain_name
         }
         if not trust_id:
             kwargs['project_name'] = \
-                cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
-            kwargs['project_domain_name'] = "Default"
+                cfg.CONF[CFG_KEYSTONE_GROUP].project_name
+            kwargs['project_domain_name'] = \
+                cfg.CONF[CFG_KEYSTONE_GROUP].project_domain_name
         else:
             kwargs['trust_id'] = trust_id
         auth = identity.Password(**kwargs)

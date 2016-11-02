@@ -168,9 +168,9 @@ class MuranoTestRunner(object):
     def _validate_keystone_opts(self, args):
         ks_opts_to_config = {
             'auth_url': 'auth_uri',
-            'username': 'admin_user',
-            'password': 'admin_password',
-            'project_name': 'admin_tenant_name'}
+            'username': 'username',
+            'password': 'password',
+            'project_name': 'project_name'}
 
         ks_opts = {'auth_url': getattr(args, 'os_auth_url', None),
                    'username': getattr(args, 'os_username', None),
