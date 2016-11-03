@@ -19,6 +19,11 @@ sections (for version 2.x):
 * **Templates**
     An auxiliary section, used together with an Application section
     to help with object model composing. *Optional*
+* **Parameters**
+    An auxiliary section for evaluated once parameters. *Optional*
+* **ParametersSource**
+    A static action name (ClassName.methodName) to call for additional
+    parameters. *Optional*
 * **Application**
     Object model description passed to murano engine and used for application
     deployment. *Required*
@@ -83,52 +88,112 @@ Version history
 |         |   validator overloading with single ``regexpValidator`` or        |                   |
 |         |   multiple *validators* attribute.                                |                   |
 +---------+-------------------------------------------------------------------+-------------------+
+| 2.4     | - Parameters and ParametersSource sections were added             | Ocata             |
+|         | - ref() YAQL function were added to Application DSL               |                   |
+|         | - YAQL expressions can be used anywhere in the form definition    |                   |
+|         | - choice control accepts choices in dictionary format             |                   |
++---------+-------------------------------------------------------------------+-------------------+
 
-Application and Templates
--------------------------
+Application
+-----------
 
 The Application section describes an *application object model*.
-This model will be translated into JSON, and an application will be
-deployed according to that JSON. The application section should
-contain all necessary keys that are required by the murano-engine to
-deploy an application. Note that the system section of the object model goes
-under the *?*. So murano recognizes that instead of simple value,
-MuranoPL object is used. You can pick parameters you got from a user
-(they should be described in the Forms section) and pick the right place
-where they should be set. To do this `YAQL
-<https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`_ is
-used. Below is an example of how two YAQL functions are used for object model
-generation:
+The model is a dictionary (document) of application property values (inputs).
+Property value might be of any JSON-serializable type (including lists and
+maps). In addition the value can be of an object type (another application,
+application component, list of components etc.). Object properties are
+represented either by the object model of the component (i.e. dictionary) or
+by an object ID (string) if the object was already defined elsewhere.
+Each object definition (including the one in Application itself) must have a
+special ``?`` key called ``object header``. This key holds object metadata most
+important of which is the object type name. Thus the Application might look
+like this:
 
-* **generateHostname** is used for a machine hostname template generation;
-  it accepts two arguments: name pattern (string) and index (integer). If '#'
-  symbol is present in name pattern, it will be replaced with the index
-  provided. If pattern is not given, a random name will be generated.
-* **repeat** is used to produce a list of data snippets, given the template
-  snippet (first argument) and number of times it should be reproduced (second
-  argument). Inside that template snippet current step can be referenced as
-  *$index*.
+.. code-block:: yaml
 
-.. note::
-   While evaluating YAQL expressions referenced from
-   **Application** section (as well as almost all attributes inside
-   **Forms** section, see later), *$* root object is set to the list of
-   dictionaries with cleaned validated forms' data. For example, to obtain
-   a cleaned value of field *name* of form *appConfiguration* , you should reference it
-   as *$.appConfiguration.name*. This context will be called as a
-   **standard context** throughout the text.
+   Application:
+     ?:
+        type: "com.myCompany.myNamespace.MyClass"
+     property1: "string property value"
+     property2: 123
+     property3:
+         key1: value1
+         key2: [1, false, null]
+     property4:
+       ?:
+          type: "com.myCompany.myNamespace.MyComponent"
+       property: value
 
-*Example:*
+However in most cases the values in object model should come from input fields
+rather than being static as in example above. To achieve this, object model
+values can also be of a `YAQL <https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`
+expression type. With expressions language it becomes possible to retrieve
+input control values, do some calculations and data transformations (queries).
+Any YAML value that is not enclosed in quote marks and conforms to the YAQL
+syntax is considered to be a YAQL expression. There is also an explicit
+YAML tag for the YAQL expressions: ``!yaql``.
+
+So with the YAQL addition ``Application`` section might look like this:
+
+.. code-block:: yaml
+
+   Application:
+     ?:
+        type: "com.myCompany.myNamespace.MyClass"
+     property1: $.formName.controlName
+     property2: 100 + 20 + 3
+     property3:
+         !yaql "'KEY1'.toLower()'": !yaql "value1 + '1'"
+         key2: [$parameter, not true]
+     property4: null
+
+When evaluating YAQL expressions ``$`` is set to the forms data (list of
+dictionaries with cleaned validated forms' data) and templates and parameters
+are available using $templateName ($parameterName) syntax. See below on
+templates and parameters.
+
+YAQL comes with hundreds of functions bundled. In addition to that there are
+another four functions provided by murano dashboard:
+
+* **generateHostname(pattern, index)** is used for a machine hostname template
+  generation. It accepts two arguments: name pattern (string) and index
+  (integer). If '#' symbol is present in name pattern, it will be replaced
+  with the index provided. If pattern is an empty string, a random name will be
+  generated.
+* **repeat(template, times)** is used to produce a list of data snippets, given
+  the template snippet (first argument) and number of times it should be
+  reproduced (second argument). Inside that template snippet current step can
+  be referenced as *$index*.
+* **name()** returns current application name.
+* **ref(templateName [, parameterName] [, idOnly])** is used to generate object
+  definition from the template and then reference it several times in the
+  object model. This function evaluates template ``templateName`` and
+  fixes the result in parameters under ``parameterName`` key (or
+  ``templateName`` if the second parameter was omitted). Then it generates
+  object ID and places it into ``?/id`` field. On the first use of
+  ``parameterName`` or if ``idOnly`` is ``false`` the function will return
+  the whole object structure. On subsequent calls or if ``idOnly`` is
+  ``true`` it will return the ID that was generated upon the first call.
+
+Templates
+---------
+
+It is often that application object model contains number of similar instances
+of the same component/class. For example it might be list of servers for
+multi-server application or list of nodes or list of components. For such cases
+UI definition markup allow to give the repeated object model snippet a name
+and then refer to it by the name in the application object model.
+Such snippets are placed into ``Templates`` section:
 
 .. code-block:: yaml
 
    Templates:
      primaryController:
         ?:
-          type: io.murano.windows.activeDirectory.PrimaryController
+          type: "io.murano.windows.activeDirectory.PrimaryController"
         host:
           ?:
-            type: io.murano.windows.Host
+            type: "io.murano.windows.Host"
           adminPassword: $.appConfiguration.adminPassword
           name: generateHostname($.appConfiguration.unitNamingPattern, 1)
           flavor: $.instanceConfiguration.flavor
@@ -136,20 +201,122 @@ generation:
 
       secondaryController:
         ?:
-          type: io.murano.windows.activeDirectory.SecondaryController
+          type: "io.murano.windows.activeDirectory.SecondaryController"
         host:
           ?:
-            type: io.murano.windows.Host
+            type: "io.murano.windows.Host"
           adminPassword: $.appConfiguration.adminPassword
           name: generateHostname($.appConfiguration.unitNamingPattern, $index + 1)
           flavor: $.instanceConfiguration.flavor
           image: $.instanceConfiguration.osImage
+
+Then the template can be inserted into application object model or to another
+template using ``$templateName`` syntax. It is often case that it is used
+together with ``repeat`` function to put several instances of template. In
+this case templates may use of ``$index`` variable which will hold current
+iteration number:
+
+.. code-block:: yaml
 
    Application:
      ?:
        type: io.murano.windows.activeDirectory.ActiveDirectory
      primaryController: $primaryController
      secondaryControllers: repeat($secondaryController, $.appConfiguration.dcInstances - 1)
+
+
+It is important to remember that templates are evaluated upon each access or
+``repeat()`` iteration. Thus if the template has some properties set to a
+random or generated values they are going to be different for each instance
+of the template.
+
+Another use case for templates is when single object is referenced several
+times within application object model:
+
+.. code-block:: yaml
+
+   Templates:
+     instance:
+        ?:
+          type: "io.murano.resources.LinuxMuranoInstance"
+        image: myImage
+        flavor: "m1.small"
+
+   Application:
+     ?:
+       type: "com.example.MyApp"
+     components:
+       - ?:
+           type: "com.example.MyComponentType1"
+         instance: ref(instance)
+       - ?:
+           type: "com.example.MyComponentType2"
+         instance: ref(instance)
+
+In example above there are two components that uses the same server instance.
+If this example had ``$instance`` instead of ``ref(instance)`` that would
+be two unrelated servers based on the same template i.e. with the same image
+and flavor, but not the same VM.
+
+
+Parameters and ParametersSource
+-------------------------------
+
+Parameters are values that are used to parametrize the UI form and/or
+application object model. Parameters are put into ``Parameters`` section and
+accessed using ``$parameterName`` syntax:
+
+.. code-block:: yaml
+
+   Parameters:
+     param1: "Hello!"
+
+   Application:
+     ?:
+       type: "com.example.MyApp"
+     stringProperty: $param1
+
+Parameters are very similar to Templates with two differences:
+
+#. Parameter values are evaluated only once per application instance at the
+   very beginning whereas templates are evaluated on each access.
+
+#. Parameter values can be used to initialize UI control attributes (e.g.
+   initial text box value, list of choices for a drop down etc.)
+
+However the most powerful feature about parameters is that their values
+might be obtained from the application class. Here is how to do it:
+
+#. In one of the classes in the MuranoPL package (usually the main application
+   class define a static action method without arguments that returns a
+   dictionary of variables:
+
+    .. code-block:: yaml
+
+       Name: "com.example.MyApp"
+       Methods:
+         myMethod:
+           Usage: Static
+           Scope: Public
+           Body:
+             # arbitrary MuranoPL code can be used here
+             Return:
+               var1: value1
+               var2: 123
+
+#. In UI definition file add
+    .. code-block:: yaml
+
+       ParametersSource: "com.example.MyApp.myMethod"
+
+   The class name may be omitted. In this case the dashboard will try to use
+   the type of Application object or package FQN for that purpose.
+
+The values returned by the method are going to be merged into Parameters
+section like if they were defined statically.
+
+
+
 
 
 Forms
@@ -159,7 +326,7 @@ This section describes markup elements for defining forms, which are currently
 rendered and validated with Django. Each form has a name, field definitions
 (mandatory), and validator definitions (optionally).
 
-Note that each form is splitted into 2 parts:
+Note that each form is split into 2 parts:
 
 * **input area** - left side, where all the controls are located
 * **description area** - right side, where descriptions of the controls are located
@@ -175,6 +342,9 @@ Currently supported options for **type** attribute are:
 * *boolean* - boolean field, rendered as a checkbox
 * *text* - same as string, but with a multi-line input
 * *integer* - integer field with an appropriate validation, one-line text input
+* *choice* - drop-down list of variants. Each variant has a display string that
+  is going to be displayed to the user and associated key that is going to be
+  a control value
 * *password* - text field with validation for strong password, rendered as two
   masked text inputs (second one is for password confirmation)
 * *clusterip* - specific text field, used for entering cluster IP address
@@ -215,6 +385,10 @@ field attributes. The most common attributes are the following:
 * **minLength**, **maxLength** (for string fields) and **minValue**,
   **maxValue** (for integer fields) are transparently translated into django
   validation properties.
+* **choices** - a choices for the ``choice`` control type. The format is
+  ``[["key1", "display value1"], ["key2", "display value2"]]``. Starting from
+  version 2.4 this can also be passed as a
+  ``{key1: "display value1", key2: "display value2"}``
 * **regexpValidator** - regular expression to validate user input. Used with
   *string* or *password* field.
 * **errorMessages** - dictionary with optional 'invalid' and 'required' keys
@@ -416,3 +590,9 @@ fields.
              description: Select an availability zone, where service will be installed.
              required: false
 
+Control attributes might be initialized with a YAQL expression. However prior
+to version 2.4 it only worked for forms other than the first. It was designed
+to initialize controls with values input on the previous step. Starting with
+version 2.4 this limitation was removed and it become possible to use
+arbitrary YAQL expressions for any of control fields on any forms and use
+parameter values as part of these expressions.
