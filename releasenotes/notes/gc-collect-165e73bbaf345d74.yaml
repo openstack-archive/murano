@@ -9,5 +9,5 @@ features:
     destroyed before their parents and, when possible, before objects
     that are subscribed to their destruction notifications.
   - Internally, both pre-deployment garbage collection (that was done by
-    comparision of ``Objects`` and ``ObjectsCopy``) and post-deployment
+    comparison of ``Objects`` and ``ObjectsCopy``) and post-deployment
     orphan object collection are now done through the new GC.
