@@ -519,6 +519,9 @@ function configure_local_settings_py() {
         sed -e "s/\(^\s*OPENSTACK_HOST\s*=\).*$/\1 '$HOST_IP'/" -i "$HORIZON_LOCAL_CONFIG"
     fi
 
+    local local_settings=${HORIZON_LOCAL_CONFIG:-$HORIZON_DIR/openstack_dashboard/local/local_settings.py}
+    _horizon_config_set $HORIZON_LOCAL_CONFIG "" ALLOWED_HOSTS [\'*\']
+
     # Install Murano as plugin for Horizon
     ln -sf $MURANO_DASHBOARD_DIR/muranodashboard/local/enabled/*.py $HORIZON_DIR/openstack_dashboard/local/enabled/
 
