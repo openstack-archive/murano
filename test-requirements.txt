@@ -25,5 +25,5 @@ psycopg2>=2.5 # LGPL/ZPL
 oslosphinx>=4.7.0 # Apache-2.0
 sphinx!=1.3b1,<1.4,>=1.2.1 # BSD
 sphinxcontrib-httpdomain # BSD
-reno>=1.8.0 # Apache2
+reno>=1.8.0 # Apache-2.0
 openstackdocstheme>=1.5.0 # Apache-2.0
