@@ -562,6 +562,57 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.assertIn("Search by parameter 'tag' caused an  error",
                       warnings[0])
 
+    def test_packages_filter_by_search(self):
+        self._set_policy_rules(
+            {'get_package': '',
+             'manage_public_package': ''}
+        )
+        excepted_pkg1 = self._add_pkg("test_tenant",
+                                      type='Application',
+                                      name='awcloud',
+                                      description='some context')
+        excepted_pkg2 = self._add_pkg("test_tenant",
+                                      type='Application',
+                                      name='mysql',
+                                      description='awcloud product')
+        excepted_pkg3 = self._add_pkg("test_tenant",
+                                      type='Application',
+                                      name='package3',
+                                      author='mysql author')
+
+        # filter by search=awcloud can see 2 pkgs
+        req_awc = self._get('/catalog/packages',
+                            params={'search': 'awcloud'})
+
+        # filter by search=mysql only see 2 pkgs
+        req_mysql = self._get('/catalog/packages',
+                              params={'search': 'mysql'})
+
+        for dummy in range(2):
+            self.expect_policy_check('get_package')
+            self.expect_policy_check('manage_public_package')
+
+        res_awc = req_awc.get_response(self.api)
+
+        self.assertEqual(200, res_awc.status_code)
+        self.assertEqual(2, len(res_awc.json['packages']))
+
+        self.assertEqual(excepted_pkg1.name,
+                         res_awc.json['packages'][0]['name'])
+
+        self.assertEqual(excepted_pkg2.name,
+                         res_awc.json['packages'][1]['name'])
+
+        res_mysql = req_mysql.get_response(self.api)
+
+        self.assertEqual(200, res_mysql.status_code)
+        self.assertEqual(2, len(res_mysql.json['packages']))
+
+        self.assertEqual(excepted_pkg2.name,
+                         res_mysql.json['packages'][0]['name'])
+        self.assertEqual(excepted_pkg3.name,
+                         res_mysql.json['packages'][1]['name'])
+
     def test_packages(self):
         self._set_policy_rules(
             {'get_package': '',

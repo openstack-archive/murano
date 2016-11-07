@@ -82,7 +82,7 @@ For an admin role all packages are available.
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
 | ``include_disabled`` | bool        | Include disabled packages in a the result                                                                                    |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
-| ``search``           | string      | Gives opportunity to search specified data by all the package parameters                                                     |
+| ``search``           | string      | Gives opportunity to search specified data by all the package parameters and order packages                        |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
 | ``class_name``       | string      | Search only for packages, that use specified class                                                                           |
 +----------------------+-------------+------------------------------------------------------------------------------------------------------------------------------+
