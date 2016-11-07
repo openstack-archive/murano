@@ -569,7 +569,7 @@ appropriate values:
  Adds an application or multiple applications to the environment template.
 
 :command:`murano env-template-del-app <ENV_TEMPLATE_ID> <ENV_TEMPLATE_APP_ID>`
- Deletes an application from the enviroment template.
+ Deletes an application from the environment template.
 
 :command:`murano env-template-list`
  Lists the environments templates.
