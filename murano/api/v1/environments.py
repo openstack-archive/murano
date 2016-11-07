@@ -44,12 +44,17 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         all_tenants = request.GET.get('all_tenants', 'false').lower() == 'true'
-        LOG.debug('Environments:List <all_tenants: {tenants}>'.format(
-                  tenants=all_tenants))
+        tenant = request.GET.get('tenant', None)
+        LOG.debug('Environments:List <all_tenants: {tenants}, '
+                  'tenant: {tenant}>'.format(tenants=all_tenants,
+                                             tenant=tenant))
 
         if all_tenants:
             policy.check('list_environments_all_tenants', request.context)
             filters = {}
+        elif tenant:
+            policy.check('list_environments_all_tenants', request.context)
+            filters = {'tenant_id': tenant}
         else:
             policy.check('list_environments', request.context)
             # Only environments from same tenant as user should be returned

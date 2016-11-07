@@ -60,12 +60,44 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                          tenant="other")
         req.get_response(self.api)
 
-        self._check_listing(False, 'list_environments', 0)
-        self._check_listing(True, 'list_environments_all_tenants', 1)
+        self._check_listing(False, None, 'list_environments', 0)
+        self._check_listing(True, None, 'list_environments_all_tenants', 1)
 
-    def _check_listing(self, all_tenants, expected_check, expected_count):
+    def test_list_given_tenant(self):
+        self._set_policy_rules(
+            {'list_environments': '@',
+             'create_environment': '@',
+             'list_environments_all_tenants': '@'}
+        )
+        self.expect_policy_check('create_environment')
+        self.expect_policy_check('create_environment')
+        self.expect_policy_check('create_environment')
+
+        body = {'name': 'my_env1'}
+        req = self._post('/environments', jsonutils.dump_as_bytes(body),
+                         tenant="foo")
+        req.get_response(self.api)
+        body = {'name': 'my_env2'}
+        req = self._post('/environments', jsonutils.dump_as_bytes(body),
+                         tenant="bar")
+        req.get_response(self.api)
+
+        body = {'name': 'my_env3'}
+        req = self._post('/environments', jsonutils.dump_as_bytes(body),
+                         tenant="bar")
+        req.get_response(self.api)
+
+        self._check_listing(False, "foo", 'list_environments_all_tenants', 1)
+        self._check_listing(False, "bar", 'list_environments_all_tenants', 2)
+        self._check_listing(False, "other", 'list_environments_all_tenants', 0)
+
+    def _check_listing(self, all_tenants, tenant, expected_check,
+                       expected_count):
         self.expect_policy_check(expected_check)
-        req = self._get('/environments', {'all_tenants': all_tenants})
+        params = {'all_tenants': all_tenants}
+        if tenant:
+            params['tenant'] = tenant
+        req = self._get('/environments', params)
         response = req.get_response(self.api)
         body = jsonutils.loads(response.body)
         self.assertEqual(200, response.status_code)
