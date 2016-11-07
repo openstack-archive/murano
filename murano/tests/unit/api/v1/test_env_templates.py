@@ -14,6 +14,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 import mock
 
 from oslo_config import fixture as config_fixture
@@ -65,8 +66,8 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'mytemp',
                     'description_text': 'description',
                     'version': 0,
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1]}
+                    'created': datetime.isoformat(fake_now)[:-7],
+                    'updated': datetime.isoformat(fake_now)[:-7]}
 
         body = {'name': 'mytemp', 'description_text': 'description'}
         req = self._post('/templates', jsonutils.dump_as_bytes(body))
@@ -412,8 +413,8 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
 
-        expected['created'] = timeutils.isotime(expected['created'])[:-1]
-        expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
+        expected['created'] = datetime.isoformat(expected['created'])[:-7]
+        expected['updated'] = datetime.isoformat(expected['updated'])[:-7]
 
         self.assertEqual(expected, jsonutils.loads(result.body))
 
@@ -506,8 +507,8 @@ class TestEnvTemplateApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'env_template_name',
                     'description_text': '',
                     'version': 0,
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1]}
+                    'created': datetime.isoformat(fake_now)[:-7],
+                    'updated': datetime.isoformat(fake_now)[:-7]}
 
         services = [
             {

@@ -13,10 +13,10 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
 
 from oslo_config import cfg
 import oslo_messaging as messaging
-from oslo_utils import timeutils
 import six
 
 from murano.common import uuidutils
@@ -50,7 +50,7 @@ class StatusReporter(object):
             'details': details,
             'level': level,
             'environment_id': self._environment_id,
-            'timestamp': timeutils.isotime(subsecond=True)
+            'timestamp': datetime.utcnow().isoformat()
         }
         self._notifier.info({}, 'murano.report_notification', body)
 

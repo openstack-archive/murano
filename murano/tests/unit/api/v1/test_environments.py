@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from datetime import datetime
+
 from oslo_config import fixture as config_fixture
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
@@ -123,8 +125,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'my_env',
                     'description_text': 'description',
                     'version': 0,
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1],
+                    'created': datetime.isoformat(fake_now)[:-7],
+                    'updated': datetime.isoformat(fake_now)[:-7],
                     }
 
         body = {'name': 'my_env', 'description_text': 'description'}
@@ -314,8 +316,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         result = req.get_response(self.api)
         self.assertEqual(200, result.status_code)
 
-        expected['created'] = timeutils.isotime(expected['created'])[:-1]
-        expected['updated'] = timeutils.isotime(expected['updated'])[:-1]
+        expected['created'] = datetime.isoformat(expected['created'])[:-7]
+        expected['updated'] = datetime.isoformat(expected['updated'])[:-7]
         expected['acquired_by'] = None
 
         self.assertEqual(expected, jsonutils.loads(result.body))
@@ -439,8 +441,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'my-env',
                     'version': 0,
                     'description_text': '',
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1],
+                    'created': datetime.isoformat(fake_now)[:-7],
+                    'updated': datetime.isoformat(fake_now)[:-7],
                     'acquired_by': None,
                     'services': [],
                     'status': 'ready',
@@ -486,8 +488,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
                     'name': 'my-env',
                     'version': 0,
                     'description_text': '',
-                    'created': timeutils.isotime(fake_now)[:-1],
-                    'updated': timeutils.isotime(fake_now)[:-1],
+                    'created': datetime.isoformat(fake_now)[:-7],
+                    'updated': datetime.isoformat(fake_now)[:-7],
                     'acquired_by': sess_id,
                     'services': [],
                     'status': states.EnvironmentStatus.DEPLOYING,

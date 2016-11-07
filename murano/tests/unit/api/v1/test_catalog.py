@@ -14,6 +14,7 @@
 # limitations under the License.
 
 import cgi
+from datetime import datetime
 import imghdr
 import os
 import tempfile
@@ -1193,8 +1194,8 @@ This is a fake zip archive
 
         expected = {
             'name': 'new_category',
-            'created': timeutils.isotime(fake_now)[:-1],
-            'updated': timeutils.isotime(fake_now)[:-1],
+            'created': datetime.isoformat(fake_now)[:-7],
+            'updated': datetime.isoformat(fake_now)[:-7],
             'package_count': 0,
         }
 
@@ -1217,8 +1218,8 @@ This is a fake zip archive
 
         expected = {
             'name': 'new_category',
-            'created': timeutils.isotime(fake_now)[:-1],
-            'updated': timeutils.isotime(fake_now)[:-1],
+            'created': datetime.isoformat(fake_now)[:-7],
+            'updated': datetime.isoformat(fake_now)[:-7],
             'package_count': 0,
             'packages': []
         }
