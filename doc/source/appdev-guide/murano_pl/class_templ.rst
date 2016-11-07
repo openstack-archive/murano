@@ -620,7 +620,7 @@ The following block constructs are available:
 | |   - block               |                                                                                       |
 +---------------------------+---------------------------------------------------------------------------------------+
 
-Notice, that if you have more then one block construct in your workflow, you
+Notice, that if you have more than one block construct in your workflow, you
 need to insert dashes before each construct. For example::
 
   Body:
