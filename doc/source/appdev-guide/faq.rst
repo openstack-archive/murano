@@ -1,8 +1,5 @@
 .. _faq:
 
-.. toctree::
-   :maxdepth: 2
-
 ===
 FAQ
 ===
