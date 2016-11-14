@@ -62,8 +62,8 @@ client.
 
    administrator-guide/admin_index
 
-Developer Documentation
-~~~~~~~~~~~~~~~~~~~~~~~
+Application Developer Documentation
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Learn how to compose an application package and get it ready for uploading to
 Murano.
@@ -71,8 +71,7 @@ Murano.
 .. toctree::
    :maxdepth: 1
 
-   appdev-guide/step-by-step/step_by_step
-   appdev-guide/developerguide/developer_index
+   appdev-guide/developer_index
    appdev-guide/faq
 
 Contributor Documentation
@@ -92,3 +91,4 @@ Other Documentation
    :maxdepth: 1
 
    appendix/appendix_index
+   appendix/articles/articles_index

@@ -84,11 +84,11 @@ Application package could be composed manually. Follow the 5 steps below.
 
 `Browse` page looks like:
 
-.. image:: ../figures/chef_server.png
+.. image:: figures/chef_server.png
 
 The configuration form, where you can enter template parameters, will be generated automatically and looks as follows:
 
-.. image:: ../figures/chef_server_form.png
+.. image:: figures/chef_server_form.png
 
 After filling the form the application is ready to be deployed.
 

@@ -1,7 +1,3 @@
-===========================
-Murano API v1 specification
-===========================
-
 General information
 ===================
 
@@ -43,8 +39,3 @@ General information
     All requests include a keystone authentication token header
     (X-Auth-Token). Clients must authenticate with keystone before
     interacting with the murano service.
-
-.. include:: murano-api.rst
-.. include:: murano-repository.rst
-.. include:: murano-env-temp.rst
-
