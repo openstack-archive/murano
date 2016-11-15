@@ -13,12 +13,12 @@
 #    under the License.
 
 import contextlib
-import errno
 import functools
 import os
 
 from oslo_concurrency import lockutils
 from oslo_log import log as logging
+from oslo_utils import fileutils
 from webob import exc
 
 from murano.common.i18n import _
@@ -130,28 +130,6 @@ def verify_session(func):
     return __inner
 
 
-def ensure_tree(path):
-    """Create a directory (and any ancestor directories required).
-
-    :param path: Directory to create
-    :return: bool, whether the directory has actually been created
-    """
-    try:
-        os.makedirs(path)
-    except OSError as e:
-        if e.errno == errno.EEXIST:
-            if not os.path.isdir(path):
-                raise
-            else:
-                return False
-        elif e.errno == errno.EISDIR:
-            return False
-        else:
-            raise
-    else:
-        return True
-
-
 ExclusiveInterProcessLock = lockutils.InterProcessLock
 if os.name == 'nt':
     # no shared locks on windows
@@ -169,7 +147,7 @@ else:
             # to be overridden
             basedir = os.path.dirname(self.path)
             if basedir:
-                made_basedir = ensure_tree(basedir)
+                made_basedir = fileutils.ensure_tree(basedir)
                 if made_basedir:
                     self.logger.debug(
                         'Created lock base path `%s`', basedir)

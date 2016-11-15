@@ -13,9 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import errno
 import mock
-import os
 from webob import exc
 
 from murano.services import states
@@ -186,35 +184,3 @@ class TestUtils(test_base.MuranoTestCase):
     def _test_verify_session(self, request):
         """Helper function for testing above decorator."""
         pass
-
-    @mock.patch('murano.utils.os')
-    def test_ensure_tree_except_os_error(self, mock_os):
-        """Test ensure tree throws the expected exceptions.
-
-        Because OSError is a built-in exception, setattr() can't be called
-        to change its errno.
-        """
-        mock_os.path.isdir.return_value = False
-        os_error = None
-        path = os.path.realpath(__file__)
-        try:
-            os.makedirs(path)
-        except OSError as e:
-            os_error = e
-        self.assertEqual(errno.EEXIST, os_error.errno)
-        self.assertFalse(os.path.isdir(path))
-        mock_os.makedirs.side_effect = os_error
-        self.assertRaises(OSError, utils.ensure_tree, path)
-
-    @mock.patch('murano.utils.os')
-    def test_ensure_tree_with_return_false(self, mock_os):
-        mock_os.path.isdir.return_value = True
-        path = os.path.dirname(os.path.realpath(__file__))
-        try:
-            os.makedirs(path)
-        except OSError as e:
-            os_error = e
-        self.assertEqual(errno.EEXIST, os_error.errno)
-        self.assertTrue(os.path.isdir(path))
-        mock_os.makedirs.side_effect = os_error
-        self.assertFalse(utils.ensure_tree(path))
