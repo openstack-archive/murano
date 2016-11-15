@@ -1,7 +1,7 @@
 .. _quickstart:
 
 ==========
-Quickstart
+QuickStart
 ==========
 
 This is a brief walkthrough to quickly get you familiar with the basic

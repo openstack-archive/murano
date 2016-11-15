@@ -38,4 +38,4 @@ The application package root folder should contain the following:
 Here is the visual representation of the Murano application
 package structure:
 
-.. image:: ../../figures/structure.png
+.. image:: ../figures/structure.png

@@ -2,7 +2,7 @@
 
 .. _contributor-guide:
 
-Contributor guide
+Contributor Guide
 ~~~~~~~~~~~~~~~~~
 
 .. toctree::

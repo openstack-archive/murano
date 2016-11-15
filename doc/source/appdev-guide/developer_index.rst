@@ -1,11 +1,12 @@
 .. _developer-guide:
 
-Developer guide
-~~~~~~~~~~~~~~~
+Application Developer Guide
+~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 .. toctree::
    :maxdepth: 1
 
+   step-by-step/step_by_step
    exec_plan
    hot_packages
    murano_pl
