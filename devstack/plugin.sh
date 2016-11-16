@@ -184,15 +184,14 @@ function configure_murano {
     #-------------------------
 
     # Setup keystone_authtoken section
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_type password
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_uri $KEYSTONE_SERVICE_URI
-    iniset $MURANO_CONF_FILE keystone_authtoken username $MURANO_ADMIN_USER
-    iniset $MURANO_CONF_FILE keystone_authtoken password $SERVICE_PASSWORD
-    iniset $MURANO_CONF_FILE keystone_authtoken user_domain_name "$SERVICE_DOMAIN_NAME"
-    iniset $MURANO_CONF_FILE keystone_authtoken project_name $SERVICE_PROJECT_NAME
-    iniset $MURANO_CONF_FILE keystone_authtoken project_domain_name "$SERVICE_DOMAIN_NAME"
-    iniset $MURANO_CONF_FILE keystone_authtoken cafile $SSL_BUNDLE_FILE
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_url $KEYSTONE_AUTH_URI
+    iniset $MURANO_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
+    iniset $MURANO_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
+    iniset $MURANO_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
+    iniset $MURANO_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $MURANO_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
+    iniset $MURANO_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
+    iniset $MURANO_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
+    iniset $MURANO_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
 
     configure_murano_rpc_backend
 
@@ -297,11 +296,11 @@ function configure_service_broker {
     iniset $MURANO_CFAPI_CONF_FILE database connection `database_connection_url murano_cfapi`
 
     # Setup keystone_authtoken section
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
+    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
     iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
