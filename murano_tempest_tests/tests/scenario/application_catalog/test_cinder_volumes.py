@@ -49,7 +49,6 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.purge_stacks()
         cls.delete_volume(cls.volume)
         cls.client.delete_package(cls.package['id'])
         os.remove(cls.abs_archive_path)
@@ -368,7 +367,6 @@ class TestCinderVolumeIsolatedAdmin(
 
     @classmethod
     def resource_cleanup(cls):
-        cls.purge_stacks()
         cls.delete_volume(cls.volume)
         cls.client.delete_package(cls.package['id'])
         os.remove(cls.abs_archive_path)
