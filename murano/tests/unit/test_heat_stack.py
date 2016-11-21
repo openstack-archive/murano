@@ -198,7 +198,8 @@ class TestHeatStack(base.MuranoTestCase):
         hs._hot_environment = 'environments'
         hs._parameters = {}
         hs._applied = False
-        hs.push(async=True)
+        with mock.patch('murano.dsl.dsl.get_execution_session'):
+            hs.push(async=True)
 
         expected_template = {
             'heat_template_version': '2013-05-23',

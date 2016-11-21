@@ -59,7 +59,8 @@ class HeatStack(object):
 
     def _kill_push_thread(self):
         if self._is_push_thread_alive():
-            self._push_thread.kill()
+            self._push_thread.cancel()
+            self._wait_push_thread()
 
     def _wait_push_thread(self):
         if not self._is_push_thread_alive():
@@ -271,8 +272,18 @@ class HeatStack(object):
 
         self._kill_push_thread()
         if async:
+            if self._push_thread is None:
+
+                def cleanup():
+                    try:
+                        self._wait_push_thread()
+                    finally:
+                        self._push_thread = None
+
+                dsl.get_execution_session().on_session_finish(cleanup)
+
             self._push_thread =\
-                eventlet.greenthread.spawn_after_local(
+                eventlet.greenthread.spawn_after(
                     1, self._push, helpers.get_object_store())
         else:
             self._push()

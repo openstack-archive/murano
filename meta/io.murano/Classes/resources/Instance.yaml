@@ -332,7 +332,7 @@ Methods:
       - $template: $region.stack.current()
       - If: $template.get(resources) and $template.get(outputs) and not sys:GC.isDoomed($region)
         Then:
-          - $region.stack.push()
+          - $region.stack.push(async => true)
       - $.setAttr(instanceResources, [])
       - $.setAttr(instanceOutputs, [])
       - $.setAttr(fipAssigned, false)
