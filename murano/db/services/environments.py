@@ -108,13 +108,15 @@ class EnvironmentServices(object):
                                                               network_driver)
         objects['?']['type'] = 'io.murano.Environment'
         objects['?']['metadata'] = {}
-        environment_params['tenant_id'] = context.tenant
 
         data = {
             'Objects': objects,
-            'Attributes': []
+            'Attributes': [],
+            'project_id': context.tenant,
+            'user_id': context.user
         }
 
+        environment_params['tenant_id'] = context.tenant
         environment = models.Environment()
         environment.update(environment_params)
 
@@ -235,7 +237,7 @@ class EnvironmentServices(object):
         }
 
     @staticmethod
-    def deploy(session, unit, token):
+    def deploy(session, unit, context):
         environment = unit.query(models.Environment).get(
             session.environment_id)
 
@@ -243,7 +245,8 @@ class EnvironmentServices(object):
                 'ObjectsCopy' not in session.description):
             EnvironmentServices.remove(session.environment_id)
         else:
-            sessions.SessionServices.deploy(session, environment, unit, token)
+            sessions.SessionServices.deploy(
+                session, environment, unit, context)
 
     @staticmethod
     def _objectify(data, replacements):

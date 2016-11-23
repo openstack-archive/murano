@@ -48,7 +48,8 @@ class TestStaticActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         rpc_task = {
             'action': action,
             'token': None,
-            'tenant_id': 'test_tenant',
+            'project_id': 'test_tenant',
+            'user_id': 'test_user',
             'id': mock.ANY
         }
 

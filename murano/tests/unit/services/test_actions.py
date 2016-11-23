@@ -34,11 +34,14 @@ class TestActions(test_base.MuranoTestCase):
                 },
                 'applications': [],
                 'services': ['service1', 'service2']
-            }
+            },
+            'project_id': 'XXX',
+            'user_id': 'YYY'
         }
         mock_session = mock.MagicMock(description=mock_description)
-        mock_token = 'test_token'
-
+        mock_context = mock.Mock(auth_token='test_token',
+                                 tenant='test_tenant',
+                                 user='test_user')
         expected_task = {
             'action': {
                 'object_id': mock_target_obj,
@@ -52,10 +55,13 @@ class TestActions(test_base.MuranoTestCase):
                     },
                     'applications':
                         mock_session.description['Objects']['services']
-                }
+                },
+                'project_id': 'XXX',
+                'user_id': 'YYY'
             },
-            'token': mock_token,
-            'tenant_id': mock_environment.tenant_id,
+            'token': 'test_token',
+            'project_id': 'test_tenant',
+            'user_id': 'test_user',
             'id': mock_environment.id
         }
 
@@ -64,7 +70,7 @@ class TestActions(test_base.MuranoTestCase):
                                                          mock_args,
                                                          mock_environment,
                                                          mock_session,
-                                                         mock_token)
+                                                         mock_context)
 
         self.assertEqual(expected_task, task)
 
@@ -115,7 +121,10 @@ class TestActions(test_base.MuranoTestCase):
         test_args = 'test_args'
         test_environment = 'test_environment'
         test_session = 'test_session'
-        test_token = 'test_token'
+        context = mock.Mock()
+        context.auth_token = 'test_token'
+        context.tenant = 'test_tenant'
+        context.user = 'test_user'
         test_unit = 'test_unit'
 
         task_id = actions.ActionServices.submit_task(test_action_name,
@@ -123,7 +132,7 @@ class TestActions(test_base.MuranoTestCase):
                                                      test_args,
                                                      test_environment,
                                                      test_session,
-                                                     test_token,
+                                                     context,
                                                      test_unit)
 
         self.assertEqual('123', task_id)
@@ -132,7 +141,7 @@ class TestActions(test_base.MuranoTestCase):
                                                         test_args,
                                                         test_environment,
                                                         test_session,
-                                                        test_token)
+                                                        context)
         mock_update_task.assert_called_once_with(test_action_name,
                                                  test_session, mock_task,
                                                  test_unit)
