@@ -55,7 +55,7 @@ Base = declarative.declarative_base(cls=_MuranoBase)
 
 
 class Environment(Base, TimestampMixin):
-    """Represents a Environment in the metadata-store."""
+    """Represents an Environment in the metadata-store."""
     __tablename__ = 'environment'
     __table_args__ = (sa.Index(
         'ix_name_tenant_id', 'name', 'tenant_id', unique=True),)
@@ -89,7 +89,7 @@ class Environment(Base, TimestampMixin):
 
 
 class EnvironmentTemplate(Base, TimestampMixin):
-    """Represents a Environment Template in the metadata-store."""
+    """Represents an Environment Template in the metadata-store."""
     __tablename__ = 'environment-template'
 
     id = sa.Column(sa.String(36),

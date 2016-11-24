@@ -107,7 +107,7 @@ class EnvTemplateServices(object):
 
     @staticmethod
     def update(env_template_id, body):
-        """It updates the description of a environment template.
+        """It updates the description of an environment template.
 
            :param env_template_id: Template Id to be deleted.
            :param body: The description to be updated.
