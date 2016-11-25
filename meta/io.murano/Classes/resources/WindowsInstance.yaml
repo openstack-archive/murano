@@ -25,20 +25,20 @@ Methods:
       - groupName:
           Contract: $.string().notNull()
     Body:
-      - $environment: $.find(std:Environment).require()
+      - $region: $.getRegion()
       - $rules:
         - ToPort: 3389
           IpProtocol: tcp
           FromPort: 3389
           External: true
-      - $environment.securityGroupManager.addGroupIngress(
+      - $region.securityGroupManager.addGroupIngress(
           rules => $rules, groupName => $groupName)
 
   prepareUserData:
     Body:
+      - $region: $.getRegion()
+      - $rabbitMqParams: $region.getConfig().agentRabbitMq
       - $resources: new(sys:Resources)
-      - $environment: $.find(std:Environment).require()
-      - $rabbitMqParams: $environment.regionConfigs.get($environment.region).agentRabbitMq
       - $configFile: $resources.string('Agent-v1.template')
       - $initScript: $resources.string('windows-init.ps1')
       - $configReplacements:
@@ -49,12 +49,12 @@ Methods:
           "%RABBITMQ_VHOST%": $rabbitMqParams.virtual_host
           "%RABBITMQ_SSL%": str($rabbitMqParams.ssl).toLower()
           "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
-          "%RESULT_QUEUE%": $environment.agentListener.queueName()
+          "%RESULT_QUEUE%": $region.agentListener.queueName()
       - $scriptReplacements:
           "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
           "%INTERNAL_HOSTNAME%": $.name
           "%MURANO_SERVER_ADDRESS%": coalesce(config(file_server), $rabbitMqParams.host)
           "%CA_ROOT_CERT_BASE64%": ""
-      - Return: 
+      - Return:
           data: $initScript.replace($scriptReplacements)
           format: HEAT_CFNTOOLS
