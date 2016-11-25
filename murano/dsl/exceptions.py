@@ -84,13 +84,13 @@ class MethodNotExposed(Exception):
 class AmbiguousMethodName(Exception):
     def __init__(self, name):
         super(AmbiguousMethodName, self).__init__(
-            'Found more that one method "%s"' % name)
+            'Found more than one method "%s"' % name)
 
 
 class AmbiguousClassName(Exception):
     def __init__(self, name):
         super(AmbiguousClassName, self).__init__(
-            'Found more that one version of class "%s"' % name)
+            'Found more than one version of class "%s"' % name)
 
 
 class DslContractSyntaxError(Exception):
@@ -126,7 +126,7 @@ class PropertyAccessError(Exception):
 class AmbiguousPropertyNameError(PropertyAccessError):
     def __init__(self, name):
         super(AmbiguousPropertyNameError, self).__init__(
-            'Found more that one property "%s"' % name)
+            'Found more than one property "%s"' % name)
 
 
 class NoWriteAccess(PropertyAccessError):
