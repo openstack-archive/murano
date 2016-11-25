@@ -58,14 +58,12 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         categories_list = self.application_catalog_client.list_categories()
         self.assertNotIn(name, categories_list)
 
-    @testtools.testcase.attr('smoke')
     def test_get_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])
         self.assertEqual(self.category['id'], category['id'])
         self.assertEqual(self.category['name'], category['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_add_package_to_new_category_and_remove_it_from_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])

@@ -78,7 +78,6 @@ class TestServices(base.BaseApplicationCatalogTest):
             get_services_list(self.environment['id'], session['id'])
         self.assertEqual(1, len(services_list))
 
-    @testtools.testcase.attr('smoke')
     def test_clear_services_via_put(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -103,7 +102,6 @@ class TestServices(base.BaseApplicationCatalogTest):
             get_services_list(self.environment['id'], session['id'])
         self.assertEqual(1, len(services_list_))
 
-    @testtools.testcase.attr('smoke')
     def test_get_service(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -123,7 +121,6 @@ class TestServices(base.BaseApplicationCatalogTest):
                         session['id'])
         self.assertEqual(service, service_)
 
-    @testtools.testcase.attr('smoke')
     def test_get_services_without_sess_id(self):
         services = self.application_catalog_client.\
             get_services_list(self.environment['id'], None)
