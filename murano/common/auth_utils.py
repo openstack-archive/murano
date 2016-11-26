@@ -176,3 +176,13 @@ def get_session_client_parameters(service_type=None,
             'region_name': region
         })
     return result
+
+
+def get_user(uid):
+    client = _create_keystone_admin_client()
+    return client.users.get(uid).to_dict()
+
+
+def get_project(pid):
+    client = _create_keystone_admin_client()
+    return client.projects.get(pid).to_dict()

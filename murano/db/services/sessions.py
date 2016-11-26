@@ -102,7 +102,7 @@ class SessionServices(object):
         return True
 
     @staticmethod
-    def deploy(session, environment, unit, token):
+    def deploy(session, environment, unit, context):
         """Prepares and deployes environment
 
         Prepares environment for deployment and send deployment command to
@@ -118,4 +118,4 @@ class SessionServices(object):
         actions.ActionServices.submit_task(
             action_name, environment.id,
             {}, environment, session,
-            token, unit)
+            context, unit)

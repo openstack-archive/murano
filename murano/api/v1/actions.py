@@ -57,7 +57,7 @@ class Controller(object):
             raise exc.HTTPForbidden()
 
         task_id = actions.ActionServices.execute(
-            action_id, session, unit, request.context.auth_token, body or {})
+            action_id, session, unit, request.context, body or {})
         return {'task_id': task_id}
 
     @verify_env

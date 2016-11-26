@@ -36,9 +36,13 @@ class TestModelPolicyEnforcer(base.MuranoTestCase):
 
         self.task = {
             'action': {'method': 'deploy'},
-            'model': {'Objects': None},
+            'model': {'Objects': None,
+                      'project_id': 'tenant',
+                      'user_id': 'user'
+                      },
             'token': 'token',
-            'tenant_id': 'environment.tenant_id',
+            'project_id': 'tenant',
+            'user_id': 'user',
             'id': 'environment.id'
         }
 

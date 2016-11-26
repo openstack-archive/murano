@@ -115,6 +115,7 @@ class ControllerTest(object):
         # cfg.CONF.set_default('host', 'server.test')
         self.api_version = '1.0'
         self.tenant = 'test_tenant'
+        self.user = 'test_user'
         self.mock_policy_check = None
         self.mapper = routes.Mapper()
         self.api = router.API(self.mapper)

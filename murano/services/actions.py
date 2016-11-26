@@ -19,7 +19,7 @@ from murano.services import states
 class ActionServices(object):
     @staticmethod
     def create_action_task(action_name, target_obj,
-                           args, environment, session, token):
+                           args, environment, session, context):
         action = None
         if action_name and target_obj:
             action = {
@@ -30,8 +30,9 @@ class ActionServices(object):
         task = {
             'action': action,
             'model': session.description,
-            'token': token,
-            'tenant_id': environment.tenant_id,
+            'token': context.auth_token,
+            'project_id': context.tenant,
+            'user_id': context.user,
             'id': environment.id
         }
         if session.description['Objects'] is not None:
@@ -58,16 +59,16 @@ class ActionServices(object):
 
     @staticmethod
     def submit_task(action_name, target_obj,
-                    args, environment, session, token, unit):
+                    args, environment, session, context, unit):
         task = ActionServices.create_action_task(
             action_name, target_obj, args,
-            environment, session, token)
+            environment, session, context)
         task_id = actions_db.update_task(action_name, session, task, unit)
         rpc.engine().handle_task(task)
         return task_id
 
     @staticmethod
-    def execute(action_id, session, unit, token, args=None):
+    def execute(action_id, session, unit, context, args=None):
         if args is None:
             args = {}
         environment = actions_db.get_environment(session, unit)
@@ -79,7 +80,7 @@ class ActionServices(object):
 
         return ActionServices.submit_task(
             action[1]['name'], action[0], args, environment,
-            session, token, unit)
+            session, context, unit)
 
     @staticmethod
     def find_action(model, action_id):

@@ -35,6 +35,8 @@ Classes:
   io.murano.StackTrace: StackTrace.yaml
   io.murano.SharedIp: SharedIp.yaml
   io.murano.File: File.yaml
+  io.murano.User: User.yaml
+  io.murano.Project: Project.yaml
 
 
   io.murano.configuration.Linux: configuration/Linux.yaml

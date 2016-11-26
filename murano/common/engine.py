@@ -182,7 +182,10 @@ class TaskExecutor(object):
         self._model = task['model']
         self._session = execution_session.ExecutionSession()
         self._session.token = task['token']
-        self._session.project_id = task['tenant_id']
+        self._session.project_id = task['project_id']
+        self._session.user_id = task['user_id']
+        self._session.environment_owner_project_id = self._model['project_id']
+        self._session.environment_owner_user_id = self._model['user_id']
         self._session.system_attributes = self._model.get('SystemData', {})
         self._reporter = reporter
 
@@ -202,6 +205,8 @@ class TaskExecutor(object):
             self._session.system_attributes[
                 'Packages'] = pkg_loader.export_fixation_table()
         self._model['SystemData'] = self._session.system_attributes
+        self._model['project_id'] = self._session.environment_owner_project_id
+        self._model['user_id'] = self._session.environment_owner_user_id
         result['model'] = self._model
 
         if (not self._model.get('Objects') and
@@ -335,7 +340,8 @@ class StaticActionExecutor(object):
         self._action = task['action']
         self._session = execution_session.ExecutionSession()
         self._session.token = task['token']
-        self._session.project_id = task['tenant_id']
+        self._session.project_id = task['project_id']
+        self._session.user_id = task['user_id']
         self._reporter = reporter
         self._model_policy_enforcer = enforcer.ModelPolicyEnforcer(
             self._session)

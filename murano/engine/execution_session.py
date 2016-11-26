@@ -24,6 +24,9 @@ class ExecutionSession(object):
     def __init__(self):
         self.token = None
         self.project_id = None
+        self.user_id = None
+        self.environment_owner_project_id = None
+        self.environment_owner_user_id = None
         self.trust_id = None
         self.system_attributes = {}
         self._set_up_list = []

@@ -381,3 +381,9 @@ def spawn(func, *args, **kwargs):
                 return func(*args, **kwargs)
 
     return eventlet.spawn(wrapper)
+
+
+def new(properties, owner=None, type=None):
+    context = helpers.get_context()
+    return helpers.get_object_store().load(
+        properties, owner, type or get_this(context).type, context=context)

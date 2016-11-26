@@ -71,7 +71,8 @@ class TestActionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
                 'method': 'Testaction',
                 'object_id': '12345'
             },
-            'tenant_id': self.tenant,
+            'project_id': self.tenant,
+            'user_id': self.user,
             'model': {
                 'Attributes': {},
                 'Objects': {

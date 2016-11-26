@@ -1,0 +1,5 @@
+---
+features:
+  - Added classes that represent OpenStack user and project
+  - Added ability to retrieve current user and project info
+  - Added ability to retrieve environment owner user and project info

@@ -30,7 +30,8 @@ class StaticActionServices(object):
         task = {
             'action': action,
             'token': credentials['token'],
-            'tenant_id': credentials['tenant_id'],
+            'project_id': credentials['project_id'],
+            'user_id': credentials['user_id'],
             'id': str(uuid.uuid4())
         }
         return rpc.engine().call_static_action(task)

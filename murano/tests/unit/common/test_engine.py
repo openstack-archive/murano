@@ -72,15 +72,23 @@ class TestTaskExecutor(base.MuranoTestCase):
                 'SystemData': {
                     'Packages': 'my_packages'
                 },
+                'project_id': 'my_tenant_id',
+                'user_id': 'my_user_id'
             },
             'token': 'my_token',
-            'tenant_id': 'my_tenant_id',
+            'project_id': 'my_tenant_id',
+            'user_id': 'my_user_id',
             'id': 'my_env_id'
         }
         self.task_executor = engine.TaskExecutor(self.task)
         self.task_executor._model = self.task['model']
         self.task_executor._session.token = self.task['token']
-        self.task_executor._session.project_id = self.task['tenant_id']
+        self.task_executor._session.project_id = self.task['project_id']
+        self.task_executor._session.user_id = self.task['user_id']
+        self.task_executor._session.environment_owner_project_id_ = \
+            self.task['model']['project_id']
+        self.task_executor._session.environment_owner_user_id = \
+            self.task['model']['user_id']
         (self.task_executor._session
             .system_attributes) = (self.task_executor._model.
                                    get('SystemData', {}))
@@ -155,7 +163,8 @@ class TestStaticActionExecutor(base.MuranoTestCase):
         self.task = {
             'action': self.action,
             'token': 'test_token',
-            'tenant_id': 'test_tenant',
+            'project_id': 'test_tenant',
+            'user_id': 'test_user',
             'id': 'test_task_id'
         }
         self.task_executor = engine.StaticActionExecutor(self.task)
@@ -262,9 +271,14 @@ class TestTaskProcessingEndpoint(base.MuranoTestCase):
         }
         self.task = {
             'action': self.action,
-            'model': {'SystemData': {'TrustId': 'test_trust_id'}},
+            'model': {
+                'SystemData': {'TrustId': 'test_trust_id'},
+                'project_id': 'test_tenant',
+                'user_id': 'test_user'
+            },
             'token': 'test_token',
-            'tenant_id': 'test_tenant',
+            'project_id': 'test_tenant',
+            'user_id': 'test_user',
             'id': 'test_task_id'
         }
         context_manager = mock_context_manager.MockContextManager()
@@ -309,7 +323,8 @@ class TestStaticActionEndpoint(base.MuranoTestCase):
             'action': self.action,
             'model': {'SystemData': {'TrustId': 'test_trust_id'}},
             'token': 'test_token',
-            'tenant_id': 'test_tenant',
+            'project_id': 'test_tenant',
+            'user_id': 'test_user',
             'id': 'test_task_id'
         }
         context_manager = mock_context_manager.MockContextManager()

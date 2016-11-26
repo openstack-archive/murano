@@ -133,7 +133,7 @@ class Controller(object):
 
         envs.EnvironmentServices.deploy(session,
                                         unit,
-                                        request.context.auth_token)
+                                        request.context)
 
 
 def create_resource():
