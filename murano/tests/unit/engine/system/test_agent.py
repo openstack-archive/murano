@@ -18,7 +18,6 @@ import datetime
 import json
 import os
 import tempfile
-import unittest
 
 import mock
 from oslo_config import cfg
@@ -77,12 +76,12 @@ class TestAgent(base.MuranoTestCase):
             return file.read()
 
     @mock.patch('murano.common.messaging.mqclient.kombu')
-    def test_prepare(self, mock_kombu):
-        self.agent.prepare()
+    def test_send_creates_queue(self, mock_kombu):
+        self.agent.send_raw({})
 
         # Verify that MQClient was instantiated, by checking whether
         # kombu.Connection was called.
-        mock_kombu.Connection.assert_called_once_with(
+        mock_kombu.Connection.assert_called_with(
             'amqp://{login}:{password}@{host}:{port}/{virtual_host}'.format(
                 **self.rabbit_mq_settings['agentRabbitMq']
             ), ssl=None)
@@ -93,14 +92,12 @@ class TestAgent(base.MuranoTestCase):
         self.assertEqual(1, mock_kombu.Queue.call_count)
 
     @mock.patch('murano.engine.system.agent.LOG')
-    def test_prepare_with_murano_agent_disabled(self, mock_log):
+    def test_send_with_murano_agent_disabled(self, mock_log):
         CONF.set_override('disable_murano_agent', True, group='engine',
                           enforce_type=True)
 
-        self.agent.prepare()
-
-        mock_log.debug.assert_called_once_with(
-            'Use of murano-agent is disallowed by the server configuration')
+        self.assertRaises(exceptions.PolicyViolationException,
+                          self.agent.send_raw, {})
 
     @mock.patch('murano.common.messaging.mqclient.kombu')
     def test_send(self, mock_kombu):
@@ -121,7 +118,6 @@ class TestAgent(base.MuranoTestCase):
             body=json.dumps(plan),
             message_id=plan['ID'])
 
-    @unittest.skipIf(True, 'Skipping until bug #1633176 resolved.')
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
     def test_is_ready(self, mock_kombu, mock_event):

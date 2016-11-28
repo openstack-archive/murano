@@ -142,8 +142,6 @@ Methods:
       - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
 
       - $preparedUserData: $.prepareUserData()
-      # Create MQ queue to communicate with the VM
-      - $.agent.prepare()
       - $properties:
           name: $.name
           flavor: $.flavor
