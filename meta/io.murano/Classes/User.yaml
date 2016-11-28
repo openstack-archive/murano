@@ -1,0 +1,14 @@
+Name: io.murano.User
+
+Properties:
+  id:
+    Contract: $.string().notNull()
+  name:
+    Contract: $.string().notNull()
+  domain:
+    Contract: $.string().notNull()
+  email:
+    Contract: $.string()
+  extra:
+    Contract:
+      $.string().notNull(): $.string()
