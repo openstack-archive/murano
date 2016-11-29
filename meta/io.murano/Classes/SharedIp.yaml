@@ -14,6 +14,7 @@ Namespaces:
   =: io.murano
 
 Name: SharedIp
+Extends: CloudResource
 
 Properties:
   assignFloatingIp:
@@ -30,8 +31,6 @@ Methods:
   initialize:
     Body:
       - $._environment: $.find(Environment).require()
-      - $._region: $.getRegion()
-      - $.network: $._environment.defaultNetworks.environment
       - $.instances: []
 
 
@@ -39,9 +38,11 @@ Methods:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
+          - $region: $.getRegion()
+          - $network: $region.defaultNetworks.environment
           - $reporter: $._environment.reporter
-          - $.network.deploy()
-          - $networkData: $.network.describe()
+          - $network.deploy()
+          - $networkData: $network.describe()
           - $aapPortName: format('AllowedAddressPairsPort-{0}', id($))
           - $template:
               resources:
@@ -57,7 +58,7 @@ Methods:
                   value:
                     get_attr: [$aapPortName, fixed_ips, 0, ip_address]
                   description: format('SharedIP Address of SharedIp group {0}', id($))
-          - $._region.stack.updateTemplate($template)
+          - $region.stack.updateTemplate($template)
           - If: $.assignFloatingIp
             Then:
               - $extNetId: $networkData.floatingIpNetId
@@ -76,11 +77,11 @@ Methods:
                       value:
                         get_attr: [$fipName, floating_ip_address]
                       description: Shared Floating IP assigned
-              - $._region.stack.updateTemplate($template)
+              - $region.stack.updateTemplate($template)
 
           - $reporter.report($this, 'Allocating shared ip address')
-          - $._region.stack.push()
-          - $outputs: $._region.stack.output()
+          - $region.stack.push()
+          - $outputs: $region.stack.output()
           - $.virtualIp: $outputs.get(format('AllowedAddressPairsPort-{0}-virtualIp', id($)))
           - $.floatingIpAddress: $outputs.get(format('Shared-Floating-ip-{0}-val', id($)))
           - $reporter.report($this, format('Shared IP allocated at {0}', $.virtualIp))
@@ -99,14 +100,15 @@ Methods:
 
   releaseResources:
     Body:
-      - $template: $._region.stack.current()
+      - $region: $.getRegion()
+      - $template: $region.stack.current()
       - $template.resources: $template.resources.delete(format('AllowedAddressPairsPort-{0}', id($)))
       - $template.outputs: $template.outputs.delete(format('AllowedAddressPairsPort-{0}-virtualIp', id($)))
       - If: $.assignFloatingIp
         Then:
           - $template.resources: $template.resources.delete(format('Shared-Floating-ip-{0}', id($)))
           - $template.outputs: $template.outputs.delete(format('Shared-Floating-ip-{0}-val', id($)))
-      - $._region.stack.setTemplate($template)
-      - $._region.stack.push()
+      - $region.stack.setTemplate($template)
+      - $region.stack.push()
       - $.floatingIpAddress: null
       - $.virtualIp: null

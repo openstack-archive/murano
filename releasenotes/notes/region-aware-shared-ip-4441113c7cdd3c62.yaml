@@ -1,0 +1,4 @@
+---
+fixes:
+  - Fixed 'io.murano.SharedIp' class to properly wotk in muti-region
+    environments.
