@@ -1,0 +1,10 @@
+---
+issues:
+  - If a VM being a part of some shared-ip group is attached to the network
+    which is not owned by the current tenant (shared network) a policy
+    violation may occur thus failing the deployment.
+
+fixes:
+  - Murano no longer specifies fixed-ip parameter for ports when creating VMs
+    attached to networks owned and shared by other tenants. Specifying this
+    parameter for non-owned networks could cause violation of neutron policies.

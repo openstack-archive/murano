@@ -65,10 +65,18 @@ Workflow:
             $.network_id = $this._internalNetworkId).first().name
       - If: $._internalSubnetworkId = null
         Then:
-          $._internalSubnetworkId: $._getSubnetworks().where(
-            ($.name = $this.internalSubnetworkName or
-              $.id = $this.internalSubnetworkName) and
-                $.network_id = $this._internalNetworkId).first().id
+          # Specify subnetwork id only if the network is owned by the
+          # environment owner tenant (otherwise we may not be allowed to create
+          # a port to that specific subnet)
+          - $net: $this._getNetworks().where($.id = $this._internalNetworkId).first()
+          - If: $net.tenant_id = std:Project.getEnvironmentOwner().id
+            Then:
+              - $._internalSubnetworkId: $._getSubnetworks().where(
+                  ($.name = $this.internalSubnetworkName or
+                    $.id = $this.internalSubnetworkName) and
+                      $.network_id = $this._internalNetworkId).first().id
+            Else:
+              - $._internalSubnetworkId: null
 
       - If: $.externalNetworkName = null and $._internalNetworkId != null
         Then:

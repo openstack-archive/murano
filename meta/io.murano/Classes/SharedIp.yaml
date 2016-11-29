@@ -51,13 +51,20 @@ Methods:
                   properties:
                     network_id: $networkData.netId
                     replacement_policy: AUTO
-                    fixed_ips:
-                      - subnet_id: $networkData.subnetId
               outputs:
                 $aapPortName+'-virtualIp':
                   value:
                     get_attr: [$aapPortName, fixed_ips, 0, ip_address]
                   description: format('SharedIP Address of SharedIp group {0}', id($))
+          - If: $networkData.subnetId
+            Then:
+              - $t:
+                  resources:
+                    $aapPortName:
+                      properties:
+                        fixed_ips:
+                          - subnet_id: $networkData.subnetId
+              - $template: $template.mergeWith($t)
           - $region.stack.updateTemplate($template)
           - If: $.assignFloatingIp
             Then:

@@ -59,9 +59,17 @@ Methods:
               type: 'OS::Neutron::Port'
               properties:
                 network: $netRef
-                fixed_ips:
-                  - subnet: $subnetRef
                 replacement_policy: AUTO
+
+      - If: $subnetRef
+        Then:
+          - $template:
+              resources:
+                $portName:
+                  properties:
+                    fixed_ips:
+                      - subnet: $subnetRef
+          - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - If: bool($securityGroupName) and $securityGroupsEnabled
         Then:
