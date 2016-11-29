@@ -130,7 +130,7 @@ class EnvTemplateServices(object):
 
         template = EnvTemplateServices.get_env_template(env_template_id)
         if template is None:
-            raise ValueError("The environment template does not exists")
+            raise ValueError("The environment template does not exist")
         return template.description
 
     @staticmethod
