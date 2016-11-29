@@ -52,7 +52,6 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
         client.delete_package(cls.package['id'])
         super(TestStaticActions, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
     def test_call_static_action_basic(self):
         action_result = self.application_catalog_client.call_static_action(
             class_name=self.package['class_definitions'][0],

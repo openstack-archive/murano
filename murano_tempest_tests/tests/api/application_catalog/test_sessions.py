@@ -48,7 +48,6 @@ class TestSessions(base.BaseApplicationCatalogTest):
         self.application_catalog_client.delete_session(self.environment['id'],
                                                        session['id'])
 
-    @testtools.testcase.attr('smoke')
     def test_get_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])

@@ -78,7 +78,6 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
         cls.application_catalog_client.delete_package(cls.package['id'])
         super(TestRepository, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
     def test_get_package(self):
         package = self.application_catalog_client.get_package(
             self.package['id'])
@@ -171,14 +170,11 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
             self.package['id'], post_body)
         self.assertEqual("New name", result['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_download_package(self):
         self.application_catalog_client.download_package(self.package['id'])
 
-    @testtools.testcase.attr('smoke')
     def test_get_ui_definitions(self):
         self.application_catalog_client.get_ui_definition(self.package['id'])
 
-    @testtools.testcase.attr('smoke')
     def test_get_logo(self):
         self.application_catalog_client.get_logo(self.package['id'])

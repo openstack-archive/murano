@@ -21,7 +21,6 @@ from murano_tempest_tests import utils
 
 class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
 
-    @testtools.testcase.attr('smoke')
     def test_list_empty_env_templates(self):
         templates_list = self.application_catalog_client.\
             get_env_templates_list()
@@ -61,13 +60,11 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             delete_env_template(cls.env_template['id'])
         super(TestEnvironmentTemplates, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
     def test_get_env_template(self):
         env_template = self.application_catalog_client.\
             get_env_template(self.env_template['id'])
         self.assertEqual(self.env_template['name'], env_template['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_create_env_template_with_a_service(self):
         name = utils.generate_name('create_env_template_with_service')
         post_body = self._get_demo_app()
@@ -115,7 +112,6 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
                                              post_body)
         self.assertEqual("updated_name", service['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_create_public_env_template(self):
         name = utils.generate_name('create_public_env_template')
         env_template = self.application_catalog_client.\
@@ -127,7 +123,6 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             get_env_template(env_template['id'])
         self.assertTrue(env_temp['is_public'])
 
-    @testtools.testcase.attr('smoke')
     def test_clone_env_template(self):
         name = utils.generate_name('clone_env_template')
         cloned_template = self.alt_client.\
@@ -138,7 +133,6 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         template = self.alt_client.get_env_template(cloned_template['id'])
         self.assertEqual(name, template['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_get_public_private_both_env_templates(self):
         name = utils.generate_name('get_public_private_both')
         public_env_template = self.application_catalog_client.\

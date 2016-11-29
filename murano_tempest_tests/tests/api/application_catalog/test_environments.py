@@ -56,7 +56,6 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual(len(environments_list),
                          len(upd_environments_list))
 
-    @testtools.testcase.attr('smoke')
     def test_create_and_delete_environment_with_unicode_name(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
@@ -73,7 +72,6 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual(len(environments_list),
                          len(upd_environments_list))
 
-    @testtools.testcase.attr('smoke')
     def test_get_environment(self):
         environment = self.application_catalog_client.\
             get_environment(self.environment['id'])
@@ -85,7 +83,6 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
             update_environment(self.environment['id'])
         self.assertIsNot(self.environment['name'], environment['name'])
 
-    @testtools.testcase.attr('smoke')
     def test_get_environment_model(self):
         model = self.application_catalog_client.\
             get_environment_model(self.environment['id'])
@@ -100,7 +97,6 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual("{0}-network".format(self.environment['name']),
                          net_name)
 
-    @testtools.testcase.attr('smoke')
     def test_update_environment_model(self):
         session = self.application_catalog_client. \
             create_session(self.environment['id'])
