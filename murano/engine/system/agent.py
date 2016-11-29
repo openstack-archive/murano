@@ -51,21 +51,25 @@ class Agent(object):
         self._enabled = True
         env = host.find_owner('io.murano.Environment')
         self._queue = str('e%s-h%s' % (env.id, host.id)).lower()
+        self._initialized = False
 
     @property
     def enabled(self):
         return self._enabled
 
-    def prepare(self):
+    def _initialize(self):
+        if self._initialized:
+            return
+
         # (sjmc7) - turn this into a no-op if agents are disabled
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
-            return
-
-        region = dsl.MuranoObjectInterface.create(self._host().getRegion())
-        with common.create_rmq_client(region) as client:
-            client.declare(self._queue, enable_ha=True, ttl=86400000)
+        else:
+            region = dsl.MuranoObjectInterface.create(self._host().getRegion())
+            with common.create_rmq_client(region) as client:
+                client.declare(self._queue, enable_ha=True, ttl=86400000)
+        self._initialized = True
 
     def queue_name(self):
         return self._queue
@@ -84,6 +88,7 @@ class Agent(object):
 
     def _send(self, template, wait_results, timeout):
         """Send a message over the MQ interface."""
+        self._initialize()
         region = self._host().getRegion()
         msg_id = template.get('ID', uuid.uuid4().hex)
         if wait_results:
