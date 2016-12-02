@@ -39,13 +39,14 @@ class Controller(object):
 
         check_env(request, environment_id)
 
-        # no new session can be opened if environment has deploying status
+        # No new session can be opened if environment has deploying or
+        # deleting status.
         env_status = envs.EnvironmentServices.get_status(environment_id)
         if env_status in (states.EnvironmentStatus.DEPLOYING,
                           states.EnvironmentStatus.DELETING):
             msg = _('Could not open session for environment <EnvId: '
-                    '{env_id}>, environment has deploying status.').format(
-                env_id=environment_id)
+                    '{env_id}>, environment has deploying or '
+                    'deleting status.').format(env_id=environment_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
