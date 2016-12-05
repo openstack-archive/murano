@@ -378,7 +378,7 @@ class ResourceExceptionHandler(object):
         # convert to webob exceptions.
         if isinstance(ex_value, TypeError):
             exc_info = (ex_type, ex_value, ex_traceback)
-            LOG.error(_("Exception handling resource: {0}").format(ex_value),
+            LOG.error(_LE("Exception handling resource: {0}").format(ex_value),
                       exc_info=exc_info)
             raise webob.exc.HTTPBadRequest()
 
