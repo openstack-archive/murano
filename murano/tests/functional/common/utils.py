@@ -31,9 +31,11 @@ from muranoclient.glance import client as glare_client
 from oslo_log import log as logging
 import yaml
 
+from murano.common.i18n import _LW, _LE
 from murano.services import states
 import murano.tests.functional.common.zip_utils_mixin as zip_utils
 import murano.tests.functional.engine.config as cfg
+
 
 CONF = cfg.cfg.CONF
 
@@ -201,7 +203,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
         deployment = cls.get_last_deployment(environment)
         try:
             details = deployment.result['result']['details']
-            LOG.warning('Details:\n {details}'.format(details=details))
+            LOG.warning(_LW('Details:\n {details}').format(details=details))
         except Exception as e:
             LOG.error(e)
         report = cls.get_deployment_report(environment, deployment)
@@ -335,7 +337,8 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
                 service_type='application-catalog', endpoint_type='publicURL')
         except ks_exceptions.EndpointNotFound:
             url = CONF.murano.murano_url
-            LOG.warning("Murano endpoint not found in Keystone. Using CONF.")
+            LOG.warning(_LW("Murano endpoint not found in Keystone. "
+                            "Using CONF."))
         return url if 'v1' not in url else "/".join(
             url.split('/')[:url.split('/').index('v1')])
 
@@ -359,7 +362,7 @@ class DeployTestMixin(zip_utils.ZipUtilsMixin):
                 raise RuntimeError('Resource at {0}:{1} not exist'.
                                    format(ip, port))
         except socket.error as e:
-            LOG.error('Socket Error: {error}'.format(error=e))
+            LOG.error(_LE('Socket Error: {error}').format(error=e))
 
     @classmethod
     def get_ip_by_appname(cls, environment, appname):
