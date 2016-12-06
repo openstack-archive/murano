@@ -367,7 +367,7 @@ def main():
         CONF.set_default('use_stderr', False)
         logging.setup(CONF, 'murano')
     except RuntimeError as e:
-        LOG.exception(_LE("Failed to initialize murano-test-runner: %s") % e)
+        LOG.exception(_LE("Failed to initialize murano-test-runner: %s"), e)
         sys.exit("ERROR: %s" % e)
 
     try:
