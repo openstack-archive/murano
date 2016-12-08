@@ -18,7 +18,6 @@ Default actions reside in this module.
 These action are available out of the box for Murano users.
 
 """
-import six
 import yaql.language.utils as utils
 
 import murano.dsl.exceptions as exceptions
@@ -42,7 +41,7 @@ class ActionUtils(object):
             for item in obj:
                 self._get_objects_by_id(item, objects)
         elif isinstance(obj, utils.FrozenDict):
-            for k, v in six.iteritems(obj):
+            for k, v in obj.items():
                 self._get_objects_by_id(k, objects)
                 self._get_objects_by_id(v, objects)
         return objects

@@ -55,7 +55,7 @@ class TokenSanitizer(object):
         :return: Sanitized object
         """
         if isinstance(obj, dict):
-            return dict([self.sanitize(item) for item in six.iteritems(obj)])
+            return dict([self.sanitize(item) for item in obj.items()])
         elif isinstance(obj, list):
             return [self.sanitize(item) for item in obj]
         elif isinstance(obj, tuple):
