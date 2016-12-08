@@ -41,4 +41,4 @@ class TestContextManager(test_case.DslTestCase):
 
     def test_create_object_context(self):
         obj = 'obj'
-        self.assertIs(None, self.context_manager.create_object_context(obj))
+        self.assertIsNone(self.context_manager.create_object_context(obj))
