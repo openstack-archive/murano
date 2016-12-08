@@ -208,7 +208,7 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
                           states.EnvironmentStatus.DELETING]
         expected_error_msg = 'Could not open session for environment '\
                              '<EnvId: {env_id}>, environment has '\
-                             'deploying status.'\
+                             'deploying or deleting status.'\
                              .format(env_id='test_env_id')
 
         for state in illegal_states:
