@@ -55,4 +55,9 @@ class TestSessions(base.BaseApplicationCatalogTest):
                         self.environment['id'], session['id'])
         session_from_resp = self.application_catalog_client.\
             get_session(self.environment['id'], session['id'])
+        # Deleting dates from dictionaries to skip it in assert
+        session.pop('updated', None)
+        session.pop('created', None)
+        session_from_resp.pop('updated', None)
+        session_from_resp.pop('created', None)
         self.assertEqual(session, session_from_resp)
