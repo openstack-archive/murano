@@ -49,10 +49,14 @@ Methods:
           Contract: $.string()
       - floatingIpNetRef:
           Contract: $
+      - netName:
+          Contract: $.string().notNull()
     Body:
       - $netExplorer: $._getNetExplorer()
       - $securityGroupsEnabled: $netExplorer.listNeutronExtensions().alias.contains('security-group')
       - $portName: format('port-{0}-{1}', id($), $instance.name)
+
+      - $addressesOutputName: format('addresses-{0}-{1}', $instance.name, id($this))
       - $patchTemplate:
           resources:
             $portName:
@@ -60,6 +64,11 @@ Methods:
               properties:
                 network: $netRef
                 replacement_policy: AUTO
+          outputs:
+            $addressesOutputName:
+              description: format('Addresses for {0} in {1}', $instance.name, $netName)
+              value:
+                get_attr: [$instance.name, 'addresses', $netName]
 
       - If: $subnetRef
         Then:
@@ -82,7 +91,7 @@ Methods:
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - $instanceResources: [$portName]
-      - $instanceOutputs: []
+      - $instanceOutputs: [$addressesOutputName]
 
       - For: sip
         In: $sharedIps
@@ -123,7 +132,6 @@ Methods:
           instanceResources: $instanceResources
           instanceOutputs: $instanceOutputs
 
-
   generateSecurityGroupManager:
     Body:
       - $region: $.getRegion()
@@ -135,3 +143,11 @@ Methods:
         Else:
           - $._environment.reporter.report($this, "Warning! Security groups are disabled!")
           - Return: new(sys:DummySecurityGroupManager, $region)
+
+  getInstanceIpList:
+    Arguments:
+      - instance:
+          Contract: $.class(Instance).notNull()
+    Body:
+      - Return: $.getRegion().stack.output()[
+          format('addresses-{0}-{1}', $instance.name, id($this))].addr.distinct()

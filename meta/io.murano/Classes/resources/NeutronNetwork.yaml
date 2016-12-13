@@ -150,7 +150,8 @@ Methods:
             netRef => $netRef,
             subnetRef => $subnetRef,
             floatingIpResourceName => $fipName,
-            floatingIpNetRef => $extNetId
+            floatingIpNetRef => $extNetId,
+            netName => $._getHeatName()
           )
 
       # (sjmc7) This is a workaround for https://bugs.launchpad.net/heat/+bug/1299259
@@ -163,18 +164,7 @@ Methods:
                     - $._getRouterInterfaceName()
           - $result.template: $result.template.mergeWith($template)
 
-      - $addressOutputName: format('adresses-{0}-in-{1}', $instance.name, $this.name)
-      - $ipsOutputTemplate:
-          outputs:
-            $addressOutputName:
-              description: format('Addresses for  {0} in {1}', $instance.name, $this.name)
-              value:
-                get_attr: [$instance.name, 'addresses', $._getHeatName()]
-      - $result.template: $result.template.mergeWith($ipsOutputTemplate)
-      - $result.instanceOutputs: $result.instanceOutputs.append($addressOutputName)
-
       - Return: $result
-
 
   describe:
     Body:
@@ -208,14 +198,6 @@ Methods:
       - $regiont.stack.setTemplate($template)
       - $region.stack.push()
       - $.openstackId: null
-
-  getInstanceIpList:
-    Arguments:
-      - instance:
-          Contract: $.class(Instance).notNull()
-    Body:
-      - Return: $.getRegion().stack.output().get(format('adresses-{0}-in-{1}', $instance.name, $this.name)).select($["addr"]).distinct()
-
 
   _getRouterInterfaceName:
     Body:

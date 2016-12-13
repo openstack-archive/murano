@@ -59,6 +59,13 @@ Workflow:
             $.name = $this.internalNetworkName or
             $.id = $this.internalNetworkName).first().id
 
+      - If: $._internalNetworkId = $.internalNetworkName
+        Then:
+          $._internalNetworkName: $._getNetworks().where(
+            $.id = $this._internalNetworkId).first().name
+        Else:
+          $._internalNetworkName: $.internalNetworkName
+
       - If: $.internalSubnetworkName = null
         Then:
           $.internalSubnetworkName: $._getSubnetworks().where(
@@ -145,7 +152,8 @@ Workflow:
             netRef => $._internalNetworkId,
             subnetRef => $._internalSubnetworkId,
             floatingIpResourceName => $fipName,
-            floatingIpNetRef => $floatingIpNetRef
+            floatingIpNetRef => $floatingIpNetRef,
+            netName => $._internalNetworkName
           )
 
   describe:
