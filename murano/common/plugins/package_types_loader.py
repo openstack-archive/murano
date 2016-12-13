@@ -18,7 +18,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from stevedore import dispatch
 
-from murano.common.i18n import _LE, _LW
+from murano.common.i18n import _LE, _LW, _LI
 
 
 CONF = cfg.CONF
@@ -28,7 +28,7 @@ NAMESPACE = 'io.murano.plugins.packages'
 
 class PluginLoader(object):
     def __init__(self):
-        LOG.info('Loading package type plugins')
+        LOG.info(_LI('Loading package type plugins'))
         extension_manager = dispatch.EnabledExtensionManager(
             NAMESPACE,
             self._is_plugin_enabled,
@@ -75,7 +75,7 @@ class PluginLoader(object):
         else:
             self._initialize_plugin(package_class)
             self.formats.setdefault(name, {})[version] = package_class
-            LOG.info('Plugin for "{0}" package type was loaded'.format(
+            LOG.info(_LI('Plugin for "{0}" package type was loaded').format(
                 format_name))
 
     def get_package_handler(self, format_name):

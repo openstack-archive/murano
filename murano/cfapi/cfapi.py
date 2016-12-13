@@ -21,7 +21,7 @@ import six
 import tenacity
 from webob import response
 
-from murano.common.i18n import _LI, _LW
+from murano.common.i18n import _LI, _LW, _LE
 from murano.common import auth_utils  # noqa
 from murano.common import wsgi
 from murano.db.services import cf_connections as db_cf
@@ -304,8 +304,9 @@ def _get_muranoclient(token_id, req):
 
     murano_url = CONF.murano.url or req.endpoints.get('murano')
     if not murano_url:
-        LOG.error('No murano url is specified and no "application-catalog" '
-                  'service is registered in keystone.')
+        LOG.error(_LE('No murano url is specified and no '
+                      '"application-catalog" '
+                      'service is registered in keystone.'))
 
     return muranoclient.Client(1, murano_url, token=token_id,
                                artifacts_client=artifacts_client)
@@ -316,8 +317,8 @@ def _get_glareclient(token_id, req):
 
     url = glare_settings.url or req.endpoints.get('glare')
     if not url:
-        LOG.error('No glare url is specified and no "artifact" '
-                  'service is registered in keystone.')
+        LOG.error(_LE('No glare url is specified and no "artifact" '
+                  'service is registered in keystone.'))
 
     return glare_client.Client(
         endpoint=url, token=token_id,
