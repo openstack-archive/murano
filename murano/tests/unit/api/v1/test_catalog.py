@@ -878,8 +878,8 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue(b'Acceptable response can not be provided'
-                        in result.body)
+        self.assertIn(b'Acceptable response can not be provided',
+                      result.body)
 
     @mock.patch('murano.api.v1.catalog._validate_body')
     @mock.patch('murano.common.policy.check')
@@ -1067,8 +1067,8 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue(b'Acceptable response can not be provided'
-                        in result.body)
+        self.assertIn(b'Acceptable response can not be provided',
+                      result.body)
 
     def test_get_logo(self):
         self._set_policy_rules(
@@ -1102,8 +1102,8 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         result = req.get_response(self.api)
 
         self.assertEqual(406, result.status_code)
-        self.assertTrue(b'Acceptable response can not be provided'
-                        in result.body)
+        self.assertIn(b'Acceptable response can not be provided',
+                      result.body)
 
     def test_add_public_unauthorized(self):
         self._set_policy_rules({

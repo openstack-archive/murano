@@ -408,8 +408,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         """Test abandon environment belongs to another tenant."""
         result = self._test_delete_or_abandon(abandon=True, tenant='not_match')
         self.assertEqual(403, result.status_code)
-        self.assertTrue((b'User is not authorized to access these'
-                         b' tenant resources') in result.body)
+        self.assertIn((b'User is not authorized to access these'
+                       b' tenant resources'), result.body)
 
     def test_get_last_status_of_different_tenant(self):
         """Test get last services status of env belongs to another tenant."""
@@ -417,8 +417,8 @@ class TestEnvironmentApi(tb.ControllerTest, tb.MuranoApiTestCase):
         req = self._get('/environments/111/lastStatus', tenant='not_match')
         result = req.get_response(self.api)
         self.assertEqual(403, result.status_code)
-        self.assertTrue((b'User is not authorized to access these'
-                         b' tenant resources') in result.body)
+        self.assertIn((b'User is not authorized to access these'
+                       b' tenant resources'), result.body)
 
     def test_get_environment(self):
         """Test GET request of an environment in ready status"""
