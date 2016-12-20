@@ -614,13 +614,14 @@ if is_service_enabled murano; then
             start_service_broker
         fi
         setup_core_library
-        configure_murano_tempest_plugin
 
         # Give Murano some time to Start
         sleep 3
 
         # Install Murano apps, if needed
         install_murano_apps
+    elif [[ "$1" == "stack" && "$2" == "test-config" ]]; then
+        configure_murano_tempest_plugin
     fi
 
     if [[ "$1" == "unstack" ]]; then
