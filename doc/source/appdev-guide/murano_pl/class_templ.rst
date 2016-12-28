@@ -78,6 +78,9 @@ do not specify any parents or omit the key, then the class extends
 ``io.murano.Object``. Thus, ``io.murano.Object`` is the root class
 for all class hierarchies.
 
+.. _class_props:
+
+
 Properties
 ----------
 
