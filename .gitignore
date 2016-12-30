@@ -21,6 +21,7 @@ ChangeLog
 .testrepository
 .coverage
 cover
+api-ref/build/
 
 #Python
 *.pyc
