@@ -346,7 +346,7 @@ with even a more advanced ``servers`` property definition:
              assignFloatingIp: $.instanceConfiguration.assignFloatingIP
            serverNamePattern: $.instanceConfiguration.unitNamingPattern
 
-Here the the instance definition for the ``SingleServerGroup`` (our primary
+Here the instance definition for the ``SingleServerGroup`` (our primary
 server) differs from the servers in the ``ServerReplicationGroup`` by its name
 only. However the same technique might be used to customize other properties
 as well as to create even more sophisticated server group topologies. For
