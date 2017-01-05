@@ -1,0 +1,4 @@
+---
+fixes:
+  - |
+    Now admin can delete user's environments.
