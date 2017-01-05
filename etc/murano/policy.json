@@ -16,6 +16,7 @@
     "add_category": "rule:admin_api",
 
     "list_deployments": "rule:default",
+    "list_deployments_all_environments": "rule:default",
     "statuses_deployments": "rule:default",
 
     "list_environments": "rule:default",

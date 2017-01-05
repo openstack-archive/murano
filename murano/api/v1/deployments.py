@@ -14,6 +14,7 @@
 
 from oslo_log import log as logging
 from sqlalchemy import desc
+from sqlalchemy.orm import load_only
 from webob import exc
 
 from murano.api.v1 import request_statistics
@@ -24,7 +25,7 @@ from murano.common import utils
 from murano.common import wsgi
 from murano.db import models
 from murano.db import session as db_session
-from murano.utils import verify_env
+from murano.utils import check_env
 
 LOG = logging.getLogger(__name__)
 
@@ -33,18 +34,41 @@ API_NAME = 'Deployments'
 
 class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Index')
-    @verify_env
-    def index(self, request, environment_id):
-        target = {"environment_id": environment_id}
-        policy.check("list_deployments", request.context, target)
+    def index(self, request, environment_id=None):
+        all_environments = environment_id is None
+        LOG.debug('Deployments:List <all_environments: {0}>'
+                  .format(all_environments))
+
+        if all_environments:
+            policy.check("list_deployments_all_environments", request.context)
+        else:
+            check_env(request, environment_id)
+            target = {"environment_id": environment_id}
+            policy.check("list_deployments", request.context, target)
 
         unit = db_session.get_session()
-        query = unit.query(models.Task) \
-            .filter_by(environment_id=environment_id) \
-            .order_by(desc(models.Task.created))
-        result = query.all()
-        deployments = [set_dep_state(deployment, unit).to_dict() for deployment
-                       in result]
+
+        if all_environments:
+            query = unit.query(models.Environment) \
+                .options(load_only('tenant_id')) \
+                .filter_by(tenant_id=request.context.tenant) \
+                .join(models.Task) \
+                .order_by(desc(models.Task.created))
+            result = query.all()
+            # The join statement above fetches the deployments into
+            # Environment.tasks. Iterate over that to get the deployments.
+            deployments = []
+            for row in result:
+                for deployment in row.tasks:
+                    deployment = set_dep_state(deployment, unit).to_dict()
+                    deployments.append(deployment)
+        else:
+            query = unit.query(models.Task) \
+                .filter_by(environment_id=environment_id) \
+                .order_by(desc(models.Task.created))
+            result = query.all()
+            deployments = [set_dep_state(deployment, unit).to_dict()
+                           for deployment in result]
         return {'deployments': deployments}
 
     @request_statistics.stats_count(API_NAME, 'Statuses')

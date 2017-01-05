@@ -679,6 +679,9 @@ Returns information about all deployments of the specified environment.
 +==========+====================================+======================================+
 | GET      | /environments/<env_id>/deployments | Get list of environment deployments  |
 +----------+------------------------------------+--------------------------------------+
+| GET      | /deployments                       | Get list of deployments for all      |
+|          |                                    | environments in user's project       |
++----------+---------------------------------------------------------------------------+
 
 *Response*
 
