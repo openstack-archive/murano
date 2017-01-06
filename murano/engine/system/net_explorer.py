@@ -151,7 +151,7 @@ class NetworkExplorer(object):
         # For each router this network is connected to
         # check if the router has external_gateway set
         for router_port in router_ports:
-            ext_net_id = self.getExternalNetworkIdForRouter(
+            ext_net_id = self.get_external_network_id_for_router(
                 router_port.get('device_id'))
             if ext_net_id:
                 return ext_net_id
