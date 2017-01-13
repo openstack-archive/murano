@@ -807,11 +807,11 @@ should use next endpoint: */environments/<env_id>/services/<application_id>/name
         }
     }
 
-POST applications
------------------
+Create new application
+----------------------
 
-New application can be added to the murano environment using session.
-Result JSON is calculated in Murano dashboard, which based on `UI definition <Dynamic UI Spec>`_
+Create a new application and add it to the murano environment.
+Result JSON is calculated in Murano dashboard, which is based on `UI definition <https://git.openstack.org/cgit/openstack/murano/tree/doc/source/appdev-guide/muranopackages/dynamic_ui.rst>`_.
 
 *Request*
 
@@ -880,13 +880,13 @@ Created application returned
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | Session is deleted successfully                           |
+| 200            | Application was created successfully                      |
 +----------------+-----------------------------------------------------------+
-| 401            | User is not authorized to access this session             |
+| 401            | User is not authorized to perform this action             |
 +----------------+-----------------------------------------------------------+
-| 403            | Session is in deploying state and could not be deleted    |
+| 403            | Policy prevents this user from performing this action     |
 +----------------+-----------------------------------------------------------+
-| 404            | Not found. Specified session doesn`t exist                |
+| 404            | Not found. Environment doesn't exist                      |
 +----------------+-----------------------------------------------------------+
 | 400            | Required header or body are not provided                  |
 +----------------+-----------------------------------------------------------+
