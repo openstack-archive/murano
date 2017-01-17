@@ -461,7 +461,6 @@ class Resource(object):
             method = getattr(obj, action)
         except AttributeError:
             method = getattr(obj, 'default')
-
         return method(*args, **kwargs)
 
     def get_action_args(self, request_environment):
@@ -981,13 +980,13 @@ class JSONPatchDeserializer(TextDeserializer):
             msg = _('Pointer `%s` contains adjacent "/".') % pointer
             raise webob.exc.HTTPBadRequest(explanation=msg)
         if len(pointer) > 1 and pointer.endswith('/'):
-            msg = _('Pointer `%s` end with "/".') % pointer
+            msg = _('Pointer `%s` ends with "/".') % pointer
             raise webob.exc.HTTPBadRequest(explanation=msg)
         if pointer[1:].strip() == '/':
-            msg = _('Pointer `%s` does not contains valid token.') % pointer
+            msg = _('Pointer `%s` does not contain a valid token.') % pointer
             raise webob.exc.HTTPBadRequest(explanation=msg)
         if re.search('~[^01]', pointer) or pointer.endswith('~'):
-            msg = _('Pointer `%s` contains "~" not part of'
+            msg = _('Pointer `%s` contains "~", which is not part of'
                     ' a recognized escape sequence.') % pointer
             raise webob.exc.HTTPBadRequest(explanation=msg)
 
@@ -1108,11 +1107,11 @@ class FormDataDeserializer(TextDeserializer):
     def _from_json(self, datastring):
         value = datastring
         try:
-            LOG.debug("Trying deserialize '{data}' to json".format(
+            LOG.debug("Trying to deserialize '{data}' to json".format(
                 data=datastring))
             value = jsonutils.loads(datastring)
         except ValueError:
-            LOG.warning(_LW("Unable deserialize to json, using raw text"))
+            LOG.warning(_LW("Unable to deserialize to json, using raw text"))
         return value
 
     def default(self, request):
