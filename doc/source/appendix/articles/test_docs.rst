@@ -8,7 +8,7 @@ This page describes automated tests for a Murano project:
 
 * where tests are located
 * how they are run
-* how execute tests on a local machine
+* how to execute tests on a local machine
 * how to find the root of problems with FAILed tests
 
 Murano continuous integration service
@@ -22,29 +22,29 @@ Murano CI uses OpenStack QA cloud for testing infrastructure.
 Murano CI url: https://murano-ci.mirantis.com/jenkins/ Anyone can login
 to that server, using launchpad credentials.
 
-There you can find each job for each repository: one for the **murano** and
+There you can find each job for each repository: one for **murano** and
 another one for **murano-dashboard**.
 
 * ``gate-murano-dashboard-ubuntu\*`` verifies each commit to
   the murano-dashboard repository
 * ``gate-murano-ubuntu\*`` verifies each commit to the murano repository
 
-Other jobs allow to build and test Murano documentation and perform another
-useful work to support Murano CI infrastructure.
-All jobs are run on fresh installation of operating system and all components
+Other jobs allow one to build and test Murano documentation and to perform other
+useful work to support the Murano CI infrastructure.
+All jobs are run following a fresh installation of the operating system and all components
 are installed on each run.
 
 UI tests
 ~~~~~~~~
 
-The murano project has a web user interface and all possible user scenarios
+The Murano project has a web user interface and all possible user scenarios
 should be tested.
-All UI tests are located at the
+All UI tests are located at
 ``https://git.openstack.org/cgit/openstack/murano-dashboard/tree/muranodashboard/tests/functional``.
 
-Automated tests for the Murano web UI are written in Python using special
-Selenium library. This library is used to automate web browser interaction
-from Python. See official `Selenium documentation <https://selenium-python.readthedocs.org/>`_
+Automated tests for the Murano web UI are written in Python using the special
+Selenium library. This library is used to automate web browser interactions
+with Python. See official `Selenium documentation <https://selenium-python.readthedocs.org/>`_
 for details.
 
 Prerequisites:
@@ -62,7 +62,7 @@ Prerequisites:
 
     .. note::
 
-       If you do not have firefox package out of the box,
+       If you do not have Firefox package out of the box,
        install and remove it. Otherwise, you will need to install
        dependant libraries manually. To downgrade Firefox:
 
@@ -122,7 +122,7 @@ To download and run the tests:
       ``config.conf``.
 
    #. Set appropriate URLs and credentials for your OpenStack lab.
-      Only Administrator user are appropriate.
+      Only Administrator user credentials are appropriate.
 
       .. code-block:: console
 
@@ -137,7 +137,7 @@ To download and run the tests:
 
 All tests are kept in ``sanity_check.py`` and divided into 10 test suites:
 
-* TestSuiteSmoke - verification of Murano panels; check, that could be open
+* TestSuiteSmoke - verification of Murano panels; checks that they can be open
   without errors.
 * TestSuiteEnvironment - verification of all operations with environment are
   finished successfully.
@@ -200,16 +200,16 @@ type:
 Tempest tests
 ~~~~~~~~~~~~~
 
-All Murano services have tempest-based automated tests, which allow to verify
+All Murano services have tempest-based automated tests, which verify
 API interfaces and deployment scenarios.
 Tempest tests for Murano are located at ``https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional``.
 
-The following Python files contains basic tests suites for different Murano components.
+The following Python files contain basic test suites for different Murano components.
 
 API tests
 ---------
 
-Murano API tests are run on devstack gate and located at
+Murano API tests are run on the devstack gate located at
 ``https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional/api``.
 
 * ``test_murano_envs.py`` contains test suite with actions on murano
@@ -233,5 +233,5 @@ Command-line interface tests
 ----------------------------
 
 Murano CLI tests are currently in the middle of creation. The current scope
-is read only operations on a cloud that are hard to test through unit tests.
-All tests have description and execution steps in there docstrings.
+is read-only operations on a cloud that are hard to test through unit tests.
+All tests have description and execution steps in their docstrings.
