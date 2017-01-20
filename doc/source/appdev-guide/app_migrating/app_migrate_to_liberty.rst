@@ -153,7 +153,7 @@ To use this feature you need to:
 
   .. code-block:: yaml
 
-    # first agrument is agent of instance, second - your command
+    # first argument is agent of instance, second - your command
     $linux.runCommand($.instance.agent, 'service apache2 restart')
   ..
 

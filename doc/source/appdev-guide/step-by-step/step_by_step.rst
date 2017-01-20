@@ -32,10 +32,10 @@ The course consists of the following parts:
 .. #. Learning some advanced stuff for production-grade deployments
 
 Before you proceed, please ensure that you have an OpenStack cloud
-(devstack-based will work just fine) and a latest version of Murano deployed.
+(devstack-based will work just fine) and the latest version of Murano deployed.
 This guide assumes that the reader has a basic knowledge of some programming
 languages and object-oriented design and is a bit familiar with the scripting
-languages used to configure Linux servers. Also it would be benficial to be
+languages used to configure Linux servers. Also it would be beneficial to be
 familiar with YAML format: lots of software configuration tools nowadays use
-YAML, and Murano is no difference.
+YAML, and Murano is no different.
 
