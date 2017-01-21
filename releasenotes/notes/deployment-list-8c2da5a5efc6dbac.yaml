@@ -1,0 +1,5 @@
+---
+features:
+  - It is now possible to make a GET request to '/deployments' endpoint.
+    This will result in deployments for all environments in a specific project
+    (tenant) being returned.

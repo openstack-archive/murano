@@ -168,6 +168,10 @@ class API(wsgi.Router):
                        controller=deployments_resource,
                        action='statuses',
                        conditions={'method': ['GET']})
+        mapper.connect('/deployments',
+                       controller=deployments_resource,
+                       action='index',
+                       conditions={'method': ['GET']})
 
         sessions_resource = sessions.create_resource()
         mapper.connect('/environments/{environment_id}/configure',
