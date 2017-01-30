@@ -35,7 +35,7 @@ Enabling in Devstack
 
    Example::
 
-     MURANO_APPS=io.murano.apps.apache.Tomcat,io.murano.apps.Guacamole
+     MURANO_APPS=com.example.apache.Tomcat,org.openstack.Rally
 
    You can also use the variables ``MURANO_APPS_REPO`` and ``MURANO_APPS_BRANCH``
    to configure the git repository which will be used as the source for the
