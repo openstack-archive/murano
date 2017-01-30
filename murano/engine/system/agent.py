@@ -224,8 +224,9 @@ class Agent(object):
         scripts = []
         for script in script_files:
             script_path = os.path.join(scripts_folder, script)
-            script_path = base64.encode_as_text(script_path) + "\n"
-            scripts.append(resources.string(script_path, binary=True))
+            scripts.append(base64.encode_as_text(
+                resources.string(script_path, binary=True),
+                encoding='latin1'))
         template['Scripts'] = scripts
         return template
 
