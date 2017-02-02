@@ -15,10 +15,7 @@
 
 from oslo_config import cfg
 
-service_available_group = cfg.OptGroup(name="service_available",
-                                       title="Available OpenStack Services")
-
-ServiceAvailableGroup = [
+service_option = [
     cfg.BoolOpt("murano",
                 default=True,
                 help="Whether or not murano is expected to be available"),
