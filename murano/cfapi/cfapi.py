@@ -269,7 +269,8 @@ class Controller(object):
         # NOTE(freerunner): Prevent code 500 if requested environment
         # already doesn't exist.
         if not service:
-            LOG.warning(_LW('Requested service for instance {} is not found'))
+            LOG.warning(_LW('Requested service for instance {0} is not found')
+                        .format(instance_id))
             body = {}
             resp = response.Response(status=410, json_body=body)
             return resp
@@ -280,6 +281,8 @@ class Controller(object):
         # NOTE(starodubcevna): we can track only environment status. it's
         # murano API limitation.
         m_environment = m_cli.environments.get(env_id)
+        body = {'state': 'unknown', 'description': 'operation unknown'}
+        resp = response.Response(status=500, json_body=body)
         if m_environment.status == 'ready':
             body = {'state': 'succeeded',
                     'description': 'operation succeed'}
@@ -299,7 +302,7 @@ class Controller(object):
 def _get_muranoclient(token_id, req):
 
     artifacts_client = None
-    if CONF.cfapi.packages_service in ['glance', 'glare']:
+    if CONF.engine.packages_service in ['glance', 'glare']:
         artifacts_client = _get_glareclient(token_id, req)
 
     murano_url = CONF.murano.url or req.endpoints.get('murano')
