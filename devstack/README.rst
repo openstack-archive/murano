@@ -7,11 +7,14 @@ Enabling in Devstack
     git clone https://git.openstack.org/openstack-dev/devstack
     cd devstack
 
-#. Edit ``local.conf`` to enable murano devstack plugin::
+#. Edit ``local.conf`` to enable murano and heat devstack plugin::
 
      > cat local.conf
      [[local|localrc]]
      enable_plugin murano git://git.openstack.org/openstack/murano
+
+     #Enable heat plugin
+     enable_plugin heat https://git.openstack.org/openstack/heat
 
 #. If you want Murano Cloud Foundry Broker API service enabled, add the
    following line to ``local.conf``::
