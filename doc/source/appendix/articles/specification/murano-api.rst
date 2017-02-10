@@ -341,7 +341,9 @@ User could not open new session for environment that in
 Configure environment / open session
 ------------------------------------
 
-During this call new working session is created, and session ID should be sent in a request header with name ``X-Configuration-Session``.
+During this call a new working session is created with its ID returned in response body.
+Notice that the session ID should be added to request headers with name ``X-Configuration-Session``
+in subsequent requests when necessary.
 
 *Request*
 
@@ -361,12 +363,14 @@ During this call new working session is created, and session ID should be sent i
 ::
 
   {
+      "id": "257bef44a9d848daa5b2563779714820",
       "updated": datetime.datetime(2014, 5, 14, 14, 17, 58, 949358),
       "environment_id": "744e44812da84e858946f5d817de4f72",
       "ser_id": "4e91d06270c54290b9dbdf859356d3b3",
       "created": datetime.datetime(2014, 5, 14, 14, 17, 58, 949305),
-      "state": "open", "version": 0L, "id": "257bef44a9d848daa5b2563779714820"
-   }
+      "state": "open",
+      "version": 0L
+  }
 
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
