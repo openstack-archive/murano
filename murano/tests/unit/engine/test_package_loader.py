@@ -181,7 +181,6 @@ class TestPackageCache(base.MuranoTestCase):
         self.assertEqual(expected_fixations, self.loader._fixations)
         self.loader.cleanup()
 
-    @testtools.skipIf(True, "Skip until bug #1632107 resolved.")
     def test_load_package_except_lookup_error(self):
         expected_error_msg = 'Package "test_package_name" is not found'
         invalid_specs = [semantic_version.Spec('>=1.1.1'),
