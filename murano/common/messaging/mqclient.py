@@ -17,7 +17,9 @@ import ssl as ssl_module
 
 from eventlet import patcher
 from oslo_serialization import jsonutils
+from oslo_service import sslutils
 
+from murano.common.i18n import _
 from murano.common.messaging import subscription
 
 kombu = patcher.import_patched('kombu')
@@ -25,7 +27,7 @@ kombu = patcher.import_patched('kombu')
 
 class MqClient(object):
     def __init__(self, login, password, host, port, virtual_host,
-                 ssl=False, ca_certs=None, insecure=False):
+                 ssl=False, ssl_version=None, ca_certs=None, insecure=False):
         ssl_params = None
 
         if ssl:
@@ -35,10 +37,19 @@ class MqClient(object):
                     cert_reqs = ssl_module.CERT_OPTIONAL
                 else:
                     cert_reqs = ssl_module.CERT_NONE
+
             ssl_params = {
                 'ca_certs': ca_certs,
                 'cert_reqs': cert_reqs
             }
+
+            if ssl_version:
+                key = ssl_version.lower()
+                try:
+                    ssl_params['ssl_version'] = sslutils._SSL_PROTOCOLS[key]
+                except KeyError:
+                    raise RuntimeError(
+                        _("Invalid SSL version: %s") % ssl_version)
 
         self._connection = kombu.Connection(
             'amqp://{0}:{1}@{2}:{3}/{4}'.format(
