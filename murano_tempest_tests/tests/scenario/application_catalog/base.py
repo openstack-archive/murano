@@ -295,9 +295,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
     @classmethod
     def create_volume(cls, **kwargs):
         volume = cls.volumes_client.create_volume(**kwargs)['volume']
-        waiters.wait_for_volume_status(cls.volumes_client,
-                                       volume['id'], 'available')
-        return volume['id']
+        waiters.wait_for_volume_resource_status(cls.volumes_client,
+                                                volume['id'], 'available')
+        return volume
 
     @classmethod
     def delete_volume(cls, volume_id):
@@ -311,9 +311,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
     def create_snapshot(self, volume_id):
         snapshot = self.snapshots_client.\
             create_snapshot(volume_id=volume_id)['snapshot']
-        waiters.wait_for_snapshot_status(self.snapshots_client,
-                                         snapshot['id'], 'available')
-        return snapshot['id']
+        waiters.wait_for_volume_resource_status(self.snapshots_client,
+                                                snapshot['id'], 'available')
+        return snapshot
 
     def delete_snapshot(self, snapshot_id):
         self.snapshots_client.delete_snapshot(snapshot_id)
@@ -327,9 +327,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         backup = self.backups_client.create_backup(
             volume_id=volume_id,
             force=True)['backup']
-        waiters.wait_for_backup_status(self.backups_client,
-                                       backup['id'], 'available')
-        return backup['id']
+        waiters.wait_for_volume_resource_status(self.backups_client,
+                                                backup['id'], 'available')
+        return backup
 
     def delete_backup(self, backup_id):
         self.backups_client.delete_backup(backup_id)

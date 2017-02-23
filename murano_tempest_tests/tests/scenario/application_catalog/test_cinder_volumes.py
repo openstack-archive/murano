@@ -49,7 +49,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_volume(cls.volume)
+        cls.delete_volume(cls.volume['id'])
         cls.client.delete_package(cls.package['id'])
         os.remove(cls.abs_archive_path)
         super(TestCinderVolumes, cls).resource_cleanup()
@@ -148,7 +148,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                 "?": {
                     "type": "io.murano.resources.ExistingCinderVolume"
                 },
-                "openstackId": self.volume
+                "openstackId": self.volume['id']
             }
         }
         post_body = self.vm_cinder(attributes=volume_attributes)
@@ -157,7 +157,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                            post_body)
         self.deploy_environment(environment, session)
 
-        self.check_volume_attached('testMurano', self.volume)
+        self.check_volume_attached('testMurano', self.volume['id'])
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
@@ -274,7 +274,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                     "?": {
                         "type": "io.murano.resources.ExistingCinderVolume"
                     },
-                    "openstackId": self.volume
+                    "openstackId": self.volume['id']
                 }
             }
         }
@@ -287,7 +287,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
-        self.assertEqual(volume_data['source_volid'], self.volume)
+        self.assertEqual(volume_data['source_volid'], self.volume['id'])
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
@@ -307,8 +307,8 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
             created from existing volume snapshot
             8. Delete environment, snapshot
         """
-        snapshot = self.create_snapshot(self.volume)
-        self.addCleanup(self.delete_snapshot, snapshot)
+        snapshot = self.create_snapshot(self.volume['id'])
+        self.addCleanup(self.delete_snapshot, snapshot['id'])
         name = utils.generate_name('testMurano')
         environment = self.application_catalog_client.\
             create_environment(name)
@@ -325,7 +325,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
                     "?": {
                         "type": "io.murano.resources.CinderVolumeSnapshot"
                     },
-                    "openstackId": snapshot
+                    "openstackId": snapshot['id']
                 }
             }
         }
@@ -338,7 +338,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
-        self.assertEqual(volume_data['snapshot_id'], snapshot)
+        self.assertEqual(volume_data['snapshot_id'], snapshot['id'])
 
 
 class TestCinderVolumeIsolatedAdmin(
@@ -367,26 +367,26 @@ class TestCinderVolumeIsolatedAdmin(
 
     @classmethod
     def resource_cleanup(cls):
-        cls.delete_volume(cls.volume)
+        cls.delete_volume(cls.volume['id'])
         cls.client.delete_package(cls.package['id'])
         os.remove(cls.abs_archive_path)
         super(TestCinderVolumeIsolatedAdmin, cls).resource_cleanup()
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
-    def test_deploy_app_with_volume_creation_readonly_multiattach(self):
-        """Test app deploy with volume creation with multiattach and readonly
+    def test_deploy_app_with_volume_creation_readonly(self):
+        """Test app deploy with volume creation with readonly
 
         Scenario:
             1. Create environment
             2. Add VM application with ability to create and
-            attach Cinder volume with size 1 GiB, multiattach and readonly
+            attach Cinder volume with size 1 GiB and readonly
             properties to the instance
             3. Deploy environment
             4. Make sure that deployment finished successfully
             5. Check that application is accessible
             6. Check that volume is attached to the instance, has size 1GiB,
-            multiattach, readonly attributes
+            and readonly attributes
             7. Delete environment
         """
         name = utils.generate_name('testMurano')
@@ -401,8 +401,7 @@ class TestCinderVolumeIsolatedAdmin(
                     "type": "io.murano.resources.CinderVolume"
                 },
                 "size": 1,
-                "readOnly": True,
-                "multiattach": True
+                "readOnly": True
             }
         }
         post_body = self.vm_cinder(attributes=volume_attributes)
@@ -415,7 +414,6 @@ class TestCinderVolumeIsolatedAdmin(
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
         self.assertEqual(volume_data['metadata']['readonly'], 'True')
-        self.assertTrue(volume_data['multiattach'])
 
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
@@ -442,8 +440,8 @@ class TestCinderVolumeIsolatedAdmin(
                    "will be skipped.")
             raise self.skipException(msg)
 
-        backup = self.create_backup(self.volume)
-        self.addCleanup(self.delete_backup, backup)
+        backup = self.create_backup(self.volume['id'])
+        self.addCleanup(self.delete_backup, backup['id'])
         name = utils.generate_name('testMurano')
         environment = self.application_catalog_client. \
             create_environment(name)
@@ -456,12 +454,12 @@ class TestCinderVolumeIsolatedAdmin(
                     "type": "io.murano.resources.CinderVolume"
                 },
                 "size": 1,
-                "name": "restore_backup_" + backup,
+                "name": "restore_backup_" + backup['id'],
                 "sourceVolumeBackup": {
                     "?": {
                         "type": "io.murano.resources.CinderVolumeBackup"
                     },
-                    "openstackId": backup
+                    "openstackId": backup['id']
                 }
             }
         }
@@ -474,4 +472,4 @@ class TestCinderVolumeIsolatedAdmin(
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
         self.assertEqual(volume_data['size'], 1)
-        self.assertIn(backup, volume_data['name'])
+        self.assertIn(backup['id'], volume_data['name'])
