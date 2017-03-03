@@ -126,7 +126,7 @@ that determine who and how can access objects. These policies are defined
 in the service's :file:`policy.json` file.
 
 On each API call corresponding policy check is performed.
-:file:`policy.json` file can be changed whiteout interrupting the API service.
+:file:`policy.json` file can be changed without interrupting the API service.
 
 For detailed information on :file:`policy.json` syntax, please refer to the
 `OpenStack official documentation <http://docs.openstack.org/kilo/config-reference/content/policy-json-file.html>`_
