@@ -33,10 +33,7 @@ class AgentListenerException(Exception):
 @dsl.name('io.murano.system.AgentListener')
 class AgentListener(object):
     def __init__(self, name):
-        self._enabled = False
-        if CONF.engine.disable_murano_agent:
-            return
-        self._enabled = True
+        self._enabled = not CONF.engine.disable_murano_agent
         self._results_queue = str('-execution-results-%s' % name.lower())
         self._subscriptions = {}
         self._receive_thread = None
