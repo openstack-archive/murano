@@ -45,10 +45,8 @@ class Agent(object):
         if CONF.engine.disable_murano_agent:
             LOG.debug('Use of murano-agent is disallowed '
                       'by the server configuration')
-            return
-
         self._host = host
-        self._enabled = True
+        self._enabled = not CONF.engine.disable_murano_agent
         env = host.find_owner('io.murano.Environment')
         self._queue = str('e%s-h%s' % (env.id, host.id)).lower()
 
