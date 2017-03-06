@@ -1,0 +1,24 @@
+{
+    "environments": [
+        {
+            "status": "ready",
+            "updated": "2014-05-14T13:02:54",
+            "networking": {},
+            "name": "test1",
+            "created": "2014-05-14T13:02:46",
+            "tenant_id": "726ed856965f43cc8e565bc991fa76c3",
+            "version": 0,
+            "id": "2fa5ab704749444bbeafe7991b412c33"
+        },
+        {
+            "status": "ready",
+            "updated": "2014-05-14T13:02:55",
+            "networking": {},
+            "name": "test2",
+            "created": "2014-05-14T13:02:51",
+            "tenant_id": "726ed856965f43cc8e565bc991fa76c3",
+            "version": 0,
+            "id": "744e44812da84e858946f5d817de4f72"
+        }
+    ]
+}
