@@ -36,7 +36,7 @@ class InstanceReportNotifier(object):
         self._notifier = messaging.Notifier(
             InstanceReportNotifier.transport,
             publisher_id=uuidutils.generate_uuid(),
-            topic='murano')
+            topics=['murano'])
         self._environment_id = environment.id
 
     def _track_instance(self, instance, instance_type,

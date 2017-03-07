@@ -36,7 +36,7 @@ class StatusReporter(object):
         self._notifier = messaging.Notifier(
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),
-            topic='murano')
+            topics=['murano'])
         if isinstance(environment, six.string_types):
             self._environment_id = environment
         else:
