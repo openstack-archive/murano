@@ -1,0 +1,25 @@
+Listen %PUBLICPORT%
+
+<VirtualHost *:%PUBLICPORT%>
+    WSGIDaemonProcess murano-api processes=1 threads=10 user=%USER% display-name=%{GROUP} %VIRTUALENV%
+    WSGIProcessGroup murano-api
+    WSGIScriptAlias / %MURANO_BIN_DIR%/murano-wsgi-api
+    WSGIApplicationGroup %{GLOBAL}
+    WSGIPassAuthorization On
+    AllowEncodedSlashes On
+    <IfVersion >= 2.4>
+      ErrorLogFormat "%{cu}t %M"
+    </IfVersion>
+    ErrorLog /var/log/%APACHE_NAME%/murano_api.log
+    CustomLog /var/log/%APACHE_NAME%/murano_api_access.log combined
+
+    <Directory %MURANO_BIN_DIR%>
+        <IfVersion >= 2.4>
+            Require all granted
+        </IfVersion>
+        <IfVersion < 2.4>
+            Order allow,deny
+            Allow from all
+        </IfVersion>
+    </Directory>
+</VirtualHost>

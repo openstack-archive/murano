@@ -218,6 +218,30 @@ class Service(service.Service):
         super(Service, self).reset()
 
 
+def get_notification_listener():
+
+    endpoints = [report_notification, track_instance, untrack_instance]
+    transport = messaging.get_notification_transport(CONF)
+    s_target = target.Target(topic='murano', server=str(uuid.uuid4()))
+    listener = messaging.get_notification_listener(
+        transport, [s_target], endpoints, executor='threading')
+
+    return listener
+
+
+def get_rpc_server():
+
+    endpoints = [ResultEndpoint()]
+    transport = messaging.get_transport(CONF)
+    s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
+    access_policy = dispatcher.DefaultRPCAccessPolicy
+    server = messaging.get_rpc_server(
+        transport, s_target, endpoints, 'threading',
+        access_policy=access_policy)
+
+    return server
+
+
 class NotificationService(Service):
     def __init__(self):
         super(NotificationService, self).__init__()
