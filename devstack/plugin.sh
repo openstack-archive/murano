@@ -20,6 +20,17 @@ fi
 
 MURANO_AUTH_CACHE_DIR=${MURANO_AUTH_CACHE_DIR:-/var/cache/murano}
 
+# Toggle for deploying Murano-API under under a wsgi server
+MURANO_USE_UWSGI=${MURANO_USE_UWSGI:-True}
+
+MURANO_UWSGI=$MURANO_BIN_DIR/murano-wsgi-api
+MURANO_UWSGI_CONF=$MURANO_CONF_DIR/murano-api-uwsgi.ini
+
+if [[ "$MURANO_USE_UWSGI" == "True" ]]; then
+    MURANO_API_URL="$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST/application-catalog"
+else
+    MURANO_API_URL="$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+fi
 
 # create_murano_accounts() - Set up common required murano accounts
 #
@@ -36,9 +47,9 @@ function create_murano_accounts() {
     get_or_create_service "murano" "application-catalog" "Application Catalog Service"
     get_or_create_endpoint "application-catalog" \
         "$REGION_NAME" \
-        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
-        "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+        "$MURANO_API_URL" \
+        "$MURANO_API_URL" \
+        "$MURANO_API_URL"
 
     if is_service_enabled murano-cfapi; then
     get_or_create_service "murano-cfapi" "service-broker" "Murano CloudFoundry Service Broker"
@@ -167,7 +178,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE DEFAULT debug $MURANO_DEBUG
     iniset $MURANO_CONF_FILE DEFAULT use_syslog $SYSLOG
     # Format logging
-    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ]; then
+    if [ "$LOG_COLOR" == "True" ] && [ "$SYSLOG" == "False" ] && [ "$MURANO_USE_UWSGI" == "False" ] ; then
         setup_colorized_logging $MURANO_CONF_FILE DEFAULT
     else
         # Show user_name and project_name instead of user_id and project_id
@@ -203,7 +214,7 @@ function configure_murano {
     iniset $MURANO_CONF_FILE keystone auth_url $KEYSTONE_SERVICE_URI
 
     # Configure Murano API URL
-    iniset $MURANO_CONF_FILE murano url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
+    iniset $MURANO_CONF_FILE murano url "$MURANO_API_URL"
 
     # Configure the number of api workers
     if [[ -n "$MURANO_API_WORKERS" ]]; then
@@ -217,6 +228,11 @@ function configure_murano {
     if is_murano_backend_glare; then
         configure_murano_glare_backend
     fi
+
+    if [ "$MURANO_USE_UWSGI" == "True" ]; then
+        write_uwsgi_config "$MURANO_UWSGI_CONF" "$MURANO_UWSGI" "/application-catalog"
+    fi
+
 }
 
 # set the murano packages service backend
@@ -264,7 +280,7 @@ function install_murano_apps() {
                        --os-password $OS_PASSWORD \
                        --os-tenant-name $OS_PROJECT_NAME \
                        --os-auth-url $KEYSTONE_SERVICE_URI \
-                       --murano-url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+                       --murano-url $MURANO_API_URL \
                        --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
                        --murano-packages-service $MURANO_PACKAGES_SERVICE \
                        package-import \
@@ -350,7 +366,7 @@ function setup_core_library() {
            --os-tenant-name admin \
            --os-auth-url $KEYSTONE_SERVICE_URI \
            --os-region-name $REGION_NAME \
-           --murano-url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
+           --murano-url $MURANO_API_URL \
            --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
            --murano-packages-service $MURANO_PACKAGES_SERVICE \
            package-import $MURANO_DIR/meta/*.zip \
@@ -370,6 +386,7 @@ function install_murano() {
     if is_murano_backend_glare; then
         install_murano_artifact_plugin
     fi
+
 }
 
 function install_murano_pythonclient() {
@@ -387,7 +404,11 @@ function install_murano_pythonclient() {
 
 # start_murano() - Start running processes, including screen
 function start_murano() {
-    run_process murano-api "$MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
+    if [ "$MURANO_USE_UWSGI" == "True" ]; then
+        run_process murano-api "$MURANO_BIN_DIR/uwsgi --ini $MURANO_UWSGI_CONF"
+    else
+        run_process murano-api "$MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
+    fi
     run_process murano-engine "$MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano.conf"
 }
 
@@ -395,7 +416,12 @@ function start_murano() {
 # stop_murano() - Stop running processes
 function stop_murano() {
     # Kill the Murano screen windows
-    stop_process murano-api
+    if [ "$MURANO_USE_UWSGI" == "True" ]; then
+        disable_apache_site murano-api
+        restart_apache_server
+    else
+        stop_process murano-api
+    fi
     stop_process murano-engine
 }
 
@@ -417,6 +443,11 @@ function cleanup_murano() {
 
     # Cleanup keystone signing dir
     sudo rm -rf $MURANO_KEYSTONE_SIGNING_DIR
+
+    if [[ "$MURANO_USE_UWSGI" == "True" ]]; then
+        remove_uwsgi_config "$MURANO_UWSGI_CONF" "$MURANO_UWSGI"
+    fi
+
 }
 
 function configure_murano_tempest_plugin() {
