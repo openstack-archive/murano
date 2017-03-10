@@ -54,14 +54,14 @@ class TestHotPackage(test_base.MuranoTestCase):
         manifest_path = os.path.join(cls.test_dirs[0], 'template.yaml')
         cls.manifest = {}
         with open(manifest_path) as manifest_file:
-            for key, value in yaml.load(manifest_file).items():
+            for key, value in yaml.safe_load(manifest_file).items():
                 cls.manifest[key] = value
 
         properties_manifest_path = os.path.join(cls.test_dirs[0],
                                                 'properties_manifest.yaml')
         cls.properties_manifest = {}
         with open(properties_manifest_path) as manifest_file:
-            for key, value in yaml.load(manifest_file).items():
+            for key, value in yaml.safe_load(manifest_file).items():
                 cls.properties_manifest[key] = value
 
     def test_heat_files_generated(self):

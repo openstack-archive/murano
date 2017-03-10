@@ -29,7 +29,7 @@ class TestMPLPackage(test_base.MuranoTestCase):
         manifest_path = os.path.join(cls.source_directory, 'manifest.yaml')
         cls.manifest = {}
         with open(manifest_path) as manifest_file:
-            for key, value in yaml.load(manifest_file).items():
+            for key, value in yaml.safe_load(manifest_file).items():
                 cls.manifest[key] = value
 
     def test_classes_property(self):
