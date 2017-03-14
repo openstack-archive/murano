@@ -263,7 +263,7 @@ basic, the snippet is simple as well:
 
 This json follows a standard json-patch notation, i.e. it defines a number of
 operations to edit a large json document. This particular one `adds` (note the
-value of ``op`` key) an object descibed in the ``value`` of the json to the
+value of ``op`` key) an object described in the ``value`` of the json to the
 `root` (note the ``path`` equal to ``/-`` - that's root) of our environment.
 The object we add has the `type` of ``com.yourdomain.HelloWorld`` - that's the
 class we just created two steps ago. Other keys in this json parameterize the
