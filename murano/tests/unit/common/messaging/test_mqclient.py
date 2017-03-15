@@ -14,11 +14,15 @@
 #    under the License.
 
 import mock
+from oslo_config import cfg
 from oslo_serialization import jsonutils
 import ssl as ssl_module
 
+from murano.common.i18n import _
 from murano.common.messaging import mqclient
 from murano.tests.unit import base
+
+CONF = cfg.CONF
 
 
 class MQClientTest(base.MuranoTestCase):
@@ -41,6 +45,60 @@ class MQClientTest(base.MuranoTestCase):
         self.assertEqual(mock_kombu.Connection(), self.ssl_client._connection)
         self.assertIsNone(self.ssl_client._channel)
         self.assertFalse(self.ssl_client._connected)
+
+    @mock.patch('murano.common.messaging.mqclient.kombu', autospec=True)
+    def test_client_initialization_with_ssl_version(self, mock_kombu):
+        ssl_versions = (
+            ('tlsv1', getattr(ssl_module, 'PROTOCOL_TLSv1', None)),
+            ('tlsv1_1', getattr(ssl_module, 'PROTOCOL_TLSv1_1', None)),
+            ('tlsv1_2', getattr(ssl_module, 'PROTOCOL_TLSv1_2', None)),
+            ('sslv2', getattr(ssl_module, 'PROTOCOL_SSLv2', None)),
+            ('sslv23', getattr(ssl_module, 'PROTOCOL_SSLv23', None)),
+            ('sslv3', getattr(ssl_module, 'PROTOCOL_SSLv3', None)))
+        exception_count = 0
+
+        for ssl_name, ssl_version in ssl_versions:
+            ssl_kwargs = {
+                'login': 'test_login',
+                'password': 'test_password',
+                'host': 'test_host',
+                'port': 'test_port',
+                'virtual_host': 'test_virtual_host',
+                'ssl': True,
+                'ssl_version': ssl_name,
+                'ca_certs': ['cert1'],
+                'insecure': False
+            }
+
+            # If a ssl_version is not valid, a RuntimeError is thrown.
+            # According to the ssl_version docs in config.py, certain versions
+            # of TLS may be available depending on the system. So, just
+            # check that at least 1 ssl_version works.
+            if ssl_version is None:
+                e = self.assertRaises(RuntimeError, mqclient.MqClient,
+                                      **ssl_kwargs)
+                self.assertEqual(_('Invalid SSL version: %s') % ssl_name,
+                                 e.__str__())
+                exception_count += 1
+                continue
+
+            self.ssl_client = mqclient.MqClient(**ssl_kwargs)
+
+            mock_kombu.Connection.assert_called_once_with(
+                'amqp://{0}:{1}@{2}:{3}/{4}'.format(
+                    'test_login', 'test_password', 'test_host', 'test_port',
+                    'test_virtual_host'),
+                ssl={'ca_certs': ['cert1'],
+                     'cert_reqs': ssl_module.CERT_REQUIRED,
+                     'ssl_version': ssl_version})
+            self.assertEqual(
+                mock_kombu.Connection(), self.ssl_client._connection)
+            self.assertIsNone(self.ssl_client._channel)
+            self.assertFalse(self.ssl_client._connected)
+            mock_kombu.Connection.reset_mock()
+
+        # Check that at least one ssl_version worked.
+        self.assertGreater(len(ssl_versions), exception_count)
 
     @mock.patch('murano.common.messaging.mqclient.kombu')
     def test_alternate_client_initializations(self, mock_kombu):
