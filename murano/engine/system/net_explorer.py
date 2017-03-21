@@ -24,7 +24,6 @@ import tenacity
 
 from murano.common import auth_utils
 from murano.common import exceptions as exc
-from murano.common.i18n import _LI
 from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import session_local_storage
@@ -98,7 +97,7 @@ class NetworkExplorer(object):
                 }
                 router = self._client.create_router(
                     body=body_data).get('router')
-                LOG.info(_LI('Created router: {id}').format(id=router['id']))
+                LOG.info('Created router: {id}'.format(id=router['id']))
                 return router['id']
             else:
                 raise KeyError('Router %s was not found' % router_name)

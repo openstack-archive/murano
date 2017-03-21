@@ -25,7 +25,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common import auth_utils
-from murano.common.i18n import _LW
 from murano.dsl import dsl
 from murano.dsl import session_local_storage
 
@@ -53,7 +52,7 @@ class MistralClient(object):
     @session_local_storage.execution_session_memoize
     def _create_client(region):
         if not mistralcli:
-            LOG.warning(_LW("Mistral client is not available"))
+            LOG.warning("Mistral client is not available")
             raise mistral_import_error
 
         mistral_settings = CONF.mistral

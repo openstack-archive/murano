@@ -17,7 +17,6 @@ import time
 from oslo_log import log as logging
 
 from murano.api import v1
-from murano.common.i18n import _LE
 from murano.common import wsgi
 from murano.db.services import stats
 
@@ -63,8 +62,8 @@ def stats_count(api, method):
             except Exception:
                 te = time.time()
                 tenant = args[1].context.tenant
-                LOG.exception(_LE('API {api} method {method} raised an '
-                                  'exception').format(api=api, method=method))
+                LOG.exception('API {api} method {method} raised an '
+                              'exception'.format(api=api, method=method))
                 update_error_count(api, method, te - te, tenant)
                 raise
         return wrap

@@ -18,7 +18,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common import exceptions
-from murano.common.i18n import _LE
 from murano.dsl import dsl
 from murano.engine.system import common
 
@@ -40,8 +39,8 @@ class AgentListener(object):
 
     def _check_enabled(self):
         if CONF.engine.disable_murano_agent:
-            LOG.error(_LE('Use of murano-agent is disallowed '
-                          'by the server configuration'))
+            LOG.error('Use of murano-agent is disallowed '
+                      'by the server configuration')
 
             raise exceptions.PolicyViolationException(
                 'Use of murano-agent is disallowed '

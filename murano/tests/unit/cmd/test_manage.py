@@ -22,7 +22,6 @@ except ImportError:
     from io import StringIO
 
 from murano.cmd import manage
-from murano.common.i18n import _LE
 from murano.db.catalog import api as db_catalog_api
 from murano.db import models
 from murano.db import session as db_session
@@ -146,8 +145,8 @@ class TestManage(test_base.MuranoWithDBTestCase):
         manage.do_import_package()
 
         mock_log.error.assert_called_once_with(
-            _LE("Package '{name}' exists ({pkg_id}). Use --update.")
-            .format(name='test_full_name', pkg_id=self.test_package.id))
+            "Package '{name}' exists ({pkg_id}). Use --update."
+                .format(name='test_full_name', pkg_id=self.test_package.id))
 
     @mock.patch('sys.stdout', new_callable=StringIO)
     def test_do_list_categories(self, mock_stdout):
@@ -225,7 +224,7 @@ class TestManage(test_base.MuranoWithDBTestCase):
     def test_main_except_general_exception(self, mock_conf):
         mock_conf.command.func.side_effect = Exception
 
-        expected_err_msg = _LE("murano-manage command failed:")
+        expected_err_msg = "murano-manage command failed:"
 
         with self.assertRaisesRegexp(SystemExit, expected_err_msg):
             manage.main()

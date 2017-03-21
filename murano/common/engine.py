@@ -39,7 +39,6 @@ from murano.engine import execution_session
 from murano.engine import package_loader
 from murano.engine.system import status_reporter
 from murano.engine.system import yaql_functions
-from murano.common.i18n import _LI, _LE, _LW
 from murano.policy import model_policy_enforcer as enforcer
 
 CONF = cfg.CONF
@@ -128,7 +127,7 @@ class TaskProcessingEndpoint(object):
     @staticmethod
     def execute(task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        LOG.info(_LI('Starting processing task: {task_desc}').format(
+        LOG.info('Starting processing task: {task_desc}'.format(
             task_desc=jsonutils.dumps(s_task)))
 
         result = None
@@ -139,7 +138,7 @@ class TaskProcessingEndpoint(object):
             result = task_executor.execute()
             return result
         finally:
-            LOG.info(_LI('Finished processing task: {task_desc}').format(
+            LOG.info('Finished processing task: {task_desc}'.format(
                 task_desc=jsonutils.dumps(result)))
 
 
@@ -147,8 +146,8 @@ class StaticActionEndpoint(object):
     @classmethod
     def call_static_action(cls, context, task):
         s_task = token_sanitizer.TokenSanitizer().sanitize(task)
-        LOG.info(_LI('Starting execution of static action: '
-                     '{task_desc}').format(task_desc=jsonutils.dumps(s_task)))
+        LOG.info('Starting execution of static action: '
+                 '{task_desc}'.format(task_desc=jsonutils.dumps(s_task)))
 
         result = None
         reporter = status_reporter.StatusReporter(task['id'])
@@ -158,8 +157,8 @@ class StaticActionEndpoint(object):
             result = task_executor.execute()
             return result
         finally:
-            LOG.info(_LI('Finished execution of static action: '
-                     '{task_desc}').format(task_desc=jsonutils.dumps(result)))
+            LOG.info('Finished execution of static action: '
+                     '{task_desc}'.format(task_desc=jsonutils.dumps(result)))
 
 
 class TaskExecutor(object):
@@ -214,7 +213,7 @@ class TaskExecutor(object):
             try:
                 self._delete_trust()
             except Exception:
-                LOG.warning(_LW('Cannot delete trust'), exc_info=True)
+                LOG.warning('Cannot delete trust', exc_info=True)
 
         return result
 
@@ -277,8 +276,8 @@ class TaskExecutor(object):
         else:
             exception_traceback = traceback.format_exc()
             LOG.exception(
-                _LE("Exception %(exc)s occurred"
-                    " during invocation of %(method)s"),
+                ("Exception %(exc)s occurred"
+                 " during invocation of %(method)s"),
                 {'exc': exception, 'method': method_name})
         self._reporter.report_error(root, str(exception))
 

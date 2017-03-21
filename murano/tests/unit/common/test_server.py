@@ -16,7 +16,6 @@
 from datetime import datetime
 import mock
 
-from murano.common.i18n import _LI, _LW
 from murano.common import server
 from murano.services import states
 from murano.tests.unit import base
@@ -75,8 +74,8 @@ class ServerTest(base.MuranoTestCase):
             states.SessionState.DEPLOYED,
             mock_db_session.get_session().query().filter_by().first().state)
         mock_log.info.assert_called_once_with(
-            _LI('EnvId: {env_id} TenantId: {tenant_id} Status: '
-                'Successful Apps: {services}')
+            'EnvId: {env_id} TenantId: {tenant_id} Status: '
+            'Successful Apps: {services}'
             .format(env_id=mock_env.id,
                     tenant_id=mock_env.tenant_id,
                     services=test_result['model']['Objects']['services']))
@@ -123,8 +122,8 @@ class ServerTest(base.MuranoTestCase):
             states.SessionState.DEPLOY_FAILURE,
             mock_db_session.get_session().query().filter_by().first().state)
         mock_log.warning.assert_called_once_with(
-            _LW('EnvId: {env_id} TenantId: {tenant_id} Status: '
-                'Failed Apps: {services}')
+            'EnvId: {env_id} TenantId: {tenant_id} Status: '
+            'Failed Apps: {services}'
             .format(env_id=mock_env.id,
                     tenant_id=mock_env.tenant_id,
                     services=test_result['model']['Objects']['services']))
@@ -170,8 +169,8 @@ class ServerTest(base.MuranoTestCase):
             states.SessionState.DELETE_FAILURE,
             mock_db_session.get_session().query().filter_by().first().state)
         mock_log.warning.assert_called_once_with(
-            _LI('EnvId: {env_id} TenantId: {tenant_id} Status: '
-                'Failed Apps: {services}')
+            'EnvId: {env_id} TenantId: {tenant_id} Status: '
+            'Failed Apps: {services}'
             .format(env_id=mock_env.id,
                     tenant_id=mock_env.tenant_id,
                     services=[]))
@@ -188,9 +187,8 @@ class ServerTest(base.MuranoTestCase):
                                                      'test_env_id')
         self.assertIsNone(result)
         mock_log.warning.assert_called_once_with(
-            _LW('Environment result could not be handled, '
-                'specified environment not found in database')
-        )
+            'Environment result could not be handled, '
+            'specified environment not found in database')
 
     @mock.patch('murano.common.server.environments')
     @mock.patch('murano.common.server.session')

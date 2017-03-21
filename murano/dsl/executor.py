@@ -24,7 +24,6 @@ from yaql.language import exceptions as yaql_exceptions
 from yaql.language import specs
 from yaql.language import utils
 
-from murano.common.i18n import _LW, _LE
 from murano.dsl import attribute_store
 from murano.dsl import constants
 from murano.dsl import dsl
@@ -348,9 +347,9 @@ class MuranoDslExecutor(object):
                             method, subscriber, None, [obj], {},
                             invoke_action=False)
             except Exception as e:
-                LOG.warning(_LW(
-                    'Muted exception during destruction dependency '
-                    'execution in {0}: {1}').format(obj, e), exc_info=True)
+                LOG.warning('Muted exception during destruction dependency '
+                            'execution in {0}: {1}'.format(obj, e),
+                            exc_info=True)
         obj.load_dependencies(None)
 
     def destroy_objects(self, *objects):
@@ -372,9 +371,9 @@ class MuranoDslExecutor(object):
                     tb = e.format(prefix='  ')
                 else:
                     tb = traceback.format_exc()
-                LOG.warning(_LW(
+                LOG.warning(
                     'Muted exception during execution of .destroy '
-                    'on {0}: {1}').format(obj, tb), exc_info=True)
+                    'on {0}: {1}'.format(obj, tb), exc_info=True)
 
     def create_root_context(self, runtime_version):
         context = self._root_context_cache.get(runtime_version)
@@ -478,8 +477,8 @@ class MuranoDslExecutor(object):
             return model
         except Exception as e:
             LOG.exception(
-                _LE("Exception %s occurred"
-                    " during MuranoDslExecutor finalization"), e)
+                "Exception %s occurred"
+                " during MuranoDslExecutor finalization", e)
             return None
 
     def __enter__(self):

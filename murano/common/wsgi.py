@@ -41,7 +41,7 @@ import webob.exc
 from murano.api.v1 import validation_schemas
 from murano.common import config
 from murano.common import exceptions
-from murano.common.i18n import _, _LE, _LW
+from murano.common.i18n import _
 from murano.common import xmlutils
 
 eventlet.patcher.monkey_patch(all=False, socket=True)
@@ -378,7 +378,7 @@ class ResourceExceptionHandler(object):
         # convert to webob exceptions.
         if isinstance(ex_value, TypeError):
             exc_info = (ex_type, ex_value, ex_traceback)
-            LOG.error(_LE("Exception handling resource: {0}").format(ex_value),
+            LOG.error("Exception handling resource: {0}".format(ex_value),
                       exc_info=exc_info)
             raise webob.exc.HTTPBadRequest()
 
@@ -778,8 +778,8 @@ class RequestDeserializer(object):
         try:
             content_type = request.get_content_type()
         except exceptions.UnsupportedContentType as e:
-            LOG.error(_LE("Unrecognized Content-Type provided in request: "
-                          "{error}").format(error=str(e)))
+            LOG.error("Unrecognized Content-Type provided in request: "
+                      "{error}".format(error=str(e)))
             raise
 
         if content_type is None:
@@ -947,7 +947,7 @@ class JSONPatchDeserializer(TextDeserializer):
             try:
                 jsonschema.validate(property_to_update, schema)
             except jsonschema.ValidationError as e:
-                LOG.error(_LE("Schema validation error occurred: %s"), e)
+                LOG.error("Schema validation error occurred: %s", e)
                 raise webob.exc.HTTPBadRequest(explanation=e.message)
 
     def _decode_json_pointer(self, pointer):
@@ -1111,7 +1111,7 @@ class FormDataDeserializer(TextDeserializer):
                 data=datastring))
             value = jsonutils.loads(datastring)
         except ValueError:
-            LOG.warning(_LW("Unable to deserialize to json, using raw text"))
+            LOG.warning("Unable to deserialize to json, using raw text")
         return value
 
     def default(self, request):

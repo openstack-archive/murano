@@ -21,7 +21,6 @@ return
 from oslo_log import log as logging
 
 from murano.api import versions
-from murano.common.i18n import _LW
 from murano.common import wsgi
 
 LOG = logging.getLogger(__name__)
@@ -51,7 +50,7 @@ class VersionNegotiationFilter(wsgi.Middleware):
         try:
             version = self._match_version_string(req_version)
         except ValueError:
-            LOG.warning(_LW("Unknown version. Returning version choices."))
+            LOG.warning("Unknown version. Returning version choices.")
             return self.versions_app
 
         req.environ['api.version'] = version

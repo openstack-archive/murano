@@ -18,8 +18,6 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from stevedore import dispatch
 
-from murano.common.i18n import _LE, _LW, _LI
-
 
 CONF = cfg.CONF
 LOG = logging.getLogger(__name__)
@@ -28,7 +26,7 @@ NAMESPACE = 'io.murano.plugins.packages'
 
 class PluginLoader(object):
     def __init__(self):
-        LOG.info(_LI('Loading package type plugins'))
+        LOG.info('Loading package type plugins')
         extension_manager = dispatch.EnabledExtensionManager(
             NAMESPACE,
             self._is_plugin_enabled,
@@ -52,14 +50,14 @@ class PluginLoader(object):
 
     @staticmethod
     def _on_load_failure(manager, ep, exc):
-        LOG.warning(_LW("Error loading entry-point {ep} from package {dist}: "
-                        "{err}").format(ep=ep.name, dist=ep.dist, err=exc))
+        LOG.warning("Error loading entry-point {ep} from package {dist}: "
+                    "{err}".format(ep=ep.name, dist=ep.dist, err=exc))
 
     @staticmethod
     def _parse_format_string(format_string):
         parts = format_string.rsplit('/', 1)
         if len(parts) != 2:
-            LOG.error(_LE("Incorrect format name {name}").format(
+            LOG.error("Incorrect format name {name}".format(
                 name=format_string))
             raise ValueError(format_string)
         return (
@@ -75,7 +73,7 @@ class PluginLoader(object):
         else:
             self._initialize_plugin(package_class)
             self.formats.setdefault(name, {})[version] = package_class
-            LOG.info(_LI('Plugin for "{0}" package type was loaded').format(
+            LOG.info('Plugin for "{0}" package type was loaded'.format(
                 format_name))
 
     def get_package_handler(self, format_name):

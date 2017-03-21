@@ -15,7 +15,6 @@
 
 from oslo_log import log as logging
 
-from murano.common.i18n import _LE
 
 LOG = logging.getLogger(__name__)
 
@@ -43,8 +42,8 @@ class ExecutionSession(object):
             try:
                 delegate()
             except Exception:
-                LOG.exception(_LE('Unhandled exception on invocation of '
-                              'pre-execution hook'))
+                LOG.exception('Unhandled exception on invocation of '
+                              'pre-execution hook')
         self._set_up_list = []
 
     def finish(self):
@@ -52,6 +51,6 @@ class ExecutionSession(object):
             try:
                 delegate()
             except Exception:
-                LOG.exception(_LE('Unhandled exception on invocation of '
-                              'post-execution hook'))
+                LOG.exception('Unhandled exception on invocation of '
+                              'post-execution hook')
         self._tear_down_list = []

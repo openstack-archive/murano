@@ -16,7 +16,6 @@
 import mock
 import time
 
-from murano.common.i18n import _LE
 from murano.common import statservice
 from murano.tests.unit import base
 
@@ -92,5 +91,5 @@ class StatsCollectingServiceTest(base.MuranoTestCase):
         self.service.update_stats()
 
         mock_log.exception.assert_called_once_with(
-            _LE("Failed to get statistics object from a "
-                "database. {error_code}").format(error_code='test_error_code'))
+            "Failed to get statistics object from a "
+            "database. {error_code}".format(error_code='test_error_code'))

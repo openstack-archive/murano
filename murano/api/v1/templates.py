@@ -18,7 +18,7 @@ import six
 from webob import exc
 
 from murano.api.v1 import request_statistics
-from murano.common.i18n import _, _LE
+from murano.common.i18n import _
 from murano.common import policy
 from murano.common import utils
 from murano.common import wsgi
@@ -237,7 +237,7 @@ class Controller(object):
         old_env_template = self._validate_exists(env_template_id)
 
         if not old_env_template.get('is_public'):
-            msg = _LE('User has no access to these resources.')
+            msg = _('User has no access to these resources.')
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
         self._validate_body_name(body)
@@ -262,7 +262,7 @@ class Controller(object):
         if env_template.is_public or request.context.is_admin:
             return
         if env_template.tenant_id != request.context.tenant:
-            msg = _LE('User has no access to these resources.')
+            msg = _('User has no access to these resources.')
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 

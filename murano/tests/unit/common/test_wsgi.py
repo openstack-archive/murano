@@ -23,7 +23,7 @@ from oslo_config import cfg
 from xml.dom import minidom
 
 from murano.common import exceptions
-from murano.common.i18n import _, _LW
+from murano.common.i18n import _
 from murano.common import wsgi
 from murano.tests.unit import base
 
@@ -604,4 +604,4 @@ class TestFormDataDeserializer(base.MuranoTestCase):
         mock_log.debug.assert_called_once_with(
             "Trying to deserialize 'value error' to json")
         mock_log.warning.assert_called_once_with(
-            _LW('Unable to deserialize to json, using raw text'))
+            'Unable to deserialize to json, using raw text')

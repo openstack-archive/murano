@@ -24,7 +24,6 @@ from oslo_config import cfg
 import semantic_version
 import testtools
 
-from murano.common.i18n import _LE, _LW
 from murano.dsl import exceptions as dsl_exceptions
 from murano.dsl import murano_package as dsl_package
 from murano.engine import package_loader
@@ -79,8 +78,8 @@ class TestPackageCache(base.MuranoTestCase):
 
         mock_versionutils.report_deprecated_feature.assert_called_once_with(
             package_loader.LOG,
-            _LW("'glance' packages_service option has been renamed "
-                "to 'glare', please update your configuration"))
+            "'glance' packages_service option has been renamed "
+            "to 'glare', please update your configuration")
 
         self.assertIsNotNone(client)
         self.assertIsNotNone(self.loader._glare_client)
@@ -425,7 +424,7 @@ class TestPackageCache(base.MuranoTestCase):
         self.loader._get_package_by_definition(package)
 
         mock_log.exception.assert_called_once_with(
-            _LE('Unable to load package from cache. Clean-up.'))
+            'Unable to load package from cache. Clean-up.')
         mock_log.exception.reset_mock()
 
         # Test that the second instance of the exception is caught.
@@ -434,7 +433,7 @@ class TestPackageCache(base.MuranoTestCase):
         self.loader._get_package_by_definition(package)
 
         mock_log.exception.assert_called_once_with(
-            _LE('Unable to load package from cache. Clean-up.'))
+            'Unable to load package from cache. Clean-up.')
         os.remove(temp_directory)
 
     @testtools.skipIf(os.name == 'nt', "Doesn't work on Windows")
