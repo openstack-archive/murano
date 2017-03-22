@@ -252,8 +252,7 @@ class TestAuthUtils(base.MuranoTestCase):
             conf_section, option_names))
 
     def test_get_config_option_return_default(self):
-        self.assertEqual(None, auth_utils._get_config_option(
-            None, []))
+        self.assertIsNone(auth_utils._get_config_option(None, []))
 
     @mock.patch.object(auth_utils, '_get_config_option', autospec=True)
     def test_get_session(self, mock_get_config_option):
