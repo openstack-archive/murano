@@ -26,17 +26,17 @@ paste_deploy_opts = [
 ]
 
 bind_opts = [
-    cfg.StrOpt('bind-host', default='0.0.0.0',
-               help='Address to bind the Murano API server to.'),
+    cfg.HostAddressOpt('bind-host', default='0.0.0.0',
+                       help='Address to bind the Murano API server to.'),
     cfg.PortOpt('bind-port',
                 default=8082,
                 help='Port the bind the Murano API server to.'),
 ]
 
 rabbit_opts = [
-    cfg.StrOpt('host', default='localhost',
-               help='The RabbitMQ broker address which used for communication '
-               'with Murano guest agents.'),
+    cfg.HostAddressOpt('host', default='localhost',
+                       help='The RabbitMQ broker address which used for '
+                            'communication with Murano guest agents.'),
 
     cfg.PortOpt('port',
                 default=5672,
@@ -186,9 +186,9 @@ networking_opts = [
     cfg.IntOpt('max_hosts', default=250,
                help='Maximum number of VMs per environment'),
 
-    cfg.StrOpt('env_ip_template', default='10.0.0.0',
-               help='Template IP address for generating environment '
-               'subnet cidrs'),
+    cfg.HostAddressOpt('env_ip_template', default='10.0.0.0',
+                       help='Template IP address for generating environment '
+                            'subnet cidrs'),
 
     cfg.ListOpt('default_dns', default=[],
                 help='List of default DNS nameservers to be assigned to '

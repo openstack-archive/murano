@@ -24,8 +24,8 @@ from murano import version
 cfapi_opts = [
     cfg.StrOpt('tenant', default='admin',
                help=_('Project for service broker')),
-    cfg.StrOpt('bind_host', default='localhost',
-               help=_('Host for service broker')),
+    cfg.HostAddressOpt('bind_host', default='localhost',
+                       help=_('Host for service broker')),
     cfg.StrOpt('bind_port', default='8083',
                help=_('Port for service broker')),
     cfg.StrOpt('auth_url', default='localhost:5000',
