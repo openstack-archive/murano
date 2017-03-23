@@ -2,17 +2,17 @@
 # Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
 msgid ""
 msgstr ""
-"Project-Id-Version: murano 2.0.0.0rc2.dev91\n"
+"Project-Id-Version: murano 3.2.1.dev28\n"
 "Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
-"POT-Creation-Date: 2016-04-17 20:06+0000\n"
+"POT-Creation-Date: 2017-03-22 16:25+0000\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"PO-Revision-Date: 2015-12-28 11:00+0000\n"
-"Last-Translator: Kirill Zaitsev <k.zaitsev@me.com>\n"
+"PO-Revision-Date: 2016-04-12 05:46+0000\n"
+"Last-Translator: Copied by Zanata <copied-by-zanata@zanata.org>\n"
 "Language-Team: Russian\n"
 "Language: ru\n"
-"X-Generator: Zanata 3.7.3\n"
+"X-Generator: Zanata 3.9.6\n"
 "Plural-Forms: nplurals=3; plural=(n%10==1 && n%100!=11 ? 0 : n%10>=2 && n"
 "%10<=4 && (n%100<10 || n%100>=20) ? 1 : 2)\n"
 
@@ -31,9 +31,6 @@ msgstr "URL аутентификации"
 
 msgid "Authorization required"
 msgstr "Требуется авторизация"
-
-msgid "Bad value passed to filter. Got {key}, exected:{valid}"
-msgstr "Фильтру передано неверное значение. Получено {key}, ожидалось:{valid}"
 
 msgid "Category '{name}' doesn't exist"
 msgstr "Категория '{name}' не существует"
@@ -62,13 +59,6 @@ msgid ""
 msgstr ""
 "Не удалось связать с %(host)s:%(port)s в течении 30 секунд: адрес уже "
 "используется"
-
-msgid ""
-"Could not open session for environment <EnvId: {env_id}>, environment has "
-"deploying status."
-msgstr ""
-"Не удалось открыть сессию для окружения <EnvId: {env_id}>, окружение "
-"находится в состоянии развёртывания."
 
 msgid "Couldn't load package from file: {reason}"
 msgstr "Не удалось загрузить пакет из файла: {reason}"
@@ -124,9 +114,6 @@ msgstr "Окружение с id {env_id} не найдено"
 msgid "Environment with specified name already exists"
 msgstr "Окружение с указанным именем уже существует"
 
-msgid "Exception handling resource: {0}"
-msgstr "Исключение при обработке ресурса: {0}"
-
 msgid "Invalid sort direction: {0}"
 msgstr "Неверное направление сортировки: {0}"
 
@@ -156,12 +143,6 @@ msgstr ""
 
 msgid "Malformed request body"
 msgstr "Неправильно сформированное тело запроса"
-
-msgid ""
-"Method '{method}' is not allowed for a path with name '{name}'. Allowed "
-"operations are: '{ops}'"
-msgstr ""
-"Метод '{method}' недопустим для пути '{name}'. Возможные операции: '{ops}'"
 
 msgid "Murano object model validation failed: {0}"
 msgstr "Ошибка при валидации объкетной модели мурано: {0}"
@@ -208,26 +189,12 @@ msgid "Please, specify a name of the environment to create"
 msgstr "Укажите имя создаваемого окружения"
 
 #, python-format
-msgid "Pointer `%s` contains \"~\" not part of a recognized escape sequence."
-msgstr ""
-"Указатель `%s` содержит символ \"~\", не входящий в распознаваемую Esc-"
-"последовательность."
-
-#, python-format
 msgid "Pointer `%s` contains adjacent \"/\"."
 msgstr "Указатель `%s` содержит смежный \"/\"."
 
 #, python-format
-msgid "Pointer `%s` does not contains valid token."
-msgstr "Указатель `%s` не содержит допустимого маркера."
-
-#, python-format
 msgid "Pointer `%s` does not start with \"/\"."
 msgstr "Указатель `%s` не начинается с \"/\"."
-
-#, python-format
-msgid "Pointer `%s` end with \"/\"."
-msgstr "Указатель `%s` оканчивается на \"/\"."
 
 msgid "Request body is empty: please, provide application object model"
 msgstr "Пустое тело запроса: укажите объектную модель приложения"
