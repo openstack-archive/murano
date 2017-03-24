@@ -570,9 +570,12 @@ function install_murano_dashboard() {
 function cleanup_murano_dashboard() {
     echo_summary "Cleanup Murano Dashboard"
 
-    rm $HORIZON_DIR/openstack_dashboard/local/enabled/_50_murano.py
+    # remove all the pannels we've installed, also any pyc/pyo files
+    for i in $(find $MURANO_DASHBOARD_DIR/muranodashboard/local/enabled -iname '_[0-9]*.py' -printf '%f\n'); do
+        rm -rf $HORIZON_DIR/openstack_dashboard/local/enabled/${i%.*}.*
+    done
 
-    rm $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
+    rm $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.*
 
     rm $HORIZON_DIR/openstack_dashboard/conf/murano_policy.json
 }
