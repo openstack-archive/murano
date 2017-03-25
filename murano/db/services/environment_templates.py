@@ -111,7 +111,7 @@ class EnvTemplateServices(object):
 
            :param env_template_id: Template Id to be deleted.
            :param body: The description to be updated.
-           :return the template description updated
+           :return: the template description updated
         """
 
         unit = db_session.get_session()
