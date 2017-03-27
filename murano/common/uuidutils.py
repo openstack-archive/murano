@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import uuid
+from oslo_utils import uuidutils
 
 
 def generate_uuid():
-    return uuid.uuid4().hex
+    return uuidutils.generate_uuid(dashed=False)
