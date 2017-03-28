@@ -16,32 +16,49 @@ from keystoneauth1 import identity
 from keystoneauth1 import loading as ka_loading
 from keystoneclient.v3 import client as ks_client
 from oslo_config import cfg
+from oslo_log import log as logging
+from oslo_log import versionutils
 
 from murano.dsl import helpers
 
 
 CFG_KEYSTONE_GROUP = 'keystone_authtoken'
+LOG = logging.getLogger(__name__)
 
 cfg.CONF.import_group(CFG_KEYSTONE_GROUP, 'keystonemiddleware.auth_token')
 
 
 def _get_keystone_auth(trust_id=None):
-    if not cfg.CONF[CFG_KEYSTONE_GROUP].auth_type:
+    auth_uri = cfg.CONF['murano_auth'].auth_uri
+    username = cfg.CONF['murano_auth'].admin_user
+    password = cfg.CONF['murano_auth'].admin_password
+    user_domain_name = cfg.CONF['murano_auth'].user_domain_name or "Default"
+    auth_type = cfg.CONF['murano_auth'].auth_type
+    project_name = cfg.CONF['murano_auth'].admin_project_name
+    project_domain_name = cfg.CONF['murano_auth'].project_domain_name or \
+        "Default"
+    if not (auth_uri and username and password):
+        versionutils.report_deprecated_feature(
+            LOG, "Please update configuration in 'murano_auth' group")
+        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
+        username = cfg.CONF[CFG_KEYSTONE_GROUP].admin_user
+        password = cfg.CONF[CFG_KEYSTONE_GROUP].admin_password
+        auth_type = cfg.CONF[CFG_KEYSTONE_GROUP].auth_type
+        project_name = cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
+    if not auth_type:
         # Fallback to legacy v2 options if no auth_type is set.
         # If auth_type is set, it is possible to use the auth loader
         # from keystoneauth1. This is the same fallback as keystonemiddleware
         # uses.
         kwargs = {
-            'auth_url':
-                cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri.replace('v2.0', 'v3'),
-            'username': cfg.CONF[CFG_KEYSTONE_GROUP].admin_user,
-            'password': cfg.CONF[CFG_KEYSTONE_GROUP].admin_password,
-            'user_domain_name': "Default"
+            'auth_url': auth_uri.replace('v2.0', 'v3'),
+            'username': username,
+            'password': password,
+            'user_domain_name': user_domain_name
         }
         if not trust_id:
-            kwargs['project_name'] = \
-                cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
-            kwargs['project_domain_name'] = "Default"
+            kwargs['project_name'] = project_name
+            kwargs['project_domain_name'] = project_domain_name
         else:
             kwargs['trust_id'] = trust_id
         auth = identity.Password(**kwargs)

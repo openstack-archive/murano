@@ -23,7 +23,6 @@ from muranoclient.common import utils
 from oslo_config import cfg
 from oslo_db import options
 from oslo_log import log as logging
-from oslo_utils import importutils
 from oslo_utils import timeutils
 import six
 
@@ -170,7 +169,7 @@ class MuranoTestRunner(object):
             'auth_url': 'auth_uri',
             'username': 'admin_user',
             'password': 'admin_password',
-            'project_name': 'admin_tenant_name'}
+            'project_name': 'admin_project_name'}
 
         ks_opts = {'auth_url': getattr(args, 'os_auth_url', None),
                    'username': getattr(args, 'os_username', None),
@@ -184,12 +183,10 @@ class MuranoTestRunner(object):
                            '--os-project-name', '--os-tenant-id']))
             LOG.error(msg)
             self.error(msg)
-        # Load keystone configuration parameters from config
-        importutils.import_module('keystonemiddleware.auth_token')
 
         for param, value in six.iteritems(ks_opts):
             if not value:
-                ks_opts[param] = getattr(CONF.keystone_authtoken,
+                ks_opts[param] = getattr(CONF.murano_auth,
                                          ks_opts_to_config[param])
             if param == 'auth_url':
                 ks_opts[param] = ks_opts[param].replace('v2.0', 'v3')

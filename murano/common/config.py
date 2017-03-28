@@ -328,6 +328,27 @@ home_region = cfg.StrOpt(
     'home_region',
     help="Default region name used to get services endpoints.")
 
+murano_auth_opts = [
+    cfg.StrOpt('auth_type', help='Authentication type to load.'),
+
+    cfg.StrOpt('auth_uri', help='Identity API endpoint.'),
+
+    cfg.StrOpt('admin_user',
+               help='User name for murano authentication.'),
+
+    cfg.StrOpt('admin_password',
+               help='Password for murano authentication.'),
+
+    cfg.StrOpt('user_domain_name',
+               help="User's domain name for authentication."),
+
+    cfg.StrOpt('admin_project_name',
+               help="Project name for project scoping."),
+
+    cfg.StrOpt('project_domain_name',
+               help="Project's domain name."),
+]
+
 
 CONF = cfg.CONF
 CONF.register_opts(paste_deploy_opts, group='paste_deploy')
@@ -345,6 +366,7 @@ CONF.register_opts(stats_opts, group='stats')
 CONF.register_opts(networking_opts, group='networking')
 CONF.register_opts(glare_opts, group='glare')
 CONF.register_opts(glance_opts, group='glance')
+CONF.register_opts(murano_auth_opts, group='murano_auth')
 
 
 def parse_args(args=None, usage=None, default_config_files=None):

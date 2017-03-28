@@ -18,6 +18,8 @@ else
     MURANO_BIN_DIR=$(get_python_exec_prefix)
 fi
 
+MURANO_AUTH_CACHE_DIR=${MURANO_AUTH_CACHE_DIR:-/var/cache/murano}
+
 
 # create_murano_accounts() - Set up common required murano accounts
 #
@@ -184,14 +186,15 @@ function configure_murano {
     #-------------------------
 
     # Setup keystone_authtoken section
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
-    iniset $MURANO_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
-    iniset $MURANO_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
-    iniset $MURANO_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
-    iniset $MURANO_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
-    iniset $MURANO_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
+    configure_auth_token_middleware $MURANO_CONF_FILE $MURANO_ADMIN_USER $MURANO_AUTH_CACHE_DIR
+
+    # Setup murano_auth section
+    iniset $MURANO_CONF_FILE murano_auth auth_uri $KEYSTONE_AUTH_URI
+    iniset $MURANO_CONF_FILE murano_auth admin_project_name $SERVICE_TENANT_NAME
+    iniset $MURANO_CONF_FILE murano_auth admin_user $MURANO_ADMIN_USER
+    iniset $MURANO_CONF_FILE murano_auth admin_password $SERVICE_PASSWORD
+    iniset $MURANO_CONF_FILE murano_auth user_domain_name "$SERVICE_DOMAIN_NAME"
+    iniset $MURANO_CONF_FILE murano_auth project_domain_name "$SERVICE_DOMAIN_NAME"
 
     configure_murano_rpc_backend
 
@@ -202,10 +205,10 @@ function configure_murano {
     iniset $MURANO_CONF_FILE database connection `database_connection_url murano`
 
     # Configure keystone auth url
-    iniset $MURANO_CONF_FILE keystone auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
+    iniset $MURANO_CONF_FILE keystone auth_url $KEYSTONE_SERVICE_URI
 
     # Configure Murano API URL
-    iniset $MURANO_CONF_FILE murano url "http://127.0.0.1:8082"
+    iniset $MURANO_CONF_FILE murano url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
 
     # Configure the number of api workers
     if [[ -n "$MURANO_API_WORKERS" ]]; then
@@ -265,8 +268,8 @@ function install_murano_apps() {
                 murano --os-username $OS_USERNAME \
                        --os-password $OS_PASSWORD \
                        --os-tenant-name $OS_PROJECT_NAME \
-                       --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
-                       --murano-url http://127.0.0.1:8082 \
+                       --os-auth-url $KEYSTONE_SERVICE_URI \
+                       --murano-url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
                        --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
                        --murano-packages-service $MURANO_PACKAGES_SERVICE \
                        package-import \
@@ -290,20 +293,13 @@ function configure_service_broker {
     iniset $MURANO_CFAPI_CONF_FILE cfapi tenant "$MURANO_CFAPI_DEFAULT_TENANT"
     iniset $MURANO_CFAPI_CONF_FILE cfapi bind_host "$MURANO_SERVICE_HOST"
     iniset $MURANO_CFAPI_CONF_FILE cfapi bind_port "$MURANO_CFAPI_SERVICE_PORT"
-    iniset $MURANO_CFAPI_CONF_FILE cfapi auth_url "http://${KEYSTONE_AUTH_HOST}:5000"
+    iniset $MURANO_CFAPI_CONF_FILE cfapi auth_url "$KEYSTONE_SERVICE_URI"
 
     # configure the database.
     iniset $MURANO_CFAPI_CONF_FILE database connection `database_connection_url murano_cfapi`
 
     # Setup keystone_authtoken section
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_uri "http://${KEYSTONE_AUTH_HOST}:5000"
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_host $KEYSTONE_AUTH_HOST
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_port $KEYSTONE_AUTH_PORT
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken auth_protocol $KEYSTONE_AUTH_PROTOCOL
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken cafile $KEYSTONE_SSL_CA
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_tenant_name $SERVICE_TENANT_NAME
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_user $MURANO_ADMIN_USER
-    iniset $MURANO_CFAPI_CONF_FILE keystone_authtoken admin_password $SERVICE_PASSWORD
+    configure_auth_token_middleware $MURANO_CFAPI_CONF_FILE $MURANO_ADMIN_USER $MURANO_AUTH_CACHE_DIR
 
 }
 
@@ -328,7 +324,17 @@ function init_murano() {
     recreate_database murano utf8
 
     $MURANO_BIN_DIR/murano-db-manage --config-file $MURANO_CONF_FILE upgrade
+
+    create_murano_cache_dir
+
 }
+
+# create_murano_cache_dir() - Part of the init_murano() process
+function create_murano_cache_dir {
+    # Create cache dirs
+    sudo install -d -o $STACK_USER $MURANO_AUTH_CACHE_DIR
+}
+
 
 # init_murano_cfapi() - Initialize databases, etc.
 function init_murano_cfapi() {
@@ -347,9 +353,9 @@ function setup_core_library() {
     murano --os-username admin \
            --os-password $ADMIN_PASSWORD \
            --os-tenant-name admin \
-           --os-auth-url http://$KEYSTONE_AUTH_HOST:5000 \
+           --os-auth-url $KEYSTONE_SERVICE_URI \
            --os-region-name $REGION_NAME \
-           --murano-url http://127.0.0.1:8082 \
+           --murano-url "$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT" \
            --glare-url $GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT \
            --murano-packages-service $MURANO_PACKAGES_SERVICE \
            package-import $MURANO_DIR/meta/*.zip \
@@ -613,10 +619,11 @@ if is_service_enabled murano; then
             init_murano_cfapi
             start_service_broker
         fi
-        setup_core_library
 
         # Give Murano some time to Start
         sleep 3
+
+        setup_core_library
 
         # Install Murano apps, if needed
         install_murano_apps

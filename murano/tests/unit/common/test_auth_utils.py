@@ -45,7 +45,9 @@ class TestAuthUtils(base.MuranoTestCase):
         mock_conf.auth_uri = 'foo_auth_uri/v2.0'
         mock_conf.admin_user = mock.sentinel.admin_user
         mock_conf.admin_password = mock.sentinel.admin_password
-        mock_conf.admin_tenant_name = mock.sentinel.admin_tenant_name
+        mock_conf.admin_project_name = mock.sentinel.admin_project_name
+        mock_conf.user_domain_name = mock.sentinel.user_domain_name
+        mock_conf.project_domain_name = mock.sentinel.project_domain_name
         return mock_cfg, mock_auth_obj
 
     def test_get_keystone_auth(self):
@@ -55,9 +57,9 @@ class TestAuthUtils(base.MuranoTestCase):
             'auth_url': 'foo_auth_uri/v3',
             'username': mock.sentinel.admin_user,
             'password': mock.sentinel.admin_password,
-            'user_domain_name': 'Default',
-            'project_name': mock.sentinel.admin_tenant_name,
-            'project_domain_name': 'Default'
+            'user_domain_name': mock.sentinel.user_domain_name,
+            'project_name': mock.sentinel.admin_project_name,
+            'project_domain_name': mock.sentinel.project_domain_name
         }
         expected_auth = mock.sentinel.auth
         actual_auth = auth_utils._get_keystone_auth()
@@ -72,7 +74,7 @@ class TestAuthUtils(base.MuranoTestCase):
             'auth_url': 'foo_auth_uri/v3',
             'username': mock.sentinel.admin_user,
             'password': mock.sentinel.admin_password,
-            'user_domain_name': 'Default',
+            'user_domain_name': mock.sentinel.user_domain_name,
             'trust_id': mock.sentinel.trust_id
         }
         expected_auth = mock.sentinel.auth
