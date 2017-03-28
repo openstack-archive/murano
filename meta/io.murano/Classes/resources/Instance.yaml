@@ -186,6 +186,10 @@ Methods:
       - $region: $.getRegion()
       - $region.stack.push()
       - $outputs: $region.stack.output()
+      - For: blockDevice
+        In: $.blockDevices
+        Do:
+          - $blockDevice.volume.setAttachments($outputs.get(format('{0}-attachments', $blockDevice.volume.getResourceName())))
       - $.openstackId: $outputs.get(format('{0}-id', $this.name))
       - If: $._floatingIpOutputName != null
         Then:

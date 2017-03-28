@@ -340,9 +340,28 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         stack_outputs = self.orchestration_client.\
             show_stack(stack)['stack']['outputs']
         for output in stack_outputs:
-            if 'vol' in output['output_key']:
+            if (output['output_key'].startswith('vol-') and
+                    output['output_key'].endswith('-id')):
                 volume_id = output['output_value']
                 return self.volumes_client.show_volume(volume_id)['volume']
+
+    def get_volume_attachments(self, environment_id):
+        stack = self.get_stack_id(environment_id)
+        stack_outputs = self.orchestration_client.\
+            show_stack(stack)['stack']['outputs']
+        for output in stack_outputs:
+            if (output['output_key'].startswith('vol-') and
+                    output['output_key'].endswith('-attachments')):
+                return output['output_value']
+
+    def check_volume_attachments(self, environment_id):
+        volume_attachments = self.get_volume_attachments(environment_id)
+        self.assertIsInstance(volume_attachments, list)
+        self.assertGreater(len(volume_attachments), 0)
+        instance_id = self.get_instance_id('testMurano')
+        for attachment in volume_attachments:
+            self.assertEqual(attachment.get('server_id'), instance_id)
+            self.assertTrue(attachment.get('device').startswith('/dev/'))
 
     def check_volume_attached(self, name, volume_id):
         instance_id = self.get_instance_id(name)
