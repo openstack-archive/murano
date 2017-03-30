@@ -1,0 +1,165 @@
+# variables in header
+request_id:
+  description: |
+    A unique ID for tracking service request. The request ID associated
+    with the request by default appears in the service logs.
+  in: header
+  required: true
+  type: UUID
+abandon:
+  description: |
+    Indicates how to delete environment.
+    ``True`` is used when just database must be cleaned.
+    ``False`` is used if all resources used by environment must be destroyed.
+  in: path
+  required: false
+  default: false
+  type: boolean
+env_id_url:
+  description: |
+    The UUID of the environment.
+  in: path
+  required: true
+  type: string
+env_model_path:
+  description: |
+    Allows to get a specific section of the model, for example
+    ``defaultNetworks``, ``region`` or ``?`` or any of the subsections.
+  in: path
+  required: false
+  type: string
+env_name_update:
+  description: |
+    A name for the environment. Name must be at least
+    one non-white space symbol.
+  in: path
+  required: true
+  type: string
+all_tenants:
+  description: |
+    Indicates whether environments from all projects are listed.
+    ``True`` environments from all projects are listed. Admin user required.
+    ``False`` environments only from current project are listed (default like
+    option unspecified).
+  in: query
+  required: false
+  default: false
+  type: boolean
+created:
+  description: |
+    The date and time when the resource was created. The date and time stamp
+    format is `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+
+    The ``±hh:mm`` value, if included, is the time zone as an offset
+    from UTC.
+  in: body
+  required: true
+  type: string
+env_default_networks:
+  description: |
+    The default networks of the environment.
+  in: body
+  required: true
+  type: array
+env_id:
+  description: |
+    The UUID of the environment.
+  in: body
+  required: true
+  type: string
+env_model:
+  description: |
+    The ``?`` sections of the environment..
+  in: body
+  required: true
+  type: array
+env_name:
+  description: |
+    A name for the environment. Name must be at least
+    one non-white space symbol.
+  in: body
+  required: true
+  type: string
+env_name_request:
+  description: |
+    A name for the environment. Name must be at least
+    one non-white space symbol.
+  in: body
+  required: true
+  type: string
+env_region:
+  description: |
+    Current region of the environment.
+  in: body
+  required: true
+  type: string
+env_status:
+  description: |
+    Current status of the environment.
+  in: body
+  required: true
+  type: string
+env_version:
+  description: |
+    Current version.
+  in: body
+  required: true
+  type: int
+environments:
+  description: |
+    A list of ``environment`` object.
+  in: body
+  required: true
+  type: array
+last_status_uuid:
+  description: |
+    A list of environment last status object.
+  in: body
+  required: true
+  type: array
+networking:
+  description: |
+    Current network of the environment.
+  in: body
+  required: true
+  type: string
+regions:
+  description: |
+    The regions detail of the cloud.
+  in: body
+  required: true
+  type: array
+services:
+  description: |
+    A list of ``services`` object.
+  in: body
+  required: true
+  type: array
+tenant_id:
+  description: |
+    The UUID of the tenant. A tenant is also known as
+    a project.
+  in: body
+  required: true
+  type: string
+updated:
+  description: |
+    The date and time when the object was updated. The date and time stamp
+    format is `ISO 8601 <https://en.wikipedia.org/wiki/ISO_8601>`_:
+
+    ::
+
+       CCYY-MM-DDThh:mm:ss±hh:mm
+
+    For example, ``2015-08-27T09:49:58-05:00``.
+
+    The ``±hh:mm`` value, if included, is the time zone as an offset from UTC.
+  in: body
+  required: true
+  type: string

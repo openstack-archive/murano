@@ -1,0 +1,5 @@
+[{
+  "op": "replace",
+  "path": "/defaultNetworks/flat",
+  "value": true
+}]

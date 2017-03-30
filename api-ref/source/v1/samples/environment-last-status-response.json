@@ -1,0 +1,15 @@
+{
+    "lastStatuses": {
+        "66563e45-4d0a-451e-8138-7bc773b0607d": {
+            "updated": "2017-03-09T07:31:51",
+            "task_id": "1267d8dfcf2144f9a31f0f033defa0fd",
+            "level": "info",
+            "text": "Unable to install ApacheHttpServer on node-1 due to The murano-agent did not respond within 3600 seconds",
+            "created": "2017-03-09T07:31:51",
+            "entity_id": "66563e45-4d0a-451e-8138-7bc773b0607d",
+            "entity": null,
+            "details": null,
+            "id": "4f93ae1f73294bf1a58cbc59fffe6238"
+        }
+    }
+}

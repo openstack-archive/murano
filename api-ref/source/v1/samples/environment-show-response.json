@@ -1,0 +1,35 @@
+{
+    "status": "ready",
+    "updated": "2014-05-14T13:12:26",
+    "networking": {},
+    "name": "quick-env-2",
+    "created": "2014-05-14T13:09:55",
+    "tenant_id": "726ed856965f43cc8e565bc991fa76c3",
+    "version": 1,
+    "services": [
+        {
+            "instance": {
+                "flavor": "m1.medium",
+                "image": "cloud-fedora-v3",
+                "name": "exgchhv6nbika2",
+                "ipAddresses": [
+                    "10.0.0.200"
+                ],
+                "?": {
+                    "type": "io.murano.resources.Instance",
+                    "id": "14cce9d9-aaa1-4f09-84a9-c4bb859edaff"
+                }
+            },
+            "name": "rewt4w56",
+            "?": {
+                "status": "ready",
+                "_26411a1861294160833743e45d0eaad9": {
+                    "name": "Telnet"
+                },
+                "type": "io.murano.apps.linux.Telnet",
+                "id": "446373ef-03b5-4925-b095-6c56568fa518"
+            }
+        }
+    ],
+    "id": "20d4a012628e4073b48490a336a8acbf"
+}
