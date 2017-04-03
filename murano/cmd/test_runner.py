@@ -27,10 +27,9 @@ from oslo_utils import importutils
 from oslo_utils import timeutils
 import six
 
-from murano import version
-from murano.common.i18n import _, _LE
 from murano.common import config
 from murano.common import engine
+from murano.common.i18n import _
 from murano.dsl import dsl_exception
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
@@ -39,6 +38,7 @@ from murano.dsl import helpers
 from murano.engine import execution_session
 from murano.engine import mock_context_manager
 from murano.engine import package_loader
+from murano import version
 
 
 CONF = cfg.CONF
@@ -178,8 +178,8 @@ class MuranoTestRunner(object):
                    'project_name': getattr(args, 'os_project_name', None)}
 
         if None in ks_opts.values() and not CONF.default_config_files:
-            msg = _LE('Please provide murano config file or credentials for '
-                      'authorization: {0}').format(
+            msg = ('Please provide murano config file or credentials for '
+                   'authorization: {0}').format(
                 ', '.join(['--os-auth-url', '--os-username', '--os-password',
                            '--os-project-name', '--os-tenant-id']))
             LOG.error(msg)
@@ -367,7 +367,7 @@ def main():
         CONF.set_default('use_stderr', False)
         logging.setup(CONF, 'murano')
     except RuntimeError as e:
-        LOG.exception(_LE("Failed to initialize murano-test-runner: %s"), e)
+        LOG.exception("Failed to initialize murano-test-runner: %s", e)
         sys.exit("ERROR: %s" % e)
 
     try:
@@ -378,7 +378,7 @@ def main():
             tb = e.format()
         else:
             tb = traceback.format_exc()
-        err_msg = _LE("Command failed: {0}\n{1}").format(e, tb)
+        err_msg = "Command failed: {0}\n{1}".format(e, tb)
         LOG.error(err_msg)
         sys.exit(err_msg)
 

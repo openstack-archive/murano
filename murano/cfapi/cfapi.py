@@ -21,7 +21,6 @@ import six
 import tenacity
 from webob import response
 
-from murano.common.i18n import _LI, _LW, _LE
 from murano.common import auth_utils  # noqa
 from murano.common import wsgi
 from murano.db.services import cf_connections as db_cf
@@ -111,9 +110,9 @@ class Controller(object):
         except AttributeError:
             tenant = req.headers['X-Project-Id']
             db_cf.set_tenant_for_org(org_guid, tenant)
-            LOG.info(_LI("Cloud Foundry {org_id} mapped to tenant "
-                         "{tenant_name}").format(org_id=org_guid,
-                                                 tenant_name=tenant))
+            LOG.info("Cloud Foundry {org_id} mapped to tenant "
+                     "{tenant_name}".format(org_id=org_guid,
+                                            tenant_name=tenant))
 
         token = req.headers['X-Auth-Token']
         m_cli = _get_muranoclient(token, req)
@@ -133,19 +132,19 @@ class Controller(object):
             try:
                 env = m_cli.environments.get(environment_id)
             except exceptions.HTTPNotFound:
-                msg = (_LI("Can not find environment_id {environment_id}, "
-                           "will create a new one."
-                           ).format(environment_id=environment_id))
+                msg = ("Can not find environment_id {environment_id}, "
+                       "will create a new one."
+                       .format(environment_id=environment_id))
                 LOG.info(msg)
                 env = {}
             if not env:
-                log_msg = (_LI("Cloud Foundry {space_id} remapped to "
-                               "{environment_id}"))
+                log_msg = ("Cloud Foundry {space_id} remapped to "
+                           "{environment_id}")
                 environment_id = _set_new_environment_for_space(
                     space_guid, log_msg)
         except AttributeError:
-            log_msg = (_LI("Cloud Foundry {space_id} mapped to "
-                           "{environment_id}"))
+            log_msg = ("Cloud Foundry {space_id} mapped to "
+                       "{environment_id}")
             environment_id = _set_new_environment_for_space(
                 space_guid, log_msg)
 
@@ -162,9 +161,9 @@ class Controller(object):
         # necessary in our scenario
         if '?' in parameters.keys():
             parameters.pop('?', None)
-            LOG.warning(_LW("Incorrect input parameters. Package related "
-                            "parameters shouldn't be passed through Cloud "
-                            "Foundry"))
+            LOG.warning("Incorrect input parameters. Package related "
+                        "parameters shouldn't be passed through Cloud "
+                        "Foundry")
         params = [parameters]
         while params:
             a = params.pop()
@@ -238,13 +237,13 @@ class Controller(object):
                     result = _get_creds(m_cli, task_id, environment_id)
 
             if not result:
-                LOG.warning(_LW("This application doesn't have action "
-                                "getCredentials"))
+                LOG.warning("This application doesn't have action "
+                            "getCredentials")
                 return response.Response(status=500)
         except KeyError:
             # NOTE(starodubcevna): In CF service broker API spec return
             # code for failed bind is not present, so we will return 500.
-            LOG.warning(_LW("This application doesn't have actions at all"))
+            LOG.warning("This application doesn't have actions at all")
             return response.Response(status=500)
 
         if 'credentials' in list(result):
@@ -269,8 +268,8 @@ class Controller(object):
         # NOTE(freerunner): Prevent code 500 if requested environment
         # already doesn't exist.
         if not service:
-            LOG.warning(_LW('Requested service for instance {0} is not found')
-                        .format(instance_id))
+            LOG.warning('Requested service for instance {0} is not '
+                        'found'.format(instance_id))
             body = {}
             resp = response.Response(status=410, json_body=body)
             return resp
@@ -307,9 +306,9 @@ def _get_muranoclient(token_id, req):
 
     murano_url = CONF.murano.url or req.endpoints.get('murano')
     if not murano_url:
-        LOG.error(_LE('No murano url is specified and no '
-                      '"application-catalog" '
-                      'service is registered in keystone.'))
+        LOG.error('No murano url is specified and no '
+                  '"application-catalog" '
+                  'service is registered in keystone.')
 
     return muranoclient.Client(1, murano_url, token=token_id,
                                artifacts_client=artifacts_client)
@@ -320,8 +319,8 @@ def _get_glareclient(token_id, req):
 
     url = glare_settings.url or req.endpoints.get('glare')
     if not url:
-        LOG.error(_LE('No glare url is specified and no "artifact" '
-                  'service is registered in keystone.'))
+        LOG.error('No glare url is specified and no "artifact" '
+                  'service is registered in keystone.')
 
     return glare_client.Client(
         endpoint=url, token=token_id,

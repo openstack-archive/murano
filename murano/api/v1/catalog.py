@@ -30,11 +30,11 @@ from webob import exc
 import murano.api.v1
 from murano.api.v1 import validation_schemas
 from murano.common import exceptions
+from murano.common.i18n import _
 from murano.common import policy
 import murano.common.utils as murano_utils
 from murano.common import wsgi
 from murano.db.catalog import api as db_api
-from murano.common.i18n import _, _LW
 from murano.packages import exceptions as pkg_exc
 from murano.packages import load_utils
 from muranoclient.glance import client as glare_client
@@ -64,8 +64,8 @@ def _get_filters(query_params):
     for param_pair in query_params:
         k, v = param_pair
         if k not in SUPPORTED_PARAMS:
-            LOG.warning(_LW("Search by parameter '{name}' "
-                            "is not supported. Skipping it.").format(name=k))
+            LOG.warning("Search by parameter '{name}' "
+                        "is not supported. Skipping it.".format(name=k))
             continue
 
         if k in LIST_PARAMS:
@@ -74,10 +74,10 @@ def _get_filters(query_params):
                 try:
                     filters[k] = murano_utils.split_for_quotes(in_value)
                 except ValueError as err:
-                    LOG.warning(_LW("Search by parameter '{name}' "
-                                    "caused an {message} error."
-                                    "Skipping it.").format(name=k,
-                                                           message=err))
+                    LOG.warning("Search by parameter '{name}' "
+                                "caused an {message} error."
+                                "Skipping it.".format(name=k,
+                                                      message=err))
             else:
                 filters.setdefault(k, []).append(v)
         else:
@@ -86,8 +86,8 @@ def _get_filters(query_params):
         for i in order_by[:]:
             if ORDER_VALUES and i not in ORDER_VALUES:
                 filters['order_by'].remove(i)
-                LOG.warning(_LW("Value of 'order_by' parameter is not valid. "
-                                "Allowed values are: {values}. Skipping it.")
+                LOG.warning("Value of 'order_by' parameter is not valid. "
+                            "Allowed values are: {values}. Skipping it."
                             .format(values=", ".join(ORDER_VALUES)))
     return filters
 

@@ -32,8 +32,6 @@ from murano.dsl import virtual_exceptions
 from murano.dsl import yaql_integration
 
 
-from murano.common.i18n import _LW
-
 LOG = logging.getLogger(__name__)
 macros.register()
 virtual_exceptions.register()
@@ -139,8 +137,8 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
         if self._usage == dsl_types.MethodUsages.Action:
             runtime_version = self.declaring_type.package.runtime_version
             if runtime_version > constants.RUNTIME_VERSION_1_3:
-                LOG.warning(_LW('"Usage: Action" is deprecated, '
-                            'use "Scope: Public" instead'))
+                LOG.warning('"Usage: Action" is deprecated, '
+                            'use "Scope: Public" instead')
             if self._scope == dsl_types.MethodScopes.Session:
                 raise ValueError(
                     'Both "Usage: Action" and "Scope: Session" are '

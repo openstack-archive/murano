@@ -26,7 +26,6 @@ from oslo_log import log as logging
 
 from murano.common import consts
 from murano.db.catalog import api as db_catalog_api
-from murano.common.i18n import _LI, _LE
 from murano.packages import load_utils
 from murano import version
 
@@ -55,7 +54,7 @@ def _do_import_package(_dir, categories, update=False):
                 exst_pkg_id=existing_pkg.id)
             db_catalog_api.package_delete(existing_pkg.id, AdminContext())
         else:
-            LOG.error(_LE("Package '{name}' exists ({pkg_id}). Use --update.")
+            LOG.error("Package '{name}' exists ({pkg_id}). Use --update."
                       .format(name=pkg.full_name, pkg_id=existing_pkg.id))
             return
 
@@ -82,8 +81,7 @@ def _do_import_package(_dir, categories, update=False):
     # it is a required field in the DB, that's why we pass an empty string
     result = db_catalog_api.package_upload(package, '')
 
-    LOG.info(_LI("Finished import of package {res_id}").format(
-        res_id=result.id))
+    LOG.info("Finished import of package {res_id}".format(res_id=result.id))
 
 
 # TODO(ruhe): proper error handling
@@ -155,7 +153,7 @@ def main():
              version=version.version_string,
              default_config_files=default_config_files)
     except RuntimeError as e:
-        LOG.error(_LE("failed to initialize murano-manage: {error}").format(
+        LOG.error("failed to initialize murano-manage: {error}".format(
             error=e))
         sys.exit("ERROR: %s" % e)
 
@@ -163,8 +161,8 @@ def main():
         CONF.command.func()
     except Exception as e:
         tb = traceback.format_exc()
-        err_msg = _LE("murano-manage command failed: {error}\n"
-                      "{traceback}").format(error=e, traceback=tb)
+        err_msg = ("murano-manage command failed: {error}\n"
+                   "{traceback}").format(error=e, traceback=tb)
         LOG.error(err_msg)
         sys.exit(err_msg)
 

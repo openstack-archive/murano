@@ -32,8 +32,7 @@ class MiddlewareVersionNegotiationTest(base.MuranoTestCase):
 
         self.assertIsInstance(result, versions.Controller)
         mock_log.warning.assert_called_once_with(
-            version_negotiation._LW(
-                "Unknown version. Returning version choices."))
+            "Unknown version. Returning version choices.")
 
     @mock.patch.object(version_negotiation, 'LOG')
     def test_process_request(self, mock_log):
@@ -83,8 +82,7 @@ class MiddlewareVersionNegotiationTest(base.MuranoTestCase):
 
         self.assertIsInstance(result, versions.Controller)
         mock_log.warning.assert_called_once_with(
-            version_negotiation._LW(
-                "Unknown version. Returning version choices."))
+            "Unknown version. Returning version choices.")
 
     def test_factory(self):
         app = version_negotiation.VersionNegotiationFilter.factory(None)

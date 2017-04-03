@@ -20,7 +20,6 @@ from oslo_log import log as logging
 import six
 from stevedore import dispatch
 
-from murano.common.i18n import _LE, _LI, _LW
 from murano.dsl import murano_package
 
 
@@ -50,7 +49,7 @@ class PluginLoader(object):
         dist_name = str(extension.entry_point.dist)
         name = extension.entry_point.name
         if not NAME_RE.match(name):
-            LOG.warning(_LW("Entry-point 'name' {name} is invalid").format(
+            LOG.warning("Entry-point 'name' {name} is invalid".format(
                 name=name))
             return
         name_map.setdefault(name, []).append(dist_name)
@@ -64,21 +63,21 @@ class PluginLoader(object):
         try:
             package.classes[name] = initialize_plugin(plugin)
         except Exception:
-            LOG.exception(_LE("Unable to initialize plugin for {name}").format(
+            LOG.exception("Unable to initialize plugin for {name}".format(
                 name=name))
             return
-        LOG.info(_LI("Loaded class {class_name} from {dist}").format(
+        LOG.info("Loaded class {class_name} from {dist}".format(
                  class_name=name, dist=dist_name))
 
     def cleanup_duplicates(self, name_map):
         for class_name, package_names in six.iteritems(name_map):
             if len(package_names) >= 2:
-                LOG.warning(_LW("Class is defined in multiple packages!"))
+                LOG.warning("Class is defined in multiple packages!")
                 for package_name in package_names:
-                    LOG.warning(_LW("Disabling class {class_name} in {dist} "
-                                    "due to conflict").format(
-                                        class_name=class_name,
-                                        dist=package_name))
+                    LOG.warning(
+                        "Disabling class {class_name} in {dist} due to "
+                        "conflict".format(
+                            class_name=class_name, dist=package_name))
                     self.packages[package_name].classes.pop(class_name)
 
     @staticmethod
@@ -92,8 +91,8 @@ class PluginLoader(object):
 
     @staticmethod
     def _on_load_failure(manager, ep, exc):
-        LOG.warning(_LW("Error loading entry-point {ep} from package {dist}: "
-                        "{err}").format(ep=ep.name, dist=ep.dist, err=exc))
+        LOG.warning("Error loading entry-point {ep} from package {dist}: "
+                    "{err}".format(ep=ep.name, dist=ep.dist, err=exc))
 
     def register_in_loader(self, package_loader):
         for package in six.itervalues(self.packages):
@@ -129,11 +128,11 @@ class MuranoPackage(murano_package.MuranoPackage):
             pkg_loader, package_definition.name, runtime_version='1.0')
         for class_name, clazz in six.iteritems(package_definition.classes):
             if hasattr(clazz, "_murano_class_name"):
-                LOG.warning(_LW("Class '%(class_name)s' has a MuranoPL "
-                                "name '%(name)s' defined which will be "
-                                "ignored") %
+                LOG.warning("Class '%(class_name)s' has a MuranoPL "
+                            "name '%(name)s' defined which will be "
+                            "ignored" %
                             dict(class_name=class_name,
-                            name=getattr(clazz, "_murano_class_name")))
+                                 name=getattr(clazz, "_murano_class_name")))
             LOG.debug("Registering '%s' from '%s' in class loader",
                       class_name, package_definition.name)
             self.register_class(clazz, class_name)

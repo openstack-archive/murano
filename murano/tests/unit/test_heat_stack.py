@@ -239,7 +239,7 @@ class TestHeatStack(base.MuranoTestCase):
         hs.push()
 
         mock_log.warning.assert_called_with(
-            heat_stack._LW('Conflicting operation: ERROR: test_error_msg'))
+            'Conflicting operation: ERROR: test_error_msg')
 
     @mock.patch(CLS_NAME + '.current')
     def test_update_wrong_template_version(self, current):
@@ -438,7 +438,7 @@ class TestHeatStack(base.MuranoTestCase):
         self.assertTrue(hs._applied)
         self.assertEqual({}, hs._template)
         mock_log.warning.assert_called_with(
-            heat_stack._LW('Stack test-stack already deleted?'))
+            'Stack test-stack already deleted?')
 
     @mock.patch(CLS_NAME + '._wait_state')
     @mock.patch(CLS_NAME + '._get_status')
@@ -463,8 +463,8 @@ class TestHeatStack(base.MuranoTestCase):
 
         self.assertTrue(hs._applied)
         self.assertEqual({}, hs._template)
-        mock_log.warning.assert_called_with(
-            heat_stack._LW('Conflicting operation: ERROR: test_error_msg'))
+        mock_log.warning.assert_called_with('Conflicting operation: '
+                                            'ERROR: test_error_msg')
 
     @mock.patch(CLS_NAME + '._wait_state')
     @mock.patch(CLS_NAME + '._get_status')

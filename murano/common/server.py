@@ -28,7 +28,6 @@ from murano.db import models
 from murano.db.services import environments
 from murano.db.services import instances
 from murano.db import session
-from murano.common.i18n import _LI, _LW
 from murano.services import states
 
 CONF = cfg.CONF
@@ -50,8 +49,8 @@ class ResultEndpoint(object):
         environment = unit.query(models.Environment).get(environment_id)
 
         if not environment:
-            LOG.warning(_LW('Environment result could not be handled, '
-                            'specified environment not found in database'))
+            LOG.warning('Environment result could not be handled, '
+                        'specified environment not found in database')
             return
 
         if model['Objects'] is None and model.get('ObjectsCopy', {}) is None:
@@ -113,14 +112,14 @@ class ResultEndpoint(object):
         if objects:
             services = objects.get('services')
         if num_errors + num_warnings > 0:
-            LOG.warning(_LW('EnvId: {env_id} TenantId: {tenant_id} Status: '
-                            'Failed Apps: {services}')
+            LOG.warning('EnvId: {env_id} TenantId: {tenant_id} Status: '
+                        'Failed Apps: {services}'
                         .format(env_id=environment.id,
                                 tenant_id=environment.tenant_id,
                                 services=services))
         else:
-            LOG.info(_LI('EnvId: {env_id} TenantId: {tenant_id} Status: '
-                         'Successful Apps: {services}')
+            LOG.info('EnvId: {env_id} TenantId: {tenant_id} Status: '
+                     'Successful Apps: {services}'
                      .format(env_id=environment.id,
                              tenant_id=environment.tenant_id,
                              services=services))

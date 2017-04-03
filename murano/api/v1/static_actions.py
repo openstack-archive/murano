@@ -16,7 +16,7 @@ from oslo_log import log as logging
 from oslo_messaging.rpc import client
 from webob import exc
 
-from murano.common.i18n import _LE, _
+from murano.common.i18n import _
 from murano.common import policy
 from murano.common import wsgi
 from murano.services import static_actions
@@ -56,8 +56,8 @@ class Controller(object):
                 method_name, class_name, pkg_name, class_version, args,
                 credentials)
         except client.RemoteError as e:
-            LOG.error(_LE('Exception during call of the method {method_name}: '
-                          '{exc}').format(method_name=method_name, exc=str(e)))
+            LOG.error('Exception during call of the method {method_name}: '
+                      '{exc}'.format(method_name=method_name, exc=str(e)))
             if e.exc_type in (
                     'NoClassFound', 'NoMethodFound', 'NoPackageFound',
                     'NoPackageForClassFound', 'MethodNotExposed',
@@ -67,8 +67,8 @@ class Controller(object):
                 raise exc.HTTPBadRequest(e.value)
             raise exc.HTTPServiceUnavailable(e.value)
         except ValueError as e:
-            LOG.error(_LE('Exception during call of the method {method_name}: '
-                          '{exc}').format(method_name=method_name, exc=str(e)))
+            LOG.error('Exception during call of the method {method_name}: '
+                      '{exc}'.format(method_name=method_name, exc=str(e)))
             raise exc.HTTPBadRequest(e.message)
 
 

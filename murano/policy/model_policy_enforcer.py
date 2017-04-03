@@ -23,7 +23,7 @@ except ImportError as congress_client_import_error:
 from oslo_log import log as logging
 
 from murano.common import auth_utils
-from murano.common.i18n import _, _LI
+from murano.common.i18n import _
 from murano.policy import congress_rules
 from murano.policy.modify.actions import action_manager as am
 
@@ -127,7 +127,7 @@ class ModelPolicyEnforcer(object):
                 LOG.error(msg)
                 raise ValidationError(msg)
         else:
-            LOG.info(_LI('Model valid'))
+            LOG.info('Model valid')
 
     def _execute_simulation(self, package_loader, env_id, model, query):
         rules = congress_rules.CongressRulesManager().convert(

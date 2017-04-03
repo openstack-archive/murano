@@ -26,7 +26,6 @@ import psutil
 
 from murano.api import v1
 from murano.api.v1 import request_statistics
-from murano.common.i18n import _LE
 from murano.db.services import stats as db_stats
 
 CONF = cfg.CONF
@@ -94,5 +93,5 @@ class StatsCollectingService(service.Service):
             stats.cpu_percent = psutil.cpu_percent()
             self._stats_db.update(self._hostname, stats)
         except Exception as e:
-            LOG.exception(_LE("Failed to get statistics object from a "
-                              "database. {error_code}").format(error_code=e))
+            LOG.exception("Failed to get statistics object from a "
+                          "database. {error_code}".format(error_code=e))

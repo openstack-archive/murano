@@ -24,9 +24,9 @@ from sqlalchemy.orm import attributes
 # TODO(ruhe) use exception declared in openstack/common/db
 from webob import exc
 
+from murano.common.i18n import _
 from murano.db import models
 from murano.db import session as db_session
-from murano.common.i18n import _, _LW
 
 
 SEARCH_MAPPING = {'fqn': 'fully_qualified_name',
@@ -189,9 +189,8 @@ def _do_add(package, change):
         try:
             getattr(package, path).append(item)
         except AssertionError:
-            LOG.warning(_LW('One of the specified {path} is already associated'
-                            ' with a package. Doing nothing.').format(
-                                path=path))
+            LOG.warning('One of the specified {path} is already associated'
+                        ' with a package. Doing nothing.'.format(path=path))
     return package
 
 

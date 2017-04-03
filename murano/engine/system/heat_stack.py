@@ -24,7 +24,6 @@ from oslo_log import log as logging
 import six
 
 from murano.common import auth_utils
-from murano.common.i18n import _LW
 from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import session_local_storage
@@ -252,7 +251,7 @@ class HeatStack(object):
                         else:
                             self.delete()
             except heat_exc.HTTPConflict as e:
-                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
+                LOG.warning('Conflicting operation: {msg}'.format(msg=e))
                 eventlet.sleep(3)
             else:
                 break
@@ -300,11 +299,11 @@ class HeatStack(object):
                     lambda status: status in ('DELETE_COMPLETE', 'NOT_FOUND'),
                     wait_progress=True)
             except heat_exc.NotFound:
-                LOG.warning(_LW('Stack {stack_name} already deleted?')
+                LOG.warning('Stack {stack_name} already deleted?'
                             .format(stack_name=self._name))
                 break
             except heat_exc.HTTPConflict as e:
-                LOG.warning(_LW('Conflicting operation: {msg}').format(msg=e))
+                LOG.warning('Conflicting operation: {msg}'.format(msg=e))
                 eventlet.sleep(3)
             else:
                 break

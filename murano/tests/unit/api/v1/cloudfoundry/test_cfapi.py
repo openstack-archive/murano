@@ -19,7 +19,6 @@ from oslo_serialization import base64
 from webob import response
 
 from murano.cfapi import cfapi as api
-from murano.common.i18n import _LE, _LI, _LW
 from murano.common import wsgi
 from murano.db import models
 from murano.tests.unit import base
@@ -225,10 +224,10 @@ class TestController(base.MuranoTestCase):
         mock_muranoclient.environments.get.assert_called_once_with(
             mock.sentinel.environment_id)
         mock_log.info.assert_has_calls([
-            mock.call(_LI("Can not find environment_id sentinel.environment_id"
-                          ", will create a new one.")),
-            mock.call(_LI("Cloud Foundry foo_space_guid remapped to "
-                          "sentinel.alt_environment_id"))
+            mock.call("Can not find environment_id sentinel.environment_id"
+                      ", will create a new one."),
+            mock.call("Cloud Foundry foo_space_guid remapped to "
+                      "sentinel.alt_environment_id")
         ])
 
     @mock.patch.object(api, 'uuid', autospec=True)
@@ -308,7 +307,7 @@ class TestController(base.MuranoTestCase):
         mock_get_service.assert_called_once_with(self.controller, m_env,
                                                  mock.sentinel.service_id)
         mock_log.warning.assert_called_once_with(
-            _LW("This application doesn't have actions at all"))
+            "This application doesn't have actions at all")
 
     @mock.patch.object(api, 'LOG', autospec=True)
     @mock.patch.object(api.Controller, '_get_service', autospec=True)
@@ -338,7 +337,7 @@ class TestController(base.MuranoTestCase):
         mock_get_service.assert_called_once_with(self.controller, m_env,
                                                  mock.sentinel.service_id)
         mock_log.warning.assert_called_once_with(
-            _LW("This application doesn't have action getCredentials"))
+            "This application doesn't have action getCredentials")
 
     def test_unbind(self):
         self.assertEqual({}, self.controller.unbind(None, None, None))
@@ -354,8 +353,8 @@ class TestController(base.MuranoTestCase):
         self.assertEqual(410, resp.status_code)
         self.assertEqual({}, resp.json_body)
         mock_log.warning.assert_called_once_with(
-            _LW('Requested service for instance sentinel.instance_id is not '
-                'found'))
+            'Requested service for instance sentinel.instance_id is not '
+            'found')
 
     @mock.patch.object(api, '_get_muranoclient', autospec=True)
     @mock.patch.object(api, 'db_cf', autospec=True)
@@ -520,11 +519,11 @@ class TestController(base.MuranoTestCase):
             1, None, token=mock.sentinel.token_id,
             artifacts_client=m_artifacts_client)
         mock_log.error.assert_has_calls([
-            mock.call(_LE('No glare url is specified and no "artifact" '
-                          'service is registered in keystone.')),
-            mock.call(_LE('No murano url is specified and no '
-                          '"application-catalog" service is registered in '
-                          'keystone.'))
+            mock.call('No glare url is specified and no "artifact" '
+                      'service is registered in keystone.'),
+            mock.call('No murano url is specified and no '
+                      '"application-catalog" service is registered in '
+                      'keystone.')
         ])
 
     def _override_conf(self, without_urls=False):

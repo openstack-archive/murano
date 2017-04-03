@@ -20,7 +20,6 @@ from murano.common import wsgi
 from murano.db.services import environments as envs
 from murano.db.services import sessions
 from murano.db import session as db_session
-from murano.common.i18n import _LE, _, _LW
 from murano.services import actions
 from murano.services import states
 from murano.utils import verify_env
@@ -43,17 +42,17 @@ class Controller(object):
         env_status = envs.EnvironmentServices.get_status(environment_id)
         if env_status in (states.EnvironmentStatus.DEPLOYING,
                           states.EnvironmentStatus.DELETING):
-            LOG.warning(_LW('Could not open session for environment '
-                            '<EnvId: {id}>, environment has deploying '
-                            'status.').format(id=environment_id))
+            LOG.warning('Could not open session for environment '
+                        '<EnvId: {id}>, environment has deploying '
+                        'status.'.format(id=environment_id))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
         session = sessions.SessionServices.create(environment_id, user_id)
 
         if not sessions.SessionServices.validate(session):
-            LOG.error(_LE('Session <SessionId {id}> '
-                          'is invalid').format(id=session.id))
+            LOG.error('Session <SessionId {id}> '
+                      'is invalid'.format(id=session.id))
             raise exc.HTTPForbidden()
 
         task_id = actions.ActionServices.execute(
@@ -72,9 +71,9 @@ class Controller(object):
 
         if result is not None:
             return result
-        msg = _('Result for task with environment_id: {env_id} and task_id: '
-                '{task_id} was not found.').format(env_id=environment_id,
-                                                   task_id=task_id)
+        msg = ('Result for task with environment_id: {env_id} and task_id: '
+               '{task_id} was not found.'.format(env_id=environment_id,
+                                                 task_id=task_id))
         LOG.error(msg)
         raise exc.HTTPNotFound(msg)
 

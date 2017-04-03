@@ -21,7 +21,7 @@ from oslo_config import cfg
 from oslo_log import log
 from webob import exc
 
-from murano.common.i18n import _, _LW
+from murano.common.i18n import _
 from murano.common import wsgi
 
 CONF = cfg.CONF
@@ -44,7 +44,7 @@ class ExternalContextMiddleware(wsgi.Middleware):
         elif auth_url.endswith('v3'):
             pass
         else:
-            LOG.warning(_LW('Wrong format for service broker auth url'))
+            LOG.warning('Wrong format for service broker auth url')
 
         kwargs = {'auth_url': auth_url,
                   'username': user,

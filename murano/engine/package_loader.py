@@ -33,7 +33,6 @@ from oslo_utils import fileutils
 import six
 
 from murano.common import auth_utils
-from murano.common.i18n import _LE, _LI, _LW
 from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import helpers
@@ -103,9 +102,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
         if CONF.engine.packages_service in ['glance', 'glare']:
             if CONF.engine.packages_service == 'glance':
                 versionutils.report_deprecated_feature(
-                    LOG,
-                    _LW("'glance' packages_service option has been renamed "
-                        "to 'glare', please update your configuration"))
+                    LOG, "'glance' packages_service option has been renamed "
+                         "to 'glare', please update your configuration")
             artifacts_client = self._get_glare_client()
         else:
             artifacts_client = None
@@ -241,8 +239,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             try:
                 return load_utils.load_from_dir(package_directory)
             except pkg_exc.PackageLoadError:
-                LOG.exception(
-                    _LE('Unable to load package from cache. Clean-up.'))
+                LOG.exception('Unable to load package from cache. Clean-up.')
                 shutil.rmtree(package_directory, ignore_errors=True)
 
         # the package is not yet in cache, let's try to download it.
@@ -260,8 +257,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                 try:
                     return load_utils.load_from_dir(package_directory)
                 except pkg_exc.PackageLoadError:
-                    LOG.error(
-                        _LE('Unable to load package from cache. Clean-up.'))
+                    LOG.error('Unable to load package from cache. Clean-up.')
                     shutil.rmtree(package_directory, ignore_errors=True)
 
             # attempt the download itself
@@ -286,9 +282,10 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                         package_file.name,
                         target_dir=package_directory,
                         drop_dir=False) as app_package:
-                    LOG.info(_LI(
-                        "Successfully downloaded and unpacked package {} {}")
-                        .format(package_def.fully_qualified_name, package_id))
+                    LOG.info(
+                        "Successfully downloaded and unpacked "
+                        "package {} {}".format(
+                            package_def.fully_qualified_name, package_id))
                     self._downloaded.append(app_package)
 
                     self.try_cleanup_cache(
@@ -365,9 +362,8 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                         try:
                             os.remove(lock_path)
                         except OSError:
-                            LOG.warning(
-                                _LW("Couldn't delete lock file: "
-                                    "{}").format(lock_path))
+                            LOG.warning("Couldn't delete lock file: "
+                                        "{}".format(lock_path))
             except RuntimeError:
                 # couldn't upgrade read lock to write-lock. go on.
                 continue
@@ -470,10 +466,10 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
                     system_objects.register(dsl_package)
                 self.register_package(dsl_package)
             except pkg_exc.PackageLoadError:
-                LOG.info(_LI('Unable to load package from path: {0}').format(
+                LOG.info('Unable to load package from path: {0}'.format(
                     folder))
                 continue
-            LOG.info(_LI('Loaded package from path {0}').format(folder))
+            LOG.info('Loaded package from path {0}'.format(folder))
 
     def import_fixation_table(self, fixations):
         self._fixations = deserialize_package_fixations(fixations)
