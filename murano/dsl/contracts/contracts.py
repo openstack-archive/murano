@@ -14,7 +14,6 @@
 
 import copy
 
-import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -144,7 +143,7 @@ class Contract(object):
             return data
         result = {}
         yaql_key = None
-        for key, value in six.iteritems(spec):
+        for key, value in spec.items():
             if isinstance(key, dsl_types.YaqlExpression):
                 if yaql_key is not None:
                     raise exceptions.DslContractSyntaxError(
@@ -159,7 +158,7 @@ class Contract(object):
 
         if yaql_key is not None:
             yaql_value = spec[yaql_key]
-            for key, value in six.iteritems(data):
+            for key, value in data.items():
                 if key in result:
                     continue
                 key = self._map(key, yaql_key, context, path)
@@ -252,7 +251,7 @@ class Contract(object):
         contract_context = base_context_func(
             self._runtime_version).create_child_context()
         contract_context['root_context'] = context
-        for key, value in six.iteritems(kwargs):
+        for key, value in kwargs.items():
             contract_context[key] = value
         contract_context[constants.CTX_NAMES_SCOPE] = \
             context[constants.CTX_NAMES_SCOPE]

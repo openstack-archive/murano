@@ -14,7 +14,6 @@
 
 import os.path
 
-import six
 
 from murano.dsl import constants
 from murano.dsl import murano_package
@@ -57,7 +56,7 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
         self._package = TestPackage(
             self, package_name, None, constants.RUNTIME_VERSION_1_0,
             None, self._configs, meta)
-        for name, payload in six.iteritems(self._classes):
+        for name, payload in self._classes.items():
             self._package.register_class(payload, name)
         super(TestPackageLoader, self).__init__()
 
@@ -106,8 +105,8 @@ class TestPackageLoader(package_loader.MuranoPackageLoader):
             if 'Name' not in data:
                 continue
 
-            for name, method in six.iteritems(data.get('Methods') or data.get(
-                    'Workflow') or {}):
+            for name, method in (data.get('Methods') or data.get(
+                    'Workflow') or {}).items():
                 if name.startswith('test'):
                     method['Scope'] = 'Public'
 

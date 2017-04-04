@@ -14,7 +14,6 @@
 
 import collections
 
-import six
 
 from murano.dsl import dsl_types
 
@@ -49,8 +48,8 @@ class AttributeStore(object):
     def serialize(self, known_objects):
         return [
             [key1, key2[0], key2[1], value]
-            for key1, inner in six.iteritems(self._attributes)
-            for key2, value in six.iteritems(inner)
+            for key1, inner in self._attributes.items()
+            for key2, value in inner.items()
             if key1 in known_objects
         ]
 

@@ -17,7 +17,6 @@ import gc
 import weakref
 
 from oslo_log import log as logging
-import six
 
 from murano.dsl import dsl_types
 from murano.dsl import helpers
@@ -60,7 +59,7 @@ class ObjectStore(object):
         self._store[murano_object.object_id] = murano_object
 
     def iterate(self):
-        return six.iterkeys(self._store)
+        return self._store.keys()
 
     def remove(self, object_id):
         self._store.pop(object_id)
@@ -85,7 +84,7 @@ class ObjectStore(object):
 
     @staticmethod
     def _get_designer_attributes(header):
-        return dict((k, v) for k, v in six.iteritems(header)
+        return dict((k, v) for k, v in header.items()
                     if str(k).startswith('_'))
 
     def designer_attributes(self, object_id):
@@ -109,7 +108,7 @@ class ObjectStore(object):
     def prepare_finalize(self, used_objects):
         used_objects = set(used_objects) if used_objects else []
         sentenced_objects = [
-            obj for obj in six.itervalues(self._store)
+            obj for obj in self._store.values()
             if obj not in used_objects
         ]
         with helpers.with_object_store(self):

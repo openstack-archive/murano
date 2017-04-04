@@ -93,7 +93,7 @@ class MuranoMethod(dsl_types.MuranoMethod, meta.MetaProvider):
             arguments_scheme = helpers.list_value(payload.get('Arguments'))
             if isinstance(arguments_scheme, dict):
                 arguments_scheme = [{key: value} for key, value in
-                                    six.iteritems(arguments_scheme)]
+                                    arguments_scheme.items()]
             self._arguments_scheme = collections.OrderedDict()
             seen_varargs = False
             seen_kwargs = False

@@ -178,7 +178,7 @@ class HotPackage(package_base.PackageBase):
     @staticmethod
     def _translate_outputs(hot):
         contract = {}
-        for key in six.iterkeys(hot.get('outputs') or {}):
+        for key in (hot.get('outputs') or {}).keys():
             contract[key] = YAQL("$.string()")
         return {
             'templateOutputs': {
@@ -391,7 +391,7 @@ class HotPackage(package_base.PackageBase):
 
         rest_group = []
         properties = []
-        for key, value in six.iteritems(hot_parameters):
+        for key, value in hot_parameters.items():
             if key not in used_parameters:
                 rest_group.append(HotPackage._translate_ui_parameter(
                     key, value))

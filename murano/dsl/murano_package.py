@@ -50,7 +50,7 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
                 semantic_version.Spec('==0')
         self._classes = {}
         self._imported_types = {object, murano_object.MuranoObject}
-        for key, value in six.iteritems(requirements or {}):
+        for key, value in (requirements or {}).items():
             self._requirements[key] = helpers.parse_version_spec(value)
 
         self._load_queue = {}
@@ -181,8 +181,7 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
             return result
         if search_requirements:
             pkgs_for_search = []
-            for package_name, version_spec in six.iteritems(
-                    self._requirements):
+            for package_name, version_spec in self._requirements.items():
                 if package_name == self.name:
                     continue
                 referenced_package = self._package_loader.load_package(

@@ -189,7 +189,7 @@ class MatchMacro(expressions.DslExpression):
 
     def execute(self, context):
         match_value = helpers.evaluate(self._value, context)
-        for key, value in six.iteritems(self._switch):
+        for key, value in self._switch.items():
             if key == match_value:
                 CodeBlock(value).execute(context)
                 return
@@ -207,7 +207,7 @@ class SwitchMacro(expressions.DslExpression):
 
     def execute(self, context):
         matched = False
-        for key, value in six.iteritems(self._switch):
+        for key, value in self._switch.items():
             if helpers.evaluate(key, context):
                 matched = True
                 CodeBlock(value).execute(context)

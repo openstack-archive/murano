@@ -14,7 +14,6 @@
 
 import weakref
 
-import six
 import yaql
 from yaql.language import contexts
 from yaql.language import conventions
@@ -132,7 +131,7 @@ def call_func(__context, __name, *args, **kwargs):
     return __context(__name, engine)(
         *args,
         **{CONVENTION.convert_parameter_name(key): value
-           for key, value in six.iteritems(kwargs)})
+           for key, value in kwargs.items()})
 
 
 def _infer_parameter_type(name, class_name):
@@ -330,7 +329,7 @@ def _create_basic_mpl_stub(murano_method, reserve_params, payload,
     i = reserve_params + 1
     varargs = False
     kwargs = False
-    for name, arg_spec in six.iteritems(murano_method.arguments_scheme):
+    for name, arg_spec in murano_method.arguments_scheme.items():
         position = i
         if arg_spec.usage == dsl_types.MethodArgumentUsages.VarArgs:
             name = '*'
@@ -396,7 +395,7 @@ def get_class_factory_definition(cls, murano_class):
 def filter_parameters(__fd, *args, **kwargs):
     if '*' not in __fd.parameters:
         position_args = 0
-        for p in six.itervalues(__fd.parameters):
+        for p in __fd.parameters.values():
             if p.position is not None:
                 position_args += 1
         args = args[:position_args]
@@ -405,7 +404,7 @@ def filter_parameters(__fd, *args, **kwargs):
         if not utils.is_keyword(name):
             del kwargs[name]
     if '**' not in __fd.parameters:
-        names = {p.alias or p.name for p in six.itervalues(__fd.parameters)}
+        names = {p.alias or p.name for p in __fd.parameters.values()}
         for name in list(kwargs.keys()):
             if name not in names:
                 del kwargs[name]

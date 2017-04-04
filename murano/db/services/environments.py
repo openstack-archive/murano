@@ -254,7 +254,7 @@ class EnvironmentServices(object):
             if isinstance(data.get('?'), dict):
                 data['?']['id'] = uuidutils.generate_uuid()
             result = {}
-            for key, value in six.iteritems(data):
+            for key, value in data.items():
                 result[key] = EnvironmentServices._objectify(
                     value, replacements)
             return result
@@ -262,7 +262,7 @@ class EnvironmentServices(object):
             return [EnvironmentServices._objectify(v, replacements)
                     for v in data]
         elif isinstance(data, six.string_types):
-            for key, value in six.iteritems(replacements):
+            for key, value in replacements.items():
                 data = data.replace('%' + key + '%', value)
         return data
 

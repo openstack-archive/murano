@@ -55,7 +55,7 @@ def evaluate(value, context, freeze=True):
         return dict_type(
             (evaluate(d_key, context, freeze),
              evaluate(d_value, context, freeze))
-            for d_key, d_value in six.iteritems(value))
+            for d_key, d_value in value.items())
     elif yaqlutils.is_sequence(value):
         return list_type(evaluate(t, context, freeze) for t in value)
     elif isinstance(value, yaqlutils.SetType):
@@ -574,7 +574,7 @@ def parse_object_definition(spec, scope_type, context):
         'destroyed': system_data.get('destroyed', False),
         'dependencies': system_data.get('dependencies', {}),
         'extra': {
-            key: value for key, value in six.iteritems(system_data)
+            key: value for key, value in system_data.items()
             if key.startswith('_')
         }
     }

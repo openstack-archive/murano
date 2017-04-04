@@ -14,7 +14,6 @@
 
 import itertools
 
-import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -52,7 +51,7 @@ def _prepare_context():
                 src_property.set(
                     utils.FrozenDict(
                         itertools.chain(
-                            six.iteritems(src),
+                            src.items(),
                             ((key, value),))))
             elif isinstance(src, dsl_types.MuranoObject):
                 src.set_property(key, value, context['#root_context'])

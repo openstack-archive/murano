@@ -122,7 +122,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
     def load_class_package(self, class_name, version_spec):
         packages = self._class_cache.get(class_name)
         if packages:
-            version = version_spec.select(six.iterkeys(packages))
+            version = version_spec.select(packages.keys())
             if version:
                 return packages[version]
 
@@ -148,7 +148,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
 
         packages = self._package_cache.get(package_name)
         if packages:
-            version = version_spec.select(six.iterkeys(packages))
+            version = version_spec.select(packages.keys())
             if version:
                 return packages[version]
 
@@ -484,7 +484,7 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         packages = self._packages_by_class.get(class_name)
         if not packages:
             raise exceptions.NoPackageForClassFound(class_name)
-        version = version_spec.select(six.iterkeys(packages))
+        version = version_spec.select(packages.keys())
         if not version:
             raise exceptions.NoPackageForClassFound(class_name)
         return packages[version]
@@ -497,7 +497,7 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
         packages = self._packages_by_name.get(package_name)
         if not packages:
             raise exceptions.NoPackageFound(package_name)
-        version = version_spec.select(six.iterkeys(packages))
+        version = version_spec.select(packages.keys())
         if not version:
             raise exceptions.NoPackageFound(package_name)
         self._fixations[package_name].add(version)
@@ -513,8 +513,8 @@ class DirectoryPackageLoader(package_loader.MuranoPackageLoader):
 
     @property
     def packages(self):
-        for package_versions in six.itervalues(self._packages_by_name):
-            for package in six.itervalues(package_versions):
+        for package_versions in self._packages_by_name.values():
+            for package in package_versions.values():
                 yield package
 
     @staticmethod
@@ -582,7 +582,7 @@ class CombinedPackageLoader(package_loader.MuranoPackageLoader):
         for loader in self.directory_loaders:
             fixations = deserialize_package_fixations(
                 loader.export_fixation_table())
-            for key, value in six.iteritems(fixations):
+            for key, value in fixations.items():
                 result[key].update(value)
         return serialize_package_fixations(result)
 
@@ -625,7 +625,7 @@ def _with_to_generator(context_obj):
 
 def deserialize_package_fixations(fixations):
     result = collections.defaultdict(set)
-    for name, versions in six.iteritems(fixations):
+    for name, versions in fixations.items():
         for version in versions:
             result[name].add(helpers.parse_version(version))
     return result
@@ -634,5 +634,5 @@ def deserialize_package_fixations(fixations):
 def serialize_package_fixations(fixations):
     return {
         name: list(str(v) for v in versions)
-        for name, versions in six.iteritems(fixations)
+        for name, versions in fixations.items()
     }

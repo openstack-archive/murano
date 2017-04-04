@@ -163,7 +163,7 @@ def _pass12_serialize(value, parent, serialized_objects,
         result = {}
         need_another_pass = False
 
-        for d_key, d_value in six.iteritems(value):
+        for d_key, d_value in value.items():
             if (isinstance(d_key, dsl_types.MuranoType) and
                     serialization_type == dsl_types.DumpTypes.Serializable):
                 result_key = str(d_key)
@@ -244,7 +244,7 @@ def collect_objects(root_object):
                 for t in rec(value):
                     yield t
         elif isinstance(obj, utils.MappingType):
-            for value in six.itervalues(obj):
+            for value in obj.values():
                 for t in rec(value):
                     yield t
         elif isinstance(obj, dsl_types.MuranoObjectInterface):

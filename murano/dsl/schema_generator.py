@@ -122,7 +122,7 @@ def generate_entity_schema(entity, context, declaring_type, meta):
         'type': 'object',
         'properties': {
             name: generate_property_schema(prop, context, type_weights)
-            for name, prop in six.iteritems(properties)
+            for name, prop in properties.items()
             },
         'additionalProperties': False,
         'formSections': generate_sections(meta, type_weights)
@@ -248,7 +248,7 @@ def translate_dict(contract, context, runtime_version):
     """Translates dictionary contracts into json-schema objects"""
     properties = {}
     additional_properties = False
-    for key, value in six.iteritems(contract):
+    for key, value in contract.items():
         if isinstance(key, dsl_types.YaqlExpression):
             additional_properties = translate(value, context, runtime_version)
         else:

@@ -984,7 +984,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         # pkg_to_upload into package_meta dict.
         pkg_to_upload = mock.MagicMock(
             __exit__=lambda obj, type, value, tb: False)
-        for k, v in six.iteritems(PKG_PARAMS_MAP):
+        for k, v in PKG_PARAMS_MAP.items():
             if v in test_package_meta.keys():
                 val = test_package_meta[v]
                 setattr(pkg_to_upload.__enter__(), k, val)

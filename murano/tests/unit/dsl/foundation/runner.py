@@ -40,7 +40,7 @@ class TestContextManager(context_manager.ContextManager):
         context = helpers.link_contexts(
             root_context, yaql_functions.get_context(runtime_version))
         context = context.create_child_context()
-        for name, func in six.iteritems(self.__functions):
+        for name, func in self.__functions.items():
             context.register_function(func, name)
         return context
 
@@ -97,7 +97,7 @@ class Runner(object):
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_args.append(arg)
-            for name, arg in six.iteritems(kwargs):
+            for name, arg in kwargs.items():
                 if isinstance(arg, object_model.Object):
                     arg = object_model.build_model(arg)
                 final_kwargs[name] = arg

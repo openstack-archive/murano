@@ -15,7 +15,6 @@
 
 from oslo_log import log as logging
 from oslo_utils import importutils
-import six
 from stevedore import extension
 import yaml
 
@@ -84,7 +83,7 @@ class ModifyActionManager(object):
                              '"action-name: {{p1: v1, ...}}" '
                              'but got "{action_spec}"'
                              .format(action_spec=action_spec))
-        for name, kwargs in six.iteritems(actions):
+        for name, kwargs in actions.items():
             LOG.debug('Executing action {name}, params {params}'
                       .format(name=name, params=kwargs))
             # loads action class

@@ -319,8 +319,8 @@ class Package(FileWrapperMixin):
     def classes(self):
         if not hasattr(self, '_classes'):
             self._classes = {}
-            for class_name, class_file in six.iteritems(
-                    self.manifest.get('Classes', {})):
+            for class_name, class_file in (
+                    self.manifest.get('Classes', {}).items()):
                 filename = "Classes/%s" % class_file
                 if filename not in self.contents.namelist():
                     continue
@@ -431,7 +431,7 @@ class Package(FileWrapperMixin):
     def _get_direct_deps(package, base_url, path):
         result = []
         if 'Require' in package.manifest:
-            for dep_name, ver in six.iteritems(package.manifest['Require']):
+            for dep_name, ver in package.manifest['Require'].items():
                 try:
                     req_file = Package.from_location(
                         dep_name,
@@ -480,7 +480,7 @@ class NamespaceResolver(object):
 
 def get_local_inheritance(classes):
     result = {}
-    for class_name, klass in six.iteritems(classes):
+    for class_name, klass in classes.items():
         if 'Extends' not in klass:
             continue
         ns = klass.get('Namespaces')

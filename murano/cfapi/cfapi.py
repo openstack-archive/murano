@@ -17,7 +17,6 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 import tenacity
 from webob import response
 
@@ -167,7 +166,7 @@ class Controller(object):
         params = [parameters]
         while params:
             a = params.pop()
-            for k, v in six.iteritems(a):
+            for k, v in a.items():
                 if isinstance(v, dict):
                     params.append(v)
                     if k == '?':
