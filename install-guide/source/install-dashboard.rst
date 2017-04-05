@@ -16,23 +16,23 @@
 Install Murano Dashboard
 ========================
 
- Murano API & Engine services provide the core of Murano. However, your need a
- control plane to use it. This section describes how to install and run Murano
- Dashboard.
+Murano API & Engine services provide the core of Murano. However, your need a
+control plane to use it. This section describes how to install and run Murano
+Dashboard.
 
 #.  Clone the murano dashboard repository.
 
     .. code-block:: console
 
-        cd ~/murano
-        git clone git://git.openstack.org/openstack/murano-dashboard
+       $ cd ~/murano
+       $ git clone git://git.openstack.org/openstack/murano-dashboard
     ..
 
 #.  Clone the ``horizon`` repository
 
     .. code-block:: console
 
-        git clone git://git.openstack.org/openstack/horizon
+       $ git clone git://git.openstack.org/openstack/horizon
     ..
 
 #.  Create a virtual environment and install ``muranodashboard`` as an editable
@@ -40,16 +40,16 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        cd horizon
-        tox -e venv -- pip install -e ../murano-dashboard
+       $ cd horizon
+       $ tox -e venv -- pip install -e ../murano-dashboard
     ..
 
 #.  Prepare local settings.
 
     .. code-block:: console
 
-        cp openstack_dashboard/local/local_settings.py.example \
-        openstack_dashboard/local/local_settings.py
+       $ cp openstack_dashboard/local/local_settings.py.example \
+         openstack_dashboard/local/local_settings.py
     ..
 
     For more information, check out the official
@@ -57,27 +57,27 @@ Install Murano Dashboard
 
 #.  Enable and configure Murano dashboard in the OpenStack Dashboard:
 
-    *  For Newton (and later) OpenStack installations, copy the plugin file,
-       local settings files, and policy files.
+    * For Newton (and later) OpenStack installations, copy the plugin file,
+      local settings files, and policy files.
 
-        .. code-block:: console
+      .. code-block:: console
 
-            cp ../murano-dashboard/muranodashboard/local/enabled/*.py \
-            openstack_dashboard/local/enabled/
+         $ cp ../murano-dashboard/muranodashboard/local/enabled/*.py \
+           openstack_dashboard/local/enabled/
 
-            cp ../murano-dashboard/muranodashboard/local/local_settings.d/*.py \
-            openstack_dashboard/local/local_settings.d/
+         $ cp ../murano-dashboard/muranodashboard/local/local_settings.d/*.py \
+           openstack_dashboard/local/local_settings.d/
 
-            cp ../murano-dashboard/muranodashboard/conf/* openstack_dashboard/conf/
-        ..
+         $ cp ../murano-dashboard/muranodashboard/conf/* openstack_dashboard/conf/
+      ..
 
-    *  For the OpenStack installations prior to the Newton release, run:
+    * For the OpenStack installations prior to the Newton release, run:
 
-        .. code-block:: console
+      .. code-block:: console
 
-            cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
-            openstack_dashboard/local/enabled/
-        ..
+         $ cp ../murano-dashboard/muranodashboard/local/_50_murano.py \
+           openstack_dashboard/local/enabled/
+      ..
 
     Customize local settings of your horizon installation, by editing the
     :file:`openstack_dashboard/local/local_settings.py` file:
@@ -125,7 +125,7 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        tox -e venv -- python manage.py migrate --noinput
+       $ tox -e venv -- python manage.py migrate --noinput
     ..
 
 #.  Run the Django server at 127.0.0.1:8000 or provide different IP and PORT
@@ -133,12 +133,12 @@ Install Murano Dashboard
 
     .. code-block:: console
 
-        tox -e venv -- python manage.py runserver <IP:PORT>
+       $ tox -e venv -- python manage.py runserver <IP:PORT>
     ..
 
 .. note::
 
-    The development server restarts automatically following every code change.
+   The development server restarts automatically following every code change.
 ..
 
 **Result:** The murano dashboard is available at http://IP:PORT.

@@ -51,11 +51,11 @@ Automatic Neutron network configuration
 To create a router automatically, provide the following parameters in the
 config file:
 
-    .. code-block:: ini
+.. code-block:: ini
 
-        [networking]
+   [networking]
 
-        external_network = %EXTERNAL_NETWORK_NAME%
-        router_name = %MURANO_ROUTER_NAME%
-        create_router = true
-    ..
+   external_network = %EXTERNAL_NETWORK_NAME%
+   router_name = %MURANO_ROUTER_NAME%
+   create_router = true
+..
