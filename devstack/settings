@@ -20,11 +20,6 @@ MURANO_POLICY_FILE=${MURANO_CONF_DIR}/policy.json
 MURANO_DEBUG=$(trueorfalse True MURANO_DEBUG)
 MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT=$(trueorfalse False MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT)
 
-# Since Murano support raw cloud images, we can allow download any image with cloud init
-UBUNTU_CLOUD_IMAGE_URL=${UBUNTU_CLOUD_IMAGE_URL:-'http://storage.apps.openstack.org/images/ubuntu-14.04-m-agent.qcow2'}
-IMAGE_URLS+=",${UBUNTU_CLOUD_IMAGE_URL}"
-CLOUD_IMAGE_NAME=$(basename "$UBUNTU_CLOUD_IMAGE_URL" ".qcow2")
-
 # Set up murano service endpoint
 MURANO_SERVICE_HOST=${MURANO_SERVICE_HOST:-$SERVICE_HOST}
 MURANO_SERVICE_PORT=${MURANO_SERVICE_PORT:-8082}
