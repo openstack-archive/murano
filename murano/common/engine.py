@@ -21,6 +21,7 @@ import eventlet.debug
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
+from oslo_messaging.rpc import dispatcher
 from oslo_messaging import target
 from oslo_serialization import jsonutils
 from oslo_service import service
@@ -65,8 +66,10 @@ class EngineService(service.Service):
 
         transport = messaging.get_notification_transport(CONF)
         s_target = target.Target('murano', 'tasks', server=str(uuid.uuid4()))
+        access_policy = dispatcher.DefaultRPCAccessPolicy
         self.server = messaging.get_rpc_server(
-            transport, s_target, endpoints, 'eventlet')
+            transport, s_target, endpoints, 'eventlet',
+            access_policy=access_policy)
         self.server.start()
         super(EngineService, self).start()
 
