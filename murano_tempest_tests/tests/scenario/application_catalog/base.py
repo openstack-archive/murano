@@ -19,7 +19,6 @@ import time
 
 from tempest.clients import Manager as services_manager
 from tempest.common import credentials_factory as common_creds
-from tempest.common import dynamic_creds
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import base
@@ -62,20 +61,19 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         else:
             cls.admin_role = 'admin'
         if not hasattr(cls, 'dynamic_cred'):
-            cls.dynamic_cred = dynamic_creds.DynamicCredentialProvider(
-                identity_version=CONF.identity.auth_version,
-                name=cls.__name__, admin_role=cls.admin_role,
-                admin_creds=common_creds.get_configured_admin_credentials(
-                    'identity_admin'))
+            cls.credentials = common_creds.get_credentials_provider(
+                name=cls.__name__,
+                force_tenant_isolation=CONF.auth.use_dynamic_credentials,
+                identity_version=CONF.identity.auth_version)
         if type_of_creds == 'primary':
-            creds = cls.dynamic_cred.get_primary_creds()
+            creds = cls.credentials.get_primary_creds()
         elif type_of_creds == 'admin':
-            creds = cls.dynamic_cred.get_admin_creds()
+            creds = cls.credentials.get_admin_creds()
         elif type_of_creds == 'alt':
-            creds = cls.dynamic_cred.get_alt_creds()
+            creds = cls.credentials.get_alt_creds()
         else:
-            creds = cls.dynamic_cred.get_credentials(type_of_creds)
-        cls.dynamic_cred.type_of_creds = type_of_creds
+            creds = cls.credentials.get_credentials(type_of_creds)
+        cls.credentials.type_of_creds = type_of_creds
 
         return creds.credentials
 
@@ -118,7 +116,7 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
     @classmethod
     def clear_isolated_creds(cls):
         if hasattr(cls, "dynamic_cred"):
-            cls.dynamic_cred.clear_creds()
+            cls.credentials.clear_creds()
 
     def environment_delete(self, environment_id, timeout=180):
         self.application_catalog_client.delete_environment(environment_id)
