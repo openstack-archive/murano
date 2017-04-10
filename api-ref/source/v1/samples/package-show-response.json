@@ -1,0 +1,25 @@
+{
+    "updated": "2017-04-06T08:22:11",
+    "description": "The Apache HTTP Server Project is an effort to develop and maintain an\nopen-source HTTP server for modern operating systems including UNIX and\nWindows NT. The goal of this project is to provide a secure, efficient and\nextensible server that provides HTTP services in sync with the current HTTP\nstandards.\nApache httpd has been the most popular web server on the Internet since\nApril 1996, and celebrated its 17th birthday as a project this February.\n",
+    "tags": [
+        "HTTP",
+        "Server",
+        "WebServer",
+        "HTML",
+        "Apache"
+    ],
+    "class_definitions": [
+        "com.example.apache.ApacheHttpServer"
+    ],
+    "is_public": false,
+    "categories": [],
+    "name": "Apache HTTP Server",
+    "created": "2017-04-06T08:22:11",
+    "author": "Mirantis, Inc",
+    "enabled": true,
+    "id": "979637f39a7245cebeabc99e6aa01666",
+    "supplier": {},
+    "fully_qualified_name": "com.example.apache.ApacheHttpServer",
+    "type": "Application",
+    "owner_id": "c0f6e4cf1bfc48aba587e709b58c9f28"
+}

@@ -35,6 +35,12 @@ env_name_update:
   in: path
   required: true
   type: string
+pkg_id_url:
+  description: |
+    The UUID of the package.
+  in: path
+  required: true
+  type: string
 all_tenants:
   description: |
     Indicates whether environments from all projects are listed.
@@ -45,6 +51,114 @@ all_tenants:
   required: false
   default: false
   type: boolean
+catalog:
+  description: |
+    If ``false`` (default) - search packages, that current user can edit
+    (own for non-admin, all for admin). If ``true`` - search packages,
+    that current user can deploy (i.e. his own + public).
+  in: query
+  required: false
+  default: false
+  type: boolean
+category:
+  description: |
+    Allows to filter by categories.
+  in: query
+  required: false
+  type: string
+class_name:
+  description: |
+    Search only for packages, that use specified class.
+  in: query
+  required: false
+  type: string
+fqn:
+  description: |
+    Allows to filter by fully qualified name.
+  in: query
+  required: false
+  type: string
+include_disabled:
+  description: |
+    Include disabled packages in the result.
+  in: query
+  required: false
+  default: false
+  type: boolean
+limit:
+  description: |
+    When present the maximum number of results returned will not exceed
+    the specified value. The typical pattern of limit and marker is to
+    make an initial limited request and then to use the ID of the last
+    package from the response as the marker parameter in a
+    subsequent limited request.
+  in: query
+  required: false
+  type: string
+marker:
+  description: |
+    A package identifier marker may be specified. When present only
+    packages which occur after the identifier ID will be listed
+  in: query
+  required: false
+  type: string
+order_by:
+  description: |
+    Allows to sort packages by ``fqn``, ``name``, ``created``.
+    Created is default value.
+  in: query
+  required: false
+  type: string
+owned:
+  description: |
+    Search only from packages owned by current project.
+  in: query
+  required: false
+  default: false
+  type: boolean
+pkg_id_query:
+  description: |
+    Allows to filter by package id.
+  in: query
+  required: false
+  type: string
+pkg_name_query:
+  description: |
+    Allows to filter by package name.
+  in: query
+  required: false
+  type: string
+pkg_type_query:
+  description: |
+    Allows to filter package by type, e.g. ``application``, ``library``.
+  in: query
+  required: false
+  type: string
+search:
+  description: |
+    Gives opportunity to search specified data by all the
+    package parameters and order packages.
+  in: query
+  required: false
+  type: string
+author:
+  description: |
+    The author of the package.
+  in: body
+  required: true
+  type: string
+categories:
+  description: |
+    The categories of the package.
+  in: body
+  required: true
+  type: array
+class_definitions:
+  description: |
+    The class_definitions of the package.
+  in: body
+  required: true
+  type: array
 created:
   description: |
     The date and time when the resource was created. The date and time stamp
@@ -61,6 +175,18 @@ created:
   in: body
   required: true
   type: string
+description:
+  description: |
+    The description of the package.
+  in: body
+  required: true
+  type: string
+enabled:
+  description: |
+    Whether the package is browsed in the Application Catalog.
+  in: body
+  required: true
+  type: boolean
 env_default_networks:
   description: |
     The default networks of the environment.
@@ -117,6 +243,18 @@ environments:
   in: body
   required: true
   type: array
+fully_qualified_name:
+  description: |
+    The fqn of the package.
+  in: body
+  required: true
+  type: string
+is_public:
+  description: |
+    Whether the package is shared for other projects.
+  in: body
+  required: true
+  type: boolean
 last_status_uuid:
   description: |
     A list of environment last status object.
@@ -129,6 +267,48 @@ networking:
   in: body
   required: true
   type: string
+owner_id:
+  description: |
+    The owner id of the package.
+  in: body
+  required: true
+  type: string
+packages:
+  description: |
+    A list of ``package`` object.
+  in: body
+  required: true
+  type: array
+pkg_file:
+  description: |
+    The upload package file.
+  in: body
+  required: true
+  type: object
+pkg_id:
+  description: |
+    The UUID of the package.
+  in: body
+  required: true
+  type: string
+pkg_name:
+  description: |
+    The name of the package.
+  in: body
+  required: true
+  type: string
+pkg_supplier:
+  description: |
+    The supplier info of the package.
+  in: body
+  required: true
+  type: object
+pkg_type:
+  description: |
+    The type of the package.
+  in: body
+  required: true
+  type: string
 regions:
   description: |
     The regions detail of the cloud.
@@ -138,6 +318,12 @@ regions:
 services:
   description: |
     A list of ``services`` object.
+  in: body
+  required: true
+  type: array
+tags:
+  description: |
+    The tags of the package.
   in: body
   required: true
   type: array
