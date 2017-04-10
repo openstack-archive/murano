@@ -17,6 +17,7 @@ import uuid
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
+from oslo_messaging.rpc import dispatcher
 from oslo_messaging import target
 from oslo_service import service
 from oslo_utils import timeutils
@@ -242,7 +243,9 @@ class ApiService(Service):
 
         transport = messaging.get_transport(CONF)
         s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
+        access_policy = dispatcher.DefaultRPCAccessPolicy
         self.server = messaging.get_rpc_server(
-            transport, s_target, endpoints, 'eventlet')
+            transport, s_target, endpoints, 'eventlet',
+            access_policy=access_policy)
         self.server.start()
         super(ApiService, self).start()
