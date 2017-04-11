@@ -64,6 +64,9 @@ Properties:
   securityGroupName:
     Contract: $.string()
     Default: null
+  securityGroups:
+    Contract: [$.string()]
+    Default: []
   sharedIps:
     Contract:
       - $.class(std:SharedIp)
@@ -135,11 +138,11 @@ Methods:
       - $.ensureNetworksDeployed()
       - If: $.networks.useEnvironmentNetwork and $region.defaultNetworks.environment!=null
         Then:
-          $.joinNet($region.defaultNetworks.environment, $securityGroupName)
+          $.joinNet($region.defaultNetworks.environment, $securityGroupName, $this.securityGroups)
       - If: $.networks.useFlatNetwork and $region.defaultNetworks.flat!=null
         Then:
-          $.joinNet($region.defaultNetworks.flat, $securityGroupName)
-      - $.networks.customNetworks.select($this.joinNet($, $securityGroupName))
+          $.joinNet($region.defaultNetworks.flat, $securityGroupName, $this.securityGroups)
+      - $.networks.customNetworks.select($this.joinNet($, $securityGroupName, $this.securityGroups))
 
       - $preparedUserData: $.prepareUserData()
       - $properties:
@@ -251,6 +254,8 @@ Methods:
           Contract: $.class(Network).notNull()
       - securityGroupName:
           Contract: $.string()
+      - securityGroups:
+          Contract: [$.string()]
     Body:
       - $primary: $net = $._primaryNetwork
       - $assignFip: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
@@ -261,6 +266,7 @@ Methods:
       - $joinResult: $net.joinInstance(
             instance => $this,
             securityGroupName => $securityGroupName,
+            securityGroups => $securityGroups,
             assignFloatingIp => $assignFip,
             sharedIps => $sharedIps
           )

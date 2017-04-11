@@ -127,6 +127,8 @@ Methods:
           Contract: $.class(Instance).notNull()
       - securityGroupName:
           Contract: $.string()
+      - securityGroups:
+          Contract: [$.string()]
       - assignFloatingIp:
           Contract: $.bool().notNull()
       - sharedIps:
@@ -146,6 +148,7 @@ Methods:
       - $result: $.joinInstanceToNetwork(
             instance => $instance,
             securityGroupName => $securityGroupName,
+            securityGroups => $securityGroups,
             sharedIps => $sharedIps,
             netRef => $netRef,
             subnetRef => $subnetRef,

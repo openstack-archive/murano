@@ -212,6 +212,32 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         }
         return post_body
 
+    def vm_test(self, **kwargs):
+        instance = {
+            "flavor": "m1.small",
+            "image": self.cirros_image,
+            "assignFloatingIp": True,
+            "availabilityZone": "nova",
+            "?": {
+                "type": "io.murano.resources.LinuxMuranoInstance",
+                "id": utils.generate_uuid()
+            },
+            "name": utils.generate_name("testMurano")
+        }
+        if kwargs.get('securityGroups'):
+            instance['securityGroups'] = kwargs.get('securityGroups')
+        return {
+            "instance": instance,
+            "name": utils.generate_name("VM"),
+            "?": {
+                "_{id}".format(id=utils.generate_uuid()): {
+                    "name": "VM"
+                },
+                "type": "io.murano.apps.test.VM",
+                "id": utils.generate_uuid()
+            }
+        }
+
     def update_executor(self, flavor='m1.small'):
         post_body = {
             "instance": {
@@ -365,7 +391,7 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         instance_id = self.get_instance_id(name)
         attached_volumes = self.servers_client.\
             list_volume_attachments(instance_id)['volumeAttachments']
-        assert attached_volumes[0]['id'] == volume_id
+        self.assertEqual(attached_volumes[0]['id'], volume_id)
 
 
 class BaseApplicationCatalogScenarioIsolatedAdminTest(

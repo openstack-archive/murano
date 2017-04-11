@@ -362,6 +362,8 @@ Currently supported options for **type** attribute are:
   a list
 * *network* - specific field, used to select a network and subnet from a list
   of the ones available to the current user
+* *securitygroup* - specific field, used for selecting a custom security group
+  to assign to the instance
 * any other value is considered to be a fully qualified name for some
   Application package and is rendered as a pair of controls: one for selecting
   already existing Applications of that type in an Environment, second - for

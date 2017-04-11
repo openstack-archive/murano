@@ -1,0 +1,5 @@
+---
+features:
+  - |
+    Users can now assign an existing security group to an application as
+    an alternative to using the one created by Murano's ``SecurityGroupManager``.
