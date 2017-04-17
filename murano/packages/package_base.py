@@ -47,7 +47,7 @@ class PackageBase(package.Package):
         self._author = manifest.get('Author')
         self._supplier = manifest.get('Supplier') or {}
         self._logo = manifest.get('Logo')
-        self._tags = manifest.get('Tags')
+        self._tags = manifest.get('Tags', [])
 
         self._logo_cache = None
         self._supplier_logo_cache = None
