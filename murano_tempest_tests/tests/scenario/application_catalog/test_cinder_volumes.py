@@ -172,7 +172,8 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
             4. Make sure that deployment finished successfully
             5. Check that application is accessible
             6. Check that volume is attached to the instance and has size 1GiB
-            7. Delete environment
+            7. Check that we can access some attachment info about the volume
+            8. Delete environment
         """
         name = utils.generate_name('testMurano')
         environment = self.application_catalog_client.\
@@ -196,6 +197,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
+        self.check_volume_attachments(environment['id'])
         self.assertEqual(volume_data['size'], 1)
 
     @testtools.testcase.attr('smoke')

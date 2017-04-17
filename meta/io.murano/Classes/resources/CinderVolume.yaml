@@ -51,6 +51,10 @@ Properties:
   sourceVolumeBackup:
     Contract: $.class(CinderVolumeBackup)
 
+  attachments:
+    Contract: []
+    Usage: Out
+
 Methods:
   buildResourceDefinition:
     Body:
@@ -95,6 +99,9 @@ Methods:
         outputs:
           format('vol-{0}-id', id($)):
             value: $.getRef()
+          format('vol-{0}-attachments', id($)):
+            value:
+              get_attr: [$.getResourceName(), attachments_list]
 
   deploy:
     Body:
@@ -132,13 +139,25 @@ Methods:
       - $region.stack.push()
       - $.setAttr(lastTemplate, null)
       - $.openstackId: null
+      - $.attachments: null
 
   getRef:
     Body:
       Return:
         get_resource: format('vol-{0}', id($))
 
+  getResourceName:
+    Body:
+      Return:
+        format('vol-{0}', id($))
 
   getResourceType:
     Body:
       - Return: 'OS::Cinder::Volume'
+
+  setAttachments:
+    Arguments:
+      - attachments:
+          Contract: []
+    Body:
+      - $.attachments: $attachments
