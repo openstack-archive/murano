@@ -67,6 +67,7 @@ def safe_minidom_parse_string(xml_string):
 
     """
     try:
-        return minidom.parseString(xml_string, parser=ProtectedExpatParser())
+        return minidom.parseString(  # nosec
+            xml_string, parser=ProtectedExpatParser())  # nosec
     except sax.SAXParseException:
         raise expat.ExpatError()
