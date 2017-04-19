@@ -54,7 +54,7 @@ class ApplicationCatalogClient(rest_client.RestClient):
         endpoint = self.base_url
         url = endpoint + uri
         resp = requests.post(url, files={package_name: files}, data=post_body,
-                             headers=headers)
+                             headers=headers, timeout=self.build_timeout)
         self.expected_success(200, resp.status_code)
         return self._parse_resp(resp.text)
 
