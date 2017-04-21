@@ -72,7 +72,12 @@ class ResourceManager(object):
     @specs.inject('receiver', yaqltypes.Receiver())
     @specs.meta(constants.META_NO_TRACE, True)
     def yaml(cls, receiver, name, owner=None):
-        return yamllib.load(
+        # NOTE(kzaitsev, Sam Pilla) Bandit will raise an issue here,
+        # because it thinks that we're using an unsafe yaml.load.
+        # However we're passing a SafeLoader here
+        # (see definition of `yaml_loader` in this file; L27-30)
+        # so a `nosec` was added to ignore the false positive report.
+        return yamllib.load(  # nosec
             cls.string(receiver, name, owner), Loader=yaml_loader)
 
     @staticmethod
