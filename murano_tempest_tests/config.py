@@ -83,9 +83,9 @@ ApplicationCatalogGroup = [
 
 ServiceBrokerGroup = [
     # Test runs control
-    cfg.StrOpt("run_service_broker_tests",
-               default=False,
-               help="Defines whether run service broker api tests or not"),
+    cfg.BoolOpt("run_service_broker_tests",
+                default=False,
+                help="Defines whether run service broker api tests or not"),
 
     cfg.StrOpt("catalog_type",
                default="service-broker",
