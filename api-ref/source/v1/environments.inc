@@ -212,7 +212,7 @@ Response Example
 Delete environment
 ==================
 
-.. rest_method::  DELETE /environments/{id}?abandon
+.. rest_method::  DELETE /environments/{id}
 
 Remove specified Environment.
 

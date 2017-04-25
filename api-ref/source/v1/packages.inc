@@ -63,7 +63,7 @@ Response Parameters
    - created: created
    - enabled: enabled
    - tags: tags
-   - categories: categories
+   - categories: package_categories
    - owner_id: owner_id
 
 Response Example
@@ -78,6 +78,10 @@ Upload package
 .. rest_method::  POST /v1/catalog/packages
 
 Create a package.
+
+.. note::
+   Though specifying categories is optional, it is recommended that you
+   specify at least one. It helps to filter applications in the catalog.
 
 Response Codes
 --------------
@@ -97,7 +101,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - categories: categories
+   - categories: package_categories
    - is_public: is_public
    - file: pkg_file
 
@@ -120,7 +124,7 @@ Response Parameters
    - created: created
    - enabled: enabled
    - tags: tags
-   - categories: categories
+   - categories: package_categories
    - owner_id: owner_id
 
 Response Example
@@ -176,7 +180,7 @@ Response Parameters
    - created: created
    - enabled: enabled
    - tags: tags
-   - categories: categories
+   - categories: package_categories
    - owner_id: owner_id
 
 Response Example
@@ -239,7 +243,7 @@ Response Parameters
    - created: created
    - enabled: enabled
    - tags: tags
-   - categories: categories
+   - categories: package_categories
    - owner_id: owner_id
 
 Response Example

@@ -1,0 +1,14 @@
+{
+    "id": "b308f7fa8a2f4a5eb419970c827f4466",
+    "updated": "2015-01-28T17:00:19",
+    "packages": [
+        {
+            "fully_qualified_name": "io.murano.apps.ZabbixServer",
+            "id": "4dfb566e69e6445fbd4aea5099fe95e9",
+            "name": "Zabbix Server"
+        }
+    ],
+    "name": "Web",
+    "created": "2015-01-28T17:00:19",
+    "package_count": 1
+}
