@@ -49,12 +49,37 @@ pkg_id_url:
   in: path
   required: true
   type: string
+service_id_url:
+  description:
+    The UUID of a service belonging to an environment template.
+  in: path
+  required: true
+  type: string
 session_id_url:
   description: |
     The UUID of the session.
   in: path
   required: true
   type: string
+template_id_url:
+  description: |
+    The UUID of the environment template.
+  in: path
+  required: true
+  type: string
+template_is_public_url:
+  description: |
+    Indicates whether public environment templates are listed or not. The
+    following options are possible:
+
+    - ``True``. Public environments templates from all projects are listed.
+    - ``False``. Private environments templates from current project are
+      listed.
+    - ``empty``. All project templates plus public templates from all projects.
+      are listed
+  in: path
+  required: false
+  type: boolean
 
 # variables in query
 all_tenants:
@@ -366,7 +391,7 @@ regions:
   type: array
 services:
   description: |
-    A list of ``services`` object.
+    A list of ``service`` objects.
   in: body
   required: true
   type: array
@@ -403,10 +428,116 @@ tags:
   in: body
   required: true
   type: array
+template_description:
+  description: |
+    The enviroment template description.
+  in: body
+  required: true
+  type: string
+template_id:
+  description: |
+    The UUID of the environment template.
+  in: body
+  required: true
+  type: string
+template_is_public:
+  description: |
+    Indicates whether an environment template is public or not.
+
+    - ``True``. The environment template is public. Can be cloned.
+    - ``False``. The environment template is private.
+  in: body
+  required: true
+  type: boolean
+template_name:
+  description: |
+    The name of the environment template. Only alphanumeric characters are
+    allowed.
+  in: body
+  required: true
+  type: string
+template_service:
+  description: |
+    Detailed information about the ``service`` to be added to the environment
+    template. The ``service`` includes virtual resources and application
+    information. The virtual resources information is specified inside the
+    ``instance`` object property. Application information is specified
+    inside the body of the ``service`` object.
+
+    The ``instance`` object properties include:
+
+    - ``assignFloatingIp``. Whether to assign a floating IP to the VM.
+    - ``keyname``. The key name of a key pair for the VM.
+    - ``image``. The image to be used to provision the VM.
+    - ``flavor``. The flavor to be used to provision the VM.
+    - ``?``. An object which includes the ``type`` of the server.
+
+    An example ``instance`` looks like::
+
+      {
+        "assignFloatingIp": "true",
+        "keyname": "mykeyname",
+        "image": "cloud-fedora-v3",
+        "flavor": "m1.medium",
+        "?": {
+          "type": "io.murano.resources.LinuxMuranoInstance",
+          "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+        }
+      }
+
+    In addition, the ``service`` should also include the following:
+
+    - ``name``. The ``name`` of the application.
+    - ``?``. An object that includes the ``type`` and ``id`` of the
+      application. An example ``type`` is:
+      "io.murano.resources.LinuxMuranoInstance".
+    - ``port``: The port to be used by the application. The value must be
+      greater than 0 and less than 65536 (although formatted as a string).
+
+    The entire ``service`` looks like::
+
+      {
+        "instance": {
+          "assignFloatingIp": "true",
+          "keyname": "mykeyname",
+          "image": "cloud-fedora-v3",
+          "flavor": "m1.medium",
+          "?": {
+            "type": "io.murano.resources.LinuxMuranoInstance",
+            "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+          }
+        },
+        "name": "orion",
+        "?": {
+          "type": "io.murano.apps.apache.Tomcat",
+          "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+        },
+        "port": "8080"
+      }
+  in: body
+  required: true
+  type: object
+template_services:
+  description: |
+    The list of environment template ``service`` objects.
+  in: body
+  required: true
+  type: array
+template_version:
+  description: |
+    The current version of the environment template.
+  in: body
+  required: true
+  type: integer
+templates:
+  description: |
+    The list of templates.
+  in: body
+  required: true
+  type: array
 tenant_id:
   description: |
-    The UUID of the tenant. A tenant is also known as
-    a project.
+    The UUID of the tenant. A tenant is also known as a project.
   in: body
   required: true
   type: string
