@@ -49,6 +49,12 @@ pkg_id_url:
   in: path
   required: true
   type: string
+session_id_url:
+  description: |
+    The UUID of the session.
+  in: path
+  required: true
+  type: string
 
 # variables in query
 all_tenants:
@@ -364,6 +370,33 @@ services:
   in: body
   required: true
   type: array
+session_id:
+  description: |
+    The UUID of the session.
+  in: body
+  required: true
+  type: string
+session_state:
+  description: |
+    The current state of the environment. When a session is first
+    opened for the environment the state is ``opened``.
+  in: body
+  required: true
+  type: string
+session_user_id:
+  description: |
+    The UUID of the session owner.
+  in: body
+  required: true
+  type: string
+session_version:
+  description: |
+    The version of the session. It is tied to the version of the environment,
+    so that only sessions whose version matches that of the environment can
+    be deployed.
+  in: body
+  required: true
+  type: integer
 tags:
   description: |
     The tags of the package.
