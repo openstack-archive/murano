@@ -81,11 +81,12 @@ class BaseApplicationCatalogTest(base.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os"):
+        if not hasattr(cls, "os_primary"):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
-            cls.os = clients.Manager(credentials=creds)
-        cls.application_catalog_client = cls.os.application_catalog_client
-        cls.artifacts_client = cls.os.artifacts_client
+            cls.os_primary = clients.Manager(credentials=creds)
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
+        cls.artifacts_client = cls.os_primary.artifacts_client
 
     @classmethod
     def resource_cleanup(cls):
@@ -122,7 +123,7 @@ class BaseApplicationCatalogAdminTest(BaseApplicationCatalogTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.os = clients.Manager()
+        cls.os_primary = clients.Manager()
         super(BaseApplicationCatalogAdminTest, cls).resource_setup()
 
 
@@ -131,5 +132,5 @@ class BaseApplicationCatalogIsolatedAdminTest(BaseApplicationCatalogTest):
     @classmethod
     def resource_setup(cls):
         creds = cls.get_configured_isolated_creds(type_of_creds='admin')
-        cls.os = clients.Manager(credentials=creds)
+        cls.os_primary = clients.Manager(credentials=creds)
         super(BaseApplicationCatalogIsolatedAdminTest, cls).resource_setup()

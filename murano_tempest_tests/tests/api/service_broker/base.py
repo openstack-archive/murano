@@ -76,14 +76,15 @@ class BaseServiceBrokerTest(base.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os"):
+        if not hasattr(cls, "os_primary"):
             cls.username = CONF.identity.username
             cls.password = CONF.identity.password
             cls.tenant_name = CONF.identity.tenant_name
             cls.verify_nonempty(cls.username, cls.password, cls.tenant_name)
-            cls.os = clients.Manager()
-        cls.service_broker_client = cls.os.service_broker_client
-        cls.application_catalog_client = cls.os.application_catalog_client
+            cls.os_primary = clients.Manager()
+        cls.service_broker_client = cls.os_primary.service_broker_client
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
 
     def setUp(self):
         super(BaseServiceBrokerTest, self).setUp()
@@ -129,5 +130,5 @@ class BaseServiceBrokerAdminTest(BaseServiceBrokerTest):
 
     @classmethod
     def resource_setup(cls):
-        cls.os = clients.Manager()
+        cls.os_primary = clients.Manager()
         super(BaseServiceBrokerAdminTest, cls).resource_setup()
