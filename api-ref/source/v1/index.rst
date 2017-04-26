@@ -6,6 +6,7 @@ OpenStack Application Catalog API v1
 
 .. rest_expand_all::
 
+.. include:: categories.inc
 .. include:: environments.inc
 .. include:: packages.inc
 .. include:: sessions.inc

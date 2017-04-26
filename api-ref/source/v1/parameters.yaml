@@ -6,6 +6,8 @@ request_id:
   in: header
   required: true
   type: UUID
+
+# variables in path
 abandon:
   description: |
     Indicates how to delete environment.
@@ -15,6 +17,12 @@ abandon:
   required: false
   default: false
   type: boolean
+category_id_url:
+  description: |
+    The UUID of the category.
+  in: path
+  required: true
+  type: string
 env_id_url:
   description: |
     The UUID of the environment.
@@ -41,6 +49,8 @@ pkg_id_url:
   in: path
   required: true
   type: string
+
+# variables in query
 all_tenants:
   description: |
     Indicates whether environments from all projects are listed.
@@ -141,15 +151,36 @@ search:
   in: query
   required: false
   type: string
+
+# variables in body
+all_categories:
+  description: |
+    All categories available in the application catalog.
+  in: body
+  required: true
+  type: array
 author:
   description: |
     The author of the package.
   in: body
   required: true
   type: string
-categories:
+category_id:
   description: |
-    The categories of the package.
+    The UUID of the category.
+  in: body
+  required: true
+  type: string
+category_name:
+  description: |
+    The name of the category.
+  in: body
+  required: true
+  type: string
+category_packages:
+  description: |
+    The list of packages associated with a package. Each package returned
+    includes its ``id``, ``fully_qualified_name``, and ``name``.
   in: body
   required: true
   type: array
@@ -201,7 +232,7 @@ env_id:
   type: string
 env_model:
   description: |
-    The ``?`` sections of the environment..
+    The ``?`` sections of the environment.
   in: body
   required: true
   type: array
@@ -273,6 +304,18 @@ owner_id:
   in: body
   required: true
   type: string
+package_categories:
+  description: |
+    The categories associated with the package.
+  in: body
+  required: true
+  type: array
+package_count:
+  description: |
+    The number of packages associated with the category.
+  in: body
+  required: true
+  type: integer
 packages:
   description: |
     A list of ``package`` object.
