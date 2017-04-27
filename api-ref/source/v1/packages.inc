@@ -4,6 +4,48 @@
 Packages
 ========
 
+In Murano, each application, as well as the UI form for application data entry,
+is defined by packages.
+
+Package Structure
+=================
+
+The structure of the Murano application package is predefined. The application package root folder
+should contain the following:
+
+* ``manifest.yaml`` file is the application entry point.
+
+    .. note::
+
+        The filename is fixed, so do not use any custom names.
+
+* ``Classes`` folder contains MuranoPL class definitions.
+
+* ``Resources`` folder contaisn execution plan templates as well as the
+  ``scripts`` folder with all the files required for an application
+  deployment located inside it.
+
+* ``UI`` folder contains the dynamic UI YAML definitions.
+
+* ``logo.png`` file (optional) is an image file associated with your
+  application. The logo appears in the Application Catalog within
+  Murano Dasboard.
+
+    .. note::
+
+        There are no special limitations regarding an image filename.
+        However, if it differs from the default ``logo.png``, specify it
+        in an application manifest file.
+
+* ``images.lst`` file (optional) contains a list of images required by an
+  application.
+
+.. note::
+
+    A bundle is a collection of packages. In the Community App Catalog, you can
+    find such bundles as ``container-based-apps``, ``app-servers``, and so on.
+    The packages in the Application Catalog are sorted by usage.
+
 List Packages
 =============
 
@@ -22,7 +64,7 @@ Response Codes
 
    - 400
    - 401
-   - 500
+   - 403
 
 Request Parameters
 ------------------
@@ -77,9 +119,10 @@ Upload package
 
 .. rest_method::  POST /v1/catalog/packages
 
-Create a package.
+Upload a package to the application catalog.
 
 .. note::
+
    Though specifying categories is optional, it is recommended that you
    specify at least one. It helps to filter applications in the catalog.
 
@@ -94,6 +137,7 @@ Response Codes
 
    - 400
    - 401
+   - 403
    - 409
 
 Request Parameters
@@ -151,8 +195,8 @@ Response Codes
 
    - 400
    - 401
+   - 403
    - 404
-   - 500
 
 Request Parameters
 ------------------
@@ -209,7 +253,6 @@ Response Codes
    - 403
    - 404
    - 409
-   - 500
 
 Request Parameters
 ------------------
@@ -267,9 +310,9 @@ Response Codes
 
 .. rest_status_code:: error status.yaml
 
+   - 401
    - 403
    - 404
-   - 500
 
 Request Parameters
 ------------------
@@ -302,7 +345,7 @@ Response Codes
 
    - 400
    - 401
-   - 500
+   - 403
 
 Request Parameters
 ------------------
@@ -322,7 +365,7 @@ Get UI definition
 
 .. rest_method::  GET /v1/catalog/packages/{id}/ui
 
-Retrieve UI definition for a application.
+Retrieve UI definition for an application.
 
 Response Codes
 --------------
@@ -335,7 +378,8 @@ Response Codes
 
    - 400
    - 401
-   - 500
+   - 403
+   - 404
 
 Request Parameters
 ------------------
@@ -347,8 +391,21 @@ Request Parameters
 Response Parameters
 -------------------
 
-This request does not return anything in the response body.
-   :language: javascript
+Returns the entire UI definition for the package, if the logo has a
+UI definition.
+
+Below is an example of a very basic UI definition::
+
+   Version: 2.2
+
+   Forms:
+     - appConfiguration:
+         fields:
+           - name: license
+             type: string
+             description: Apache License, Version 2.0
+             hidden: false
+             required: false
 
 Get logo
 ========
@@ -368,7 +425,8 @@ Response Codes
 
    - 400
    - 401
-   - 500
+   - 403
+   - 404
 
 Request Parameters
 ------------------
@@ -380,5 +438,4 @@ Request Parameters
 Response Parameters
 -------------------
 
-This request does not return anything in the response body.
-   :language: javascript
+Returns the binary logo data for the package, if the package has a logo.
