@@ -1,8 +1,12 @@
 {
-    "id": "ce373a477f211e187a55404a662f968",
-    "name": "env_name_changed",
-    "created": "2013-11-30T03:23:42Z",
-    "updated": "2013-11-30T03:45:54Z",
-    "tenant_id": "0849006f7ce94961b3aab4e46d6f229a",
-    "version": 0
+  "status": "ready",
+  "updated": "2017-04-27T16:01:29",
+  "created": "2017-04-27T15:33:55",
+  "tenant_id": "cca37eef752244d99945a4123f30ff79",
+  "acquired_by": null,
+  "services": [],
+  "version": 0,
+  "description_text": "",
+  "id": "f199275420ff4e938e0307b0cf68374d",
+  "name": "env_name_changed"
 }

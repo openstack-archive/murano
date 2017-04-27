@@ -29,18 +29,19 @@ Response Codes
 
 .. rest_status_code:: success status.yaml
 
-   - 200
+    - 200
 
 .. rest_status_code:: error status.yaml
 
-   - 401
+    - 401
 
 Response Parameters
 -------------------
 
 .. rest_parameters:: parameters.yaml
 
-   - deployments: deployments
+    - X-Openstack-Request-Id: request_id
+    - deployments: deployments
 
 Response Example
 ----------------

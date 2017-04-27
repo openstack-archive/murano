@@ -83,6 +83,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - templates: templates
    - created: created
    - updated: updated
@@ -137,6 +138,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - created: created
    - updated: updated
    - name: template_name
@@ -183,6 +185,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - created: created
    - updated: updated
    - name: template_name
@@ -263,6 +266,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - updated: updated
    - created: created
    - tenant_id: tenant_id
@@ -336,15 +340,16 @@ Request Parameters
 Response Parameters
 -------------------
 
-    - updated: updated
-    - created: created
-    - tenant_id: tenant_id
-    - services: template_services
-    - version: template_version
-    - description_text: template_description
-    - is_public: template_is_public
-    - id: template_id
-    - name: template_name
+   - X-Openstack-Request-Id: request_id
+   - updated: updated
+   - created: created
+   - tenant_id: tenant_id
+   - services: template_services
+   - version: template_version
+   - description_text: template_description
+   - is_public: template_is_public
+   - id: template_id
+   - name: template_name
 
 Response Example
 ----------------
@@ -391,6 +396,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - service: template_service
 
 Response Example
@@ -438,6 +444,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - environment_id: env_id
    - name: env_name
    - created: created
@@ -495,6 +502,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - environment_id: env_id
    - name: env_name
    - created: created

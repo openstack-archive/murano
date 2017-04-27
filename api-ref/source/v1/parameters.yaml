@@ -79,6 +79,7 @@ template_is_public_url:
       are listed
   in: path
   required: false
+  default: false
   type: boolean
 
 # variables in query
@@ -184,6 +185,13 @@ search:
   type: string
 
 # variables in body
+acquired_by:
+  description: |
+    The session that is currently `deploying` the environment. Returns the
+    `first` session id that is in ``DEPLOYING`` state for the environment.
+  in: body
+  required: true
+  type: string
 all_categories:
   description: |
     All categories available in the application catalog.
@@ -265,26 +273,57 @@ enabled:
   type: boolean
 env_default_networks:
   description: |
-    The default networks of the environment.
+    The default networking information of the environment. The information
+    includes the ``name`` of the network, along with the ``type`` and ``id``
+    of the network, contained in the ``?`` property.
+
+    An example ``defaultNetworks`` object looks like::
+
+        "defaultNetworks": {
+            "environment": {
+                "internalNetworkName": "net_two",
+                "?": {
+                    "type": "io.murano.resources.ExistingNeutronNetwork",
+                    "id": "594e94fcfe4c48ef8f9b55edb3b9f177"
+                }
+            },
+            "flat": null
+        }
   in: body
   required: true
-  type: array
+  type: object
+env_description:
+  description: |
+    The description of the environment.
+  in: body
+  required: true
+  type: string
 env_id:
   description: |
     The UUID of the environment.
   in: body
   required: true
   type: string
-env_model:
+env_last_status:
   description: |
-    The ``?`` sections of the environment.
+    Shows the most recent status of the environment for each service in the
+    environment. The response object includes detailed information
+    by ``service_id``.
   in: body
   required: true
-  type: array
+  type: object
+env_model:
+  description: |
+    The ``?`` section of the environment, containing information about the
+    environment model, including its ``type``, ``id`` and associated
+    ``metadata``.
+  in: body
+  required: true
+  type: object
 env_name:
   description: |
-    A name for the environment. Name must be at least
-    one non-white space symbol.
+    A name for the environment. Name must be at least one non-white space
+    symbol and less than 256 characters long.
   in: body
   required: true
   type: string
@@ -341,12 +380,6 @@ is_public:
   in: body
   required: true
   type: boolean
-last_status_uuid:
-  description: |
-    A list of environment last status object.
-  in: body
-  required: true
-  type: array
 networking:
   description: |
     Current network of the environment.
@@ -409,10 +442,10 @@ pkg_type:
   type: string
 regions:
   description: |
-    The regions detail of the cloud.
+    Detailed region information for the cloud environment.
   in: body
   required: true
-  type: array
+  type: object
 services:
   description: |
     A list of ``service`` objects.

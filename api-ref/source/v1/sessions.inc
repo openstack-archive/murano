@@ -49,6 +49,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - created: created
    - updated: updated
    - environment_id: env_id
@@ -121,6 +122,7 @@ Response Parameters
 
 .. rest_parameters:: parameters.yaml
 
+   - X-Openstack-Request-Id: request_id
    - id: session_id
    - environment_id: env_id
    - created: created
