@@ -1,0 +1,51 @@
+{
+    "deployments": [
+        {
+            "updated": "2014-05-15T07:24:21",
+            "environment_id": "744e44812da84e858946f5d817de4f72",
+            "description": {
+                "services": [
+                    {
+                        "instance": {
+                            "flavor": "m1.medium",
+                            "image": "cloud-fedora-v3",
+                            "?": {
+                                "type": "io.murano.resources.Instance",
+                                "id": "ef729199-c71e-4a4c-a314-0340e279add8"
+                            },
+                            "name": "xkaduhv7qeg4m7"
+                        },
+                        "name": "teslnet1",
+                        "?": {
+                            "_26411a1861294160833743e45d0eaad9": {
+                                "name": "Telnet"
+                            },
+                            "type": "io.murano.apps.linux.Telnet",
+                            "id": "6e437be2-b5bc-4263-8814-6fd57d6ddbd5"
+                        }
+                    }
+                ],
+                "defaultNetworks": {
+                    "environment": {
+                        "name": "test2-network",
+                        "?": {
+                            "type": "io.murano.lib.networks.neutron.NewNetwork",
+                            "id": "b6a1d515434047d5b4678a803646d556"
+                        }
+                    },
+                    "flat": null
+                },
+                "name": "test2",
+                "?": {
+                    "type": "io.murano.Environment",
+                    "id": "744e44812da84e858946f5d817de4f72"
+                }
+            },
+            "created": "2014-05-15T07:24:21",
+            "started": "2014-05-15T07:24:21",
+            "finished": null,
+            "state": "running",
+            "id": "327c81e0e34a4c93ad9b9052ef42b752"
+        }
+    ]
+}

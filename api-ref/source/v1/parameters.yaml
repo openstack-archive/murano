@@ -212,6 +212,20 @@ created:
   in: body
   required: true
   type: string
+deployments:
+  description: |
+    The list of deployments for either the current environment or all
+    environments for the current tenant (project).
+
+    The following APIs control whether deployments by environment or by
+    project are returned:
+
+    * ``/deployments``: Returns all deployments for a project.
+    * ``/environments/{env_id}/deployments``: Returns all deployments for an
+      environment in a project.
+  in: body
+  required: true
+  type: array
 description:
   description: |
     The description of the package.
@@ -264,7 +278,17 @@ env_region:
   type: string
 env_status:
   description: |
-    Current status of the environment.
+    Current status of the environment. The available statuses are:
+
+    * **Ready to configure**. When the environment is new and contains no
+      components.
+    * **Ready to deploy**. When the environment contains a component or multiple
+      components and is ready for deployment.
+    * **Ready**. When the environment has been successfully deployed.
+    * **Deploying**. When the deploying is in progress.
+    * **Deploy FAILURE**. When the deployment finished with errors.
+    * **Deleting**. When deleting of an environment is in progress.
+    * **Delete FAILURE**. You can abandon the environment in this case.
   in: body
   required: true
   type: string
