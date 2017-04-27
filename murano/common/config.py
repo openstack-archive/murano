@@ -336,7 +336,7 @@ murano_auth_opts = [
     cfg.StrOpt('admin_user',
                help='User name for murano authentication.'),
 
-    cfg.StrOpt('admin_password',
+    cfg.StrOpt('admin_password', secret=True,
                help='Password for murano authentication.'),
 
     cfg.StrOpt('user_domain_name',
