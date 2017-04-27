@@ -1,0 +1,33 @@
+[
+  {
+    "instance":
+    {
+      "assignFloatingIp": "true",
+      "keyname": "mykeyname",
+      "image": "cloud-fedora-v3",
+      "flavor": "m1.medium",
+      "?":
+      {
+        "type": "io.murano.resources.LinuxMuranoInstance",
+        "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+      }
+    },
+    "name": "tomcat",
+    "?":
+    {
+      "type": "io.murano.apps.apache.Tomcat",
+      "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+    },
+    "port": "8080"
+  },
+  {
+    "instance": "ef984a74-29a4-45c0-b1dc-2ab9f075732e",
+    "password": "XXX",
+    "name": "mysql",
+    "?":
+    {
+      "type": "io.murano.apps.database.MySQL",
+      "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+    }
+  }
+]

@@ -1,0 +1,30 @@
+{
+  "updated": "2017-04-26T19:41:58",
+  "created": "2017-04-26T19:33:10",
+  "tenant_id": "cca37eef752244d99945a4123f30ff79",
+  "services": [
+    {
+      "instance": {
+        "assignFloatingIp": "true",
+        "keyname": "mykeyname",
+        "image": "cloud-fedora-v3",
+        "flavor": "m1.medium",
+        "?": {
+          "type": "io.murano.resources.LinuxMuranoInstance",
+          "id": "ef984a74-29a4-45c0-b1dc-2ab9f075732e"
+        }
+      },
+      "name": "orion",
+      "?": {
+        "type": "io.murano.apps.apache.Tomcat",
+        "id": "54cea43d-5970-4c73-b9ac-fea656f3c722"
+      },
+      "port": "8080"
+    }
+  ],
+  "version": 0,
+  "description_text": "",
+  "is_public": false,
+  "id": "64670f5ada0848408734b2985f5cbb92",
+  "name": "test_application"
+}
