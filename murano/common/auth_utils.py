@@ -100,7 +100,12 @@ def get_client_session(execution_session=None, conf=None):
 
 
 def get_token_client_session(token=None, project_id=None, conf=None):
-    auth_url = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri.replace('v2.0', 'v3')
+    auth_uri = cfg.CONF['murano_auth'].auth_uri
+    if not auth_uri:
+        versionutils.report_deprecated_feature(
+            LOG, "Please update configuration in 'murano_auth' group")
+        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
+    auth_url = auth_uri.replace('v2.0', 'v3')
     if token is None or project_id is None:
         execution_session = helpers.get_execution_session()
         token = execution_session.token
