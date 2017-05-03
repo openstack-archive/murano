@@ -138,7 +138,7 @@ class MuranoDslExecutor(object):
         with self._acquire_method_lock(method, this_lock, arg_values_for_lock):
             for i, arg in enumerate(args, 2):
                 context[str(i)] = arg
-            for key, value in six.iteritems(kwargs):
+            for key, value in kwargs.items():
                 context[key] = value
 
             def call():
@@ -238,7 +238,7 @@ class MuranoDslExecutor(object):
         param_gen = itertools.chain(
             (six.text_type(arg) for arg in args),
             (u'{0} => {1}'.format(name, value)
-             for name, value in six.iteritems(kwargs)))
+             for name, value in kwargs.items()))
         params_str = u', '.join(param_gen)
         method_name = '::'.join((method.declaring_type.name, method.name))
         thread_id = helpers.get_current_thread_id()
@@ -274,7 +274,7 @@ class MuranoDslExecutor(object):
         vararg_values = []
         kwargs_arg = None
         kwarg_values = {}
-        for name, definition in six.iteritems(arguments_scheme):
+        for name, definition in arguments_scheme.items():
             if definition.usage == dsl_types.MethodArgumentUsages.VarArgs:
                 varargs_arg = name
                 parameter_values[name] = vararg_values
@@ -293,7 +293,7 @@ class MuranoDslExecutor(object):
             else:
                 parameter_values[name] = arg
 
-        for name, value in six.iteritems(utils.filter_parameters_dict(kwargs)):
+        for name, value in utils.filter_parameters_dict(kwargs).items():
             if name in arguments_scheme and name not in (
                     varargs_arg, kwargs_arg):
                 parameter_values[name] = value

@@ -17,7 +17,6 @@ import re
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 from stevedore import dispatch
 
 from murano.dsl import murano_package
@@ -70,7 +69,7 @@ class PluginLoader(object):
                  class_name=name, dist=dist_name))
 
     def cleanup_duplicates(self, name_map):
-        for class_name, package_names in six.iteritems(name_map):
+        for class_name, package_names in name_map.items():
             if len(package_names) >= 2:
                 LOG.warning("Class is defined in multiple packages!")
                 for package_name in package_names:
@@ -95,7 +94,7 @@ class PluginLoader(object):
                     "{err}".format(ep=ep.name, dist=ep.dist, err=exc))
 
     def register_in_loader(self, package_loader):
-        for package in six.itervalues(self.packages):
+        for package in self.packages.values():
             package_loader.register_package(
                 MuranoPackage(package_loader, package))
 
@@ -126,7 +125,7 @@ class MuranoPackage(murano_package.MuranoPackage):
     def __init__(self, pkg_loader, package_definition):
         super(MuranoPackage, self).__init__(
             pkg_loader, package_definition.name, runtime_version='1.0')
-        for class_name, clazz in six.iteritems(package_definition.classes):
+        for class_name, clazz in package_definition.classes.items():
             if hasattr(clazz, "_murano_class_name"):
                 LOG.warning("Class '%(class_name)s' has a MuranoPL "
                             "name '%(name)s' defined which will be "

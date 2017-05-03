@@ -24,7 +24,6 @@ from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
 from oslo_log import versionutils
-import six
 from webob import exc
 
 import murano.api.v1
@@ -262,7 +261,7 @@ class Controller(object):
                     tempf.name, target_dir=None,
                     drop_dir=True) as pkg_to_upload:
                 # extend dictionary for update db
-                for k, v in six.iteritems(PKG_PARAMS_MAP):
+                for k, v in PKG_PARAMS_MAP.items():
                     if hasattr(pkg_to_upload, k):
                         package_meta[v] = getattr(pkg_to_upload, k)
                 if len(package_meta['name']) > 80:

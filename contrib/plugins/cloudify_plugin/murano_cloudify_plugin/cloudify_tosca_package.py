@@ -12,7 +12,6 @@
 
 import os
 
-import six
 import yaml
 
 from murano.packages import exceptions
@@ -87,7 +86,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     @staticmethod
     def _generate_properties(inputs, outputs):
         contracts = {}
-        for name, value in six.iteritems(inputs):
+        for name, value in inputs.items():
             prop = {
                 'Contract': YAQL('$.string().notNull()'),
                 'Usage': 'In'
@@ -96,7 +95,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
                 prop['Default'] = value['default']
             contracts[name] = prop
 
-        for name in six.iterkeys(outputs):
+        for name in outputs.keys():
             contracts[name] = {
                 'Contract': YAQL('$.string()'),
                 'Usage': 'Out'
@@ -107,7 +106,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     def _generate_describe_method(self, inputs):
         input_values = {
             name: YAQL('$.' + name)
-            for name in six.iterkeys(inputs)
+            for name in inputs.keys()
         }
 
         return {
@@ -123,7 +122,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
     def _generate_update_outputs_method(outputs):
         assignments = [
             {YAQL('$.' + name): YAQL('$outputs.get({0})'.format(name))}
-            for name in six.iterkeys(outputs)
+            for name in outputs.keys()
         ]
         return {
             'Arguments': [{
@@ -147,7 +146,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
                                          package_version=None):
         section = {
             key: YAQL(
-                '$.appConfiguration.' + key) for key in six.iterkeys(inputs)
+                '$.appConfiguration.' + key) for key in inputs.keys()
         }
         section.update({
             '?': {
@@ -169,7 +168,7 @@ class CloudifyToscaPackage(package_base.PackageBase):
                 'type': 'string',
                 'required': True,
                 'description': value.get('description', key)
-            } for key, value in six.iteritems(inputs)
+            } for key, value in inputs.items()
         ]
         return [{
             'appConfiguration': {

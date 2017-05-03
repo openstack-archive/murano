@@ -212,7 +212,7 @@ def build_entity_map(value):
         if isinstance(value, dict):
             if '?' in value and 'id' in value['?']:
                 id_map[value['?']['id']] = value
-            for v in six.itervalues(value):
+            for v in value.values():
                 build_entity_map_recursive(v, id_map)
         if isinstance(value, list):
             for item in value:

@@ -53,7 +53,7 @@ def new(__context, __type_name, __owner=None, __object_name=None, __extra=None,
         __type_name: parameters,
         'name': __object_name
     }
-    for key, value in six.iteritems(__extra or {}):
+    for key, value in (__extra or {}).items():
         if key.startswith('_'):
             data[key] = value
 
@@ -241,7 +241,7 @@ def call_func(context, op_dot, base, name, args, kwargs,
         args += tuple(
             expressions.MappingRuleExpression(expressions.KeywordConstant(key),
                                               value)
-            for key, value in six.iteritems(kwargs))
+            for key, value in kwargs.items())
         function = expressions.Function(name, *args)
         return op_dot(context, receiver, function)
     else:

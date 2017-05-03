@@ -13,7 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
 from yaql.language import specs
 from yaql.language import yaqltypes
 
@@ -91,7 +90,7 @@ def with_original(context, **kwargs):
     new_context = context.create_child_context()
 
     original_context = context[constants.CTX_ORIGINAL_CONTEXT]
-    for k, v in six.iteritems(kwargs):
+    for k, v in kwargs.items():
         new_context['$' + k] = v(original_context)
     return new_context
 

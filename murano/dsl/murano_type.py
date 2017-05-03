@@ -263,7 +263,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
     def find_methods(self, predicate):
         result = list(filter(predicate, self.methods.values()))
         for c in self.ancestors():
-            for method in six.itervalues(c.methods):
+            for method in c.methods.values():
                 if predicate(method) and method not in result:
                     result.append(method)
         return result
@@ -345,7 +345,7 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
                     (parent.package, requirement))
 
         package_bindings = {}
-        for versions in six.itervalues(aggregation):
+        for versions in aggregation.values():
             mappings = self._remap_package(versions)
             package_bindings.update(mappings)
 
@@ -504,7 +504,7 @@ def _create_class(cls, name, ns_resolver, data, package, *args, **kwargs):
         data.get('Import'), *args, **kwargs)
 
     properties = data.get('Properties') or {}
-    for property_name, property_spec in six.iteritems(properties):
+    for property_name, property_spec in properties.items():
         spec = murano_property.MuranoProperty(
             type_obj, property_name, property_spec)
         type_obj.add_property(spec)
@@ -516,7 +516,7 @@ def _create_class(cls, name, ns_resolver, data, package, *args, **kwargs):
         'destroy': '.destroy'
     }
 
-    for method_name, payload in six.iteritems(methods):
+    for method_name, payload in methods.items():
         type_obj.add_method(
             method_mappings.get(method_name, method_name), payload)
 

@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 
 from murano.dsl import constants
 from murano.dsl import dsl
@@ -93,7 +92,7 @@ class MuranoObject(dsl_types.MuranoObject):
         used_names = used_names or set()
         names = set(self.type.properties)
         if init:
-            names.update(six.iterkeys(init.arguments_scheme))
+            names.update(init.arguments_scheme.keys())
         last_errors = len(names)
         init_args = {}
         while True:
@@ -376,7 +375,7 @@ class MuranoObject(dsl_types.MuranoObject):
             self._owner = None
             self._destruction_dependencies = None
             self._this = None
-        for p in six.itervalues(self._parents):
+        for p in self._parents.values():
             p.mark_destroyed(clear_data)
 
     @property

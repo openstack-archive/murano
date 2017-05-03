@@ -396,7 +396,7 @@ class CSARPackage(package_base.PackageBase):
 
         rest_group = []
         properties = []
-        for key, value in six.iteritems(tosca_inputs):
+        for key, value in tosca_inputs.items():
             if key not in used_inputs:
                 rest_group.append(CSARPackage._translate_ui_parameter(
                     key, value))

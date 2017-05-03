@@ -21,7 +21,6 @@ import heatclient.client as hclient
 import heatclient.exc as heat_exc
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 
 from murano.common import auth_utils
 from murano.dsl import dsl
@@ -146,7 +145,7 @@ class HeatStack(object):
 
     @staticmethod
     def _remove_system_params(parameters):
-        return dict((k, v) for k, v in six.iteritems(parameters) if
+        return dict((k, v) for k, v in parameters.items() if
                     not k.startswith('OS::'))
 
     def _get_status(self):

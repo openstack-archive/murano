@@ -20,7 +20,6 @@ from tempest import config
 from tempest.lib.common import rest_client
 
 from murano_tempest_tests import utils
-import six
 
 CONF = config.CONF
 
@@ -132,7 +131,7 @@ class ArtifactsClient(rest_client.RestClient):
             'tags': manifest.get('Tags', []),
             'class_definitions': package.classes.keys()
         }
-        for k, v in six.iteritems(body):
+        for k, v in body.items():
             package_draft[k] = v
 
         inherits = utils.get_local_inheritance(package.classes)

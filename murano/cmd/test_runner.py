@@ -24,7 +24,6 @@ from oslo_config import cfg
 from oslo_db import options
 from oslo_log import log as logging
 from oslo_utils import timeutils
-import six
 
 from murano.common import config
 from murano.common import engine
@@ -106,7 +105,7 @@ class MuranoTestRunner(object):
             # Check for method name occurrence in all methods.
             # if there is no dot in provided item - it is a method name
             if '.' not in item:
-                for class_name, methods in six.iteritems(class_to_methods):
+                for class_name, methods in class_to_methods.items():
                     methods_to_run[class_name] = []
                     if item in methods:
                         methods_to_run[class_name].append(item)
@@ -125,9 +124,9 @@ class MuranoTestRunner(object):
                     m for m in class_to_methods[class_to_test]
                     if m == test_method]
                 continue
-        methods_count = sum(len(v) for v in six.itervalues(methods_to_run))
+        methods_count = sum(len(v) for v in methods_to_run.values())
         methods = [k + '.' + method
-                   for k, v in six.iteritems(methods_to_run) for method in v]
+                   for k, v in methods_to_run.items() for method in v]
         LOG.debug('{0} method(s) is(are) going to be executed: '
                   '\n{1}'.format(methods_count, '\n'.join(methods)))
         return methods_to_run
@@ -184,7 +183,7 @@ class MuranoTestRunner(object):
             LOG.error(msg)
             self.error(msg)
 
-        for param, value in six.iteritems(ks_opts):
+        for param, value in ks_opts.items():
             if not value:
                 ks_opts[param] = getattr(CONF.murano_auth,
                                          ks_opts_to_config[param])
@@ -227,7 +226,7 @@ class MuranoTestRunner(object):
                                                class_to_methods)
             max_length = 0
             num_tests = 0
-            for pkg_class, test_cases in six.iteritems(run_set):
+            for pkg_class, test_cases in run_set.items():
                 for m in test_cases:
                     max_length = max(max_length, len(pkg_class)+len(m)+1)
                 num_tests += len(test_cases)
@@ -244,7 +243,7 @@ class MuranoTestRunner(object):
             run_count = 0
             error_count = 0
             started = timeutils.utcnow()
-            for pkg_class, test_cases in six.iteritems(run_set):
+            for pkg_class, test_cases in run_set.items():
                 for m in test_cases:
                     # Create new executor for each test case to provide
                     # pure test environment

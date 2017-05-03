@@ -13,7 +13,6 @@
 #    under the License.
 
 import os
-import six
 import testtools
 
 from tempest import config
@@ -54,7 +53,7 @@ class TestVersioningNegative(base.BaseArtifactsTest):
 
     @classmethod
     def resource_cleanup(cls):
-        for pkg in six.itervalues(cls.packages):
+        for pkg in cls.packages.values():
             cls.artifacts_client.delete_package(pkg['id'])
         map(os.remove, cls.abs_archive_paths)
         super(TestVersioningNegative, cls).resource_cleanup()
