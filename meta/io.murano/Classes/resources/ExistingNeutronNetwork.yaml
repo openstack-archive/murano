@@ -131,6 +131,8 @@ Workflow:
           Contract: $.class(Instance).notNull()
       - securityGroupName:
           Contract: $.string()
+      - securityGroups:
+          Contract: [$.string()]
       - assignFloatingIp:
           Contract: $.bool().notNull()
       - sharedIps:

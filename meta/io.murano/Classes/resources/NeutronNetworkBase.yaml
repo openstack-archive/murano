@@ -38,6 +38,8 @@ Methods:
           Contract: $.class(Instance).notNull()
       - securityGroupName:
           Contract: $.string()
+      - securityGroups:
+          Contract: [$.string()]
       - sharedIps:
           Contract:
             - $.class(std:SharedIp)
@@ -80,15 +82,30 @@ Methods:
                       - subnet: $subnetRef
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
-      - If: bool($securityGroupName) and $securityGroupsEnabled
+      - If: $securityGroupsEnabled
         Then:
-          - $template:
-              resources:
-                $portName:
-                  properties:
-                    security_groups:
-                      - get_resource: $securityGroupName
-          - $patchTemplate: $patchTemplate.mergeWith($template)
+          - If: len($securityGroups) > 0 and $securityGroups[0] != ""
+            Then:
+              - For: securityGroup
+                In: $securityGroups
+                Do:
+                  - $template:
+                      resources:
+                        $portName:
+                          properties:
+                            security_groups:
+                              - $securityGroup
+                  - $patchTemplate: $patchTemplate.mergeWith($template)
+            Else:
+              - If: bool($securityGroupName)
+                Then:
+                  - $template:
+                      resources:
+                        $portName:
+                          properties:
+                            security_groups:
+                              - get_resource: $securityGroupName
+                  - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - $instanceResources: [$portName]
       - $instanceOutputs: [$addressesOutputName]
