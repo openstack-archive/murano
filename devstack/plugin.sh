@@ -393,29 +393,29 @@ function install_murano_pythonclient() {
 
 # start_murano() - Start running processes, including screen
 function start_murano() {
-    screen_it murano-api "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
-    screen_it murano-engine "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano.conf"
+    run_process murano-api "$MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
+    run_process murano-engine "$MURANO_BIN_DIR/murano-engine --config-file $MURANO_CONF_DIR/murano.conf"
 }
 
 
 # stop_murano() - Stop running processes
 function stop_murano() {
     # Kill the Murano screen windows
-    screen -S $SCREEN_NAME -p murano-api -X kill
-    screen -S $SCREEN_NAME -p murano-engine -X kill
+    stop_process murano-api
+    stop_process murano-engine
 }
 
 
 # start_service_broker() - start murano CF service broker
 function start_service_broker() {
-    screen_it murano-cfapi "cd $MURANO_DIR && $MURANO_BIN_DIR/murano-cfapi --config-file $MURANO_CONF_DIR/murano-cfapi.conf"
+    run_process murano-cfapi "$MURANO_BIN_DIR/murano-cfapi --config-file $MURANO_CONF_DIR/murano-cfapi.conf"
 }
 
 
 # stop_service_broker() - stop murano CF service broker
 function stop_service_broker() {
     # Kill the Murano screen windows
-    screen -S $SCREEN_NAME -p murano-cfapi -X kill
+    stop_process murano-cfapi
 }
 
 
