@@ -272,3 +272,17 @@ Name: TemplateTestChild
 Properties:
   bar:
     Contract: $.int().notNull()
+
+---
+
+Name: TemplatePropertyClass
+Properties:
+  owned:
+    Contract: $.class(Node)
+  template:
+    Contract: $.template(Node)
+
+Methods:
+  testTemplateWithExternallyOwnedObject:
+    Body:
+     - Return: new($.template).nodes.select(id($))

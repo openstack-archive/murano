@@ -27,10 +27,11 @@ class ObjRef(object):
 
 
 def serialize(obj, executor,
-              serialization_type=dsl_types.DumpTypes.Serializable):
+              serialization_type=dsl_types.DumpTypes.Serializable,
+              allow_refs=True):
     with helpers.with_object_store(executor.object_store):
         return serialize_model(
-            obj, executor, True,
+            obj, executor, allow_refs,
             make_copy=False,
             serialize_attributes=False,
             serialize_actions=False,
@@ -45,9 +46,12 @@ def _serialize_object(root_object, designer_attributes, allow_refs,
     serialized_objects = set()
 
     obj = root_object
+    if isinstance(obj, dsl.MuranoObjectInterface):
+        obj = obj.object
+    parent = obj.owner if isinstance(obj,  dsl_types.MuranoObject) else None
     while True:
         obj, need_another_pass = _pass12_serialize(
-            obj, None, serialized_objects, designer_attributes, executor,
+            obj, parent, serialized_objects, designer_attributes, executor,
             serialize_actions, serialization_type, allow_refs,
             with_destruction_dependencies)
         if not need_another_pass:
@@ -130,8 +134,11 @@ def _pass12_serialize(value, parent, serialized_objects,
         if value.owner is not parent or value.object_id in serialized_objects:
             return ObjRef(value), True
     elif isinstance(value, ObjRef):
-        if (value.ref_obj.object_id not in serialized_objects and
-                is_nested_in(value.ref_obj.owner, parent)):
+        can_move = value.ref_obj.object_id not in serialized_objects
+        if can_move and allow_refs and value.ref_obj.owner is not None:
+            can_move = (is_nested_in(parent, value.ref_obj.owner) and
+                        value.ref_obj.owner.object_id in serialized_objects)
+        if can_move:
             value = value.ref_obj
         else:
             return value, False

@@ -176,6 +176,8 @@ class Template(contracts.ContractMethod):
         if self.value is None:
             return None
         object_store = helpers.get_object_store()
+        if object_store.initializing:
+            return {}
         passkey = getattr(self.value, '__passkey__', None)
         with helpers.thread_local_attribute(
                 constants.TL_CONTRACT_PASSKEY, passkey):

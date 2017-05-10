@@ -327,6 +327,15 @@ class TestContracts(test_case.DslTestCase):
         self.assertEqual('PROPERTY', self._runner.testDefaultExpression())
         self.assertEqual('value', self._runner.testDefaultExpression('value'))
 
+    def test_template_with_externally_owned_object(self):
+        node = om.Object('Node', 'OBJ_ID')
+        node_template = om.Object('Node', nodes=['OBJ_ID'])
+        model = om.Object(
+            'TemplatePropertyClass', owned=node, template=node_template)
+        runner = self.new_runner(model)
+        self.assertEqual(
+            ['OBJ_ID'], runner.testTemplateWithExternallyOwnedObject())
+
 
 class TestContractsTransform(test_case.DslTestCase):
     def setUp(self):

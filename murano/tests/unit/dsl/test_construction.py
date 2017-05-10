@@ -34,7 +34,7 @@ class TestConstruction(test_case.DslTestCase):
 
     def test_new_with_ownership(self):
         obj = serializer.serialize(self._runner.testNewWithOwnership(),
-                                   self._runner.executor)
+                                   self._runner.executor, allow_refs=False)
         self.assertEqual('STRING', obj.get('property1'))
         self.assertIsNotNone('string', obj.get('xxx'))
         self.assertEqual('STR', obj['xxx'].get('property1'))
