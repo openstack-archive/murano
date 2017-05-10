@@ -88,14 +88,15 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os"):
+        if not hasattr(cls, "os_primary"):
             creds = cls.get_configured_isolated_creds(type_of_creds='primary')
-            cls.os = clients.Manager(credentials=creds)
+            cls.os_primary = clients.Manager(credentials=creds)
             cls.services_manager = services_manager(creds)
 
         cls.linux_image = CONF.application_catalog.linux_image
-        cls.application_catalog_client = cls.os.application_catalog_client
-        cls.artifacts_client = cls.os.artifacts_client
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
+        cls.artifacts_client = cls.os_primary.artifacts_client
         cls.servers_client = cls.services_manager.servers_client
         cls.orchestration_client = cls.services_manager.orchestration_client
         cls.snapshots_client = cls.services_manager.snapshots_v2_client
@@ -400,7 +401,7 @@ class BaseApplicationCatalogScenarioIsolatedAdminTest(
     @classmethod
     def resource_setup(cls):
         creds = cls.get_configured_isolated_creds(type_of_creds='admin')
-        cls.os = clients.Manager(credentials=creds)
+        cls.os_primary = clients.Manager(credentials=creds)
         cls.services_manager = services_manager(creds)
         super(BaseApplicationCatalogScenarioIsolatedAdminTest, cls).\
             resource_setup()
