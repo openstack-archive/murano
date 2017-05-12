@@ -128,6 +128,7 @@ class Controller(object):
     @request_statistics.stats_count(API_NAME, 'Update')
     @verify_env
     def update(self, request, environment_id, body):
+        """"Rename an environment."""
         LOG.debug('Environments:Update <Id: {id}, '
                   'Body: {body}>'.format(id=environment_id, body=body))
         target = {"environment_id": environment_id}
@@ -142,7 +143,7 @@ class Controller(object):
                 LOG.error(msg)
                 raise exc.HTTPBadRequest(explanation=msg)
             try:
-                environment.update(body)
+                environment.update({'name': new_name})
                 environment.save(session)
             except db_exc.DBDuplicateEntry:
                 msg = _('Environment with specified name already exists')
