@@ -527,28 +527,19 @@ class TestController(base.MuranoTestCase):
         ])
 
     def _override_conf(self, without_urls=False):
-        override = api.CONF.set_override
-        clear_override = api.CONF.clear_override
         if without_urls:
-            override('url', None, group='glare',
-                     enforce_type=True)
-            override('url', None, group='murano',
-                     enforce_type=True)
+            self.override_config('url', None, group='glare')
+            self.override_config('url', None, group='murano')
         else:
-            override('url', 'foo_glare_url', group='glare',
-                     enforce_type=True)
-            override('url', 'foo_murano_url', group='murano',
-                     enforce_type=True)
-        self.addCleanup(clear_override, 'url', group='glare')
-        self.addCleanup(clear_override, 'url', group='murano')
+            self.override_config('url', 'foo_glare_url', group='glare')
+            self.override_config('url', 'foo_murano_url', group='murano')
         for arg, group, override_val in (
                 ('packages_service', 'engine', 'glare'),
                 ('insecure', 'glare', True),
                 ('key_file', 'glare', 'foo_key_file'),
                 ('ca_file', 'glare', 'foo_ca_file'),
                 ('cert_file', 'glare', 'foo_cert_file')):
-            override(arg, override_val, group=group, enforce_type=True)
-            self.addCleanup(clear_override, arg, group=group)
+            self.override_config(arg, override_val, group=group)
 
     def test_resource(self):
         self.assertIsInstance(api.create_resource(), wsgi.Resource)

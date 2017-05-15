@@ -30,8 +30,7 @@ class TestHeatStack(base.MuranoTestCase):
         super(TestHeatStack, self).setUp()
         self.heat_client_mock = mock.Mock()
         self.heat_client_mock.stacks = mock.MagicMock(spec=stacks.StackManager)
-        CONF.set_override('stack_tags', ['test-murano'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano'], 'heat')
         self.mock_tag = ','.join(CONF.heat.stack_tags)
         self._patch_get_client()
 
@@ -283,8 +282,8 @@ class TestHeatStack(base.MuranoTestCase):
 
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -315,8 +314,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_parameters(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -348,8 +347,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_reload(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -386,8 +385,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_delete(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -471,8 +470,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_set_template_and_params(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -509,8 +508,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_set_hot_env_and_files(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}
@@ -547,8 +546,8 @@ class TestHeatStack(base.MuranoTestCase):
     def test_none_template(self, status_get, wait_st):
         status_get.return_value = 'NOT_FOUND'
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = None
@@ -562,8 +561,8 @@ class TestHeatStack(base.MuranoTestCase):
     @mock.patch(CLS_NAME + '._wait_state')
     def test_get_hot_status(self, wait_st):
         wait_st.return_value = {}
-        CONF.set_override('stack_tags', ['test-murano', 'murano-tag'], 'heat',
-                          enforce_type=True)
+        self.override_config('stack_tags', ['test-murano', 'murano-tag'],
+                             'heat')
         hs = heat_stack.HeatStack('test-stack', None)
         hs._description = None
         hs._template = {'resources': {'test': 1}}

@@ -26,9 +26,9 @@ CONF = cfg.CONF
 class AppLoaderTest(base.MuranoTestCase):
     def setUp(self):
         super(AppLoaderTest, self).setUp()
-        CONF.set_override('flavor', 'myflavor', 'paste_deploy')
-        CONF.set_override('config_file', 'path/to/myapp-paste.ini',
-                          'paste_deploy')
+        self.override_config('flavor', 'myflavor', 'paste_deploy')
+        self.override_config('config_file', 'path/to/myapp-paste.ini',
+                             'paste_deploy')
         CONF.config_file = ['myapp.conf']
         CONF.prog = 'myapp'
         CONF.find_file = mock.MagicMock(return_value='path/to/myapp-paste.ini')
@@ -52,23 +52,23 @@ class AppLoaderTest(base.MuranoTestCase):
         self._test_load_paste_app(appname=None)
 
     def test_load_paste_app_no_flavor(self):
-        CONF.set_override('flavor', None, 'paste_deploy')
+        self.override_config('flavor', None, 'paste_deploy')
         self._test_load_paste_app(fullname='myapp')
 
     def test_load_paste_app_no_pastedep_cfg_opt(self):
-        CONF.set_override('config_file', None, 'paste_deploy')
+        self.override_config('config_file', None, 'paste_deploy')
 
         self._test_load_paste_app()
 
     def test_load_paste_app_no_pastedep_cfg_opt_and_cfg_opt(self):
-        CONF.set_override('config_file', None, 'paste_deploy')
+        self.override_config('config_file', None, 'paste_deploy')
         CONF.config_file = []
 
         self._test_load_paste_app()
         CONF.find_file.assert_called_with('myapp-paste.ini')
 
     def test_load_paste_app_no_cfg_at_all(self):
-        CONF.set_override('config_file', None, 'paste_deploy')
+        self.override_config('config_file', None, 'paste_deploy')
         CONF.find_file.return_value = None
 
         self.assertRaises(RuntimeError, app_loader.load_paste_app, 'myapp')
