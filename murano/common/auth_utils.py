@@ -32,11 +32,11 @@ def _get_keystone_auth(trust_id=None):
     auth_uri = cfg.CONF['murano_auth'].auth_uri
     username = cfg.CONF['murano_auth'].admin_user
     password = cfg.CONF['murano_auth'].admin_password
-    user_domain_name = cfg.CONF['murano_auth'].user_domain_name or "Default"
+    user_domain_name = cfg.CONF['murano_auth'].user_domain_name or "default"
     auth_type = cfg.CONF['murano_auth'].auth_type
     project_name = cfg.CONF['murano_auth'].admin_project_name
     project_domain_name = cfg.CONF['murano_auth'].project_domain_name or \
-        "Default"
+        "default"
     if not (auth_uri and username and password):
         versionutils.report_deprecated_feature(
             LOG, "Please update configuration in 'murano_auth' group")
