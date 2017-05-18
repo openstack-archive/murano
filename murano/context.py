@@ -24,13 +24,10 @@ class RequestContext(context.RequestContext):
     as well as additional request information.
     """
 
-    def __init__(self, session=None,
-                 roles=None, is_admin=None, service_catalog=None,
+    def __init__(self, session=None, service_catalog=None,
                  **kwargs):
         super(RequestContext, self).__init__(**kwargs)
         self.session = session
-        self.roles = roles or []
         self.service_catalog = service_catalog
-        self.is_admin = is_admin
         if self.is_admin is None:
             self.is_admin = policy.check_is_admin(self)
