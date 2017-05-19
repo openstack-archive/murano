@@ -228,8 +228,8 @@ class TestAgent(base.MuranoTestCase):
 
         expected_error_msg = 'The murano-agent did not respond within 1 '\
                              'seconds'
-        with self.assertRaisesRegexp(exceptions.TimeoutException,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.TimeoutException,
+                                    expected_error_msg):
             self.agent.call(template, self.resources, None)
 
     @mock.patch('murano.engine.system.agent.datetime')

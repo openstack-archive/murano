@@ -56,8 +56,8 @@ class TestPackageBase(test_base.MuranoTestCase):
             shutil.rmtree(cls.source_directory)
 
     def test_create_package_base_without_full_name(self):
-        with self.assertRaisesRegexp(exceptions.PackageFormatError,
-                                     'FullName is not specified'):
+        with self.assertRaisesRegex(exceptions.PackageFormatError,
+                                    'FullName is not specified'):
             package_base.PackageBase('test_format',
                                      'test_runtime_version',
                                      'test_source_directory',
@@ -67,8 +67,8 @@ class TestPackageBase(test_base.MuranoTestCase):
         full_names = ['.invalid_name_1', 'invalid..name..2', 'invalid name 3']
         for full_name in full_names:
             expected_error_message = 'Invalid FullName {0}'.format(full_name)
-            with self.assertRaisesRegexp(exceptions.PackageFormatError,
-                                         expected_error_message):
+            with self.assertRaisesRegex(exceptions.PackageFormatError,
+                                        expected_error_message):
                 package_base.PackageBase('test_format',
                                          'test_runtime_version',
                                          'test_source_directory',
@@ -76,9 +76,9 @@ class TestPackageBase(test_base.MuranoTestCase):
 
     def test_create_package_base_with_invalid_type(self):
         package_type = 'Invalid'
-        with self.assertRaisesRegexp(exceptions.PackageFormatError,
-                                     'Invalid package Type {0}'
-                                     .format(package_type)):
+        with self.assertRaisesRegex(exceptions.PackageFormatError,
+                                    'Invalid package Type {0}'
+                                    .format(package_type)):
             package_base.PackageBase('test_format',
                                      'test_runtime_version',
                                      'test_source_directory',
@@ -86,19 +86,19 @@ class TestPackageBase(test_base.MuranoTestCase):
                                                'Type': package_type})
 
     def test_requirements_negative(self):
-        with self.assertRaisesRegexp(NotImplementedError, None):
+        with self.assertRaisesRegex(NotImplementedError, None):
             self.package_base.requirements
 
     def test_classes_negative(self):
-        with self.assertRaisesRegexp(NotImplementedError, None):
+        with self.assertRaisesRegex(NotImplementedError, None):
             self.package_base.classes
 
     def test_get_class_negative(self):
-        with self.assertRaisesRegexp(NotImplementedError, None):
+        with self.assertRaisesRegex(NotImplementedError, None):
             self.package_base.get_class(None)
 
     def test_ui_negative(self):
-        with self.assertRaisesRegexp(NotImplementedError, None):
+        with self.assertRaisesRegex(NotImplementedError, None):
             self.package_base.ui
 
     def test_full_name(self):
@@ -144,8 +144,8 @@ class TestPackageBase(test_base.MuranoTestCase):
         expected_error_message = 'Unable to load logo'
         self.package_base._logo = ''.join(random.choice(string.ascii_letters)
                                           for _ in range(10))
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_message):
             self.package_base.logo
         self.package_base._logo = self.mock_manifest['Logo']
 
@@ -153,8 +153,8 @@ class TestPackageBase(test_base.MuranoTestCase):
                 what=mock.MagicMock(return_value='xyz'))
     def test_load_image_with_invalid_extension(self, mock_imghdr):
         expected_error_message = 'Unsupported Format.'
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_message):
             self.package_base._load_image('logo.xyz', 'logo.xyz', 'logo')
             full_path = os.path.join(self.package_base._source_directory,
                                      'logo.xyz')
@@ -167,8 +167,8 @@ class TestPackageBase(test_base.MuranoTestCase):
         mock_os.stat.return_value = mock.MagicMock(st_size=5000 * 1024)
         mock_os.isfile = mock.MagicMock(return_value=True)
         expected_error_message = 'Max allowed size is {0}'.format(500 * 1024)
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_message):
             self.package_base._load_image('logo.xyz', 'logo.xyz', 'logo')
 
     def test_meta(self):

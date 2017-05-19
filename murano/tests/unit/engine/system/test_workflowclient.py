@@ -98,8 +98,8 @@ class TestMistralClient(base.MuranoTestCase):
         expected_error_msg = 'Mistral execution completed with ERROR.'\
                              ' Execution id: {0}. Output: {1}'\
                              .format(mock_execution.id, mock_execution.output)
-        with self.assertRaisesRegexp(workflowclient.MistralError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(workflowclient.MistralError,
+                                    expected_error_msg):
             mc.run(run_name, timeout)
 
     def test_run_except_timeout_error(self):
@@ -114,8 +114,8 @@ class TestMistralClient(base.MuranoTestCase):
 
         expected_error_msg = 'Mistral run timed out. Execution id: {0}.'\
                              .format(mock_execution.id)
-        with self.assertRaisesRegexp(workflowclient.MistralError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(workflowclient.MistralError,
+                                    expected_error_msg):
             mc.run(run_name, timeout)
 
     def test_run_with_immediate_timeout(self):
