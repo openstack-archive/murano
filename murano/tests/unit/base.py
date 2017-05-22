@@ -30,7 +30,7 @@ class MuranoTestCase(testtools.TestCase):
         self.useFixture(fixtures.FakeLogger('murano'))
 
     def override_config(self, name, override, group=None):
-        CONF.set_override(name, override, group, enforce_type=True)
+        CONF.set_override(name, override, group)
         self.addCleanup(CONF.clear_override, name, group)
 
 

@@ -20,7 +20,6 @@ import shutil
 import tempfile
 
 import mock
-from oslo_config import cfg
 import semantic_version
 import testtools
 
@@ -31,8 +30,6 @@ from murano.packages import exceptions as pkg_exc
 from murano.tests.unit import base
 from murano_tempest_tests import utils
 
-CONF = cfg.CONF
-
 
 class TestPackageCache(base.MuranoTestCase):
 
@@ -40,15 +37,13 @@ class TestPackageCache(base.MuranoTestCase):
         super(TestPackageCache, self).setUp()
 
         self.location = tempfile.mkdtemp()
-        CONF.set_override('enable_packages_cache', True, 'engine')
-        self.old_location = CONF.engine.packages_cache
-        CONF.set_override('packages_cache', self.location, 'engine')
+        self.override_config('enable_packages_cache', True, 'engine')
+        self.override_config('packages_cache', self.location, 'engine')
 
         self._patch_loader_client()
         self.loader = package_loader.ApiPackageLoader(None)
 
     def tearDown(self):
-        CONF.set_override('packages_cache', self.old_location, 'engine')
         shutil.rmtree(self.location, ignore_errors=True)
         super(TestPackageCache, self).tearDown()
 
@@ -71,8 +66,7 @@ class TestPackageCache(base.MuranoTestCase):
         session.get_endpoint.return_value = 'test_endpoint/v3'
         session_params.return_value = {'endpoint': 'test_endpoint/v3'}
 
-        CONF.set_override('packages_service', 'glance', group='engine',
-                          enforce_type=True)
+        self.override_config('packages_service', 'glance', group='engine')
 
         client = self.loader.client
 
@@ -85,8 +79,8 @@ class TestPackageCache(base.MuranoTestCase):
         self.assertIsNotNone(self.loader._glare_client)
 
         # Test whether client is initialized using different CONF.
-        CONF.set_override('packages_service', 'test_service', group='engine',
-                          enforce_type=True)
+        self.override_config('packages_service', 'test_service',
+                             group='engine')
 
         client = self.loader.client
 
@@ -520,19 +514,18 @@ class TestPackageCache(base.MuranoTestCase):
 
 class TestCombinedPackageLoader(base.MuranoTestCase):
 
-    def setUp(cls):
-        super(TestCombinedPackageLoader, cls).setUp()
+    def setUp(self):
+        super(TestCombinedPackageLoader, self).setUp()
 
         location = os.path.dirname(__file__)
-        CONF.set_override('load_packages_from', [location], 'engine',
-                          enforce_type=True)
-        cls.execution_session = mock.MagicMock()
-        cls.loader = package_loader.CombinedPackageLoader(
-            cls.execution_session)
-        cls._patch_api_loader()
+        self.override_config('load_packages_from', [location], 'engine')
+        self.execution_session = mock.MagicMock()
+        self.loader = package_loader.CombinedPackageLoader(
+            self.execution_session)
+        self._patch_api_loader()
 
-        cls.local_pkg_name = 'io.murano.test.MyTest'
-        cls.api_pkg_name = 'test.mpl.v1.app.Thing'
+        self.local_pkg_name = 'io.murano.test.MyTest'
+        self.api_pkg_name = 'test.mpl.v1.app.Thing'
 
     def _patch_api_loader(self):
         self.api_loader_patcher = mock.patch.object(

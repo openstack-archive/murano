@@ -20,7 +20,6 @@ import os
 import tempfile
 
 import mock
-from oslo_config import cfg
 from oslo_serialization import base64
 import yaml as yamllib
 
@@ -33,8 +32,6 @@ from murano.engine.system import agent
 from murano.engine.system import resource_manager
 from murano.tests.unit import base
 
-CONF = cfg.CONF
-
 
 class TestAgent(base.MuranoTestCase):
     def setUp(self):
@@ -44,8 +41,7 @@ class TestAgent(base.MuranoTestCase):
         else:
             self.yaml_loader = yamllib.SafeLoader
 
-        CONF.set_override('disable_murano_agent', False, group='engine',
-                          enforce_type=True)
+        self.override_config('disable_murano_agent', False, group='engine')
 
         mock_host = mock.MagicMock()
         mock_host.id = '1234'
@@ -93,8 +89,7 @@ class TestAgent(base.MuranoTestCase):
 
     @mock.patch('murano.engine.system.agent.LOG')
     def test_send_with_murano_agent_disabled(self, mock_log):
-        CONF.set_override('disable_murano_agent', True, group='engine',
-                          enforce_type=True)
+        self.override_config('disable_murano_agent', True, group='engine')
 
         self.assertRaises(exceptions.PolicyViolationException,
                           self.agent.send_raw, {})
@@ -217,8 +212,7 @@ class TestAgent(base.MuranoTestCase):
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
     def test_call_except_timeout(self, mock_kombu, mock_event):
-        CONF.set_override('agent_timeout', 1, group='engine',
-                          enforce_type=True)
+        self.override_config('agent_timeout', 1, group='engine')
 
         mock_event().wait.side_effect = agent.eventlet.Timeout
 

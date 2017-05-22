@@ -53,7 +53,7 @@ class TestCaseShell(testtools.TestCase):
         CONF.clear()
 
     def override_config(self, name, override, group=None):
-        CONF.set_override(name, override, group, enforce_type=True)
+        CONF.set_override(name, override, group)
         CONF.set_override('use_stderr', True)
         self.addCleanup(CONF.clear_override, name, group)
 
