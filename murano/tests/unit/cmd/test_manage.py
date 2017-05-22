@@ -217,7 +217,7 @@ class TestManage(test_base.MuranoWithDBTestCase):
     def test_main_except_runtime_error(self, mock_conf):
         mock_conf.side_effect = RuntimeError
 
-        with self.assertRaisesRegexp(SystemExit, 'ERROR:'):
+        with self.assertRaisesRegex(SystemExit, 'ERROR:'):
             manage.main()
 
     @mock.patch('murano.cmd.manage.CONF')
@@ -226,5 +226,5 @@ class TestManage(test_base.MuranoWithDBTestCase):
 
         expected_err_msg = "murano-manage command failed:"
 
-        with self.assertRaisesRegexp(SystemExit, expected_err_msg):
+        with self.assertRaisesRegex(SystemExit, expected_err_msg):
             manage.main()

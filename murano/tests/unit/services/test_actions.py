@@ -190,7 +190,7 @@ class TestActions(test_base.MuranoTestCase):
         test_action_id = 'test_action_id'
         test_session = mock.MagicMock(description=[])
 
-        with self.assertRaisesRegexp(LookupError, 'Action is not found'):
+        with self.assertRaisesRegex(LookupError, 'Action is not found'):
             actions.ActionServices.execute(test_action_id, test_session,
                                            None, None, None)
 
@@ -210,8 +210,8 @@ class TestActions(test_base.MuranoTestCase):
         }]
         test_session = mock.MagicMock(description=test_description)
 
-        with self.assertRaisesRegexp(ValueError,
-                                     'Cannot execute disabled action'):
+        with self.assertRaisesRegex(ValueError,
+                                    'Cannot execute disabled action'):
             actions.ActionServices.execute(test_action_id, test_session,
                                            None, None, None)
 

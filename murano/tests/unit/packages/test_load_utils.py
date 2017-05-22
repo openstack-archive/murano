@@ -132,8 +132,8 @@ class TestLoadUtils(test_base.MuranoTestCase):
             self._create_temp_zip_file(zip_path, manifest_path)
 
         expected_error_msg = "Unsupported format {0}".format(test_format)
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             with load_utils.load_from_file(archive_path=zip_path,
                                            target_dir=target_dir,
                                            drop_dir=True):
@@ -143,8 +143,8 @@ class TestLoadUtils(test_base.MuranoTestCase):
 
     def test_load_from_file_with_invalid_archive_path(self):
         expected_error_msg = "Unable to find package file"
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             with load_utils.load_from_file('invalid file path'):
                 pass
 
@@ -153,8 +153,8 @@ class TestLoadUtils(test_base.MuranoTestCase):
         mock_os.listdir = mock.MagicMock(return_value=True)
         temp_file = self._create_temp_file()
         expected_error_msg = "Target directory is not empty"
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             this_dir = os.path.dirname(os.path.realpath(__file__))
             with load_utils.load_from_file(temp_file.name,
                                            target_dir=this_dir):
@@ -164,8 +164,8 @@ class TestLoadUtils(test_base.MuranoTestCase):
         temp_file = self._create_temp_file()
         expected_error_msg = "Uploaded file {0} is not a zip archive".\
                              format(temp_file.name)
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             with load_utils.load_from_file(temp_file.name):
                 pass
 
@@ -177,8 +177,8 @@ class TestLoadUtils(test_base.MuranoTestCase):
         mock_zipfile.is_zipfile = mock.MagicMock(
             side_effect=ValueError(test_error_msg))
         temp_file = self._create_temp_file()
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             with load_utils.load_from_file(temp_file.name):
                 pass
         mock_zipfile.is_zipfile.assert_called_once_with(
@@ -186,15 +186,15 @@ class TestLoadUtils(test_base.MuranoTestCase):
 
     def test_load_from_dir_without_source_directory(self):
         expected_error_msg = 'Invalid package directory'
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             load_utils.load_from_dir('random_test_directory')
 
     def test_load_from_dir_with_invalid_source_directory(self):
         source_directory = self._create_temp_dir()
         expected_error_msg = 'Unable to find package manifest'
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             load_utils.load_from_dir(source_directory)
 
     @mock.patch('murano.packages.load_utils.os.path.isfile')
@@ -204,7 +204,7 @@ class TestLoadUtils(test_base.MuranoTestCase):
         random_filename = ''.join(random.choice(string.ascii_lowercase)
                                   for i in range(20))
         expected_error_msg = 'Unable to load due to'
-        with self.assertRaisesRegexp(exceptions.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exceptions.PackageLoadError,
+                                    expected_error_msg):
             load_utils.load_from_dir(source_directory,
                                      filename=random_filename)

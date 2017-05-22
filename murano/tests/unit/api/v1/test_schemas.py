@@ -62,14 +62,14 @@ class TestSchemas(test_base.MuranoTestCase):
             dummy_error = client.RemoteError(exc_type=exc_type,
                                              value='dummy_value')
             mock_rpc.engine().generate_schema.side_effect = dummy_error
-            with self.assertRaisesRegexp(exc.HTTPNotFound,
-                                         dummy_error.value):
+            with self.assertRaisesRegex(exc.HTTPNotFound,
+                                        dummy_error.value):
                 self.controller.get_schema(mock_request, 'test_class')
 
         # Test exception handling for miscellaneous exception type.
         dummy_error = client.RemoteError(exc_type='TestExcType',
                                          value='dummy_value')
         mock_rpc.engine().generate_schema.side_effect = dummy_error
-        with self.assertRaisesRegexp(client.RemoteError,
-                                     dummy_error.value):
+        with self.assertRaisesRegex(client.RemoteError,
+                                    dummy_error.value):
             self.controller.get_schema(mock_request, 'test_class')

@@ -45,8 +45,8 @@ class TestUtils(test_base.MuranoTestCase):
         expected_error_message = 'Environment with id {env_id} not found'\
                                  .format(env_id=test_env_id)
 
-        with self.assertRaisesRegexp(exc.HTTPNotFound,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPNotFound,
+                                    expected_error_message):
             utils.check_env(mock_request, test_env_id)
 
     @mock.patch('murano.utils.db_session')
@@ -60,16 +60,16 @@ class TestUtils(test_base.MuranoTestCase):
         expected_error_message = 'User is not authorized to access these '\
                                  'tenant resources'
 
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_message):
             utils.check_env(mock_request, mock_env.environment_id)
 
     def test_check_session_with_null_session(self):
         """Test check session with null session throws exception."""
         expected_error_message = 'Session <SessionId {id}> is not found'\
                                  .format(id=None)
-        with self.assertRaisesRegexp(exc.HTTPNotFound,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPNotFound,
+                                    expected_error_message):
             utils.check_session(None, None, None, None)
 
     @mock.patch('murano.utils.check_env')
@@ -82,8 +82,8 @@ class TestUtils(test_base.MuranoTestCase):
                              'with Environment <EnvId {environment_id}>'\
                              .format(session_id=mock_session.session_id,
                                      environment_id=environment_id)
-        with self.assertRaisesRegexp(exc.HTTPBadRequest,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPBadRequest,
+                                    expected_error_msg):
             utils.check_session(None, environment_id, mock_session,
                                 mock_session.session_id)
 
@@ -95,8 +95,8 @@ class TestUtils(test_base.MuranoTestCase):
         mock_request = mock.MagicMock(context=dummy_context)
         expected_error_message = 'X-Configuration-Session header which '\
                                  'indicates to the session is missed'
-        with self.assertRaisesRegexp(exc.HTTPBadRequest,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPBadRequest,
+                                    expected_error_message):
             self._test_verify_session(mock_request)
 
     @mock.patch('murano.utils.db_session')
@@ -108,8 +108,8 @@ class TestUtils(test_base.MuranoTestCase):
         mock_db_session.get_session().query().get.return_value = None
         expected_error_message = 'Session <SessionId {0}> is not found'\
                                  .format(mock_request.context.session)
-        with self.assertRaisesRegexp(exc.HTTPNotFound,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPNotFound,
+                                    expected_error_message):
             self._test_verify_session(mock_request)
 
     @mock.patch('murano.utils.db_session')
@@ -123,8 +123,8 @@ class TestUtils(test_base.MuranoTestCase):
             mock_env_template
         expected_error_message = 'User is not authorized to access this'\
                                  ' tenant resources'
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_message):
             self._test_verify_env_template(mock_request, None)
 
     @mock.patch('murano.utils.db_session')
@@ -133,8 +133,8 @@ class TestUtils(test_base.MuranoTestCase):
         mock_db_session.get_session().query().get.return_value = None
         expected_error_message = 'Environment Template with id {id} not found'\
                                  .format(id='test_env_template_id')
-        with self.assertRaisesRegexp(exc.HTTPNotFound,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPNotFound,
+                                    expected_error_message):
             self._test_verify_env_template(None, 'test_env_template_id')
 
     @utils.verify_env_template
@@ -157,8 +157,8 @@ class TestUtils(test_base.MuranoTestCase):
                                  'environment has been updated or '\
                                  'updating right now with other session'\
                                  .format(mock_request.context.session)
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_message):
             self._test_verify_session(mock_request)
 
     @mock.patch('murano.utils.sessions.SessionServices.validate')
@@ -176,8 +176,8 @@ class TestUtils(test_base.MuranoTestCase):
         expected_error_message = 'Session <SessionId {0}> is already in '\
                                  'deployment state'\
                                  .format(mock_request.context.session)
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_message):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_message):
             self._test_verify_session(mock_request)
 
     @utils.verify_session

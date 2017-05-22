@@ -190,8 +190,8 @@ class TestPackageCache(base.MuranoTestCase):
         self.loader.import_fixation_table({fqn: [test_version]})
         self.loader.register_package(package)
 
-        with self.assertRaisesRegexp(dsl_exceptions.NoPackageFound,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(dsl_exceptions.NoPackageFound,
+                                    expected_error_msg):
             for spec in invalid_specs:
                 self.loader.load_package('test_package_name', spec)
 
@@ -324,8 +324,8 @@ class TestPackageCache(base.MuranoTestCase):
         for class_ in package.classes:
             expected_error_msg = 'Package for class "{0}" is not found'\
                                  .format(class_)
-            with self.assertRaisesRegexp(dsl_exceptions.NoPackageForClassFound,
-                                         expected_error_msg):
+            with self.assertRaisesRegex(dsl_exceptions.NoPackageForClassFound,
+                                        expected_error_msg):
                 for spec in invalid_specs:
                     self.loader.load_class_package(class_, spec)
 
@@ -371,7 +371,7 @@ class TestPackageCache(base.MuranoTestCase):
     def test_get_definition_except_lookup_error(self, mock_log):
         self.loader.client.packages.filter.return_value = []
 
-        with self.assertRaisesRegexp(LookupError, None):
+        with self.assertRaisesRegex(LookupError, None):
             self.loader._get_definition({})
 
         mock_log.debug.assert_called_once_with(
@@ -382,7 +382,7 @@ class TestPackageCache(base.MuranoTestCase):
         self.loader.client.packages.filter.side_effect =\
             muranoclient_exc.HTTPException
 
-        with self.assertRaisesRegexp(LookupError, None):
+        with self.assertRaisesRegex(LookupError, None):
             self.loader._get_definition({})
 
         mock_log.debug.assert_called_once_with(
@@ -445,8 +445,8 @@ class TestPackageCache(base.MuranoTestCase):
             muranoclient_exc.HTTPException
 
         expected_error_msg = 'Error loading package id {0}:'.format(package.id)
-        with self.assertRaisesRegexp(pkg_exc.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(pkg_exc.PackageLoadError,
+                                    expected_error_msg):
             self.loader._get_package_by_definition(package)
 
     @testtools.skipIf(os.name == 'nt', "Doesn't work on Windows")
@@ -475,8 +475,8 @@ class TestPackageCache(base.MuranoTestCase):
 
         expected_error_msg = 'Unable to extract package data for {0}'\
                              .format(package.id)
-        with self.assertRaisesRegexp(pkg_exc.PackageLoadError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(pkg_exc.PackageLoadError,
+                                    expected_error_msg):
             self.loader._get_package_by_definition(package)
 
     def test_try_cleanup_cache_with_null_package_directory(self):

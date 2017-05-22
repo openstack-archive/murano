@@ -214,8 +214,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
         for state in illegal_states:
             mock_envs.EnvironmentServices.get_status.return_value = state
 
-            with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                         expected_error_msg):
+            with self.assertRaisesRegex(exc.HTTPForbidden,
+                                        expected_error_msg):
                 self.sessions_controller.configure(mock_request, 'test_env_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -229,8 +229,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             'access session <SessionId {1}>.'\
             .format(mock_request.context.user, 'test_sess_id')
 
-        with self.assertRaisesRegexp(exc.HTTPUnauthorized,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPUnauthorized,
+                                    expected_error_msg):
             self.sessions_controller.show(mock_request, None, 'test_sess_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -247,8 +247,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
                              ' has been updated or updating right now with'\
                              ' other session'.format('test_sess_id')
 
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_msg):
             self.sessions_controller.show(mock_request, None, 'test_sess_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -262,8 +262,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             'access session <SessionId {1}>.'\
             .format(mock_request.context.user, 'test_sess_id')
 
-        with self.assertRaisesRegexp(exc.HTTPUnauthorized,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPUnauthorized,
+                                    expected_error_msg):
             self.sessions_controller.delete(mock_request, None, 'test_sess_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -281,8 +281,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
                              'state and could not be deleted'\
                              .format('test_sess_id')
 
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_msg):
             self.sessions_controller.delete(mock_request, None, 'test_sess_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -297,8 +297,8 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
                              ' has been updated or updating right now with'\
                              ' other session'.format('test_sess_id')
 
-        with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(exc.HTTPForbidden,
+                                    expected_error_msg):
             self.sessions_controller.deploy(mock_request, None, 'test_sess_id')
 
     @mock.patch('murano.api.v1.sessions.check_session')
@@ -321,7 +321,7 @@ class TestSessionsApi(tb.ControllerTest, tb.MuranoApiTestCase):
             mock_session = mock.MagicMock(state=state)
             mock_db_session.get_session().query().get.return_value =\
                 mock_session
-            with self.assertRaisesRegexp(exc.HTTPForbidden,
-                                         expected_error_msg):
+            with self.assertRaisesRegex(exc.HTTPForbidden,
+                                        expected_error_msg):
                 self.sessions_controller.deploy(
                     mock_request, None, 'test_sess_id')

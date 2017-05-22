@@ -694,8 +694,8 @@ class TestHeatStack(base.MuranoTestCase):
         # Else EnvironmentError should be thrown.
         expected_error_msg = "Unexpected stack state {0}"\
             .format('NOT_FOUND')
-        with self.assertRaisesRegexp(EnvironmentError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(EnvironmentError,
+                                    expected_error_msg):
             hs._wait_state(lambda status: status == 'CREATE_COMPLETE')
 
     @mock.patch.object(heat_stack, 'eventlet')
@@ -705,8 +705,8 @@ class TestHeatStack(base.MuranoTestCase):
         hs = heat_stack.HeatStack('test-stack', None)
         hs._client.stacks.get.side_effect = Exception('test_exception_msg')
 
-        with self.assertRaisesRegexp(Exception,
-                                     'test_exception_msg'):
+        with self.assertRaisesRegex(Exception,
+                                    'test_exception_msg'):
             hs._wait_state(lambda status: status == 'CREATE_COMPLETE')
 
         expected_calls = [mock.call.sleep(2), mock.call.sleep(4),
@@ -725,6 +725,6 @@ class TestHeatStack(base.MuranoTestCase):
 
         expected_error_msg = "Unexpected stack state {0}: {1}"\
             .format('UNEXPECTED_STATUS', 'test_reason')
-        with self.assertRaisesRegexp(EnvironmentError,
-                                     expected_error_msg):
+        with self.assertRaisesRegex(EnvironmentError,
+                                    expected_error_msg):
             hs._wait_state(lambda status: status == 'CREATE_COMPLETE')

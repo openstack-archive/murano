@@ -194,8 +194,8 @@ class MQClientTest(base.MuranoTestCase):
                                                  queue_arguments={})
 
     def test_declare_except_runtime_error(self):
-        with self.assertRaisesRegexp(RuntimeError,
-                                     'Not connected to RabbitMQ'):
+        with self.assertRaisesRegex(RuntimeError,
+                                    'Not connected to RabbitMQ'):
             self.ssl_client.declare(None)
 
     @mock.patch('murano.common.messaging.mqclient.kombu')
@@ -212,8 +212,8 @@ class MQClientTest(base.MuranoTestCase):
             body=jsonutils.dumps('test_message'), message_id='3')
 
     def test_send_except_runtime_error(self):
-        with self.assertRaisesRegexp(RuntimeError,
-                                     'Not connected to RabbitMQ'):
+        with self.assertRaisesRegex(RuntimeError,
+                                    'Not connected to RabbitMQ'):
             self.ssl_client.send(None, None)
 
     @mock.patch('murano.common.messaging.mqclient.subscription')
@@ -224,6 +224,6 @@ class MQClientTest(base.MuranoTestCase):
             self.ssl_client._connection, 'test_queue', 2)
 
     def test_open_except_runtime_error(self):
-        with self.assertRaisesRegexp(RuntimeError,
-                                     'Not connected to RabbitMQ'):
+        with self.assertRaisesRegex(RuntimeError,
+                                    'Not connected to RabbitMQ'):
             self.ssl_client.open(None)

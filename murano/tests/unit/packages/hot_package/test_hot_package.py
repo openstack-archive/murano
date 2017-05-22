@@ -133,7 +133,7 @@ class TestHotPackage(test_base.MuranoTestCase):
         self.assertEqual(expected_result, result['templateParameters'])
 
     def test_translate_param_to_contract_with_inappropriate_value(self):
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             ValueError,
             'Unsupported parameter type',
             murano.packages.hot_package.HotPackage.
@@ -149,7 +149,7 @@ class TestHotPackage(test_base.MuranoTestCase):
 
     def test_get_class_name_with_invalid_template_name(self):
         hot_package = self._get_hot_package(self.test_dirs[0])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             exceptions.PackageClassLoadError,
             'Class not defined in this package',
             hot_package.get_class,
@@ -157,7 +157,7 @@ class TestHotPackage(test_base.MuranoTestCase):
 
     def test_get_class_name_with_invalid_template_format(self):
         hot_package = self._get_hot_package(self.test_dirs[1])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             exceptions.PackageFormatError,
             'Not a HOT template',
             hot_package.get_class,
@@ -184,14 +184,14 @@ class TestHotPackage(test_base.MuranoTestCase):
 
     def test_translate_ui_with_nonexistent_template(self):
         hot_package = self._get_hot_package(self.test_dirs[2])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             exceptions.PackageClassLoadError,
             'File with class definition not found',
             hot_package._translate_ui)
 
     def test_translate_class_with_nonexistent_template(self):
         hot_package = self._get_hot_package(self.test_dirs[2])
-        self.assertRaisesRegexp(
+        self.assertRaisesRegex(
             exceptions.PackageClassLoadError,
             'File with class definition not found',
             hot_package._translate_class)
