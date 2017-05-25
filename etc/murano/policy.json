@@ -19,13 +19,6 @@
     "list_deployments_all_environments": "rule:default",
     "statuses_deployments": "rule:default",
 
-    "list_environments": "rule:default",
-    "list_environments_all_tenants": "rule:admin_api",
-    "show_environment": "rule:default",
-    "update_environment": "rule:default",
-    "create_environment": "rule:default",
-    "delete_environment": "rule:default",
-
     "list_env_templates": "rule:default",
     "create_env_template": "rule:default",
     "show_env_template": "rule:default",
