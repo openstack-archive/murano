@@ -22,7 +22,6 @@ import itertools
 
 import oslo_service.sslutils
 
-import murano.api.middleware.ssl
 import murano.common.cf_config
 import murano.common.config
 import murano.common.wsgi
@@ -50,7 +49,6 @@ _opt_lists = [
         murano.common.config.bind_opts,
         murano.common.config.file_server,
         murano.common.wsgi.wsgi_opts,
-        murano.api.middleware.ssl.ssl_middleware_opts
     ])),
 ]
 
