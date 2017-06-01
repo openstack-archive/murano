@@ -19,6 +19,8 @@ from oslo_log import log as logging
 from oslo_policy import policy
 from webob import exc as exceptions
 
+from murano.common import policies
+
 LOG = logging.getLogger(__name__)
 
 CONF = cfg.CONF
@@ -31,6 +33,14 @@ def reset():
     if _ENFORCER:
         _ENFORCER.clear()
     _ENFORCER = None
+
+
+def init(default_rule=None, use_conf=True):
+    global _ENFORCER
+    if not _ENFORCER:
+        LOG.debug("Enforcer is not present, recreating.")
+        _ENFORCER = policy.Enforcer(CONF, use_conf=use_conf)
+        register_rules(_ENFORCER)
 
 
 def set_rules(data, default_rule=None, overwrite=True):
@@ -54,19 +64,27 @@ def set_rules(data, default_rule=None, overwrite=True):
     _ENFORCER.set_rules(rules, overwrite=overwrite)
 
 
-def init(default_rule=None, use_conf=True):
-    global _ENFORCER
-    if not _ENFORCER:
-        LOG.debug("Enforcer is not present, recreating.")
-        _ENFORCER = policy.Enforcer(CONF, use_conf=use_conf)
-    _ENFORCER.load_rules()
+def check(rule, ctxt, target=None, do_raise=True, exc=None):
+    """Verify that the rule is valid on the target in this context.
 
-
-def check(rule, ctxt, target=None, do_raise=True,
-          exc=exceptions.HTTPForbidden):
+    :param rule: String representing the action to be checked, which should
+                 be colon-separated for clarity.
+    :param ctxt: Request context from which user credentials are extracted.
+    :param target: Dictionary representing the object of the action for object
+                   creation; this should be a dictionary representing the
+                   location of the object, e.g. {'environment_id':
+                   object.environment_id}
+    :param do_raise: Whether to raise an exception or not if the check fails.
+    :param exc: Class of the exception to raise if the check fails.
+    :raises exceptions.HTTPForbidden: If verification fails. Or if 'exc' is
+                                      specified it will raise an exception of
+                                      that type.
+    """
     if target is None:
         target = {}
     creds = ctxt.to_dict()
+    if not exc:
+        exc = exceptions.HTTPForbidden
 
     try:
         result = _ENFORCER.enforce(rule, target, creds, do_raise, exc)
@@ -94,5 +112,9 @@ def check_is_admin(context):
        :param context: Murano request context
        :returns: A non-False value if context role is admin.
     """
-    return check('context_is_admin', context,
-                 context.to_dict(), do_raise=False)
+    return check('context_is_admin', context, context.to_dict(),
+                 do_raise=False)
+
+
+def register_rules(enforcer):
+    enforcer.register_defaults(policies.list_rules())
