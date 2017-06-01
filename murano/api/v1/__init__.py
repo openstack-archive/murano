@@ -12,9 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-from murano.db import models
-from murano.db import session as db_session
-
 stats = None
 
 SUPPORTED_PARAMS = {'id', 'order_by', 'category', 'marker', 'tag',
@@ -34,47 +31,3 @@ PKG_PARAMS_MAP = {'display_name': 'name',
                   'tags': 'tags',
                   'supplier': 'supplier',
                   'supplier_logo': 'supplier_logo'}
-
-
-def get_draft(environment_id=None, session_id=None):
-    unit = db_session.get_session()
-    # TODO(all): When session is deployed should be returned env.description
-    if session_id:
-        session = unit.query(models.Session).get(session_id)
-        return session.description
-    else:
-        environment = unit.query(models.Environment).get(environment_id)
-        return environment.description
-
-
-def save_draft(session_id, draft):
-    unit = db_session.get_session()
-    session = unit.query(models.Session).get(session_id)
-
-    session.description = draft
-    session.save(unit)
-
-
-def get_service_status(environment_id, session_id, service):
-    status = 'draft'
-
-    unit = db_session.get_session()
-    session_state = unit.query(models.Session).get(session_id).state
-
-    entities = [u['id'] for u in service['units']]
-    reports_count = unit.query(models.Status).filter(
-        models.Status.environment_id == environment_id and
-        models.Status.session_id == session_id and
-        models.Status.entity_id.in_(entities)
-    ).count()
-
-    if session_state == 'deployed':
-        status = 'finished'
-
-    if session_state == 'deploying' and reports_count == 0:
-        status = 'pending'
-
-    if session_state == 'deploying' and reports_count > 0:
-        status = 'inprogress'
-
-    return status
