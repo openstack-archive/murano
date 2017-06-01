@@ -19,12 +19,6 @@
     "list_deployments_all_environments": "rule:default",
     "statuses_deployments": "rule:default",
 
-    "list_env_templates": "rule:default",
-    "create_env_template": "rule:default",
-    "show_env_template": "rule:default",
-    "update_env_template": "rule:default",
-    "delete_env_template": "rule:default",
-
     "execute_action": "rule:default"
 }
 

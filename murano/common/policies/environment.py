@@ -50,9 +50,13 @@ environment_policies = [
     policy.DocumentedRuleDefault(
         name='create_environment',
         check_str=base.RULE_DEFAULT,
-        description='Create an environment.',
-        operations=[{'path': '/v1/environments/{environment_id}',
-                     'method': 'POST'}]),
+        description='Create an environment or create an environment and '
+                    'session from an environment template.',
+        operations=[
+            {'path': '/v1/environments/{environment_id}',
+             'method': 'POST'},
+            {'path': '/v1/templates/{env_template_id}/create-environment',
+             'method': 'POST'}]),
     policy.DocumentedRuleDefault(
         name='delete_environment',
         check_str=base.RULE_DEFAULT,
