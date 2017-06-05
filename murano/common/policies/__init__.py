@@ -17,10 +17,12 @@ import itertools
 
 from murano.common.policies import env_template
 from murano.common.policies import environment
+from murano.common.policies import package
 
 
 def list_rules():
     return itertools.chain(
         environment.list_rules(),
-        env_template.list_rules()
+        env_template.list_rules(),
+        package.list_rules()
     )

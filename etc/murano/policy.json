@@ -3,14 +3,6 @@
     "admin_api": "is_admin:True",
     "default": "",
 
-    "get_package": "rule:default",
-    "upload_package": "rule:default",
-    "modify_package": "rule:default",
-    "publicize_package": "rule:admin_api",
-    "manage_public_package": "rule:default",
-    "delete_package": "rule:default",
-    "download_package": "rule:default",
-
     "get_category": "rule:default",
     "delete_category": "rule:admin_api",
     "add_category": "rule:admin_api",
