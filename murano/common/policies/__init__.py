@@ -15,6 +15,7 @@
 
 import itertools
 
+from murano.common.policies import category
 from murano.common.policies import deployment
 from murano.common.policies import env_template
 from murano.common.policies import environment
@@ -23,6 +24,7 @@ from murano.common.policies import package
 
 def list_rules():
     return itertools.chain(
+        category.list_rules(),
         deployment.list_rules(),
         environment.list_rules(),
         env_template.list_rules(),
