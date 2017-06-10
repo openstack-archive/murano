@@ -158,6 +158,25 @@ owned:
   required: false
   default: false
   type: boolean
+pkg_filters:
+  description: |
+      The filters that you want to use to search for packages in the
+      application catalog. If no filters query parameter is specified, the
+      application catalog API returns all packages allowed by the policy
+      settings. By using filters parameter, the API returns only the requested
+      set of packages that meet the filters. The list of filters includes:
+
+      * limit: the maximum number of packages to return
+      * type: the package type
+      * id: the package id
+      * category: the package category
+      * tag: the package tag
+      * class_name: the package class name
+      * fqn: the package fully qualified name
+      * name: the package name
+  in: query
+  required: false
+  type: string
 pkg_id_query:
   description: |
     Allows to filter by package id.
