@@ -17,6 +17,12 @@ abandon:
   required: false
   default: false
   type: boolean
+action_id_url:
+  description: |
+    The UUID of the action to be executed on the deployed environment.
+  in: path
+  required: true
+  type: string
 category_id_url:
   description: |
     The UUID of the category.
@@ -58,6 +64,13 @@ service_id_url:
 session_id_url:
   description: |
     The UUID of the session.
+  in: path
+  required: true
+  type: string
+task_id_url:
+  description: |
+    The UUID of the task associated with an action executed on a deployed
+    environment.
   in: path
   required: true
   type: string
@@ -485,6 +498,13 @@ tags:
   in: body
   required: true
   type: array
+task_id:
+  description: |
+    The UUID of the task associated with an action executed on a deployed
+    environment.
+  in: body
+  required: true
+  type: string
 template_description:
   description: |
     The enviroment template description.
