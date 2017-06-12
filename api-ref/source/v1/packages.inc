@@ -177,10 +177,43 @@ Response Example
 .. literalinclude:: samples/package-create-response.json
    :language: javascript
 
+Download package
+================
+
+.. rest_method::  GET /v1/catalog/packages/{package_id}/download
+
+Download a package.
+
+Response Codes
+--------------
+
+.. rest_status_code:: success status.yaml
+
+   - 200
+
+.. rest_status_code:: error status.yaml
+
+   - 400
+   - 401
+   - 403
+
+Request Parameters
+------------------
+
+.. rest_parameters:: parameters.yaml
+
+   - package_id: pkg_id_url
+
+Response Parameters
+-------------------
+
+This request does not return anything in the response body.
+   :language: javascript
+
 Show package details
 ====================
 
-.. rest_method::  GET /v1/catalog/packages/{id}
+.. rest_method::  GET /v1/catalog/packages/{package_id}
 
 Shows details for a package.
 
@@ -203,7 +236,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - package_id: pkg_id_url
 
 Response Parameters
 -------------------
@@ -236,9 +269,21 @@ Response Example
 Update package
 ==============
 
-.. rest_method::  PATCH /v1/catalog/packages/{id}
+.. rest_method::  PATCH /v1/catalog/packages/{package_id}
 
 Update a package.
+
+List of allowed changes::
+
+    { "op": "add", "path": "/tags", "value": [ "foo", "bar" ] }
+    { "op": "add", "path": "/categories", "value": [ "foo", "bar" ] }
+    { "op": "remove", "path": "/tags" }
+    { "op": "remove", "path": "/categories" }
+    { "op": "replace", "path": "/tags", "value": ["foo", "bar"] }
+    { "op": "replace", "path": "/is_public", "value": true }
+    { "op": "replace", "path": "/description",
+                        "value":"New description" }
+    { "op": "replace", "path": "/name", "value": "New name" }
 
 Response Codes
 --------------
@@ -259,7 +304,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - package_id: pkg_id_url
 
 Request Example
 ---------------
@@ -297,7 +342,7 @@ Response Example
 Delete package
 ==============
 
-.. rest_method::  DELETE /v1/catalog/packages/{id}
+.. rest_method::  DELETE /v1/catalog/packages/{package_id}
 
 Remove specified Environment.
 
@@ -319,7 +364,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - package_id: pkg_id_url
 
 Response Parameters
 -------------------
@@ -327,12 +372,15 @@ Response Parameters
 This request does not return anything in the response body.
    :language: javascript
 
-Download package
-================
+Search for packages
+===================
 
-.. rest_method::  GET /v1/catalog/packages/{id}/download
+.. rest_method::  GET /v1/catalog/packages
 
-Download a package.
+Search for packages in application catalog. Non-admins, by default, can view
+packages that belong to their project as well as public packages: packages
+which belong to other projects but which have been tagged as public by an
+admin. Admins can search for packages across all projects.
 
 Response Codes
 --------------
@@ -352,18 +400,17 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - filters: pkg_filters
 
 Response Parameters
 -------------------
 
-This request does not return anything in the response body.
-   :language: javascript
+Returns the list of packages matching the search criteria.
 
 Get UI definition
 =================
 
-.. rest_method::  GET /v1/catalog/packages/{id}/ui
+.. rest_method::  GET /v1/catalog/packages/{package_id}/ui
 
 Retrieve UI definition for an application.
 
@@ -386,7 +433,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - package_id: pkg_id_url
 
 Response Parameters
 -------------------
@@ -410,7 +457,7 @@ Below is an example of a very basic UI definition::
 Get logo
 ========
 
-.. rest_method::  GET /v1/catalog/packages/{id}/logo
+.. rest_method::  GET /v1/catalog/packages/{package_id}/logo
 
 Retrieve application logo.
 
@@ -433,7 +480,7 @@ Request Parameters
 
 .. rest_parameters:: parameters.yaml
 
-   - id: pkg_id_url
+   - package_id: pkg_id_url
 
 Response Parameters
 -------------------
