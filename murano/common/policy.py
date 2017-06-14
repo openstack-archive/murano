@@ -80,6 +80,8 @@ def check(rule, ctxt, target=None, do_raise=True, exc=None):
                                       specified it will raise an exception of
                                       that type.
     """
+    init()
+
     if target is None:
         target = {}
     creds = ctxt.to_dict()
