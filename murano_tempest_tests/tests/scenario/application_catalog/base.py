@@ -21,8 +21,8 @@ from tempest.clients import Manager as services_manager
 from tempest.common import credentials_factory as common_creds
 from tempest.common import waiters
 from tempest import config
-from tempest.lib import base
 from tempest.lib import exceptions
+from tempest import test
 
 from murano_tempest_tests import clients
 from murano_tempest_tests import utils
@@ -30,22 +30,42 @@ from murano_tempest_tests import utils
 CONF = config.CONF
 
 
-class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
+class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
     """Base test class for Murano Application Catalog Scenario tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseApplicationCatalogScenarioTest, cls).setUpClass()
-        cls.resource_setup()
+    def skip_checks(cls):
+        super(BaseApplicationCatalogScenarioTest, cls).skip_checks()
+        if not CONF.service_available.murano:
+            skip_msg = "Murano is disabled"
+            raise cls.skipException(skip_msg)
 
     @classmethod
-    def tearDownClass(cls):
-        cls.resource_cleanup()
-        super(BaseApplicationCatalogScenarioTest, cls).tearDownClass()
+    def setup_clients(cls):
+        super(BaseApplicationCatalogScenarioTest, cls).setup_clients()
+        if not hasattr(cls, "os_primary"):
+            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
+            cls.os_primary = clients.Manager(credentials=creds)
+            cls.services_manager = services_manager(creds)
+
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
+        cls.artifacts_client = cls.os_primary.artifacts_client
+        cls.servers_client = cls.services_manager.servers_client
+        cls.orchestration_client = cls.services_manager.orchestration_client
+        cls.snapshots_client = cls.services_manager.snapshots_v2_client
+        cls.volumes_client = cls.services_manager.volumes_v2_client
+        cls.backups_client = cls.services_manager.backups_v2_client
+        cls.images_client = cls.services_manager.image_client_v2
+
+    @classmethod
+    def resource_setup(cls):
+        super(BaseApplicationCatalogScenarioTest, cls).resource_setup()
+        cls.linux_image = CONF.application_catalog.linux_image
+        cls.cirros_image = cls.get_required_image_name()
 
     @classmethod
     def get_client_with_isolated_creds(cls, type_of_creds="admin"):
-
         creds = cls.get_configured_isolated_creds(type_of_creds=type_of_creds)
 
         os = clients.Manager(credentials=creds)
@@ -60,11 +80,10 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
             cls.admin_role = CONF.identity.admin_role
         else:
             cls.admin_role = 'admin'
-        if not hasattr(cls, 'dynamic_cred'):
-            cls.credentials = common_creds.get_credentials_provider(
-                name=cls.__name__,
-                force_tenant_isolation=CONF.auth.use_dynamic_credentials,
-                identity_version=CONF.identity.auth_version)
+        cls.credentials = common_creds.get_credentials_provider(
+            name=cls.__name__,
+            force_tenant_isolation=CONF.auth.use_dynamic_credentials,
+            identity_version=CONF.identity.auth_version)
         if type_of_creds == 'primary':
             creds = cls.credentials.get_primary_creds()
         elif type_of_creds == 'admin':
@@ -78,46 +97,9 @@ class BaseApplicationCatalogScenarioTest(base.BaseTestCase):
         return creds.credentials
 
     @classmethod
-    def verify_nonempty(cls, *args):
-        if not all(args):
-            msg = "Missing API credentials in configuration."
-            raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.service_available.murano:
-            skip_msg = "Murano is disabled"
-            raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os_primary"):
-            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
-            cls.os_primary = clients.Manager(credentials=creds)
-            cls.services_manager = services_manager(creds)
-
-        cls.linux_image = CONF.application_catalog.linux_image
-        cls.application_catalog_client = \
-            cls.os_primary.application_catalog_client
-        cls.artifacts_client = cls.os_primary.artifacts_client
-        cls.servers_client = cls.services_manager.servers_client
-        cls.orchestration_client = cls.services_manager.orchestration_client
-        cls.snapshots_client = cls.services_manager.snapshots_v2_client
-        cls.volumes_client = cls.services_manager.volumes_v2_client
-        cls.backups_client = cls.services_manager.backups_v2_client
-        cls.images_client = cls.services_manager.image_client_v2
-        cls.cirros_image = cls.get_required_image_name()
-
-    @classmethod
     def get_required_image_name(cls):
         image = cls.images_client.show_image(CONF.compute.image_ref)
         return image['name']
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.clear_isolated_creds()
-
-    @classmethod
-    def clear_isolated_creds(cls):
-        if hasattr(cls, "dynamic_cred"):
-            cls.credentials.clear_creds()
 
     def environment_delete(self, environment_id, timeout=180):
         self.application_catalog_client.delete_environment(environment_id)
@@ -399,9 +381,20 @@ class BaseApplicationCatalogScenarioIsolatedAdminTest(
         BaseApplicationCatalogScenarioTest):
 
     @classmethod
-    def resource_setup(cls):
-        creds = cls.get_configured_isolated_creds(type_of_creds='admin')
-        cls.os_primary = clients.Manager(credentials=creds)
-        cls.services_manager = services_manager(creds)
-        super(BaseApplicationCatalogScenarioIsolatedAdminTest, cls).\
-            resource_setup()
+    def setup_clients(cls):
+        super(BaseApplicationCatalogScenarioIsolatedAdminTest,
+              cls).setup_clients()
+        if not hasattr(cls, "os_admin"):
+            creds = cls.get_configured_isolated_creds(type_of_creds='admin')
+            cls.os_admin = clients.Manager(credentials=creds)
+            cls.services_manager = services_manager(creds)
+
+        cls.application_catalog_client = \
+            cls.os_admin.application_catalog_client
+        cls.artifacts_client = cls.os_admin.artifacts_client
+        cls.servers_client = cls.services_manager.servers_client
+        cls.orchestration_client = cls.services_manager.orchestration_client
+        cls.snapshots_client = cls.services_manager.snapshots_v2_client
+        cls.volumes_client = cls.services_manager.volumes_v2_client
+        cls.backups_client = cls.services_manager.backups_v2_client
+        cls.images_client = cls.services_manager.image_client_v2

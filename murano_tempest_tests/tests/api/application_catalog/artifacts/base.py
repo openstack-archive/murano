@@ -15,7 +15,7 @@
 
 from tempest.common import credentials_factory as common_creds
 from tempest import config
-from tempest.lib import base
+from tempest import test
 
 from murano_tempest_tests import clients
 from murano_tempest_tests import utils
@@ -23,22 +23,28 @@ from murano_tempest_tests import utils
 CONF = config.CONF
 
 
-class BaseArtifactsTest(base.BaseTestCase):
+class BaseArtifactsTest(test.BaseTestCase):
     """Base test class for Murano Glare tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseArtifactsTest, cls).setUpClass()
-        cls.resource_setup()
+    def skip_checks(cls):
+        super(BaseArtifactsTest, cls).skip_checks()
+        if not CONF.service_available.murano:
+            skip_msg = "Murano is disabled"
+            raise cls.skipException(skip_msg)
 
     @classmethod
-    def tearDownClass(cls):
-        cls.resource_cleanup()
-        super(BaseArtifactsTest, cls).tearDownClass()
+    def setup_clients(cls):
+        super(BaseArtifactsTest, cls).setup_clients()
+        if not hasattr(cls, "os_primary"):
+            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
+            cls.os_primary = clients.Manager(credentials=creds)
+        cls.artifacts_client = cls.os_primary.artifacts_client
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
 
     @classmethod
     def get_client_with_isolated_creds(cls, type_of_creds="admin"):
-
         creds = cls.get_configured_isolated_creds(type_of_creds=type_of_creds)
 
         os = clients.Manager(credentials=creds)
@@ -68,33 +74,6 @@ class BaseArtifactsTest(base.BaseTestCase):
         cls.credentials.type_of_creds = type_of_creds
 
         return creds.credentials
-
-    @classmethod
-    def verify_nonempty(cls, *args):
-        if not all(args):
-            msg = "Missing API credentials in configuration."
-            raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.service_available.murano:
-            skip_msg = "Murano is disabled"
-            raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os_primary"):
-            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
-            cls.os_primary = clients.Manager(credentials=creds)
-        cls.artifacts_client = cls.os_primary.artifacts_client
-        cls.application_catalog_client = \
-            cls.os_primary.application_catalog_client
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.clear_isolated_creds()
-
-    @classmethod
-    def clear_isolated_creds(cls):
-        if hasattr(cls, "dynamic_cred"):
-            cls.credentials.clear_creds()
 
     @classmethod
     def upload_package(cls, application_name, version=None, require=None):

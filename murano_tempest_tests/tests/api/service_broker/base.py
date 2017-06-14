@@ -18,55 +18,20 @@ import time
 
 from tempest.common import credentials_factory as common_creds
 from tempest import config
-from tempest.lib import base
 from tempest.lib import exceptions
+from tempest import test
 
 from murano_tempest_tests import clients
 
 CONF = config.CONF
 
 
-class BaseServiceBrokerTest(base.BaseTestCase):
+class BaseServiceBrokerTest(test.BaseTestCase):
     """Base test class for Murano Service Broker API tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseServiceBrokerTest, cls).setUpClass()
-        cls.resource_setup()
-
-    @classmethod
-    def tearDownClass(cls):
-        cls.resource_cleanup()
-        super(BaseServiceBrokerTest, cls).tearDownClass()
-
-    @classmethod
-    def get_client_with_isolated_creds(cls, name=None,
-                                       type_of_creds="admin"):
-        cls.credentials = common_creds.get_credentials_provider(
-            name=cls.__name__,
-            force_tenant_isolation=CONF.auth.use_dynamic_credentials,
-            identity_version=CONF.identity.auth_version)
-        if "admin" in type_of_creds:
-            creds = cls.credentials.get_admin_creds()
-        elif "alt" in type_of_creds:
-            creds = cls.credentials.get_alt_creds()
-        else:
-            creds = cls.credentials.get_credentials(type_of_creds)
-        cls.credentials.type_of_creds = type_of_creds
-
-        os = clients.Manager(credentials=creds)
-        client = os.service_broker_client
-
-        return client
-
-    @classmethod
-    def verify_nonempty(cls, *args):
-        if not all(args):
-            msg = "Missing API credentials in configuration."
-            raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
+    def skip_checks(cls):
+        super(BaseServiceBrokerTest, cls).skip_checks()
         if not CONF.service_broker.run_service_broker_tests:
             skip_msg = "Service Broker API tests are disabled"
             raise cls.skipException(skip_msg)
@@ -76,6 +41,10 @@ class BaseServiceBrokerTest(base.BaseTestCase):
         if not CONF.service_available.murano:
             skip_msg = "Murano is disabled"
             raise cls.skipException(skip_msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(BaseServiceBrokerTest, cls).setup_clients()
         if not hasattr(cls, "os_primary"):
             cls.username = CONF.identity.username
             cls.password = CONF.identity.password
@@ -86,18 +55,43 @@ class BaseServiceBrokerTest(base.BaseTestCase):
         cls.application_catalog_client = \
             cls.os_primary.application_catalog_client
 
-    def setUp(self):
-        super(BaseServiceBrokerTest, self).setUp()
-        self.addCleanup(self.clear_isolated_creds)
+    @classmethod
+    def get_client_with_isolated_creds(cls, type_of_creds="admin"):
+        creds = cls.get_configured_isolated_creds(type_of_creds=type_of_creds)
+
+        os = clients.Manager(credentials=creds)
+        client = os.application_catalog_client
+
+        return client
 
     @classmethod
-    def resource_cleanup(cls):
-        cls.clear_isolated_creds()
+    def get_configured_isolated_creds(cls, type_of_creds='admin'):
+        identity_version = CONF.identity.auth_version
+        if identity_version == 'v3':
+            cls.admin_role = CONF.identity.admin_role
+        else:
+            cls.admin_role = 'admin'
+        cls.credentials = common_creds.get_credentials_provider(
+            name=cls.__name__,
+            force_tenant_isolation=CONF.auth.use_dynamic_credentials,
+            identity_version=CONF.identity.auth_version)
+        if type_of_creds == 'primary':
+            creds = cls.credentials.get_primary_creds()
+        elif type_of_creds == 'admin':
+            creds = cls.credentials.get_admin_creds()
+        elif type_of_creds == 'alt':
+            creds = cls.credentials.get_alt_creds()
+        else:
+            creds = cls.credentials.get_credentials(type_of_creds)
+        cls.credentials.type_of_creds = type_of_creds
+
+        return creds.credentials
 
     @classmethod
-    def clear_isolated_creds(cls):
-        if hasattr(cls, "dynamic_cred"):
-            cls.credentials.clear_creds()
+    def verify_nonempty(cls, *args):
+        if not all(args):
+            msg = "Missing API credentials in configuration."
+            raise cls.skipException(msg)
 
     def wait_for_result(self, instance_id, timeout):
         start_time = time.time()
@@ -129,6 +123,14 @@ class BaseServiceBrokerTest(base.BaseTestCase):
 class BaseServiceBrokerAdminTest(BaseServiceBrokerTest):
 
     @classmethod
-    def resource_setup(cls):
-        cls.os_primary = clients.Manager()
-        super(BaseServiceBrokerAdminTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(BaseServiceBrokerTest, cls).setup_clients()
+        if not hasattr(cls, "os_admin"):
+            cls.username = CONF.identity.username
+            cls.password = CONF.identity.password
+            cls.tenant_name = CONF.identity.tenant_name
+            cls.verify_nonempty(cls.username, cls.password, cls.tenant_name)
+            cls.os_admin = clients.Manager()
+        cls.service_broker_client = cls.os_admin.service_broker_client
+        cls.application_catalog_client = \
+            cls.os_admin.application_catalog_client

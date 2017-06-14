@@ -15,7 +15,7 @@
 
 from tempest.common import credentials_factory as common_creds
 from tempest import config
-from tempest.lib import base
+from tempest import test
 
 from murano_tempest_tests import clients
 from murano_tempest_tests import utils
@@ -23,22 +23,28 @@ from murano_tempest_tests import utils
 CONF = config.CONF
 
 
-class BaseApplicationCatalogTest(base.BaseTestCase):
+class BaseApplicationCatalogTest(test.BaseTestCase):
     """Base test class for Murano Service Broker API tests."""
 
     @classmethod
-    def setUpClass(cls):
-        super(BaseApplicationCatalogTest, cls).setUpClass()
-        cls.resource_setup()
+    def skip_checks(cls):
+        super(BaseApplicationCatalogTest, cls).skip_checks()
+        if not CONF.service_available.murano:
+            skip_msg = "Murano is disabled"
+            raise cls.skipException(skip_msg)
 
     @classmethod
-    def tearDownClass(cls):
-        cls.resource_cleanup()
-        super(BaseApplicationCatalogTest, cls).tearDownClass()
+    def setup_clients(cls):
+        super(BaseApplicationCatalogTest, cls).setup_clients()
+        if not hasattr(cls, "os_primary"):
+            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
+            cls.os_primary = clients.Manager(credentials=creds)
+        cls.application_catalog_client = \
+            cls.os_primary.application_catalog_client
+        cls.artifacts_client = cls.os_primary.artifacts_client
 
     @classmethod
     def get_client_with_isolated_creds(cls, type_of_creds="admin"):
-
         creds = cls.get_configured_isolated_creds(type_of_creds=type_of_creds)
 
         os = clients.Manager(credentials=creds)
@@ -53,11 +59,10 @@ class BaseApplicationCatalogTest(base.BaseTestCase):
             cls.admin_role = CONF.identity.admin_role
         else:
             cls.admin_role = 'admin'
-        if not hasattr(cls, 'dynamic_cred'):
-            cls.credentials = common_creds.get_credentials_provider(
-                name=cls.__name__,
-                force_tenant_isolation=CONF.auth.use_dynamic_credentials,
-                identity_version=CONF.identity.auth_version)
+        cls.credentials = common_creds.get_credentials_provider(
+            name=cls.__name__,
+            force_tenant_isolation=CONF.auth.use_dynamic_credentials,
+            identity_version=CONF.identity.auth_version)
         if type_of_creds == 'primary':
             creds = cls.credentials.get_primary_creds()
         elif type_of_creds == 'admin':
@@ -69,33 +74,6 @@ class BaseApplicationCatalogTest(base.BaseTestCase):
         cls.credentials.type_of_creds = type_of_creds
 
         return creds.credentials
-
-    @classmethod
-    def verify_nonempty(cls, *args):
-        if not all(args):
-            msg = "Missing API credentials in configuration."
-            raise cls.skipException(msg)
-
-    @classmethod
-    def resource_setup(cls):
-        if not CONF.service_available.murano:
-            skip_msg = "Murano is disabled"
-            raise cls.skipException(skip_msg)
-        if not hasattr(cls, "os_primary"):
-            creds = cls.get_configured_isolated_creds(type_of_creds='primary')
-            cls.os_primary = clients.Manager(credentials=creds)
-        cls.application_catalog_client = \
-            cls.os_primary.application_catalog_client
-        cls.artifacts_client = cls.os_primary.artifacts_client
-
-    @classmethod
-    def resource_cleanup(cls):
-        cls.clear_isolated_creds()
-
-    @classmethod
-    def clear_isolated_creds(cls):
-        if hasattr(cls, "dynamic_cred"):
-            cls.credentials.clear_creds()
 
     @staticmethod
     def _get_demo_app():
@@ -119,18 +97,14 @@ class BaseApplicationCatalogTest(base.BaseTestCase):
         }
 
 
-class BaseApplicationCatalogAdminTest(BaseApplicationCatalogTest):
-
-    @classmethod
-    def resource_setup(cls):
-        cls.os_primary = clients.Manager()
-        super(BaseApplicationCatalogAdminTest, cls).resource_setup()
-
-
 class BaseApplicationCatalogIsolatedAdminTest(BaseApplicationCatalogTest):
 
     @classmethod
-    def resource_setup(cls):
-        creds = cls.get_configured_isolated_creds(type_of_creds='admin')
-        cls.os_primary = clients.Manager(credentials=creds)
-        super(BaseApplicationCatalogIsolatedAdminTest, cls).resource_setup()
+    def setup_clients(cls):
+        super(BaseApplicationCatalogIsolatedAdminTest, cls).setup_clients()
+        if not hasattr(cls, "os_admin"):
+            creds = cls.get_configured_isolated_creds(type_of_creds='admin')
+            cls.os_admin = clients.Manager(credentials=creds)
+        cls.application_catalog_client = \
+            cls.os_admin.application_catalog_client
+        cls.artifacts_client = cls.os_admin.artifacts_client
