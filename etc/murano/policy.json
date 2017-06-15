@@ -1,7 +1,5 @@
 {
     "context_is_admin": "role:admin",
     "admin_api": "is_admin:True",
-    "default": "",
-
-    "execute_action": "rule:default"
+    "default": ""
 }
