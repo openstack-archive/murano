@@ -21,3 +21,4 @@ Application Developer Guide
    app_development_framework
    app_debugging
    garbage_collection
+   encrypting_properties

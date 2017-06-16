@@ -1,0 +1,9 @@
+---
+features:
+  - |
+    Added a new yaql function 'decryptData' which pairs with 'encryptData' on
+    the dashboard side. Application authors can use these functions to secure
+    sensitive input to their Murano applications such as passwords.
+
+    Requires a valid secret storage backend (e.g. Barbican) to be configured
+    via Castellan.

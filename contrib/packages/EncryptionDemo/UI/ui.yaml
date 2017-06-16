@@ -1,0 +1,10 @@
+Application:
+  ?:
+     type: com.paul.EncryptionDemo
+  my_password: encryptData($.instanceConfiguration.my_password)
+
+Forms:
+  - instanceConfiguration:
+      fields:
+        - name: my_password
+          type: string

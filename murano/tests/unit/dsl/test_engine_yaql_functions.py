@@ -12,12 +12,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import mock
 import six
 from testtools import matchers
 from yaql.language import exceptions as yaql_exceptions
 
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
+
+from castellan.common import exception as castellan_exception
 
 
 class TestEngineYaqlFunctions(test_case.DslTestCase):
@@ -249,3 +252,26 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
 
     def test_new_object_assignment(self):
         self.assertTrue(self._runner.testNewObjectAssignment())
+
+    @mock.patch('murano.engine.system.yaql_functions.key_manager')
+    @mock.patch('murano.engine.system.yaql_functions.castellan_utils')
+    def test_decrypt_data(self, mock_castellan_utils, mock_key_manager):
+        dummy_context = mock.MagicMock()
+        mock_castellan_utils.credential_factory.return_value = dummy_context
+
+        encrypted_value = '91f784d0-5ef1-4b6f-9311-9b5a33d828d8'
+        decrypted_value = 'secret_password'
+
+        mock_key_manager.API().get.return_value.get_encoded.return_value =\
+            decrypted_value
+        self.assertEqual(decrypted_value,
+                         self._runner.testDecryptData(encrypted_value))
+        mock_key_manager.API().get.assert_called_once_with(dummy_context,
+                                                           encrypted_value)
+
+    @mock.patch('murano.engine.system.yaql_functions.LOG')
+    def test_decrypt_data_not_configured(self, mock_log):
+        encrypted_value = '91f784d0-5ef1-4b6f-9311-9b5a33d828d8'
+        self.assertRaises(castellan_exception.AuthTypeInvalidError,
+                          self._runner.testDecryptData, encrypted_value)
+        mock_log.error.assert_called()

@@ -318,3 +318,10 @@ Methods:
         # Thus this assignment tests the fix for bug #1597452
       - $this.target: id($newObject)
       - Return: $this.target = $newObject
+
+  testDecryptData:
+    Arguments:
+      - value:
+          Contract: $.string().notNull()
+    Body:
+      - Return: decryptData($value)
