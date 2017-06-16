@@ -364,6 +364,8 @@ Currently supported options for **type** attribute are:
   of the ones available to the current user
 * *securitygroup* - specific field, used for selecting a custom security group
   to assign to the instance
+* *volume* - specific field, used for selecting a volume or a volume snapshot
+  from a list of available volumes (and volume snapshots)
 * any other value is considered to be a fully qualified name for some
   Application package and is rendered as a pair of controls: one for selecting
   already existing Applications of that type in an Environment, second - for
@@ -458,6 +460,7 @@ field attributes. The most common attributes are the following:
   widget rendering. Note, that files should be placed to Django static folder
   in advance. Mostly they are used to do some client-side field
   enabling/disabling, hiding/unhiding etc.
+
 * **requirements** is used only with flavor field and prevents user to pick
   unstable for a deployment flavor.
   It allows to set minimum ram (in MBs), disk space (in GBs) or virtual CPU
@@ -475,6 +478,10 @@ field attributes. The most common attributes are the following:
               min_disk: 20
               min_vcpus: 2
               min_memory_mb: 2048
+
+* **include_snapshots** is used only with the volume field. ``True`` by default.
+  If ``True``, the field list includes available volumes and volume snapshots.
+  If set to ``False``, only available volumes are shown.
 
 * **include_subnets** is used only with network field. ``True`` by default.
   If ``True``, the field list includes all the possible combinations of network
