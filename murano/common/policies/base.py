@@ -25,7 +25,7 @@ rules = [
         check_str='role:admin'),
     policy.RuleDefault(
         name='admin_api',
-        check_str='is_admin:1'),
+        check_str='is_admin:True'),
     policy.RuleDefault(
         name='default',
         check_str='')

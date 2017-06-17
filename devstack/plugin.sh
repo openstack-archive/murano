@@ -161,7 +161,6 @@ function configure_murano {
                           --namespace oslo.messaging \
                           > $MURANO_CONF_FILE
     cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
-    cp $MURANO_DIR/etc/murano/policy.json $MURANO_POLICY_FILE
 
     cleanup_murano
 
@@ -362,7 +361,6 @@ function setup_core_library() {
            --is-public
 
     remove_core_apps_zip
-
 }
 
 # install_murano() - Collect source and prepare
