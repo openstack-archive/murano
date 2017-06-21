@@ -41,7 +41,7 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         super(TestCategories, cls).resource_cleanup()
 
     @testtools.testcase.attr('smoke')
-    def test_get_list_categories(self):
+    def test_list_categories(self):
         categories_list = self.application_catalog_client.list_categories()
         self.assertIsInstance(categories_list, list)
 
@@ -49,14 +49,20 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
     def test_create_and_delete_category(self):
         name = utils.generate_name('create_and_delete_category')
         categories_list = self.application_catalog_client.list_categories()
-        self.assertNotIn(name, categories_list)
+        category_names = [c['name'] for c in categories_list]
+        self.assertNotIn(name, category_names)
+
         category = self.application_catalog_client.create_category(name)
         self.assertEqual(name, category['name'])
+
         categories_list = self.application_catalog_client.list_categories()
-        self.assertIn(name, categories_list)
+        category_names = [c['name'] for c in categories_list]
+        self.assertIn(name, category_names)
+
         self.application_catalog_client.delete_category(category['id'])
         categories_list = self.application_catalog_client.list_categories()
-        self.assertNotIn(name, categories_list)
+        category_names = [c['name'] for c in categories_list]
+        self.assertNotIn(name, category_names)
 
     def test_get_category(self):
         category = self.application_catalog_client.get_category(

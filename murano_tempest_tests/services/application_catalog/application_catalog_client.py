@@ -270,7 +270,7 @@ class ApplicationCatalogClient(rest_client.RestClient):
 
 # -----------------------------Category methods--------------------------------
     def list_categories(self):
-        uri = 'v1/catalog/packages/categories'
+        uri = 'v1/catalog/categories'
         resp, body = self.get(uri)
         self.expected_success(200, resp.status)
         return self._parse_resp(body)

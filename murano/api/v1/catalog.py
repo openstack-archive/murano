@@ -23,7 +23,6 @@ from keystoneclient import service_catalog
 from oslo_config import cfg
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
-from oslo_log import versionutils
 from webob import exc
 
 import murano.api.v1
@@ -336,13 +335,6 @@ class Controller(object):
         policy.check("get_category", req.context)
         category = db_api.category_get(category_id, packages=True)
         return category.to_dict()
-
-    @versionutils.deprecated(as_of=versionutils.deprecated.LIBERTY,
-                             in_favor_of='categories.list()')
-    def show_categories(self, req):
-        policy.check("get_category", req.context)
-        categories = db_api.categories_list()
-        return {'categories': [category.name for category in categories]}
 
     def list_categories(self, req):
         """List all categories

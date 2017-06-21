@@ -227,10 +227,6 @@ class API(wsgi.Router):
                        conditions={'method': ['POST']})
 
         catalog_resource = catalog.create_resource()
-        mapper.connect('/catalog/packages/categories',
-                       controller=catalog_resource,
-                       action='show_categories',
-                       conditions={'method': ['GET']})
         mapper.connect('/catalog/packages/{package_id}',
                        controller=catalog_resource,
                        action='get',

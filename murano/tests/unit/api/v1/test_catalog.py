@@ -1234,22 +1234,6 @@ This is a fake zip archive
         retrieved_category = jsonutils.loads(req.get_response(self.api).body)
         self.assertEqual(retrieved_category, expected)
 
-    def test_show_categories(self):
-        """Check that show categories executed successfully"""
-
-        self._set_policy_rules({'add_category': '@', 'get_category': '@'})
-        self.expect_policy_check('add_category')
-
-        body = {'name': 'new_category'}
-        req = self._post('/catalog/categories', jsonutils.dump_as_bytes(body))
-        req.get_response(self.api)
-
-        self.expect_policy_check('get_category')
-        req = self._get('/catalog/categories')
-        retrieved_categories = self.controller.show_categories(req)
-        self.assertEqual(len(retrieved_categories), 1)
-        self.assertIn('new_category', retrieved_categories['categories'])
-
     def test_delete_category(self):
         """Check that category deleted successfully"""
         self._set_policy_rules({'delete_category': '@'})
@@ -1359,7 +1343,7 @@ This is a fake zip archive
         self.assertIn('Category name should be 80 characters maximum',
                       result_message)
 
-    def test_list_category(self):
+    def test_list_categories(self):
         names = ['cat1', 'cat2']
         for name in names:
             db_catalog_api.category_add(name)
@@ -1392,7 +1376,7 @@ This is a fake zip archive
         result_categories = jsonutils.loads(result.body)['categories']
         self.assertEqual(names, [c['name'] for c in result_categories])
 
-    def test_list_category_negative(self):
+    def test_list_categories_negative(self):
         self._set_policy_rules({'get_category': '@'})
         self.expect_policy_check('get_category')
 

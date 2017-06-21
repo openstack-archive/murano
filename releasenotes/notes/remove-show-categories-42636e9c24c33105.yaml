@@ -1,0 +1,5 @@
+---
+deprecations:
+  - |
+    Removed `show_categories` endpoint from the application catalog API which
+    has been deprecated since the Liberty cycle. Use `list_categories` instead.
