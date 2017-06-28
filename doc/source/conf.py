@@ -35,10 +35,10 @@ sys.path.insert(0, os.path.abspath('./'))
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
 extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
               'sphinx.ext.coverage',
-              'sphinx.ext.viewcode', 'sphinxcontrib.httpdomain']
+              'sphinx.ext.viewcode', 'sphinxcontrib.httpdomain',]
 
 if not on_rtd:
-    extensions.append('oslosphinx')
+    extensions.append('openstackdocstheme')
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ['_templates']
@@ -51,6 +51,13 @@ master_doc = 'index'
 
 # General information about the project.
 project = 'Murano'
+
+# openstackdocstheme options
+repository_name = 'openstack/murano'
+bug_project = 'murano'
+bug_tag = ''
+html_last_updated_fmt = '%Y-%m-%d %H:%M'
+
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -84,21 +91,10 @@ if not on_rtd:
     #TODO(efedorova): Change local theme to correspond with the theme on rtd
     pass
 
-# If not '', a 'Last updated on:' timestamp is inserted at every page bottom,
-# using the given strftime format.
-#html_last_updated_fmt = '%b %d, %Y'
-git_cmd = ["git", "log", "--pretty=format:'%ad, commit %h'", "--date=local",
-           "-n1"]
-try:
-    html_last_updated_fmt = subprocess.check_output(git_cmd).decode('utf-8')
-except OSError:
-    warnings.warn('Cannot get last updated time from git repository. '
-                  'Not setting "html_last_updated_fmt".')
-
-
 # The name for this set of Sphinx documents. If None, it defaults to
 # "<project> v<release> documentation".
 html_title = 'Murano'
+html_theme = 'openstackdocs'
 
 # Custom sidebar templates, maps document names to template names.
 html_sidebars = {
