@@ -173,7 +173,12 @@ networking_opts = [
 stats_opts = [
     cfg.IntOpt('period', default=5,
                help=_('Statistics collection interval in minutes.'
-                      'Default value is 5 minutes.'))
+                      'Default value is 5 minutes.')),
+    cfg.IntOpt('env_audit_period', default=60,
+               help=_('Environment audit interval in minutes. '
+                      'Default value is 60 minutes.')),
+    cfg.BoolOpt('env_audit_enabled', default=True,
+                help=_('Whether environment audit events enabled'))
 ]
 
 engine_opts = [

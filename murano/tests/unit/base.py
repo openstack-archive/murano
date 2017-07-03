@@ -41,3 +41,15 @@ class MuranoWithDBTestCase(MuranoTestCase):
         self.override_config('connection', "sqlite://", group='database')
         db_api.setup_db()
         self.addCleanup(db_api.drop_db)
+
+        self.override_config('env_audit_enabled', False, group='stats')
+
+
+class MuranoNotifyWithDBTestCase(MuranoWithDBTestCase):
+
+    def setUp(self):
+        super(MuranoNotifyWithDBTestCase, self).setUp()
+        self.override_config('connection', "sqlite://", group='database')
+        db_api.setup_db()
+        self.addCleanup(db_api.drop_db)
+        self.override_config('env_audit_enabled', True, group='stats')

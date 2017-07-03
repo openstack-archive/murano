@@ -23,10 +23,16 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_service import service
 import psutil
+from sqlalchemy import desc
 
 from murano.api import v1
+from murano.api.v1.deployments import set_dep_state
 from murano.api.v1 import request_statistics
+from murano.db import models
+from murano.db.services import environments as envs
 from murano.db.services import stats as db_stats
+from murano.db import session as db_session
+from murano.engine.system import status_reporter
 
 CONF = cfg.CONF
 
@@ -41,10 +47,12 @@ class StatsCollectingService(service.Service):
         self._hostname = socket.gethostname()
         self._stats_db = db_stats.Statistics()
         self._prev_time = time.time()
+        self._notifier = status_reporter.Notification()
 
     def start(self):
         super(StatsCollectingService, self).start()
         self.tg.add_thread(self._collect_stats_loop)
+        self.tg.add_thread(self._report_env_stats_loop)
 
     def stop(self):
         super(StatsCollectingService, self).stop()
@@ -54,6 +62,12 @@ class StatsCollectingService(service.Service):
         while True:
             self.update_stats()
             eventlet.sleep(period)
+
+    def _report_env_stats_loop(self):
+        env_audit_period = CONF_STATS.env_audit_period * 60
+        while True:
+            self.report_env_stats()
+            eventlet.sleep(env_audit_period)
 
     def update_stats(self):
         LOG.debug("Updating statistic information.")
@@ -95,3 +109,27 @@ class StatsCollectingService(service.Service):
         except Exception as e:
             LOG.exception("Failed to get statistics object from a "
                           "database. {error_code}".format(error_code=e))
+
+    def report_env_stats(self):
+        LOG.debug("Reporting env stats")
+        try:
+            environments = envs.EnvironmentServices.get_environments_by({})
+
+            for env in environments:
+                deployments = get_env_deployments(env.id)
+                success_deployments = [d for d in deployments
+                                       if d['state'] == "success"]
+                if success_deployments:
+                    self._notifier.report('environment.exists', env.to_dict())
+        except Exception:
+            LOG.exception("Failed to report existing envs")
+
+
+def get_env_deployments(environment_id):
+    unit = db_session.get_session()
+    query = unit.query(models.Task).filter_by(
+        environment_id=environment_id).order_by(desc(models.Task.created))
+    result = query.all()
+    deployments = [
+        set_dep_state(deployment, unit).to_dict() for deployment in result]
+    return deployments

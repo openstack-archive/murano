@@ -14,8 +14,10 @@
 # limitations under the License.
 
 from datetime import datetime
+import socket
 
 from oslo_config import cfg
+from oslo_log import log as logging
 import oslo_messaging as messaging
 import six
 
@@ -23,6 +25,7 @@ from murano.common import uuidutils
 from murano.dsl import dsl
 
 CONF = cfg.CONF
+LOG = logging.getLogger(__name__)
 
 
 @dsl.name('io.murano.system.StatusReporter')
@@ -63,3 +66,66 @@ class StatusReporter(object):
     @dsl.name('report_error')
     def report_error(self, instance, msg):
         self._report(instance, msg, None, 'error')
+
+
+class Notification(object):
+    transport = None
+
+    def __init__(self):
+        if not CONF.stats.env_audit_enabled:
+            return
+
+        if Notification.transport is None:
+            Notification.transport = messaging.get_notification_transport(
+                CONF)
+        self._notifier = messaging.Notifier(
+            Notification.transport,
+            publisher_id=('murano.%s' % socket.gethostname()),
+            driver='messaging')
+
+    def _report(self, event_type, environment, level='info'):
+        if not CONF.stats.env_audit_enabled:
+            return
+
+        if 'deleted' in environment:
+            deleted_at = environment['deleted'].isoformat()
+        else:
+            deleted_at = None
+
+        body = {
+            'id': environment['id'],
+            'level': level,
+            'environment_id': environment['id'],
+            'tenant_id': environment['tenant_id'],
+            'created_at': environment.get('created').isoformat(),
+            'deleted_at': deleted_at,
+            'launched_at': None,
+            'timestamp': datetime.utcnow().isoformat()
+        }
+
+        optional_fields = ("deployment_started", "deployment_finished")
+        for f in optional_fields:
+            body[f] = environment.get(f, None)
+
+        LOG.debug("Sending out notification, type=%s, body=%s, level=%s",
+                  event_type, body, level)
+
+        self._notifier.info({}, 'murano.%s' % event_type,
+                            body)
+
+    def report(self, event_type, environment):
+        self._report(event_type, environment)
+
+    def report_error(self, event_type, environment):
+        self._report(event_type, environment, 'error')
+
+
+NOTIFIER = None
+
+
+def get_notifier():
+    global NOTIFIER
+    if not NOTIFIER:
+        NOTIFIER = Notification()
+
+    return NOTIFIER

@@ -30,12 +30,13 @@ class ServerTest(base.MuranoTestCase):
         cls.result_endpoint = server.ResultEndpoint()
         cls.dummy_context = test_utils.dummy_context()
 
+    @mock.patch('murano.common.server.status_reporter.get_notifier')
     @mock.patch('murano.common.server.LOG')
     @mock.patch('murano.common.server.get_last_deployment')
     @mock.patch('murano.common.server.models')
     @mock.patch('murano.common.server.session')
     def test_process_result(self, mock_db_session, mock_models,
-                            mock_last_deployment, mock_log):
+                            mock_last_deployment, mock_log, mock_notifier):
         test_result = {
             'model': {
                 'Objects': {
@@ -79,6 +80,9 @@ class ServerTest(base.MuranoTestCase):
             .format(env_id=mock_env.id,
                     tenant_id=mock_env.tenant_id,
                     services=test_result['model']['Objects']['services']))
+        mock_notifier.return_value.report.assert_called_once_with(
+            'environment.deploy.end',
+            mock_db_session.get_session().query().get(mock_env.id).to_dict())
 
     @mock.patch('murano.common.server.LOG')
     @mock.patch('murano.common.server.get_last_deployment')
