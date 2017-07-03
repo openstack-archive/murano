@@ -14,6 +14,7 @@
 
 import weakref
 
+from oslo_config import cfg
 import yaql
 from yaql.language import contexts
 from yaql.language import conventions
@@ -30,8 +31,9 @@ from murano.dsl import helpers
 from murano.dsl import yaql_functions
 
 
+CONF = cfg.CONF
 ENGINE_10_OPTIONS = {
-    'yaql.limitIterators': constants.ITERATORS_LIMIT,
+    'yaql.limitIterators': CONF.murano.dsl_iterators_limit,
     'yaql.memoryQuota': constants.EXPRESSION_MEMORY_QUOTA,
     'yaql.convertSetsToLists': True,
     'yaql.convertTuplesToLists': True,
@@ -39,7 +41,7 @@ ENGINE_10_OPTIONS = {
 }
 
 ENGINE_12_OPTIONS = {
-    'yaql.limitIterators': constants.ITERATORS_LIMIT,
+    'yaql.limitIterators': CONF.murano.dsl_iterators_limit,
     'yaql.memoryQuota': constants.EXPRESSION_MEMORY_QUOTA,
     'yaql.convertSetsToLists': True,
     'yaql.convertTuplesToLists': True

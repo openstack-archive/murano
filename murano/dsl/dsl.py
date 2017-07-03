@@ -16,6 +16,7 @@ import inspect
 import os.path
 
 import eventlet
+from oslo_config import cfg
 import six
 from yaql.language import expressions as yaql_expressions
 from yaql.language import specs
@@ -28,6 +29,7 @@ from murano.dsl import dsl_types
 from murano.dsl import helpers
 
 
+CONF = cfg.CONF
 NO_VALUE = utils.create_marker('NO_VALUE')
 
 
@@ -349,7 +351,8 @@ def to_mutable(obj, yaql_engine=None):
         else:
             return utils.convert_output_data(value, limit_func, engine, rec)
 
-    limiter = lambda it: utils.limit_iterable(it, constants.ITERATORS_LIMIT)
+    limiter = lambda it: utils.limit_iterable(
+        it, CONF.murano.dsl_iterators_limit)
     return converter(obj, limiter, yaql_engine, converter)
 
 

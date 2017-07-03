@@ -26,6 +26,7 @@ import weakref
 
 import eventlet.greenpool
 import eventlet.greenthread
+from oslo_config import cfg
 import semantic_version
 import six
 from yaql.language import contexts
@@ -41,6 +42,7 @@ from murano.dsl import exceptions
 _threads_sequencer = 0
 # type string: ns.something.MyApp[/1.2.3-alpha][@my.package.fqn]
 TYPE_RE = re.compile(r'([a-zA-Z0-9_.]+)(?:/([^@]+))?(?:@([a-zA-Z0-9_.]+))?$')
+CONF = cfg.CONF
 
 
 def evaluate(value, context, freeze=True):
@@ -64,7 +66,7 @@ def evaluate(value, context, freeze=True):
         return list_type(
             evaluate(t, context, freeze)
             for t in yaqlutils.limit_iterable(
-                value, constants.ITERATORS_LIMIT))
+                value, CONF.murano.dsl_iterators_limit))
     elif isinstance(value, dsl_types.MuranoObjectInterface):
         return value.object
     else:

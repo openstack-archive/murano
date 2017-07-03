@@ -16,7 +16,6 @@ import semantic_version
 
 
 EXPRESSION_MEMORY_QUOTA = 512 * 1024
-ITERATORS_LIMIT = 2000
 
 CTX_ACTIONS_ONLY = '?actionsOnly'
 CTX_ALLOW_PROPERTY_WRITES = '$?allowPropertyWrites'

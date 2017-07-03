@@ -176,6 +176,10 @@ murano_opts = [
     cfg.IntOpt('api_workers',
                help=_('Number of API workers')),
 
+    cfg.IntOpt('dsl_iterators_limit', default=2000,
+               help=_('Maximum number of elements that can be iterated per '
+                      'object type.')),
+
 ]
 
 networking_opts = [

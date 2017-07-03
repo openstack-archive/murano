@@ -1,0 +1,8 @@
+---
+fixes:
+  - |
+    Remove hardcoded constant called 'ITERATORS_LIMIT', that can be
+    exceeded (2000) having big amount of objects.
+    Introduce dsl_iterators_limit configuration option instead of
+    constant.
+
