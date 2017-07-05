@@ -27,8 +27,10 @@ CONF = config.CONF
 
 class Manager(object):
     def __init__(self,
-                 credentials=common_creds.get_configured_admin_credentials(
-                     'identity_admin')):
+                 credentials=None):
+        if credentials is None:
+            credentials = common_creds.\
+                get_configured_admin_credentials('identity_admin')
         self.auth_provider = get_auth_provider(credentials)
         self.service_broker_client = service_broker_client.ServiceBrokerClient(
             self.auth_provider)
