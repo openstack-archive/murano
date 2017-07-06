@@ -31,7 +31,7 @@ function create_murano_accounts() {
         return
     fi
 
-    create_service_user "murano"
+    create_service_user "murano" "admin"
 
     get_or_create_service "murano" "application-catalog" "Application Catalog Service"
     get_or_create_endpoint "application-catalog" \
