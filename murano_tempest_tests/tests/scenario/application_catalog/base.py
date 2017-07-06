@@ -142,7 +142,7 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
                 return instance['id']
 
     def apache(
-            self, attributes=None, userName=None, flavor='m1.small'):
+            self, attributes=None, userName=None, flavor='m1.tiny'):
         post_body = {
             "instance": {
                 "flavor": flavor,
@@ -169,7 +169,7 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
         return post_body
 
     def vm_cinder(
-            self, attributes=None, userName=None, flavor='m1.small'):
+            self, attributes=None, userName=None, flavor='m1.tiny'):
         post_body = {
             "instance": {
                 "flavor": flavor,
@@ -197,7 +197,7 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
 
     def vm_test(self, **kwargs):
         instance = {
-            "flavor": "m1.small",
+            "flavor": "m1.tiny",
             "image": self.cirros_image,
             "assignFloatingIp": True,
             "availabilityZone": "nova",
@@ -221,7 +221,7 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
             }
         }
 
-    def update_executor(self, flavor='m1.small'):
+    def update_executor(self, flavor='m1.tiny'):
         post_body = {
             "instance": {
                 "flavor": flavor,
@@ -352,28 +352,23 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
                 volume_id = output['output_value']
                 return self.volumes_client.show_volume(volume_id)['volume']
 
-    def get_volume_attachments(self, environment_id):
-        stack = self.get_stack_id(environment_id)
-        stack_outputs = self.orchestration_client.\
-            show_stack(stack)['stack']['outputs']
-        for output in stack_outputs:
-            if (output['output_key'].startswith('vol-') and
-                    output['output_key'].endswith('-attachments')):
-                return output['output_value']
-
-    def check_volume_attachments(self, environment_id):
-        volume_attachments = self.get_volume_attachments(environment_id)
-        self.assertIsInstance(volume_attachments, list)
-        self.assertGreater(len(volume_attachments), 0)
-        instance_id = self.get_instance_id('testMurano')
-        for attachment in volume_attachments:
-            self.assertEqual(attachment.get('server_id'), instance_id)
-            self.assertTrue(attachment.get('device').startswith('/dev/'))
-
-    def check_volume_attached(self, name, volume_id):
+    def get_volume_attachments(self, name):
         instance_id = self.get_instance_id(name)
         attached_volumes = self.servers_client.\
             list_volume_attachments(instance_id)['volumeAttachments']
+        return attached_volumes
+
+    def check_volume_attachments(self, name):
+        volume_attachments = self.get_volume_attachments(name)
+        self.assertIsInstance(volume_attachments, list)
+        self.assertGreater(len(volume_attachments), 0)
+        instance_id = self.get_instance_id(name)
+        for attachment in volume_attachments:
+            self.assertEqual(attachment.get('serverId'), instance_id)
+            self.assertTrue(attachment.get('device').startswith('/dev/'))
+
+    def check_volume_attached(self, name, volume_id):
+        attached_volumes = self.get_volume_attachments(name)
         self.assertEqual(attached_volumes[0]['id'], volume_id)
 
 

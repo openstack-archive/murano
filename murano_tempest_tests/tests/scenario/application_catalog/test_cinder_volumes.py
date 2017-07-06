@@ -14,7 +14,6 @@
 
 import os
 import testtools
-import unittest
 
 from tempest import config
 
@@ -79,7 +78,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
             create_session(environment['id'])
         post_body = {
             "instance": {
-                "flavor": "m1.small",
+                "flavor": "m1.tiny",
                 "blockDevices": {
                     "volume": {
                         "?": {
@@ -160,7 +159,6 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         self.check_volume_attached('testMurano', self.volume['id'])
 
-    @unittest.expectedFailure  # failing, should be fixed as part of #1701230
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation(self):
@@ -199,7 +197,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
-        self.check_volume_attachments(environment['id'])
+        self.check_volume_attachments('testMurano')
         self.assertEqual(volume_data['size'], 1)
 
     @testtools.testcase.attr('smoke')

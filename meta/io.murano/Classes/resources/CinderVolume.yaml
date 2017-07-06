@@ -99,9 +99,6 @@ Methods:
         outputs:
           format('vol-{0}-id', id($)):
             value: $.getRef()
-          format('vol-{0}-attachments', id($)):
-            value:
-              get_attr: [$.getResourceName(), attachments_list]
 
   deploy:
     Body:
