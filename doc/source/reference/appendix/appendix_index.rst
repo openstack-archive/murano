@@ -9,3 +9,4 @@ Appendix
    rest_api_spec
    cli_ref
    glossary
+   articles/articles_index

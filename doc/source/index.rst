@@ -35,7 +35,7 @@ Introduction to Murano
 .. toctree::
    :maxdepth: 1
 
-   intro/overview_index
+   reference/overview_index
 
 
 Using Murano
@@ -48,8 +48,16 @@ The screenshots provided in this guide are of the Liberty release.
 .. toctree::
    :maxdepth: 1
 
-   enduser-guide/quickstart/quickstart
-   enduser-guide/user_index
+   user/quickstart/quickstart
+   user/user_index
+
+Installation
+~~~~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 2
+
+  install/index
 
 Administrator Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -60,7 +68,7 @@ client.
 .. toctree::
    :maxdepth: 1
 
-   administrator-guide/admin_index
+   admin/admin_index
 
 First App Guide
 ~~~~~~~~~~~~~~~
@@ -81,8 +89,8 @@ Murano.
 .. toctree::
    :maxdepth: 1
 
-   appdev-guide/developer_index
-   appdev-guide/faq
+   admin/appdev-guide/developer_index
+   admin/appdev-guide/faq
 
 Contributor Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -92,7 +100,7 @@ Learn how to contribute to the project.
 .. toctree::
    :maxdepth: 1
 
-   contributor-guide/contributor_index
+   contributor/contributor_index
 
 Other Documentation
 ~~~~~~~~~~~~~~~~~~~
@@ -100,5 +108,5 @@ Other Documentation
 .. toctree::
    :maxdepth: 1
 
-   appendix/appendix_index
-   appendix/articles/articles_index
+   reference/appendix/appendix_index
+   reference/appendix/articles/articles_index

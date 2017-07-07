@@ -23,7 +23,6 @@ Miscellaneous
 .. toctree::
    :maxdepth: 1
 
-   contributing
    guidelines
 
 **Gerrit review dashboard**

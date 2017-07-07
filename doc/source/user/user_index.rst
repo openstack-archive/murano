@@ -11,4 +11,4 @@ User Guide
    userguide/log_in_to_murano_instance
    userguide/use_cli
    userguide/deploying_using_cli
-   ../../appendix/articles/multi_region
+   ../reference/appendix/articles/multi_region

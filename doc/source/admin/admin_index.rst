@@ -20,3 +20,4 @@ Deploying Murano
    configure_cloud_foundry_service_broker
    using_glare.rst
    admin_troubleshooting
+   appdev-guide/developer_index
