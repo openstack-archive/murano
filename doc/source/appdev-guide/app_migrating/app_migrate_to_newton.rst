@@ -128,5 +128,5 @@ of objects destruction and let objects be aware of other objects destruction,
 react to this event, including the ability to prevent other objects from
 being destroyed.
 
-Please refer to the documentation on how to use the garbage collector:
-:ref:`garbage_collection`.
+Please refer to the documentation on how to use the
+:ref:`Garbage Collector <garbage_collection>`.

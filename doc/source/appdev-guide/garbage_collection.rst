@@ -1,4 +1,4 @@
-.. garbage_collection:
+.. _garbage_collection:
 
 =====================================
 Garbage collection system in MuranoPL

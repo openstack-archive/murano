@@ -56,7 +56,7 @@ Create a configuration session
 
 Murano uses configuration sessions to allow several users to edit and configure
 the same environment concurrently. Most of environment-related commands
-require the :option:`--session-id` parameter. For convenience, this guide
+require the ``--session-id`` parameter. For convenience, this guide
 refers to session ID as ``$SESS_ID``.
 
 To create a configuration session, use the
@@ -127,7 +127,7 @@ Verify your object model
 
 To verify whether your object model is correct, check the environment by
 running the :command:`environment-show` command with the
-:option:`--session-id` parameter:
+``--session-id`` parameter:
 
 .. code-block:: console
 
@@ -172,7 +172,7 @@ You can later use the :command:`murano environment-show` command to
 track the deployment status.
 
 To view the deployed applications of a particular environment, use the
-:command:`murano environment-show` command with the :option:`--only-apps`
+:command:`murano environment-show` command with the ``--only-apps``
 parameter and specifying the environment ID:
 
 .. code-block:: console

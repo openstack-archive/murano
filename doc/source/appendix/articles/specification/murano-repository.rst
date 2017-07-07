@@ -136,7 +136,7 @@ See the example of multipart/form-data request, It should contain two parts - te
 
 **Request (multipart/form-data)**
 
-::
+.. code-block:: none
 
     Content-type: multipart/form-data, boundary=AaB03x
     Content-Length: $requestlen
@@ -167,7 +167,7 @@ See the example of multipart/form-data request, It should contain two parts - te
 
 **Response 200 (application/json)**
 
-::
+.. code-block:: json
 
     {
         "updated": "2014-04-03T13:00:13",
@@ -583,7 +583,7 @@ Delete category
 | Method   | URI                               | Description                 |
 +==========+===================================+=============================+
 | DELETE   | /catalog/categories/<category_id> | Delete category with        |
-|          |                                   | specified ID                |                    
+|          |                                   | specified ID                |
 +----------+-----------------------------------+-----------------------------+
 
 *Parameters:*

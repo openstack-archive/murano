@@ -121,20 +121,20 @@ Steps to reproduce test:
 #. Ensure that there is NO KVM PROCESSES on the host. To do this, run
    command:
 
-   ::
+   .. code-block:: console
 
        ps aux | grep kvm
 
 #. Make 5 copies of Windows image file:
 
-   ::
+   .. code-block:: console
 
        for i in $(seq 5); do \
        cp ws-2012-std.qcow2 ws-2012-std-$i.qcow2; done
 
 #. Create script start-vm.sh in the folder with .qcow2 files:
 
-   ::
+   .. code-block:: console
 
        #!/bin/bash
        [ -z $1 ] || echo "VM count not provided!"; exit 1
@@ -147,13 +147,13 @@ Steps to reproduce test:
    appears. To view VM’s desktop, connect with VNC viewer to your host
    to VNC screen :1 (port 5901):
 
-   ::
+   .. code-block:: console
 
        sudo ./start-vm.sh 1
 
 #. Turn VM off. You may simply kill all KVM processes by
 
-   ::
+   .. code-block:: console
 
        sudo killall kvm
 
@@ -162,13 +162,13 @@ Steps to reproduce test:
    window appears. To view VM’s desktops, connect with VNC viewer to your
    host to VNC screens :1 thru :5 (ports 5901-5905):
 
-   ::
+   .. code-block:: console
 
        sudo ./start-vm.sh 5
 
 #. Turn VMs off. You may simply kill all KVM processes by
 
-   ::
+   .. code-block:: console
 
        sudo killall kvm
 

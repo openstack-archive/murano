@@ -308,7 +308,9 @@ a logger name as the only parameter. It is a common recommendation to use full
 class name as a logger name within that class. This convention avoids names
 conflicts in logs and ensures a better logging subsystem configurability.
 
-Logger class instantiation::
+Logger class instantiation:
+
+.. code-block:: yaml
 
     $log: logger('io.murano.apps.activeDirectory.ActiveDirectory')
 
@@ -340,7 +342,9 @@ There are several methods that fully correspond to the log levels you can use
 for logging events. They are ``debug``, ``trace``, ``info``, ``warning``,
 ``error``, and ``critical``.
 
-Logging example::
+Logging example:
+
+.. code-block:: yaml
 
   $log.info('print my info message {message}', message=>message)
 
