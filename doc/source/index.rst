@@ -62,6 +62,16 @@ client.
 
    administrator-guide/admin_index
 
+First App Guide
+~~~~~~~~~~~~~~~
+
+A guide for developing your first Murano application.
+
+.. toctree::
+   :maxdepth: 1
+
+   first-app/source/index
+
 Application Developer Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 

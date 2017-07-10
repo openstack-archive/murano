@@ -67,12 +67,12 @@ DevStack installation
    to view the empty list of packages.
    Alternatively, use the :command:`murano` command.
 
-#. Use :option:`--murano-packages-service` option to specify backend,
+#. Use ``--murano-packages-service`` option to specify backend,
    used by :command:`murano` command. Set it to ``glare`` for using ``Glare``
 
    .. note:: You also can use ``glance`` as value
-             of :option:`--murano-packages-service` option or environment variable
-             :option:`MURANO_PACKAGES_SERVICE` for same behaviour
+             of ``--murano-packages-service`` option or environment variable
+             ``MURANO_PACKAGES_SERVICE`` for same behaviour
 
    + View list of packages:
 
@@ -125,7 +125,7 @@ specify where g-glare service is running.
       GLARE_API_URL = 'http://<GLARE_API>:<GLARE_API_PORT>'
 
 #. Set the ``GLARE_URL`` environment variable for python-muranoclient.
-   Alternatively, use the :option:`--glare-url` option in CLI.
+   Alternatively, use the ``--glare-url`` option in CLI.
 
    .. code-block:: console
 

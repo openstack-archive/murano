@@ -40,7 +40,7 @@ occasionally will be no longer supported. Also, you cannot use both
 The following example shows an action that returns an archive with a
 configuration file:
 
-::
+.. code-block:: yaml
 
  exportConfig:
      Scope: Public
@@ -62,7 +62,7 @@ Request:
 
 Response:
 
-.. code-block:: javascript
+.. code-block:: json
 
     {
       "name": "SimpleVM",
@@ -93,7 +93,7 @@ result of its execution will be returned.
 Consider the following example of the static action that makes use both of
 static class property and user's input as an argument:
 
-::
+.. code-block:: yaml
 
  Name: Bar
 
@@ -118,7 +118,7 @@ Request:
 
 Request body:
 
-.. code-block:: javascript
+.. code-block:: json
 
     {
       "className": "ns.Bar",
@@ -128,6 +128,6 @@ Request body:
 
 Responce:
 
-.. code-block:: javascript
+.. code-block:: json
 
    "Hello, John"

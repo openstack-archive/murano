@@ -2,6 +2,8 @@
 My first Murano App getting started guide
 =========================================
 
+.. include:: ../README.rst
+
 Contents
 ~~~~~~~~
 

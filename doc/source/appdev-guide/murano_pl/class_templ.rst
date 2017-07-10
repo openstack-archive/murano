@@ -318,7 +318,9 @@ Default, if specified, must conform to a declared property contract.
 If Default is not specified, then null is the default.
 
 For properties that are references to other classes, Default can modify
-a default value of the referenced objects. For example::
+a default value of the referenced objects. For example:
+
+.. code-block:: yaml
 
   p:
    Contract: $.class(MyClass)
@@ -398,7 +400,9 @@ Unlike class properties Arguments may have a different set of Usages:
          with keys being valid keyword strings and values matching a contract
          of the argument.
 
-Arguments example::
+Arguments example:
+
+.. code-block:: yaml
 
   scaleRc:
     Arguments:
@@ -650,7 +654,7 @@ Object model, and a predefined method is executed on the root object.
 
 Objects are serialized to JSON using the following template:
 
-.. code-block:: yaml
+.. code-block:: json
    :linenos:
 
    {

@@ -48,7 +48,7 @@ If any issues occur, first of all verify the following:
 
 **Failed to execute `murano-db-manage`**
 
-* Make sure the :option:`--config-file` option is provided.
+* Make sure the ``--config-file`` option is provided.
 * Check `connection` parameter in the provided configuration file. It should
   be a `connection string <http://docs.sqlalchemy.org/en/rel_0_8/core/engines.html>`_.
 
@@ -112,7 +112,7 @@ Workarounds:
   In murano, the corresponding configuration option is located in the
   ``engine`` section:
 
-  .. code-block:: console
+  .. code-block:: ini
 
      [engine]
 

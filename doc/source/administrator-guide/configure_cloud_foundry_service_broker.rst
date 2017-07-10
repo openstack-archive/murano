@@ -116,7 +116,7 @@ Devstack installation
 ~~~~~~~~~~~~~~~~~~~~~
 
 It is really easy to enable service broker in your devstack installation.
-You need simply update your :file:`local.conf` with the following:
+You need simply update your ``local.conf`` with the following:
 
     .. code-block:: ini
 
@@ -162,7 +162,7 @@ To access and use murano packages through Cloud Foundry, you need to perform fol
 
    .. note::
 
-      You can use :command:`service-access` command to see human-readable list of packages.
+      You can use ``service-access`` command to see human-readable list of packages.
 
 #. Provision murano service through Cloud Foundry.
 
@@ -180,7 +180,7 @@ To access and use murano packages through Cloud Foundry, you need to perform fol
               },
               "keyname": "nstarodubtsev",
               "assignFloatingIp": "True",
-              "name": <name_pattern>,
+              "name": "<name_pattern>",
               "availabilityZone": "nova",
               "image": "1b9ff37e-dff3-4308-be08-9185705dad91"
           },

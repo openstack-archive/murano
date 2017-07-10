@@ -75,7 +75,7 @@ the test cases, or a separate package. You can specify a class name to
 execute all the tests located in it, or specify a particular test case name.
 
 Authorization parameters can be provided in the murano configuration file, or
-with higher priority :option:`-os-` parameters.
+with higher priority ``-os-`` parameters.
 
 Consider the following example of test execution for the Tomcat application.
 Tests are located in the same package with application, but in a separate class

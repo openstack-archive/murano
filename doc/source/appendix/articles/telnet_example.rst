@@ -1,4 +1,6 @@
-.. _telnet-example:
+:orphan:
+
+.. _telnet_example:
 
 Telnet Example
 --------------

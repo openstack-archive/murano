@@ -18,7 +18,7 @@ of your app.
 
 For example:
 
-::
+.. code-block:: yaml
 
     Workflow:
       deploy:
@@ -27,7 +27,7 @@ For example:
 
 Should be changed to:
 
-::
+.. code-block:: yaml
 
     Methods:
       deploy:
@@ -68,7 +68,7 @@ type. This change must be added to UI form definition in *app.name/UI/ui.yaml*.
 For example, if you are going to install your application on Ubuntu, you need to
 change:
 
-::
+.. code-block:: yaml
 
   Application:
     ?:
@@ -78,7 +78,7 @@ change:
 
 to:
 
-::
+.. code-block:: yaml
 
   Application:
     ?:
