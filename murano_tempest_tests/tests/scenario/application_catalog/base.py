@@ -22,6 +22,7 @@ from tempest.common import credentials_factory as common_creds
 from tempest.common import waiters
 from tempest import config
 from tempest.lib import exceptions
+from tempest.services import orchestration
 from tempest import test
 
 from murano_tempest_tests import clients
@@ -52,7 +53,11 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
             cls.os_primary.application_catalog_client
         cls.artifacts_client = cls.os_primary.artifacts_client
         cls.servers_client = cls.services_manager.servers_client
-        cls.orchestration_client = cls.services_manager.orchestration_client
+        # NOTE(andreaf) The orchestration client is not initialised in Tempest
+        # by default anymore.
+        params = config.service_client_config('orchestration')
+        cls.orchestration_client = orchestration.OrchestrationClient(
+            cls.services_manager.auth_provider, **params)
         cls.snapshots_client = cls.services_manager.snapshots_v2_client
         cls.volumes_client = cls.services_manager.volumes_v2_client
         cls.backups_client = cls.services_manager.backups_v2_client
