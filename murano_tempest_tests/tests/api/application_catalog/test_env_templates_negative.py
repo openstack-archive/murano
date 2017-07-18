@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
@@ -41,25 +40,25 @@ class TestEnvironmentTemplatesNegative(base.BaseApplicationCatalogTest):
             cls.environment['id'])
         super(TestEnvironmentTemplatesNegative, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_clone_env_template_private(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.clone_env_template,
                           self.env_template['id'], 'cloned_template')
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_environment_with_wrong_env_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_env_template,
                           None)
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_environment_with_wrong_payload(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.create_env_template,
                           '  ')
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_double_delete_env_template(self):
         name = utils.generate_name('double_delete_env_template')
         env_template = self.application_catalog_client.\
@@ -70,7 +69,7 @@ class TestEnvironmentTemplatesNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.delete_env_template,
                           env_template['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_deleted_env_template(self):
         name = utils.generate_name('get_deleted_env_template')
         env_template = self.application_catalog_client.\
@@ -81,13 +80,13 @@ class TestEnvironmentTemplatesNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.get_env_template,
                           env_template['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_environment_template_with_same_name(self):
         self.assertRaises(exceptions.Conflict,
                           self.application_catalog_client.create_env_template,
                           self.name)
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_env_from_template_witch_existing_name(self):
         self.assertRaises(exceptions.Conflict,
                           self.application_catalog_client.
@@ -112,13 +111,13 @@ class TestEnvTemplatesTenantIsolation(base.BaseApplicationCatalogTest):
             delete_env_template(cls.env_template['id'])
         super(TestEnvTemplatesTenantIsolation, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_env_template_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_env_template,
                           self.env_template['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_env_template_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_env_template,

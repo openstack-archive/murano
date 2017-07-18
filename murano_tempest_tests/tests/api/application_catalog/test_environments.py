@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -33,13 +33,13 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestEnvironments, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_list_environments(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
         self.assertIsInstance(environments_list, list)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_create_and_delete_environment(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
@@ -77,7 +77,7 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
             get_environment(self.environment['id'])
         self.assertEqual(self.environment['name'], environment['name'])
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_update_environment(self):
         environment = self.application_catalog_client.\
             update_environment(self.environment['id'])

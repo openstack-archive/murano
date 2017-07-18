@@ -15,7 +15,8 @@
 
 import json
 import os
-import testtools
+
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.service_broker import base
 from murano_tempest_tests import utils
@@ -23,13 +24,12 @@ from murano_tempest_tests import utils
 
 class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
 
-    @testtools.testcase.attr('gate')
+    @decorators.attr(type='gate')
     def test_applications_listing(self):
         app_list = self.service_broker_client.get_applications_list()
         self.assertIsInstance(app_list, list)
 
-    @testtools.testcase.attr('smoke')
-    @testtools.testcase.attr('gate')
+    @decorators.attr(type=['smoke', 'gate'])
     def test_provision_and_deprovision(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -53,8 +53,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.addCleanup(self.perform_deprovision, instance_id)
         self.assertIsInstance(json.loads(service), dict)
 
-    @testtools.testcase.attr('smoke')
-    @testtools.testcase.attr('gate')
+    @decorators.attr(type=['smoke', 'gate'])
     def test_binding_instance(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -81,8 +80,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.assertIsInstance(binding, dict)
         self.assertEqual({'uri': 'localhost'}, binding)
 
-    @testtools.testcase.attr('smoke')
-    @testtools.testcase.attr('gate')
+    @decorators.attr(type=['smoke', 'gate'])
     def test_provision_with_incorrect_input(self):
         """Test provision with restricted items in object model
 
@@ -119,8 +117,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.addCleanup(self.perform_deprovision, instance_id)
         self.assertIsInstance(json.loads(service), dict)
 
-    @testtools.testcase.attr('smoke')
-    @testtools.testcase.attr('gate')
+    @decorators.attr(type=['smoke', 'gate'])
     def test_double_provision_to_the_same_space(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \

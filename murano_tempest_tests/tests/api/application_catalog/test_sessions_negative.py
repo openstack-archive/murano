@@ -13,8 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
-
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
@@ -36,13 +35,13 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestSessionsNegative, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_session_before_env(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.create_session,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_session_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -52,7 +51,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.delete_session,
                           None, session['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_session_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -62,7 +61,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.get_session,
                           None, session['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_session_after_delete_env(self):
         name = utils.generate_name('get_session_after_delete_env')
         environment = self.application_catalog_client.create_environment(name)
@@ -73,7 +72,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.get_session,
                           environment['id'], session['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_double_delete_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -101,13 +100,13 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
             delete_environment(cls.environment['id'])
         super(TestSessionsNegativeTenantIsolation, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_session_in_env_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.create_session,
                           self.environment['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -117,7 +116,7 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           self.alt_client.delete_session,
                           self.environment['id'], session['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -127,7 +126,7 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           self.alt_client.get_session,
                           self.environment['id'], session['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_deploy_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])

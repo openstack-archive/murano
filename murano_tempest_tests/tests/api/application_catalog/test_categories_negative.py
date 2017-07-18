@@ -13,8 +13,8 @@
 #    under the License.
 
 import os
-import testtools
 
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
@@ -43,25 +43,25 @@ class TestCategoriesNegative(base.BaseApplicationCatalogIsolatedAdminTest):
         cls.application_catalog_client.delete_category(cls.category['id'])
         super(TestCategoriesNegative, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_category_by_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_category,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_category_by_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_category,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_create_category_with_same_name(self):
         self.assertRaises(exceptions.Conflict,
                           self.application_catalog_client.create_category,
                           self.category['name'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_category_with_package(self):
         self.assertRaises(exceptions.Forbidden,
                           self.application_catalog_client.delete_category,

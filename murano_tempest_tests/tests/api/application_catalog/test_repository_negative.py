@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
@@ -33,7 +33,7 @@ class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
             raise cls.skipException(msg)
         super(TestRepositoryNegativeNotFound, cls).resource_setup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_update_package_with_incorrect_id(self):
 
         post_body = [
@@ -48,31 +48,31 @@ class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.update_package,
                           utils.generate_uuid(), post_body)
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_package,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_package,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_download_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.download_package,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_ui_definition_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_ui_definition,
                           utils.generate_uuid())
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_logo_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_logo,
@@ -107,7 +107,7 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
         cls.application_catalog_client.delete_package(cls.package['id'])
         super(TestRepositoryNegativeForbidden, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_update_package_from_another_tenant(self):
         post_body = [
             {
@@ -122,31 +122,31 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
                           self.package['id'],
                           post_body)
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_package,
                           self.package['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_delete_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_package,
                           self.package['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_download_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.download_package,
                           self.package['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_ui_definition_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_ui_definition,
                           self.package['id'])
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_get_logo_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_logo,

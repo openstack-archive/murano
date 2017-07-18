@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog.artifacts import base
 from murano_tempest_tests import utils
@@ -64,7 +64,7 @@ class TestVersioning(base.BaseArtifactsTest):
         map(os.remove, cls.abs_archive_paths)
         super(TestVersioning, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_availability_of_packages_with_different_versions(self):
         """Test availability of packages with different versions.
 
@@ -84,7 +84,7 @@ class TestVersioning(base.BaseArtifactsTest):
         self.assertIn(self.packages['1.0.0']['id'], artifact_packages)
         self.assertIn(self.packages['2.0.0']['id'], artifact_packages)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_deploy_packages_with_different_versions(self):
         """Test deployment of packages with different versions.
 
@@ -126,7 +126,7 @@ class TestVersioning(base.BaseArtifactsTest):
 
         self.assertEqual(deploy_result, 'ready')
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_deploy_package_with_required_package_version(self):
         """Test deployment of package which requires package with present version.
 
