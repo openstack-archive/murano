@@ -197,7 +197,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         volume_data = self.get_volume(environment['id'])
         self.check_volume_attached('testMurano', volume_data['id'])
-        self.check_volume_attachments('testMurano')
+        self.check_volume_attachments(environment['id'])
         self.assertEqual(volume_data['size'], 1)
 
     @testtools.testcase.attr('smoke')
