@@ -393,7 +393,11 @@ class BaseApplicationCatalogScenarioIsolatedAdminTest(
             cls.os_admin.application_catalog_client
         cls.artifacts_client = cls.os_admin.artifacts_client
         cls.servers_client = cls.services_manager.servers_client
-        cls.orchestration_client = cls.services_manager.orchestration_client
+        # NOTE(andreaf) The orchestration client is not initialised in Tempest
+        # by default anymore.
+        params = config.service_client_config('orchestration')
+        cls.orchestration_client = orchestration.OrchestrationClient(
+            cls.services_manager.auth_provider, **params)
         cls.snapshots_client = cls.services_manager.snapshots_v2_client
         cls.volumes_client = cls.services_manager.volumes_v2_client
         cls.backups_client = cls.services_manager.backups_v2_client
