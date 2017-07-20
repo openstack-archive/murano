@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog.artifacts import base
 from murano_tempest_tests import utils
@@ -58,8 +58,7 @@ class TestVersioningNegative(base.BaseArtifactsTest):
         map(os.remove, cls.abs_archive_paths)
         super(TestVersioningNegative, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type=['negative', 'smoke'])
     def test_deploy_package_with_no_required_package_version(self):
         """Test deployment of package which requires package with absent version.
 

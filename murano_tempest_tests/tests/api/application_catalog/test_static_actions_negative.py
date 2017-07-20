@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 from tempest.lib import exceptions
 
 from murano_tempest_tests.tests.api.application_catalog import base
@@ -53,19 +53,19 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
         client.delete_package(cls.package['id'])
         super(TestStaticActionsNegative, cls).resource_cleanup()
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_no_args(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action)
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_wrong_class(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
                           'wrong.class', 'staticAction',
                           args={'myName': 'John'})
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_wrong_method(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -73,7 +73,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           method_name='wrongMethod',
                           args={'myName': 'John'})
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_session_method(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -81,7 +81,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           method_name='staticNotAction',
                           args={'myName': 'John'})
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_wrong_args(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action,
@@ -89,7 +89,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           method_name='staticAction',
                           args={'myEmail': 'John'})
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_wrong_package(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -98,7 +98,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           package_name='wrong.package',
                           args={'myName': 'John'})
 
-    @testtools.testcase.attr('negative')
+    @decorators.attr(type='negative')
     def test_call_static_action_wrong_version_format(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action,

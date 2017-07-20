@@ -13,7 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import testtools
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -26,7 +26,7 @@ class TestEnvironmentTemplatesSanity(base.BaseApplicationCatalogTest):
             get_env_templates_list()
         self.assertIsInstance(templates_list, list)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_create_and_delete_env_template(self):
         name = utils.generate_name('create_and_delete_env_template')
         env_template = self.application_catalog_client.\
@@ -82,7 +82,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         self.assertIsInstance(list_services, list)
         self.assertIn(post_body, list_services)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_add_and_remove_service_in_env_templates(self):
         env_template_services = self.application_catalog_client.\
             get_services_list_in_env_template(self.env_template['id'])
@@ -101,7 +101,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
             get_services_list_in_env_template(self.env_template['id'])
         self.assertNotIn(service, services)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_update_service_in_env_templates(self):
         env_template_services = self.application_catalog_client.\
             get_services_list_in_env_template(self.env_template['id'])
@@ -224,7 +224,7 @@ class TestEnvironmentTemplates(base.BaseApplicationCatalogTest):
         self.assertNotIn(private_env_template, alt_env_templates)
         self.assertIn(private_alt_env_template, alt_env_templates)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_create_env_from_template(self):
         name = utils.generate_name('create_env_from_template')
         env_template = self.application_catalog_client.\

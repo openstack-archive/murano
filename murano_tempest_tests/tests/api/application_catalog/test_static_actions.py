@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -59,7 +59,7 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
             args={'myName': 'John'})
         self.assertEqual('"Hello, John"', action_result)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_call_static_action_full(self):
         if CONF.application_catalog.glare_backend:
             name_attr = 'name'

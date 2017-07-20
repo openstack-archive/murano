@@ -13,9 +13,9 @@
 #    under the License.
 
 import os
-import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -33,12 +33,12 @@ class TestRepositorySanity(base.BaseApplicationCatalogTest):
             raise cls.skipException(msg)
         super(TestRepositorySanity, cls).resource_setup()
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_get_list_packages(self):
         package_list = self.application_catalog_client.get_list_packages()
         self.assertIsInstance(package_list, list)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_upload_and_delete_package(self):
         application_name = utils.generate_name('package_test_upload')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -83,7 +83,7 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
             self.package['id'])
         self.assertEqual(self.package['tags'], package['tags'])
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_update_package(self):
         post_body = [
             {

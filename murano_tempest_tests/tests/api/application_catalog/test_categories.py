@@ -13,7 +13,8 @@
 #    under the License.
 
 import os
-import testtools
+
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.api.application_catalog import base
 from murano_tempest_tests import utils
@@ -40,12 +41,12 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         cls.application_catalog_client.delete_category(cls.category['id'])
         super(TestCategories, cls).resource_cleanup()
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_list_categories(self):
         categories_list = self.application_catalog_client.list_categories()
         self.assertIsInstance(categories_list, list)
 
-    @testtools.testcase.attr('smoke')
+    @decorators.attr(type='smoke')
     def test_create_and_delete_category(self):
         name = utils.generate_name('create_and_delete_category')
         categories_list = self.application_catalog_client.list_categories()
