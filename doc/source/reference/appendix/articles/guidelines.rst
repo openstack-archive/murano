@@ -18,7 +18,7 @@ To check your code against PEP 8 run:
 
    * https://pep8.readthedocs.org/en/latest/
    * https://flake8.readthedocs.org
-   * http://docs.openstack.org/developer/hacking/
+   * https://docs.openstack.org/hacking/latest/
 
 Blueprints and Specs
 --------------------

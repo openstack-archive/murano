@@ -6,7 +6,7 @@ Creating a Murano plug-in
 Murano plug-in is a setuptools-compliant python package with ``setup.py`` and
 all other necessary files. For more information about defining stevedore
 plug-ins, see `stevedore documentation
-<http://docs.openstack.org/developer/stevedore/>`_.
+<https://docs.openstack.org/stevedore/latest/>`_.
 
 The structure of the demo application package
 +++++++++++++++++++++++++++++++++++++++++++++

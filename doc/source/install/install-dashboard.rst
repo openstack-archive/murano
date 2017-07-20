@@ -53,7 +53,7 @@ Dashboard.
     ..
 
     For more information, check out the official
-    `horizon documentation <http://docs.openstack.org/developer/horizon/topics/settings.html#openstack-settings-partial>`_.
+    `horizon documentation <https://docs.openstack.org/horizon/latest/>`_.
 
 #.  Enable and configure Murano dashboard in the OpenStack Dashboard:
 
