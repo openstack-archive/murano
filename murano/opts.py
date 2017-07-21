@@ -19,6 +19,7 @@ __all__ = [
 
 import copy
 import itertools
+from keystoneauth1 import loading as ks_loading
 
 import oslo_service.sslutils
 
@@ -43,7 +44,13 @@ _opt_lists = [
     ('mistral', murano.common.config.mistral_opts),
     ('networking', murano.common.config.networking_opts),
     ('stats', murano.common.config.stats_opts),
-    ('murano_auth', murano.common.config.murano_auth_opts),
+    ('murano_auth',
+     murano.common.config.murano_auth_opts +
+     ks_loading.get_session_conf_options() +
+     ks_loading.get_auth_common_conf_options() +
+     ks_loading.get_auth_plugin_conf_options('password') +
+     ks_loading.get_auth_plugin_conf_options('v2password') +
+     ks_loading.get_auth_plugin_conf_options('v3password')),
     (None, build_list([
         murano.common.config.metadata_dir,
         murano.common.config.bind_opts,

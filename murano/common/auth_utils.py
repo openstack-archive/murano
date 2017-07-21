@@ -23,42 +23,35 @@ from murano.dsl import helpers
 
 
 CFG_KEYSTONE_GROUP = 'keystone_authtoken'
+CFG_MURANO_AUTH_GROUP = 'murano_auth'
 LOG = logging.getLogger(__name__)
 
 cfg.CONF.import_group(CFG_KEYSTONE_GROUP, 'keystonemiddleware.auth_token')
 
 
 def _get_keystone_auth(trust_id=None):
-    auth_uri = cfg.CONF['murano_auth'].auth_uri
-    username = cfg.CONF['murano_auth'].admin_user
-    password = cfg.CONF['murano_auth'].admin_password
-    user_domain_name = cfg.CONF['murano_auth'].user_domain_name or "default"
-    auth_type = cfg.CONF['murano_auth'].auth_type
-    project_name = cfg.CONF['murano_auth'].admin_project_name
-    project_domain_name = cfg.CONF['murano_auth'].project_domain_name or \
-        "default"
-    if not (auth_uri and username and password):
-        versionutils.report_deprecated_feature(
-            LOG, "Please update configuration in 'murano_auth' group")
-        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
-        username = cfg.CONF[CFG_KEYSTONE_GROUP].admin_user
-        password = cfg.CONF[CFG_KEYSTONE_GROUP].admin_password
-        auth_type = cfg.CONF[CFG_KEYSTONE_GROUP].auth_type
-        project_name = cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
-    if not auth_type:
-        # Fallback to legacy v2 options if no auth_type is set.
+    if not cfg.CONF[CFG_MURANO_AUTH_GROUP].auth_type:
+        # Fallback to legacy v2 options in keystone_authtoken
+        # if no auth_type is set.
         # If auth_type is set, it is possible to use the auth loader
         # from keystoneauth1. This is the same fallback as keystonemiddleware
         # uses.
+        versionutils.report_deprecated_feature(
+            LOG, 'Please update configuration in ' + CFG_MURANO_AUTH_GROUP +
+                 ' group')
+        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
+        username = cfg.CONF[CFG_KEYSTONE_GROUP].admin_user
+        password = cfg.CONF[CFG_KEYSTONE_GROUP].admin_password
+        project_name = cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
         kwargs = {
             'auth_url': auth_uri.replace('v2.0', 'v3'),
             'username': username,
             'password': password,
-            'user_domain_name': user_domain_name
+            'user_domain_name': 'default'
         }
         if not trust_id:
             kwargs['project_name'] = project_name
-            kwargs['project_domain_name'] = project_domain_name
+            kwargs['project_domain_name'] = 'default'
         else:
             kwargs['trust_id'] = trust_id
         auth = identity.Password(**kwargs)
@@ -73,16 +66,14 @@ def _get_keystone_auth(trust_id=None):
             kwargs['trust_id'] = trust_id
         auth = ka_loading.load_auth_from_conf_options(
             cfg.CONF,
-            CFG_KEYSTONE_GROUP,
+            CFG_MURANO_AUTH_GROUP,
             **kwargs)
     return auth
 
 
 def _create_keystone_admin_client():
     auth = _get_keystone_auth()
-    session = _get_session(
-        auth=auth,
-        conf_section=cfg.CONF[CFG_KEYSTONE_GROUP])
+    session = _get_session(auth=auth)
     return ks_client.Client(session=session)
 
 
@@ -100,10 +91,11 @@ def get_client_session(execution_session=None, conf=None):
 
 
 def get_token_client_session(token=None, project_id=None, conf=None):
-    auth_uri = cfg.CONF['murano_auth'].auth_uri
+    auth_uri = cfg.CONF[CFG_MURANO_AUTH_GROUP].auth_uri
     if not auth_uri:
         versionutils.report_deprecated_feature(
-            LOG, "Please update configuration in 'murano_auth' group")
+            LOG, 'Please configure auth_uri in ' + CFG_MURANO_AUTH_GROUP +
+                 ' group')
         auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
     auth_url = auth_uri.replace('v2.0', 'v3')
     if token is None or project_id is None:
@@ -155,11 +147,11 @@ def _get_config_option(conf_section, option_names, default=None):
     return default
 
 
-def _get_session(auth, conf_section):
-    # Fallback to keystone_authtoken section for TLS parameters
+def _get_session(auth, conf_section=None):
+    # Fallback to murano_auth section for TLS parameters
     # if no other conf_section supplied
     if not conf_section:
-        conf_section = cfg.CONF[CFG_KEYSTONE_GROUP]
+        conf_section = cfg.CONF[CFG_MURANO_AUTH_GROUP]
     session = ka_loading.session.Session().load_from_options(
         auth=auth,
         insecure=_get_config_option(conf_section, 'insecure', False),

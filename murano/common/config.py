@@ -13,6 +13,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from keystoneauth1 import loading as ks_loading
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_middleware import cors
@@ -332,26 +333,11 @@ home_region = cfg.StrOpt(
     'home_region',
     help="Default region name used to get services endpoints.")
 
+# Unfortuntely we cannot use murano_auth.auth_url, since it
+# is private to the actual authentication plugin used.
 murano_auth_opts = [
-    cfg.StrOpt('auth_type', help='Authentication type to load.'),
-
-    cfg.StrOpt('auth_uri', help='Identity API endpoint.'),
-
-    cfg.StrOpt('admin_user',
-               help='User name for murano authentication.'),
-
-    cfg.StrOpt('admin_password', secret=True,
-               help='Password for murano authentication.'),
-
-    cfg.StrOpt('user_domain_name',
-               help="User's domain name for authentication."),
-
-    cfg.StrOpt('admin_project_name',
-               help="Project name for project scoping."),
-
-    cfg.StrOpt('project_domain_name',
-               help="Project's domain name."),
-]
+    cfg.StrOpt('auth_uri',
+               help='Identity API endpoint for authenticating with tokens.')]
 
 
 CONF = cfg.CONF
@@ -371,6 +357,8 @@ CONF.register_opts(networking_opts, group='networking')
 CONF.register_opts(glare_opts, group='glare')
 CONF.register_opts(glance_opts, group='glance')
 CONF.register_opts(murano_auth_opts, group='murano_auth')
+ks_loading.register_auth_conf_options(CONF, group='murano_auth')
+ks_loading.register_session_conf_options(CONF, group='murano_auth')
 
 
 def parse_args(args=None, usage=None, default_config_files=None):
