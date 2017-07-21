@@ -68,7 +68,7 @@ client.
 .. toctree::
    :maxdepth: 1
 
-   admin/admin_index
+   admin/index
 
 First App Guide
 ~~~~~~~~~~~~~~~
