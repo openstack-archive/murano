@@ -1,0 +1,139 @@
+#
+#"context_is_admin": "role:admin"
+
+#
+#"admin_api": "is_admin:True"
+
+#
+#"default": ""
+
+# Excute an available action on a deployed environment,
+# retrieve the task status of an executed action, or retrieve the
+# result of
+# an executed static action.
+# POST  v1/environments/{environment_id}/actions/{action_id}
+# GET  v1/environments/{environment_id}/actions/{task_id}
+# POST  v1/actions
+#"execute_action": "rule:default"
+
+# Show category details or list all categories in the
+# application catalog.
+# GET  /v1/catalog/categories/{category_id}
+# GET  /v1/catalog/categories
+#"get_category": "rule:default"
+
+# Delete a category.
+# DELETE  /v1/catalog/categories/{category_id}
+#"delete_category": "rule:admin_api"
+
+# Create a category.
+# POST  /v1/catalog/categories
+#"add_category": "rule:admin_api"
+
+# List deployments for an environment.
+# GET  /v1/environments/{env_id}/deployments
+#"list_deployments": "rule:default"
+
+# List deployments for all environments in a project.
+# GET  /v1/deployments
+#"list_deployments_all_environments": "rule:default"
+
+# Show deployment status details for a deployment.
+# GET  /v1/environments/{env_id}/deployments/{deployment_id}
+#"statuses_deployments": "rule:default"
+
+# List environments in a project.
+# GET  /v1/environments
+#"list_environments": "rule:default"
+
+# List environments across all projects.
+# GET  /v1/environments?all_tenants=true
+#"list_environments_all_tenants": "rule:admin_api"
+
+# Show details for an environment or shows the environment model.
+# GET  /v1/environments/{environment_id}
+# GET  /v1/environments/{environment_id}/model
+#"show_environment": "rule:default"
+
+# Update or rename an environment.
+# PUT  /v1/environments/{environment_id}
+# PATCH  /v1/environments/{environment_id}/model
+#"update_environment": "rule:default"
+
+# Create an environment or create an environment and session from an
+# environment template.
+# POST  /v1/environments/{environment_id}
+# POST  /v1/templates/{env_template_id}/create-environment
+#"create_environment": "rule:default"
+
+# Delete an environment.
+# DELETE  /v1/environments/{environment_id}
+#"delete_environment": "rule:default"
+
+# List environment templates in a project.
+# GET  /v1/templates
+#"list_env_templates": "rule:default"
+
+# Create an environment template.
+# POST  /v1/templates
+#"create_env_template": "rule:default"
+
+# Show environment template details.
+# GET  /v1/templates/{env_template_id}
+#"show_env_template": "rule:default"
+
+# Update an environment template.
+# PUT  /v1/templates/{env_template_id}
+#"update_env_template": "rule:default"
+
+# Delete an environment template.
+# DELETE  /v1/templates/{env_template_id}
+#"delete_env_template": "rule:default"
+
+# Clone an environment template.
+# POST  /v1/templates/{env_template_id}/clone
+#"clone_env_template": "rule:default"
+
+# Returns either detailed package information or
+# information specific to the package's UI or logo. In addition,
+# checks for the
+# existence of a given package.
+# GET  /v1/catalog/packages/{package_id}
+# GET  /v1/catalog/packages
+# GET  /v1/catalog/packages/{package_id}/ui
+# GET  /v1/catalog/packages/{package_id}/logo
+#"get_package": "rule:default"
+
+# Upload a package to the application catalog.
+# POST  /v1/catalog/packages
+#"upload_package": "rule:default"
+
+# Update package information for a given package.
+# PATCH  /v1/catalog/packages/{package_id}
+#"modify_package": "rule:default"
+
+# Publicize a package across all projects. Grants users in
+# any project the ability to use the package. Enforced only when
+# `is_public`
+# parameter is set to True in the request body of the `update` or
+# `upload`
+# package request.
+# PATCH  /v1/catalog/packages/{package_id}
+# POST  /v1/catalog/packages
+#"publicize_package": "rule:admin_api"
+
+# Either update, delete or check for the existence of a
+# public package. Only enforced when the package is public.
+# PATCH  /v1/catalog/packages/{package_id}
+# DELETE  /v1/catalog/packages/{package_id}
+# GET  /v1/catalog/packages
+#"manage_public_package": "rule:default"
+
+# Delete a given package.
+# DELETE  /v1/catalog/packages/{package_id}
+#"delete_package": "rule:default"
+
+# Download a package from the application catalog.
+# GET  /v1/catalog/packages/{package_id}/download
+#"download_package": "rule:default"
+

@@ -1,8 +1,8 @@
 .. _policy_enf:
 
-==================
-Policy enforcement
-==================
+=================================
+Policy enforcement using Congress
+=================================
 
 Policies are defined and evaluated in the Congress_ project.
 The policy language for Congress is Datalog. The congress policy consists

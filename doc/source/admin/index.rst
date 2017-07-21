@@ -11,6 +11,7 @@ Deploying Murano
    deploy_murano
    prepare_lab
    configuration
+   murano_policies
    manage_packages
    manage_images
    manage_categories
