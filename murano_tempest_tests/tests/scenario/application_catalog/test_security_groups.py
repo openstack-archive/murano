@@ -15,6 +15,7 @@ import os
 import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.scenario.application_catalog import base
 from murano_tempest_tests import utils
@@ -48,6 +49,7 @@ class TestSecurityGroups(base.BaseApplicationCatalogScenarioTest):
         os.remove(cls.abs_archive_path)
         super(TestSecurityGroups, cls).resource_cleanup()
 
+    @decorators.idempotent_id('1344f041-3f7a-4e75-acfc-36b050ccec82')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_murano_defined_security_group(self):
@@ -64,6 +66,7 @@ class TestSecurityGroups(base.BaseApplicationCatalogScenarioTest):
         self.assertEqual(len(security_groups), 1)
         self.assertEqual(len(security_groups[0].get('rules')), 4)
 
+    @decorators.idempotent_id('c52cb4a2-53dd-44c3-95d5-7e1606954caa')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_user_defined_security_group(self):

@@ -34,6 +34,7 @@ class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
         super(TestRepositoryNegativeNotFound, cls).resource_setup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('49c557f4-789c-4d9c-8f48-0ba6bea4f234')
     def test_update_package_with_incorrect_id(self):
 
         post_body = [
@@ -49,30 +50,35 @@ class TestRepositoryNegativeNotFound(base.BaseApplicationCatalogTest):
                           utils.generate_uuid(), post_body)
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('72590141-5046-424a-bed2-17e7b7aabd9a')
     def test_get_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_package,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('09e3f9d9-40ae-4d5c-a488-4137e3abd7a2')
     def test_delete_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_package,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('a3cbcb58-7e46-47e9-a633-e3fc296681a9')
     def test_download_package_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.download_package,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('46799c58-8fe1-4d30-91a9-6067af780b32')
     def test_get_ui_definition_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_ui_definition,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('062ad8ab-6b5e-43ed-8331-b4bcd849b06e')
     def test_get_logo_with_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_logo,
@@ -108,6 +114,7 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
         super(TestRepositoryNegativeForbidden, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('29f9b3f1-8e8a-4305-a593-e3055e098666')
     def test_update_package_from_another_tenant(self):
         post_body = [
             {
@@ -123,30 +130,35 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
                           post_body)
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('75b57ded-6077-436f-97f8-d3087f2f3b77')
     def test_get_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_package,
                           self.package['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('1d9f8f74-8aca-4ee8-be0d-ac5b9d5a7dcd')
     def test_delete_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_package,
                           self.package['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('a1467fed-cd6f-44dd-b79c-ea0f91e082dc')
     def test_download_package_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.download_package,
                           self.package['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('b6074261-f981-4c15-9cd6-5811bd75127a')
     def test_get_ui_definition_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_ui_definition,
                           self.package['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('a5a3c2bb-3fde-49cb-ae4c-c454d7eb956b')
     def test_get_logo_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_logo,

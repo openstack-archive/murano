@@ -59,6 +59,7 @@ class TestVersioningNegative(base.BaseArtifactsTest):
         super(TestVersioningNegative, cls).resource_cleanup()
 
     @decorators.attr(type=['negative', 'smoke'])
+    @decorators.idempotent_id('c72fcd24-4694-4479-b550-bdd8cf0bd348')
     def test_deploy_package_with_no_required_package_version(self):
         """Test deployment of package which requires package with absent version.
 

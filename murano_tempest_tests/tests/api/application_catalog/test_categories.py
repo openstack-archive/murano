@@ -42,11 +42,13 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         super(TestCategories, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('4785781d-4bea-4559-939e-1c2fdf0dbec3')
     def test_list_categories(self):
         categories_list = self.application_catalog_client.list_categories()
         self.assertIsInstance(categories_list, list)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('c02841bc-3305-4e88-a733-696fb8690552')
     def test_create_and_delete_category(self):
         name = utils.generate_name('create_and_delete_category')
         categories_list = self.application_catalog_client.list_categories()
@@ -65,12 +67,14 @@ class TestCategories(base.BaseApplicationCatalogIsolatedAdminTest):
         category_names = [c['name'] for c in categories_list]
         self.assertNotIn(name, category_names)
 
+    @decorators.idempotent_id('c7931b7f-e811-4555-8ecc-84bea7885d96')
     def test_get_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])
         self.assertEqual(self.category['id'], category['id'])
         self.assertEqual(self.category['name'], category['name'])
 
+    @decorators.idempotent_id('9b92705a-4203-4f02-9d6b-abc797c0eaac')
     def test_add_package_to_new_category_and_remove_it_from_category(self):
         category = self.application_catalog_client.get_category(
             self.category['id'])

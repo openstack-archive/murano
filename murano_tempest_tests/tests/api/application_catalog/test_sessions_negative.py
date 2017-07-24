@@ -36,12 +36,14 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
         super(TestSessionsNegative, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('eaf51e99-ff10-45ff-8c9f-416b6a125799')
     def test_create_session_before_env(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.create_session,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('1269efdf-5586-4119-80e3-e88aa20d3111')
     def test_delete_session_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -52,6 +54,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           None, session['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('a96f8e67-165c-4a43-92f1-05d28275d576')
     def test_get_session_without_env_id(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -62,6 +65,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           None, session['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('784486ca-9645-4edc-8b23-c7ef781a85ae')
     def test_get_session_after_delete_env(self):
         name = utils.generate_name('get_session_after_delete_env')
         environment = self.application_catalog_client.create_environment(name)
@@ -73,6 +77,7 @@ class TestSessionsNegative(base.BaseApplicationCatalogTest):
                           environment['id'], session['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('8e5e1148-0a79-4c5a-bf93-2178ff7a92fe')
     def test_double_delete_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -101,12 +106,14 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
         super(TestSessionsNegativeTenantIsolation, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('72108505-3eb1-49b2-a757-a7340d18f52c')
     def test_create_session_in_env_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.create_session,
                           self.environment['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('35ada820-67f1-4a8b-852d-f1a02c11a110')
     def test_delete_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -117,6 +124,7 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           self.environment['id'], session['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('62d469ac-2e91-4e50-bbe8-3f93ab79d903')
     def test_get_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -127,6 +135,7 @@ class TestSessionsNegativeTenantIsolation(base.BaseApplicationCatalogTest):
                           self.environment['id'], session['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('d261f060-7189-4234-9ece-06ae46127591')
     def test_deploy_session_in_env_from_another_tenant(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])

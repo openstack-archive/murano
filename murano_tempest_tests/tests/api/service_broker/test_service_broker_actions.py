@@ -25,11 +25,13 @@ from murano_tempest_tests import utils
 class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
 
     @decorators.attr(type='gate')
+    @decorators.idempotent_id('76cadf4b-7143-402c-975e-11d7464dd20e')
     def test_applications_listing(self):
         app_list = self.service_broker_client.get_applications_list()
         self.assertIsInstance(app_list, list)
 
     @decorators.attr(type=['smoke', 'gate'])
+    @decorators.idempotent_id('51ad86a2-b8e4-43d1-8099-75e4be293f79')
     def test_provision_and_deprovision(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -54,6 +56,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.assertIsInstance(json.loads(service), dict)
 
     @decorators.attr(type=['smoke', 'gate'])
+    @decorators.idempotent_id('d5bd537a-7912-4916-a137-d0601157fb9e')
     def test_binding_instance(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -81,6 +84,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.assertEqual({'uri': 'localhost'}, binding)
 
     @decorators.attr(type=['smoke', 'gate'])
+    @decorators.idempotent_id('f738fdc2-a180-40e5-9aa6-d338d8660b88')
     def test_provision_with_incorrect_input(self):
         """Test provision with restricted items in object model
 
@@ -118,6 +122,7 @@ class ServiceBrokerActionsTest(base.BaseServiceBrokerAdminTest):
         self.assertIsInstance(json.loads(service), dict)
 
     @decorators.attr(type=['smoke', 'gate'])
+    @decorators.idempotent_id('ef9bc7ca-21b7-480d-a3ba-32cb39b33909')
     def test_double_provision_to_the_same_space(self):
         application_name = utils.generate_name('cfapi')
         abs_archive_path, dir_with_archive, archive_name = \

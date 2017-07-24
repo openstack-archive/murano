@@ -34,11 +34,13 @@ class TestRepositorySanity(base.BaseApplicationCatalogTest):
         super(TestRepositorySanity, cls).resource_setup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('d0f3ad6c-70b4-4ce0-90c5-e7afb20ace80')
     def test_get_list_packages(self):
         package_list = self.application_catalog_client.get_list_packages()
         self.assertIsInstance(package_list, list)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('53f679d9-955f-4dc1-8cdc-1fcdcfbb07a5')
     def test_upload_and_delete_package(self):
         application_name = utils.generate_name('package_test_upload')
         abs_archive_path, dir_with_archive, archive_name = \
@@ -78,12 +80,14 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
         cls.application_catalog_client.delete_package(cls.package['id'])
         super(TestRepository, cls).resource_cleanup()
 
+    @decorators.idempotent_id('5ea58ef1-1a63-403d-a57a-ef4423202993')
     def test_get_package(self):
         package = self.application_catalog_client.get_package(
             self.package['id'])
         self.assertEqual(self.package['tags'], package['tags'])
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('daf5694d-abbf-4ab1-a6df-99540d0efc70')
     def test_update_package(self):
         post_body = [
             {
@@ -170,11 +174,14 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
             self.package['id'], post_body)
         self.assertEqual("New name", result['name'])
 
+    @decorators.idempotent_id('fe4711ba-d1ee-4291-8a48-f8efcbd480ab')
     def test_download_package(self):
         self.application_catalog_client.download_package(self.package['id'])
 
+    @decorators.idempotent_id('1c017c1b-9efc-4498-95ff-833a9ce565a0')
     def test_get_ui_definitions(self):
         self.application_catalog_client.get_ui_definition(self.package['id'])
 
+    @decorators.idempotent_id('9f5ee28a-cec7-4d8b-a0fd-affbfceb0fc2')
     def test_get_logo(self):
         self.application_catalog_client.get_logo(self.package['id'])

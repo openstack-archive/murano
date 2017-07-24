@@ -22,12 +22,14 @@ from murano_tempest_tests import utils
 class TestEnvironmentsNegative(base.BaseApplicationCatalogTest):
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('9e245625-ce24-4068-916e-20a5608f6d5a')
     def test_delete_environment_with_wrong_env_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_environment,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('1dae123c-27f4-4996-871e-31c66f76ee49')
     def test_double_delete_environment(self):
         name = utils.generate_name('double_del_negavive')
         environment = self.application_catalog_client.\
@@ -38,6 +40,7 @@ class TestEnvironmentsNegative(base.BaseApplicationCatalogTest):
                           environment['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('a8032052-5a48-48f0-b333-d1cefcfcbf5f')
     def test_get_deleted_environment(self):
         name = utils.generate_name('double_del_negavive')
         environment = self.application_catalog_client.\
@@ -66,18 +69,21 @@ class TestEnvironmentNegativeTenantIsolation(base.BaseApplicationCatalogTest):
         super(TestEnvironmentNegativeTenantIsolation, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('0fc96a16-5df9-48b9-a681-ba5b3730e95b')
     def test_get_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_environment,
                           self.environment['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('d3c6dc81-ed60-4346-869c-0a091c2fe5b8')
     def test_update_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.update_environment,
                           self.environment['id'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('56aea1db-9314-4558-8b97-5fcd35fd6955')
     def test_delete_environment_from_another_tenant(self):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.delete_environment,

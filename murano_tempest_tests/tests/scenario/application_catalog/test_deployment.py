@@ -19,6 +19,7 @@ from murano_tempest_tests.tests.scenario.application_catalog import base
 from murano_tempest_tests import utils
 
 from tempest import config
+from tempest.lib import decorators
 
 CONF = config.CONF
 
@@ -83,6 +84,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
         map(os.remove, cls.abs_archive_path)
         super(TestMuranoDeployment, cls).resource_cleanup()
 
+    @decorators.idempotent_id('244c7f25-05bb-43f8-af81-563902979109')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_app_deployment(self):
@@ -112,6 +114,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
         self.status_check(environment['id'],
                           [[post_body['instance']['name'], 22, 80]])
 
+    @decorators.idempotent_id('f161ac2f-69b8-4c0b-89ee-225459e7f113')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_resources_deallocation(self):
@@ -173,6 +176,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
         self.assertNotIn(floating_ip, template['outputs'])
         self.assertNotIn(instance_name, template['resources'])
 
+    @decorators.idempotent_id('5f0f1326-83b4-4ebb-a80d-312a744851b1')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_dependent_app(self):
@@ -215,6 +219,7 @@ class TestMuranoDeployment(base.BaseApplicationCatalogScenarioTest):
         self.status_check(environment['id'],
                           [[updater['instance']['name'], 22, 80]])
 
+    @decorators.idempotent_id('3a1fbca7-f5b3-4274-b4dd-3a66822bad77')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_simple_software_configuration(self):

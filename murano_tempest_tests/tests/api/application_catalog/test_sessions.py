@@ -34,6 +34,7 @@ class TestSessions(base.BaseApplicationCatalogTest):
         super(TestSessions, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('9f8ca4dd-1159-4c12-bd97-84ee7f36775e')
     def test_create_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
@@ -42,12 +43,14 @@ class TestSessions(base.BaseApplicationCatalogTest):
         self.assertEqual(self.environment['id'], session['environment_id'])
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('a2782f54-9f9a-443b-97be-edc17039aea5')
     def test_delete_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])
         self.application_catalog_client.delete_session(self.environment['id'],
                                                        session['id'])
 
+    @decorators.idempotent_id('0639a8ef-f527-4a5d-b34a-4e2d46f48b30')
     def test_get_session(self):
         session = self.application_catalog_client.\
             create_session(self.environment['id'])

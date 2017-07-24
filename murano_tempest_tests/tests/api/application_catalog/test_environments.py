@@ -34,12 +34,14 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         super(TestEnvironments, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('32f26f2e-6c55-4e83-9d8c-023d86299d3e')
     def test_list_environments(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
         self.assertIsInstance(environments_list, list)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('a4c0b2fd-2c1b-473c-80cc-d433ceec4c80')
     def test_create_and_delete_environment(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
@@ -56,6 +58,7 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual(len(environments_list),
                          len(upd_environments_list))
 
+    @decorators.idempotent_id('52a06d5f-69e4-4184-a127-1bb13ce6dc7c')
     def test_create_and_delete_environment_with_unicode_name(self):
         environments_list = self.application_catalog_client.\
             get_environments_list()
@@ -72,17 +75,20 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual(len(environments_list),
                          len(upd_environments_list))
 
+    @decorators.idempotent_id('2b45d30b-3f1d-4482-805e-7cf15d19fe38')
     def test_get_environment(self):
         environment = self.application_catalog_client.\
             get_environment(self.environment['id'])
         self.assertEqual(self.environment['name'], environment['name'])
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('950f5bc1-3e5c-48d1-8b05-dc33303ce6f3')
     def test_update_environment(self):
         environment = self.application_catalog_client.\
             update_environment(self.environment['id'])
         self.assertIsNot(self.environment['name'], environment['name'])
 
+    @decorators.idempotent_id('61001866-e885-4dda-9ac9-5b24c67a0e25')
     def test_get_environment_model(self):
         model = self.application_catalog_client.\
             get_environment_model(self.environment['id'])
@@ -97,6 +103,7 @@ class TestEnvironments(base.BaseApplicationCatalogTest):
         self.assertEqual("{0}-network".format(self.environment['name']),
                          net_name)
 
+    @decorators.idempotent_id('23416978-9701-49ff-9bb1-d312292a7f49')
     def test_update_environment_model(self):
         session = self.application_catalog_client. \
             create_session(self.environment['id'])

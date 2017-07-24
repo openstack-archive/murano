@@ -16,6 +16,7 @@ import os
 import testtools
 
 from tempest import config
+from tempest.lib import decorators
 
 from murano_tempest_tests.tests.scenario.application_catalog import base
 from murano_tempest_tests import utils
@@ -54,6 +55,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         os.remove(cls.abs_archive_path)
         super(TestCinderVolumes, cls).resource_cleanup()
 
+    @decorators.idempotent_id('241ace7d-3b6e-413e-8936-a851ff1163f8')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_boot_volume_as_image(self):
@@ -122,6 +124,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         self.assertFalse(
             self.servers_client.show_server(server)['server']['image'])
 
+    @decorators.idempotent_id('e10d3bad-7145-46df-8118-4040842883f6')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_existing_volume(self):
@@ -159,6 +162,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
         self.check_volume_attached('testMurano', self.volume['id'])
 
+    @decorators.idempotent_id('6338a496-7415-42a9-a514-61f6f5cb1e65')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation(self):
@@ -200,6 +204,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         self.check_volume_attachments(environment['id'])
         self.assertEqual(volume_data['size'], 1)
 
+    @decorators.idempotent_id('1eb9bbe4-9810-408e-86a0-78ff114aadae')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation_from_image(self):
@@ -243,6 +248,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         self.assertEqual(volume_data['volume_image_metadata']['image_name'],
                          self.cirros_image)
 
+    @decorators.idempotent_id('bd624a9b-10ae-4079-b515-7b6031d9e725')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation_from_volume(self):
@@ -291,6 +297,7 @@ class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
         self.assertEqual(volume_data['size'], 1)
         self.assertEqual(volume_data['source_volid'], self.volume['id'])
 
+    @decorators.idempotent_id('7a671222-160d-4594-97bf-ea47f60ad965')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation_from_snapshot(self):
@@ -374,6 +381,7 @@ class TestCinderVolumeIsolatedAdmin(
         os.remove(cls.abs_archive_path)
         super(TestCinderVolumeIsolatedAdmin, cls).resource_cleanup()
 
+    @decorators.idempotent_id('4111eb94-2636-4d0b-af5c-776ed5a59b87')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation_readonly(self):
@@ -417,6 +425,7 @@ class TestCinderVolumeIsolatedAdmin(
         self.assertEqual(volume_data['size'], 1)
         self.assertEqual(volume_data['metadata']['readonly'], 'True')
 
+    @decorators.idempotent_id('5c134343-11bc-4329-ac30-9b43f32c15e2')
     @testtools.testcase.attr('smoke')
     @testtools.testcase.attr('scenario')
     def test_deploy_app_with_volume_creation_from_backup(self):
