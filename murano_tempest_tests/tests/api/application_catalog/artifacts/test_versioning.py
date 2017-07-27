@@ -65,6 +65,7 @@ class TestVersioning(base.BaseArtifactsTest):
         super(TestVersioning, cls).resource_cleanup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('03ee155c-d65f-4ea7-a00a-bdbc7105fc8b')
     def test_availability_of_packages_with_different_versions(self):
         """Test availability of packages with different versions.
 
@@ -85,6 +86,7 @@ class TestVersioning(base.BaseArtifactsTest):
         self.assertIn(self.packages['2.0.0']['id'], artifact_packages)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('15c3a52d-cffe-4d03-82c2-31c9be8423d6')
     def test_deploy_packages_with_different_versions(self):
         """Test deployment of packages with different versions.
 
@@ -127,6 +129,7 @@ class TestVersioning(base.BaseArtifactsTest):
         self.assertEqual(deploy_result, 'ready')
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('2c472476-f9cd-424b-91ee-cbc770602bf3')
     def test_deploy_package_with_required_package_version(self):
         """Test deployment of package which requires package with present version.
 

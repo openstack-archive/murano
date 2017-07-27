@@ -44,24 +44,28 @@ class TestCategoriesNegative(base.BaseApplicationCatalogIsolatedAdminTest):
         super(TestCategoriesNegative, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('20fe075f-7d07-462e-bfbc-3032b5367207')
     def test_delete_category_by_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.delete_category,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('e655365b-ec8b-49da-8745-5c80b1f5e65b')
     def test_get_category_by_incorrect_id(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.get_category,
                           utils.generate_uuid())
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('c4948d0f-3530-419c-8017-1ee8bbc29dee')
     def test_create_category_with_same_name(self):
         self.assertRaises(exceptions.Conflict,
                           self.application_catalog_client.create_category,
                           self.category['name'])
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('2bdce780-96dc-46d6-a28e-cdcf768359ae')
     def test_delete_category_with_package(self):
         self.assertRaises(exceptions.Forbidden,
                           self.application_catalog_client.delete_category,

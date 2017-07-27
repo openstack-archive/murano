@@ -34,11 +34,13 @@ class TestRepositorySanity(base.BaseArtifactsTest):
         super(TestRepositorySanity, cls).resource_setup()
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('2818aaa0-6613-4bd9-8abe-02713121357a')
     def test_get_list_packages(self):
         package_list = self.artifacts_client.get_list_packages()
         self.assertIsInstance(package_list, list)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('bc717c98-5f6b-42a6-9131-43a711cfe848')
     def test_upload_and_delete_package(self):
         application_name = utils.generate_name('package_test_upload')
         abs_archive_path, dir_with_archive, archive_name = \

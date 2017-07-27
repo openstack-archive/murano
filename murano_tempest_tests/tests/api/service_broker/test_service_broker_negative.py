@@ -23,6 +23,7 @@ from murano_tempest_tests import utils
 class ServiceBrokerNegativeTest(base.BaseServiceBrokerAdminTest):
 
     @decorators.attr(type=['gate', 'negative'])
+    @decorators.idempotent_id('3c9c14a2-1655-490a-90f0-6cb5dd6dba07')
     def test_get_status_with_not_present_instance_id(self):
         not_present_instance_id = utils.generate_uuid()
         self.assertRaises(

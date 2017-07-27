@@ -54,11 +54,13 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
         super(TestStaticActionsNegative, cls).resource_cleanup()
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('c6d05273-b6fe-4a33-8a87-c7110c171bc2')
     def test_call_static_action_no_args(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action)
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('35440618-6649-40cb-b878-b5cddd4ea0dd')
     def test_call_static_action_wrong_class(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -66,6 +68,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           args={'myName': 'John'})
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('75c6cc5e-0804-45d9-beb2-10c7ab409b70')
     def test_call_static_action_wrong_method(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -74,6 +77,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           args={'myName': 'John'})
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('334c828b-3f49-49e0-97a2-534f57596bfb')
     def test_call_static_action_session_method(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -82,6 +86,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           args={'myName': 'John'})
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('3ebb5009-2f61-4200-a34c-2bc506d94aed')
     def test_call_static_action_wrong_args(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action,
@@ -90,6 +95,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           args={'myEmail': 'John'})
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('5f4f6edc-2d66-4426-bb81-48e7570d93ef')
     def test_call_static_action_wrong_package(self):
         self.assertRaises(exceptions.NotFound,
                           self.application_catalog_client.call_static_action,
@@ -99,6 +105,7 @@ class TestStaticActionsNegative(base.BaseApplicationCatalogTest):
                           args={'myName': 'John'})
 
     @decorators.attr(type='negative')
+    @decorators.idempotent_id('c0854170-700f-4924-9cfe-3bff876b9e63')
     def test_call_static_action_wrong_version_format(self):
         self.assertRaises(exceptions.BadRequest,
                           self.application_catalog_client.call_static_action,

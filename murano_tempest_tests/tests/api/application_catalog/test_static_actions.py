@@ -52,6 +52,7 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
         client.delete_package(cls.package['id'])
         super(TestStaticActions, cls).resource_cleanup()
 
+    @decorators.idempotent_id('ac3359e8-8762-417a-95c6-fb2d678850f7')
     def test_call_static_action_basic(self):
         action_result = self.application_catalog_client.call_static_action(
             class_name=self.package['class_definitions'][0],
@@ -60,6 +61,7 @@ class TestStaticActions(base.BaseApplicationCatalogTest):
         self.assertEqual('"Hello, John"', action_result)
 
     @decorators.attr(type='smoke')
+    @decorators.idempotent_id('8b427735-bb73-41ab-8992-c81b3d8ebc42')
     def test_call_static_action_full(self):
         if CONF.application_catalog.glare_backend:
             name_attr = 'name'
