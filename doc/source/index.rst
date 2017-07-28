@@ -59,6 +59,14 @@ Installation
 
   install/index
 
+Configuration
+~~~~~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 2
+
+  configuration/index
+
 Administrator Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
