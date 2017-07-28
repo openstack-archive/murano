@@ -188,12 +188,8 @@ function configure_murano {
     configure_auth_token_middleware $MURANO_CONF_FILE $MURANO_ADMIN_USER $MURANO_AUTH_CACHE_DIR
 
     # Setup murano_auth section
+    configure_auth_token_middleware $MURANO_CONF_FILE $MURANO_ADMIN_USER $MURANO_AUTH_CACHE_DIR murano_auth
     iniset $MURANO_CONF_FILE murano_auth auth_uri $KEYSTONE_AUTH_URI
-    iniset $MURANO_CONF_FILE murano_auth admin_project_name $SERVICE_TENANT_NAME
-    iniset $MURANO_CONF_FILE murano_auth admin_user $MURANO_ADMIN_USER
-    iniset $MURANO_CONF_FILE murano_auth admin_password $SERVICE_PASSWORD
-    iniset $MURANO_CONF_FILE murano_auth user_domain_name "$SERVICE_DOMAIN_NAME"
-    iniset $MURANO_CONF_FILE murano_auth project_domain_name "$SERVICE_DOMAIN_NAME"
 
     configure_murano_rpc_backend
 

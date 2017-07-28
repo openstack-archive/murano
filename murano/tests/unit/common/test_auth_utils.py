@@ -20,11 +20,22 @@ from keystoneauth1 import loading as ka_loading
 from murano.common import auth_utils
 from murano.tests.unit import base
 
+from oslo_config import cfg
+
 
 class TestAuthUtils(base.MuranoTestCase):
 
     def setUp(self):
         super(TestAuthUtils, self).setUp()
+        # Register the Password auth plugin options,
+        # so we can use CONF.set_override
+        password_option = ka_loading.get_auth_plugin_conf_options('password')
+        cfg.CONF.register_opts(password_option,
+                               group=auth_utils.CFG_MURANO_AUTH_GROUP)
+        self.addCleanup(
+            cfg.CONF.unregister_opts,
+            password_option,
+            group=auth_utils.CFG_MURANO_AUTH_GROUP)
         self.addCleanup(mock.patch.stopall)
 
     def _init_mock_cfg(self, auth_type):
@@ -33,33 +44,73 @@ class TestAuthUtils(base.MuranoTestCase):
                                               spec_set=ka_loading).start()
             mock_auth_obj.load_auth_from_conf_options.return_value = \
                 mock.sentinel.auth
-            mock_auth_obj.session.Session.return_value.load_from_options.\
+            mock_auth_obj.session.Session().load_from_options.\
                 return_value = mock.sentinel.session
+            cfg.CONF.set_override('auth_type',
+                                  'password',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('auth_uri',
+                                  'foo_auth_uri',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('auth_url',
+                                  'foo_auth_url',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('username',
+                                  'fakeuser',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('password',
+                                  'fakepass',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('user_domain_name',
+                                  'Default',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('project_domain_name',
+                                  'Default',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('project_name',
+                                  'fakeproj',
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
         else:
             mock_auth_obj = mock.patch.object(auth_utils, 'identity',
                                               autospec=True).start()
             mock_auth_obj.Password.return_value = mock.sentinel.auth
-        mock_cfg = mock.patch.object(auth_utils, 'cfg', autospec=True).start()
-        mock_conf = mock_cfg.CONF.__getitem__.return_value
-        mock_conf.auth_type = auth_type
-        mock_conf.auth_uri = 'foo_auth_uri/v2.0'
-        mock_conf.admin_user = mock.sentinel.admin_user
-        mock_conf.admin_password = mock.sentinel.admin_password
-        mock_conf.admin_project_name = mock.sentinel.admin_project_name
-        mock_conf.user_domain_name = mock.sentinel.user_domain_name
-        mock_conf.project_domain_name = mock.sentinel.project_domain_name
-        return mock_cfg, mock_auth_obj
+            cfg.CONF.set_override('auth_type',
+                                  None,
+                                  auth_utils.CFG_MURANO_AUTH_GROUP)
+            cfg.CONF.set_override('auth_uri',
+                                  'foo_auth_uri/v3',
+                                  auth_utils.CFG_KEYSTONE_GROUP)
+            cfg.CONF.set_override('admin_user',
+                                  'adminuser',
+                                  auth_utils.CFG_KEYSTONE_GROUP)
+            cfg.CONF.set_override('admin_password',
+                                  'adminpass',
+                                  auth_utils.CFG_KEYSTONE_GROUP)
+            cfg.CONF.set_override('admin_tenant_name',
+                                  'admintenant',
+                                  auth_utils.CFG_KEYSTONE_GROUP)
+        return mock_auth_obj
 
     def test_get_keystone_auth(self):
-        mock_cfg, mock_identity = self._init_mock_cfg(False)
+        mock_identity = self._init_mock_cfg(True)
+
+        expected_auth = mock.sentinel.auth
+        actual_auth = auth_utils._get_keystone_auth()
+
+        self.assertEqual(expected_auth, actual_auth)
+        mock_identity.load_auth_from_conf_options.assert_called_once_with(
+            cfg.CONF, auth_utils.CFG_MURANO_AUTH_GROUP)
+
+    def test_get_keystone_auth_fallback_to_v2(self):
+        mock_identity = self._init_mock_cfg(False)
 
         expected_kwargs = {
             'auth_url': 'foo_auth_uri/v3',
-            'username': mock.sentinel.admin_user,
-            'password': mock.sentinel.admin_password,
-            'user_domain_name': mock.sentinel.user_domain_name,
-            'project_name': mock.sentinel.admin_project_name,
-            'project_domain_name': mock.sentinel.project_domain_name
+            'username': 'adminuser',
+            'password': 'adminpass',
+            'user_domain_name': 'default',
+            'project_name': 'admintenant',
+            'project_domain_name': 'default'
         }
         expected_auth = mock.sentinel.auth
         actual_auth = auth_utils._get_keystone_auth()
@@ -67,24 +118,8 @@ class TestAuthUtils(base.MuranoTestCase):
         self.assertEqual(expected_auth, actual_auth)
         mock_identity.Password.assert_called_once_with(**expected_kwargs)
 
-    def test_get_keystone_auth_with_trust_id(self):
-        mock_cfg, mock_identity = self._init_mock_cfg(False)
-
-        expected_kwargs = {
-            'auth_url': 'foo_auth_uri/v3',
-            'username': mock.sentinel.admin_user,
-            'password': mock.sentinel.admin_password,
-            'user_domain_name': mock.sentinel.user_domain_name,
-            'trust_id': mock.sentinel.trust_id
-        }
-        expected_auth = mock.sentinel.auth
-        actual_auth = auth_utils._get_keystone_auth(mock.sentinel.trust_id)
-
-        self.assertEqual(expected_auth, actual_auth)
-        mock_identity.Password.assert_called_once_with(**expected_kwargs)
-
-    def test_get_keystone_auth_without_auth(self):
-        mock_cfg, mock_ka_loading = self._init_mock_cfg(True)
+    def test_get_keystone_with_trust_id(self):
+        mock_ka_loading = self._init_mock_cfg(True)
 
         expected_kwargs = {
             'project_name': None,
@@ -97,9 +132,25 @@ class TestAuthUtils(base.MuranoTestCase):
 
         self.assertEqual(expected_auth, actual_auth)
         mock_ka_loading.load_auth_from_conf_options.assert_called_once_with(
-            mock_cfg.CONF,
-            auth_utils.CFG_KEYSTONE_GROUP,
+            cfg.CONF,
+            auth_utils.CFG_MURANO_AUTH_GROUP,
             **expected_kwargs)
+
+    def test_get_keystone_auth_with_trust_id_fallback_to_v2(self):
+        mock_identity = self._init_mock_cfg(False)
+
+        expected_kwargs = {
+            'auth_url': 'foo_auth_uri/v3',
+            'username': 'adminuser',
+            'password': 'adminpass',
+            'user_domain_name': 'default',
+            'trust_id': mock.sentinel.trust_id
+        }
+        expected_auth = mock.sentinel.auth
+        actual_auth = auth_utils._get_keystone_auth(mock.sentinel.trust_id)
+
+        self.assertEqual(expected_auth, actual_auth)
+        mock_identity.Password.assert_called_once_with(**expected_kwargs)
 
     @mock.patch.object(auth_utils, 'ks_client', autospec=True)
     @mock.patch.object(auth_utils, '_get_session', autospec=True)
@@ -132,7 +183,8 @@ class TestAuthUtils(base.MuranoTestCase):
         mock_get_execution_session.assert_called_once_with()
         mock_get_keystone_auth.assert_called_once_with(mock.sentinel.trust_id)
         mock_get_session.assert_called_once_with(
-            auth=mock.sentinel.auth, conf_section=mock.sentinel.conf)
+            auth=mock.sentinel.auth,
+            conf_section=mock.sentinel.conf)
 
     @mock.patch.object(auth_utils, 'get_token_client_session', autospec=True)
     @mock.patch.object(
@@ -156,18 +208,20 @@ class TestAuthUtils(base.MuranoTestCase):
     @mock.patch.object(auth_utils, 'identity', autospec=True)
     @mock.patch.object(
         auth_utils.helpers, 'get_execution_session', autospec=True)
-    @mock.patch.object(auth_utils, 'cfg', autospec=True)
     def test_get_token_client_session(
-            self, mock_cfg, mock_get_execution_session, mock_identity,
+            self, mock_get_execution_session, mock_identity,
             mock_get_session):
-        mock_cfg.CONF.__getitem__.return_value.auth_uri = 'foo_auth_uri/v2.0'
+        cfg.CONF.set_override('auth_uri',
+                              'foo_auth_uri/v2.0',
+                              auth_utils.CFG_MURANO_AUTH_GROUP)
+
         mock_get_execution_session.return_value = \
             mock.Mock(token=mock.sentinel.token,
                       project_id=mock.sentinel.project_id)
         mock_identity.Token.return_value = mock.sentinel.auth
         mock_get_session.return_value = mock.sentinel.session
 
-        session = auth_utils.get_token_client_session(conf=mock.sentinel.conf)
+        session = auth_utils.get_token_client_session()
         self.assertEqual(mock.sentinel.session, session)
 
         mock_get_execution_session.assert_called_once_with()
@@ -175,7 +229,8 @@ class TestAuthUtils(base.MuranoTestCase):
             'foo_auth_uri/v3', token=mock.sentinel.token,
             project_id=mock.sentinel.project_id)
         mock_get_session.assert_called_once_with(
-            auth=mock.sentinel.auth, conf_section=mock.sentinel.conf)
+            auth=mock.sentinel.auth,
+            conf_section=None)
 
     @mock.patch.object(auth_utils, 'get_token_client_session', autospec=True)
     @mock.patch.object(auth_utils, 'ks_client', autospec=True)
@@ -256,43 +311,30 @@ class TestAuthUtils(base.MuranoTestCase):
     def test_get_config_option_return_default(self):
         self.assertIsNone(auth_utils._get_config_option(None, []))
 
-    @mock.patch.object(auth_utils, '_get_config_option', autospec=True)
-    def test_get_session(self, mock_get_config_option):
-        mock_cfg, mock_ka_loading = self._init_mock_cfg(True)
-        mock_cfg.CONF.__getitem__.return_value = mock.sentinel.conf_section
-        mock_get_config_option.side_effect = [
-            mock.sentinel.secure_option,
-            mock.sentinel.cacert_option,
-            mock.sentinel.keyfile_option,
-            mock.sentinel.cert_option,
-        ]
+    def test_get_session(self):
+        mock_ka_loading = self._init_mock_cfg(True)
 
-        session = auth_utils._get_session(mock.sentinel.auth, None)
+        session = auth_utils._get_session(mock.sentinel.auth)
 
         self.assertEqual(mock.sentinel.session, session)
-        mock_ka_loading.session.Session.return_value.load_from_options.\
+        mock_ka_loading.session.Session().load_from_options.\
             assert_called_once_with(auth=mock.sentinel.auth,
-                                    insecure=mock.sentinel.secure_option,
-                                    cacert=mock.sentinel.cacert_option,
-                                    key=mock.sentinel.keyfile_option,
-                                    cert=mock.sentinel.cert_option)
+                                    cacert=None,
+                                    cert=None,
+                                    insecure=False,
+                                    key=None)
 
-    @mock.patch.object(auth_utils, '_get_config_option', autospec=True)
-    @mock.patch.object(auth_utils, 'cfg', autospec=True)
-    def test_get_session_client_parameters(
-            self, mock_cfg, mock_get_config_option):
-        mock_cfg.CONF.home_region = mock.sentinel.home_region
-        mock_get_config_option.side_effect = [
-            mock.sentinel.url,
-            mock.sentinel.endpoint_type
-        ]
+    def test_get_session_client_parameters(self):
+
+        cfg.CONF.set_override('url', 'foourl', 'murano')
 
         expected_result = {
             'session': mock.sentinel.session,
-            'endpoint_override': mock.sentinel.url
+            'endpoint_override': 'foourl'
         }
 
         result = auth_utils.get_session_client_parameters(
+            conf=cfg.CONF.murano,
             service_type=mock.sentinel.service_type,
             service_name=mock.sentinel.service_name,
             session=mock.sentinel.session)
@@ -300,27 +342,21 @@ class TestAuthUtils(base.MuranoTestCase):
         for key, val in expected_result.items():
             self.assertEqual(val, result[key])
 
-    @mock.patch.object(auth_utils, '_get_config_option', autospec=True)
-    @mock.patch.object(auth_utils, 'cfg', autospec=True)
-    def test_get_session_client_parameters_without_url(
-            self, mock_cfg, mock_get_config_option):
-        mock_cfg.CONF.home_region = mock.sentinel.home_region
-        mock_get_config_option.side_effect = [
-            None,
-            mock.sentinel.endpoint_type
-        ]
+    def test_get_session_client_parameters_without_url(self):
+        cfg.CONF.set_override('home_region', 'fooregion')
 
         expected_result = {
             'session': mock.sentinel.session,
             'service_type': mock.sentinel.service_type,
             'service_name': mock.sentinel.service_name,
             'interface': mock.sentinel.endpoint_type,
-            'region_name': mock.sentinel.home_region
+            'region_name': 'fooregion'
         }
 
         result = auth_utils.get_session_client_parameters(
             service_type=mock.sentinel.service_type,
             service_name=mock.sentinel.service_name,
+            interface=mock.sentinel.endpoint_type,
             session=mock.sentinel.session)
 
         for key, val in expected_result.items():
