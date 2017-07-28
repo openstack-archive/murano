@@ -39,9 +39,8 @@ class MetadefBrowser(object):
     @staticmethod
     @session_local_storage.execution_session_memoize
     def _get_client(region_name):
-        glance_settings = CONF.glance
         return gclient.Client(**auth_utils.get_session_client_parameters(
-            service_type='image', region=region_name, conf=glance_settings
+            service_type='image', region=region_name, conf='glance'
         ))
 
     @property

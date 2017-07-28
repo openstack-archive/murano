@@ -45,9 +45,8 @@ class NetworkExplorer(object):
     @staticmethod
     @session_local_storage.execution_session_memoize
     def _get_client(region_name):
-        neutron_settings = CONF.neutron
         return nclient.Client(**auth_utils.get_session_client_parameters(
-            service_type='network', region=region_name, conf=neutron_settings
+            service_type='network', region=region_name, conf='neutron'
         ))
 
     @property

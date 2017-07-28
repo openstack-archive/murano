@@ -138,12 +138,9 @@ def delete_trust(trust):
     user_client.trusts.delete(trust)
 
 
-def _get_config_option(conf_section, option_names, default=None):
-    if not isinstance(option_names, (list, tuple)):
-        option_names = (option_names,)
-    for name in option_names:
-        if hasattr(conf_section, name):
-            return getattr(conf_section, name)
+def _get_config_option(conf_section, option_name, default=None):
+    if hasattr(cfg.CONF[conf_section], option_name):
+        return getattr(cfg.CONF[conf_section], option_name)
     return default
 
 
@@ -151,15 +148,11 @@ def _get_session(auth, conf_section=None):
     # Fallback to murano_auth section for TLS parameters
     # if no other conf_section supplied
     if not conf_section:
-        conf_section = cfg.CONF[CFG_MURANO_AUTH_GROUP]
-    session = ka_loading.session.Session().load_from_options(
+        conf_section = CFG_MURANO_AUTH_GROUP
+    session = ka_loading.load_session_from_conf_options(
         auth=auth,
-        insecure=_get_config_option(conf_section, 'insecure', False),
-        cacert=_get_config_option(
-            conf_section,
-            ('ca_file', 'cafile', 'cacert')),
-        key=_get_config_option(conf_section, ('key_file', 'keyfile')),
-        cert=_get_config_option(conf_section, ('cert_file', 'certfile')))
+        conf=cfg.CONF,
+        group=conf_section)
     return session
 
 

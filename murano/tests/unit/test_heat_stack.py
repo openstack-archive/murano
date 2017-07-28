@@ -605,7 +605,7 @@ class TestHeatStack(base.MuranoTestCase):
         self.assertEqual("<class 'heatclient.v1.client.Client'>",
                          str(client.__class__))
         mock_auth_utils.get_client_session.assert_called_with(
-            conf=heat_stack.CONF.heat)
+            conf='heat')
 
     @mock.patch.object(heat_stack, 'auth_utils')
     def test_get_token_client(self, mock_auth_utils):
@@ -622,7 +622,7 @@ class TestHeatStack(base.MuranoTestCase):
         self.assertEqual("<class 'heatclient.v1.client.Client'>",
                          str(token_client.__class__))
         mock_auth_utils.get_token_client_session.assert_called_with(
-            conf=heat_stack.CONF.heat)
+            conf='heat')
 
     def test_wait_state(self):
         hs = heat_stack.HeatStack('test-stack', None)

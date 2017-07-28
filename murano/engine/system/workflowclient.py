@@ -67,6 +67,7 @@ class MistralClient(object):
             region_name=region)
         auth_ref = session.auth.get_access(session)
 
+        # TODO(gyurco): use auth_utils.get_session_client_parameters
         return mistralcli.client(
             mistral_url=mistral_url,
             project_id=auth_ref.project_id,
@@ -75,7 +76,7 @@ class MistralClient(object):
             auth_token=auth_ref.auth_token,
             user_id=auth_ref.user_id,
             insecure=mistral_settings.insecure,
-            cacert=mistral_settings.ca_cert
+            cacert=mistral_settings.cafile
         )
 
     def upload(self, definition):

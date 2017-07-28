@@ -425,11 +425,12 @@ class Controller(object):
         url = glare_settings.url
         if not url:
             url = self._get_glare_url(request)
+        # TODO(gyurco): use auth_utils.get_session_client_parameters
         client = glare_client.Client(
             endpoint=url, token=token, insecure=glare_settings.insecure,
-            key_file=glare_settings.key_file or None,
-            ca_file=glare_settings.ca_file or None,
-            cert_file=glare_settings.cert_file or None,
+            key_file=glare_settings.keyfile or None,
+            ca_file=glare_settings.cafile or None,
+            cert_file=glare_settings.certfile or None,
             type_name='murano',
             type_version=1)
         return client

@@ -37,11 +37,20 @@ def build_list(opt_list):
 _opt_lists = [
     ('engine', murano.common.config.engine_opts),
     ('rabbitmq', murano.common.config.rabbit_opts),
-    ('heat', murano.common.config.heat_opts),
-    ('neutron', murano.common.config.neutron_opts),
-    ('murano', murano.common.config.murano_opts),
-    ('glare', murano.common.config.glare_opts),
-    ('mistral', murano.common.config.mistral_opts),
+    ('heat',
+     murano.common.config.heat_opts +
+     ks_loading.get_session_conf_options()),
+    ('neutron',
+     murano.common.config.neutron_opts +
+     ks_loading.get_session_conf_options()),
+    ('murano', murano.common.config.murano_opts +
+     ks_loading.get_session_conf_options()),
+    ('glare',
+     murano.common.config.glare_opts +
+     ks_loading.get_session_conf_options()),
+    ('mistral',
+     murano.common.config.mistral_opts +
+     ks_loading.get_session_conf_options()),
     ('networking', murano.common.config.networking_opts),
     ('stats', murano.common.config.stats_opts),
     ('murano_auth',
@@ -61,7 +70,9 @@ _opt_lists = [
 
 _cfapi_opt_lists = [
     ('cfapi', murano.common.cf_config.cfapi_opts),
-    ('glare', murano.common.config.glare_opts),
+    ('glare',
+     murano.common.config.glare_opts +
+     ks_loading.get_session_conf_options())
 ]
 
 _opt_lists.extend(oslo_service.sslutils.list_opts())
