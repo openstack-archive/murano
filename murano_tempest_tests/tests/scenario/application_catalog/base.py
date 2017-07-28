@@ -58,9 +58,6 @@ class BaseApplicationCatalogScenarioTest(test.BaseTestCase):
         params = config.service_client_config('orchestration')
         cls.orchestration_client = orchestration.OrchestrationClient(
             cls.services_manager.auth_provider, **params)
-        cls.snapshots_client = cls.services_manager.snapshots_v2_client
-        cls.volumes_client = cls.services_manager.volumes_v2_client
-        cls.backups_client = cls.services_manager.backups_v2_client
         cls.images_client = cls.services_manager.image_client_v2
 
     @classmethod
