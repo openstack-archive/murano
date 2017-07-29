@@ -69,7 +69,7 @@ class HeatStack(object):
     def _create_client(session, region_name):
         parameters = auth_utils.get_session_client_parameters(
             service_type='orchestration', region=region_name,
-            conf=CONF.heat, session=session)
+            conf='heat', session=session)
         return hclient.Client('1', **parameters)
 
     @property
@@ -79,11 +79,11 @@ class HeatStack(object):
     @staticmethod
     @session_local_storage.execution_session_memoize
     def _get_client(region_name):
-        session = auth_utils.get_client_session(conf=CONF.heat)
+        session = auth_utils.get_client_session(conf='heat')
         return HeatStack._create_client(session, region_name)
 
     def _get_token_client(self):
-        ks_session = auth_utils.get_token_client_session(conf=CONF.heat)
+        ks_session = auth_utils.get_token_client_session(conf='heat')
         return self._create_client(ks_session, self._region_name)
 
     def current(self):

@@ -320,13 +320,13 @@ def _get_glareclient(token_id, req):
     if not url:
         LOG.error('No glare url is specified and no "artifact" '
                   'service is registered in keystone.')
-
+    # TODO(gyurco): use auth_utils.get_session_client_parameters
     return glare_client.Client(
         endpoint=url, token=token_id,
         insecure=glare_settings.insecure,
-        key_file=glare_settings.key_file or None,
-        ca_file=glare_settings.ca_file or None,
-        cert_file=glare_settings.cert_file or None,
+        key_file=glare_settings.keyfile or None,
+        ca_file=glare_settings.cafile or None,
+        cert_file=glare_settings.certfile or None,
         type_name='murano',
         type_version=1)
 

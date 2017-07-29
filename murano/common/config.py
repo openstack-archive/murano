@@ -74,21 +74,6 @@ rabbit_opts = [
 heat_opts = [
     cfg.StrOpt('url', help='Optional heat endpoint override'),
 
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                '"insecure" SSL connections and transfers with Heat API.'),
-
-    cfg.StrOpt('ca_file',
-               help='(SSL) Tells Murano to use the specified certificate file '
-               'to verify the peer running Heat API.'),
-
-    cfg.StrOpt('cert_file',
-               help='(SSL) Tells Murano to use the specified client '
-               'certificate file when communicating with Heat.'),
-
-    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
-                                'communicate with Heat API.'),
-
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Heat endpoint type.'),
 
@@ -104,27 +89,11 @@ mistral_opts = [
                help='Mistral endpoint type.'),
 
     cfg.StrOpt('service_type', default='workflowv2',
-               help='Mistral service type.'),
-
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                '"insecure" SSL connections and transfers with Mistral.'),
-
-    cfg.StrOpt('ca_cert',
-               help='(SSL) Tells Murano to use the specified client '
-               'certificate file when communicating with Mistral.')
+               help='Mistral service type.')
 ]
 
 neutron_opts = [
     cfg.StrOpt('url', help='Optional neutron endpoint override'),
-
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                '"insecure" SSL connections and transfers with Neutron API.'),
-
-    cfg.StrOpt('ca_cert',
-               help='(SSL) Tells Murano to use the specified client '
-               'certificate file when communicating with Neutron.'),
 
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Neutron endpoint type.')
@@ -133,25 +102,6 @@ neutron_opts = [
 murano_opts = [
     cfg.StrOpt('url', help='Optional murano url in format '
                            'like http://0.0.0.0:8082 used by Murano engine'),
-
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                     '"insecure" SSL connections and transfers used by '
-                     'Murano engine.'),
-
-    cfg.StrOpt('cacert',
-               help='(SSL) Tells Murano to use the specified client '
-               'certificate file when communicating with Murano API '
-               'used by Murano engine.'),
-
-    cfg.StrOpt('cert_file',
-               help='(SSL) Tells Murano to use the specified client '
-                    'certificate file when communicating with Murano '
-                    'used by Murano engine.'),
-
-    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name '
-                                'to communicate with Murano API used by '
-                                'Murano engine.'),
 
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Murano endpoint type used by Murano engine.'),
@@ -278,25 +228,6 @@ glare_opts = [
                            'like http://0.0.0.0:9494 used by Glare API',
                deprecated_group='glance'),
 
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                '"insecure" SSL connections and transfers with Glare API.',
-                deprecated_group='glance'),
-
-    cfg.StrOpt('ca_file',
-               help='(SSL) Tells Murano to use the specified certificate file '
-               'to verify the peer running Glare API.',
-               deprecated_group='glance'),
-
-    cfg.StrOpt('cert_file',
-               help='(SSL) Tells Murano to use the specified client '
-               'certificate file when communicating with Glare.',
-               deprecated_group='glance'),
-
-    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
-                                'communicate with Glare API.',
-               deprecated_group='glance'),
-
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Glare endpoint type.',
                deprecated_group='glance')
@@ -304,21 +235,6 @@ glare_opts = [
 
 glance_opts = [
     cfg.StrOpt('url', help='Optional glance endpoint override'),
-
-    cfg.BoolOpt('insecure', default=False,
-                help='This option explicitly allows Murano to perform '
-                '"insecure" SSL connections and transfers with Glance API.'),
-
-    cfg.StrOpt('ca_file',
-               help='(SSL) Tells Murano to use the specified certificate file '
-                    'to verify the peer running Glance API.'),
-
-    cfg.StrOpt('cert_file',
-               help='(SSL) Tells Murano to use the specified client '
-                    'certificate file when communicating with Glance.'),
-
-    cfg.StrOpt('key_file', help='(SSL/SSH) Private key file name to '
-                                'communicate with Glance API.'),
 
     cfg.StrOpt('endpoint_type', default='publicURL',
                help='Glance endpoint type.')
@@ -358,7 +274,20 @@ CONF.register_opts(glare_opts, group='glare')
 CONF.register_opts(glance_opts, group='glance')
 CONF.register_opts(murano_auth_opts, group='murano_auth')
 ks_loading.register_auth_conf_options(CONF, group='murano_auth')
-ks_loading.register_session_conf_options(CONF, group='murano_auth')
+
+
+for group in ('heat', 'mistral', 'neutron', 'glance', 'glare',
+              'murano', 'murano_auth'):
+    ks_loading.register_session_conf_options(
+        CONF,
+        group=group,
+        deprecated_opts={
+            'cafile':   [cfg.DeprecatedOpt('cacert', group),
+                         cfg.DeprecatedOpt('ca_file', group)],
+            'certfile': [cfg.DeprecatedOpt('cert_file', group)],
+            'keyfile':  [cfg.DeprecatedOpt('key_file', group)]
+
+        })
 
 
 def parse_args(args=None, usage=None, default_config_files=None):

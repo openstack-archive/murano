@@ -44,7 +44,7 @@ class TestAuthUtils(base.MuranoTestCase):
                                               spec_set=ka_loading).start()
             mock_auth_obj.load_auth_from_conf_options.return_value = \
                 mock.sentinel.auth
-            mock_auth_obj.session.Session().load_from_options.\
+            mock_auth_obj.load_session_from_conf_options.\
                 return_value = mock.sentinel.session
             cfg.CONF.set_override('auth_type',
                                   'password',
@@ -303,13 +303,12 @@ class TestAuthUtils(base.MuranoTestCase):
             mock.sentinel.trust)
 
     def test_get_config_option(self):
-        option_names = 'foo'
-        conf_section = mock.Mock(foo='bar')
-        self.assertEqual('bar', auth_utils._get_config_option(
-            conf_section, option_names))
+        cfg.CONF.set_override('url', 'foourl', 'murano')
+        self.assertEqual('foourl', auth_utils._get_config_option(
+            'murano', 'url'))
 
     def test_get_config_option_return_default(self):
-        self.assertIsNone(auth_utils._get_config_option(None, []))
+        self.assertIsNone(auth_utils._get_config_option(None, 'url'))
 
     def test_get_session(self):
         mock_ka_loading = self._init_mock_cfg(True)
@@ -317,12 +316,10 @@ class TestAuthUtils(base.MuranoTestCase):
         session = auth_utils._get_session(mock.sentinel.auth)
 
         self.assertEqual(mock.sentinel.session, session)
-        mock_ka_loading.session.Session().load_from_options.\
+        mock_ka_loading.load_session_from_conf_options.\
             assert_called_once_with(auth=mock.sentinel.auth,
-                                    cacert=None,
-                                    cert=None,
-                                    insecure=False,
-                                    key=None)
+                                    conf=cfg.CONF,
+                                    group=auth_utils.CFG_MURANO_AUTH_GROUP)
 
     def test_get_session_client_parameters(self):
 
@@ -334,7 +331,7 @@ class TestAuthUtils(base.MuranoTestCase):
         }
 
         result = auth_utils.get_session_client_parameters(
-            conf=cfg.CONF.murano,
+            conf='murano',
             service_type=mock.sentinel.service_type,
             service_name=mock.sentinel.service_name,
             session=mock.sentinel.session)

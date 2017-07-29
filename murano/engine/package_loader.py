@@ -84,20 +84,19 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     service_type='artifact',
                     interface=glare_settings.endpoint_type,
                     region_name=CONF.home_region)
-
+            # TODO(gyurco): use auth_utils.get_session_client_parameters
             self._glare_client = glare_client.Client(
                 endpoint=url, token=token,
                 insecure=glare_settings.insecure,
-                key_file=glare_settings.key_file or None,
-                ca_file=glare_settings.ca_file or None,
-                cert_file=glare_settings.cert_file or None,
+                key_file=glare_settings.keyfile or None,
+                ca_file=glare_settings.cafile or None,
+                cert_file=glare_settings.certfile or None,
                 type_name='murano',
                 type_version=1)
         return self._glare_client
 
     @property
     def client(self):
-        murano_settings = CONF.murano
         last_glare_client = self._glare_client
         if CONF.engine.packages_service in ['glance', 'glare']:
             if CONF.engine.packages_service == 'glance':
@@ -113,7 +112,7 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             parameters = auth_utils.get_session_client_parameters(
                 service_type='application-catalog',
                 execution_session=self._execution_session,
-                conf=murano_settings
+                conf='murano'
             )
             self._murano_client = muranoclient.Client(
                 artifacts_client=artifacts_client, **parameters)
