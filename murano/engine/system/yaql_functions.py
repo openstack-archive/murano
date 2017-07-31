@@ -21,6 +21,7 @@ import time
 
 import jsonpatch
 import jsonpointer
+from oslo_log import log as logging
 from oslo_serialization import base64
 import six
 from yaql.language import specs
@@ -33,6 +34,11 @@ from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import yaql_integration
 
+from castellan.common import exception as castellan_exception
+from castellan.common import utils as castellan_utils
+from castellan import key_manager
+
+LOG = logging.getLogger(__name__)
 
 _random_string_counter = None
 
@@ -203,6 +209,25 @@ def logger(context, logger_name):
     return log
 
 
+@specs.parameter('value', yaqltypes.String())
+@specs.extension_method
+def decrypt_data(value):
+    manager = key_manager.API()
+    try:
+        context = castellan_utils.credential_factory(conf=cfg.CONF)
+    except castellan_exception.AuthTypeInvalidError as e:
+        LOG.exception(e)
+        LOG.error("Castellan must be correctly configured in order to use "
+                  "decryptData()")
+        raise
+    try:
+        data = manager.get(context, value).get_encoded()
+    except castellan_exception.KeyManagerError as e:
+        LOG.exception(e)
+        raise
+    return data
+
+
 @helpers.memoize
 def get_context(runtime_version):
     context = yaql_integration.create_empty_context()
@@ -213,6 +238,7 @@ def get_context(runtime_version):
     context.register_function(random_name)
     context.register_function(patch_)
     context.register_function(logger)
+    context.register_function(decrypt_data, 'decryptData')
 
     if runtime_version <= constants.RUNTIME_VERSION_1_1:
         context.register_function(substr)

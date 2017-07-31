@@ -1,0 +1,18 @@
+Namespaces:
+  =: com.paul
+  std: io.murano
+  res: io.murano.resources
+
+Name: EncryptionDemo
+
+Extends: std:Application
+
+Properties:
+  my_password:
+    Contract: $.string()
+
+Methods:
+  deploy:
+    Body:
+      - $reporter: $this.find(std:Environment).reporter
+      - $reporter.report($this, decryptData($.my_password))

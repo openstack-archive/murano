@@ -1,0 +1,6 @@
+FullName: com.paul.EncryptionDemo
+Type: Application
+Description: Simple app to demonstrate Murano encryption
+Author: Paul Bourke
+Classes:
+  com.paul.EncryptionDemo: EncryptionDemo.yaml
