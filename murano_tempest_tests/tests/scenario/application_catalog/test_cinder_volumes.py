@@ -27,6 +27,30 @@ CONF = config.CONF
 class TestCinderVolumes(base.BaseApplicationCatalogScenarioTest):
 
     @classmethod
+    def skip_checks(cls):
+        super(TestCinderVolumes, cls).skip_checks()
+        if not CONF.service_available.cinder:
+            msg = "Cinder is not available. Skipping volumes attachment tests"
+            raise cls.skipException(msg)
+        if (not CONF.volume_feature_enabled.api_v3 and
+                not CONF.volume_feature_enabled.api_v2):
+            msg = ("Neither cinder v2 nor v3 are not available. Skipping"
+                   "volumes attachment tests")
+            raise cls.skipException(msg)
+
+    @classmethod
+    def setup_clients(cls):
+        super(TestCinderVolumes, cls).setup_clients()
+        # Prefer volume v3 which is the current version
+        if CONF.volume_feature_enabled.api_v3:
+            _volume = cls.services_manager.volume_v3
+        elif CONF.volume_feature_enabled.api_v2:
+            _volume = cls.services_manager.volume_v2
+        cls.volumes_client = _volume.VolumesClient()
+        cls.backups_client = _volume.BackupsClient()
+        cls.snapshots_client = _volume.SnapshotsClient()
+
+    @classmethod
     def resource_setup(cls):
         if not CONF.application_catalog.cinder_volume_tests:
             msg = "Cinder volumes attachment tests will be skipped."
