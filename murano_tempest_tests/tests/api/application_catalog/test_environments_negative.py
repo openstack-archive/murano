@@ -50,6 +50,20 @@ class TestEnvironmentsNegative(base.BaseApplicationCatalogTest):
                           self.application_catalog_client.get_environment,
                           environment['id'])
 
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('f0b6102c-dd22-4f4d-9775-ce0a7a53d881')
+    def test_update_environment_with_wrong_env_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.application_catalog_client.update_environment,
+                          None)
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('03266970-2f9d-4b82-971f-532fe23d1027')
+    def test_abandon_environment_with_wrong_env_id(self):
+        self.assertRaises(exceptions.NotFound,
+                          self.application_catalog_client.abandon_environment,
+                          None)
+
 
 class TestEnvironmentNegativeTenantIsolation(base.BaseApplicationCatalogTest):
 
