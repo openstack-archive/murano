@@ -163,3 +163,31 @@ class TestRepositoryNegativeForbidden(base.BaseApplicationCatalogTest):
         self.assertRaises(exceptions.Forbidden,
                           self.alt_client.get_logo,
                           self.package['id'])
+
+    @decorators.attr(type='negative')
+    @decorators.idempotent_id('12928ec7-bd31-415d-9260-5c488aebd4c7')
+    def test_publicize_package_as_non_admin_user(self):
+        # Given a package that isn't public
+        application_name = utils.generate_name('test_publicize_package_'
+                                               'as_non_admin_user')
+        abs_archive_path, dir_with_archive, archive_name = \
+            utils.prepare_package(application_name)
+        self.addCleanup(os.remove, abs_archive_path)
+        package = self.application_catalog_client.upload_package(
+            application_name, archive_name, dir_with_archive,
+            {"categories": [], "tags": [], 'is_public': False})
+        self.addCleanup(self.application_catalog_client.delete_package,
+                        package['id'])
+
+        # When package is publicized, then the method throws an exception
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/is_public",
+                "value": True
+            }
+        ]
+        self.assertRaises(exceptions.Forbidden,
+                          self.application_catalog_client.update_package,
+                          package['id'],
+                          post_body)
