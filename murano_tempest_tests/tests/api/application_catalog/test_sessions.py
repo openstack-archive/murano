@@ -64,3 +64,30 @@ class TestSessions(base.BaseApplicationCatalogTest):
         session_from_resp.pop('updated', None)
         session_from_resp.pop('created', None)
         self.assertEqual(session, session_from_resp)
+
+    @decorators.idempotent_id('30a63368-e75a-4e00-ac91-c91b17e54a62')
+    def test_deploy_session(self):
+        # Given an environment with a session
+        name = utils.generate_name('_create_and_deploy_env_session')
+        environment = self.application_catalog_client.create_environment(
+            name)
+        self.addCleanup(self.application_catalog_client.delete_environment,
+                        environment['id'])
+        session = self.application_catalog_client.create_session(
+            environment['id'])
+        self.addCleanup(self.application_catalog_client.delete_session,
+                        environment['id'], session['id'])
+
+        # When deploy session is called
+        self.application_catalog_client.deploy_session(environment['id'],
+                                                       session['id'])
+        utils.wait_for_environment_deploy(self.application_catalog_client,
+                                          environment['id'])
+
+        # Then there is only one deployment and it is in a success state
+        fetched_deployments = self.application_catalog_client.list_deployments(
+            environment['id'])
+        self.assertEqual(1, len(fetched_deployments))
+        first_deployment = fetched_deployments[0]
+        self.assertEqual(environment['id'], first_deployment['environment_id'])
+        self.assertEqual('success', first_deployment['state'])

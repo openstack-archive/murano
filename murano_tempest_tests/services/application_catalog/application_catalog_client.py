@@ -207,6 +207,34 @@ class ApplicationCatalogClient(rest_client.RestClient):
         self.expected_success(200, resp.status)
         return self._parse_resp(body)
 
+# ----------------------------Deployment methods-------------------------------
+
+    def list_deployments(self, environment_id):
+        uri = 'v1/environments/{0}/deployments'.format(
+            environment_id)
+        body = None
+
+        resp, body = self.get(uri, body)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def list_deployment_statuses(self, environment_id, deployment_id):
+        uri = 'v1/environments/{0}/deployments/{1}'.format(
+            environment_id, deployment_id)
+        body = None
+
+        resp, body = self.get(uri, body)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
+    def list_all_deployments(self):
+        uri = 'v1/deployments'
+        body = None
+
+        resp, body = self.get(uri, body)
+        self.expected_success(200, resp.status)
+        return self._parse_resp(body)
+
 # -----------------------------Service methods---------------------------------
     def create_service(self, environment_id, session_id, post_body):
         headers = self.get_headers()
