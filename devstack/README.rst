@@ -49,4 +49,4 @@ Enabling in Devstack
     ./stack.sh
 
 
-.. _DevStack: http://docs.openstack.org/developer/devstack/
+.. _DevStack: https://docs.openstack.org/devstack/latest/

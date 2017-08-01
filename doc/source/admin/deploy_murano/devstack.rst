@@ -63,5 +63,5 @@ with murano, proceed with the following steps:
 **Result:** Murano has installed with DevStack.
 
 .. Links
-.. _DevStack: http://docs.openstack.org/developer/devstack/
+.. _DevStack: https://docs.openstack.org/devstack/latest/
 .. _murano/devstack: https://git.openstack.org/cgit/openstack/murano/tree/devstack
