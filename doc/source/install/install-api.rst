@@ -30,7 +30,7 @@ Install and configure components
 
       # apt-get update
 
-      # apt-get install
+      # apt-get install murano-engine murano-api
 
 #. Edit the ``/etc/murano/murano.conf`` file and complete the following
    actions:
