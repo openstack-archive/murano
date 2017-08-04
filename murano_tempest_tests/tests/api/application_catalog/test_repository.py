@@ -178,6 +178,40 @@ class TestRepository(base.BaseApplicationCatalogIsolatedAdminTest):
     def test_download_package(self):
         self.application_catalog_client.download_package(self.package['id'])
 
+    @decorators.attr(type='smoke')
+    @decorators.idempotent_id('9e55ae34-dea4-4db5-be4a-b3b793c9c4a7')
+    def test_publicize_package(self):
+        # Given a package that isn't public
+        application_name = utils.generate_name('test_publicize_package')
+        abs_archive_path, dir_with_archive, archive_name = \
+            utils.prepare_package(application_name)
+        self.addCleanup(os.remove, abs_archive_path)
+        package = self.application_catalog_client.upload_package(
+            application_name, archive_name, dir_with_archive,
+            {"categories": [], "tags": [], 'is_public': False})
+        self.addCleanup(self.application_catalog_client.delete_package,
+                        package['id'])
+
+        fetched_package = self.application_catalog_client.get_package(
+            package['id'])
+        self.assertFalse(fetched_package['is_public'])
+
+        # When package is publicized
+        post_body = [
+            {
+                "op": "replace",
+                "path": "/is_public",
+                "value": True
+            }
+        ]
+        self.application_catalog_client.update_package(package['id'],
+                                                       post_body)
+
+        # Then package becomes public
+        fetched_package = self.application_catalog_client.get_package(
+            package['id'])
+        self.assertTrue(fetched_package['is_public'])
+
     @decorators.idempotent_id('1c017c1b-9efc-4498-95ff-833a9ce565a0')
     def test_get_ui_definitions(self):
         self.application_catalog_client.get_ui_definition(self.package['id'])
