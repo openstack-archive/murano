@@ -155,11 +155,8 @@ function configure_murano {
     mkdir_chown_stack "$MURANO_CONF_DIR"
 
     # Generate Murano configuration file and configure common parameters.
-    oslo-config-generator --namespace keystonemiddleware.auth_token \
-                          --namespace murano \
-                          --namespace oslo.db \
-                          --namespace oslo.messaging \
-                          > $MURANO_CONF_FILE
+    oslo-config-generator --config-file $MURANO_DIR/etc/oslo-config-generator/murano.conf --output-file $MURANO_CONF_FILE
+
     cp $MURANO_DIR/etc/murano/murano-paste.ini $MURANO_CONF_DIR
 
     cleanup_murano
@@ -232,10 +229,8 @@ function set_packages_service_backend() {
 function configure_murano_cfapi {
 
     # Generate Murano configuration file and configure common parameters.
-    oslo-config-generator --namespace keystonemiddleware.auth_token \
-                          --namespace murano.cfapi \
-                          --namespace oslo.db \
-                          > $MURANO_CFAPI_CONF_FILE
+    oslo-config-generator --config-file $MURANO_DIR/etc/oslo-config-generator/murano-cfapi.conf --output-file $MURANO_CFAPI_CONF_FILE
+
     cp $MURANO_DIR/etc/murano/murano-cfapi-paste.ini $MURANO_CONF_DIR
 
     configure_service_broker
