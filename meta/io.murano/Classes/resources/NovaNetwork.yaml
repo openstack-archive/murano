@@ -40,11 +40,17 @@ Methods:
       - $instanceResources: []
       - $instanceOutputs: []
       - $instanceNetworkOutput: format('{0}-assigned-ips', $instance.name)
+      - $template:
+          outputs:
+            $instanceNetworkOutput:
+                description: format('Network IPs assigned to {0} instance', $instance.name)
+                value:
+                  get_attr: [ $instance.name, networks ]
       - If: $assignFloatingIp
         Then:
           - $instanceFipOutput: $instance.name + '-floatingIPaddress'
           - $fipName: format('fip-nn-{0}', $instance.name)
-          - $template:
+          - $fipTemplate:
               resources:
                 $fipName:
                   type: 'OS::Nova::FloatingIP'
@@ -60,10 +66,7 @@ Methods:
                   value:
                     get_attr: [$fipName, ip]
                   description: format('Floating IP of {0}', $instance.name)
-                $instanceNetworkOutput:
-                  description: format('Network IPs assigned to {0} instance', $instance.name)
-                  value:
-                    get_attr: [ $instance.name, networks ]
+          - $template: $template.mergeWith($fipTemplate)
           - $instanceResources: [$fipName, $fipName + 'Assignment']
           - $instanceOutputs: [$instanceFipOutput, $instanceNetworkOutput]
       - Return:
