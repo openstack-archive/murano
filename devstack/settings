@@ -13,6 +13,7 @@ GITDIR["python-muranoclient"]=$DEST/python-muranoclient
 
 # Set up default directories
 MURANO_DIR=$DEST/murano
+MURANO_FILES_DIR=$MURANO_DIR/devstack/files
 MURANO_CONF_DIR=${MURANO_CONF_DIR:-/etc/murano}
 MURANO_CONF_FILE=${MURANO_CONF_DIR}/murano.conf
 MURANO_CFAPI_CONF_FILE=${MURANO_CONF_DIR}/murano-cfapi.conf

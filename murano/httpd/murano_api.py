@@ -25,6 +25,7 @@ from murano.common import app_loader
 from murano.common import config
 from murano.common.i18n import _
 from murano.common import policy
+from murano.common import server
 
 
 def init_application():
@@ -38,6 +39,8 @@ def init_application():
     config.set_middleware_defaults()
     request_statistics.init_stats()
     policy.init()
+    server.get_notification_listener().start()
+    server.get_rpc_server().start()
 
     port = cfg.CONF.bind_port
     host = cfg.CONF.bind_host
