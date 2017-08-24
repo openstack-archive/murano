@@ -1,0 +1,11 @@
+---
+features:
+  - |
+
+    Add notifications about environment events that are required for
+    tracking. These are AMQP notifications and oslo.messaging library
+    is used for sending them.
+    The follow event types are provided: environment.deploy.end,
+    environment.delete.end, environment.exists
+    There are 2 new configuration options controlling these notifications:
+    stats.env_audit_period, env_audit_enabled.

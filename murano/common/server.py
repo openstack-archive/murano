@@ -29,6 +29,7 @@ from murano.db import models
 from murano.db.services import environments
 from murano.db.services import instances
 from murano.db import session
+from murano.engine.system import status_reporter
 from murano.services import states
 
 CONF = cfg.CONF
@@ -124,6 +125,12 @@ class ResultEndpoint(object):
                      .format(env_id=environment.id,
                              tenant_id=environment.tenant_id,
                              services=services))
+            if action_name == 'Deployment':
+                env = environment.to_dict()
+                env["deployment_started"] = deployment.started
+                env["deployment_finished"] = deployment.finished
+                status_reporter.get_notifier().report(
+                    'environment.deploy.end', env)
 
 
 def notification_endpoint_wrapper(priority='info'):

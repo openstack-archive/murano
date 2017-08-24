@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import datetime
+
 import jsonpatch
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
@@ -30,6 +32,7 @@ from murano.db.services import core_services
 from murano.db.services import environments as envs
 from murano.db.services import sessions as session_services
 from murano.db import session as db_session
+from murano.engine.system import status_reporter
 from murano.services import states
 from murano.utils import check_env
 from murano.utils import check_session
@@ -41,6 +44,11 @@ API_NAME = 'Environments'
 
 
 class Controller(object):
+
+    def __init__(self, *args, **kwargs):
+        super(Controller, self).__init__(*args, **kwargs)
+        self._notifier = status_reporter.Notification()
+
     @request_statistics.stats_count(API_NAME, 'Index')
     def index(self, request):
         all_tenants = request.GET.get('all_tenants', 'false').lower() == 'true'
@@ -161,19 +169,25 @@ class Controller(object):
     def delete(self, request, environment_id):
         target = {"environment_id": environment_id}
         policy.check('delete_environment', request.context, target)
+        environment = check_env(request, environment_id)
+
         if request.GET.get('abandon', '').lower() == 'true':
-            check_env(request, environment_id)
-            LOG.debug('Environments:Abandon  <Id: {id}>'
-                      .format(id=environment_id))
+            LOG.debug(
+                'Environments:Abandon  <Id: {id}>'.format(id=environment_id))
             envs.EnvironmentServices.remove(environment_id)
         else:
-            LOG.debug('Environments:Delete <Id: {id}>'
-                      .format(id=environment_id))
+            LOG.debug(
+                'Environments:Delete <Id: {id}>'.format(id=environment_id))
             sessions_controller = sessions.Controller()
-            session = sessions_controller.configure(request, environment_id)
+            session = sessions_controller.configure(
+                request, environment_id)
             session_id = session['id']
             envs.EnvironmentServices.delete(environment_id, session_id)
             sessions_controller.deploy(request, environment_id, session_id)
+
+        env = environment.to_dict()
+        env['deleted'] = datetime.datetime.utcnow()
+        self._notifier.report('environment.delete.end', env)
 
     @request_statistics.stats_count(API_NAME, 'LastStatus')
     @verify_env
