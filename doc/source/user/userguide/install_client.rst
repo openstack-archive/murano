@@ -116,4 +116,4 @@ steps:
 
    .. code-block:: console
 
-      $ source ~/.bash_completion/murano.sh
+      $ . ~/.bash_completion/murano.sh

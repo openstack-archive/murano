@@ -78,7 +78,7 @@ DevStack installation
 
      .. code-block:: console
 
-         $ source {DEVSTACK_SOURCE_DIR}/openrc admin admin
+         $ . {DEVSTACK_SOURCE_DIR}/openrc admin admin
          $ murano --murano-packages-service=glare  package-list
 
          +----+------+-----+--------+--------+-----------+------+---------+
