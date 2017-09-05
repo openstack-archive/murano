@@ -35,7 +35,7 @@ def reset():
     _ENFORCER = None
 
 
-def init(default_rule=None, use_conf=True):
+def init(use_conf=True):
     global _ENFORCER
     if not _ENFORCER:
         LOG.debug("Enforcer is not present, recreating.")
