@@ -11,8 +11,8 @@ Contributor License Agreement
 In order to contribute to the Murano project, you need to have
 signed OpenStack's contributor's agreement:
 
-* http://docs.openstack.org/infra/manual/developers.html
-* http://wiki.openstack.org/CLA
+* https://docs.openstack.org/infra/manual/developers.html
+* https://wiki.openstack.org/wiki/How_To_Contribute#Contributor_License_Agreement
 
 
 Project Hosting Details
@@ -48,7 +48,7 @@ Project Hosting Details
 * Code Review
     * https://review.openstack.org/#/q/murano+AND+status:+open,n,z
 
-    * http://docs.openstack.org/infra/manual/developers.html#development-workflow
+    * https://docs.openstack.org/infra/manual/developers.html#development-workflow
 
 * Murano Design Specifications
     * https://git.openstack.org/openstack/murano-specs

@@ -380,7 +380,7 @@ This method uses the ERROR level:
     file.
 
   * `OpenStack networking logging
-    configuration <http://docs.openstack.org/liberty/config-reference/content/networking-options-logging.html>`_.
+    configuration <https://docs.openstack.org/liberty/config-reference/content/networking-options-logging.html>`_.
 
 .. _status-reporter:
 

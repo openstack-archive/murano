@@ -20,7 +20,7 @@ compose reliable application environments with the push of a button.
 Project Resources
 -----------------
 
-* `Murano Official Documentation <http://docs.openstack.org/murano/latest/>`_
+* `Murano Official Documentation <https://docs.openstack.org/murano/latest/>`_
 
 * Project status, bugs, and blueprints are tracked on
   `Launchpad <https://launchpad.net/murano>`_
