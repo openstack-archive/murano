@@ -175,7 +175,7 @@ environment template.
 +----------------+-----------------------------------------------------------+
 | Code           | Description                                               |
 +================+===========================================================+
-| 200            | OK. Environment Template created successfully             |
+| 200            | OK. Get environment template details successfully         |
 +----------------+-----------------------------------------------------------+
 | 401            | User is not authorized to access this session             |
 +----------------+-----------------------------------------------------------+
