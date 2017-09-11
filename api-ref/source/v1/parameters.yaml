@@ -526,7 +526,7 @@ task_id:
   type: string
 template_description:
   description: |
-    The enviroment template description.
+    The environment template description.
   in: body
   required: true
   type: string
