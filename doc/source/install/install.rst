@@ -9,7 +9,7 @@ Application Catalog service, code-named murano, on the controller node.
 This section assumes that you already have a working OpenStack environment with
 at least the following components installed: Identity service, Image service,
 Compute service, Networking service, Block Storage service and Orchestration
-service. See `OpenStack Install Guides <http://docs.openstack.org/
+service. See `OpenStack Install Guides <https://docs.openstack.org/
 #install-guides>`__.
 
 Note that installation and configuration vary by distribution. Currently,
