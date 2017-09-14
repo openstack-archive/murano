@@ -13,8 +13,8 @@
 # under the License.
 
 import congressclient.v1.client as cclient
-import keystoneclient
-from keystoneclient.v2_0 import client as ksclient
+from keystoneauth1 import auth as ksauth
+from keystoneauth1 import session as ksasession
 from tempest import config
 
 import murano.tests.functional.common.utils as common_utils
@@ -28,19 +28,20 @@ class TempestDeployTestMixin(common_utils.DeployTestMixin):
     @staticmethod
     @common_utils.memoize
     def keystone_client():
-        return ksclient.Client(username=CONF.auth.admin_username,
-                               password=CONF.auth.admin_password,
-                               tenant_name=CONF.auth.admin_project_name,
-                               auth_url=CONF.identity.uri)
+        return ksauth.identity.v2.Password(
+            auth_url=CONF.identity.uri,
+            username=CONF.auth.admin_username,
+            password=CONF.auth.admin_password,
+            project_name=CONF.auth.admin_project_name)
 
     @staticmethod
     @common_utils.memoize
     def congress_client():
-        auth = keystoneclient.auth.identity.v2.Password(
+        auth = ksauth.identity.v3.Password(
             auth_url=CONF.identity.uri,
             username=CONF.auth.admin_username,
             password=CONF.auth.admin_password,
-            tenant_name=CONF.auth.admin_project_name)
-        session = keystoneclient.session.Session(auth=auth)
+            project_name=CONF.auth.admin_project_name)
+        session = ksasession.Session(auth=auth)
         return cclient.Client(session=session,
                               service_type='policy')
