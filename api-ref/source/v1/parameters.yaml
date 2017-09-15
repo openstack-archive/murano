@@ -215,6 +215,12 @@ search:
   in: query
   required: false
   type: string
+tenant:
+  description: |
+    Indicates environments from specified tenant are listed. Admin user required.
+  in: query
+  required: false
+  type: string
 
 # variables in body
 acquired_by:
