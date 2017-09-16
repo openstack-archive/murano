@@ -256,9 +256,7 @@ class Controller(object):
         return template.to_dict()
 
     def _validate_request(self, request, env_template_id):
-        self._validate_exists(env_template_id)
-        get_env_template = env_temps.EnvTemplateServices.get_env_template
-        env_template = get_env_template(env_template_id)
+        env_template = self._validate_exists(env_template_id)
         if env_template.is_public or request.context.is_admin:
             return
         if env_template.tenant_id != request.context.tenant:
