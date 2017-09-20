@@ -91,6 +91,7 @@ List environments
   *True* environments from all projects are listed. Admin user required.
   *False* environments only from current project are listed (default like option unspecified).
 
+* `tenant` - indicates environments from specified tenant are listed. Admin user required.
 
 *Response*
 

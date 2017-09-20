@@ -39,6 +39,7 @@ Request Parameters
 .. rest_parameters:: parameters.yaml
 
    - all_tenants: all_tenants
+   - tenant: tenant
 
 Response Parameters
 -------------------
