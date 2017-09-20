@@ -64,7 +64,7 @@ Prerequisites:
 
        If you do not have Firefox package out of the box,
        install and remove it. Otherwise, you will need to install
-       dependant libraries manually. To downgrade Firefox:
+       dependent libraries manually. To downgrade Firefox:
 
        .. code-block:: console
 
