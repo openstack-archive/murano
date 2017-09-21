@@ -383,6 +383,9 @@ in subsequent requests when necessary.
 | 403            | Could not open session for environment, environment has   |
 |                | deploying status                                          |
 +----------------+-----------------------------------------------------------+
+| 404            | Not found. Specified environment doesn`t exist            |
++----------------+-----------------------------------------------------------+
+
 
 Deploy session
 --------------
@@ -410,7 +413,7 @@ With this request all local changes made within the environment start to deploy 
 +----------------+-----------------------------------------------------------+
 | 403            | Session is already deployed or deployment is in progress  |
 +----------------+-----------------------------------------------------------+
-| 404            | Not found. Specified session doesn`t exist                |
+| 404            | Not found. Specified session or environment doesn`t exist |
 +----------------+-----------------------------------------------------------+
 
 Get session details
@@ -449,7 +452,7 @@ Get session details
 +----------------+-----------------------------------------------------------+
 | 403            | Session is invalid                                        |
 +----------------+-----------------------------------------------------------+
-| 404            | Not found. Specified session doesn`t exist                |
+| 404            | Not found. Specified session or environment doesn`t exist |
 +----------------+-----------------------------------------------------------+
 
 Delete session
@@ -475,7 +478,7 @@ Delete session
 +----------------+-----------------------------------------------------------+
 | 403            | Session is in deploying state and could not be deleted    |
 +----------------+-----------------------------------------------------------+
-| 404            | Not found. Specified session doesn`t exist                |
+| 404            | Not found. Specified session or environment doesn`t exist |
 +----------------+-----------------------------------------------------------+
 
 Environment model API
