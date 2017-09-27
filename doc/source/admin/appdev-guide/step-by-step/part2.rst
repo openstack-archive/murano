@@ -392,6 +392,10 @@ part contained only mandatory fields. This is how it should look by now:
 
    FullName: com.yourdomain.HelloWorld
    Type: Application
+   Description: |
+      A package which demonstrates
+      development for Murano
+      by greeting the user.
    Classes:
      com.yourdomain.HelloWorld: HelloWorld.yaml
 
@@ -400,9 +404,6 @@ Let's add more fields here.
 First, you can add a ``Name`` attribute. Unlike ``FullName``, it is not a
 unique identifier of the package. But, if specified, it overrides the name of
 the package that is displayed in the catalog.
-
-Then there is a ``Description`` field. This is a multi-line text attribute,
-providing detailed info about your package.
 
 Then an ``Author`` field: here you can put your name or the name of your
 company, so it will be displayed in catalog as the name of the package
