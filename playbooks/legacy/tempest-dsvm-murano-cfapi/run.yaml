@@ -1,0 +1,60 @@
+- hosts: all
+  name: Autoconverted job legacy-tempest-dsvm-murano-cfapi from old job gate-tempest-dsvm-murano-cfapi-ubuntu-xenial-nv
+  tasks:
+
+    - name: Ensure legacy workspace directory
+      file:
+        path: '{{ ansible_user_dir }}/workspace'
+        state: directory
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          cat > clonemap.yaml << EOF
+          clonemap:
+            - name: openstack-infra/devstack-gate
+              dest: devstack-gate
+          EOF
+          /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
+              git://git.openstack.org \
+              openstack-infra/devstack-gate
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          export PYTHONUNBUFFERED=true
+          export DEVSTACK_GATE_TEMPEST=1
+          export DEVSTACK_GATE_NEUTRON=1
+          # Allow tempest to use site-packages with plugins
+          export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
+          export PROJECTS="openstack/heat $PROJECTS"
+          export PROJECTS="openstack/python-heatclient $PROJECTS"
+          export PROJECTS="openstack/murano $PROJECTS"
+          export PROJECTS="openstack/murano-dashboard $PROJECTS"
+          export PROJECTS="openstack/python-muranoclient $PROJECTS"
+          export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
+          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin murano git://git.openstack.org/openstack/murano"
+          export BRANCH_OVERRIDE=default
+          if [ "$BRANCH_OVERRIDE" != "default" ] ; then
+              export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
+          fi
+          if [ "cfapi" = "cfapi" ]; then
+              export ENABLED_SERVICES+=,murano-cfapi
+              export DEVSTACK_GATE_TEMPEST_REGEX="service_broker"
+          elif [ "cfapi" = "api" ]; then
+              export DEVSTACK_GATE_TEMPEST_REGEX="application_catalog"
+          elif [ "cfapi" = "glare-backend" ]; then
+              export DEVSTACK_GATE_TEMPEST_REGEX="application_catalog"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_service g-glare"
+              export DEVSTACK_LOCAL_CONFIG+=$'\n'"MURANO_USE_GLARE=True"
+          fi
+          cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+          ./safe-devstack-vm-gate-wrap.sh
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
