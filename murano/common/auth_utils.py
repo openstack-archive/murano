@@ -30,44 +30,18 @@ cfg.CONF.import_group(CFG_KEYSTONE_GROUP, 'keystonemiddleware.auth_token')
 
 
 def _get_keystone_auth(trust_id=None):
-    if not cfg.CONF[CFG_MURANO_AUTH_GROUP].auth_type:
-        # Fallback to legacy v2 options in keystone_authtoken
-        # if no auth_type is set.
-        # If auth_type is set, it is possible to use the auth loader
-        # from keystoneauth1. This is the same fallback as keystonemiddleware
-        # uses.
-        versionutils.report_deprecated_feature(
-            LOG, 'Please update configuration in ' + CFG_MURANO_AUTH_GROUP +
-                 ' group')
-        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
-        username = cfg.CONF[CFG_KEYSTONE_GROUP].admin_user
-        password = cfg.CONF[CFG_KEYSTONE_GROUP].admin_password
-        project_name = cfg.CONF[CFG_KEYSTONE_GROUP].admin_tenant_name
-        kwargs = {
-            'auth_url': auth_uri.replace('v2.0', 'v3'),
-            'username': username,
-            'password': password,
-            'user_domain_name': 'default'
-        }
-        if not trust_id:
-            kwargs['project_name'] = project_name
-            kwargs['project_domain_name'] = 'default'
-        else:
-            kwargs['trust_id'] = trust_id
-        auth = identity.Password(**kwargs)
-    else:
-        kwargs = {}
-        if trust_id:
-            # Remove project_name and project_id, since we need a trust scoped
-            # auth object
-            kwargs['project_name'] = None
-            kwargs['project_domain_name'] = None
-            kwargs['project_id'] = None
-            kwargs['trust_id'] = trust_id
-        auth = ka_loading.load_auth_from_conf_options(
-            cfg.CONF,
-            CFG_MURANO_AUTH_GROUP,
-            **kwargs)
+    kwargs = {}
+    if trust_id:
+        # Remove project_name and project_id, since we need a trust scoped
+        # auth object
+        kwargs['project_name'] = None
+        kwargs['project_domain_name'] = None
+        kwargs['project_id'] = None
+        kwargs['trust_id'] = trust_id
+    auth = ka_loading.load_auth_from_conf_options(
+        cfg.CONF,
+        CFG_MURANO_AUTH_GROUP,
+        **kwargs)
     return auth
 
 
