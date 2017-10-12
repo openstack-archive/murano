@@ -230,7 +230,7 @@ class Controller(object):
         :return: the description of the created template.
         """
 
-        LOG.debug('EnvTemplates:Clone <Env Template {0} for body {1}>'.
+        LOG.debug('EnvTemplates:Clone <Env Template {1} for body {0}>'.
                   format(body, env_template_id))
         policy.check('clone_env_template', request.context)
 
