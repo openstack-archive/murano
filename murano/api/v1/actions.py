@@ -44,7 +44,7 @@ class Controller(object):
                           states.EnvironmentStatus.DELETING):
             LOG.warning('Could not open session for environment '
                         '<EnvId: {id}>, environment has deploying '
-                        'status.'.format(id=environment_id))
+                        'or deleting status.'.format(id=environment_id))
             raise exc.HTTPForbidden()
 
         user_id = request.context.user
