@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import os
+
 from keystoneauth1 import identity
 from keystoneauth1 import loading as ka_loading
 from keystoneclient.v3 import client as ks_client
@@ -73,7 +75,14 @@ def get_token_client_session(token=None, project_id=None, conf=None):
             CFG_MURANO_AUTH_GROUP + 'group')
         www_authenticate_uri = \
             cfg.CONF[CFG_KEYSTONE_GROUP].www_authenticate_uri
-    auth_url = www_authenticate_uri.replace('v2.0', 'v3')
+    if not (www_authenticate_uri.endswith('v2.0') or
+            www_authenticate_uri.endswith('v3')):
+        auth_url = os.path.join(www_authenticate_uri, 'v3')
+    elif www_authenticate_uri.endswith('v2.0'):
+        auth_url = www_authenticate_uri.replace('v2.0', 'v3')
+    else:
+        auth_url = www_authenticate_uri
+
     if token is None or project_id is None:
         execution_session = helpers.get_execution_session()
         token = execution_session.token
