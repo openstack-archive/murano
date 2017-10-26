@@ -12,6 +12,7 @@
 
 Namespaces:
   =: io.murano
+  res: io.murano.resources
 
 Name: SharedIp
 Extends: CloudResource
@@ -26,6 +27,10 @@ Properties:
   floatingIpAddress:
     Contract: $.string()
     Usage: Out
+  network:
+    Contract: $.class(res:Network)
+    Usage: InOut
+
 
 Methods:
   initialize:
@@ -34,15 +39,25 @@ Methods:
       - $.instances: []
 
 
+  deployNetwork:
+    Body:
+      - If: $.network = null
+        Then:
+          $.network: $.getRegion().defaultNetworks.environment
+
+      - $.network.deploy()
+
+
   deploy:
     Body:
       - If: not $.getAttr(deployed, false)
         Then:
           - $region: $.getRegion()
-          - $network: $region.defaultNetworks.environment
           - $reporter: $._environment.reporter
-          - $network.deploy()
-          - $networkData: $network.describe()
+
+          - $.deployNetwork()
+          - $networkData: $.network.describe()
+
           - $aapPortName: format('AllowedAddressPairsPort-{0}', id($))
           - $template:
               resources:
@@ -66,7 +81,7 @@ Methods:
                           - subnet_id: $networkData.subnetId
               - $template: $template.mergeWith($t)
           - $region.stack.updateTemplate($template)
-          - If: $.assignFloatingIp
+          - If: $.assignFloatingIp and $networkData.floatingIpNetId
             Then:
               - $extNetId: $networkData.floatingIpNetId
               - $fipName: format('Shared-Floating-ip-{0}', id($))

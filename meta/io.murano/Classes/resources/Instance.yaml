@@ -259,10 +259,15 @@ Methods:
     Body:
       - $primary: $net = $._primaryNetwork
       - $assignFip: $primary and $.assignFloatingIp and not $.getAttr(fipAssigned, false)
+
       - $sharedIps: []
-      - If: $primary
-        Then:
-          $sharedIps: $.sharedIps
+      - For: sharedIp
+        In: $.sharedIps
+        Do:
+          - If: $sharedIp.network = $net
+            Then:
+              - $sharedIps: $sharedIps.append($sharedIp)
+
       - $joinResult: $net.joinInstance(
             instance => $this,
             securityGroupName => $securityGroupName,

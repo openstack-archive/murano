@@ -219,7 +219,11 @@ Methods:
 
   _getExternalNetId:
     Body:
-      Return: $._getNetExplorer().getExternalNetworkIdForRouter($.externalRouterId)
+      - If: $.externalRouterId != null
+        Then:
+          Return: $._getNetExplorer().getExternalNetworkIdForRouter($.externalRouterId)
+        Else:
+          Return: null
 
   _getHeatName:
     Body:
