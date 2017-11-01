@@ -22,6 +22,7 @@ import zipfile
 import six
 import yaml
 
+from murano.common.helpers import path
 from murano.common.plugins import package_types_loader
 import murano.packages.exceptions as e
 import murano.packages.hot_package
@@ -76,14 +77,14 @@ def load_from_file(archive_path, target_dir=None, drop_dir=False):
                 shutil.rmtree(target_dir)
             else:
                 for f in os.listdir(target_dir):
-                    os.unlink(os.path.join(target_dir, f))
+                    os.unlink(path.secure_join(target_dir, f))
 
 
 def load_from_dir(source_directory, filename='manifest.yaml'):
     if not os.path.isdir(source_directory) or not os.path.exists(
             source_directory):
         raise e.PackageLoadError('Invalid package directory')
-    full_path = os.path.join(source_directory, filename)
+    full_path = path.secure_join(source_directory, filename)
     if not os.path.isfile(full_path):
         raise e.PackageLoadError('Unable to find package manifest')
 

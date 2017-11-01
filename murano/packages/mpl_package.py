@@ -14,6 +14,7 @@
 
 import os
 
+from murano.common.helpers import path
 from murano.packages import exceptions
 from murano.packages import package_base
 
@@ -34,7 +35,8 @@ class MuranoPlPackage(package_base.PackageBase):
 
     @property
     def ui(self):
-        full_path = os.path.join(self._source_directory, 'UI', self._ui_file)
+        full_path = path.secure_join(
+            self._source_directory, 'UI', self._ui_file)
         if not os.path.isfile(full_path):
             return None
         with open(full_path, 'rb') as stream:
@@ -49,7 +51,8 @@ class MuranoPlPackage(package_base.PackageBase):
             raise exceptions.PackageClassLoadError(
                 name, 'Class not defined in package ' + self.full_name)
         def_file = self._classes[name]
-        full_path = os.path.join(self._source_directory, 'Classes', def_file)
+        full_path = path.secure_join(
+            self._source_directory, 'Classes', def_file)
         if not os.path.isfile(full_path):
             raise exceptions.PackageClassLoadError(
                 name, 'File with class definition not found')

@@ -22,6 +22,7 @@ import sys
 import semantic_version
 import six
 
+from murano.common.helpers import path
 from murano.common.i18n import _
 from murano.packages import exceptions
 from murano.packages import package
@@ -119,13 +120,13 @@ class PackageBase(package.Package):
             self._supplier.get('Logo'), 'supplier_logo.png', 'supplier logo')
 
     def get_resource(self, name):
-        resources_dir = os.path.join(self._source_directory, 'Resources')
+        resources_dir = path.secure_join(self._source_directory, 'Resources')
         if not os.path.exists(resources_dir):
             os.makedirs(resources_dir)
-        return os.path.join(resources_dir, name)
+        return path.secure_join(resources_dir, name)
 
     def _load_image(self, file_name, default_name, what_image):
-        full_path = os.path.join(
+        full_path = path.secure_join(
             self._source_directory, file_name or default_name)
         if not os.path.isfile(full_path) and not file_name:
             return
