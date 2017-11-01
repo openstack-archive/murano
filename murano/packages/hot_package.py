@@ -19,6 +19,7 @@ import sys
 import six
 import yaml
 
+from murano.common.helpers import path
 from murano.packages import exceptions
 from murano.packages import package_base
 
@@ -76,7 +77,8 @@ class HotPackage(package_base.PackageBase):
         return self._translated_class, '<generated code>'
 
     def _translate_class(self):
-        template_file = os.path.join(self._source_directory, 'template.yaml')
+        template_file = path.secure_join(
+            self._source_directory, 'template.yaml')
 
         if not os.path.isfile(template_file):
             raise exceptions.PackageClassLoadError(
@@ -92,9 +94,8 @@ class HotPackage(package_base.PackageBase):
             'Extends': 'io.murano.Application'
         }
 
-        hot_envs_path = os.path.join(self._source_directory,
-                                     RESOURCES_DIR_NAME,
-                                     HOT_ENV_DIR_NAME)
+        hot_envs_path = path.secure_join(
+            self._source_directory, RESOURCES_DIR_NAME, HOT_ENV_DIR_NAME)
 
         # if using hot environments, doing parameter validation with contracts
         # will overwrite the parameters in the hot environment.
@@ -190,9 +191,8 @@ class HotPackage(package_base.PackageBase):
 
     @staticmethod
     def _translate_files(source_directory):
-        hot_files_path = os.path.join(source_directory,
-                                      RESOURCES_DIR_NAME,
-                                      HOT_FILES_DIR_NAME)
+        hot_files_path = path.secure_join(
+            source_directory, RESOURCES_DIR_NAME, HOT_FILES_DIR_NAME)
 
         return HotPackage._build_hot_resources(hot_files_path)
 
@@ -202,7 +202,7 @@ class HotPackage(package_base.PackageBase):
         if os.path.isdir(basedir):
             for root, _, files in os.walk(os.path.abspath(basedir)):
                 for f in files:
-                    full_path = os.path.join(root, f)
+                    full_path = path.secure_join(root, f)
                     relative_path = os.path.relpath(full_path, basedir)
                     result.append(relative_path)
         return result
@@ -517,7 +517,8 @@ class HotPackage(package_base.PackageBase):
         return app
 
     def _translate_ui(self):
-        template_file = os.path.join(self._source_directory, 'template.yaml')
+        template_file = path.secure_join(
+            self._source_directory, 'template.yaml')
 
         if not os.path.isfile(template_file):
             raise exceptions.PackageClassLoadError(
