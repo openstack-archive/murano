@@ -10,11 +10,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import os
-
 import six
 import yaml
 
+from murano.common.helpers import path
 from murano.packages import exceptions
 from murano.packages import package_base
 
@@ -137,9 +136,9 @@ class CloudifyToscaPackage(package_base.PackageBase):
         }
 
     def _get_inputs_outputs(self):
-        path = os.path.join(
+        entry_point_path = path.secure_join(
             self.source_directory, RESOURCES_DIR_NAME, self._entry_point)
-        with open(path) as blueprint:
+        with open(entry_point_path) as blueprint:
             data = yaml.safe_load(blueprint)
             return data.get('inputs') or {}, data.get('outputs') or {}
 
