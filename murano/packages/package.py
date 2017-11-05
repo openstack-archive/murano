@@ -20,6 +20,8 @@ import zipfile
 
 import six
 
+from murano.common.helpers import path
+
 
 class PackageType(object):
     Library = 'Library'
@@ -114,11 +116,11 @@ class Package(object):
         raise NotImplementedError()
 
 
-def _zip_dir(path, zip_file):
-    for root, _, files in os.walk(path):
+def _zip_dir(base, zip_file):
+    for root, _, files in os.walk(base):
         for f in files:
-            abs_path = os.path.join(root, f)
-            relative_path = os.path.relpath(abs_path, path)
+            abs_path = path.secure_join(root, f)
+            relative_path = os.path.relpath(abs_path, base)
             zip_file.write(abs_path, relative_path)
 
 
