@@ -24,10 +24,6 @@
     experimental:
       jobs:
         - legacy-murano-dsvm-functional
-    post:
-      jobs:
-        - legacy-murano-firstapp-docs:
-            branches: ^(?!bug/).*$
 
 - job:
     name: murano-congress-devstack-dsvm
