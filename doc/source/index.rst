@@ -86,7 +86,7 @@ A guide for developing your first Murano application.
 .. toctree::
    :maxdepth: 1
 
-   first-app/source/index
+   first-app/index
 
 Application Developer Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
