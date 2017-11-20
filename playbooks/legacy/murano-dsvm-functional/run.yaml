@@ -1,0 +1,69 @@
+- hosts: all
+  name: Autoconverted job legacy-murano-dsvm-functional from old job gate-murano-dsvm-functional-ubuntu-xenial
+  tasks:
+
+    - name: Ensure legacy workspace directory
+      file:
+        path: '{{ ansible_user_dir }}/workspace'
+        state: directory
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          cat > clonemap.yaml << EOF
+          clonemap:
+            - name: openstack-infra/devstack-gate
+              dest: devstack-gate
+          EOF
+          /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
+              git://git.openstack.org \
+              openstack-infra/devstack-gate
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          cat << 'EOF' >>"/tmp/dg-local.conf"
+          [[local|localrc]]
+          enable_plugin heat git://git.openstack.org/openstack/heat
+          enable_plugin murano git://git.openstack.org/openstack/murano
+
+          EOF
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
+          export PYTHONUNBUFFERED=true
+          export DEVSTACK_GATE_TEMPEST=0
+          export DEVSTACK_GATE_TEMPEST_NOTESTS=1
+          export DEVSTACK_GATE_NEUTRON=1
+
+          export PROJECTS="openstack/heat $PROJECTS"
+          export PROJECTS="openstack/python-heatclient $PROJECTS"
+          export PROJECTS="openstack/murano $PROJECTS"
+          export PROJECTS="openstack/murano-dashboard $PROJECTS"
+          export PROJECTS="openstack/python-muranoclient $PROJECTS"
+
+          export BRANCH_OVERRIDE=default
+          if [ "$BRANCH_OVERRIDE" != "default" ] ; then
+              export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
+          fi
+
+          function post_test_hook {
+              source $BASE/new/murano/functionaltests/post_test_hook_experimental.sh
+          }
+          export -f post_test_hook
+
+          cp devstack-gate/devstack-vm-gate-wrap.sh ./safe-devstack-vm-gate-wrap.sh
+          ./safe-devstack-vm-gate-wrap.sh
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
