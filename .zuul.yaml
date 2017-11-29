@@ -28,8 +28,8 @@
 - job:
     name: murano-congress-devstack-dsvm
     parent: legacy-dsvm-base
-    run: playbooks/legacy/murano-congress-devstack-dsvm/run
-    post-run: playbooks/legacy/murano-congress-devstack-dsvm/post
+    run: playbooks/legacy/murano-congress-devstack-dsvm/run.yaml
+    post-run: playbooks/legacy/murano-congress-devstack-dsvm/post.yaml
     timeout: 4200
     required-projects:
       - openstack-dev/devstack
@@ -49,8 +49,8 @@
 - job:
     name: rally-dsvm-murano-task
     parent: legacy-dsvm-base
-    run: playbooks/legacy/rally-dsvm-murano-task/run
-    post-run: playbooks/legacy/rally-dsvm-murano-task/post
+    run: playbooks/legacy/rally-dsvm-murano-task/run.yaml
+    post-run: playbooks/legacy/rally-dsvm-murano-task/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -64,8 +64,8 @@
 - job:
     name: tempest-dsvm-murano-api
     parent: legacy-dsvm-base
-    run: playbooks/legacy/tempest-dsvm-murano-api/run
-    post-run: playbooks/legacy/tempest-dsvm-murano-api/post
+    run: playbooks/legacy/tempest-dsvm-murano-api/run.yaml
+    post-run: playbooks/legacy/tempest-dsvm-murano-api/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
@@ -79,8 +79,8 @@
 - job:
     name: tempest-dsvm-murano-cfapi
     parent: legacy-dsvm-base
-    run: playbooks/legacy/tempest-dsvm-murano-cfapi/run
-    post-run: playbooks/legacy/tempest-dsvm-murano-cfapi/post
+    run: playbooks/legacy/tempest-dsvm-murano-cfapi/run.yaml
+    post-run: playbooks/legacy/tempest-dsvm-murano-cfapi/post.yaml
     timeout: 7800
     required-projects:
       - openstack-infra/devstack-gate
