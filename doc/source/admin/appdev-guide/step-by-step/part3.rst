@@ -260,10 +260,10 @@ and put the following script there:
    sudo apt-get update
 
    # Install the operating system software and libraries needed to run Plone:
-   sudo apt-get -y install python-setuptools python-dev build-essential libssl-dev libxml2-dev libxslt1-dev libbz2-dev libjpeg62-dev
+   sudo apt-get install python-setuptools python-dev build-essential libssl-dev libxml2-dev libxslt1-dev libbz2-dev libjpeg62-dev
 
    # Install optional system packages for the handling of PDF and Office files. Can be omitted:
-   sudo apt-get -y install libreadline-dev wv poppler-utils
+   sudo apt-get install libreadline-dev wv poppler-utils
 
    # Download the latest Plone unified installer:
    wget --no-check-certificate https://launchpad.net/plone/5.0/5.0.4/+download/Plone-5.0.4-UnifiedInstaller.tgz
