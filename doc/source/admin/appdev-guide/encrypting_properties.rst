@@ -1,8 +1,8 @@
 .. _encrypting-properties:
 
-================================
-Managing Senstive Data in Murano
-================================
+=================================
+Managing Sensitive Data in Murano
+=================================
 
 Overview
 --------
