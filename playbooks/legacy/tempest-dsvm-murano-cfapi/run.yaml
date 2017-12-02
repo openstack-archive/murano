@@ -27,18 +27,30 @@
         cmd: |
           set -e
           set -x
+          cat << 'EOF' >>"/tmp/dg-local.conf"
+          [[local|localrc]]
+          TEMPEST_PLUGINS='/opt/stack/new/murano-tempest-plugin'
+          enable_plugin heat git://git.openstack.org/openstack/heat
+          enable_plugin murano git://git.openstack.org/openstack/murano
+          EOF
+        executable: /bin/bash
+        chdir: '{{ ansible_user_dir }}/workspace'
+      environment: '{{ zuul | zuul_legacy_vars }}'
+
+    - shell:
+        cmd: |
+          set -e
+          set -x
           export PYTHONUNBUFFERED=true
           export DEVSTACK_GATE_TEMPEST=1
           export DEVSTACK_GATE_NEUTRON=1
-          # Allow tempest to use site-packages with plugins
-          export DEVSTACK_GATE_TEMPEST_ALL_PLUGINS=1
+          export ENABLED_SERVICES=tempest
           export PROJECTS="openstack/heat $PROJECTS"
           export PROJECTS="openstack/python-heatclient $PROJECTS"
           export PROJECTS="openstack/murano $PROJECTS"
           export PROJECTS="openstack/murano-dashboard $PROJECTS"
           export PROJECTS="openstack/python-muranoclient $PROJECTS"
-          export DEVSTACK_LOCAL_CONFIG="enable_plugin heat git://git.openstack.org/openstack/heat"
-          export DEVSTACK_LOCAL_CONFIG+=$'\n'"enable_plugin murano git://git.openstack.org/openstack/murano"
+          export PROJECTS="openstack/murano-tempest-plugin $PROJECTS"
           export BRANCH_OVERRIDE=default
           if [ "$BRANCH_OVERRIDE" != "default" ] ; then
               export OVERRIDE_ZUUL_BRANCH=$BRANCH_OVERRIDE
