@@ -117,9 +117,9 @@ To reproduce the performance test, proceed with the following steps:
    between the instance launch and the moment when the Server Manager window
    displays.
 
-  .. code-block:: console
+   .. code-block:: console
 
-     sudo ./start-vm.sh 1
+      sudo ./start-vm.sh 1
 
    To view the instance desktop, connect with VNC viewer to your host
    to VNC screen :1 (port 5901).
