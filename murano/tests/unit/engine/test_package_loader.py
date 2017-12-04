@@ -28,7 +28,7 @@ from murano.dsl import murano_package as dsl_package
 from murano.engine import package_loader
 from murano.packages import exceptions as pkg_exc
 from murano.tests.unit import base
-from murano_tempest_tests import utils
+from murano.tests.unit import utils
 
 
 class TestPackageCache(base.MuranoTestCase):
