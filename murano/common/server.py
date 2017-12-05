@@ -239,7 +239,7 @@ def get_notification_listener():
 def get_rpc_server():
 
     endpoints = [ResultEndpoint()]
-    transport = messaging.get_transport(CONF)
+    transport = messaging.get_rpc_transport(CONF)
     s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
     access_policy = dispatcher.DefaultRPCAccessPolicy
     server = messaging.get_rpc_server(
@@ -272,7 +272,7 @@ class ApiService(Service):
     def start(self):
         endpoints = [ResultEndpoint()]
 
-        transport = messaging.get_transport(CONF)
+        transport = messaging.get_rpc_transport(CONF)
         s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
         access_policy = dispatcher.DefaultRPCAccessPolicy
         self.server = messaging.get_rpc_server(
