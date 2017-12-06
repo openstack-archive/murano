@@ -26,24 +26,25 @@ To configure Murano to use Barbican, place the following configuration into
 `murano-engine.conf`::
 
   [key_manager]
-  auth_type = 'keystone_password'
+  auth_type = keystone_password
   auth_url = <keystone_url>
   username = <username>
   password = <password>
-  project_id = <project_id>
   user_domain_name = <domain_name>
 
 Similarly, place the following configuration into `_50_murano.py` to configure
 the murano-dashboard end::
 
     KEY_MANAGER = {
-            'auth_url': <keystone_url>/v3',
-            'username': <username>,
-            'user_domain_name': <domain_name>,
-            'password': <password>,
-            'project_name': <project_name>,
-            'project_domain_name': <domain_name>
+            'auth_url': '<keystone_url>/v3',
+            'username': '<username>',
+            'user_domain_name': '<domain_name>',
+            'password': '<password>',
+            'project_name': '<project_name>',
+            'project_domain_name': '<domain_name>'
     }
+
+.. note:: Horizon config must be valid Python, so the quotes above are important.
 
 Example
 -------
