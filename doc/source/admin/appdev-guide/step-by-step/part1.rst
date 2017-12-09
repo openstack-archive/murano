@@ -56,6 +56,8 @@ domain-specific prefix.
 Murano, while a ``Library`` is  bundle of reusable scenarios which may be used
 by other packages. For now we just need a single standalone app, so let's
 choose an ``Application`` type.
+The ``Description`` is a text attribute, providing detailed info about your
+package.
 
 Enter these values and save the file. You should have something like this:
 
@@ -64,7 +66,10 @@ Enter these values and save the file. You should have something like this:
 
    FullName: com.yourdomain.HelloWorld
    Type: Application
-
+   Description: |
+       A package which demonstrates
+       development for Murano
+       by greeting the user.
 
 This is the minimum required to start. We'll add more manifest data later.
 
