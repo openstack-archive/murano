@@ -1,0 +1,452 @@
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Andi Chandler <andi@gowling.com>, 2017. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: murano VERSION\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2017-12-19 17:39+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2017-12-23 11:14+0000\n"
+"Last-Translator: Andi Chandler <andi@gowling.com>\n"
+"Language-Team: English (United Kingdom)\n"
+"Language: en-GB\n"
+"X-Generator: Zanata 3.9.6\n"
+"Plural-Forms: nplurals=2; plural=(n != 1)\n"
+
+msgid ""
+"'multipart/form-data' request body should contain 1 or 2 parts: json string "
+"and zip archive. Current body consists of {amount} part(s)"
+msgstr ""
+"'multipart/form-data' request body should contain 1 or 2 parts: json string "
+"and zip archive. Current body consists of {amount} part(s)"
+
+msgid "Acceptable response can not be provided"
+msgstr "Acceptable response cannot be provided"
+
+msgid "Attribute '{0}' is invalid"
+msgstr "Attribute '{0}' is invalid"
+
+msgid "Authentication URL"
+msgstr "Authentication URL"
+
+msgid "Authorization required"
+msgstr "Authorisation required"
+
+msgid "Bad value passed to filter. Got {key}, expected:{valid}"
+msgstr "Bad value passed to filter. Got {key}, expected:{valid}"
+
+msgid "Category '{name}' doesn't exist"
+msgstr "Category '{name}' doesn't exist"
+
+msgid "Category id '{id}' not found"
+msgstr "Category id '{id}' not found"
+
+msgid "Category name should be 80 characters maximum"
+msgstr "Category name should be 80 characters maximum"
+
+msgid "Category with specified name is already exist"
+msgstr "Category with specified name is already exist"
+
+msgid "Class name and method name must be specified for static action"
+msgstr "Class name and method name must be specified for static action"
+
+msgid ""
+"Class with the same full name is already registered in the visibility scope"
+msgstr ""
+"Class with the same full name is already registered in the visibility scope"
+
+msgid "Content-Type must be '{type}'"
+msgstr "Content-Type must be '{type}'"
+
+#, python-format
+msgid ""
+"Could not bind to %(host)s:%(port)s after trying for 30 seconds: Address "
+"already in use."
+msgstr ""
+"Could not bind to %(host)s:%(port)s after trying for 30 seconds: Address "
+"already in use."
+
+msgid ""
+"Could not open session for environment <EnvId: {env_id}>, environment has "
+"deploying or deleting status."
+msgstr ""
+"Could not open session for environment <EnvId: {env_id}>, environment has "
+"deploying or deleting status."
+
+msgid "Couldn't load package from file: {reason}"
+msgstr "Couldn't load package from file: {reason}"
+
+msgid "Create resources using trust token rather than user's token"
+msgstr "Create resources using trust token rather than user's token"
+
+msgid "Disallow the use of murano-agent"
+msgstr "Disallow the use of murano-agent"
+
+msgid "Domain name of the project"
+msgstr "Domain name of the project"
+
+msgid "Domain name of the user"
+msgstr "Domain name of the user"
+
+msgid "Enable model policy enforcer using Congress"
+msgstr "Enable model policy enforcer using Congress"
+
+msgid ""
+"Enables murano-engine to persist on disk packages downloaded during "
+"deployments. The packages would be re-used for consequent deployments."
+msgstr ""
+"Enables murano-engine to persist on disk packages downloaded during "
+"deployments. The packages would be re-used for consequent deployments."
+
+msgid "Env Template with specified name already exists"
+msgstr "Env Template with specified name already exists"
+
+msgid "EnvTemplate <TempId {temp_id}> is not found"
+msgstr "EnvTemplate <TempId {temp_id}> is not found"
+
+msgid "EnvTemplate body is incorrect"
+msgstr "EnvTemplate body is incorrect"
+
+msgid "Environment <EnvId {0}> is not found"
+msgstr "Environment <EnvId {0}> is not found"
+
+msgid "Environment Template <EnvId {0}> is not found"
+msgstr "Environment Template <EnvId {0}> is not found"
+
+msgid "Environment Template <EnvId {id}> is not found"
+msgstr "Environment Template <EnvId {id}> is not found"
+
+msgid "Environment Template must contain at least one non-white space symbol"
+msgstr "Environment Template must contain at least one non-white space symbol"
+
+msgid "Environment Template with id {id} not found"
+msgstr "Environment Template with id {id} not found"
+
+msgid "Environment audit interval in minutes. Default value is 60 minutes."
+msgstr "Environment audit interval in minutes. Default value is 60 minutes."
+
+msgid "Environment name must contain at least one non-white space symbol"
+msgstr "Environment name must contain at least one non-white space symbol"
+
+msgid "Environment name should be 255 characters maximum"
+msgstr "Environment name should be 255 characters maximum"
+
+msgid "Environment template name should be 255 characters maximum"
+msgstr "Environment template name should be 255 characters maximum"
+
+msgid "Environment template specified name already exists"
+msgstr "Environment template specified name already exists"
+
+msgid "Environment with id {env_id} not found"
+msgstr "Environment with id {env_id} not found"
+
+msgid "Environment with specified name already exists"
+msgstr "Environment with specified name already exists"
+
+msgid "Host for service broker"
+msgstr "Host for service broker"
+
+#, python-format
+msgid "Invalid SSL version: %s"
+msgstr "Invalid SSL version: %s"
+
+#, python-format
+msgid "Invalid filter value %s. The quote is not closed."
+msgstr "Invalid filter value %s. The quote is not closed."
+
+#, python-format
+msgid ""
+"Invalid filter value %s. There is no comma after opening quotation mark."
+msgstr ""
+"Invalid filter value %s. There is no comma after opening quotation mark."
+
+#, python-format
+msgid ""
+"Invalid filter value %s. There is no comma before opening quotation mark."
+msgstr ""
+"Invalid filter value %s. There is no comma before opening quotation mark."
+
+msgid "Invalid sort direction: {0}"
+msgstr "Invalid sort direction: {0}"
+
+msgid "Invalid sort key: {sort_key}. Must be one of the following: {available}"
+msgstr ""
+"Invalid sort key: {sort_key}. Must be one of the following: {available}"
+
+msgid ""
+"It's impossible to delete categories assigned to the package, uploaded to "
+"the catalog"
+msgstr ""
+"It's impossible to delete categories assigned to the package, uploaded to "
+"the catalogue"
+
+msgid "JSON-patch must be a list."
+msgstr "JSON-patch must be a list."
+
+msgid "Limit param must be an integer"
+msgstr "Limit param must be an integer"
+
+msgid "Limit param must be positive"
+msgstr "Limit param must be positive"
+
+msgid ""
+"List of directories to load local packages from. If not provided, packages "
+"will be loaded only API"
+msgstr ""
+"List of directories to load local packages from. If not provided, packages "
+"will be loaded only API"
+
+msgid ""
+"Local package is not found since \"load-packages-from\" engine parameter is "
+"not provided and specified packages is not loaded to murano-api"
+msgstr ""
+"Local package is not found since \"load-packages-from\" engine parameter is "
+"not provided and specified packages is not loaded to murano-api"
+
+msgid "Malformed request body"
+msgstr "Malformed request body"
+
+msgid "Maximum number of elements that can be iterated per object type."
+msgstr "Maximum number of elements that can be iterated per object type."
+
+msgid ""
+"Method '{method}' is not allowed for a path with name '{name}'. Allowed "
+"operations are: {ops}"
+msgstr ""
+"Method '{method}' is not allowed for a path with name '{name}'. Allowed "
+"operations are: {ops}"
+
+msgid "Murano object model validation failed: {0}"
+msgstr "Murano object model validation failed: {0}"
+
+msgid "Nested paths are not allowed"
+msgstr "Nested paths are not allowed"
+
+msgid "No tests found for execution."
+msgstr "No tests found for execution."
+
+msgid "Number of API workers"
+msgstr "Number of API workers"
+
+msgid "Number of engine workers"
+msgstr "Number of engine workers"
+
+#, python-format
+msgid "Operation \"%s\" requires a member named \"value\"."
+msgstr "Operation \"%s\" requires a member named \"value\"."
+
+msgid "Operations must be JSON objects."
+msgstr "Operations must be JSON objects."
+
+msgid "Package '{pkg_id}' is not owned by tenant '{tenant}'"
+msgstr "Package '{pkg_id}' is not owned by tenant '{tenant}'"
+
+msgid "Package '{pkg_id}' is not public and not owned by tenant '{tenant}' "
+msgstr "Package '{pkg_id}' is not public and not owned by tenant '{tenant}' "
+
+msgid "Package id '{pkg_id}' not found"
+msgstr "Package id '{pkg_id}' not found"
+
+msgid "Package name should be 80 characters maximum"
+msgstr "Package name should be 80 characters maximum"
+
+msgid "Package schema is not valid: {reason}"
+msgstr "Package schema is not valid: {reason}"
+
+msgid "Package service which should be used by service broker"
+msgstr "Package service which should be used by service broker"
+
+msgid "Package with specified full name is already registered"
+msgstr "Package with specified full name is already registered"
+
+msgid "Package with the same Name is already made public"
+msgstr "Package with the same Name is already made public"
+
+msgid "Path to class configuration files"
+msgstr "Path to class configuration files"
+
+msgid "Please, specify a name of the environment template."
+msgstr "Please, specify a name of the environment template."
+
+msgid "Please, specify a name of the environment to create"
+msgstr "Please, specify a name of the environment to create"
+
+#, python-format
+msgid ""
+"Pointer `%s` contains \"~\", which is not part of a recognized escape "
+"sequence."
+msgstr ""
+"Pointer `%s` contains \"~\", which is not part of a recognised escape "
+"sequence."
+
+#, python-format
+msgid "Pointer `%s` contains adjacent \"/\"."
+msgstr "Pointer `%s` contains adjacent \"/\"."
+
+#, python-format
+msgid "Pointer `%s` does not contain a valid token."
+msgstr "Pointer `%s` does not contain a valid token."
+
+#, python-format
+msgid "Pointer `%s` does not start with \"/\"."
+msgstr "Pointer `%s` does not start with \"/\"."
+
+#, python-format
+msgid "Pointer `%s` ends with \"/\"."
+msgstr "Pointer `%s` ends with \"/\"."
+
+msgid "Port for service broker"
+msgstr "Port for service broker"
+
+msgid "Project for service broker"
+msgstr "Project for service broker"
+
+msgid "Request body is empty: please, provide application object model"
+msgstr "Request body is empty: please, provide application object model"
+
+msgid "Request body is empty: please, provide environment object model patch"
+msgstr "Request body is empty: please, provide environment object model patch"
+
+msgid "Request body must be a JSON array of operation objects."
+msgstr "Request body must be a JSON array of operation objects."
+
+msgid "Role used to identify an authenticated user as administrator."
+msgstr "Role used to identify an authenticated user as administrator."
+
+msgid "Session <SessionId {0}> is already in deployment state"
+msgstr "Session <SessionId {0}> is already in deployment state"
+
+msgid ""
+"Session <SessionId {0}> is invalid: environment has been updated or updating "
+"right now with other session"
+msgstr ""
+"Session <SessionId {0}> is invalid: environment has been updated or updating "
+"right now with other session"
+
+msgid "Session <SessionId {0}> is not found"
+msgstr "Session <SessionId {0}> is not found"
+
+msgid "Session <SessionId {id}> is not found"
+msgstr "Session <SessionId {id}> is not found"
+
+msgid ""
+"Session <SessionId {s_id}> is already deployed or deployment is in progress"
+msgstr ""
+"Session <SessionId {s_id}> is already deployed or deployment is in progress"
+
+msgid ""
+"Session <SessionId {session_id}> is not tied with Environment <EnvId "
+"{environment_id}>"
+msgstr ""
+"Session <SessionId {session_id}> is not tied with Environment <EnvId "
+"{environment_id}>"
+
+msgid ""
+"Session <SessionId: {s_id}> is in deploying state and could not be deleted"
+msgstr ""
+"Session <SessionId: {s_id}> is in deploying state and could not be deleted"
+
+msgid "Source object or path is malformed"
+msgstr "Source object or path is malformed"
+
+msgid ""
+"Specified package is not found: {0} were scanned together with murano "
+"database"
+msgstr ""
+"Specified package is not found: {0} were scanned together with Murano "
+"database"
+
+#, python-format
+msgid "Starting Murano REST API on %(host)s:%(port)s"
+msgstr "Starting Murano REST API on %(host)s:%(port)s"
+
+msgid "Statistics collection interval in minutes.Default value is 5 minutes."
+msgstr "Statistics collection interval in minutes. Default value is 5 minutes."
+
+msgid "The environment template {templ_id} does not exist"
+msgstr "The environment template {templ_id} does not exist"
+
+msgid ""
+"The service to store murano packages: murano (stands for legacy behavior "
+"using murano-api) or glance (stands for glance-glare artifact service)"
+msgstr ""
+"The service to store Murano packages: Murano (stands for legacy behaviour "
+"using murano-api) or Glance (stands for glance-glare artefact service)"
+
+msgid "The template does not exist {templ_id}"
+msgstr "The template does not exist {templ_id}"
+
+msgid "There is no file package with application description"
+msgstr "There is no file package with application description"
+
+msgid "Time for waiting for a response from murano agent during the deployment"
+msgstr ""
+"Time for waiting for a response from murano agent during the deployment"
+
+#, python-format
+msgid "Unable to find '%s' in JSON Schema change"
+msgstr "Unable to find '%s' in JSON Schema change"
+
+#, python-format
+msgid ""
+"Unable to load %(app_name)s from configuration file %(conf_file)s. \n"
+"Got: %(e)r"
+msgstr ""
+"Unable to load %(app_name)s from configuration file %(conf_file)s. \n"
+"Got: %(e)r"
+
+#, python-format
+msgid "Unable to locate paste config file for %s."
+msgstr "Unable to locate paste config file for %s."
+
+msgid "Unsupported Content-Type"
+msgstr "Unsupported Content-Type"
+
+msgid "Uploading file can't be empty"
+msgstr "Uploading file can't be empty"
+
+msgid "Uploading file is too large. The limit is {0} Mb"
+msgstr "Uploading file is too large. The limit is {0} Mb"
+
+msgid ""
+"User <UserId {usr_id}> is not authorized to access session <SessionId {s_id}"
+">."
+msgstr ""
+"User <UserId {usr_id}> is not authorised to access session <SessionId {s_id}"
+">."
+
+msgid "User has no access to these resources."
+msgstr "User has no access to these resources."
+
+msgid "User is not authorized to access these tenant resources"
+msgstr "User is not authorised to access these tenant resources"
+
+msgid "User is not authorized to access this tenant resources"
+msgstr "User is not authorised to access this tenant resources"
+
+msgid "Value '{value}' of property '{path}' does not exist."
+msgstr "Value '{value}' of property '{path}' does not exist."
+
+msgid "Whether environment audit events enabled"
+msgstr "Whether environment audit events enabled"
+
+msgid "X-Configuration-Session header which indicates to the session is missed"
+msgstr ""
+"X-Configuration-Session header which indicates to the session is missed"
+
+msgid "Your credentials are wrong. Please try again"
+msgstr "Your credentials are wrong. Please try again"
+
+msgid "cannot understand JSON"
+msgstr "cannot understand JSON"
+
+msgid "cannot understand XML"
+msgstr "cannot understand XML"
+
+msgid "{0}: Unsupported Format. Only {1} allowed"
+msgstr "{0}: Unsupported Format. Only {1} allowed"
+
+msgid "{0}: Uploaded image size {1} is too large. Max allowed size is {2}"
+msgstr "{0}: Uploaded image size {1} is too large. Max allowed size is {2}"
