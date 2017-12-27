@@ -32,7 +32,8 @@ class InstanceReportNotifier(object):
 
     def __init__(self, environment):
         if InstanceReportNotifier.transport is None:
-            InstanceReportNotifier.transport = messaging.get_transport(CONF)
+            InstanceReportNotifier.transport = \
+                messaging.get_notification_transport(CONF)
         self._notifier = messaging.Notifier(
             InstanceReportNotifier.transport,
             publisher_id=uuidutils.generate_uuid(),
