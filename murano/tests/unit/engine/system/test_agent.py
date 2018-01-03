@@ -94,13 +94,15 @@ class TestAgent(base.MuranoTestCase):
         self.assertRaises(exceptions.PolicyViolationException,
                           self.agent.send_raw, {})
 
+    @mock.patch('murano.engine.system.agent.Agent._sign')
     @mock.patch('murano.common.messaging.mqclient.kombu')
-    def test_send(self, mock_kombu):
+    def test_send(self, mock_kombu, mock_sign):
         template = yamllib.load(
             self._read('template_with_files.template'),
             Loader=self.yaml_loader)
 
         self.agent._queue = 'test_queue'
+        mock_sign.return_value = 'SIGNATURE'
         plan = self.agent.build_execution_plan(template, self.resources)
         with mock.patch.object(self.agent, 'build_execution_plan',
                                return_value=plan):
@@ -111,7 +113,9 @@ class TestAgent(base.MuranoTestCase):
             exchange='',
             routing_key='test_queue',
             body=json.dumps(plan),
-            message_id=plan['ID'])
+            message_id=plan['ID'],
+            headers={'signature': 'SIGNATURE'}
+        )
 
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
@@ -129,9 +133,10 @@ class TestAgent(base.MuranoTestCase):
 
         self.assertFalse(self.agent.is_ready(1))
 
+    @mock.patch('murano.engine.system.agent.Agent._sign')
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
-    def test_call_with_v1_result(self, mock_kombu, mock_event):
+    def test_call_with_v1_result(self, mock_kombu, mock_event, mock_sign):
         template = yamllib.load(
             self._read('template_with_files.template'),
             Loader=self.yaml_loader)
@@ -149,6 +154,7 @@ class TestAgent(base.MuranoTestCase):
 
         mock_event().wait.side_effect = None
         mock_event().wait.return_value = test_v1_result
+        mock_sign.return_value = 'SIGNATURE'
 
         self.agent._queue = 'test_queue'
         plan = self.agent.build_execution_plan(template, self.resources)
@@ -164,11 +170,14 @@ class TestAgent(base.MuranoTestCase):
             exchange='',
             routing_key='test_queue',
             body=json.dumps(plan),
-            message_id=plan['ID'])
+            message_id=plan['ID'],
+            headers={'signature': 'SIGNATURE'}
+        )
 
+    @mock.patch('murano.engine.system.agent.Agent._sign')
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
-    def test_call_with_v2_result(self, mock_kombu, mock_event):
+    def test_call_with_v2_result(self, mock_kombu, mock_event, mock_sign):
         template = yamllib.load(
             self._read('template_with_files.template'),
             Loader=self.yaml_loader)
@@ -179,6 +188,7 @@ class TestAgent(base.MuranoTestCase):
 
         mock_event().wait.side_effect = None
         mock_event().wait.return_value = v2_result
+        mock_sign.return_value = 'SIGNATURE'
 
         self.agent._queue = 'test_queue'
         plan = self.agent.build_execution_plan(template, self.resources)
@@ -194,7 +204,9 @@ class TestAgent(base.MuranoTestCase):
             exchange='',
             routing_key='test_queue',
             body=json.dumps(plan),
-            message_id=plan['ID'])
+            message_id=plan['ID'],
+            headers={'signature': 'SIGNATURE'}
+        )
 
     @mock.patch('murano.engine.system.agent.eventlet.event.Event')
     @mock.patch('murano.common.messaging.mqclient.kombu')
@@ -357,6 +369,8 @@ class TestExecutionPlan(base.MuranoTestCase):
         self.resources.string.return_value = 'text'
         self.uuids = ['ID1', 'ID2', 'ID3', 'ID4']
         self.mock_uuid = self._stub_uuid(self.uuids)
+        time_mock = mock.patch('time.time').start()
+        time_mock.return_value = 2
         self.addCleanup(mock.patch.stopall)
 
     def _read(self, path):
@@ -430,6 +444,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             },
             'FormatVersion': '2.0.0',
             'ID': self.uuids[0],
+            'Stamp': 20000,
             'Name': 'Deploy Tomcat',
             'Parameters': {
                 'appName': '$appName'
@@ -470,6 +485,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             },
             'FormatVersion': '2.0.0',
             'ID': self.uuids[0],
+            'Stamp': 20000,
             'Name': 'Deploy Tomcat',
             'Parameters': {
                 'appName': '$appName'
@@ -504,6 +520,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             },
             'FormatVersion': '2.0.0',
             'ID': self.uuids[0],
+            'Stamp': 20000,
             'Name': 'Deploy Tomcat',
             'Parameters': {
                 'appName': '$appName'
@@ -542,6 +559,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             },
             'FormatVersion': '2.0.0',
             'ID': self.uuids[0],
+            'Stamp': 20000,
             'Name': 'Deploy Chef',
             'Parameters': {
                 'appName': '$appName'
@@ -587,6 +605,7 @@ class TestExecutionPlan(base.MuranoTestCase):
             },
             'FormatVersion': '2.0.0',
             'ID': self.uuids[0],
+            'Stamp': 20000,
             'Name': 'Deploy Telnet',
             'Parameters': {
                 'appName': '$appName'

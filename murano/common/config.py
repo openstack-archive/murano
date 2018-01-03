@@ -220,6 +220,9 @@ engine_opts = [
                       'for legacy behavior using murano-api) or glance '
                       '(stands for glance-glare artifact service)'),
                deprecated_group='packages_opts'),
+
+    cfg.StrOpt('signing_key', default='~/.ssh/id_rsa',
+               help=_('Path to RSA key for agent message signing')),
 ]
 
 # TODO(sjmc7): move into engine opts?

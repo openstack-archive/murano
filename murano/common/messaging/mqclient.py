@@ -102,16 +102,22 @@ class MqClient(object):
         bound_queue = queue(self._connection)
         bound_queue.declare()
 
-    def send(self, message, key, exchange=''):
+    def send(self, message, key, exchange='', signing_func=None):
         if not self._connected:
             raise RuntimeError('Not connected to RabbitMQ')
 
         producer = kombu.Producer(self._connection)
+        data = jsonutils.dumps(message.body)
+        headers = None
+        if signing_func:
+            headers = {'signature':  signing_func(data)}
+
         producer.publish(
             exchange=str(exchange),
             routing_key=str(key),
-            body=jsonutils.dumps(message.body),
-            message_id=str(message.id)
+            body=data,
+            message_id=str(message.id),
+            headers=headers
         )
 
     def open(self, queue, prefetch_count=1):
