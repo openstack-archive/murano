@@ -223,6 +223,9 @@ engine_opts = [
 
     cfg.StrOpt('signing_key', default='~/.ssh/id_rsa',
                help=_('Path to RSA key for agent message signing')),
+
+    cfg.StrOpt('agent_source', default='murano-agent',
+               help=_('pip URL/package spec for murano-agent')),
 ]
 
 # TODO(sjmc7): move into engine opts?

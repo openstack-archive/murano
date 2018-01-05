@@ -1,0 +1,8 @@
+---
+features:
+  - |
+    A configuration file setting `[engine]/agent_source` was added.
+    The value is then used for the `pip install` command to install the
+    murano-agent. Since pip accepts http and git URLs, this can be used
+    to install agent from the custom git repo or install version other than the
+    latest.

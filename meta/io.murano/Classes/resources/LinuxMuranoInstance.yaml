@@ -93,6 +93,7 @@ Methods:
             "%MURANO_AGENT_CONF%": base64encode($muranoAgentConf)
             "%MURANO_AGENT_SERVICE%": base64encode($muranoAgentService)
             "%MURANO_AGENT%": base64encode($muranoAgent)
+            "%PIP_SOURCE%": config(engine, agent_source)
 
         - $userData: $muranoScript.replace($muranoReplacements) + $initScript.replace($scriptReplacements)
         - Return: $userData
