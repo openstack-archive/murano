@@ -32,6 +32,10 @@ else
     MURANO_API_URL="$MURANO_SERVICE_PROTOCOL://$MURANO_SERVICE_HOST:$MURANO_SERVICE_PORT"
 fi
 
+HORIZON_URL="http://${KEYSTONE_SERVICE_HOST}/dashboard"
+
+DASHBOARD_FUNCTIONAL_CONFIG_DIR=$MURANO_DASHBOARD_DIR/muranodashboard/tests/functional/config
+
 # create_murano_accounts() - Set up common required murano accounts
 #
 # Tenant      User       Roles
@@ -519,7 +523,23 @@ MURANO_REPOSITORY_URL=${MURANO_REPOSITORY_URL:-'http://apps.openstack.org/api/v1
 function configure_murano_dashboard() {
     configure_local_settings_py
 
+    configure_dashboard_functional_config
+
     restart_apache_server
+}
+
+
+function configure_dashboard_functional_config() {
+    cp $DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf.sample $DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf
+    sed -e "s%\(^\s*horizon_url\s*=\).*$%\1 $HORIZON_URL%" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+    sed -e "s%\(^\s*murano_url\s*=\).*$%\1 $MURANO_API_URL%" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+    sed -e "s/\(^\s*user\s*=\).*$/\1 $OS_USERNAME/" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+    sed -e "s/\(^\s*password\s*=\).*$/\1 $OS_PASSWORD/" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+    sed -e "s/\(^\s*tenant\s*=\).*$/\1 $OS_PROJECT_NAME/" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+    sed -e "s%\(^\s*keystone_url\s*=\).*$%\1 $KEYSTONE_SERVICE_URI/v3%" -i "$DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf"
+
+    echo_summary "Show the DASHBOARD_FUNCTIONAL_CONFIG"
+    cat $DASHBOARD_FUNCTIONAL_CONFIG_DIR/config.conf
 }
 
 
