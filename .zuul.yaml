@@ -2,19 +2,19 @@
     name: openstack/murano
     check:
       jobs:
-        - murano-congress-devstack-dsvm
-        - rally-dsvm-murano-task
-        - tempest-dsvm-murano-api
-        - tempest-dsvm-murano-cfapi
+        - murano-congress-devstack
+        - murano-rally
+        - murano-tempest-api
+        - murano-tempest-cfapi
     gate:
       jobs:
-        - tempest-dsvm-murano-api
+        - murano-tempest-api
     experimental:
       jobs:
-        - murano-dsvm-functional
+        - murano-functional
 
 - job:
-    name: murano-congress-devstack-dsvm
+    name: murano-congress-devstack
     parent: legacy-dsvm-base
     run: playbooks/legacy/murano-congress-devstack-dsvm/run.yaml
     post-run: playbooks/legacy/murano-congress-devstack-dsvm/post.yaml
@@ -36,7 +36,7 @@
       - openstack/python-muranoclient
 
 - job:
-    name: rally-dsvm-murano-task
+    name: murano-rally
     parent: legacy-dsvm-base
     run: playbooks/legacy/rally-dsvm-murano-task/run.yaml
     post-run: playbooks/legacy/rally-dsvm-murano-task/post.yaml
@@ -52,7 +52,7 @@
       - openstack/rally
 
 - job:
-    name: tempest-dsvm-murano-api
+    name: murano-tempest-api
     parent: legacy-dsvm-base
     run: playbooks/legacy/tempest-dsvm-murano-api/run.yaml
     post-run: playbooks/legacy/tempest-dsvm-murano-api/post.yaml
@@ -75,7 +75,11 @@
       - openstack/murano-tempest-plugin
 
 - job:
-    name: tempest-dsvm-murano-cfapi
+    name: tempest-dsvm-murano-api
+    parent: murano-tempest-api
+
+- job:
+    name: murano-tempest-cfapi
     parent: legacy-dsvm-base
     run: playbooks/legacy/tempest-dsvm-murano-cfapi/run.yaml
     post-run: playbooks/legacy/tempest-dsvm-murano-cfapi/post.yaml
@@ -99,7 +103,11 @@
       - openstack/murano-tempest-plugin
 
 - job:
-    name: murano-dsvm-functional
+    name: tempest-dsvm-murano-cfapi
+    parent: murano-tempest-cfapi
+
+- job:
+    name: murano-functional
     parent: legacy-dsvm-base
     run: playbooks/legacy/murano-dsvm-functional/run.yaml
     post-run: playbooks/legacy/murano-dsvm-functional/post.yaml
