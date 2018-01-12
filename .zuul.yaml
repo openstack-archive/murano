@@ -75,10 +75,6 @@
       - openstack/murano-tempest-plugin
 
 - job:
-    name: tempest-dsvm-murano-api
-    parent: murano-tempest-api
-
-- job:
     name: murano-tempest-cfapi
     parent: legacy-dsvm-base
     run: playbooks/legacy/tempest-dsvm-murano-cfapi/run.yaml
@@ -101,10 +97,6 @@
       - openstack/python-muranoclient
       - openstack/tempest
       - openstack/murano-tempest-plugin
-
-- job:
-    name: tempest-dsvm-murano-cfapi
-    parent: murano-tempest-cfapi
 
 - job:
     name: murano-functional
