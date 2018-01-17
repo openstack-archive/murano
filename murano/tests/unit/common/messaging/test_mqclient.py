@@ -209,7 +209,23 @@ class MQClientTest(base.MuranoTestCase):
             self.ssl_client._connection)
         mock_kombu.Producer().publish.assert_called_once_with(
             exchange='test_exchange', routing_key='test_key',
-            body=jsonutils.dumps('test_message'), message_id='3')
+            body=jsonutils.dumps('test_message'), message_id='3',
+            headers=None)
+
+    @mock.patch('murano.common.messaging.mqclient.kombu')
+    def test_send_signed(self, mock_kombu):
+        mock_message = mock.MagicMock(body='test_message', id=3)
+
+        signer = lambda msg: "SIGNATURE"
+        self.ssl_client.connect()
+        self.ssl_client.send(mock_message, 'test_key', 'test_exchange', signer)
+
+        mock_kombu.Producer.assert_called_once_with(
+            self.ssl_client._connection)
+        mock_kombu.Producer().publish.assert_called_once_with(
+            exchange='test_exchange', routing_key='test_key',
+            body=jsonutils.dumps('test_message'), message_id='3',
+            headers={'signature': 'SIGNATURE'})
 
     def test_send_except_runtime_error(self):
         with self.assertRaisesRegex(RuntimeError,

@@ -16,8 +16,14 @@
 import copy
 import datetime
 import os
+import os.path
+import time
 import uuid
 
+from cryptography.hazmat.backends import default_backend
+from cryptography.hazmat.primitives.asymmetric import padding
+from cryptography.hazmat.primitives import hashes
+from cryptography.hazmat.primitives import serialization
 import eventlet.event
 from oslo_config import cfg
 from oslo_log import log as logging
@@ -49,11 +55,32 @@ class Agent(object):
         self._enabled = not CONF.engine.disable_murano_agent
         env = host.find_owner('io.murano.Environment')
         self._queue = str('e%s-h%s' % (env.id, host.id)).lower()
+        self._signing_key = None
+        if CONF.engine.signing_key:
+            key_path = os.path.expanduser(CONF.engine.signing_key)
+            if not os.path.exists(key_path):
+                LOG.warn("Key file %s does not exist. "
+                         "Message signing is disabled")
+            else:
+                with open(key_path, "rb") as key_file:
+                    key_data = key_file.read()
+                    self._signing_key = serialization.load_pem_private_key(
+                        key_data, password=None, backend=default_backend())
+        self._last_stamp = 0
         self._initialized = False
 
     @property
     def enabled(self):
         return self._enabled
+
+    @specs.parameter('line_prefix', specs.yaqltypes.String())
+    def signing_key(self, line_prefix=''):
+        if not self._signing_key:
+            return ""
+        key = self._signing_key.public_key().public_bytes(
+            serialization.Encoding.PEM,
+            serialization.PublicFormat.PKCS1)
+        return line_prefix + line_prefix.join(key.splitlines(True))
 
     def _initialize(self):
         if self._initialized:
@@ -96,8 +123,7 @@ class Agent(object):
 
         msg = self._prepare_message(template, msg_id)
         with common.create_rmq_client(region) as client:
-            client.send(message=msg, key=self._queue)
-
+            client.send(message=msg, key=self._queue, signing_func=self._sign)
         if wait_results:
             try:
                 with eventlet.Timeout(timeout):
@@ -160,6 +186,13 @@ class Agent(object):
         template = {'Body': 'return', 'FormatVersion': '2.0.0', 'Scripts': {}}
         self.call_raw(template, timeout)
 
+    def _sign(self, msg):
+        if not self._signing_key:
+            return None
+        return self._signing_key.sign(
+            (self._queue + msg).encode('utf-8'),
+            padding.PKCS1v15(), hashes.SHA256())
+
     def _process_v1_result(self, result):
         if result['IsException']:
             raise AgentException(dict(self._get_exception_info(
@@ -216,6 +249,13 @@ class Agent(object):
         else:
             return self._build_v2_execution_plan(template, resources)
 
+    def _generate_stamp(self):
+        stamp = int(time.time() * 10000)
+        if stamp <= self._last_stamp:
+            stamp = self._last_stamp + 1
+        self._last_stamp = stamp
+        return stamp
+
     def _build_v1_execution_plan(self, template, resources):
         scripts_folder = 'scripts'
         script_files = template.get('Scripts', [])
@@ -226,12 +266,15 @@ class Agent(object):
                 resources.string(script_path, binary=True),
                 encoding='latin1'))
         template['Scripts'] = scripts
+        template['Stamp'] = self._generate_stamp()
         return template
 
     def _build_v2_execution_plan(self, template, resources):
         scripts_folder = 'scripts'
         plan_id = uuid.uuid4().hex
         template['ID'] = plan_id
+        template['Stamp'] = self._generate_stamp()
+
         if 'Action' not in template:
             template['Action'] = 'Execute'
         if 'Files' not in template:

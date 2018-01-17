@@ -4,7 +4,7 @@
 		<section name="nlog" type="NLog.Config.ConfigSectionHandler, NLog"/>
 	</configSections>
 	<startup>
-        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5" />
+        <supportedRuntime version="v4.0" sku=".NETFramework,Version=v4.5.1"/>
     </startup>
 	<nlog xmlns="http://www.nlog-project.org/schemas/NLog.xsd"
 		xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance">
@@ -31,6 +31,8 @@
 		<add key="rabbitmq.ssl" value="%RABBITMQ_SSL%"/>
 		<add key="rabbitmq.allowInvalidCA" value="true"/>
 		<add key="rabbitmq.sslServerName" value=""/>
+
+		<add key="engine.key" value="%SIGNING_KEY%"/>
 
 	</appSettings>
 </configuration>

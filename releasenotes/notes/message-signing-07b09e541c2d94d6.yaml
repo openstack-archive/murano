@@ -1,0 +1,7 @@
+---
+features:
+  - |
+    Murano engine can be configured to sign all the RabbitMQ messages sent
+    to the agents. When the RSA key is provided, engine will provide agents
+    with its public part and sign all the messages sent. Agents then will
+    ignore any command that was not sent by the engine.

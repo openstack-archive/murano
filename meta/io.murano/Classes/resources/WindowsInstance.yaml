@@ -50,6 +50,7 @@ Methods:
           "%RABBITMQ_SSL%": str($rabbitMqParams.ssl).toLower()
           "%RABBITMQ_INPUT_QUEUE%": $.agent.queueName()
           "%RESULT_QUEUE%": $region.agentListener.queueName()
+          "%SIGNING_KEY%": $.agent.signingKey('')
       - $scriptReplacements:
           "%AGENT_CONFIG_BASE64%": base64encode($configFile.replace($configReplacements))
           "%INTERNAL_HOSTNAME%": $.name

@@ -5,6 +5,9 @@ log_file = /var/log/murano-agent.log
 
 storage=/var/murano/plans
 
+engine_key =
+%SIGNING_KEY%
+
 [rabbitmq]
 
 # Input queue name
