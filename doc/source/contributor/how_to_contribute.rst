@@ -10,4 +10,4 @@ How to contribute
    - How a new-comer can contribute?
    - Communication channels
    - Useful links for an OpenStack contributor
-   - consider the context of http://docs.openstack.org/developer/sahara/devref/how_to_participate.html
+   - consider the context of https://docs.openstack.org/sahara/latest/contributor/how-to-participate.html
