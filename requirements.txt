@@ -22,7 +22,7 @@ keystonemiddleware>=4.17.0 # Apache-2.0
 testtools>=2.2.0 # MIT
 yaql>=1.1.3 # Apache 2.0 License
 debtcollector>=1.2.0 # Apache-2.0
-cryptography>=1.9,!=2.0 # BSD/Apache-2.0
+cryptography!=2.0,>=1.9 # BSD/Apache-2.0
 
 # For paste.util.template used in keystone.common.template
 Paste>=2.0.2 # MIT
