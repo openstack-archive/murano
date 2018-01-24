@@ -138,7 +138,7 @@ To reproduce the performance test, proceed with the following steps:
 
       sudo ./start-vm.sh 5
 
-   To view VM’s desktops, connect with VNC viewer to your
+   To view VM's desktops, connect with VNC viewer to your
    host to VNC screens :1 thru :5 (ports 5901-5905).
 
 #. Turn off the instances. You may simply kill all KVM processes by running:

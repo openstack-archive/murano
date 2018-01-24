@@ -41,9 +41,9 @@ There are two notable exceptions to the support phases rule:
   the same: low regression risks during upgrades, high adoption impact. However
   since core library is much more sensitive app, backports to it should be taken
   more seriously and should be discussed on IRC and Mailing List and receive
-  PTL’s approval.
+  PTL's approval.
 
-These two exceptions do not mean, that we’re free to backport
+These two exceptions do not mean, that we're free to backport
 any code from master to stable branches. Instead they show, that murano team
 recognises the importance of these two areas of murano project and treats
 exceptions to those slightly more liberally than to other parts of murano

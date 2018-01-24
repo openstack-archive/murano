@@ -12,7 +12,7 @@ The decision of how to combine applications is made by the author of
 an application.
 
 To illustrate the way such interconnection can be configured,
-let’s analyze the mechanisms applied in WordPress application, which
+let's analyze the mechanisms applied in WordPress application, which
 uses MySql.
 
 MySql is a very popular database and can be used in quite a number of various
@@ -160,7 +160,7 @@ External load-balancer
 ----------------------
 Suppose, you have powerful load-balancer on a real server. And you want to run
 the application on an OpenStack VM. Murano can set up new applications to be managed
-by that external load-balancer (LB). Let’s go into more details.
+by that external load-balancer (LB). Let's go into more details.
 
 To implement this case the following apps are used:
 

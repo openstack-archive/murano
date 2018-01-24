@@ -14,7 +14,7 @@ Examples
      - Description
 
    * - | `Zabbix Agent`_
-     - Zabbix Agent is a simple application. It doesn’t deploy a VM by itself,
+     - Zabbix Agent is a simple application. It doesn't deploy a VM by itself,
        but is installed on a specific VM that may contain any other
        applications. This VM is tracked by Zabbix and by its configuration.
 
@@ -24,7 +24,7 @@ Examples
 
        It is worth noting that application scripts are written in Python, not
        in Bash as usual. This application does not work without Zabbix server
-       application since it’s a required property, determined in the
+       application since it's a required property, determined in the
        application definition.
 
    * - | `Zabbix Server`_
@@ -55,7 +55,7 @@ Examples
        needed to be opened) is contained in the getContainer method. All other
        actions for the application configuration are located at the
        DockerStandaloneHost definition and its dependencies. Note that this
-       application doesn’t have a filename:Resources folder at all since the
+       application doesn't have a filename:Resources folder at all since the
        installation is made by Docker itself.
 
 

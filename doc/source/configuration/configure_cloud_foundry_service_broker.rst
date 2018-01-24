@@ -10,10 +10,10 @@ Service broker overview
 Service broker is a new murano component which implements `Cloud Foundry
 <https://www.cloudfoundry.org/>`_ Service Broker API.
 
-This lets users build ‘hybrid’ infrastructures that are services like databases, message
+This lets users build 'hybrid' infrastructures that are services like databases, message
 queues, key/value stores, and so on. This services can be uploaded and deployed with
 murano and made available to Cloud Foundry apps on demand. The result is lowered cost,
-shorter timetables, and quicker access to required tools — developers can ‘self serve’
+shorter timetables, and quicker access to required tools — developers can 'self serve'
 by building any required service, then make it instantly available in Cloud Foundry.
 
 Configure service broker

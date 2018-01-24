@@ -143,8 +143,8 @@ Steps to reproduce test:
        kvm -m 1024 -drive file=ws-2012-std-$i.qcow2,if=virtio -net user -net nic,model=virtio -nographic -usbdevice tablet -vnc :$i & done
 
 #. Start ONE instance with command below (as root) and measure time
-   between VM’s launch and the moment when Server Manager window
-   appears. To view VM’s desktop, connect with VNC viewer to your host
+   between VM's launch and the moment when Server Manager window
+   appears. To view VM's desktop, connect with VNC viewer to your host
    to VNC screen :1 (port 5901):
 
    .. code-block:: console
@@ -158,8 +158,8 @@ Steps to reproduce test:
        sudo killall kvm
 
 #. Start FIVE instances with command below (as root) and measure time
-   interval between ALL VM’s launch and the moment when LAST Server Manager
-   window appears. To view VM’s desktops, connect with VNC viewer to your
+   interval between ALL VM's launch and the moment when LAST Server Manager
+   window appears. To view VM's desktops, connect with VNC viewer to your
    host to VNC screens :1 thru :5 (ports 5901-5905):
 
    .. code-block:: console
