@@ -1,6 +1,6 @@
 #!/bin/bash
 
-source ./run_tests_common.sh
+. ./run_tests_common.sh
 
 # Add tempest source tree to PYTHONPATH
 export PYTHONPATH=$PYTHONPATH:$TEMPEST_DIR

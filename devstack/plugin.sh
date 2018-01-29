@@ -496,7 +496,7 @@ function configure_murano_tempest_plugin() {
 # - configure_murano_dashboard
 # - cleanup_murano_dashboard
 
-source $TOP_DIR/lib/horizon
+. $TOP_DIR/lib/horizon
 
 # Defaults
 # --------
