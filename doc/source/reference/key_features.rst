@@ -6,7 +6,7 @@ Key features
 
 Murano has a number of features designed to
 interact with the application catalog, for instance
-managing  what’s in the catalog, and determining
+managing  what's in the catalog, and determining
 how apps in the catalog are deployed.
 
 Application catalog

@@ -42,7 +42,7 @@ Heat Template?**
   value is ``In``, so sometimes it is omitted. The ``Out`` property
   indicates that it is not set from outside, but is calculated in
   the class methods and is available for the ``read`` operation from
-  other classes. If you don’t want to initialize in the class
+  other classes. If you don't want to initialize in the class
   constructor, and the property has no default value, you specify
   ``Out`` in the ``Usage``.
 
@@ -52,7 +52,7 @@ Heat Template?**
   string in the regular YAML notation. The list with one element is
   also acceptable.
 
-**There are FullName and Name properties in the manifest file. What’s
+**There are FullName and Name properties in the manifest file. What's
 the difference between them?**
 
   ``Name`` is displayed in the web UI catalog, and ``FullName`` is a

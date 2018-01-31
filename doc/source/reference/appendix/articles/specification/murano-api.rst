@@ -316,7 +316,7 @@ simultaneously, but only one session going to be deployed. First session that
 starts deploying is going to be deployed; other ones become invalid and could
 not be deployed at all.
 User could not open new session for environment that in
-*deploying* state (that’s why we call it "almost lock free" model).
+*deploying* state (that's why we call it "almost lock free" model).
 
 +----------------------+------------+-------------------------------------------+
 | Attribute            | Type       | Description                               |

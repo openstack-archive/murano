@@ -241,7 +241,7 @@ This command supports an optional ``--package-version`` parameter that instructs
 murano client to download a specified package version.
 
 The :command:`package-import` command inspects package requirements
-specified in the package’s manifest under the *Require* section, and
+specified in the package's manifest under the *Require* section, and
 attempts to import them from murano repository. The :command:`package-import`
 command also inspects any image prerequisites mentioned in the
 :file:`images.lst` file in the package. If there are any image

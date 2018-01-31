@@ -97,10 +97,10 @@ Hot packages with nested Heat templates
 
 In Murano HOT packages it is possible to allow Heat nested templates to be
 saved and deployed as part of a Murano Heat applications. Such templates
-should be placed in package under ‘/Resources/HotFiles’. Adding additional
+should be placed in package under '/Resources/HotFiles'. Adding additional
 templates to a package is optional. When a Heat generated package is being
 deployed, if there are any Heat nested templates located in the package under
-‘/Resources/HotFiles’, they are sent to Heat together with the main template
+'/Resources/HotFiles', they are sent to Heat together with the main template
 and params during stack creation.
 
 These nested templates can be referenced by putting the template name into the
