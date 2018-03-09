@@ -113,7 +113,7 @@ class TestHotPackage(test_base.MuranoTestCase):
         self.assertEqual("$.bool().check($ in list(True, False))", param1.expr)
         self.assertEqual("$.string().check($ in list('bar'))."
                          "check(len($) <= 50).check(len($) >= 0)."
-                         "check(matches($, '['A-Za-z0-9']'))", param2.expr)
+                         "check(matches($, '[A-Za-z0-9]'))", param2.expr)
         self.assertEqual("$.int().check($ in list(0, 1, 2, 3, 4))"
                          ".check(len($) >= 0 and len($) <= 5)."
                          "check($ >= 0 and $ <= 4)", param3.expr)

@@ -11,7 +11,7 @@ parameters:
           max: 50
       - length: 
           min: 0
-      - allowed_pattern: [A-Za-z0-9]
+      - allowed_pattern: "[A-Za-z0-9]"
   param3:
     type: number
     constraints:
