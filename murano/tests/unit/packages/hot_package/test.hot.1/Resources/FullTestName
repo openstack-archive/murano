@@ -16,7 +16,7 @@ parameters:
           description: Range Description
       - allowed_values: [0, 1, 2, 3, 4]
         description: Allowed Values Description
-      - allowed_pattern: [A-Za-z0-9]
+      - allowed_pattern: "[A-Za-z0-9]"
         description: Allowed Pattern Description
   bar:
     type: boolean
@@ -51,7 +51,7 @@ parameter_groups:
               description: Range Description
           - allowed_values: [0, 1, 2, 3, 4]
             description: Allowed Values Description
-          - allowed_pattern: [A-Za-z0-9]
+          - allowed_pattern: "[A-Za-z0-9]"
             description: Allowed Pattern Description
       bar:
         type: boolean
