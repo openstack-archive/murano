@@ -63,7 +63,9 @@ def main():
         workers = CONF.murano.api_workers
         if not workers:
             workers = processutils.get_worker_count()
-        launcher = service.launch(CONF, server.ApiService(), workers=workers)
+        launcher = service.launch(
+            CONF, server.ApiService(),
+            workers=workers, restart_method='mutate')
 
         app = app_loader.load_paste_app('murano')
         port, host = (CONF.bind_port, CONF.bind_host)

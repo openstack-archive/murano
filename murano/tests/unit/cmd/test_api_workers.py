@@ -39,7 +39,8 @@ class TestAPIWorkers(base.MuranoTestCase):
                              load_paste_app, set_middleware_defaults):
         api.main()
         launch.assert_called_once_with(mock.ANY, mock.ANY,
-                                       workers=processutils.get_worker_count())
+                                       workers=processutils.get_worker_count(),
+                                       restart_method='mutate')
 
     @mock.patch.object(config, 'parse_args')
     @mock.patch.object(logging, 'setup')
@@ -51,7 +52,8 @@ class TestAPIWorkers(base.MuranoTestCase):
                                   load_paste_app, set_middleware_defaults):
         self.override_config("api_workers", 8, "murano")
         api.main()
-        launch.assert_called_once_with(mock.ANY, mock.ANY, workers=8)
+        launch.assert_called_once_with(mock.ANY, mock.ANY, workers=8,
+                                       restart_method='mutate')
 
     @mock.patch.object(config, 'parse_args')
     @mock.patch.object(logging, 'setup')
@@ -64,4 +66,5 @@ class TestAPIWorkers(base.MuranoTestCase):
         self.override_config("api_workers", 0, "murano")
         api.main()
         launch.assert_called_once_with(mock.ANY, mock.ANY,
-                                       workers=processutils.get_worker_count())
+                                       workers=processutils.get_worker_count(),
+                                       restart_method='mutate')

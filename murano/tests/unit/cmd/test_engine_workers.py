@@ -30,7 +30,8 @@ class TestEngineWorkers(base.MuranoTestCase):
     def test_workers_default(self, launch, setup, parse_args):
         engine.main()
         launch.assert_called_once_with(mock.ANY, mock.ANY,
-                                       workers=processutils.get_worker_count())
+                                       workers=processutils.get_worker_count(),
+                                       restart_method='mutate')
 
     @mock.patch.object(config, 'parse_args')
     @mock.patch.object(logging, 'setup')
@@ -38,7 +39,8 @@ class TestEngineWorkers(base.MuranoTestCase):
     def test_workers_good_setting(self, launch, setup, parse_args):
         self.override_config("engine_workers", 8, "engine")
         engine.main()
-        launch.assert_called_once_with(mock.ANY, mock.ANY, workers=8)
+        launch.assert_called_once_with(mock.ANY, mock.ANY, workers=8,
+                                       restart_method='mutate')
 
     @mock.patch.object(config, 'parse_args')
     @mock.patch.object(logging, 'setup')
@@ -47,4 +49,5 @@ class TestEngineWorkers(base.MuranoTestCase):
         self.override_config("engine_workers", 0, "engine")
         engine.main()
         launch.assert_called_once_with(mock.ANY, mock.ANY,
-                                       workers=processutils.get_worker_count())
+                                       workers=processutils.get_worker_count(),
+                                       restart_method='mutate')
