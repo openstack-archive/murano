@@ -5,9 +5,11 @@
         - murano-rally
         - murano-tempest-api
         - murano-tempest-cfapi
+        - openstack-tox-lower-constraints
     gate:
       jobs:
         - murano-tempest-api
+        - openstack-tox-lower-constraints
     experimental:
       jobs:
         - murano-functional
