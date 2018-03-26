@@ -53,8 +53,9 @@ def main():
         workers = CONF.engine.engine_workers
         if not workers:
             workers = processutils.get_worker_count()
-        launcher = service.launch(CONF,
-                                  engine.EngineService(), workers=workers)
+        launcher = service.launch(
+            CONF, engine.EngineService(),
+            workers=workers, restart_method='mutate')
         launcher.wait()
     except RuntimeError as e:
         sys.stderr.write("ERROR: %s\n" % e)
