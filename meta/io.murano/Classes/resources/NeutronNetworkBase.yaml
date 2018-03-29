@@ -17,6 +17,10 @@ Namespaces:
 
 Name: NeutronNetworkBase
 
+Properties:
+  port_security_disable:
+    Contract: $.bool()
+
 Extends: Network
 
 Methods:
@@ -82,7 +86,7 @@ Methods:
                       - subnet: $subnetRef
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
-      - If: $securityGroupsEnabled
+      - If: $securityGroupsEnabled and not $.port_security_disable
         Then:
           - If: len($securityGroups) > 0 and $securityGroups[0] != ""
             Then:
@@ -106,6 +110,16 @@ Methods:
                             security_groups:
                               - get_resource: $securityGroupName
                   - $patchTemplate: $patchTemplate.mergeWith($template)
+
+      - If: $.port_security_disable
+        Then:
+          - $template:
+              resources:
+                $portName:
+                  properties:
+                    port_security_enabled: false
+
+          - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - $instanceResources: [$portName]
       - $instanceOutputs: [$addressesOutputName]
