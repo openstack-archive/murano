@@ -598,6 +598,11 @@ fields.
              label: Availability zone
              description: Select an availability zone, where service will be installed.
              required: false
+     validators:
+        # if unitNamingPattern is given and dcInstances > 1, then '#' should occur in unitNamingPattern
+        - expr: $.appConfiguration.dcInstances < 2 or not $.appConfiguration.unitNamingPattern.bool()
+                or '#' in $.appConfiguration.unitNamingPattern
+          message: Incrementation symbol "#" is required in the Instance Naming Pattern
 
 Control attributes might be initialized with a YAQL expression. However prior
 to version 2.4 it only worked for forms other than the first. It was designed
