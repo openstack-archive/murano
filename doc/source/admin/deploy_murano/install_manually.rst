@@ -118,7 +118,7 @@ Install the API service and engine
         ...
 
         [keystone_authtoken]
-        auth_uri = 'http://%OPENSTACK_HOST_IP%:5000'
+        www_authenticate_uri  = 'http://%OPENSTACK_HOST_IP%:5000'
         auth_host = '%OPENSTACK_HOST_IP%'
         auth_port = 5000
         auth_protocol = http
