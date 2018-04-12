@@ -263,7 +263,7 @@ home_region = cfg.StrOpt(
 # Unfortuntely we cannot use murano_auth.auth_url, since it
 # is private to the actual authentication plugin used.
 murano_auth_opts = [
-    cfg.StrOpt('auth_uri',
+    cfg.StrOpt('www_authenticate_uri',
                help='Identity API endpoint for authenticating with tokens.')]
 
 

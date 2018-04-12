@@ -201,7 +201,7 @@ function configure_murano {
 
     # Setup murano_auth section
     configure_auth_token_middleware $MURANO_CONF_FILE $MURANO_ADMIN_USER $MURANO_AUTH_CACHE_DIR murano_auth
-    iniset $MURANO_CONF_FILE murano_auth auth_uri $KEYSTONE_AUTH_URI
+    iniset $MURANO_CONF_FILE murano_auth www_authenticate_uri  $KEYSTONE_AUTH_URI
 
     configure_murano_rpc_backend
 

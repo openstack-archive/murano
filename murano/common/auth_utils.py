@@ -65,13 +65,15 @@ def get_client_session(execution_session=None, conf=None):
 
 
 def get_token_client_session(token=None, project_id=None, conf=None):
-    auth_uri = cfg.CONF[CFG_MURANO_AUTH_GROUP].auth_uri
-    if not auth_uri:
+    www_authenticate_uri = \
+        cfg.CONF[CFG_MURANO_AUTH_GROUP].www_authenticate_uri
+    if not www_authenticate_uri:
         versionutils.report_deprecated_feature(
-            LOG, 'Please configure auth_uri in ' + CFG_MURANO_AUTH_GROUP +
-                 ' group')
-        auth_uri = cfg.CONF[CFG_KEYSTONE_GROUP].auth_uri
-    auth_url = auth_uri.replace('v2.0', 'v3')
+            LOG, 'Please configure www_authenticate_uri in ' +
+            CFG_MURANO_AUTH_GROUP + 'group')
+        www_authenticate_uri = \
+            cfg.CONF[CFG_KEYSTONE_GROUP].www_authenticate_uri
+    auth_url = www_authenticate_uri.replace('v2.0', 'v3')
     if token is None or project_id is None:
         execution_session = helpers.get_execution_session()
         token = execution_session.token
