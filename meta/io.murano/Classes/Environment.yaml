@@ -115,7 +115,7 @@ Methods:
           )
 
   deploy:
-    Usage: Action
+    Scope: Public
     Body:
       - $.applications.pselect($.deploy())
 
