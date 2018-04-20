@@ -17,7 +17,7 @@ The :code:`/source` directory contains the tutorial documentation as
 `reStructuredText <http://docutils.sourceforge.net/rst.html>`_ (RST).
 
 To build the documentation, you must install `Sphinx <http://sphinx-doc.org/>`_ and the
-`OpenStack docs.openstack.org Sphinx theme (openstackdocstheme) <https://pypi.python.org/pypi/openstackdocstheme/>`_. When
+`OpenStack docs.openstack.org Sphinx theme (openstackdocstheme) <https://pypi.org/project/openstackdocstheme/>`_. When
 you invoke tox, these dependencies are automatically pulled in from the
 top-level :code:`test-requirements.txt`.
 
