@@ -114,7 +114,7 @@ JSON object model independently which cause for objects that were not deleted
 between deployments to instantiate twice. If deleted object were to cause any
 changes to such alive objects they were made to the objects loaded from
 ``ObjectsCopy`` and immediately discarded before the deployment.
-Now this behaviour is changed and there is no more duplicates of the same object.
+Now this behaviour is changed and there are no more duplicates of the same object.
 
 Applications can also make use of the new features. Now it is possible to
 perform on-demand destruction of the unreferenced MuranoPL objects during the
