@@ -48,8 +48,8 @@ class TestAuthUtils(base.MuranoTestCase):
         cfg.CONF.set_override('auth_type',
                               'password',
                               auth_utils.CFG_MURANO_AUTH_GROUP)
-        cfg.CONF.set_override('auth_uri',
-                              'foo_auth_uri',
+        cfg.CONF.set_override('www_authenticate_uri',
+                              'foo_www_authenticate_uri',
                               auth_utils.CFG_MURANO_AUTH_GROUP)
         cfg.CONF.set_override('auth_url',
                               'foo_auth_url',
@@ -158,8 +158,8 @@ class TestAuthUtils(base.MuranoTestCase):
     def test_get_token_client_session(
             self, mock_get_execution_session, mock_identity,
             mock_get_session):
-        cfg.CONF.set_override('auth_uri',
-                              'foo_auth_uri/v2.0',
+        cfg.CONF.set_override('www_authenticate_uri',
+                              'foo_www_authenticate_uri/v2.0',
                               auth_utils.CFG_MURANO_AUTH_GROUP)
 
         mock_get_execution_session.return_value = \
@@ -173,7 +173,7 @@ class TestAuthUtils(base.MuranoTestCase):
 
         mock_get_execution_session.assert_called_once_with()
         mock_identity.Token.assert_called_once_with(
-            'foo_auth_uri/v3', token=mock.sentinel.token,
+            'foo_www_authenticate_uri/v3', token=mock.sentinel.token,
             project_id=mock.sentinel.project_id)
         mock_get_session.assert_called_once_with(
             auth=mock.sentinel.auth,
