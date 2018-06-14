@@ -111,7 +111,7 @@ def _prepare_context():
             if utils.is_sequence(src):
                 src_property.set(src[:index] + (value,) + src[index + 1:])
             elif isinstance(src, utils.MappingType):
-                attribution(src_property, index).set(value)
+                attribution(context, src_property, index).set(value)
 
         if isinstance(index, int):
             return _Property(
