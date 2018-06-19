@@ -21,6 +21,7 @@ import time
 
 import jsonpatch
 import jsonpointer
+from oslo_config import cfg as oslo_cfg
 from oslo_log import log as logging
 from oslo_serialization import base64
 import six
@@ -37,6 +38,7 @@ from murano.dsl import yaql_integration
 from castellan.common import exception as castellan_exception
 from castellan.common import utils as castellan_utils
 from castellan import key_manager
+from castellan import options
 
 LOG = logging.getLogger(__name__)
 
@@ -212,6 +214,8 @@ def logger(context, logger_name):
 @specs.parameter('value', yaqltypes.String())
 @specs.extension_method
 def decrypt_data(value):
+    options.set_defaults(oslo_cfg.CONF,
+                         barbican_endpoint_type='internal')
     manager = key_manager.API()
     try:
         context = castellan_utils.credential_factory(conf=cfg.CONF)
