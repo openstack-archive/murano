@@ -68,7 +68,7 @@ Create environment
 
 .. rest_method::  POST /environments
 
-Creates a environment.
+Creates an environment.
 
 Response Codes
 --------------
@@ -182,7 +182,7 @@ Show environment details
 
 .. rest_method::  GET /environments/{env_id}
 
-Shows details for a environment.
+Shows details for an environment.
 
 Response Codes
 --------------

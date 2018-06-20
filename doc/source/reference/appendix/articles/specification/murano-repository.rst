@@ -354,7 +354,7 @@ Get UI definition
 
 `/v1/catalog/packages/{id}/ui [GET]`
 
-Retrieve UI definition for a application which described in a package with provided id
+Retrieve UI definition for an application which described in a package with provided id
 
 **Parameters**
 
