@@ -30,6 +30,9 @@ Project Resources
 
 * `Python client <https://git.openstack.org/cgit/openstack/python-muranoclient>`_
 
+* Release notes for the project can be found at:
+  `Release notes <https://docs.openstack.org/releasenotes/murano/>`_ page
+
 License
 -------
 
