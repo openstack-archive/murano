@@ -2,7 +2,7 @@
     check:
       jobs:
         - murano-congress-devstack
-        - murano-rally
+        - murano-rally-task
         - murano-tempest-api
         - murano-tempest-cfapi
         - openstack-tox-lower-constraints
@@ -37,20 +37,15 @@
       - openstack/python-muranoclient
 
 - job:
-    name: murano-rally
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/rally-dsvm-murano-task/run.yaml
-    post-run: playbooks/legacy/rally-dsvm-murano-task/post.yaml
-    voting: false
+    name: murano-rally-task
+    parent: rally-task-murano
     timeout: 7800
+    vars:
+      devstack_plugins:
+        rally-openstack: https://git.openstack.org/openstack/rally-openstack
+      rally_task: rally-jobs/task-murano.yaml
     required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/heat
-      - openstack/murano
-      - openstack/murano-dashboard
-      - openstack/python-heatclient
-      - openstack/python-muranoclient
-      - openstack/rally
+      - openstack/rally-openstack
 
 - job:
     name: murano-tempest-api
