@@ -23,6 +23,9 @@ ChangeLog
 cover
 api-ref/build/
 
+!/.stestr.conf
+.stestr/
+
 #Python
 *.pyc
 
