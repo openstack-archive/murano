@@ -37,3 +37,9 @@ License
 -------
 
 Apache License Version 2.0 http://www.apache.org/licenses/LICENSE-2.0
+
+
+Release Notes
+-------------
+
+Release Notes may be found here: https://docs.openstack.org/releasenotes/murano
