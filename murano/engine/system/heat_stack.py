@@ -44,7 +44,7 @@ class HeatStack(object):
         self._template = None
         self._parameters = {}
         self._files = {}
-        self._hot_environment = ''
+        self._hot_environment = {}
         self._applied = True
         self._description = description
         self._last_stack_timestamps = (None, None)
