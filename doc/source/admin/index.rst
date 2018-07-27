@@ -20,3 +20,4 @@ Deploying Murano
    using_glare.rst
    admin_troubleshooting
    appdev-guide/developer_index
+   config-wsgi
