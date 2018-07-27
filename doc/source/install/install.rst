@@ -27,5 +27,6 @@ be adapted to work with other types of distros.
 
    install-api.rst
    install-dashboard.rst
+   from-source.rst
    install-network-config.rst
    enable-ssl.rst

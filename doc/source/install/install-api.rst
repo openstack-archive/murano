@@ -17,7 +17,7 @@ Install Murano API
 ~~~~~~~~~~~~~~~~~~
 
 This section describes how to install and configure the Application Catalog
-service for Ubuntu 14.04 (LTS).
+service for Ubuntu 16.04 (LTS).
 
 .. include:: common_prerequisites.rst
 
@@ -31,55 +31,6 @@ Install and configure components
       # apt-get update
 
       # apt-get install murano-engine murano-api
-
-#. Edit the ``/etc/murano/murano.conf`` file and complete the following
-   actions:
-
-   * In the ``[database]`` section, configure database access:
-
-     .. code-block:: ini
-
-        [database]
-        ...
-        connection = mysql+pymysql://murano:MURANO_DBPASS@controller/murano
-
-Install the API service and Engine
-----------------------------------
-
-#.  Create a folder which will hold all Murano components.
-
-    .. code-block:: console
-
-        mkdir ~/murano
-    ..
-
-#.  Clone the murano git repository to the management server.
-
-    .. code-block:: console
-
-        cd ~/murano
-        git clone git://git.openstack.org/openstack/murano
-    ..
-
-#.  Set up the murano config file
-
-    Murano has a common config file for API and Engine services.
-
-    First, generate a sample configuration file, using tox
-
-    .. code-block:: console
-
-        cd ~/murano/murano
-        tox -e genconfig
-    ..
-
-    And make a copy of it for further modifications
-
-    .. code-block:: console
-
-        cd ~/murano/murano/etc/murano
-        ln -s murano.conf.sample murano.conf
-    ..
 
 #.  Edit ``murano.conf`` with your favorite editor. Below is an example
     which contains basic settings you likely need to configure.
@@ -104,8 +55,7 @@ Install the API service and Engine
         ...
 
         [database]
-        backend = sqlalchemy
-        connection = sqlite:///murano.sqlite
+        connection = mysql+pymysql://murano:MURANO_DBPASS@controller/murano
 
         ...
 
@@ -139,51 +89,22 @@ Install the API service and Engine
                               # DNS configured
     ..
 
-#.  Create a virtual environment and install Murano prerequisites. We will use
-    *tox* for that. The virtual environment will be created under *.tox*
-    directory.
+#. Populate the Murano database:
 
-    .. code-block:: console
+   .. code-block:: console
 
-        cd ~/murano/murano
-        tox
-    ..
+      # su -s /bin/sh -c "murano-db-manage upgrade" murano
 
-#.  Create database tables for Murano.
+   .. note::
 
-    .. code-block:: console
+      Ignore any deprecation messages in this output.
 
-        cd ~/murano/murano
-        tox -e venv -- murano-db-manage \
-          --config-file ./etc/murano/murano.conf upgrade
-    ..
+Finalize installation
+---------------------
 
-#.  Open a new console and launch Murano API. A separate terminal is
-    required because the console will be locked by a running process.
+#. Restart the Application Catalog services:
 
-    .. code-block:: console
+   .. code-block:: console
 
-        cd ~/murano/murano
-        tox -e venv -- murano-api --config-file ./etc/murano/murano.conf
-    ..
-
-#.  Import Core Murano Library.
-
-    .. code-block:: console
-
-        cd ~/murano/murano
-        pushd ./meta/io.murano
-        zip -r ../../io.murano.zip *
-        popd
-        tox -e venv -- murano --murano-url http://localhost:8082 \
-          package-import --is-public io.murano.zip
-    ..
-
-#.  Open a new console and launch Murano Engine. A separate terminal is
-    required because the console will be locked by a running process.
-
-    .. code-block:: console
-
-        cd ~/murano/murano
-        tox -e venv -- murano-engine --config-file ./etc/murano/murano.conf
-    ..
+      # service murano-api restart
+      # service murano-engine restart
