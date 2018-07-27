@@ -21,6 +21,13 @@
     post-run: playbooks/legacy/murano-congress-devstack-dsvm/post.yaml
     voting: false
     timeout: 4200
+    irrelevant-files:
+      - ^(test-|)requirements.txt$
+      - ^setup.cfg$
+      - ^doc/.*$
+      - ^.*\.rst$
+      - ^releasenotes/.*$
+      - ^murano/tests/.*$
     required-projects:
       - openstack-dev/devstack
       - openstack-infra/devstack-gate
