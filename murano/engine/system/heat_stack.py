@@ -23,6 +23,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 
 from murano.common import auth_utils
+from murano.common.helpers import token_sanitizer
 from murano.dsl import dsl
 from murano.dsl import helpers
 from murano.dsl import session_local_storage
@@ -212,7 +213,9 @@ class HeatStack(object):
 
     def _push(self, object_store=None):
         template = copy.deepcopy(self._template)
-        LOG.debug('Pushing: {template}'.format(template=json.dumps(template)))
+        s_template = token_sanitizer.TokenSanitizer().sanitize(template)
+        LOG.debug('Pushing: {template}'.format(
+            template=json.dumps(s_template)))
         object_store = object_store or helpers.get_object_store()
         while True:
             try:

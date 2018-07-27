@@ -141,8 +141,9 @@ class TaskProcessingEndpoint(object):
             result = task_executor.execute()
             return result
         finally:
+            s_result = token_sanitizer.TokenSanitizer().sanitize(result)
             LOG.info('Finished processing task: {task_desc}'.format(
-                task_desc=jsonutils.dumps(result)))
+                task_desc=jsonutils.dumps(s_result)))
 
 
 class StaticActionEndpoint(object):
