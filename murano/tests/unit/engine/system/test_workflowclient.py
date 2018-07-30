@@ -14,6 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+import random
+
 try:
     from mistralclient.api import client as mistralcli
 except ImportError as mistral_import_error:
@@ -26,12 +28,19 @@ from murano.dsl import murano_method
 from murano.dsl import murano_type
 
 from murano.engine.system import workflowclient
-from murano.tests.functional.common import utils as test_utils
 from murano.tests.unit import base
 
 
 CONF = cfg.CONF
-rand_name = test_utils.DeployTestMixin.rand_name
+
+
+def rand_name(name='murano'):
+    """Generates random string.
+
+    :param name: Basic name
+    :return:
+    """
+    return name + str(random.randint(1, 0x7fffffff))
 
 
 class TestMistralClient(base.MuranoTestCase):
