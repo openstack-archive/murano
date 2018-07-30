@@ -16,25 +16,27 @@
 
 - job:
     name: murano-congress-devstack
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/murano-congress-devstack-dsvm/run.yaml
-    post-run: playbooks/legacy/murano-congress-devstack-dsvm/post.yaml
+    parent: murano-tempest-base
     voting: false
     timeout: 4200
     required-projects:
-      - openstack-dev/devstack
-      - openstack-infra/devstack-gate
       - openstack/congress
       - openstack/congress-dashboard
-      - openstack/heat
       - openstack/mistral
       - openstack/mistral-dashboard
-      - openstack/murano
-      - openstack/murano-dashboard
       - openstack/python-congressclient
       - openstack/python-heatclient
       - openstack/python-mistralclient
       - openstack/python-muranoclient
+    vars:
+      devstack_services:
+        tls-proxy: false
+      devstack_localrc:
+        MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: True
+      devstack_plugins:
+        congress: https://git.openstack.org/openstack/congress
+        mistral: https://git.openstack.org/openstack/mistral
+      tempest_test_regex: functional
 
 - job:
     name: murano-rally-task
