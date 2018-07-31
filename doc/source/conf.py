@@ -33,9 +33,16 @@ sys.path.insert(0, os.path.abspath('./'))
 
 # Add any Sphinx extension module names here, as strings. They can be extensions
 # coming with Sphinx (named 'sphinx.ext.*') or your custom ones.
-extensions = ['sphinx.ext.autodoc', 'sphinx.ext.doctest', 'sphinx.ext.todo',
+extensions = ['sphinx.ext.autodoc',
+              'sphinx.ext.doctest',
+              'sphinx.ext.todo',
               'sphinx.ext.coverage',
-              'sphinx.ext.viewcode', 'sphinxcontrib.httpdomain',]
+              'oslo_config.sphinxconfiggen',
+              'oslo_config.sphinxext',
+              'oslo_policy.sphinxext',
+              'oslo_policy.sphinxpolicygen',
+              'sphinx.ext.viewcode',
+              'sphinxcontrib.httpdomain',]
 
 if not on_rtd:
     extensions.append('openstackdocstheme')
@@ -58,6 +65,13 @@ bug_project = 'murano'
 bug_tag = ''
 html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
+config_generator_config_file = '../../etc/oslo-config-generator/murano.conf'
+sample_config_basename = '_static/murano'
+
+policy_generator_config_file = [
+    ('../../etc/oslo-policy-generator/murano-policy-generator.conf',
+     '_static/murano'),
+]
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the

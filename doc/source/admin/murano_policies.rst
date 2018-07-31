@@ -112,4 +112,4 @@ For reference:
 Default Murano Policies
 -----------------------
 
-.. literalinclude:: ../_static/policy.yaml.sample
+.. literalinclude:: ../_static/murano.policy.yaml.sample

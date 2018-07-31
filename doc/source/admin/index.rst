@@ -18,5 +18,7 @@ Deploying Murano
    murano_agent
    policy_enf
    using_glare.rst
+   net_configuration
+   configure_cloud_foundry_service_broker
    admin_troubleshooting
    appdev-guide/developer_index
