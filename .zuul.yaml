@@ -55,10 +55,8 @@
       - openstack/rally-openstack
 
 - job:
-    name: murano-tempest-api
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/tempest-dsvm-murano-api/run.yaml
-    post-run: playbooks/legacy/tempest-dsvm-murano-api/post.yaml
+    name: murano-tempest-base
+    parent: devstack-tempest
     irrelevant-files:
       - ^(test-|)requirements.txt$
       - ^setup.cfg$
@@ -68,7 +66,6 @@
       - ^murano/tests/.*$
     timeout: 7800
     required-projects:
-      - openstack-infra/devstack-gate
       - openstack/heat
       - openstack/murano
       - openstack/murano-dashboard
@@ -76,30 +73,34 @@
       - openstack/python-muranoclient
       - openstack/tempest
       - openstack/murano-tempest-plugin
+    vars:
+      devstack_plugins:
+        murano: https://git.openstack.org/openstack/murano
+        heat: https://git.openstack.org/openstack/heat
+      devstack_services:
+        tempest: true
+        s-account: False
+        s-container: False
+        s-object: False
+        s-proxy: False
+        tls-proxy: false
+      devstack_localrc:
+        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/git.openstack.org/openstack/murano-tempest-plugin'"
+      tempest_test_regex: application_catalog
+      tox_envlist: all
+
+- job:
+    name: murano-tempest-api
+    parent: murano-tempest-base
 
 - job:
     name: murano-tempest-cfapi
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/tempest-dsvm-murano-cfapi/run.yaml
-    post-run: playbooks/legacy/tempest-dsvm-murano-cfapi/post.yaml
+    parent: murano-tempest-base
     voting: false
-    irrelevant-files:
-      - ^(test-|)requirements.txt$
-      - ^setup.cfg$
-      - ^doc/.*$
-      - ^.*\.rst$
-      - ^releasenotes/.*$
-      - ^murano/tests/.*$
-    timeout: 7800
-    required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/heat
-      - openstack/murano
-      - openstack/murano-dashboard
-      - openstack/python-heatclient
-      - openstack/python-muranoclient
-      - openstack/tempest
-      - openstack/murano-tempest-plugin
+    vars:
+      devstack_services:
+        murano-cfapi: true
+      tempest_test_regex: service_broker
 
 - job:
     name: murano-functional
