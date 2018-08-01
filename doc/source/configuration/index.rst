@@ -3,7 +3,8 @@ Configuration Guide
 ===================
 
 .. toctree::
-   :maxdepth: 2
+   :maxdepth: 1
 
-   configuration
-   configure_cloud_foundry_service_broker
+   config-options
+   sample_config
+   sample_policy

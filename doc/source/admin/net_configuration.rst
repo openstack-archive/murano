@@ -1,11 +1,6 @@
-.. _configuration:
-
-=============
-Configuration
-=============
-
+=====================
 Network configuration
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 Murano may work in various networking environments and is capable of detecting
 the current network configuration and choosing appropriate settings
