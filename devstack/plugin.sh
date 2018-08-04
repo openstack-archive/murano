@@ -574,7 +574,6 @@ function configure_local_settings_py() {
     sed -e "s%\(^\s*MURANO_REPO_URL\s*=\).*$%\1 '$MURANO_REPOSITORY_URL'%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
     sed -e "s%\(^\s*'NAME':\).*$%\1 os.path.join('$MURANO_DASHBOARD_DIR', 'openstack-dashboard.sqlite')%" -i $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
     echo -e $"\nMETADATA_CACHE_DIR = '$MURANO_DASHBOARD_CACHE_DIR'" | sudo tee -a $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
-    echo -e $"\nGLARE_API_URL = '$GLANCE_SERVICE_PROTOCOL://$GLANCE_GLARE_HOSTPORT'" | sudo tee -a $HORIZON_DIR/openstack_dashboard/local/local_settings.d/_50_murano.py
 
 }
 
