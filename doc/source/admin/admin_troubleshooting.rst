@@ -57,9 +57,20 @@ If any issues occur, first of all verify the following:
 
 **Applications panel is not seen in horizon**
 
-* Make sure that the :file:`_50_murano.py` file is copied to the
-  ``openstack-dashboard/local/enabled`` directory and there is no other file
-  starting with ``_50``.
+* Make sure that the following files are copied to the
+  ``openstack_dashboard/local/enabled`` directory, and _50_murano.py is copied
+  to ``openstack_dashboard/local/local_settings.d`` directory.
+
+  * _50_dashboard_catalog.py
+  * _51_muranodashboard.py
+  * _60_panel_group_browse.py
+  * _63_panel_murano_catalog.py
+  * _70_panel_group_manage.py
+  * _71_panel_murano_packages.py
+  * _72_panel_murano_images.py
+  * _73_panel_murano_categories.py
+  * _80_panel_group_applications.py
+  * _81_panel_applications_environments.py
 
 * Check that murano data is not inserted twice in the settings file and as a
   plugin.
@@ -105,7 +116,7 @@ Workarounds:
 
 * Use trusts. Only possible in the v3 version. Read more in the
   `official documentation <https://wiki.openstack.org/wiki/Keystone/Trusts>`_
-  or `here <http://docs.openstack.org/admin-guide-cloud/orchestration-auth-model.html>`_.
+  or `here <https://docs.openstack.org/heat/latest/admin/auth-model.html>`_.
   Do not forget to check the corresponding heat and murano settings. Trusts
   are enabled by default in murano and heat since Kilo release.
 
