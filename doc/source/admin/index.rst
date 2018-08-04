@@ -22,3 +22,4 @@ Deploying Murano
    configure_cloud_foundry_service_broker
    admin_troubleshooting
    appdev-guide/developer_index
+   config-wsgi
