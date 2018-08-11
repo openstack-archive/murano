@@ -260,7 +260,7 @@ class HeatStack(object):
 
         self._applied = self._template == template
 
-    def push(self, async=False):
+    def push(self, is_async=False):
         if self._applied or self._template is None:
             return
 
@@ -272,7 +272,7 @@ class HeatStack(object):
             self._template['description'] = self._description
 
         self._kill_push_thread()
-        if async:
+        if is_async:
             if self._push_thread is None:
 
                 def cleanup():
