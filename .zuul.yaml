@@ -5,7 +5,7 @@
       - publish-openstack-docs-pti
       - check-requirements
       - periodic-stable-jobs
-      - release-notes-jobs
+      - release-notes-jobs-python3
     check:
       jobs:
         - murano-congress-devstack
