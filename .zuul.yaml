@@ -1,17 +1,30 @@
 - project:
+    templates:
+      - openstack-python-jobs
+      - openstack-python35-jobs
+      - publish-openstack-docs-pti
+      - check-requirements
+      - periodic-stable-jobs
+      - release-notes-jobs
     check:
       jobs:
         - murano-congress-devstack
         - murano-rally
         - murano-tempest-api
         - murano-tempest-cfapi
+        - openstack-tox-cover:
+            voting: false
     gate:
+      queue: murano
       jobs:
         - murano-tempest-api
     experimental:
       jobs:
         - murano-functional
 
+    post:
+      jobs:
+        - openstack-tox-cover
 - job:
     name: murano-congress-devstack
     parent: legacy-dsvm-base
