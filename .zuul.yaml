@@ -1,0 +1,17 @@
+- project:
+    templates:
+      - openstack-python-jobs
+      - openstack-python35-jobs
+      - publish-openstack-docs-pti
+      - check-requirements
+      - periodic-stable-jobs
+      - release-notes-jobs
+    check:
+      jobs:
+        - openstack-tox-cover:
+            voting: false
+    gate:
+      queue: murano
+    post:
+      jobs:
+        - openstack-tox-cover
