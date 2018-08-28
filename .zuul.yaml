@@ -1,4 +1,12 @@
 - project:
+    templates:
+      - openstack-python-jobs
+      - openstack-python35-jobs
+      - publish-openstack-docs-pti
+      - check-requirements
+      - periodic-stable-jobs
+      - release-notes-jobs
+      - install-guide-jobs
     check:
       jobs:
         - murano-congress-devstack
@@ -6,7 +14,10 @@
         - murano-tempest-api
         - murano-tempest-cfapi
         - openstack-tox-lower-constraints
+        - openstack-tox-cover:
+            voting: false
     gate:
+      queue: murano
       jobs:
         - murano-tempest-api
         - openstack-tox-lower-constraints
@@ -14,6 +25,9 @@
       jobs:
         - murano-functional
 
+    post:
+      jobs:
+        - openstack-tox-cover
 - job:
     name: murano-congress-devstack
     parent: murano-tempest-base
@@ -39,7 +53,7 @@
       devstack_services:
         tls-proxy: false
       devstack_localrc:
-        MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: True
+        MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: true
       devstack_plugins:
         congress: https://git.openstack.org/openstack/congress
         mistral: https://git.openstack.org/openstack/mistral
@@ -81,10 +95,10 @@
         heat: https://git.openstack.org/openstack/heat
       devstack_services:
         tempest: true
-        s-account: False
-        s-container: False
-        s-object: False
-        s-proxy: False
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
         tls-proxy: false
       devstack_localrc:
         TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/git.openstack.org/openstack/murano-tempest-plugin'"
