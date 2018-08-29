@@ -6,7 +6,6 @@
       - check-requirements
       - periodic-stable-jobs
       - release-notes-jobs
-      - install-guide-jobs
     check:
       jobs:
         - murano-congress-devstack
@@ -24,10 +23,10 @@
     experimental:
       jobs:
         - murano-functional
-
     post:
       jobs:
         - openstack-tox-cover
+
 - job:
     name: murano-congress-devstack
     parent: murano-tempest-base
