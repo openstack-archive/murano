@@ -1,0 +1,13 @@
+---
+prelude: >
+    Added new tool ``murano-status upgrade check``.
+features:
+  - |
+    New framework for ``murano-status upgrade check`` command is added.
+    This framework allows adding various checks which can be run before a
+    Murano upgrade to ensure if the upgrade can be performed safely.
+upgrade:
+  - |
+    Operator can now use new CLI tool ``murano-status upgrade check``
+    to check if Murano deployment can be safely upgraded from
+    N-1 to N release.
