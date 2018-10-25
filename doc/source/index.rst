@@ -67,6 +67,14 @@ Configuration
 
   configuration/index
 
+CLI Guide
+~~~~~~~~~
+
+.. toctree::
+  :maxdepth: 2
+
+  cli/index
+
 Administrator Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
