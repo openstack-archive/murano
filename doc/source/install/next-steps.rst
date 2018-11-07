@@ -13,7 +13,7 @@ Additional Resources
 --------------------
 
 #. To add additional services, see
-   `<https://docs.openstack.org/project-install-guide/ocata/>`__.
+   `<https://docs.openstack.org/latest/install/>`__.
 
 #. If you would like to add glare as the storage service for packages, see:
    `<https://docs.openstack.org/murano/latest/admin/using_glare.html>`__.

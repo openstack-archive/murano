@@ -18,4 +18,4 @@ environments with the push of a button.
 
 This chapter assumes a working setup of OpenStack following the
 `OpenStack Installation Tutorial
-<https://docs.openstack.org/project-install-guide/ocata/>`_.
+<https://docs.openstack.org/latest/install/>`_.
