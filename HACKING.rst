@@ -4,7 +4,7 @@ Style Commandments
 Read the OpenStack Style Commandments https://docs.openstack.org/hacking/latest/
 
 Murano Specific Commandments
----------------------------
+----------------------------
 
 - [M318] Change assertEqual(A, None) or assertEqual(None, A) by optimal assert
   like assertIsNone(A)
