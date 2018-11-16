@@ -1,0 +1,455 @@
+# Ian Y. Choi <ianyrchoi@gmail.com>, 2015. #zanata
+# Lucas Palm <lapalm@us.ibm.com>, 2015. #zanata
+# OpenStack Infra <zanata@openstack.org>, 2015. #zanata
+# Andreas Jaeger <jaegerandi@gmail.com>, 2016. #zanata
+# Sungjin Kang <gang.sungjin@gmail.com>, 2016. #zanata
+# JongSoo Ha <neo415ha@gmail.com>, 2018. #zanata
+msgid ""
+msgstr ""
+"Project-Id-Version: murano VERSION\n"
+"Report-Msgid-Bugs-To: https://bugs.launchpad.net/openstack-i18n/\n"
+"POT-Creation-Date: 2018-08-30 07:51+0000\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"PO-Revision-Date: 2018-11-15 07:58+0000\n"
+"Last-Translator: JongSoo Ha <neo415ha@gmail.com>\n"
+"Language-Team: Korean (South Korea)\n"
+"Language: ko_KR\n"
+"X-Generator: Zanata 4.3.3\n"
+"Plural-Forms: nplurals=1; plural=0\n"
+
+msgid ""
+"'multipart/form-data' request body should contain 1 or 2 parts: json string "
+"and zip archive. Current body consists of {amount} part(s)"
+msgstr ""
+"'multipart/form-data' 요청 본문은 json 문자열 및 zip 압축에 해당하는 1 또는 "
+"2 파트를 포함해야 합니다. 현재 본문은 {amount} 파트로 구성되어 있습니다"
+
+msgid "Acceptable response can not be provided"
+msgstr "승인될 수 있는 반응이 제공되지 않음"
+
+msgid "Attribute '{0}' is invalid"
+msgstr "Attribute '{0}' 적절치 않음"
+
+msgid "Authentication URL"
+msgstr "인증 URL"
+
+msgid "Authorization required"
+msgstr "인증 필요"
+
+msgid "Bad value passed to filter. Got {key}, expected:{valid}"
+msgstr "안 좋은 값이 필터를 통과했습니다. {key}를 받았고, 예측값:{valid}"
+
+msgid "Category '{name}' doesn't exist"
+msgstr "카테고리 '{name}' 존재하지 않음"
+
+msgid "Category id '{id}' not found"
+msgstr "카테고리 id '{id}' 발견되지 않음"
+
+msgid "Category name should be 80 characters maximum"
+msgstr "카테고리 이름은 80자가 최대치여야 합니다"
+
+msgid "Category with specified name is already exist"
+msgstr "해당 이름의 카테고리가 이미 존재합니다"
+
+msgid "Class name and method name must be specified for static action"
+msgstr "클래스 이름과 메소드 이름은 반드시 정적 액션을 구체화해야 합니다"
+
+msgid ""
+"Class with the same full name is already registered in the visibility scope"
+msgstr ""
+"전체가 동일한 이름을 갖는 클래스가 이미 가시성 범위에 등록되어 있습니다."
+
+msgid "Content-Type must be '{type}'"
+msgstr "Content-Type은 '{type}' 이어야 합니다"
+
+#, python-format
+msgid ""
+"Could not bind to %(host)s:%(port)s after trying for 30 seconds: Address "
+"already in use."
+msgstr "30초의 시도 후 %(host)s:%(port)s로 연결이 안됩니다. 주소값 이미 사용중"
+
+msgid ""
+"Could not open session for environment <EnvId: {env_id}>, environment has "
+"deploying or deleting status."
+msgstr ""
+"환경 <EnvId: {env_id}>을 위한 세션을 열수 없습니다, 환경이 상태를 배치하고 있"
+"거나 삭제하고 있습니다."
+
+msgid "Couldn't load package from file: {reason}"
+msgstr "파일로부터 패키지 불러오기 실패: {reason}"
+
+msgid "Create resources using trust token rather than user's token"
+msgstr "사용자의 토큰이 아닌 신뢰 토큰을 사용하여 리소스 생성."
+
+msgid "Disallow the use of murano-agent"
+msgstr "murano-agent의 사용을 불허했습니다."
+
+msgid "Domain name of the project"
+msgstr "프로젝트의 도메인 이름"
+
+msgid "Domain name of the user"
+msgstr "유저의 도메인 이름"
+
+msgid "Enable model policy enforcer using Congress"
+msgstr "Congress를 사용하여 모델 정책 시행자 활성화"
+
+msgid ""
+"Enables murano-engine to persist on disk packages downloaded during "
+"deployments. The packages would be re-used for consequent deployments."
+msgstr ""
+"배포 중에 다운로드 한 디스크 패키지에 murano-engine을 유지할 수 있습니다. 패"
+"키지는 결과적 배포를 할 때 다시 사용됩니다."
+
+msgid "Env Template with specified name already exists"
+msgstr "구체화된 이름의 환경 템플릿 이미 존재"
+
+msgid "EnvTemplate <TempId {temp_id}> is not found"
+msgstr "환경 템플릿 <TempId {temp_id}> 발견 안됨"
+
+msgid "EnvTemplate body is incorrect"
+msgstr "환경 템플릿의 바디 정확하지 않음"
+
+msgid "Environment <EnvId {0}> is not found"
+msgstr "환경 <EnvId {0}> 이 발견되지 않았습니다"
+
+msgid "Environment Template <EnvId {0}> is not found"
+msgstr "환경 템플릿 <EnvId {0}> 이 발견되지 않았습니다"
+
+msgid "Environment Template <EnvId {id}> is not found"
+msgstr "환경 템플릿 <EnvId {id}> 이 발견되지 않았습니다."
+
+msgid "Environment Template must contain at least one non-white space symbol"
+msgstr "환경 템플릿은 최소 한개의 공백문자가 포함되어야 합니다"
+
+msgid "Environment Template with id {id} not found"
+msgstr "id {id} 를 가진 Environment Template 을 찾을 수 없습니다"
+
+msgid "Environment audit interval in minutes. Default value is 60 minutes."
+msgstr "환경 감사 추적은 분 간격입니다. 기본값은 60 분입니다."
+
+msgid "Environment name must contain at least one non-white space symbol"
+msgstr "환경의 이름은 최소 한개의 공백문자가 포함되어야 합니다"
+
+msgid "Environment name should be 255 characters maximum"
+msgstr "환경의 이름은 255 글자가 최대치여야 합니다"
+
+msgid "Environment template name should be 255 characters maximum"
+msgstr "환경 템플릿의 이름은 최대 255 글자여야 합니다"
+
+msgid "Environment template specified name already exists"
+msgstr "구체화된 이름의 환경 템플릿이 이미 존재합니다."
+
+msgid "Environment with id {env_id} not found"
+msgstr "Environment id {env_id}을 찾을 수 없습니다"
+
+msgid "Environment with specified name already exists"
+msgstr "지정된 이름의 환경이 이미 있음"
+
+msgid "Host for service broker"
+msgstr "서비스 브로커를 위한 호스트"
+
+#, python-format
+msgid "Invalid SSL version: %s"
+msgstr "유효하지 않은 SSL 버젼: %s"
+
+#, python-format
+msgid "Invalid filter value %s. The quote is not closed."
+msgstr "올바르지 않은 필터 값 %s. 따옴표가 닫히질 않았습니다."
+
+#, python-format
+msgid ""
+"Invalid filter value %s. There is no comma after opening quotation mark."
+msgstr "올바르지 않은 필터 값 %s. 따옴표를 연 후 콤마가 없습니다"
+
+#, python-format
+msgid ""
+"Invalid filter value %s. There is no comma before opening quotation mark."
+msgstr "올바르지 않은 필터 값 %s. 따옴표를 열기 전 콤마가 없습니다"
+
+msgid "Invalid sort direction: {0}"
+msgstr "올바르지 않은 정렬 방향: {0}"
+
+msgid "Invalid sort key: {sort_key}. Must be one of the following: {available}"
+msgstr ""
+"올바르지 않은 정렬 키: {sort_key}. 다음 중 하나여만 합니다:  {available}"
+
+msgid ""
+"It's impossible to delete categories assigned to the package, uploaded to "
+"the catalog"
+msgstr ""
+"패키지에 할당되고 카탈로그에 업로드 된 카테고리를 삭제하는 것은 불가능합니다."
+
+msgid "JSON-patch must be a list."
+msgstr "JSON-patch 무조건 리스트여야 합니다."
+
+msgid "Limit param must be an integer"
+msgstr "Limit 매개변수는 정수여야 합니다"
+
+msgid "Limit param must be positive"
+msgstr "Limit 매개변수는 양수여야 합니다"
+
+msgid ""
+"List of directories to load local packages from. If not provided, packages "
+"will be loaded only API"
+msgstr ""
+"로컬 패키지를 로드할 디렉토리 목록. 제공되지 않으면 패키지는 API 만 로드됩니"
+"다."
+
+msgid ""
+"Local package is not found since \"load-packages-from\" engine parameter is "
+"not provided and specified packages is not loaded to murano-api"
+msgstr ""
+"\"load-packages-from\" 엔진 매개변수가 제공되지 않았거나 구체화된 패키지가 "
+"murano-api에 로드 되지 않았기 때문에 로컬 패키지가 발견되지 않았습니다."
+
+msgid "Malformed request body"
+msgstr "형식이 틀린 요청 본문"
+
+msgid "Maximum number of elements that can be iterated per object type."
+msgstr "객체 유형별로 반복 할 수있는 최대 요소 수입니다."
+
+msgid ""
+"Method '{method}' is not allowed for a path with name '{name}'. Allowed "
+"operations are: {ops}"
+msgstr ""
+"메소드 '{method}' 는'{name}' 이라는 이름의 경로에게는 허용이 안됩니다. 허용 "
+"연산자들은 : {ops}"
+
+msgid "Murano object model validation failed: {0}"
+msgstr "Murano 객체 모델 검증 실패: {0}"
+
+msgid "Nested paths are not allowed"
+msgstr "복집한 경로는 허용되지 않습니다"
+
+msgid "No tests found for execution."
+msgstr "실행을 위한 테스트들을 발견하지 못했습니다"
+
+msgid "Number of API workers"
+msgstr "API 근무자들의 수"
+
+msgid "Number of engine workers"
+msgstr "엔진 근무자의 수"
+
+#, python-format
+msgid "Operation \"%s\" requires a member named \"value\"."
+msgstr "\"%s\" 오퍼레이션에는 \"value\"라는 이름의 멤버가 필요합니다."
+
+msgid "Operations must be JSON objects."
+msgstr "오퍼레이션은 JSON 오브젝트여야 합니다."
+
+msgid "Package '{pkg_id}' is not owned by tenant '{tenant}'"
+msgstr "패키지 '{pkg_id}'는 거주자 '{tenant}'의 소유가 아닙니다."
+
+msgid "Package '{pkg_id}' is not public and not owned by tenant '{tenant}' "
+msgstr ""
+"패키지 '{pkg_id}'는 public이 아니며 거주자 '{tenant}'의 소유가 아닙니다."
+
+msgid "Package id '{pkg_id}' not found"
+msgstr "패키지 id '{pkg_id}' 발견되지 않음"
+
+msgid "Package name should be 80 characters maximum"
+msgstr "패키지 이름은 80 자가 최대여야 합니다."
+
+msgid "Package schema is not valid: {reason}"
+msgstr "패키지 스키마가 유효하지 않습니다: {reason}"
+
+msgid "Package service which should be used by service broker"
+msgstr "서비스 브로커에 의해 사용되어야만 하는 패키지 서비스"
+
+msgid "Package with specified full name is already registered"
+msgstr "명시된 전체 이름에 대한 패키지가 이미 등록되어 있습니다"
+
+msgid "Package with the same Name is already made public"
+msgstr "같은 Name으로 된 패키지는 이미 public 으로 만들어졌습니다"
+
+msgid "Path to RSA key for agent message signing"
+msgstr "에이전트 메시지 가입을 위한 RSA 키의 경로"
+
+msgid "Path to class configuration files"
+msgstr "배치 파일 클래스로의 경로"
+
+msgid "Please, specify a name of the environment template."
+msgstr "환경 템플릿의 이름을 구체화 해주시기 바랍니다"
+
+msgid "Please, specify a name of the environment to create"
+msgstr "만들려는 환경의 이름을 구체화 해주세요"
+
+#, python-format
+msgid ""
+"Pointer `%s` contains \"~\", which is not part of a recognized escape "
+"sequence."
+msgstr ""
+"포인터 `%s` 인식 된 이스케이프 시퀀스의 일부가 아닌 \"~\" 를 갖고 있습니다"
+
+#, python-format
+msgid "Pointer `%s` contains adjacent \"/\"."
+msgstr "포인터 `%s` 에 인접 \"/\"가 포함됩니다. "
+
+#, python-format
+msgid "Pointer `%s` does not contain a valid token."
+msgstr "포인터 `%s` 는 유효 토큰을 구성하지 않습니다."
+
+#, python-format
+msgid "Pointer `%s` does not start with \"/\"."
+msgstr "`%s` 포인터가 \"/\"로 시작하지 않습니다."
+
+#, python-format
+msgid "Pointer `%s` ends with \"/\"."
+msgstr "포인터 `%s` 는 \"/\" 로 끝납니다"
+
+msgid "Port for service broker"
+msgstr "서비스 브로커를 위한 포트"
+
+msgid "Project for service broker"
+msgstr "서비스 브로커를 위한 프로젝트"
+
+msgid "Request body is empty: please, provide application object model"
+msgstr "요청 본문이 비어있음: 응용 객체 모델을 제공해주세요"
+
+msgid "Request body is empty: please, provide environment object model patch"
+msgstr "요청 본문이 비어있음: 환경 객체 모델 패치를 제공해주세요"
+
+msgid "Request body must be a JSON array of operation objects."
+msgstr "요청 본문은 오퍼레이션 오브젝트의 JSON 배열이어야 합니다."
+
+msgid "Role used to identify an authenticated user as administrator."
+msgstr "인증된 사용자를 관리자로 식별하는 데 사용되는 역할."
+
+msgid "Session <SessionId {0}> is already in deployment state"
+msgstr "Session <SessionId {0}> 이 이미 배포 상태에 있습니다"
+
+msgid ""
+"Session <SessionId {0}> is invalid: environment has been updated or updating "
+"right now with other session"
+msgstr ""
+"Session <SessionId {0}> 이 유효하지 않습니다: environment가 업데이트 되었거"
+"나 다른 세션과 함께 현재 업데이트 중입니다"
+
+msgid "Session <SessionId {0}> is not found"
+msgstr "Session <SessionId {0}> 을 찾을 수 없습니다"
+
+msgid "Session <SessionId {id}> is not found"
+msgstr "Session <SessionId {id}> 을 찾을 수 없습니다"
+
+msgid ""
+"Session <SessionId {s_id}> is already deployed or deployment is in progress"
+msgstr "세션 <SessionId {s_id}> 이 이미 배치되었거나 배치가 진행중입니다."
+
+msgid ""
+"Session <SessionId {session_id}> is not tied with Environment <EnvId "
+"{environment_id}>"
+msgstr ""
+"Session <SessionId {session_id}> 이 Environment <EnvId {environment_id}>와 결"
+"합되어 있지 않습니다"
+
+msgid ""
+"Session <SessionId: {s_id}> is in deploying state and could not be deleted"
+msgstr ""
+"세션 <SessionId: {s_id}> 이 상태를 배치하거나, 아직 삭제되지 않았을 수 있습니"
+"다"
+
+msgid "Source object or path is malformed"
+msgstr "소스 객체나 경로가 손상되었습니다."
+
+msgid ""
+"Specified package is not found: {0} were scanned together with murano "
+"database"
+msgstr ""
+"구체화된 패키지 발견되지 않음: {0} 이 murano 데이터베이스와 함께 스캔됨"
+
+#, python-format
+msgid "Starting Murano REST API on %(host)s:%(port)s"
+msgstr "%(host)s에서 Murano REST API 를 시작 중:%(port)s"
+
+msgid "Statistics collection interval in minutes.Default value is 5 minutes."
+msgstr "통계 수집은 분 간격입니다. 기본값은 5 분입니다."
+
+msgid "The environment template {templ_id} does not exist"
+msgstr "환경 템플릿 {templ_id} 존재하지 않음"
+
+msgid ""
+"The service to store murano packages: murano (stands for legacy behavior "
+"using murano-api) or glance (stands for glance-glare artifact service)"
+msgstr ""
+"murano 피키지를 저장하기 위한 서비스: marano(murano-api를 사용하여 기존 동작"
+"을 나타냄) 또는 glance (Glance-Glare 유물 서비스의 약자를 나타냄)"
+
+msgid "The template does not exist {templ_id}"
+msgstr "템플릿 존재하지 않음 {templ_id}"
+
+msgid "There is no file package with application description"
+msgstr "응용프로그램 설명에 대한 파일 패키지가 없습니다"
+
+msgid "Time for waiting for a response from murano agent during the deployment"
+msgstr "배포 중 murano agent부터의 응답을 기다리는 시간"
+
+#, python-format
+msgid "Unable to find '%s' in JSON Schema change"
+msgstr "JSON 스키마 변경에서 '%s'을(를) 찾을 수 없음"
+
+#, python-format
+msgid ""
+"Unable to load %(app_name)s from configuration file %(conf_file)s. \n"
+"Got: %(e)r"
+msgstr ""
+"배치 파일 %(conf_file)s 로부터 %(app_name)s 을 로드할 수 없습니다.\n"
+"얻은 것: %(e)r"
+
+#, python-format
+msgid "Unable to locate paste config file for %s."
+msgstr "%s에 대한 붙여넣기 구성 파일을 찾을 수 없습니다."
+
+msgid "Unsupported Content-Type"
+msgstr "지원되지 않는 Content-Type"
+
+msgid "Uploading file can't be empty"
+msgstr "업로드 중인 파일은 비어있을 수 없습니다"
+
+msgid "Uploading file is too large. The limit is {0} Mb"
+msgstr "업로드 중인 파일이 너무 큽니다. {0} Mb가 제한입니다."
+
+msgid ""
+"User <UserId {usr_id}> is not authorized to access session <SessionId {s_id}"
+">."
+msgstr ""
+"유저 <UserId {usr_id}> 는 세션 <SessionId {s_id}> 을 접근하는 것이 허가되지 "
+"않습니다."
+
+msgid "User has no access to these resources."
+msgstr "유저는 이 자원들에 접근 권한 없음"
+
+msgid "User is not authorized to access these tenant resources"
+msgstr "사용자는 해당 tenant 자원에 액세스할 권한이 없습니다"
+
+msgid "User is not authorized to access this tenant resources"
+msgstr "사용자는 해당 tenant 자원에 액세스할 권한이 없습니다"
+
+msgid "Value '{value}' of property '{path}' does not exist."
+msgstr "프로퍼티 '{path}' 의 값 '{value}' 가 존재하지 않습니다"
+
+msgid "Whether environment audit events enabled"
+msgstr "날씨 환경 감사 추적 이벤트가 활성화 되었습니다."
+
+msgid "X-Configuration-Session header which indicates to the session is missed"
+msgstr "세션을 가리키는 X-Configuration-Session 헤더가 빠져 있습니다"
+
+msgid "Your credentials are wrong. Please try again"
+msgstr "credentials이 잘못되었습니다. 재시도하세요"
+
+msgid "cannot understand JSON"
+msgstr "JSON을 이해할 수 없음"
+
+msgid "cannot understand XML"
+msgstr "XML을 이해할 수 없음"
+
+msgid "pip URL/package spec for murano-agent"
+msgstr "murano-agent 를 위한 pip URL/package 스펙"
+
+msgid "{0}: Unsupported Format. Only {1} allowed"
+msgstr "{0}:지원하지않는 포맷. 오직 {1}만 허용됨"
+
+msgid "{0}: Uploaded image size {1} is too large. Max allowed size is {2}"
+msgstr ""
+"{0}: 업로드된 이미지 크기 {1} 은 너무 큽니다. 최대 허용 사이즈는 {2}입니다."
