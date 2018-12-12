@@ -124,7 +124,7 @@ def delete_trust(trust):
 
 
 def _get_config_option(conf_section, option_name, default=None):
-    if hasattr(cfg.CONF[conf_section], option_name):
+    if conf_section and hasattr(cfg.CONF[conf_section], option_name):
         return getattr(cfg.CONF[conf_section], option_name)
     return default
 
