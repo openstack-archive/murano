@@ -12,6 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import six
+
 from oslo_log import log as logging
 from oslo_messaging.rpc import client
 from webob import exc
@@ -68,8 +70,9 @@ class Controller(object):
             raise exc.HTTPServiceUnavailable(e.value)
         except ValueError as e:
             LOG.error('Exception during call of the method {method_name}: '
-                      '{exc}'.format(method_name=method_name, exc=str(e)))
-            raise exc.HTTPBadRequest(e.message)
+                      '{exc}'.format(method_name=method_name,
+                                     exc=six.text_type(e)))
+            raise exc.HTTPBadRequest(six.text_type(e))
 
 
 def create_resource():
