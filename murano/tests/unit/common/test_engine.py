@@ -39,7 +39,7 @@ class TestEngineService(base.MuranoTestCase):
     def test_start_stop_reset(self, mock_messaging, mock_start,
                               mock_stop, mock_reset):
         self.engine.start()
-        self.assertTrue(mock_messaging.get_notification_transport.called)
+        self.assertTrue(mock_messaging.get_rpc_transport.called)
         self.assertTrue(mock_messaging.get_rpc_server.called)
         self.assertTrue(mock_start.called)
         self.engine.stop()
@@ -52,7 +52,7 @@ class TestEngineService(base.MuranoTestCase):
     @mock.patch('murano.common.engine.messaging')
     def test_stop_graceful(self, mock_messaging, mock_start, mock_stop):
         self.engine.start()
-        self.assertTrue(mock_messaging.get_notification_transport.called)
+        self.assertTrue(mock_messaging.get_rpc_transport.called)
         self.assertTrue(mock_messaging.get_rpc_server.called)
         self.assertTrue(mock_start.called)
         self.engine.stop(graceful=True)

@@ -76,8 +76,7 @@ class Notification(object):
             return
 
         if Notification.transport is None:
-            Notification.transport = messaging.get_notification_transport(
-                CONF)
+            Notification.transport = messaging.get_notification_transport(CONF)
         self._notifier = messaging.Notifier(
             Notification.transport,
             publisher_id=('murano.%s' % socket.gethostname()),

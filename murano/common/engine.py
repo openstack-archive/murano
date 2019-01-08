@@ -64,7 +64,7 @@ class EngineService(service.Service):
             SchemaEndpoint()
         ]
 
-        transport = messaging.get_notification_transport(CONF)
+        transport = messaging.get_rpc_transport(CONF)
         s_target = target.Target('murano', 'tasks', server=str(uuid.uuid4()))
         access_policy = dispatcher.DefaultRPCAccessPolicy
         self.server = messaging.get_rpc_server(
