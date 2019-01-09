@@ -53,7 +53,7 @@ class MistralClient(object):
     def _create_client(region):
         if not mistralcli:
             LOG.warning("Mistral client is not available")
-            raise mistral_import_error
+            raise ImportError("Import mistralcliet error")
 
         mistral_settings = CONF.mistral
 

@@ -280,9 +280,9 @@ class MuranoClass(dsl_types.MuranoClass, MuranoType, dslmeta.MetaProvider):
         for name in self.all_method_names:
             try:
                 yield self.find_single_method(name)
-            except exceptions.AmbiguousMethodName as e:
+            except exceptions.AmbiguousMethodName:
                 def func(*args, **kwargs):
-                    raise e
+                    raise
                 yield murano_method.MuranoMethod(
                     self, name, func, ephemeral=True)
 

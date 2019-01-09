@@ -54,7 +54,7 @@ class ModelPolicyEnforcer(object):
     def _create_client(self):
         if not congress_client:
             # congress client was not imported
-            raise congress_client_import_error
+            raise ImportError("Import congresscliet error")
         return congress_client.Client(
             **auth_utils.get_session_client_parameters(
                 service_type='policy',
