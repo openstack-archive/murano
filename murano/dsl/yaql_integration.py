@@ -154,9 +154,10 @@ def _infer_parameter_type(name, class_name):
 
 def get_function_definition(func, murano_method, original_name):
     cls = murano_method.declaring_type.extension_class
-    param_type_func = \
-        lambda name: None if not cls else _infer_parameter_type(
-            name, cls.__name__)
+
+    def param_type_func(name):
+        return None if not cls else _infer_parameter_type(name, cls.__name__)
+
     body = func
     if (cls is None or helpers.inspect_is_method(cls, original_name) or
             helpers.inspect_is_classmethod(cls, original_name)):

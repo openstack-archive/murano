@@ -116,7 +116,8 @@ def merge_providers(initial_class, producer, context):
 
 
 def aggregate_meta(provider, context, group_by_name=True):
-    key_func = lambda m: m.type.name if group_by_name else m.type
+    def key_func(m):
+        return m.type.name if group_by_name else m.type
     meta = provider.get_meta(context)
     result = {}
     for item in meta:

@@ -302,7 +302,8 @@ class TestDSLHelpers(base.MuranoTestCase):
             [mock.sentinel.second], [mock.sentinel.third]
         ]
         first_obj = mock.sentinel.first
-        handler = lambda i: True
+        handler = mock.MagicMock()
+        handler.return_value = True
 
         expected = [
             [mock.sentinel.first],
@@ -321,7 +322,8 @@ class TestDSLHelpers(base.MuranoTestCase):
             [mock.sentinel.second], [mock.sentinel.second]
         ]
         first_obj = mock.sentinel.first
-        handler = lambda i: True
+        handler = mock.MagicMock()
+        handler.return_value = True
 
         expected = [
             [mock.sentinel.first],

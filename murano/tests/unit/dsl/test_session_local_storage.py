@@ -97,7 +97,8 @@ class TestExecutionSessionMemoize(test_case.DslTestCase):
     @mock.patch.object(helpers, 'get_memoize_func',
                        return_value=mock.sentinel.mem_func)
     def test_execution_session_memoize(self, mock_gef):
-        f = lambda: 'im a function'
+        f = mock.MagicMock()
+        f.return_value = 'im a function'
         new_f = session_local_storage.execution_session_memoize(f)
         self.assertEqual(f, mock_gef.call_args[0][0])
         self.assertIsInstance(mock_gef.call_args[0][1],

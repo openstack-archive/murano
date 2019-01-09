@@ -216,7 +216,8 @@ class MQClientTest(base.MuranoTestCase):
     def test_send_signed(self, mock_kombu):
         mock_message = mock.MagicMock(body='test_message', id=3)
 
-        signer = lambda msg: "SIGNATURE"
+        signer = mock.MagicMock()
+        signer.return_value = "SIGNATURE"
         self.ssl_client.connect()
         self.ssl_client.send(mock_message, 'test_key', 'test_exchange', signer)
 

@@ -351,8 +351,9 @@ def to_mutable(obj, yaql_engine=None):
         else:
             return utils.convert_output_data(value, limit_func, engine, rec)
 
-    limiter = lambda it: utils.limit_iterable(
-        it, CONF.murano.dsl_iterators_limit)
+    def limiter(it):
+        return utils.limit_iterable(it, CONF.murano.dsl_iterators_limit)
+
     return converter(obj, limiter, yaql_engine, converter)
 
 
