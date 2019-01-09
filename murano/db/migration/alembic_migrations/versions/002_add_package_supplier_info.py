@@ -18,14 +18,12 @@ Revises: None
 Create Date: 2014-06-23 16:34:33.698760
 
 """
+from alembic import op
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '002'
 down_revision = '001'
-
-from alembic import op
-import sqlalchemy as sa
-
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

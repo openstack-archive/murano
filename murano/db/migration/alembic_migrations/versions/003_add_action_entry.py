@@ -19,15 +19,14 @@ Revises: table deployment
 Create Date: 2014-07-30 16:11:33.244
 
 """
-
-# revision identifiers, used by Alembic.
-revision = '003'
-down_revision = '002'
-
 from alembic import op
 import sqlalchemy as sa
 
 import murano.db.migration.helpers as helpers
+
+# revision identifiers, used by Alembic.
+revision = '003'
+down_revision = '002'
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

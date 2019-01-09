@@ -12,11 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-__all__ = [
-    'list_opts',
-    'list_cfapi_opts',
-]
-
 import copy
 import itertools
 from keystoneauth1 import loading as ks_loading
@@ -26,6 +21,11 @@ import oslo_service.sslutils
 import murano.common.cf_config
 import murano.common.config
 import murano.common.wsgi
+
+__all__ = [
+    'list_opts',
+    'list_cfapi_opts',
+]
 
 
 def build_list(opt_list):

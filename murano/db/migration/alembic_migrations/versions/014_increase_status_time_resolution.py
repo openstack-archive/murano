@@ -20,12 +20,12 @@ Create Date: 2016-04-28
 
 """
 
+from alembic import op
+import sqlalchemy.dialects.mysql as sa_mysql
+
 # revision identifiers, used by Alembic.
 revision = '014'
 down_revision = '013'
-
-from alembic import op
-import sqlalchemy.dialects.mysql as sa_mysql
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

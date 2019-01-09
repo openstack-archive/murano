@@ -20,13 +20,12 @@ Revises: table template
 
 """
 
-# revision identifiers, used by Alembic.
-revision = '011'
-down_revision = '010'
-
 from alembic import op
 import sqlalchemy as sa
 
+# revision identifiers, used by Alembic.
+revision = '011'
+down_revision = '010'
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

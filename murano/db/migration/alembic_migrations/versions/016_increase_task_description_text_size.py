@@ -21,13 +21,13 @@ Create Date: 2016-08-30 10:45:00
 
 """
 
-# revision identifiers, used by Alembic.
-revision = '016'
-down_revision = '015'
-
 from alembic import op
 import sqlalchemy as sa
 import sqlalchemy.dialects.mysql as sa_mysql
+
+# revision identifiers, used by Alembic.
+revision = '016'
+down_revision = '015'
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'
