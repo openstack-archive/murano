@@ -20,13 +20,12 @@ Revises: table session, table package
 
 """
 
-# revision identifiers, used by Alembic.
-revision = '012'
-down_revision = '011'
-
 from alembic import op
 import sqlalchemy as sa
 
+# revision identifiers, used by Alembic.
+revision = '012'
+down_revision = '011'
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

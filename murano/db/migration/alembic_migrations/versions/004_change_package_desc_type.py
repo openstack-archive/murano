@@ -18,16 +18,15 @@ Revision ID: 004
 Revises: table package
 
 """
-
-# revision identifiers, used by Alembic.
-revision = '004'
-down_revision = '003'
-
 from alembic import op
 import sqlalchemy as sa
 
 import murano.db.migration.helpers as helpers
 from murano.db.sqla import types as st
+
+# revision identifiers, used by Alembic.
+revision = '004'
+down_revision = '003'
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

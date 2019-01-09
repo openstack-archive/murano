@@ -19,14 +19,12 @@ Revision ID: 005
 Revises: table template
 
 """
+from alembic import op
+import sqlalchemy as sa
 
 # revision identifiers, used by Alembic.
 revision = '005'
 down_revision = '004'
-
-from alembic import op
-import sqlalchemy as sa
-
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'

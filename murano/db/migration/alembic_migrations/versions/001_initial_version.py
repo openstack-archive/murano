@@ -18,11 +18,6 @@ Revises: None
 Create Date: 2014-05-29 16:32:33.698760
 
 """
-
-# revision identifiers, used by Alembic.
-revision = '001'
-down_revision = None
-
 import uuid
 
 from alembic import op
@@ -33,6 +28,9 @@ from sqlalchemy.sql.expression import table as sa_table
 from murano.common import consts
 from murano.db.sqla import types as st
 
+# revision identifiers, used by Alembic.
+revision = '001'
+down_revision = None
 
 MYSQL_ENGINE = 'InnoDB'
 MYSQL_CHARSET = 'utf8'
