@@ -11,4 +11,4 @@ Properties:
     Contract: $.string()
   extra:
     Contract:
-      $.string().notNull(): $.string()
+      $.string().notNull(): $
