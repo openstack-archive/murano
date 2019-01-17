@@ -19,9 +19,6 @@
       queue: murano
       jobs:
         - murano-tempest-api
-    experimental:
-      jobs:
-        - murano-functional
 
 - job:
     name: murano-congress-devstack
@@ -96,7 +93,7 @@
         s-proxy: false
         tls-proxy: false
       devstack_localrc:
-        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/git.openstack.org/openstack/murano-tempest-plugin'"
+        TEMPEST_PLUGINS: "/opt/stack/murano-tempest-plugin"
       tempest_test_regex: application_catalog
       tox_envlist: all
 
@@ -112,17 +109,3 @@
       devstack_services:
         murano-cfapi: true
       tempest_test_regex: service_broker
-
-- job:
-    name: murano-functional
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/murano-dsvm-functional/run.yaml
-    post-run: playbooks/legacy/murano-dsvm-functional/post.yaml
-    timeout: 7800
-    required-projects:
-      - openstack-infra/devstack-gate
-      - openstack/heat
-      - openstack/murano
-      - openstack/murano-dashboard
-      - openstack/python-heatclient
-      - openstack/python-muranoclient
