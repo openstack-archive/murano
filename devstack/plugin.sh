@@ -418,9 +418,8 @@ function stop_murano() {
     if [ "$MURANO_USE_UWSGI" == "True" ]; then
         disable_apache_site murano-api
         restart_apache_server
-    else
-        stop_process murano-api
     fi
+    stop_process murano-api
     stop_process murano-engine
 }
 
