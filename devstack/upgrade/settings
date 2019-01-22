@@ -1,0 +1,11 @@
+register_project_for_upgrade murano
+register_db_to_save murano
+
+devstack_localrc base enable_plugin murano https://git.openstack.org/openstack/murano
+devstack_localrc target enable_plugin murano https://git.openstack.org/openstack/murano
+
+devstack_localrc base enable_service murano-api murano-engine
+devstack_localrc target enable_service murano-api murano-engine
+
+BASE_RUN_SMOKE=False
+TARGET_RUN_SMOKE=False
