@@ -118,9 +118,10 @@ def create_trust(trustee_token=None, trustee_project_id=None):
     return trust.id
 
 
-def delete_trust(trust):
-    user_client = _create_keystone_admin_client()
-    user_client.trusts.delete(trust)
+def delete_trust(session):
+    user_client = create_keystone_client(
+        token=session.token, project_id=session.project_id)
+    user_client.trusts.delete(session.trust_id)
 
 
 def _get_config_option(conf_section, option_name, default=None):

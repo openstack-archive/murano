@@ -323,7 +323,7 @@ class TaskExecutor(object):
     def _delete_trust(self):
         trust_id = self._session.trust_id
         if trust_id:
-            auth_utils.delete_trust(self._session.trust_id)
+            auth_utils.delete_trust(self._session)
             self._session.system_attributes['TrustId'] = None
             self._session.trust_id = None
 

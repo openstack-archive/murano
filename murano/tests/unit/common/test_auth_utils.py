@@ -238,16 +238,23 @@ class TestAuthUtils(base.MuranoTestCase):
             role_names=mock.sentinel.role_names,
             project=mock.sentinel.project_id)
 
-    @mock.patch.object(
-        auth_utils, '_create_keystone_admin_client', autospec=True)
-    def test_delete_trust(self, mock_create_ks_admin_client):
-        mock_admin_client = mock.Mock()
-        mock_create_ks_admin_client.return_value = mock_admin_client
+    @mock.patch.object(auth_utils, 'create_keystone_client', autospec=True)
+    def test_delete_trust(self, mock_ks_client):
+        mock_auth_ref = mock.Mock(trust_id=mock.sentinel.trust_id,
+                                  token=mock.sentinel.token,
+                                  project_id=mock.sentinel.project_id)
+        mock_user_session = mock.Mock(**{
+            'auth.get_access.return_value': mock_auth_ref
+        })
+        mock_user_client = mock.Mock(
+            session=mock_user_session)
 
-        auth_utils.delete_trust(mock.sentinel.trust)
+        mock_ks_client.return_value = mock_user_client
 
-        mock_admin_client.trusts.delete.assert_called_once_with(
-            mock.sentinel.trust)
+        auth_utils.delete_trust(mock_auth_ref)
+
+        mock_user_client.trusts.delete.assert_called_once_with(
+            mock_auth_ref.trust_id)
 
     def test_get_config_option(self):
         cfg.CONF.set_override('url', 'foourl', 'murano')
