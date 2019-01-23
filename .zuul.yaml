@@ -15,6 +15,7 @@
         - murano-rally-task
         - murano-tempest-api
         - murano-tempest-cfapi
+        - murano-grenade
     gate:
       queue: murano
       jobs:
@@ -109,3 +110,27 @@
       devstack_services:
         murano-cfapi: true
       tempest_test_regex: service_broker
+
+- job:
+    name: murano-grenade
+    parent: legacy-dsvm-base
+    timeout: 10800
+    voting: false
+    run: playbooks/legacy/grenade-devstack-murano/run.yaml
+    post-run: playbooks/legacy/grenade-devstack-murano/post.yaml
+    irrelevant-files:
+      - ^(test-|)requirements.txt$
+      - ^setup.cfg$
+      - ^doc/.*$
+      - ^.*\.rst$
+      - ^releasenotes/.*$
+      - ^murano/tests/.*$
+    required-projects:
+      - openstack-dev/grenade
+      - openstack-infra/devstack-gate
+      - openstack/heat
+      - openstack/murano
+      - openstack/murano-dashboard
+      - openstack/python-heatclient
+      - openstack/python-muranoclient
+      - openstack/murano-tempest-plugin
