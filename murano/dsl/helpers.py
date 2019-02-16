@@ -737,10 +737,16 @@ def walk_gc(obj, towards, handler):
 
         visited.add(id(item))
         if towards:
-            queue.extend(
-                [(t, trace + [item]) for t in gc.get_referrers(item)]
-            )
+            try:
+                queue.extend(
+                    [(t, trace + [item]) for t in gc.get_referrers(item)]
+                )
+            except StopIteration:
+                return
         else:
-            queue.extend(
-                [(t, [item] + trace) for t in gc.get_referents(item)]
-            )
+            try:
+                queue.extend(
+                    [(t, [item] + trace) for t in gc.get_referents(item)]
+                )
+            except StopIteration:
+                return
