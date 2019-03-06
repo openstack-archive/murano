@@ -29,7 +29,7 @@
           set -x
           cat << 'EOF' >>"/tmp/dg-local.conf"
           [[local|localrc]]
-          TEMPEST_PLUGINS='/opt/stack/new/murano-tempest-plugin'
+          TEMPEST_PLUGINS='/opt/stack/new/murano-tempest-plugin /opt/stack/new/heat-tempest-plugin'
           enable_plugin heat git://git.openstack.org/openstack/heat
           EOF
         executable: /bin/bash
@@ -49,10 +49,12 @@
           export PROJECTS="openstack/murano $PROJECTS"
           export PROJECTS="openstack/murano-dashboard $PROJECTS"
           export PROJECTS="openstack/python-muranoclient $PROJECTS"
+          export PROJECTS="openstack/heat-tempest-plugin $PROJECTS"
           export PROJECTS="openstack/murano-tempest-plugin $PROJECTS"
           export BRANCH_OVERRIDE=default
 
           export GRENADE_PLUGINRC="enable_grenade_plugin murano https://git.openstack.org/openstack/murano"
+          export GRENADE_PLUGINRC+=$'\n'"enable_grenade_plugin heat https://git.openstack.org/openstack/heat"
           export DEVSTACK_GATE_GRENADE=pullup
 
 

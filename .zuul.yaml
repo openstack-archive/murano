@@ -134,4 +134,5 @@
       - openstack/murano-dashboard
       - openstack/python-heatclient
       - openstack/python-muranoclient
+      - openstack/heat-tempest-plugin
       - openstack/murano-tempest-plugin
