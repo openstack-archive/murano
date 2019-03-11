@@ -1183,6 +1183,55 @@ This is a fake zip archive
             res = req.get_response(self.api)
             self.assertEqual(200, res.status_code)
 
+    def test_upload_pkg_with_tag(self):
+        """Check upload package with tags successfully"""
+
+        self._set_policy_rules({'upload_package': '@'})
+        self.expect_policy_check('upload_package')
+        file_obj_str = cStringIO("This is some dummy data")
+        file_obj = mock.MagicMock(cgi.FieldStorage)
+        file_obj.file = file_obj_str
+        package_from_dir, _ = self._test_package()
+
+        body_fmt = '''\
+
+--BOUNDARY
+Content-Disposition: form-data; name="__metadata__"
+
+{0}
+--BOUNDARY
+Content-Disposition: form-data; name="ziparchive"; filename="file.zip"
+
+This is a fake zip archive
+--BOUNDARY--'''
+
+        def format_body(content):
+            content = jsonutils.dumps(content)
+            body = body_fmt.format(content)
+            if six.PY3:
+                body = body.encode('utf-8')
+            return body
+
+        with mock.patch('murano.packages.load_utils.load_from_file') as lff:
+            ctxmgr = mock.Mock()
+            ctxmgr.__enter__ = mock.Mock(return_value=package_from_dir)
+            ctxmgr.__exit__ = mock.Mock(return_value=False)
+            lff.return_value = ctxmgr
+
+            # Uploading a package with foo_tag
+            req = self._post(
+                '/catalog/packages',
+                format_body({'tags': ['foo_tag']}),
+                content_type='multipart/form-data; ; boundary=BOUNDARY',
+            )
+            res = req.get_response(self.api)
+
+            processed_result = jsonutils.loads(res.body)
+            # check user set foo_tag in result
+            self.assertIn('foo_tag', processed_result["tags"])
+            # check tag Linux from package in result
+            self.assertIn('Linux', processed_result["tags"])
+
     def test_add_category(self):
         """Check that category added successfully"""
 

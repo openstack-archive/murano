@@ -262,7 +262,11 @@ class Controller(object):
                 # extend dictionary for update db
                 for k, v in PKG_PARAMS_MAP.items():
                     if hasattr(pkg_to_upload, k):
-                        package_meta[v] = getattr(pkg_to_upload, k)
+                        if k == "tags" and package_meta.get(k):
+                            package_meta[v] = list(set(
+                                package_meta[v] + getattr(pkg_to_upload, k)))
+                        else:
+                            package_meta[v] = getattr(pkg_to_upload, k)
                 if len(package_meta['name']) > 80:
                     msg = _('Package name should be 80 characters maximum')
                     LOG.error(msg)
