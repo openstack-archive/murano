@@ -22,7 +22,7 @@ with murano, proceed with the following steps:
 
       > cat local.conf
       [[local|localrc]]
-      enable_plugin murano git://git.openstack.org/openstack/murano
+      enable_plugin murano https://git.openstack.org/openstack/murano
 
 #. If you want to enable Murano Cloud Foundry Broker API service, add the
    following line to ``local.conf``:
