@@ -107,7 +107,7 @@ To download and run the tests:
 
    .. code-block:: console
 
-      git clone git://git.openstack.org/openstack/murano-dashboard
+      git clone https://git.openstack.org/openstack/murano-dashboard
 
 #. Change the default settings:
 
