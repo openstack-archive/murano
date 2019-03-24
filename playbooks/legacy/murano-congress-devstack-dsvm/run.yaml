@@ -17,7 +17,7 @@
               dest: devstack-gate
           EOF
           /usr/zuul-env/bin/zuul-cloner -m clonemap.yaml --cache-dir /opt/git \
-              git://git.openstack.org \
+              https://git.openstack.org \
               openstack-infra/devstack-gate
         executable: /bin/bash
         chdir: '{{ ansible_user_dir }}/workspace'
@@ -29,11 +29,11 @@
           set -x
           cat << 'EOF' >>"/tmp/dg-local.conf"
           [[local|localrc]]
-          enable_plugin heat git://git.openstack.org/openstack/heat
-          enable_plugin mistral git://git.openstack.org/openstack/mistral
-          enable_plugin congress git://git.openstack.org/openstack/congress
+          enable_plugin heat https://git.openstack.org/openstack/heat
+          enable_plugin mistral https://git.openstack.org/openstack/mistral
+          enable_plugin congress https://git.openstack.org/openstack/congress
           MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT=True
-          enable_plugin murano git://git.openstack.org/openstack/murano
+          enable_plugin murano https://git.openstack.org/openstack/murano
 
           EOF
         executable: /bin/bash

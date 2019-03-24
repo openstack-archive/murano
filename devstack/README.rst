@@ -11,7 +11,7 @@ Enabling in Devstack
 
      > cat local.conf
      [[local|localrc]]
-     enable_plugin murano git://git.openstack.org/openstack/murano
+     enable_plugin murano https://git.openstack.org/openstack/murano
 
      #Enable heat plugin
      enable_plugin heat https://git.openstack.org/openstack/heat
