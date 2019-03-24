@@ -21,7 +21,7 @@ Install the API service and Engine
     .. code-block:: console
 
         cd ~/murano
-        git clone git://git.openstack.org/openstack/murano
+        git clone https://git.openstack.org/openstack/murano
     ..
 
 #.  Set up the murano config file
@@ -163,14 +163,14 @@ Dashboard.
     .. code-block:: console
 
        $ cd ~/murano
-       $ git clone git://git.openstack.org/openstack/murano-dashboard
+       $ git clone https://git.openstack.org/openstack/murano-dashboard
     ..
 
 #.  Clone the ``horizon`` repository
 
     .. code-block:: console
 
-       $ git clone git://git.openstack.org/openstack/horizon
+       $ git clone https://git.openstack.org/openstack/horizon
     ..
 
 #.  Create a virtual environment and install ``muranodashboard`` as an editable
