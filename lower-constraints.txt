@@ -91,7 +91,7 @@ pika==0.10.0
 ply==3.11
 prettytable==0.7.2
 psutil==3.2.2
-psycopg2==2.6.2
+psycopg2==2.7.0
 pycadf==2.7.0
 pycparser==2.18
 pyflakes==0.8.1
