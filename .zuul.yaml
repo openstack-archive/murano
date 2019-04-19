@@ -48,8 +48,8 @@
       devstack_localrc:
         MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: true
       devstack_plugins:
-        congress: https://git.openstack.org/openstack/congress
-        mistral: https://git.openstack.org/openstack/mistral
+        congress: https://opendev.org/openstack/congress
+        mistral: https://opendev.org/openstack/mistral
       tempest_test_regex: functional
 
 - job:
@@ -58,7 +58,7 @@
     timeout: 7800
     vars:
       devstack_plugins:
-        rally-openstack: https://git.openstack.org/openstack/rally-openstack
+        rally-openstack: https://opendev.org/openstack/rally-openstack
       rally_task: rally-jobs/task-murano.yaml
     required-projects:
       - openstack/rally-openstack
@@ -84,8 +84,8 @@
       - openstack/murano-tempest-plugin
     vars:
       devstack_plugins:
-        murano: https://git.openstack.org/openstack/murano
-        heat: https://git.openstack.org/openstack/heat
+        murano: https://opendev.org/openstack/murano
+        heat: https://opendev.org/openstack/heat
       devstack_services:
         tempest: true
         s-account: false
@@ -126,8 +126,8 @@
       - ^releasenotes/.*$
       - ^murano/tests/.*$
     required-projects:
-      - openstack-dev/grenade
-      - openstack-infra/devstack-gate
+      - openstack/grenade
+      - openstack/devstack-gate
       - openstack/heat
       - openstack/murano
       - openstack/murano-dashboard
