@@ -54,8 +54,8 @@
       devstack_localrc:
         MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: true
       devstack_plugins:
-        congress: https://git.openstack.org/openstack/congress
-        mistral: https://git.openstack.org/openstack/mistral
+        congress: https://opendev.org/openstack/congress
+        mistral: https://opendev.org/openstack/mistral
       tempest_test_regex: functional
 
 - job:
@@ -64,7 +64,7 @@
     timeout: 7800
     vars:
       devstack_plugins:
-        rally-openstack: https://git.openstack.org/openstack/rally-openstack
+        rally-openstack: https://opendev.org/openstack/rally-openstack
       rally_task: rally-jobs/task-murano.yaml
     required-projects:
       - openstack/rally-openstack
@@ -90,8 +90,8 @@
       - openstack/murano-tempest-plugin
     vars:
       devstack_plugins:
-        murano: https://git.openstack.org/openstack/murano
-        heat: https://git.openstack.org/openstack/heat
+        murano: https://opendev.org/openstack/murano
+        heat: https://opendev.org/openstack/heat
       devstack_services:
         tempest: true
         s-account: false
@@ -100,7 +100,7 @@
         s-proxy: false
         tls-proxy: false
       devstack_localrc:
-        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/git.openstack.org/openstack/murano-tempest-plugin'"
+        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/opendev.org/openstack/murano-tempest-plugin'"
       tempest_test_regex: application_catalog
       tox_envlist: all
 
@@ -124,7 +124,7 @@
     post-run: playbooks/legacy/murano-dsvm-functional/post.yaml
     timeout: 7800
     required-projects:
-      - openstack-infra/devstack-gate
+      - openstack/devstack-gate
       - openstack/heat
       - openstack/murano
       - openstack/murano-dashboard
