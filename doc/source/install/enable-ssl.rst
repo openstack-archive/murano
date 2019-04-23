@@ -107,7 +107,7 @@ Rabbit MQ. Just set the *ssl* parameter to True to enable ssl.
 
 If you want to configure Murano Agent in a different way, change the default
 template. It can be found in the Murano Core Library, located at
-*http://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Resources/Agent-v1.template*.
+*https://opendev.org/openstack/murano/src/branch/master/meta/io.murano/Resources/Agent-v1.template*.
 Take a look at the appSettings section:
 
 ::

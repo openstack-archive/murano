@@ -822,7 +822,7 @@ Create new application
 ----------------------
 
 Create a new application and add it to the murano environment.
-Result JSON is calculated in Murano dashboard, which is based on `UI definition <https://git.openstack.org/cgit/openstack/murano/tree/doc/source/appdev-guide/muranopackages/dynamic_ui.rst>`_.
+Result JSON is calculated in Murano dashboard, which is based on `UI definition <https://opendev.org/openstack/murano/src/branch/master/doc/source/admin/appdev-guide/muranopackages/dynamic_ui.rst>`_.
 
 *Request*
 

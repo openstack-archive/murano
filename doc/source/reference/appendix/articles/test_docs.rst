@@ -40,7 +40,7 @@ UI tests
 The Murano project has a web user interface and all possible user scenarios
 should be tested.
 All UI tests are located at
-``https://git.openstack.org/cgit/openstack/murano-dashboard/tree/muranodashboard/tests/functional``.
+``https://opendev.org/openstack/murano-dashboard/src/branch/master/muranodashboard/tests/functional``.
 
 Automated tests for the Murano web UI are written in Python using the special
 Selenium library. This library is used to automate web browser interactions
@@ -107,7 +107,7 @@ To download and run the tests:
 
    .. code-block:: console
 
-      git clone https://git.openstack.org/openstack/murano-dashboard
+      git clone https://opendev.org/openstack/murano-dashboard
 
 #. Change the default settings:
 
@@ -202,7 +202,7 @@ Tempest tests
 
 All Murano services have tempest-based automated tests, which verify
 API interfaces and deployment scenarios.
-Tempest tests for Murano are located at ``https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional``.
+Tempest tests for Murano are located at ``https://opendev.org/openstack/murano/src/branch/master/murano/tests/functional``.
 
 The following Python files contain basic test suites for different Murano components.
 
@@ -210,7 +210,7 @@ API tests
 ---------
 
 Murano API tests are run on the devstack gate located at
-``https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional/api``.
+``https://opendev.org/openstack/murano-tempest-plugin/src/branch/master/murano_tempest_tests/tests/api``.
 
 * ``test_murano_envs.py`` contains test suite with actions on murano
   environments (create, delete, get, and others).
@@ -224,7 +224,7 @@ Murano API tests are run on the devstack gate located at
 Engine tests
 ------------
 
-Murano Engine Tests are run on murano-ci at ``https://git.openstack.org/cgit/openstack/murano/tree/murano/tests/functional/engine``:
+Murano Engine Tests are run on murano-ci at ``https://opendev.org/openstack/murano-tempest-plugin/src/branch/master/murano_tempest_tests/tests/functional``:
 
 * ``base.py`` contains base test class and tests with actions on deploy
   Murano services such as Telnet and Apache.

@@ -126,7 +126,7 @@ like this:
 
 However in most cases the values in object model should come from input fields
 rather than being static as in example above. To achieve this, object model
-values can also be of a `YAQL <https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`
+values can also be of a `YAQL <https://opendev.org/openstack/yaql/src/branch/master/README.rst>`
 expression type. With expressions language it becomes possible to retrieve
 input control values, do some calculations and data transformations (queries).
 Any YAML value that is not enclosed in quote marks and conforms to the YAQL
@@ -399,7 +399,7 @@ field attributes. The most common attributes are the following:
   that set up what message to show to the user in case of errors.
 * **validators** is a list of dictionaries, each dictionary should at least
   have *expr* key, under that key either some
-  `YAQL <https://git.openstack.org/cgit/openstack/yaql/tree/README.rst>`_
+  `YAQL <https://opendev.org/openstack/yaql/src/branch/master/README.rst>`_
   expression is stored, either one-element dictionary with *regexpValidator*
   key (and some regexp string as value).
   Another possible key of a validator dictionary is *message*, and although

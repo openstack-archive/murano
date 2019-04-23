@@ -96,7 +96,7 @@ set ``ssl = True`` in the  ``[rabbitmq]`` section of
    insecure = False
 
 If you want to configure the murano agent differently, you need to change
-the `default template <http://git.openstack.org/cgit/openstack/murano/tree/meta/io.murano/Resources/Agent-v1.template>`_ located in the murano core library.
+the `default template <https://opendev.org/openstack/murano/src/branch/master/meta/io.murano/Resources/Agent-v1.template>`_ located in the murano core library.
 After you finish with the template modification, verify that you zip and
 re-upload the murano core library.
 

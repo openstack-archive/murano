@@ -13,7 +13,7 @@ with murano, proceed with the following steps:
 
    .. code-block:: console
 
-      git clone https://git.openstack.org/openstack-dev/devstack
+      git clone https://opendev.org/openstack/devstack
       cd devstack
 
 #. Edit ``local.conf`` to enable murano DevStack plug-in:
@@ -22,7 +22,7 @@ with murano, proceed with the following steps:
 
       > cat local.conf
       [[local|localrc]]
-      enable_plugin murano https://git.openstack.org/openstack/murano
+      enable_plugin murano https://opendev.org/openstack/murano
 
 #. If you want to enable Murano Cloud Foundry Broker API service, add the
    following line to ``local.conf``:
@@ -64,4 +64,4 @@ with murano, proceed with the following steps:
 
 .. Links
 .. _DevStack: https://docs.openstack.org/devstack/latest/
-.. _murano/devstack: https://git.openstack.org/cgit/openstack/murano/tree/devstack
+.. _murano/devstack: https://opendev.org/openstack/murano/src/branch/master/devstack

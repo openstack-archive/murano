@@ -21,7 +21,7 @@ This can be done via the dashboard or via CLI:
     .. code-block:: console
 
         cd ~/murano
-        git clone https://git.openstack.org/openstack/murano-apps
+        git clone https://opendev.org/openstack/murano-apps
     ..
 
 2.  Import every package you need from this repository, using the command
