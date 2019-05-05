@@ -249,7 +249,7 @@ class Controller(object):
                 env_template_id, request.context.tenant, body['name'],
                 is_public)
         except db_exc.DBDuplicateEntry:
-            msg = _('Environment with specified name already exists')
+            msg = _('Env template with specified name already exists')
             LOG.error(msg)
             raise exc.HTTPConflict(explanation=msg)
 
