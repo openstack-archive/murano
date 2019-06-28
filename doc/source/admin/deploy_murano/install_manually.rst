@@ -64,7 +64,7 @@ Install the API service and engine
     .. code-block:: console
 
         cd ~/murano
-        git clone https://git.openstack.org/openstack/murano
+        git clone https://opendev.org/openstack/murano
 
 #.  Create the configuration file. Murano has a common configuration
     file for API and engine services.
@@ -244,13 +244,13 @@ This section describes how to install and run the murano dashboard.
     .. code-block:: console
 
         cd ~/murano
-        git clone https://git.openstack.org/openstack/murano-dashboard
+        git clone https://opendev.org/openstack/murano-dashboard
 
 #.  Clone the ``horizon`` repository:
 
     .. code-block:: console
 
-       git clone https://git.openstack.org/openstack/horizon
+       git clone https://opendev.org/openstack/horizon
 
 #.  Create a virtual environment and install ``muranodashboard``
     as an editable module:
@@ -368,7 +368,7 @@ To import applications using CLI, complete the following tasks:
    .. code-block:: console
 
       cd ~/murano
-      git clone https://git.openstack.org/openstack/murano-apps
+      git clone https://opendev.org/openstack/murano-apps
 
 #. Import every package you need from this repository by running
    the following command:

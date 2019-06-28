@@ -17,7 +17,7 @@ MuranoPL unit tests.
 All application test cases should be:
 
 * Specified in the MuranoPL class, inherited from
-  `io.murano.test.testFixture <https://git.openstack.org/cgit/openstack/murano/tree/murano/engine/system/test_fixture.py>`_
+  `io.murano.test.testFixture <https://opendev.org/openstack/murano/src/branch/master/murano/engine/system/test_fixture.py>`_
 
   This class supports loading object model with the corresponding `load(json)`
   function. Also it contains a minimal set of assertions such as
@@ -216,5 +216,5 @@ only once as needed. And assert from the second test case checks for a variable
 value at the end of the application deployment.
 
 Test cases examples can be found in :file:`TomcatTest.yaml` class of the
-Apache Tomcat application located at `murano-apps repository <https://git.openstack.org/cgit/openstack/murano-apps/tree/Tomcat/package/Classes/TomcatTest.yaml>`_.
+Apache Tomcat application located at `murano-apps repository <https://opendev.org/openstack/murano-apps/src/branch/master/Tomcat/package/Classes/TomcatTest.yaml>`_.
 You can run test cases with the commands provided above.

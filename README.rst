@@ -28,7 +28,7 @@ Project Resources
 * Additional resources are linked from the project
   `Wiki <https://wiki.openstack.org/wiki/Murano>`_ page
 
-* `Python client <https://git.openstack.org/cgit/openstack/python-muranoclient>`_
+* `Python client <https://opendev.org/openstack/python-muranoclient>`_
 
 License
 -------

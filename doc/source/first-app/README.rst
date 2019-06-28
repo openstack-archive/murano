@@ -2,7 +2,7 @@ This directory contains the "My first Murano App getting started  guide"
 tutorial.
 
 The tutorials work with an application that can be found in the
-`openstack/murano-apps <http://git.openstack.org/cgit/openstack/murano-apps/tree/Plone/package>`_
+`openstack/murano-apps <https://opendev.org/openstack/murano-apps/src/branch/master/Plone/package>`_
 repository.
 
 Prerequisites
