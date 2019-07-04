@@ -293,10 +293,10 @@ for group in ('heat', 'mistral', 'neutron', 'glance', 'glare',
         CONF,
         group=group,
         deprecated_opts={
-            'cafile':   [cfg.DeprecatedOpt('cacert', group),
-                         cfg.DeprecatedOpt('ca_file', group)],
+            'cafile': [cfg.DeprecatedOpt('cacert', group),
+                       cfg.DeprecatedOpt('ca_file', group)],
             'certfile': [cfg.DeprecatedOpt('cert_file', group)],
-            'keyfile':  [cfg.DeprecatedOpt('key_file', group)]
+            'keyfile': [cfg.DeprecatedOpt('key_file', group)]
 
         })
 

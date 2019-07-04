@@ -110,7 +110,7 @@ class MqClient(object):
         data = jsonutils.dumps(message.body)
         headers = None
         if signing_func:
-            headers = {'signature':  signing_func(data)}
+            headers = {'signature': signing_func(data)}
 
         producer.publish(
             exchange=str(exchange),

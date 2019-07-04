@@ -54,7 +54,8 @@ class EnvTemplateServices(object):
 
     @staticmethod
     def create(env_template_params, tenant_id):
-        """Creates environment-template with specified params, in particular - name.
+        """Creates environment-template with specified params,
+           in particular - name.
 
            :param env_template_params: Dict, e.g. {'name': 'temp-name'}
            :param tenant_id: Tenant Id
@@ -183,7 +184,8 @@ class EnvTemplateServices(object):
 
     @staticmethod
     def clone(env_template_id, tenant_id, env_template_name, is_public):
-        """Clones environment-template with specified params, in particular - name.
+        """Clones environment-template with specified params,
+           in particular - name.
 
            :param env_template_params: Dict, e.g. {'name': 'temp-name'}
            :param tenant_id: Tenant Id
