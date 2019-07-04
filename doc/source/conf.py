@@ -13,9 +13,7 @@
 #    under the License.
 
 import os
-import subprocess
 import sys
-import warnings
 
 on_rtd = os.environ.get('READTHEDOCS', None) == 'True'
 
@@ -56,14 +54,10 @@ source_suffix = '.rst'
 # The master toctree document.
 master_doc = 'index'
 
-# General information about the project.
-project = 'Murano'
-
 # openstackdocstheme options
 repository_name = 'openstack/murano'
 bug_project = 'murano'
 bug_tag = ''
-html_last_updated_fmt = '%Y-%m-%d %H:%M'
 
 config_generator_config_file = '../../etc/oslo-config-generator/murano.conf'
 sample_config_basename = '_static/murano'
@@ -72,13 +66,6 @@ policy_generator_config_file = [
     ('../../etc/oslo-policy-generator/murano-policy-generator.conf',
      '_static/murano'),
 ]
-
-# The version info for the project you're documenting, acts as replacement for
-# |version| and |release|, also used in various other places throughout the
-# built documents.
-from murano.version import version_info
-release = version_info.release_string()
-version = version_info.version_string()
 
 # Set the default Pygments syntax
 highlight_language = 'python'
