@@ -103,7 +103,7 @@ def format_frame(frame, prefix=''):
 
 
 def create_stack_trace(context, include_native_frames=True):
-        stacktrace = yaql_integration.call_func(
-            context, 'new', 'io.murano.StackTrace',
-            includeNativeFrames=include_native_frames)
-        return dsl.MuranoObjectInterface.create(stacktrace)
+    stacktrace = yaql_integration.call_func(
+        context, 'new', 'io.murano.StackTrace',
+        includeNativeFrames=include_native_frames)
+    return dsl.MuranoObjectInterface.create(stacktrace)

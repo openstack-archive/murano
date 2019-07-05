@@ -217,7 +217,7 @@ def type_to_type_ref(murano_type):
 @specs.parameter('provider', meta.MetaProvider)
 @specs.name('#property#meta')
 def get_meta(context, provider):
-        return provider.get_meta(context)
+    return provider.get_meta(context)
 
 
 @specs.yaql_property(dsl_types.MuranoMetaClass)
@@ -250,6 +250,7 @@ def register(context):
     )
     for f in funcs:
         context.register_function(f)
+
 
 yaqlization.yaqlize(semantic_version.Version, whitelist=[
     'major', 'minor', 'patch', 'prerelease', 'build'

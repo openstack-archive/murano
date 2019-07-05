@@ -228,7 +228,7 @@ class MuranoTestRunner(object):
             num_tests = 0
             for pkg_class, test_cases in run_set.items():
                 for m in test_cases:
-                    max_length = max(max_length, len(pkg_class)+len(m)+1)
+                    max_length = max(max_length, len(pkg_class) + len(m) + 1)
                 num_tests += len(test_cases)
             max_length += 3
 
@@ -300,7 +300,7 @@ class MuranoTestRunner(object):
                          '{3} failed'.format(run_count,
                                              timeutils.delta_seconds(
                                                  started, completed),
-                                             run_count-error_count,
+                                             run_count - error_count,
                                              error_count))
         return exit_code
 

@@ -255,7 +255,7 @@ class CoreServices(object):
             if service["?"]["id"]:
                 if service["?"]["id"] == id:
                     break
-                count+1
+                count + 1
 
         utils.TraverseHelper.update("services/{0}".format(count),
                                     data, temp_description)

@@ -139,9 +139,9 @@ class Controller(object):
                 LOG.exception(msg)
                 raise exc.HTTPBadRequest(msg)
         except Exception:
-                msg = _('EnvTemplate body is incorrect')
-                LOG.exception(msg)
-                raise exc.HTTPBadRequest(msg)
+            msg = _('EnvTemplate body is incorrect')
+            LOG.exception(msg)
+            raise exc.HTTPBadRequest(msg)
 
         template = env_temps.EnvTemplateServices.update(env_template_id, body)
         return template.to_dict()

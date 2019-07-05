@@ -71,6 +71,7 @@ def _create_engine(runtime_version):
 def _finalize(obj, context):
     return helpers.evaluate(obj, context)
 
+
 CONVENTION = conventions.CamelCaseConvention()
 ENGINE_10 = _create_engine(constants.RUNTIME_VERSION_1_0)
 ENGINE_12 = _create_engine(constants.RUNTIME_VERSION_1_2)

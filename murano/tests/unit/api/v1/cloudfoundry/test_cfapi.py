@@ -159,13 +159,13 @@ class TestController(base.MuranoTestCase):
     def test_package_to_service(self):
         mock_package = mock.Mock(
             spec_set=models.Package, id='foo_package_id',
-            description='a'*257, tags=[mock.sentinel.package_tag])
+            description='a' * 257, tags=[mock.sentinel.package_tag])
         mock_package.configure_mock(name=mock.sentinel.package_name)
 
         expected_service = {
             'id': 'foo_package_id',
             'name': mock.sentinel.package_name,
-            'description': 'a'*253 + ' ...',
+            'description': 'a' * 253 + ' ...',
             'bindable': True,
             'tags': [mock.sentinel.package_tag],
             'plans': [{
