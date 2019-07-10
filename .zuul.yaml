@@ -4,8 +4,7 @@
       - openstack-cover-jobs
       - openstack-lower-constraints-jobs
       - openstack-python-jobs
-      - openstack-python36-jobs
-      - openstack-python37-jobs
+      - openstack-python3-train-jobs
       - periodic-stable-jobs
       - publish-openstack-docs-pti
       - release-notes-jobs-python3
@@ -26,7 +25,7 @@
     parent: murano-tempest-base
     voting: false
     timeout: 4200
-    irrelevant-files:
+    irrelevant-files: &murano-irrelevant-files
       - ^(test-|)requirements.txt$
       - ^setup.cfg$
       - ^doc/.*$
@@ -55,6 +54,7 @@
 - job:
     name: murano-rally-task
     parent: rally-task-murano
+    irrelevant-files: *murano-irrelevant-files
     timeout: 7800
     vars:
       devstack_plugins:
@@ -66,13 +66,7 @@
 - job:
     name: murano-tempest-base
     parent: devstack-tempest
-    irrelevant-files:
-      - ^(test-|)requirements.txt$
-      - ^setup.cfg$
-      - ^doc/.*$
-      - ^.*\.rst$
-      - ^releasenotes/.*$
-      - ^murano/tests/.*$
+    irrelevant-files: *murano-irrelevant-files
     timeout: 7800
     required-projects:
       - openstack/heat
@@ -118,13 +112,7 @@
     voting: false
     run: playbooks/legacy/grenade-devstack-murano/run.yaml
     post-run: playbooks/legacy/grenade-devstack-murano/post.yaml
-    irrelevant-files:
-      - ^(test-|)requirements.txt$
-      - ^setup.cfg$
-      - ^doc/.*$
-      - ^.*\.rst$
-      - ^releasenotes/.*$
-      - ^murano/tests/.*$
+    irrelevant-files: *murano-irrelevant-files
     required-projects:
       - openstack/grenade
       - openstack/devstack-gate

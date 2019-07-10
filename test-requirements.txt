@@ -1,7 +1,7 @@
 # The order of packages is significant, because pip processes them in the order
 # of appearance. Changing the order has an impact on the overall integration
 # process, which may cause wedges in the gate later.
-hacking!=0.13.0,<0.14,>=0.12.0 # Apache-2.0
+hacking>=1.1.0,<1.2.0 # Apache-2.0
 
 coverage!=4.4,>=4.0 # Apache-2.0
 fixtures>=3.0.0 # Apache-2.0/BSD
@@ -14,10 +14,11 @@ testresources>=2.0.0 # Apache-2.0/BSD
 testscenarios>=0.4 # Apache-2.0/BSD
 unittest2>=1.1.0 # BSD
 pylint==1.4.5 # GPLv2
+pycodestyle>=2.0.0 # MIT License
 requests>=2.14.2 # Apache-2.0
 stestr>=1.0.0 # Apache-2.0
 murano-pkg-check>=0.3.0 # Apache-2.0
-bandit>=1.1.0 # Apache-2.0
+bandit>=1.1.0,!=1.6.0 # Apache-2.0
 
 # Some of the tests use real MySQL and Postgres databases
 PyMySQL>=0.7.6 # MIT License

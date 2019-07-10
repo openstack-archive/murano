@@ -25,8 +25,8 @@ Clone the components required to build an image to that directory:
 .. code-block:: console
 
     cd $GITDIR
-    git clone https://git.openstack.org/openstack/murano
-    git clone https://git.openstack.org/openstack/murano-agent
+    git clone https://opendev.org/openstack/murano
+    git clone https://opendev.org/openstack/murano-agent
 
 
 Install diskimage-builder

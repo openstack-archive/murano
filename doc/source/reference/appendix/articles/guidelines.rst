@@ -79,5 +79,5 @@ Run the following command to build docs locally.
 .. _PEP 257: http://www.python.org/dev/peps/pep-0257/
 .. _Tox: http://tox.testrun.org/
 .. _Sphinx: http://sphinx.pocoo.org/markup/index.html
-.. _murano-specs: http://git.openstack.org/cgit/openstack/murano-specs
+.. _murano-specs: http://opendev.org/openstack/murano-specs
 .. _Launchpad: http://blueprints.launchpad.net/murano

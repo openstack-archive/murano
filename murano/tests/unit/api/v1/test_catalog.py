@@ -751,7 +751,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
                                  {'package_id': saved_package.id})
 
         data = []
-        data.append({'op': 'replace', 'path': ['name'], 'value': 'a'*81})
+        data.append({'op': 'replace', 'path': ['name'], 'value': 'a' * 81})
         req = self._patch(url, jsonutils.dump_as_bytes(data))
         self.assertRaises(exc.HTTPBadRequest, self.controller.update,
                           req, data, saved_package.id)
@@ -926,7 +926,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         mock_pkg_params_map.return_value = {}
         mock_request = mock.MagicMock(context=mock.MagicMock(
             tenant=self.tenant))
-        test_package_meta = {'name': 'a'*81}
+        test_package_meta = {'name': 'a' * 81}
         with tempfile.NamedTemporaryFile(delete=True) as temp_file:
             temp_file.write(b"Random test content\n")
             temp_file.seek(0)

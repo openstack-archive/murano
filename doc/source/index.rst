@@ -23,10 +23,10 @@ Murano project consists of several source code repositories:
 
 .. Links
 
-.. _murano: https://git.openstack.org/cgit/openstack/murano/
-.. _murano-agent: https://git.openstack.org/cgit/openstack/murano-agent/
-.. _murano-dashboard: https://git.openstack.org/cgit/openstack/murano-dashboard/
-.. _python-muranoclient: https://git.openstack.org/cgit/openstack/python-muranoclient/
+.. _murano: https://opendev.org/openstack/murano/
+.. _murano-agent: https://opendev.org/openstack/murano-agent/
+.. _murano-dashboard: https://opendev.org/openstack/murano-dashboard/
+.. _python-muranoclient: https://opendev.org/openstack/python-muranoclient/
 
 
 Introduction to Murano

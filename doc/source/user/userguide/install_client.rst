@@ -24,7 +24,7 @@ command:
 
    $ murano --version
 
-To check the latest version, see `Client library for Murano API <https://git.openstack.org/cgit/openstack/python-muranoclient>`_.
+To check the latest version, see `Client library for Murano API <https://opendev.org/openstack/python-muranoclient>`_.
 
 
 Upgrade or remove the client
@@ -84,7 +84,7 @@ Bash completion
 ---------------
 
 To get the latest bash completion script, download
-`murano.bash_completion <https://git.openstack.org/cgit/openstack/python-muranoclient/plain/tools/murano.bash_completion>`_
+`murano.bash_completion <https://opendev.org/openstack/python-muranoclient/raw/branch/master/tools/murano.bash_completion>`_
 from the source repository and add it to your completion scripts.
 
 If you are not aware of the completion scripts location, perform the following
@@ -100,7 +100,7 @@ steps:
 
    .. code-block:: console
 
-      $ curl https://git.openstack.org/cgit/openstack/python-muranoclient/plain/tools/murano.bash_completion > ~/.bash_completion/murano.sh
+      $ curl https://opendev.org/openstack/python-muranoclient/raw/branch/master/tools/murano.bash_completion > ~/.bash_completion/murano.sh
 
 #. Add the following code to the ``~/.profile`` file:
 

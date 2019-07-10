@@ -137,21 +137,21 @@ class Controller(object):
     """WSGI controller for application catalog resource in Murano v1 API."""
 
     def _validate_limit(self, value):
-            if value is None:
-                return
-            try:
-                value = int(value)
-            except ValueError:
-                msg = _("Limit param must be an integer")
-                LOG.error(msg)
-                raise exc.HTTPBadRequest(explanation=msg)
+        if value is None:
+            return
+        try:
+            value = int(value)
+        except ValueError:
+            msg = _("Limit param must be an integer")
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
 
-            if value <= 0:
-                msg = _("Limit param must be positive")
-                LOG.error(msg)
-                raise exc.HTTPBadRequest(explanation=msg)
+        if value <= 0:
+            msg = _("Limit param must be positive")
+            LOG.error(msg)
+            raise exc.HTTPBadRequest(explanation=msg)
 
-            return value
+        return value
 
     def update(self, req, body, package_id):
         """List of allowed changes

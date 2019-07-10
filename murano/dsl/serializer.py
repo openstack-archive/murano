@@ -48,7 +48,7 @@ def _serialize_object(root_object, designer_attributes, allow_refs,
     obj = root_object
     if isinstance(obj, dsl.MuranoObjectInterface):
         obj = obj.object
-    parent = obj.owner if isinstance(obj,  dsl_types.MuranoObject) else None
+    parent = obj.owner if isinstance(obj, dsl_types.MuranoObject) else None
     while True:
         obj, need_another_pass = _pass12_serialize(
             obj, parent, serialized_objects, designer_attributes, executor,
@@ -255,8 +255,8 @@ def collect_objects(root_object):
                 for t in rec(value):
                     yield t
         elif isinstance(obj, dsl_types.MuranoObjectInterface):
-                for t in rec(obj.object):
-                    yield t
+            for t in rec(obj.object):
+                yield t
         elif isinstance(obj, dsl_types.MuranoObject) and obj not in visited:
             visited.add(obj)
             yield obj

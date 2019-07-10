@@ -56,6 +56,6 @@ Example
 
 There is an example application available in the murano repository_.
 
-.. _Castellan: https://github.com/openstack/castellan
-.. _Barbican: https://github.com/openstack/barbican
-.. _repository: https://git.openstack.org/cgit/openstack/murano/tree/contrib/packages/EncryptionDemo
+.. _Castellan: https://opendev.org/openstack/castellan
+.. _Barbican: https://opendev.org/openstack/barbican
+.. _repository: https://opendev.org/openstack/murano/src/branch/master/contrib/packages/EncryptionDemo

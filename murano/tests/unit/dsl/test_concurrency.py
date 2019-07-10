@@ -33,8 +33,8 @@ class TestConcurrency(test_case.DslTestCase):
     def check_isolated_traces(self):
         for i in range(0, len(self.traces), 3):
             before = self.traces[i]
-            switch = self.traces[i+1]
-            after = self.traces[i+2]
+            switch = self.traces[i + 1]
+            after = self.traces[i + 2]
             self.assertEqual('yield', switch)
             self.assertEqual(before[0:6], after[0:6])
             self.assertTrue(before.endswith('-before'))
