@@ -81,7 +81,11 @@ function configure_murano_rpc_backend() {
     # TODO(ruhe): get rid of this ugly workaround.
     inicomment $MURANO_CONF_FILE DEFAULT rpc_backend
 
-    iniset $MURANO_CONF_FILE rabbitmq host $RABBIT_HOST
+    if [[ $SERVICE_IP_VERSION == 6 ]]; then
+        iniset $MURANO_CONF_FILE rabbitmq host "$HOST_IPV6"
+    else
+        iniset $MURANO_CONF_FILE rabbitmq host "$HOST_IP"
+    fi
     iniset $MURANO_CONF_FILE rabbitmq login $RABBIT_USERID
     iniset $MURANO_CONF_FILE rabbitmq password $RABBIT_PASSWORD
 
