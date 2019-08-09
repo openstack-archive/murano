@@ -15,10 +15,12 @@
         - murano-tempest-api
         - murano-tempest-cfapi
         - murano-grenade
+        - murano-tempest-api-ipv6-only
     gate:
       queue: murano
       jobs:
         - murano-tempest-api
+        - murano-tempest-api-ipv6-only
 
 - job:
     name: murano-congress-devstack
@@ -68,7 +70,7 @@
     parent: devstack-tempest
     irrelevant-files: *murano-irrelevant-files
     timeout: 7800
-    required-projects:
+    required-projects: &base_required_projects
       - openstack/heat
       - openstack/murano
       - openstack/murano-dashboard
@@ -76,7 +78,7 @@
       - openstack/python-muranoclient
       - openstack/tempest
       - openstack/murano-tempest-plugin
-    vars:
+    vars: &base_vars
       devstack_plugins:
         murano: https://opendev.org/openstack/murano
         heat: https://opendev.org/openstack/heat
@@ -95,6 +97,16 @@
 - job:
     name: murano-tempest-api
     parent: murano-tempest-base
+
+- job:
+    name: murano-tempest-api-ipv6-only
+    parent: devstack-tempest-ipv6
+    description: |
+      Murano devstack tempest tests job for IPv6-only deployment
+    timeout: 7800
+    irrelevant-files: *murano-irrelevant-files
+    required-projects: *base_required_projects
+    vars: *base_vars
 
 - job:
     name: murano-tempest-cfapi
