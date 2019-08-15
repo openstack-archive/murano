@@ -45,7 +45,7 @@ def upgrade(revision, config=None):
     revision = revision or 'head'
     config = config or get_alembic_config()
 
-    alembic.command.upgrade(config, revision or 'head')
+    alembic.command.upgrade(config, revision)
 
 
 def downgrade(revision, config=None):
