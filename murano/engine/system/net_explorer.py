@@ -19,6 +19,7 @@ from netaddr.strategy import ipv4
 import neutronclient.v2_0.client as nclient
 from oslo_config import cfg
 from oslo_log import log as logging
+from oslo_utils import netutils
 from oslo_utils import uuidutils
 import tenacity
 
@@ -107,7 +108,7 @@ class NetworkExplorer(object):
             router_id = routers[0]['id']
         return router_id
 
-    def get_available_cidr(self, router_id, net_id):
+    def get_available_cidr(self, router_id, net_id, ip_version=4):
         """Uses hash of network IDs to minimize the collisions
 
         Different nets will attempt to pick different cidrs out of available
@@ -117,6 +118,11 @@ class NetworkExplorer(object):
         taken_cidrs = self._get_cidrs_taken_by_router(router_id)
         id_hash = hash(net_id)
         num_fails = 0
+        available_ipv6_cidrs = []
+        if ip_version == 6:
+            for cidr in self._available_cidrs:
+                available_ipv6_cidrs.append(cidr.ipv6())
+            self._available_cidrs = available_ipv6_cidrs
         while num_fails < len(self._available_cidrs):
             cidr = self._available_cidrs[
                 (id_hash + num_fails) % len(self._available_cidrs)]
@@ -127,8 +133,18 @@ class NetworkExplorer(object):
                 return str(cidr)
         return None
 
-    def get_default_dns(self):
-        return self._settings.default_dns
+    def get_default_dns(self, ip_version=4):
+        dns_list = self._settings.default_dns
+        valid_dns = []
+        for ip in dns_list:
+            if ip_version == 6 and netutils.is_valid_ipv6(ip):
+                valid_dns.append(ip)
+            elif ip_version == 4 and netutils.is_valid_ipv4(ip):
+                valid_dns.append(ip)
+            else:
+                LOG.warning('{0} is not a vaild IPV{1} address, '
+                            'ingore...'.format(ip, ip_version))
+        return valid_dns
 
     def get_external_network_id_for_router(self, router_id):
         router = self._client.show_router(router_id).get('router')
