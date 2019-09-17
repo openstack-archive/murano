@@ -108,3 +108,27 @@ html_sidebars = {
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
 # html_static_path = ['_static']
+
+# -- Options for LaTeX output -------------------------------------------------
+
+# Grouping the document tree into LaTeX files. List of tuples
+# (source start file, target name, title, author, documentclass
+# [howto/manual]).
+latex_documents = [
+    ('index', 'doc-murano.tex', u'Murano Documentation',
+     u'OpenStack Foundation', 'manual'),
+]
+latex_domain_indices = False
+
+latex_elements = {
+    'makeindex': '',
+    'printindex': '',
+    'preamble': r'\setcounter{tocdepth}{3}',
+    'maxlistdepth': '10',
+}
+
+# Disable usage of xindy https://bugzilla.redhat.com/show_bug.cgi?id=1643664
+latex_use_xindy = False
+
+# Disable smartquotes, they don't work in latex
+smartquotes_excludes = {'builders': ['latex']}
