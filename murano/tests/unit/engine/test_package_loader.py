@@ -200,6 +200,8 @@ class TestPackageCache(base.MuranoTestCase):
         package = mock.MagicMock()
         package.fully_qualified_name = fqn
         package.classes = ['test_class_1', 'test_class_2']
+        test_version = semantic_version.Version('1.1.0')
+        package.version = test_version
         self.loader.register_package(package)
 
         spec = semantic_version.Spec('*')

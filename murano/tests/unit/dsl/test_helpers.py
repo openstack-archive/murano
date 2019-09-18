@@ -383,7 +383,7 @@ class TestParseVersionSpec(base.MuranoTestCase):
 
     def test_empty_version_spec(self):
         version_spec = ""
-        expected = semantic_version.Spec('>=0.0.0', '<1.0.0-0')
+        expected = semantic_version.Spec('>=0.0.0', '<1.0.0')
         self.check(expected, version_spec)
 
     def test_empty_kind(self):
@@ -403,7 +403,7 @@ class TestParseVersionSpec(base.MuranoTestCase):
 
     def test_remove_spaces(self):
         version_spec = "< =  2 .1"
-        expected = semantic_version.Spec('<2.2.0-0')
+        expected = semantic_version.Spec('<2.2.0')
         self.check(expected, version_spec)
 
     def test_input_version(self):
@@ -413,5 +413,5 @@ class TestParseVersionSpec(base.MuranoTestCase):
 
     def test_input_spec(self):
         version_spec = semantic_version.Spec('<=1', '<=1.11')
-        expected = semantic_version.Spec('<1.12.0-0', '<2.0.0-0')
+        expected = semantic_version.Spec('<1.12.0', '<2.0.0')
         self.check(expected, version_spec)

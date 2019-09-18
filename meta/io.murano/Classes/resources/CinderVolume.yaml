@@ -35,10 +35,6 @@ Properties:
     Contract: $.bool().notNull()
     Default: false
 
-  multiattach:
-    Contract: $.bool().notNull()
-    Default: false
-
   sourceImage:
     Contract: $.string()
 
@@ -80,11 +76,6 @@ Methods:
     - If: $.sourceVolume != null
       Then:
         $properties.source_volid: $.sourceVolume.openstackId
-
-    # Available only since Heat 6.0.0 (Mitaka)
-    - If: $.multiattach
-      Then:
-        $properties.multiattach: $.multiattach
 
     # Available only since Heat 5.0.0 (Liberty)
     - If: $.readOnly
