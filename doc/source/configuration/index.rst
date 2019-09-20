@@ -2,9 +2,11 @@
 Configuration Guide
 ===================
 
-.. toctree::
-   :maxdepth: 1
+.. only:: html
 
-   config-options
-   sample_config
-   sample_policy
+   .. toctree::
+      :maxdepth: 1
+
+      config-options
+      sample_config
+      sample_policy
