@@ -43,6 +43,7 @@
           export PYTHONUNBUFFERED=true
           export DEVSTACK_GATE_TEMPEST_NOTESTS=1
           export DEVSTACK_GATE_NEUTRON=1
+          export DEVSTACK_GATE_USE_PYTHON3=True
           export PROJECTS="openstack/grenade $PROJECTS"
           export PROJECTS="openstack/heat $PROJECTS"
           export PROJECTS="openstack/python-heatclient $PROJECTS"
