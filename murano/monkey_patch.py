@@ -11,4 +11,15 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import murano.monkey_patch  # noqa
+
+import os
+
+import eventlet
+
+
+if os.name == 'nt':
+    # eventlet monkey patching causes subprocess.Popen to fail on Windows
+    # when using pipes due to missing non blocking I/O support
+    eventlet.monkey_patch(os=False)
+else:
+    eventlet.monkey_patch()
