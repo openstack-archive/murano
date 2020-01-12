@@ -15,8 +15,7 @@
 
 import inspect
 import os.path
-
-import unittest2 as unittest
+import unittest
 import yaml
 
 from murano.common import uuidutils
