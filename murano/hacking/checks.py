@@ -13,7 +13,6 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
-import re
 
 """
 Guidelines for writing new hacking checks
@@ -28,6 +27,10 @@ Guidelines for writing new hacking checks
  - Add test cases for each new rule to /tests/unit/test_hacking.py
 """
 
+import re
+
+from hacking import core
+
 mutable_default_args = re.compile(r"^\s*def .+\((.+=\{\}|.+=\[\])")
 assert_equal_end_with_none_re = re.compile(
     r"(.)*assertEqual\((\w|\.|\'|\"|\[|\])+, None\)")
@@ -35,6 +38,7 @@ assert_equal_start_with_none_re = re.compile(
     r"(.)*assertEqual\(None, (\w|\.|\'|\"|\[|\])+\)")
 
 
+@core.flake8ext
 def assert_equal_none(logical_line):
     """Check for assertEqual(A, None) or assertEqual(None, A) sentences
 
@@ -48,20 +52,16 @@ def assert_equal_none(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def no_mutable_default_args(logical_line):
     msg = "M322: Method's default argument shouldn't be mutable!"
     if mutable_default_args.match(logical_line):
         yield (0, msg)
 
 
+@core.flake8ext
 def check_no_basestring(logical_line):
     if re.search(r"\bbasestring\b", logical_line):
         msg = ("M326: basestring is not Python3-compatible, use "
                "six.string_types instead.")
         yield(0, msg)
-
-
-def factory(register):
-    register(assert_equal_none)
-    register(no_mutable_default_args)
-    register(check_no_basestring)

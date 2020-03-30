@@ -18,7 +18,7 @@ import re
 try:
     # integration with congress is optional
     import congressclient.v1.client as congress_client
-except ImportError as congress_client_import_error:
+except ImportError:
     congress_client = None
 from oslo_log import log as logging
 

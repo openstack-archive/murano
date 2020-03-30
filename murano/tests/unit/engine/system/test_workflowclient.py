@@ -18,7 +18,7 @@ import random
 
 try:
     from mistralclient.api import client as mistralcli
-except ImportError as mistral_import_error:
+except ImportError:
     mistralcli = None
 
 import mock

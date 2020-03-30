@@ -19,7 +19,7 @@ import json
 import eventlet
 try:
     from mistralclient.api import client as mistralcli
-except ImportError as mistral_import_error:
+except ImportError:
     mistralcli = None
 from oslo_config import cfg
 from oslo_log import log as logging

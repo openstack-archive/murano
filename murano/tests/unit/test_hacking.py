@@ -104,11 +104,3 @@ class HackingTestCase(base.MuranoTestCase):
 
         self.assertEqual(0, len(list(checks.check_no_basestring(
             "isinstance('foo', six.string_types)"))))
-
-    def test_factory(self):
-        mock_register = mock.MagicMock()
-        checks.factory(mock_register)
-        expected = [
-            mock.call(checks.no_mutable_default_args),
-            mock.call(checks.check_no_basestring)]
-        mock_register.assert_has_calls(expected)
