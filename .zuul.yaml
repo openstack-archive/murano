@@ -33,6 +33,7 @@
       - ^.*\.rst$
       - ^releasenotes/.*$
       - ^murano/tests/.*$
+      - ^contrib/.*$
     required-projects:
       - openstack/congress
       - openstack/congress-dashboard
