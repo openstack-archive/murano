@@ -14,7 +14,8 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import mock
+from unittest import mock
+
 from oslo_config import fixture as config_fixture
 from oslo_serialization import jsonutils
 from webob import exc

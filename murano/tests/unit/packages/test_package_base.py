@@ -13,13 +13,13 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import os
 import random
 import semantic_version
 import shutil
 import string
 import tempfile
+from unittest import mock
 
 from murano.packages import exceptions
 from murano.packages import package_base

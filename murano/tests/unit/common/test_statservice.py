@@ -14,8 +14,8 @@
 #    under the License.
 
 import datetime as dt
-import mock
 import time
+from unittest import mock
 
 from oslo_utils import timeutils
 

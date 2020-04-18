@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from unittest import mock
 import weakref
 
-import mock
 from testtools import matchers
 
 from murano.dsl import exceptions

@@ -13,9 +13,9 @@
 from io import StringIO
 import os
 import sys
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import importutils

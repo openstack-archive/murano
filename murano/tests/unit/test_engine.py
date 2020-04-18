@@ -14,8 +14,8 @@
 # limitations under the License.
 
 import re
+from unittest import mock
 
-import mock
 import semantic_version
 import yaql
 from yaql.language import exceptions

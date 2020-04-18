@@ -12,7 +12,7 @@
 #    WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied. See the
 #    License for the specific language governing permissions and limitations
 #    under the License.
-import mock
+from unittest import mock
 
 import murano.policy.modify.actions.action_manager as am
 from murano.policy.modify.actions import default_actions as da

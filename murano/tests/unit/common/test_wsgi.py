@@ -15,8 +15,9 @@
 
 import errno
 import eventlet
-import mock
 import socket
+from unittest import mock
+
 import webob
 
 from oslo_config import cfg

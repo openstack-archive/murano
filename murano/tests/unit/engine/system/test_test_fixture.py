@@ -12,8 +12,8 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import testtools
+from unittest import mock
 
 from murano.dsl import murano_method
 from murano.dsl import murano_type

@@ -15,7 +15,8 @@
 # limitations under the License.
 
 from heatclient.v1 import stacks
-import mock
+from unittest import mock
+
 from oslo_config import cfg
 
 from murano.engine.system import heat_stack

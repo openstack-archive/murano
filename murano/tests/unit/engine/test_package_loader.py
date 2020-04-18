@@ -18,8 +18,8 @@ from muranoclient.common import exceptions as muranoclient_exc
 import os
 import shutil
 import tempfile
+from unittest import mock
 
-import mock
 import semantic_version
 import testtools
 

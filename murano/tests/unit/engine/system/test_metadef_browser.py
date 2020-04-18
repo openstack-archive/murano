@@ -12,7 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
+from unittest import mock
 
 from murano.dsl import murano_object
 from murano.engine.system import metadef_browser

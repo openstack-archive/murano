@@ -13,8 +13,9 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
+from unittest import mock
+
 import fixtures
-import mock
 
 from murano.db.services import environment_templates as env_temp
 from murano.tests.unit import base

@@ -15,13 +15,13 @@
 # limitations under the License.
 
 import random
+from unittest import mock
 
 try:
     from mistralclient.api import client as mistralcli
 except ImportError:
     mistralcli = None
 
-import mock
 from oslo_config import cfg
 
 from murano.dsl import murano_method

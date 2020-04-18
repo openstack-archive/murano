@@ -12,8 +12,8 @@
 # limitations under the License.
 
 import copy
-import mock
 import semantic_version
+from unittest import mock
 import weakref
 
 from oslo_utils.uuidutils import generate_uuid

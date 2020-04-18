@@ -12,9 +12,9 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import mock
 import pycodestyle
 import textwrap
+from unittest import mock
 
 from murano.hacking import checks
 from murano.tests.unit import base

@@ -14,9 +14,9 @@
 # limitations under the License.
 
 import logging
+from unittest import mock
 
 import fixtures
-import mock
 from oslo_utils import timeutils
 import routes
 import urllib

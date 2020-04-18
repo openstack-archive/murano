@@ -14,7 +14,7 @@
 #    under the License.
 
 from datetime import datetime
-import mock
+from unittest import mock
 
 from murano.common import server
 from murano.services import states

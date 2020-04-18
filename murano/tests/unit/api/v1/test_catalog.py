@@ -19,9 +19,9 @@ import imghdr
 from io import StringIO
 import os
 import tempfile
+from unittest import mock
 import uuid
 
-import mock
 from oslo_config import cfg
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils

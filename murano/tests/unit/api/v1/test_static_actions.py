@@ -15,7 +15,8 @@
 # limitations under the License.
 
 
-import mock
+from unittest import mock
+
 from oslo_messaging.rpc import client
 from oslo_serialization import jsonutils
 from webob import exc

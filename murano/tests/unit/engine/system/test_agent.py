@@ -18,8 +18,8 @@ import datetime
 import json
 import os
 import tempfile
+from unittest import mock
 
-import mock
 from oslo_serialization import base64
 import yaml as yamllib
 
