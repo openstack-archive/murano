@@ -16,7 +16,6 @@ import os
 import shutil
 import sys
 
-import six
 import yaml
 
 from murano.common.helpers import path
@@ -253,7 +252,7 @@ class HotPackage(package_base.PackageBase):
 
     @staticmethod
     def _format_value(value):
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return str("'" + value + "'")
         return str(value)
 

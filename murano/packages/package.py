@@ -18,8 +18,6 @@ import io
 import os
 import zipfile
 
-import six
-
 from murano.common.helpers import path
 
 
@@ -29,8 +27,7 @@ class PackageType(object):
     ALL = [Library, Application]
 
 
-@six.add_metaclass(abc.ABCMeta)
-class Package(object):
+class Package(object, metaclass=abc.ABCMeta):
     def __init__(self, format_name, runtime_version, source_directory):
         self._source_directory = source_directory
         self._format_name = format_name
