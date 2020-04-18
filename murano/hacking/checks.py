@@ -62,6 +62,6 @@ def no_mutable_default_args(logical_line):
 @core.flake8ext
 def check_no_basestring(logical_line):
     if re.search(r"\bbasestring\b", logical_line):
-        msg = ("M326: basestring is not Python3-compatible, use "
-               "six.string_types instead.")
+        msg = ("M326: basestring is not Python3 usage, use "
+               "str instead.")
         yield(0, msg)

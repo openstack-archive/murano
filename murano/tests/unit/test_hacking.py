@@ -103,4 +103,4 @@ class HackingTestCase(base.MuranoTestCase):
             "isinstance('foo', basestring)"))))
 
         self.assertEqual(0, len(list(checks.check_no_basestring(
-            "isinstance('foo', six.string_types)"))))
+            "isinstance('foo', str)"))))
