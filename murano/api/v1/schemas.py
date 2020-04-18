@@ -14,7 +14,6 @@
 
 from oslo_log import log as logging
 from oslo_messaging.rpc import client
-import six
 from webob import exc
 
 from murano.api.v1 import request_statistics
@@ -42,7 +41,7 @@ class Controller(object):
 
         try:
             methods = (list(
-                six.moves.map(six.text_type.strip, method_names.split(',')))
+                map(str.strip, method_names.split(',')))
                 if method_names else [])
             return rpc.engine().generate_schema(
                 credentials, class_name, methods,

@@ -19,7 +19,7 @@ import fixtures
 import mock
 from oslo_utils import timeutils
 import routes
-from six.moves import urllib
+import urllib
 import webob
 
 from murano.api.v1 import request_statistics

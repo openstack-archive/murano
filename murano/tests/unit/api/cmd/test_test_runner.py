@@ -10,6 +10,7 @@
 # License for the specific language governing permissions and limitations
 # under the License.
 
+from io import StringIO
 import os
 import sys
 
@@ -18,7 +19,6 @@ import mock
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_utils import importutils
-import six
 import testtools
 
 from murano.cmd import test_runner
@@ -58,8 +58,8 @@ class TestCaseShell(testtools.TestCase):
         self.addCleanup(CONF.clear_override, name, group)
 
     def shell(self, cmd_args=None, exitcode=0):
-        stdout = six.StringIO()
-        stderr = six.StringIO()
+        stdout = StringIO()
+        stderr = StringIO()
         args = self.args
         if cmd_args:
             cmd_args = cmd_args.split()
@@ -89,10 +89,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_version(self):
         stdout, stderr = self.shell('--version')
-        if six.PY3:
-            output = stdout
-        else:
-            output = stderr
+        output = stdout
         self.assertIn(version.version_string, output)
 
     @mock.patch.object(test_runner, 'LOG')
@@ -171,10 +168,7 @@ class TestCaseShell(testtools.TestCase):
 
     def test_package_is_not_provided(self):
         _, stderr = self.shell(exitcode=2)
-        if six.PY3:
-            err = 'the following arguments are required: '
-        else:
-            err = 'too few arguments'
+        err = 'the following arguments are required: '
         self.assertIn('murano-test-runner: error: %s' % err, stderr)
 
     def test_wrong_parent(self):

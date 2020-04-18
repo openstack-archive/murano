@@ -17,7 +17,6 @@ import datetime
 import jsonpatch
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
-import six
 from sqlalchemy import desc
 from webob import exc
 
@@ -83,7 +82,7 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
-        name = six.text_type(body['name'])
+        name = str(body['name'])
         if len(name) > 255:
             msg = _('Environment name should be 255 characters maximum')
             LOG.error(msg)
@@ -144,7 +143,7 @@ class Controller(object):
 
         session = db_session.get_session()
         environment = session.query(models.Environment).get(environment_id)
-        new_name = six.text_type(body['name'])
+        new_name = str(body['name'])
         if new_name.strip():
             if len(new_name) > 255:
                 msg = _('Environment name should be 255 characters maximum')
