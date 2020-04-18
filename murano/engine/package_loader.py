@@ -30,9 +30,9 @@ from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_log import versionutils
 from oslo_utils import fileutils
-import six
 
 from murano.common import auth_utils
+from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import exceptions
 from murano.dsl import helpers
@@ -133,9 +133,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
-            six.reraise(exceptions.NoPackageForClassFound,
-                        exceptions.NoPackageForClassFound(class_name),
-                        exc_info[2])
+            utils.reraise(exceptions.NoPackageForClassFound,
+                          exceptions.NoPackageForClassFound(class_name),
+                          exc_info[2])
         return self._to_dsl_package(
             self._get_package_by_definition(package_definition))
 
@@ -159,9 +159,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             self._lock_usage(package_definition)
         except LookupError:
             exc_info = sys.exc_info()
-            six.reraise(exceptions.NoPackageFound,
-                        exceptions.NoPackageFound(package_name),
-                        exc_info[2])
+            utils.reraise(exceptions.NoPackageFound,
+                          exceptions.NoPackageFound(package_name),
+                          exc_info[2])
         else:
             package = self._get_package_by_definition(package_definition)
             self._fixations[package_name].add(package.version)
@@ -269,9 +269,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
                     package_id, str(e)
                 )
                 exc_info = sys.exc_info()
-                six.reraise(pkg_exc.PackageLoadError,
-                            pkg_exc.PackageLoadError(msg),
-                            exc_info[2])
+                utils.reraise(pkg_exc.PackageLoadError,
+                              pkg_exc.PackageLoadError(msg),
+                              exc_info[2])
             package_file = None
             try:
                 with tempfile.NamedTemporaryFile(delete=False) as package_file:
@@ -294,9 +294,9 @@ class ApiPackageLoader(package_loader.MuranoPackageLoader):
             except IOError:
                 msg = 'Unable to extract package data for %s' % package_id
                 exc_info = sys.exc_info()
-                six.reraise(pkg_exc.PackageLoadError,
-                            pkg_exc.PackageLoadError(msg),
-                            exc_info[2])
+                utils.reraise(pkg_exc.PackageLoadError,
+                              pkg_exc.PackageLoadError(msg),
+                              exc_info[2])
             finally:
                 try:
                     if package_file:

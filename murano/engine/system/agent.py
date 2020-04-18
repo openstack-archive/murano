@@ -18,6 +18,7 @@ import datetime
 import os
 import os.path
 import time
+import urllib
 import uuid
 
 from cryptography.hazmat.backends import default_backend
@@ -28,7 +29,6 @@ import eventlet.event
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_serialization import base64
-import six
 from yaql import specs
 
 import murano.common.exceptions as exceptions
@@ -306,7 +306,7 @@ class Agent(object):
 
     def _is_url(self, file):
         file = self._get_url(file)
-        parts = six.moves.urllib.parse.urlsplit(file)
+        parts = urllib.parse.urlsplit(file)
         if not parts.scheme or not parts.netloc:
             return False
         else:
