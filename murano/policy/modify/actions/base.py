@@ -15,11 +15,8 @@
 
 import abc
 
-import six
 
-
-@six.add_metaclass(abc.ABCMeta)
-class ModifyActionBase(object):
+class ModifyActionBase(object, metaclass=abc.ABCMeta):
     """Base class for model modify actions.
 
     Class is instantiated base on list of actions returned from congress then
