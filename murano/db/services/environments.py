@@ -16,7 +16,6 @@
 from keystoneclient import exceptions as ks_exceptions
 from oslo_config import cfg
 from oslo_log import log as logging
-import six
 import yaml
 
 from murano.common import auth_utils
@@ -261,7 +260,7 @@ class EnvironmentServices(object):
         elif isinstance(data, list):
             return [EnvironmentServices._objectify(v, replacements)
                     for v in data]
-        elif isinstance(data, six.string_types):
+        elif isinstance(data, str):
             for key, value in replacements.items():
                 data = data.replace('%' + key + '%', value)
         return data
