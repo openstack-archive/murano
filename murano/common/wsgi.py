@@ -34,7 +34,6 @@ from oslo_service import service
 from oslo_service import sslutils
 import routes
 import routes.middleware
-import six
 import webob.dec
 import webob.exc
 
@@ -536,7 +535,7 @@ class JSONDictSerializer(DictSerializer):
             if isinstance(obj, datetime.datetime):
                 _dtime = obj - datetime.timedelta(microseconds=obj.microsecond)
                 return _dtime.isoformat()
-            return six.text_type(obj)
+            return str(obj)
         if result:
             data.body = jsonutils.dump_as_bytes(result)
         return jsonutils.dump_as_bytes(data, default=sanitizer)
@@ -917,7 +916,7 @@ class JSONPatchDeserializer(TextDeserializer):
                 allowed_methods = ['add', 'replace', 'remove']
             else:
                 msg = _("Attribute '{0}' is invalid").format(full_path)
-                raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
+                raise webob.exc.HTTPForbidden(explanation=str(msg))
 
         if change_op not in allowed_methods:
             ops = ', '.join(allowed_methods) if allowed_methods\
@@ -926,7 +925,7 @@ class JSONPatchDeserializer(TextDeserializer):
                     "'{name}'. Allowed operations are: "
                     "{ops}").format(method=change_op, name=full_path, ops=ops)
 
-            raise webob.exc.HTTPForbidden(explanation=six.text_type(msg))
+            raise webob.exc.HTTPForbidden(explanation=str(msg))
 
     def _validate_schema(self, change):
         property_to_update = change['value']
@@ -1117,6 +1116,6 @@ class FormDataDeserializer(TextDeserializer):
     def default(self, request):
         form_data_parts = request.POST
         for key, value in form_data_parts.items():
-            if isinstance(value, six.string_types):
+            if isinstance(value, str):
                 form_data_parts[key] = self._from_json(value)
         return {'body': form_data_parts}

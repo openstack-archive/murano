@@ -18,7 +18,6 @@ import re
 
 import jsonschema
 from oslo_log import log as logging
-import six
 
 from murano.common.i18n import _
 
@@ -27,7 +26,7 @@ LOG = logging.getLogger(__name__)
 
 
 class TraverseHelper(object):
-    value_type = (six.string_types, int, float, bool)
+    value_type = (str, int, float, bool)
 
     @staticmethod
     def get(path, source):
@@ -178,8 +177,8 @@ def is_different(obj1, obj2):
 
         if o1 is o2:
             return
-        elif (isinstance(o1, six.string_types) and
-                isinstance(o2, six.string_types)) and o1 == o2:
+        elif (isinstance(o1, str) and
+                isinstance(o2, str)) and o1 == o2:
             return
         elif type(o1) != type(o2):
             raise Difference()
