@@ -14,8 +14,7 @@
 
 import sys
 
-import six
-
+from murano.common import utils
 from murano.dsl import context_manager
 from murano.dsl import dsl
 from murano.dsl import dsl_exception
@@ -49,7 +48,7 @@ class Runner(object):
     class DslObjectWrapper(object):
         def __init__(self, obj, runner):
             self._runner = runner
-            if isinstance(obj, six.string_types + (dsl_types.MuranoType,)):
+            if isinstance(obj, (str,) + (dsl_types.MuranoType,)):
                 pass
             elif isinstance(obj, (object_model.Object, object_model.Ref)):
                 obj = obj.id
@@ -59,7 +58,7 @@ class Runner(object):
                 raise ValueError(
                     'obj must be object ID string, MuranoObject, MuranoType '
                     'or one of object_model helper classes (Object, Ref)')
-            if isinstance(obj, six.string_types):
+            if isinstance(obj, str):
                 self._receiver = runner.executor.object_store.get(obj)
             else:
                 self._receiver = obj
@@ -74,7 +73,7 @@ class Runner(object):
                 return call
 
     def __init__(self, model, package_loader, functions):
-        if isinstance(model, six.string_types):
+        if isinstance(model, str):
             model = object_model.Object(model)
         model = object_model.build_model(model)
         if 'Objects' not in model:
@@ -114,7 +113,7 @@ class Runner(object):
                         original_exception, dsl_exception.MuranoPlException):
                     exc_traceback = getattr(
                         e, 'original_traceback', None) or sys.exc_info()[2]
-                    six.reraise(
+                    utils.reraise(
                         type(original_exception),
                         original_exception,
                         exc_traceback)

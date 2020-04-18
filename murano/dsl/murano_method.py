@@ -17,9 +17,9 @@ import sys
 import weakref
 
 from oslo_log import log as logging
-import six
 from yaql.language import specs
 
+from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import dsl
 from murano.dsl import dsl_types
@@ -260,10 +260,10 @@ class MuranoMethodArgument(dsl_types.MuranoMethodArgument, typespec.Spec,
             msg = u'[{0}::{1}({2}{3})] {4}'.format(
                 self.murano_method.declaring_type.name,
                 self.murano_method.name, self.name,
-                e.path, six.text_type(e))
-            six.reraise(exceptions.ContractViolationException,
-                        exceptions.ContractViolationException(msg),
-                        sys.exc_info()[2])
+                e.path, str(e))
+            utils.reraise(exceptions.ContractViolationException,
+                          exceptions.ContractViolationException(msg),
+                          sys.exc_info()[2])
 
     @property
     def murano_method(self):

@@ -19,7 +19,6 @@ import traceback
 import eventlet
 import eventlet.event
 from oslo_log import log as logging
-import six
 from yaql.language import exceptions as yaql_exceptions
 from yaql.language import specs
 from yaql.language import utils
@@ -236,7 +235,7 @@ class MuranoDslExecutor(object):
     def _log_method(self, context, args, kwargs):
         method = helpers.get_current_method(context)
         param_gen = itertools.chain(
-            (six.text_type(arg) for arg in args),
+            (str(arg) for arg in args),
             (u'{0} => {1}'.format(name, value)
              for name, value in kwargs.items()))
         params_str = u', '.join(param_gen)

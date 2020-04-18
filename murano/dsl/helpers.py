@@ -23,18 +23,16 @@ import sys
 import uuid
 import weakref
 
-
 import eventlet.greenpool
 import eventlet.greenthread
 from oslo_config import cfg
 import semantic_version
-import six
 from yaql.language import contexts
 import yaql.language.exceptions
 import yaql.language.expressions
 from yaql.language import utils as yaqlutils
 
-
+from murano.common import utils
 from murano.dsl import constants
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
@@ -88,10 +86,8 @@ def merge_dicts(dict1, dict2, max_levels=0):
         if key in dict2:
             value2 = dict2[key]
             if type(value2) != type(value1):
-                if ((isinstance(value1,
-                                six.string_types) or value1 is None) and
-                        (isinstance(value2,
-                                    six.string_types) or value2 is None)):
+                if ((isinstance(value1, str) or value1 is None) and
+                        (isinstance(value2, str) or value2 is None)):
                     continue
                 raise TypeError()
             if max_levels != 1 and isinstance(value2, dict):
@@ -132,7 +128,7 @@ def parallel_select(collection, func, limit=1000):
     except StopIteration:
         return map(lambda t: t[0], result)
     else:
-        six.reraise(type(exception[0]), exception[0], exception[2])
+        utils.reraise(type(exception[0]), exception[0], exception[2])
 
 
 def enum(**enums):
@@ -320,7 +316,7 @@ def cast(obj, murano_class, pov_or_version_spec=None):
         obj = obj.object
     if isinstance(pov_or_version_spec, dsl_types.MuranoType):
         pov_or_version_spec = pov_or_version_spec.package
-    elif isinstance(pov_or_version_spec, six.string_types):
+    elif isinstance(pov_or_version_spec, str):
         pov_or_version_spec = parse_version_spec(pov_or_version_spec)
 
     if isinstance(murano_class, dsl_types.MuranoTypeReference):
@@ -425,7 +421,7 @@ def normalize_version_spec(version_spec):
             for op, funcs in transformations[item.kind]:
                 new_parts.append('{0}{1}'.format(
                     op,
-                    six.moves.reduce(lambda v, f: f(v), funcs, item.spec)
+                    functools.reduce(lambda v, f: f(v), funcs, item.spec)
                 ))
     if not new_parts:
         return semantic_version.Spec('*')
@@ -701,9 +697,9 @@ def patch_dict(dct, path, value):
 
 
 def format_scalar(value):
-    if isinstance(value, six.string_types):
+    if isinstance(value, str):
         return "'{0}'".format(value)
-    return six.text_type(value)
+    return str(value)
 
 
 def is_passkey(value):

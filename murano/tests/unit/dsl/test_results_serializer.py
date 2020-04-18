@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 from testtools import matchers
 
 from murano.dsl import serializer
@@ -96,7 +95,7 @@ class TestResultsSerializer(test_case.DslTestCase):
         action_meta = None
         for action in actions.values():
             self.assertIsInstance(action.get('enabled'), bool)
-            self.assertIsInstance(action.get('name'), six.string_types)
+            self.assertIsInstance(action.get('name'), str)
             self.assertThat(
                 action['name'],
                 matchers.StartsWith('test'))

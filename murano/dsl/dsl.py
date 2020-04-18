@@ -17,7 +17,6 @@ import os.path
 
 import eventlet
 from oslo_config import cfg
-import six
 from yaql.language import expressions as yaql_expressions
 from yaql.language import specs
 from yaql.language import utils
@@ -61,7 +60,7 @@ class MuranoObjectParameter(yaqltypes.PythonType):
             return False
         if self.murano_class:
             murano_class = self.murano_class
-            if isinstance(murano_class, six.string_types):
+            if isinstance(murano_class, str):
                 return helpers.is_instance_of(
                     value, murano_class,
                     self.version_spec or helpers.get_type(context))
@@ -110,14 +109,13 @@ class MuranoTypeParameter(yaqltypes.PythonType):
         self._resolve_strings = resolve_strings
         self._lazy = lazy
         super(MuranoTypeParameter, self).__init__(
-            (dsl_types.MuranoTypeReference,
-             six.string_types), nullable)
+            (dsl_types.MuranoTypeReference, str), nullable)
 
     def check(self, value, context, *args, **kwargs):
         if not super(MuranoTypeParameter, self).check(
                 value, context, *args, **kwargs):
             return False
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             if not self._resolve_strings:
                 return False
             value = helpers.get_class(value, context).get_reference()
@@ -138,7 +136,7 @@ class MuranoTypeParameter(yaqltypes.PythonType):
                 value2 = value2(utils.NO_VALUE, ctx, engine)
             value2 = super(MuranoTypeParameter, self).convert(
                 value2, sender, ctx, function_spec, engine)
-            if isinstance(value2, six.string_types):
+            if isinstance(value2, str):
                 value2 = helpers.get_class(value2, ctx).get_reference()
             if self._base_type and not self._base_type.is_compatible(value):
                 raise ValueError('Value must be subtype of {0}'.format(
@@ -215,7 +213,7 @@ class MuranoObjectInterface(dsl_types.MuranoObjectInterface):
         return MuranoObjectInterface.create(owner)
 
     def find_owner(self, type, optional=False):
-        if isinstance(type, six.string_types):
+        if isinstance(type, str):
             type = helpers.get_class(type)
         elif isinstance(type, dsl_types.MuranoTypeReference):
             type = type.type

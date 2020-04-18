@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -70,7 +68,7 @@ class Class(contracts.ContractMethod):
                 value, self.owner, context=self.root_context,
                 default_type=self.default_type,
                 scope_type=self.calling_type)
-        elif isinstance(value, six.string_types):
+        elif isinstance(value, str):
             obj = object_store.get(value)
             if obj is None:
                 if not object_store.initializing:

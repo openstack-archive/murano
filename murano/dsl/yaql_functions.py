@@ -13,7 +13,6 @@
 #    under the License.
 
 import eventlet
-import six
 from yaql.language import expressions
 from yaql.language import specs
 from yaql.language import utils
@@ -91,7 +90,7 @@ def super_(context, object_, func=None):
     cast_type = helpers.get_type(context)
     if func is None:
         return [object_.cast(type) for type in cast_type.parents]
-    return six.moves.map(func, super_(context, object_))
+    return map(func, super_(context, object_))
 
 
 @specs.parameter('object_', dsl.MuranoObjectParameter(decorate=False))

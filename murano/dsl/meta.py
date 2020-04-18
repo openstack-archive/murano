@@ -16,8 +16,6 @@ import abc
 import operator
 import weakref
 
-import six
-
 from murano.dsl import dsl_types
 from murano.dsl import helpers
 
@@ -112,7 +110,7 @@ def merge_providers(initial_class, producer, context):
         return result
 
     meta = merger([initial_class], set())
-    return list(six.moves.map(operator.itemgetter(1), meta))
+    return list(map(operator.itemgetter(1), meta))
 
 
 def aggregate_meta(provider, context, group_by_name=True):

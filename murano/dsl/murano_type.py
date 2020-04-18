@@ -18,7 +18,6 @@ import copy
 import weakref
 
 import semantic_version
-import six
 from yaql.language import utils
 
 from murano.dsl import constants
@@ -529,7 +528,7 @@ def _create_meta_class(cls, name, ns_resolver, data, package, *args, **kwargs):
         raise ValueError(u'Invalid MetaClass Cardinality "{}"'.format(
             cardinality))
     applies_to = data.get('Applies', dsl_types.MetaTargets.All)
-    if isinstance(applies_to, six.string_types):
+    if isinstance(applies_to, str):
         applies_to = [applies_to]
     if isinstance(applies_to, list):
         applies_to = set(applies_to)
@@ -564,7 +563,7 @@ def weigh_type_hierarchy(cls):
 
     result = {}
     for c, w in helpers.traverse(
-            [(cls, 0)], lambda t: six.moves.map(
+            [(cls, 0)], lambda t: map(
                 lambda p: (p, t[1] + 1), t[0].parents)):
         result.setdefault(c.name, w)
     return result

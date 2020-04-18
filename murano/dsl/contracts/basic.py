@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from murano.dsl import contracts
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
@@ -26,11 +24,11 @@ class String(contracts.ContractMethod):
     def transform(self):
         if self.value is None:
             return None
-        if isinstance(self.value, six.text_type):
+        if isinstance(self.value, str):
             return self.value
-        if isinstance(self.value, six.string_types) or \
-                isinstance(self.value, six.integer_types):
-            return six.text_type(self.value)
+        if isinstance(self.value, str) or \
+                isinstance(self.value, int):
+            return str(self.value)
         if isinstance(self.value, dsl_types.MuranoObject):
             return self.value.object_id
         if isinstance(self.value, dsl_types.MuranoObjectInterface):
@@ -40,7 +38,7 @@ class String(contracts.ContractMethod):
                 helpers.format_scalar(self.value)))
 
     def validate(self):
-        if self.value is None or isinstance(self.value, six.string_types):
+        if self.value is None or isinstance(self.value, str):
             return self.value
         raise exceptions.ContractViolationException()
 
