@@ -19,11 +19,11 @@ import sys
 import tempfile
 import zipfile
 
-import six
 import yaml
 
 from murano.common.helpers import path
 from murano.common.plugins import package_types_loader
+from murano.common import utils
 import murano.packages.exceptions as e
 import murano.packages.hot_package
 import murano.packages.mpl_package
@@ -93,7 +93,7 @@ def load_from_dir(source_directory, filename='manifest.yaml'):
             content = yaml.safe_load(stream)
     except Exception as ex:
         trace = sys.exc_info()[2]
-        six.reraise(
+        utils.reraise(
             e.PackageLoadError,
             e.PackageLoadError("Unable to load due to '{0}'".format(ex)),
             trace)

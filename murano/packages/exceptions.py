@@ -13,15 +13,11 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 import murano.common.exceptions as e
 
 
 class PackageException(e.Error):
-    if six.PY2:
-        def __str__(self):
-            return six.text_type(self.message).encode('UTF-8')
+    pass
 
 
 class PackageClassLoadError(PackageException):

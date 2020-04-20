@@ -13,8 +13,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from murano.packages import exceptions
 import murano.tests.unit.base as test_base
 
@@ -28,10 +26,7 @@ class TestExceptions(test_base.MuranoTestCase):
                                                  message=message)
         expected = 'Unable to load class "{0}" from package: {1}'\
                    .format(class_name, message)
-        if six.PY2:
-            self.assertEqual(expected, error.message)
-        elif six.PY34:
-            self.assertEqual(expected, error.args[0])
+        self.assertEqual(expected, error.args[0])
 
     def test_package_ui_load_error(self):
         messages = ['', 'test_message']
@@ -40,10 +35,7 @@ class TestExceptions(test_base.MuranoTestCase):
             expected = 'Unable to load ui definition from package'
             if message:
                 expected += ': {0}'.format(message)
-            if six.PY2:
-                self.assertEqual(expected, error.message)
-            elif six.PY34:
-                self.assertEqual(expected, error.args[0])
+            self.assertEqual(expected, error.args[0])
 
     def test_package_format_error(self):
         messages = ['', 'test_message']
@@ -52,7 +44,4 @@ class TestExceptions(test_base.MuranoTestCase):
             expected = 'Incorrect package format'
             if message:
                 expected += ': {0}'.format(message)
-            if six.PY2:
-                self.assertEqual(expected, error.message)
-            elif six.PY34:
-                self.assertEqual(expected, error.args[0])
+            self.assertEqual(expected, error.args[0])

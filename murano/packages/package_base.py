@@ -20,10 +20,10 @@ import re
 import sys
 
 import semantic_version
-import six
 
 from murano.common.helpers import path
 from murano.common.i18n import _
+from murano.common import utils
 from murano.packages import exceptions
 from murano.packages import package
 
@@ -153,10 +153,11 @@ class PackageBase(package.Package):
 
         except Exception as ex:
             trace = sys.exc_info()[2]
-            six.reraise(exceptions.PackageLoadError,
-                        exceptions.PackageLoadError(
-                            'Unable to load {0}: {1}'.format(what_image, ex)),
-                        trace)
+            utils.reraise(
+                exceptions.PackageLoadError,
+                exceptions.PackageLoadError(
+                    'Unable to load {0}: {1}'.format(what_image, ex)),
+                trace)
 
     @staticmethod
     def _check_full_name(full_name):
