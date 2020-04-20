@@ -16,6 +16,7 @@
 import cgi
 from datetime import datetime
 import imghdr
+from io import StringIO
 import os
 import tempfile
 import uuid
@@ -24,9 +25,6 @@ import mock
 from oslo_config import cfg
 from oslo_serialization import jsonutils
 from oslo_utils import timeutils
-import six
-from six.moves import cStringIO
-from six.moves import range
 from webob import exc
 
 from murano.api.v1 import catalog
@@ -1119,7 +1117,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
         self.expect_policy_check('upload_package')
         self.expect_policy_check('publicize_package')
 
-        file_obj_str = cStringIO("This is some dummy data")
+        file_obj_str = StringIO("This is some dummy data")
         file_obj = mock.MagicMock(cgi.FieldStorage)
         file_obj.file = file_obj_str
         package_from_dir, _ = self._test_package()
@@ -1139,8 +1137,7 @@ This is a fake zip archive
         def format_body(content):
             content = jsonutils.dumps(content)
             body = body_fmt.format(content)
-            if six.PY3:
-                body = body.encode('utf-8')
+            body = body.encode('utf-8')
             return body
 
         with mock.patch('murano.packages.load_utils.load_from_file') as lff:
@@ -1188,7 +1185,7 @@ This is a fake zip archive
 
         self._set_policy_rules({'upload_package': '@'})
         self.expect_policy_check('upload_package')
-        file_obj_str = cStringIO("This is some dummy data")
+        file_obj_str = StringIO("This is some dummy data")
         file_obj = mock.MagicMock(cgi.FieldStorage)
         file_obj.file = file_obj_str
         package_from_dir, _ = self._test_package()
@@ -1208,8 +1205,7 @@ This is a fake zip archive
         def format_body(content):
             content = jsonutils.dumps(content)
             body = body_fmt.format(content)
-            if six.PY3:
-                body = body.encode('utf-8')
+            body = body.encode('utf-8')
             return body
 
         with mock.patch('murano.packages.load_utils.load_from_file') as lff:

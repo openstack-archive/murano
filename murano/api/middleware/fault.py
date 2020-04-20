@@ -18,7 +18,6 @@ import sys
 import traceback
 
 from oslo_config import cfg
-import six
 import webob
 
 from murano.common import wsgi
@@ -96,7 +95,7 @@ class FaultWrapper(wsgi.Middleware):
 
         ex_type = ex.__class__.__name__
 
-        full_message = six.text_type(ex)
+        full_message = str(ex)
         if full_message.find('\n') > -1:
             message, msg_trace = full_message.split('\n', 1)
         else:

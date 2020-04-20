@@ -14,7 +14,6 @@
 
 from oslo_db import exception as db_exc
 from oslo_log import log as logging
-import six
 from webob import exc
 
 from murano.api.v1 import request_statistics
@@ -281,7 +280,7 @@ class Controller(object):
             LOG.error(msg)
             raise exc.HTTPBadRequest(explanation=msg)
 
-        name = six.text_type(body['name'])
+        name = str(body['name'])
         if len(name) > 255:
             msg = _('Environment template name should be 255 characters '
                     'maximum')
