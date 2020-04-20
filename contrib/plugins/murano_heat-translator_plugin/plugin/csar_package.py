@@ -12,7 +12,6 @@
 
 import os
 import shutil
-import six
 import sys
 import yaml
 import zipfile
@@ -271,9 +270,9 @@ class CSARPackage(package_base.PackageBase):
 
     @staticmethod
     def _format_value(value):
-        if isinstance(value, six.string_types):
+        if isinstance(value, str):
             return u"{}".format(value)
-        return six.text_type(value)
+        return str(value)
 
     @staticmethod
     def _generate_workflow(csar, files):
