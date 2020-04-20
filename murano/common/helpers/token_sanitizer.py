@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 
 class TokenSanitizer(object):
     """Helper class for cleaning some object from different passwords/tokens
@@ -60,7 +58,7 @@ class TokenSanitizer(object):
             return [self.sanitize(item) for item in obj]
         elif isinstance(obj, tuple):
             k, v = obj
-            if self._contains_token(k) and isinstance(v, six.string_types):
+            if self._contains_token(k) and isinstance(v, str):
                 return k, self.message
             return k, self.sanitize(v)
         else:
