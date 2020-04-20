@@ -14,7 +14,6 @@
 import uuid
 
 from oslo_db import exception as db_exception
-from six.moves import range
 from webob import exc
 
 from murano.db.catalog import api

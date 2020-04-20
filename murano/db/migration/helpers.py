@@ -13,13 +13,12 @@
 #    under the License.
 
 from alembic import op
-import six
 import sqlalchemy as sa
 
 
 def transform_table(name, renames, defaults, *columns, **kw):
     def escape(val):
-        if isinstance(val, six.string_types):
+        if isinstance(val, str):
             return "'{0}'".format(val)
         elif val is None:
             return 'NULL'
