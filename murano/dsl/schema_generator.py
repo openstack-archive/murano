@@ -13,8 +13,6 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import six
-
 from murano.dsl.contracts import contracts
 from murano.dsl import dsl_types
 from murano.dsl import executor
@@ -219,9 +217,9 @@ def generate_ui_hints(entity, context, type_weights):
 
 def sort_by_index(meta, type_weights, property_name='index'):
     """Sorts meta definitions by its distance in the class hierarchy"""
-    has_index = six.moves.filter(
+    has_index = filter(
         lambda m: m.get_property(property_name) is not None, meta)
-    has_no_index = six.moves.filter(
+    has_no_index = filter(
         lambda m: m.get_property(property_name) is None, meta)
 
     return (

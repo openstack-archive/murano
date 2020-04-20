@@ -18,7 +18,6 @@ import weakref
 
 import debtcollector
 import semantic_version
-import six
 from yaql.language import specs
 from yaql.language import utils
 
@@ -224,7 +223,7 @@ class MuranoPackage(dsl_types.MuranoPackage, dslmeta.MetaProvider):
             ns_resolver, self.name, self, utils.NO_VALUE)
 
     def get_meta(self, context):
-        if six.callable(self._meta):
+        if callable(self._meta):
             executor = helpers.get_executor()
             context = executor.create_package_context(self)
             self._meta = self._meta().get_meta(context)

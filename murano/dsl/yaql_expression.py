@@ -14,7 +14,6 @@
 
 import re
 
-import six
 from yaql.language import exceptions as yaql_exceptions
 from yaql.language import expressions
 
@@ -29,8 +28,8 @@ EXPRESSION_REGEX = re.compile('^[\s\w\d.]*$')
 class YaqlExpression(dsl_types.YaqlExpression):
     def __init__(self, expression, version):
         self._version = version
-        if isinstance(expression, six.string_types):
-            self._expression = six.text_type(expression)
+        if isinstance(expression, str):
+            self._expression = str(expression)
             self._parsed_expression = yaql_integration.parse(
                 self._expression, version)
             self._file_position = None
@@ -39,7 +38,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
             self._parsed_expression = expression._parsed_expression
             self._file_position = expression._file_position
         elif isinstance(expression, expressions.Statement):
-            self._expression = six.text_type(expression)
+            self._expression = str(expression)
             self._parsed_expression = expression
             self._file_position = None
         else:
@@ -69,7 +68,7 @@ class YaqlExpression(dsl_types.YaqlExpression):
 
     @staticmethod
     def is_expression(expression, version):
-        if not isinstance(expression, six.string_types):
+        if not isinstance(expression, str):
             return False
         if EXPRESSION_REGEX.match(expression):
             return False

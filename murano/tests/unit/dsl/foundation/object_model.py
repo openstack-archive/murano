@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from murano.dsl import helpers
 
 
@@ -71,7 +69,7 @@ class Attribute(object):
 
 class Ref(object):
     def __init__(self, obj):
-        if isinstance(obj, six.string_types):
+        if isinstance(obj, str):
             self._id = obj
         else:
             self._id = obj.id

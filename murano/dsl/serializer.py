@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import six
 from yaql import utils
 
 from murano.dsl import dsl
@@ -127,8 +125,7 @@ def _pass12_serialize(value, parent, serialized_objects,
                       with_destruction_dependencies):
     if isinstance(value, dsl.MuranoObjectInterface):
         value = value.object
-    if isinstance(value, (six.string_types,
-                          int, float, bool)) or value is None:
+    if isinstance(value, (str, int, float, bool)) or value is None:
         return value, False
     if isinstance(value, dsl_types.MuranoObject):
         if value.owner is not parent or value.object_id in serialized_objects:

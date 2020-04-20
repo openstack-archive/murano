@@ -15,8 +15,7 @@
 import sys
 import weakref
 
-import six
-
+from murano.common import utils
 from murano.dsl import dsl_types
 from murano.dsl import exceptions
 from murano.dsl import helpers
@@ -45,10 +44,10 @@ class MuranoProperty(dsl_types.MuranoProperty, typespec.Spec,
             return super(MuranoProperty, self).transform(*args, **kwargs)
         except exceptions.ContractViolationException as e:
             msg = u'[{0}.{1}{2}] {3}'.format(
-                self.declaring_type.name, self.name, e.path, six.text_type(e))
-            six.reraise(exceptions.ContractViolationException,
-                        exceptions.ContractViolationException(msg),
-                        sys.exc_info()[2])
+                self.declaring_type.name, self.name, e.path, str(e))
+            utils.reraise(exceptions.ContractViolationException,
+                          exceptions.ContractViolationException(msg),
+                          sys.exc_info()[2])
 
     @property
     def name(self):

@@ -12,9 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-
-import six
-
 from murano.dsl import constants
 from murano.dsl import dsl_exception
 from murano.dsl import exceptions
@@ -140,7 +137,7 @@ class WhileDoMacro(expressions.DslExpression):
 
 class ForMacro(expressions.DslExpression):
     def __init__(self, For, In, Do):
-        if not isinstance(For, six.string_types):
+        if not isinstance(For, str):
             raise exceptions.DslSyntaxError(
                 'For value must be of string type')
         self._code = CodeBlock(Do)

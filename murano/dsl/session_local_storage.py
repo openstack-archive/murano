@@ -15,9 +15,8 @@
 # This code is almost a complete copy of eventlet.corolocal with only
 # the concept of current thread replaced with current session
 
+import collections
 import weakref
-
-import six
 
 from murano.dsl import helpers
 
@@ -70,7 +69,7 @@ def session_local(cls):
     return type(cls.__name__, (cls, _local), {})
 
 
-class SessionLocalDict(six.moves.UserDict, object):
+class SessionLocalDict(collections.UserDict, object):
     def __init__(self, **kwargs):
         self.__session_data = weakref.WeakKeyDictionary()
         self.__default = {}

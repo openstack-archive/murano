@@ -14,11 +14,8 @@
 
 import abc
 
-import six
 
-
-@six.add_metaclass(abc.ABCMeta)
-class MuranoPackageLoader(object):
+class MuranoPackageLoader(object, metaclass=abc.ABCMeta):
     @abc.abstractmethod
     def load_package(self, package_name, version_spec):
         pass

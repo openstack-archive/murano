@@ -14,8 +14,6 @@
 
 import re
 
-import six
-
 TYPE_NAME_RE = re.compile(r'^([a-zA-Z_]\w*:|:)?[a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*$')
 NS_RE = re.compile(r'^([a-zA-Z_]\w*(\.[a-zA-Z_]\w*)*)?$')
 PREFIX_RE = re.compile(r'^([a-zA-Z_]\w*|=)$')
@@ -40,7 +38,7 @@ class NamespaceResolver(object):
     def resolve_name(self, name):
         if not self.is_typename(name, True):
             raise ValueError('Invalid type name "{0}"'.format(name))
-        name = six.text_type(name)
+        name = str(name)
         if ':' not in name:
             if '.' in name:
                 parts = ['', name]
@@ -63,7 +61,7 @@ class NamespaceResolver(object):
     def is_typename(name, relaxed):
         if not name:
             return False
-        name = six.text_type(name)
+        name = str(name)
         if not relaxed and ':' not in name:
             return False
         return TYPE_NAME_RE.match(name) is not None

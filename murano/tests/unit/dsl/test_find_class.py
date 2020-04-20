@@ -12,7 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
 import warnings
 
 from murano.dsl import exceptions
@@ -37,7 +36,7 @@ class TestFindClass(test_case.DslTestCase):
                     "recent change in plugin naming scheme. If you are "
                     "developing applications targeting this plugin consider "
                     "changing its name")
-        self.assertEqual(expected, six.text_type(observed))
+        self.assertEqual(expected, str(observed))
 
     def test_find_class_short_name(self):
         self.assertIsNone(self._runner.testFindClassShortName())
@@ -47,4 +46,4 @@ class TestFindClass(test_case.DslTestCase):
                                      self._runner.testClassWithPrefixNotFound)
         expected = ('Class "io.murano.extensions.io.murano.test.TestFixture1" '
                     'is not found in io.murano/0.0.0, tests/0.0.0')
-        self.assertEqual(expected, six.text_type(observed))
+        self.assertEqual(expected, str(observed))

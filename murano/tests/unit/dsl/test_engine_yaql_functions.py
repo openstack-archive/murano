@@ -13,7 +13,6 @@
 #    under the License.
 
 import mock
-import six
 from testtools import matchers
 from yaql.language import exceptions as yaql_exceptions
 
@@ -163,8 +162,8 @@ class TestEngineYaqlFunctions(test_case.DslTestCase):
         name1 = self._runner.testRandomName()
         name2 = self._runner.testRandomName()
 
-        self.assertIsInstance(name1, six.string_types)
-        self.assertIsInstance(name2, six.string_types)
+        self.assertIsInstance(name1, str)
+        self.assertIsInstance(name2, str)
         self.assertThat(len(name1), matchers.GreaterThan(12))
         self.assertThat(len(name2), matchers.GreaterThan(12))
         self.assertThat(name1, matchers.NotEquals(name2))

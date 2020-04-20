@@ -12,8 +12,6 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import six
-
 from murano.dsl import dsl_types
 from murano.tests.unit.dsl.foundation import object_model as om
 from murano.tests.unit.dsl.foundation import test_case
@@ -75,7 +73,7 @@ class TestDump(test_case.DslTestCase):
         result = self._runner.testDump(source)
         res = self._get_body(result)
         string_keys = [k for k in res.keys()
-                       if isinstance(res[k], six.string_types)]
+                       if isinstance(res[k], str)]
         obj_keys = [k for k in res.keys()
                     if isinstance(res[k], dict)]
         self.assertEqual(2, len(string_keys))
@@ -92,7 +90,7 @@ class TestDump(test_case.DslTestCase):
         result = self._runner.testDump(source)
         res = self._get_body(result)
         self._get_body(res['a'])
-        self.assertIsInstance(res['b'], six.string_types)
+        self.assertIsInstance(res['b'], str)
 
     def test_dump_with_inheritance(self):
         source = om.Object('dumptests.DumpTarget4', foo='FOO', qux='QUX')

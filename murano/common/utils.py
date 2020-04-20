@@ -298,3 +298,15 @@ def split_for_quotes(value):
     val_split = [val[0] or val[1] for val in re.findall(tmp, value)]
     replaced_inner_quotes = [s.replace(r'\"', '"') for s in val_split]
     return replaced_inner_quotes
+
+
+def reraise(tp, value, tb=None):
+    try:
+        if value is None:
+            value = tp()
+        if value.__traceback__ is not tb:
+            raise value.with_traceback(tb)
+        raise value
+    finally:
+        value = None
+        tb = None
