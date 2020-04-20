@@ -24,7 +24,6 @@ import jsonpointer
 from oslo_config import cfg as oslo_cfg
 from oslo_log import log as logging
 from oslo_serialization import base64
-import six
 from yaql.language import specs
 from yaql.language import utils
 from yaql.language import yaqltypes
@@ -67,7 +66,7 @@ def pselect(collection, composer):
 @specs.parameter('mappings', collections.Mapping)
 @specs.extension_method
 def bind(obj, mappings):
-    if isinstance(obj, six.string_types) and obj.startswith('$'):
+    if isinstance(obj, str) and obj.startswith('$'):
         value = _convert_macro_parameter(obj[1:], mappings)
         if value is not None:
             return value
@@ -78,7 +77,7 @@ def bind(obj, mappings):
         for key, value in obj.items():
             result[bind(key, mappings)] = bind(value, mappings)
         return result
-    elif isinstance(obj, six.string_types) and obj.startswith('$'):
+    elif isinstance(obj, str) and obj.startswith('$'):
         value = _convert_macro_parameter(obj[1:], mappings)
         if value is not None:
             return value
@@ -90,7 +89,7 @@ def _convert_macro_parameter(macro, mappings):
 
     def replace(match):
         replaced[0] = True
-        return six.text_type(mappings.get(match.group(1)))
+        return str(mappings.get(match.group(1)))
 
     result = re.sub('{(\\w+?)}', replace, macro)
     if replaced[0]:

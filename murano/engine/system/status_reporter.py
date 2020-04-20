@@ -19,7 +19,6 @@ import socket
 from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
-import six
 
 from murano.common import uuidutils
 from murano.dsl import dsl
@@ -40,7 +39,7 @@ class StatusReporter(object):
             StatusReporter.transport,
             publisher_id=uuidutils.generate_uuid(),
             topics=['murano'])
-        if isinstance(environment, six.string_types):
+        if isinstance(environment, str):
             self._environment_id = environment
         else:
             self._environment_id = environment.id
