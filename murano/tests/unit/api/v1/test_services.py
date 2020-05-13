@@ -63,7 +63,7 @@ class TestServicesApi(tb.ControllerTest, tb.MuranoApiTestCase):
         path = "/"
 
         request = self._post('/v1/environments/{0}/services'.
-                             format(environment_id, session_id), b'',
+                             format(environment_id), b'',
                              **CREDENTIALS_1)
         request.headers['X-Configuration-Session'] = str(session_id)
         request.context.session = session_id
@@ -105,7 +105,7 @@ class TestServicesApi(tb.ControllerTest, tb.MuranoApiTestCase):
         path = "/"
 
         request = self._put('/v1/environments/{0}/services'.
-                            format(environment_id, session_id), b'',
+                            format(environment_id), b'',
                             **CREDENTIALS_1)
         request.headers['X-Configuration-Session'] = str(session_id)
         request.context.session = session_id
@@ -149,7 +149,7 @@ class TestServicesApi(tb.ControllerTest, tb.MuranoApiTestCase):
         # Create service
         path = '/'
         request = self._post('/v1/environments/{0}/services'.
-                             format(environment_id, session_id), b'',
+                             format(environment_id), b'',
                              **CREDENTIALS_1)
         request.headers['X-Configuration-Session'] = str(session_id)
         request.context.session = session_id
@@ -202,7 +202,7 @@ class TestServicesApi(tb.ControllerTest, tb.MuranoApiTestCase):
         # Create service
         path = '/'
         request = self._post('/v1/environments/{0}/services'.
-                             format(environment_id, session_id), b'',
+                             format(environment_id), b'',
                              **CREDENTIALS_1)
         request.headers['X-Configuration-Session'] = str(session_id)
         request.context.session = session_id
