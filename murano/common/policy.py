@@ -96,16 +96,12 @@ def check(rule, ctxt, target=None, do_raise=True, exc=None):
     else:
         return result
     finally:
-        extra = {'policy': {'rule': rule, 'target': target}}
-
         if result:
             LOG.debug("Policy check succeeded for rule {rule} on target "
-                      "{target}".format(rule=rule, target=repr(target),
-                                        extra=extra))
+                      "{target}".format(rule=rule, target=repr(target)))
         else:
             LOG.debug("Policy check failed for rule {rule} on target: "
-                      "{target}".format(rule=rule, target=repr(target),
-                                        extra=extra))
+                      "{target}".format(rule=rule, target=repr(target)))
 
 
 def check_is_admin(context):
