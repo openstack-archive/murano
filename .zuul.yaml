@@ -93,19 +93,36 @@
 
 - job:
     name: murano-grenade
-    parent: legacy-dsvm-base
-    timeout: 10800
+    parent: grenade
     voting: false
-    run: playbooks/legacy/grenade-devstack-murano/run.yaml
-    post-run: playbooks/legacy/grenade-devstack-murano/post.yaml
     irrelevant-files: *murano-irrelevant-files
     required-projects:
-      - openstack/grenade
-      - openstack/devstack-gate
-      - openstack/heat
-      - openstack/murano
-      - openstack/murano-dashboard
-      - openstack/python-heatclient
-      - openstack/python-muranoclient
-      - openstack/heat-tempest-plugin
-      - openstack/murano-tempest-plugin
+      - opendev.org/openstack/grenade
+      - opendev.org/openstack/heat
+      - opendev.org/openstack/murano
+      - opendev.org/openstack/murano-dashboard
+      - opendev.org/openstack/python-heatclient
+      - opendev.org/openstack/python-muranoclient
+      - opendev.org/openstack/murano-tempest-plugin
+      - opendev.org/openstack/heat-tempest-plugin
+    vars:
+      grenade_localrc:
+        RUN_HEAT_INTEGRATION_TESTS: False
+      devstack_plugins:
+        murano: https://opendev.org/openstack/murano
+        heat: https://opendev.org/openstack/heat
+      devstack_services:
+        tempest: true
+        s-account: false
+        s-container: false
+        s-object: false
+        s-proxy: false
+        tls-proxy: false
+        h-api: true
+        h-api-cfn: true
+        h-eng: true
+        heat: true
+      tempest_plugins:
+        - murano-tempest-plugin
+      tempest_test_regex: ^murano_tempest_tests\.tests\.scenario\.application_catalog\.test_deployment
+      tox_envlist: all
