@@ -58,9 +58,9 @@ master_doc = 'index'
 copyright = u'2015, Murano Developers'
 
 # openstackdocstheme options
-repository_name = 'openstack/murano'
-bug_project = 'murano'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/murano'
+openstackdocs_bug_project = 'murano'
+openstackdocs_bug_tag = ''
 
 # Release notes are version independent.
 # The short X.Y version.
@@ -95,7 +95,7 @@ exclude_patterns = []
 # show_authors = False
 
 # The name of the Pygments (syntax highlighting) style to use.
-pygments_style = 'sphinx'
+pygments_style = 'native'
 
 # A list of ignored prefixes for module index sorting.
 # modindex_common_prefix = []

@@ -55,9 +55,10 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # openstackdocstheme options
-repository_name = 'openstack/murano'
-bug_project = 'murano'
-bug_tag = ''
+openstackdocs_repo_name = 'openstack/murano'
+openstackdocs_pdf_link = True
+openstackdocs_bug_project = 'murano'
+openstackdocs_bug_tag = ''
 
 config_generator_config_file = '../../etc/oslo-config-generator/murano.conf'
 sample_config_basename = '_static/murano'
