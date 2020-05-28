@@ -8,7 +8,6 @@
       - release-notes-jobs
     check:
       jobs:
-        - murano-congress-devstack
         - murano-rally
         - murano-tempest-api
         - murano-tempest-cfapi
@@ -25,27 +24,6 @@
     post:
       jobs:
         - openstack-tox-cover
-- job:
-    name: murano-congress-devstack
-    parent: legacy-dsvm-base
-    run: playbooks/legacy/murano-congress-devstack-dsvm/run.yaml
-    post-run: playbooks/legacy/murano-congress-devstack-dsvm/post.yaml
-    voting: false
-    timeout: 4200
-    required-projects:
-      - openstack/devstack
-      - openstack/devstack-gate
-      - openstack/congress
-      - openstack/congress-dashboard
-      - openstack/heat
-      - openstack/mistral
-      - openstack/mistral-dashboard
-      - openstack/murano
-      - openstack/murano-dashboard
-      - openstack/python-congressclient
-      - openstack/python-heatclient
-      - openstack/python-mistralclient
-      - openstack/python-muranoclient
 
 - job:
     name: murano-rally
