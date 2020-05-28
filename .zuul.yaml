@@ -9,7 +9,6 @@
       - release-notes-jobs-python3
     check:
       jobs:
-        - murano-congress-devstack
         - murano-rally-task
         - murano-tempest-api
         - murano-tempest-cfapi
@@ -22,10 +21,8 @@
         - murano-tempest-api-ipv6-only
 
 - job:
-    name: murano-congress-devstack
-    parent: murano-tempest-base
-    voting: false
-    timeout: 4200
+    name: murano-rally-task
+    parent: rally-task-murano
     irrelevant-files: &murano-irrelevant-files
       - ^(test-|)requirements.txt$
       - ^setup.cfg$
@@ -34,29 +31,6 @@
       - ^releasenotes/.*$
       - ^murano/tests/.*$
       - ^contrib/.*$
-    required-projects:
-      - openstack/congress
-      - openstack/congress-dashboard
-      - openstack/mistral
-      - openstack/mistral-dashboard
-      - openstack/python-congressclient
-      - openstack/python-heatclient
-      - openstack/python-mistralclient
-      - openstack/python-muranoclient
-    vars:
-      devstack_services:
-        tls-proxy: false
-      devstack_localrc:
-        MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: true
-      devstack_plugins:
-        congress: https://opendev.org/openstack/congress
-        mistral: https://opendev.org/openstack/mistral
-      tempest_test_regex: functional
-
-- job:
-    name: murano-rally-task
-    parent: rally-task-murano
-    irrelevant-files: *murano-irrelevant-files
     timeout: 7800
     vars:
       devstack_plugins:
