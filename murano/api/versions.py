@@ -45,7 +45,7 @@ class Controller(object):
         response = webob.Response(request=req,
                                   status=http_client.MULTIPLE_CHOICES,
                                   content_type='application/json')
-        response.body = jsonutils.dumps(dict(versions=version_objs))
+        response.text = jsonutils.dumps(dict(versions=version_objs))
         return response
 
     @webob.dec.wsgify(RequestClass=wsgi.Request)
