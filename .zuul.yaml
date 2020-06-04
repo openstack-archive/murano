@@ -56,6 +56,7 @@
 - job:
     name: murano-rally-task
     parent: rally-task-murano
+    voting: false
     irrelevant-files: *murano-irrelevant-files
     timeout: 7800
     vars:
