@@ -34,6 +34,9 @@ def init_application():
     LOG = logging.getLogger('murano.api')
 
     logging.register_options(cfg.CONF)
+    # NOTE(hberaud): Call reset to ensure the ConfigOpts object doesn't
+    # already contain registered options if the app is reloaded.
+    cfg.CONF.reset()
     cfg.CONF(project='murano')
     logging.setup(cfg.CONF, 'murano')
     config.set_middleware_defaults()
