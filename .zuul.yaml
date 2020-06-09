@@ -8,9 +8,10 @@
       - release-notes-jobs
     check:
       jobs:
-        - murano-congress-devstack
-        - murano-rally-task
-        - murano-tempest-api
+        - murano-rally-task:
+            voting: false
+        - murano-tempest-api:
+            voting: false
         - murano-tempest-cfapi
         - openstack-tox-lower-constraints
         - openstack-tox-cover:
@@ -18,7 +19,6 @@
     gate:
       queue: murano
       jobs:
-        - murano-tempest-api
         - openstack-tox-lower-constraints
     experimental:
       jobs:
@@ -27,36 +27,6 @@
     post:
       jobs:
         - openstack-tox-cover
-- job:
-    name: murano-congress-devstack
-    parent: murano-tempest-base
-    voting: false
-    timeout: 4200
-    irrelevant-files:
-      - ^(test-|)requirements.txt$
-      - ^setup.cfg$
-      - ^doc/.*$
-      - ^.*\.rst$
-      - ^releasenotes/.*$
-      - ^murano/tests/.*$
-    required-projects:
-      - openstack/congress
-      - openstack/congress-dashboard
-      - openstack/mistral
-      - openstack/mistral-dashboard
-      - openstack/python-congressclient
-      - openstack/python-heatclient
-      - openstack/python-mistralclient
-      - openstack/python-muranoclient
-    vars:
-      devstack_services:
-        tls-proxy: false
-      devstack_localrc:
-        MURANO_ENABLE_MODEL_POLICY_ENFORCEMENT: true
-      devstack_plugins:
-        congress: https://opendev.org/openstack/congress
-        mistral: https://opendev.org/openstack/mistral
-      tempest_test_regex: functional
 
 - job:
     name: murano-rally-task
@@ -100,7 +70,7 @@
         s-proxy: false
         tls-proxy: false
       devstack_localrc:
-        TEMPEST_PLUGINS: "'{{ ansible_user_dir }}/src/opendev.org/openstack/murano-tempest-plugin'"
+        TEMPEST_PLUGINS: "/opt/stack/murano-tempest-plugin"
       tempest_test_regex: application_catalog
       tox_envlist: all
 
