@@ -408,7 +408,7 @@ function install_murano_pythonclient() {
 # start_murano() - Start running processes, including screen
 function start_murano() {
     if [ "$MURANO_USE_UWSGI" == "True" ]; then
-        run_process murano-api "$MURANO_BIN_DIR/uwsgi --procname-prefix murano-api --ini $MURANO_UWSGI_CONF"
+        run_process murano-api "$(which uwsgi) --procname-prefix murano-api --ini $MURANO_UWSGI_CONF"
     else
         run_process murano-api "$MURANO_BIN_DIR/murano-api --config-file $MURANO_CONF_DIR/murano.conf"
     fi
