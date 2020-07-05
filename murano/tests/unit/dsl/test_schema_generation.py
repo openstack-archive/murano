@@ -47,7 +47,7 @@ class TestSchemaGeneration(test_case.DslTestCase):
             schema = name_or_schema
         self.assertIn('type', schema)
         if isinstance(types, list):
-            self.assertItemsEqual(schema['type'], types)
+            self.assertCountEqual(schema['type'], types)
         else:
             self.assertEqual(schema['type'], types)
         return schema
@@ -80,7 +80,7 @@ class TestSchemaGeneration(test_case.DslTestCase):
             'templateProperty', ['null', 'muranoObject'])
         self.assertEqual('SampleClass1', schema.get('muranoType'))
         self.assertTrue(schema.get('owned'))
-        self.assertItemsEqual(
+        self.assertCountEqual(
             ['stringProperty'],
             schema.get('excludedProperties'))
 

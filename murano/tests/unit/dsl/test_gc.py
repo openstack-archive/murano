@@ -45,7 +45,7 @@ class TestGC(test_case.DslTestCase):
         )
         model = {'Objects': None, 'ObjectsCopy': model}
         self.new_runner(model)
-        self.assertItemsEqual(['node1', 'node2'], self.traces[:2])
+        self.assertCountEqual(['node1', 'node2'], self.traces[:2])
         self.assertEqual('root', self.traces[-1])
 
     def test_collect_from_code(self):

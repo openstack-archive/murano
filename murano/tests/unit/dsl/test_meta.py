@@ -23,22 +23,22 @@ class TestMeta(test_case.DslTestCase):
         self._runner = self.new_runner(om.Object('metatests.TestMeta'))
 
     def test_class_multi_meta(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             [4, 1, 111, 2], self._runner.testClassMultiMeta())
 
     def test_class_single_meta(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             [5, 6], self._runner.testClassSingleMeta())
 
     def test_parent_class_not_inherited_meta(self):
         self.assertEqual(3, self._runner.testParentClassNotInheritedMeta())
 
     def test_method_meta(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             [7, 8, 9, 4, 1, 10], self._runner.testMethodMeta())
 
     def test_method_argument_meta(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             [1, 2, 3], self._runner.testMethodArgumentMeta())
 
     def test_inherited_property_meta(self):
@@ -46,7 +46,7 @@ class TestMeta(test_case.DslTestCase):
             [1], self._runner.testInheritedPropertyMeta())
 
     def test_overridden_property_meta(self):
-        self.assertItemsEqual(
+        self.assertCountEqual(
             [1, 4], self._runner.testOverriddenPropertyMeta())
 
     def test_package_meta(self):
@@ -54,7 +54,7 @@ class TestMeta(test_case.DslTestCase):
             [], self._runner.testPackageMeta())
 
     def test_complex_meta(self):
-        self.assertItemsEqual([
+        self.assertCountEqual([
             [1, 'metatests.PropertyType'],
             [2, 'metatests.PropertyType'],
             [3, 'metatests.PropertyType2'],
