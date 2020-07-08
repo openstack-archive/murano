@@ -17,8 +17,6 @@
 import os
 import sys
 
-import eventlet
-
 from oslo_concurrency import processutils
 from oslo_log import log as logging
 from oslo_service import service
@@ -28,13 +26,6 @@ from murano.common import engine
 
 CONF = config.CONF
 
-
-if os.name == 'nt':
-    # eventlet monkey patching causes subprocess.Popen to fail on Windows
-    # when using pipes due to missing non blocking I/O support
-    eventlet.monkey_patch(os=False)
-else:
-    eventlet.monkey_patch()
 
 # If ../murano/__init__.py exists, add ../ to Python search path, so that
 # it will override what happens to be installed in /usr/(local/)lib/python...
