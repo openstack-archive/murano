@@ -42,6 +42,7 @@ class TestAgent(base.MuranoTestCase):
             self.yaml_loader = yamllib.SafeLoader
 
         self.override_config('disable_murano_agent', False, group='engine')
+        self.override_config('signing_key', False, group='engine')
 
         mock_host = mock.MagicMock()
         mock_host.id = '1234'
@@ -354,6 +355,8 @@ class TestExecutionPlan(base.MuranoTestCase):
             self.yaml_loader = yamllib.CSafeLoader
         else:
             self.yaml_loader = yamllib.SafeLoader
+
+        self.override_config('signing_key', False, group='engine')
 
         self.mock_murano_class = mock.Mock(spec=murano_type.MuranoClass)
         self.mock_murano_class.name = 'io.murano.system.Agent'

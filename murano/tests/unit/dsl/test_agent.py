@@ -62,6 +62,7 @@ class TestAgentListener(test_case.DslTestCase):
 class TestAgent(test_case.DslTestCase):
     def test_agent_enabled(self):
         self.override_config('disable_murano_agent', False, 'engine')
+        self.override_config('signing_key', False, group='engine')
         agent_cls = 'murano.engine.system.agent.Agent'
         a = agent.Agent(mock.MagicMock())
         self.assertTrue(a.enabled)
@@ -73,6 +74,7 @@ class TestAgent(test_case.DslTestCase):
 
     def test_agent_disabled(self):
         self.override_config('disable_murano_agent', True, 'engine')
+        self.override_config('signing_key', False, group='engine')
         a = agent.Agent(mock.MagicMock())
         self.assertFalse(a.enabled)
         self.assertRaises(exc.PolicyViolationException, a.call, {}, None)
