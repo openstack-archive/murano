@@ -13,7 +13,10 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
-import congressclient
+try:
+    import congressclient
+except ImportError:
+    congressclient = None
 from unittest import mock
 
 from oslo_config import cfg
@@ -27,6 +30,8 @@ CONF = cfg.CONF
 
 class TestModelPolicyEnforcer(base.MuranoTestCase):
     def setUp(self):
+        if not congressclient:
+            self.skipTest('skipped ModelPolicyEnforcer tests')
         super(TestModelPolicyEnforcer, self).setUp()
 
         self.obj = mock.Mock()

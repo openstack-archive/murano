@@ -102,7 +102,6 @@ pyOpenSSL==17.5.0
 pyparsing==2.2.0
 pyperclip==1.6.0
 python-barbicanclient==4.6.0
-python-congressclient==1.9.0
 python-dateutil==2.7.0
 python-editor==1.0.3
 python-glanceclient==2.9.1
