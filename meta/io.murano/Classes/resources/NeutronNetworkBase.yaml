@@ -132,7 +132,7 @@ Methods:
                 $portName:
                   properties:
                     allowed_address_pairs:
-                      - ip_address: $sip.getSharedIpRef()
+                      - ip_address: $sip.virtualIp + '/32'
           - $patchTemplate: $patchTemplate.mergeWith($template)
 
       - $instanceFipOutput: null
