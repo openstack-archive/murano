@@ -611,8 +611,9 @@ class TestCombinedPackageLoader(base.MuranoTestCase):
         self.loader.api_loader.import_fixation_table(test_fixations)
 
         expected_table = {'test_package_1': ['1.1.1'],
-                          'test_package_2': ['2.2.2', '3.3.3']}
+                          'test_package_2': sorted(['2.2.2', '3.3.3'])}
         table = self.loader.export_fixation_table()
+        table['test_package_2'] = sorted(table['test_package_2'])
 
         self.assertEqual(sorted(expected_table.items()),
                          sorted(table.items()))

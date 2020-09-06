@@ -22,6 +22,7 @@
 
 - job:
     name: murano-rally-task
+    voting: false
     parent: rally-task-murano
     irrelevant-files: &murano-irrelevant-files
       - ^(test-|)requirements.txt$

@@ -373,8 +373,9 @@ class TestXMLDictSerializer(base.MuranoTestCase):
         xml_doc = minidom.Document()
         links = [{"rel": "rel", "href": "href", "type": "type"}]
         link_nodes = self.serializer._create_link_nodes(xml_doc, links)
-        self.assertEqual('<atom:link href="href" rel="rel" type="type"/>',
-                         link_nodes[0].toxml())
+        result = link_nodes[0].toxml()
+        for item in ['<atom:link', 'rel="rel"', 'href="href"', 'type="type"']:
+            self.assertIn(item, result)
 
     def test_add_xmlns(self):
         xml_dict_serializer = wsgi.XMLDictSerializer()
