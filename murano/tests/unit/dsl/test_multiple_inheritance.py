@@ -56,14 +56,14 @@ class TestMultipleInheritance(test_case.DslTestCase):
 
     def test_super(self):
         self._runner.on(self._multi_derived).testSuper()
-        self.assertItemsEqual(
+        self.assertCountEqual(
             ['CommonParent::virtualMethod', 'ParentClass2::virtualMethod',
              'CommonParent::virtualMethod', 'ParentClass2::virtualMethod'],
             self.traces)
 
     def test_psuper(self):
         self._runner.on(self._multi_derived).testPsuper()
-        self.assertItemsEqual(
+        self.assertCountEqual(
             ['CommonParent::virtualMethod', 'ParentClass2::virtualMethod',
              'CommonParent::virtualMethod', 'ParentClass2::virtualMethod'],
             self.traces)

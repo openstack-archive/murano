@@ -128,7 +128,7 @@ class TestContracts(test_case.DslTestCase):
         arg = om.Object('CreatedClass2', property1='qwerty', property2=123)
         result = self._runner.testTemplateContract(arg)
         self.assertIsInstance(result, dict)
-        self.assertItemsEqual(['?', 'property1', 'property2'], result.keys())
+        self.assertCountEqual(['?', 'property1', 'property2'], result.keys())
 
     def test_template_property_contract(self):
         template = {
@@ -148,12 +148,12 @@ class TestContracts(test_case.DslTestCase):
                         property2='INVALID')
         result = self._runner.testTemplateContractExcludeProperty(arg)
         self.assertIsInstance(result, dict)
-        self.assertItemsEqual(['?', 'property1'], result.keys())
+        self.assertCountEqual(['?', 'property1'], result.keys())
 
     def test_template_contract_with_property_exclusion_from_mpl(self):
         result = self._runner.testTemplateContractExcludePropertyFromMpl()
         self.assertIsInstance(result, dict)
-        self.assertItemsEqual(['?', 'property1'], result.keys())
+        self.assertCountEqual(['?', 'property1'], result.keys())
 
     def test_check_contract(self):
         arg = om.Object('SampleClass2', class2Property='qwerty')
