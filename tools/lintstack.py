@@ -16,6 +16,7 @@
 
 """pylint error checking."""
 
+import io
 import json
 import os
 import re
@@ -23,7 +24,6 @@ import sys
 
 from pylint import lint
 from pylint.reporters import text
-from six.moves import cStringIO as StringIO
 
 # enabled checks
 # http://pylint-messages.wikidot.com/all-codes
@@ -159,7 +159,7 @@ class ErrorKeys(object):
 
 
 def run_pylint():
-    buff = StringIO()
+    buff = io.StringIO()
     reporter = text.ParseableTextReporter(output=buff)
     args = ["-rn", "--disable=all", "--enable=" + ",".join(ENABLED_CODES),
             "murano"]
