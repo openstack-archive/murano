@@ -613,8 +613,8 @@ def assemble_object_definition(parsed, model_format=dsl_types.DumpTypes.Mixed):
 
 
 def function(c):
-    if hasattr(c, 'im_func'):
-        return c.im_func
+    if hasattr(c, '__func__'):
+        return c.__func__
     return c
 
 
