@@ -13,6 +13,7 @@
 
 import copy
 import semantic_version
+import types
 from unittest import mock
 import weakref
 
@@ -231,6 +232,18 @@ class TestDSLHelpers(base.MuranoTestCase):
         e = self.assertRaises(ValueError, helpers.assemble_object_definition,
                               test_parsed, None)
         self.assertEqual('Invalid Serialization Type', str(e))
+
+    def test_function(self):
+        def f():
+            return
+        self.assertTrue(isinstance(helpers.function(f), types.FunctionType))
+
+    def test_function_from_method(self):
+        class C:
+            def m(self):
+                return
+        c = C()
+        self.assertTrue(isinstance(helpers.function(c.m), types.FunctionType))
 
     def test_weak_proxy(self):
         self.assertIsNone(helpers.weak_proxy(None))

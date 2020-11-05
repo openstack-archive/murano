@@ -1,0 +1,4 @@
+---
+fixes:
+  - Avoid the `'method' object has no attribute '__yaql_function__'` error
+    when calling some YAQL functions with Python 3
