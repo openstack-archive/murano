@@ -17,6 +17,7 @@ from keystoneauth1 import loading as ks_loading
 from oslo_config import cfg
 from oslo_log import log as logging
 from oslo_middleware import cors
+from oslo_policy import opts
 
 from murano.common.i18n import _
 from murano import version
@@ -308,6 +309,23 @@ def parse_args(args=None, usage=None, default_config_files=None):
          version=version.version_string,
          usage=usage,
          default_config_files=default_config_files)
+
+
+def set_lib_defaults():
+    """Update default value for configuration options from other namespace.
+
+    Example, oslo lib config options. This is needed for
+    config generator tool to pick these default value changes.
+    https://docs.openstack.org/oslo.config/latest/cli/
+    generator.html#modifying-defaults-from-other-namespaces
+    """
+
+    set_middleware_defaults()
+
+    # TODO(gmann): Remove setting the default value of config policy_file
+    # once oslo_policy change the default value to 'policy.yaml'.
+    # https://github.com/openstack/oslo.policy/blob/a626ad12fe5a3abd49d70e3e5b95589d279ab578/oslo_policy/opts.py#L49
+    opts.set_defaults(CONF, 'policy.yaml')
 
 
 def set_middleware_defaults():

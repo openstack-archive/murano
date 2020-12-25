@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+from oslo_config import cfg
 from oslo_upgradecheck.upgradecheck import Code
 
 from murano.cmd import status
@@ -24,7 +25,12 @@ class TestUpgradeChecks(base.MuranoTestCase):
         super(TestUpgradeChecks, self).setUp()
         self.cmd = status.Checks()
 
-    def test__sample_check(self):
-        check_result = self.cmd._sample_check()
-        self.assertEqual(
-            Code.SUCCESS, check_result.code)
+    def test_checks(self):
+        cfg.CONF(args=[], project='murano')
+        for name, func in self.cmd._upgrade_checks:
+            if isinstance(func, tuple):
+                func_name, kwargs = func
+                result = func_name(self, **kwargs)
+            else:
+                result = func(self)
+            self.assertEqual(Code.SUCCESS, result.code)

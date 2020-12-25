@@ -32,10 +32,6 @@ class TestAuthUtils(base.MuranoTestCase):
         password_option = ka_loading.get_auth_plugin_conf_options('password')
         cfg.CONF.register_opts(password_option,
                                group=auth_utils.CFG_MURANO_AUTH_GROUP)
-        self.addCleanup(
-            cfg.CONF.unregister_opts,
-            password_option,
-            group=auth_utils.CFG_MURANO_AUTH_GROUP)
         self.addCleanup(mock.patch.stopall)
 
     def _init_mock_cfg(self):

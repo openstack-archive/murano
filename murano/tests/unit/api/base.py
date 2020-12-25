@@ -17,6 +17,7 @@ import logging
 from unittest import mock
 
 import fixtures
+from oslo_config import cfg
 from oslo_utils import timeutils
 import routes
 import urllib
@@ -126,7 +127,7 @@ class ControllerTest(object):
         super(ControllerTest, self).setUp()
 
         self.is_admin = False
-
+        cfg.CONF(args=[], project='murano')
         policy.init(use_conf=False)
         real_policy_check = policy.check
 
