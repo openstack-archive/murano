@@ -20,6 +20,7 @@ from oslo_config import cfg
 from oslo_log import log as logging
 import oslo_messaging as messaging
 
+from murano.common import rpc
 from murano.common import uuidutils
 from murano.dsl import dsl
 
@@ -29,14 +30,11 @@ LOG = logging.getLogger(__name__)
 
 @dsl.name('io.murano.system.StatusReporter')
 class StatusReporter(object):
-    transport = None
-
     def __init__(self, environment):
-        if StatusReporter.transport is None:
-            StatusReporter.transport = messaging.get_notification_transport(
-                CONF)
+        if not rpc.initialized():
+            rpc.init()
         self._notifier = messaging.Notifier(
-            StatusReporter.transport,
+            rpc.NOTIFICATION_TRANSPORT,
             publisher_id=uuidutils.generate_uuid(),
             topics=['murano'])
         if isinstance(environment, str):
@@ -68,16 +66,13 @@ class StatusReporter(object):
 
 
 class Notification(object):
-    transport = None
-
     def __init__(self):
         if not CONF.stats.env_audit_enabled:
             return
-
-        if Notification.transport is None:
-            Notification.transport = messaging.get_notification_transport(CONF)
+        if not rpc.initialized():
+            rpc.init()
         self._notifier = messaging.Notifier(
-            Notification.transport,
+            rpc.NOTIFICATION_TRANSPORT,
             publisher_id=('murano.%s' % socket.gethostname()),
             driver='messaging')
 

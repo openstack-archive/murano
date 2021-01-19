@@ -16,8 +16,6 @@ import uuid
 
 from oslo_config import cfg
 from oslo_log import log as logging
-import oslo_messaging as messaging
-from oslo_messaging.rpc import dispatcher
 from oslo_messaging import target
 from oslo_service import service
 from oslo_utils import timeutils
@@ -25,6 +23,7 @@ import pytz
 from sqlalchemy import desc
 
 from murano.common.helpers import token_sanitizer
+from murano.common import rpc
 from murano.db import models
 from murano.db.services import environments
 from murano.db.services import instances
@@ -226,25 +225,21 @@ class Service(service.Service):
 
 
 def get_notification_listener():
-
     endpoints = [report_notification, track_instance, untrack_instance]
-    transport = messaging.get_notification_transport(CONF)
     s_target = target.Target(topic='murano', server=str(uuid.uuid4()))
-    listener = messaging.get_notification_listener(
-        transport, [s_target], endpoints, executor='threading')
+    listener = rpc.get_notification_listener(
+        [s_target], endpoints, executor='threading'
+    )
 
     return listener
 
 
 def get_rpc_server():
-
     endpoints = [ResultEndpoint()]
-    transport = messaging.get_rpc_transport(CONF)
     s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
-    access_policy = dispatcher.DefaultRPCAccessPolicy
-    server = messaging.get_rpc_server(
-        transport, s_target, endpoints, 'threading',
-        access_policy=access_policy)
+    server = rpc.get_server(
+        s_target, endpoints, executor='threading'
+    )
 
     return server
 
@@ -256,13 +251,10 @@ class NotificationService(Service):
 
     def start(self):
         endpoints = [report_notification, track_instance, untrack_instance]
-
-        transport = messaging.get_notification_transport(CONF)
         s_target = target.Target(topic='murano', server=str(uuid.uuid4()))
-
-        self.server = messaging.get_notification_listener(
-            transport, [s_target], endpoints, executor='eventlet')
-
+        self.server = rpc.get_notification_listener(
+            [s_target], endpoints, executor='eventlet'
+        )
         self.server.start()
         super(NotificationService, self).start()
 
@@ -271,12 +263,9 @@ class ApiService(Service):
 
     def start(self):
         endpoints = [ResultEndpoint()]
-
-        transport = messaging.get_rpc_transport(CONF)
         s_target = target.Target('murano', 'results', server=str(uuid.uuid4()))
-        access_policy = dispatcher.DefaultRPCAccessPolicy
-        self.server = messaging.get_rpc_server(
-            transport, s_target, endpoints, 'eventlet',
-            access_policy=access_policy)
+        self.server = rpc.get_server(
+            s_target, endpoints, executor='eventlet'
+        )
         self.server.start()
         super(ApiService, self).start()

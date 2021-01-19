@@ -16,6 +16,7 @@
 from oslo_config import cfg
 import oslo_messaging as messaging
 
+from murano.common import rpc
 from murano.common import uuidutils
 from murano.dsl import dsl
 
@@ -28,14 +29,11 @@ OS_INSTANCE = 200
 
 @dsl.name('io.murano.system.InstanceNotifier')
 class InstanceReportNotifier(object):
-    transport = None
-
     def __init__(self, environment):
-        if InstanceReportNotifier.transport is None:
-            InstanceReportNotifier.transport = \
-                messaging.get_notification_transport(CONF)
+        if not rpc.initialized():
+            rpc.init()
         self._notifier = messaging.Notifier(
-            InstanceReportNotifier.transport,
+            rpc.NOTIFICATION_TRANSPORT,
             publisher_id=uuidutils.generate_uuid(),
             topics=['murano'])
         self._environment_id = environment.id

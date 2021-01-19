@@ -35,12 +35,11 @@ class TestEngineService(base.MuranoTestCase):
     @mock.patch.object(service.Service, 'reset')
     @mock.patch.object(service.Service, 'stop')
     @mock.patch.object(service.Service, 'start')
-    @mock.patch('murano.common.engine.messaging')
-    def test_start_stop_reset(self, mock_messaging, mock_start,
+    @mock.patch('murano.common.rpc.get_server')
+    def test_start_stop_reset(self, mock_get_server, mock_start,
                               mock_stop, mock_reset):
         self.engine.start()
-        self.assertTrue(mock_messaging.get_rpc_transport.called)
-        self.assertTrue(mock_messaging.get_rpc_server.called)
+        self.assertTrue(mock_get_server.called)
         self.assertTrue(mock_start.called)
         self.engine.stop()
         self.assertTrue(mock_stop.called)
@@ -49,11 +48,10 @@ class TestEngineService(base.MuranoTestCase):
 
     @mock.patch.object(service.Service, 'stop')
     @mock.patch.object(service.Service, 'start')
-    @mock.patch('murano.common.engine.messaging')
-    def test_stop_graceful(self, mock_messaging, mock_start, mock_stop):
+    @mock.patch('murano.common.rpc.get_server')
+    def test_stop_graceful(self, mock_get_server, mock_start, mock_stop):
         self.engine.start()
-        self.assertTrue(mock_messaging.get_rpc_transport.called)
-        self.assertTrue(mock_messaging.get_rpc_server.called)
+        self.assertTrue(mock_get_server.called)
         self.assertTrue(mock_start.called)
         self.engine.stop(graceful=True)
         self.assertTrue(mock_stop.called)

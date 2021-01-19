@@ -14,18 +14,72 @@
 
 from oslo_config import cfg
 import oslo_messaging as messaging
-from oslo_messaging import rpc
+from oslo_messaging.rpc import dispatcher
 from oslo_messaging import target
 
 CONF = cfg.CONF
 
+NOTIFICATION_TRANSPORT = None
 TRANSPORT = None
 
 
+def init():
+    global TRANSPORT, NOTIFICATION_TRANSPORT
+    TRANSPORT = messaging.get_rpc_transport(CONF)
+    NOTIFICATION_TRANSPORT = messaging.get_notification_transport(CONF)
+
+
+def initialized():
+    return None not in [TRANSPORT, NOTIFICATION_TRANSPORT]
+
+
+def cleanup():
+    global TRANSPORT, NOTIFICATION_TRANSPORT
+    if TRANSPORT is not None:
+        TRANSPORT.cleanup()
+    if NOTIFICATION_TRANSPORT is not None:
+        NOTIFICATION_TRANSPORT.cleanup()
+    TRANSPORT = NOTIFICATION_TRANSPORT = None
+
+
+def get_client(target, timeout=None):
+    if TRANSPORT is None:
+        init()
+    return messaging.RPCClient(
+        TRANSPORT,
+        target,
+        timeout=timeout
+    )
+
+
+def get_server(target, endpoints, executor):
+    if TRANSPORT is None:
+        init()
+    access_policy = dispatcher.DefaultRPCAccessPolicy
+    return messaging.get_rpc_server(
+        TRANSPORT,
+        target,
+        endpoints,
+        executor=executor,
+        access_policy=access_policy
+    )
+
+
+def get_notification_listener(targets, endpoints, executor):
+    if NOTIFICATION_TRANSPORT is None:
+        init()
+    return messaging.get_notification_listener(
+        NOTIFICATION_TRANSPORT,
+        targets,
+        endpoints,
+        executor=executor
+    )
+
+
 class ApiClient(object):
-    def __init__(self, transport):
+    def __init__(self):
         client_target = target.Target('murano', 'results')
-        self._client = rpc.RPCClient(transport, client_target, timeout=15)
+        self._client = get_client(client_target, timeout=15)
 
     def process_result(self, result, environment_id):
         return self._client.call({}, 'process_result', result=result,
@@ -33,9 +87,9 @@ class ApiClient(object):
 
 
 class EngineClient(object):
-    def __init__(self, transport):
+    def __init__(self):
         client_target = target.Target('murano', 'tasks')
-        self._client = rpc.RPCClient(transport, client_target, timeout=15)
+        self._client = get_client(client_target, timeout=15)
 
     def handle_task(self, task):
         return self._client.cast({}, 'handle_task', task=task)
@@ -55,16 +109,12 @@ class EngineClient(object):
 
 
 def api():
-    global TRANSPORT
-    if TRANSPORT is None:
-        TRANSPORT = messaging.get_rpc_transport(CONF)
-
-    return ApiClient(TRANSPORT)
+    if not initialized():
+        init()
+    return ApiClient()
 
 
 def engine():
-    global TRANSPORT
-    if TRANSPORT is None:
-        TRANSPORT = messaging.get_rpc_transport(CONF)
-
-    return EngineClient(TRANSPORT)
+    if not initialized():
+        init()
+    return EngineClient()

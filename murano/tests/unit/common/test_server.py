@@ -280,7 +280,7 @@ class ServerTest(base.MuranoTestCase):
         service.reset()
         service.server.reset.assert_called_once_with()
 
-    @mock.patch('murano.common.server.messaging')
+    @mock.patch('murano.common.rpc.messaging')
     def test_notification_service_class(self, mock_messaging):
         mock_server = mock.MagicMock()
         mock_messaging.get_notification_listener.return_value = mock_server
@@ -292,7 +292,7 @@ class ServerTest(base.MuranoTestCase):
                          mock_messaging.get_notification_listener.call_count)
         mock_server.start.assert_called_once_with()
 
-    @mock.patch('murano.common.server.messaging')
+    @mock.patch('murano.common.rpc.messaging')
     def test_api_service_class(self, mock_messaging):
         mock_server = mock.MagicMock()
         mock_messaging.get_rpc_server.return_value = mock_server
