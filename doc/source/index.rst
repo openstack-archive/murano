@@ -111,11 +111,12 @@ Murano.
 Contributor Documentation
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Learn how to contribute to the project.
+* If you are a new contributor to Murano please refer: :doc:`contributor/contributing`
 
 .. toctree::
    :maxdepth: 1
 
+   contributor/contributing
    contributor/contributor_index
 
 Other Documentation
