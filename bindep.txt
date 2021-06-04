@@ -7,3 +7,5 @@ mysql-server [platform:dpkg]
 postgresql
 postgresql-client [platform:dpkg]
 
+# PDF Docs package dependencies
+tex-gyre [platform:dpkg doc]
