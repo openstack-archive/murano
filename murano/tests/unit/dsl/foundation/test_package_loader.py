@@ -12,6 +12,7 @@
 #    License for the specific language governing permissions and limitations
 #    under the License.
 
+import fnmatch
 import os.path
 
 
@@ -21,7 +22,6 @@ from murano.dsl import namespace_resolver
 from murano.dsl import package_loader
 from murano.engine import yaql_yaml_loader
 from murano.tests.unit.dsl.foundation import object_model
-from oslo_utils import fnmatch
 
 
 class TestPackage(murano_package.MuranoPackage):
