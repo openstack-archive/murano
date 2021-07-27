@@ -13,7 +13,7 @@
 # See the License for the specific language governing permissions and
 # limitations under the License.
 
-import collections
+from collections import abc
 import random
 import re
 import string
@@ -63,7 +63,7 @@ def pselect(collection, composer):
     return helpers.parallel_select(collection, composer)
 
 
-@specs.parameter('mappings', collections.Mapping)
+@specs.parameter('mappings', abc.Mapping)
 @specs.extension_method
 def bind(obj, mappings):
     if isinstance(obj, str) and obj.startswith('$'):
@@ -72,7 +72,7 @@ def bind(obj, mappings):
             return value
     elif utils.is_sequence(obj):
         return [bind(t, mappings) for t in obj]
-    elif isinstance(obj, collections.Mapping):
+    elif isinstance(obj, abc.Mapping):
         result = {}
         for key, value in obj.items():
             result[bind(key, mappings)] = bind(value, mappings)
