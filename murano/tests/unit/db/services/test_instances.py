@@ -54,8 +54,10 @@ class TestInstances(test_base.MuranoTestCase):
         mock_db_session.get_session().add.assert_called_once_with(
             mock_models.Instance())
 
+    @mock.patch('murano.db.services.instances.sqlalchemy')
     @mock.patch('murano.db.services.instances.models')
-    def test_track_instance_except_duplicate_entry(self, _, mock_db_session):
+    def test_track_instance_except_duplicate_entry(self, _, mock_sqlalchemy,
+                                                   mock_db_session):
         mock_db_session.get_session().add.side_effect =\
             exception.DBDuplicateEntry
 
@@ -64,6 +66,7 @@ class TestInstances(test_base.MuranoTestCase):
                        'test_type_name', 'test_type_title')
 
         self.assertEqual(1, mock_db_session.get_session().execute.call_count)
+        self.assertEqual(1, mock_sqlalchemy.update().where.call_count)
 
     @mock.patch('murano.db.services.instances.timeutils')
     def test_destroy_instance(self, mock_timeutils, mock_db_session):
