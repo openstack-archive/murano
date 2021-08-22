@@ -63,7 +63,6 @@
         s-container: false
         s-object: false
         s-proxy: false
-        tls-proxy: false
       devstack_localrc:
         TEMPEST_PLUGINS: "/opt/stack/murano-tempest-plugin"
       tempest_test_regex: application_catalog
@@ -118,7 +117,6 @@
         s-container: false
         s-object: false
         s-proxy: false
-        tls-proxy: false
         h-api: true
         h-api-cfn: true
         h-eng: true
