@@ -113,18 +113,18 @@ class MuranoMigrationsCheckers(object):
             'enabled': True,
             'description': 'some text',
             'is_public': False,
-            'tags': ['tag1', 'tag2'],
             'logo': b"logo blob here",
             'ui_definition': '{}',
             'owner_id': '123',
             'created': datetime.datetime.now(),
             'updated': datetime.datetime.now()
         }
-        package_table.insert().execute(package)
+        ins_stmt = package_table.insert(values=package)
+        engine.execute(ins_stmt)
 
         package['id'] = str(uuid.uuid4())
         self.assertRaises(db_exc.DBDuplicateEntry,
-                          package_table.insert().execute, package)
+                          engine.execute, ins_stmt)
 
     def _check_002(self, engine, data):
         self.assertEqual('002', migration.version(engine))
