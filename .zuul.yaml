@@ -32,6 +32,7 @@
       - ^releasenotes/.*$
       - ^murano/tests/.*$
       - ^contrib/.*$
+      - ^tools/.*$
     timeout: 7800
     vars:
       devstack_plugins:
