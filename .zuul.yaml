@@ -65,6 +65,7 @@
         s-proxy: false
       devstack_localrc:
         TEMPEST_PLUGINS: "/opt/stack/murano-tempest-plugin"
+        KEYSTONE_ADMIN_ENDPOINT: true
       tempest_test_regex: application_catalog
       tox_envlist: all
 
