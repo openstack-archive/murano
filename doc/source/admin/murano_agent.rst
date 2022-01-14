@@ -30,7 +30,7 @@ Currently murano-agent can be automatically installed by cloud-init. To deploy
 an application on an image with pre-installed cloud-init you should mark the
 image with Murano specific metadata. More information about preparing images
 can be found :ref:`here <upload_images>`. This type of installation has some
-limitations. The image has to have pre-installed python 2.7. Murano-agent is
+limitations. The image has to have pre-installed python. Murano-agent is
 installed from PyPi so the instance should have connectivity with the Internet.
 Also it requires an installation of some python packages, e.g. python-pip,
 python-dev, python-setuptools, python-virtualenv, which are also installed by
