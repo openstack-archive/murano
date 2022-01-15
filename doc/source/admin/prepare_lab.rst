@@ -14,8 +14,8 @@ System prerequisites
 Supported operating systems
 ---------------------------
 
-* Ubuntu Server 12.04 LTS
-* RHEL/CentOS 6.4
+* Ubuntu Server 16.04 LTS or higher
+* RHEL/CentOS 7.4 or higher
 
 **System packages are required for Murano**
 
@@ -23,9 +23,9 @@ Supported operating systems
 
 * gcc
 
-* python-pip
+* python3-pip
 
-* python-dev
+* python3-dev
 
 * libxml2-dev
 
@@ -35,23 +35,23 @@ Supported operating systems
 
 * libpq-dev
 
-* python-openssl
+* python3-openssl
 
 * mysql-client
 
 Install all the requirements on Ubuntu by running::
 
-  sudo apt-get install gcc python-pip python-dev \
+  sudo apt-get install gcc python3-pip python3-dev \
   libxml2-dev libxslt-dev libffi-dev \
-  libpq-dev python-openssl mysql-client
+  libpq-dev python3-openssl mysql-client
 
 *CentOS*
 
 * gcc
 
-* python-pip
+* python3-pip
 
-* python-devel
+* python3-devel
 
 * libxml2-devel
 
@@ -67,7 +67,7 @@ Install all the requirements on Ubuntu by running::
 
 Install all the requirements on CentOS by running::
 
-  sudo yum install gcc python-pip python-devel libxml2-devel \
+  sudo yum install gcc python3-pip python3-devel libxml2-devel \
   libxslt-devel libffi-devel postgresql-devel pyOpenSSL \
   mysql
 
