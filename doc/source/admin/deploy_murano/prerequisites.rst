@@ -16,27 +16,27 @@ prerequisites.
 
 **Supported operating systems:**
 
-* Ubuntu Server 14.04 LTS
+* Ubuntu Server
 * RHEL/CentOS
 * Debian
 
 **System packages for Ubuntu:**
 
 * gcc
-* python-pip
-* python-dev
+* python3-pip
+* python3-dev
 * libxml2-dev
 * libxslt-dev
 * libffi-dev
 * libpq-dev
-* python-openssl
+* python3-openssl
 * mysql-client
 
 **System packages for CentOS:**
 
 * gcc
-* python-pip
-* python-devel
+* python3-pip
+* python3-devel
 * libxml2-devel
 * libxslt-devel
 * libffi-devel
