@@ -20,11 +20,7 @@ from murano.common import auth_utils
 from murano.dsl import session_local_storage
 from oslo_config import cfg as config
 
-try:
-    from magnumclient.common.apiclient import exceptions
-except ImportError:
-    # NOTE (hongbin): For magnumclient versions before 2.0.0.
-    from magnumclient.openstack.common.apiclient import exceptions
+from magnumclient import exceptions
 
 CONF = config.CONF
 
