@@ -127,7 +127,7 @@ Take a look at the appSettings section:
             <add key="rabbitmq.allowInvalidCA" value="true"/>
             <add key="rabbitmq.sslServerName" value=""/>
 
-        </appSettings>
+    </appSettings>
 
 
 The desired parameter should be set directly to the value of the key that
@@ -146,4 +146,4 @@ SSL for Murano Dashboard
 If you are not going to use self-signed certificates, additional
 configuration does not need to be done. Just prefix https in the URL.
 Otherwise, set *MURANO_API_INSECURE = True* in Horizon's config file. You can
-find it in ``/etc/openstack-dashboard/local_settings.py.``.
+find it in ``/etc/openstack-dashboard/local_settings.py``.
