@@ -127,9 +127,3 @@ To delete an application that belongs to the environment:
    you should redeploy it to apply the recent changes. If the environment
    has not been deployed with this component, the changes are applied
    immediately on receiving the confirmation.
-
-.. warning::
-   Due to a known bug in Murano Kilo, resources allocated by a deleted
-   application might not be reclaimed until the deletion of an environment.
-   See `LP1417136 <https://bugs.launchpad.net/murano/+bug/1417136>`_
-   for the details.
