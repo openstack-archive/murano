@@ -40,7 +40,7 @@ Install additional packages required by disk image builder:
 
 .. code-block:: console
 
-    sudo apt-get install qemu-utils curl python-tox
+    sudo apt-get install qemu-utils curl python3-tox
 
 
 Export paths where additional dib elements are located:
