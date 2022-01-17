@@ -58,33 +58,28 @@ Install the API service and Engine
         [DEFAULT]
         debug = true
         verbose = true
-        rabbit_host = %RABBITMQ_SERVER_IP%
-        rabbit_userid = %RABBITMQ_USER%
-        rabbit_password = %RABBITMQ_PASSWORD%
-        rabbit_virtual_host = %RABBITMQ_SERVER_VIRTUAL_HOST%
-        driver = messagingv2
+        transport_url = rabbit://%RABBITMQ_USER%:%RABBITMQ_PASSWORD%@%RABBITMQ_SERVER_IP%:5672/
 
         ...
 
         [database]
-        backend = sqlalchemy
-        connection = sqlite:///murano.sqlite
+        connection = mysql+pymysql://murano:MURANO_DBPASS@controller/murano
 
         ...
 
         [keystone]
-        auth_url = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'
+        auth_url = http://%OPENSTACK_KEYSTONE_ENDPOINT%
 
         ...
 
         [keystone_authtoken]
-        www_authenticate_uri = 'http://%OPENSTACK_HOST_IP%:5000/v2.0'
-        auth_host = '%OPENSTACK_HOST_IP%'
-        auth_port = 5000
-        auth_protocol = http
-        admin_tenant_name = %OPENSTACK_ADMIN_TENANT%
-        admin_user = %OPENSTACK_ADMIN_USER%
-        admin_password = %OPENSTACK_ADMIN_PASSWORD%
+        project_domain_name = Default
+        project_name = %OPENSTACK_ADMIN_PROJECT%
+        user_domain_name = Default
+        password = %OPENSTACK_ADMIN_PASSWORD%
+        username = %OPENSTACK_ADMIN_USER%
+        auth_url = http://%OPENSTACK_KEYSTONE_ENDPOINT%
+        auth_type = password
 
         ...
 
