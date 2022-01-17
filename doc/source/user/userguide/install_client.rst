@@ -61,8 +61,10 @@ perform the following steps:
 
       export OS_USERNAME=user
       export OS_PASSWORD=password
-      export OS_TENANT_NAME=tenant
-      export OS_AUTH_URL=http://auth.example.com:5000
+      export OS_PROJECT_NAME=tenant
+      export OS_USER_DOMAIN_NAME=Default
+      export OS_PROJECT_DOMAIN_NAME=Default
+      export OS_AUTH_URL=http://auth.example.com:5000/v3
       export MURANO_URL=http://murano.example.com:8082/
 
 #. In the terminal, source the ``PROJECT-openrc.sh`` file. For example:
