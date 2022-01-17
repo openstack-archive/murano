@@ -1,3 +1,7 @@
+==========
+Murano API
+==========
+
 Glossary
 ========
 
@@ -689,7 +693,7 @@ Returns information about all deployments of the specified environment.
 +----------+------------------------------------+--------------------------------------+
 | GET      | /deployments                       | Get list of deployments for all      |
 |          |                                    | environments in user's project       |
-+----------+---------------------------------------------------------------------------+
++----------+------------------------------------+--------------------------------------+
 
 *Response*
 
