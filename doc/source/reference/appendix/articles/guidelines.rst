@@ -39,11 +39,11 @@ Unit tests are located at ``murano/tests``.
 
 Murano's suite of unit tests can be executed in an isolated environment
 with `Tox`_. To execute the unit tests run the following from the root of
-Murano repo on Python 2.7:
+Murano repo on Python 3.x:
 
 ::
 
-    tox -e py27
+    tox -e py3.x
 
 
 Documentation Guidelines
