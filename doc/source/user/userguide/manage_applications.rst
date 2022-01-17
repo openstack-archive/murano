@@ -575,10 +575,3 @@ To delete an application that belongs to the environment:
    you should redeploy the environment to apply the recent changes.
    If the environment has not been deployed with this component,
    the changes are applied immediately on receiving the confirmation.
-
-.. warning::
-   Due to a known bug in murano as of Kilo release, the OS resources
-   allocated by a deleted application might not be reclaimed until
-   you delete the environment. See the `Deallocating stack resources
-   <https://blueprints.launchpad.net/murano/+spec/deallocating-stack-resources>`_
-   blueprint for details.
