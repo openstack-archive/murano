@@ -50,7 +50,7 @@ class Controller(object):
         if all_environments:
             query = unit.query(models.Environment) \
                 .options(load_only('tenant_id')) \
-                .filter_by(tenant_id=request.context.tenant) \
+                .filter_by(tenant_id=request.context.project_id) \
                 .join(models.Task) \
                 .order_by(desc(models.Task.created))
             result = query.all()

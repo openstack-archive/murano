@@ -55,13 +55,13 @@ def stats_count(api, method):
                 ts = time.time()
                 result = func(*args, **kwargs)
                 te = time.time()
-                tenant = args[1].context.tenant
+                tenant = args[1].context.project_id
                 update_count(api, method, te - ts,
                              tenant)
                 return result
             except Exception:
                 te = time.time()
-                tenant = args[1].context.tenant
+                tenant = args[1].context.project_id
                 LOG.exception('API {api} method {method} raised an '
                               'exception'.format(api=api, method=method))
                 update_error_count(api, method, te - te, tenant)

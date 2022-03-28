@@ -44,7 +44,7 @@ class ContextMiddleware(wsgi.Middleware):
         roles = [r.strip() for r in req.headers.get('X-Roles').split(',')]
         kwargs = {
             'user': req.headers.get('X-User-Id'),
-            'tenant': req.headers.get('X-Tenant-Id'),
+            'project_id': req.headers.get('X-Tenant-Id'),
             'auth_token': req.headers.get('X-Auth-Token'),
             'session': req.headers.get('X-Configuration-Session'),
             'is_admin': CONF.admin_role in roles,

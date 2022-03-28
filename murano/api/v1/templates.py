@@ -43,7 +43,7 @@ class Controller(object):
         """
         LOG.debug('EnvTemplates:List')
         policy.check('list_env_templates', request.context)
-        tenant_id = request.context.tenant
+        tenant_id = request.context.project_id
         filters = {}
         if request.GET.get('is_public'):
             is_public = request.GET.get('is_public', 'false').lower() == 'true'
@@ -84,7 +84,7 @@ class Controller(object):
             LOG.debug('ENV TEMP NAME: {templ_name}>'.
                       format(templ_name=body['name']))
             template = env_temps.EnvTemplateServices.create(
-                body.copy(), request.context.tenant)
+                body.copy(), request.context.project_id)
             return template.to_dict()
         except db_exc.DBDuplicateEntry:
             msg = _('Env Template with specified name already exists')
@@ -245,7 +245,7 @@ class Controller(object):
         try:
             is_public = body.get('is_public', False)
             template = env_temps.EnvTemplateServices.clone(
-                env_template_id, request.context.tenant, body['name'],
+                env_template_id, request.context.project_id, body['name'],
                 is_public)
         except db_exc.DBDuplicateEntry:
             msg = _('Env template with specified name already exists')
@@ -258,7 +258,7 @@ class Controller(object):
         env_template = self._validate_exists(env_template_id)
         if env_template.is_public or request.context.is_admin:
             return
-        if env_template.tenant_id != request.context.tenant:
+        if env_template.tenant_id != request.context.project_id:
             msg = _('User has no access to these resources.')
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)

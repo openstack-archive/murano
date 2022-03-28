@@ -994,7 +994,7 @@ class TestCatalogApi(test_base.ControllerTest, test_base.MuranoApiTestCase):
                 del test_package_meta[attr]
 
         mock_request = mock.MagicMock(context=mock.MagicMock(
-            tenant=self.tenant))
+            project_id=self.tenant))
         mock_load_from_file.return_value = pkg_to_upload
         mock_policy_check.return_value = True
 

@@ -30,7 +30,7 @@ class TestUtils(test_base.MuranoTestCase):
         """Test check env."""
         mock_request = mock.MagicMock(context=test_utils.dummy_context())
         mock_env = mock.MagicMock(environment_id='test_env_id',
-                                  tenant_id=mock_request.context.tenant)
+                                  tenant_id=mock_request.context.project_id)
         mock_db_session.get_session().query().get.return_value = mock_env
 
         env = utils.check_env(mock_request, mock_env.environment_id)
@@ -117,7 +117,7 @@ class TestUtils(test_base.MuranoTestCase):
     def test_verify_env_template_with_invalid_tenant(self, mock_db_session):
         """Test session validation failure throws expected exception."""
         mock_request = mock.MagicMock(context=test_utils.dummy_context())
-        mock_request.context.tenant = mock.MagicMock(
+        mock_request.context.project_id = mock.MagicMock(
             return_value='test_tenant_id')
         mock_env_template = mock.MagicMock(tenant_id='another_test_tenant_id')
         mock_db_session.get_session().query().get.return_value =\

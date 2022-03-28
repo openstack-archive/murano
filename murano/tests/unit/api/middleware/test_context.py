@@ -30,7 +30,7 @@ class MiddlewareContextTest(base.MuranoTestCase):
         request_headers = {
             'X-Roles': 'admin',
             'X-User-Id': "",
-            'X-Tenant-Id': "",
+            'X-Project-Id': "",
             'X-Configuration-Session': "",
         }
         request = webob.Request.blank('/environments',

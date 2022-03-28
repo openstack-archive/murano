@@ -40,7 +40,7 @@ def check_env(request, environment_id):
         raise exc.HTTPNotFound(explanation=msg)
 
     if hasattr(request, 'context'):
-        if (environment.tenant_id != request.context.tenant and not
+        if (environment.tenant_id != request.context.project_id and not
                 request.context.is_admin):
             msg = _('User is not authorized to access'
                     ' these tenant resources')
@@ -87,7 +87,7 @@ def verify_env_template(func):
             raise exc.HTTPNotFound(explanation=msg)
 
         if hasattr(request, 'context'):
-            if template.tenant_id != request.context.tenant:
+            if template.tenant_id != request.context.project_id:
                 msg = _('User is not authorized to access'
                         ' this tenant resources')
                 LOG.error(msg)

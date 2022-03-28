@@ -273,7 +273,7 @@ class Controller(object):
                     raise exc.HTTPBadRequest(explanation=msg)
                 try:
                     package = db_api.package_upload(
-                        package_meta, req.context.tenant)
+                        package_meta, req.context.project_id)
                 except db_exc.DBDuplicateEntry:
                     msg = _('Package with specified full '
                             'name is already registered')

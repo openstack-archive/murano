@@ -31,7 +31,7 @@ class ActionServices(object):
             'action': action,
             'model': session.description,
             'token': context.auth_token,
-            'project_id': context.tenant,
+            'project_id': context.project_id,
             'user_id': context.user,
             'id': environment.id
         }

@@ -47,7 +47,7 @@ class Controller(object):
 
         credentials = {
             'token': request.context.auth_token,
-            'project_id': request.context.tenant,
+            'project_id': request.context.project_id,
             'user_id': request.context.user
         }
 
