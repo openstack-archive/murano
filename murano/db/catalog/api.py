@@ -51,17 +51,17 @@ def _package_get(package_id, session):
 
 def _authorize_package(package, context, allow_public=False):
 
-    if package.owner_id != context.tenant:
+    if package.owner_id != context.project_id:
         if not allow_public:
             msg = _("Package '{pkg_id}' is not owned by tenant "
                     "'{tenant}'").format(pkg_id=package.id,
-                                         tenant=context.tenant)
+                                         tenant=context.project_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
         if not package.is_public:
             msg = _("Package '{pkg_id}' is not public and not owned by "
                     "tenant '{tenant}' ").format(pkg_id=package.id,
-                                                 tenant=context.tenant)
+                                                 tenant=context.project_id)
             LOG.error(msg)
             raise exc.HTTPForbidden(explanation=msg)
 
@@ -298,23 +298,23 @@ def package_search(filters, context, manage_public=False,
 
     if catalog:
         # Only show packages one can deploy, i.e. own + public
-        query = query.filter(or_(pkg.owner_id == context.tenant,
+        query = query.filter(or_(pkg.owner_id == context.project_id,
                                  pkg.is_public))
     else:
         # Show packages one can edit.
         if not context.is_admin:
             if manage_public:
-                query = query.filter(or_(pkg.owner_id == context.tenant,
+                query = query.filter(or_(pkg.owner_id == context.project_id,
                                          pkg.is_public))
             else:
-                query = query.filter(pkg.owner_id == context.tenant)
+                query = query.filter(pkg.owner_id == context.project_id)
         # No else here admin can edit everything.
 
     if not filters.get('include_disabled', '').lower() == 'true':
         query = query.filter(pkg.enabled)
 
     if filters.get('owned', '').lower() == 'true':
-        query = query.filter(pkg.owner_id == context.tenant)
+        query = query.filter(pkg.owner_id == context.project_id)
 
     if 'type' in filters.keys():
         query = query.filter(pkg.type == filters['type'].title())
@@ -446,10 +446,10 @@ def package_delete(package_id, context):
 
     with session.begin():
         package = _package_get(package_id, session)
-        if not context.is_admin and package.owner_id != context.tenant:
+        if not context.is_admin and package.owner_id != context.project_id:
             raise exc.HTTPForbidden(
                 explanation="Package is not owned by the"
-                            " tenant '{0}'".format(context.tenant))
+                            " tenant '{0}'".format(context.project_id))
         session.delete(package)
 
 

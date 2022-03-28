@@ -111,11 +111,11 @@ class EnvironmentServices(object):
         data = {
             'Objects': objects,
             'Attributes': [],
-            'project_id': context.tenant,
+            'project_id': context.project_id,
             'user_id': context.user
         }
 
-        environment_params['tenant_id'] = context.tenant
+        environment_params['tenant_id'] = context.project_id
         environment = models.Environment()
         environment.update(environment_params)
 
@@ -273,7 +273,7 @@ class EnvironmentServices(object):
             return driver
 
         session = auth_utils.get_token_client_session(
-            context.auth_token, context.tenant)
+            context.auth_token, context.project_id)
         try:
             session.get_endpoint(service_type='network')
         except ks_exceptions.EndpointNotFound:

@@ -36,7 +36,7 @@ class Controller(object):
         package_name = request.GET.get('packageName')
         credentials = {
             'token': request.context.auth_token,
-            'project_id': request.context.tenant
+            'project_id': request.context.project_id
         }
 
         try:

@@ -40,7 +40,7 @@ class TestActions(test_base.MuranoTestCase):
         }
         mock_session = mock.MagicMock(description=mock_description)
         mock_context = mock.Mock(auth_token='test_token',
-                                 tenant='test_tenant',
+                                 project_id='test_tenant',
                                  user='test_user')
         expected_task = {
             'action': {
@@ -123,7 +123,7 @@ class TestActions(test_base.MuranoTestCase):
         test_session = 'test_session'
         context = mock.Mock()
         context.auth_token = 'test_token'
-        context.tenant = 'test_tenant'
+        context.project_id = 'test_tenant'
         context.user = 'test_user'
         test_unit = 'test_unit'
 

@@ -65,7 +65,7 @@ class Controller(object):
         else:
             policy.check('list_environments', request.context)
             # Only environments from same tenant as user should be returned
-            filters = {'tenant_id': request.context.tenant}
+            filters = {'tenant_id': request.context.project_id}
 
         environments = envs.EnvironmentServices.get_environments_by(filters)
         environments = [env.to_dict() for env in environments]
