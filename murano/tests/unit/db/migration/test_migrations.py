@@ -27,8 +27,10 @@ import datetime
 import uuid
 
 from oslo_db import exception as db_exc
-from oslo_db.sqlalchemy import test_base
+from oslo_db.sqlalchemy import enginefacade
+from oslo_db.sqlalchemy import test_fixtures
 from oslo_db.sqlalchemy import utils as db_utils
+from oslotest import base as test_base
 import sqlalchemy
 
 from murano.db.migration import migration
@@ -39,6 +41,10 @@ class MuranoMigrationsCheckers(object):
 
     snake_walk = True
     downgrade = True
+
+    def setUp(self):
+        super().setUp()
+        self.engine = enginefacade.writer.get_engine()
 
     def assertColumnExists(self, engine, table, column):
         t = db_utils.get_table(engine, table)
@@ -172,11 +178,17 @@ class MuranoMigrationsCheckers(object):
 
 class TestMigrationsMySQL(MuranoMigrationsCheckers,
                           base.BaseWalkMigrationTestCase,
-                          test_base.MySQLOpportunisticTestCase):
+                          test_fixtures.OpportunisticDBTestMixin,
+                          test_base.BaseTestCase):
+    """Run migration tests on MySQL backend."""
+    FIXTURE = test_fixtures.MySQLOpportunisticFixture
     pass
 
 
 class TestMigrationsPostgresql(MuranoMigrationsCheckers,
                                base.BaseWalkMigrationTestCase,
-                               test_base.PostgreSQLOpportunisticTestCase):
+                               test_fixtures.OpportunisticDBTestMixin,
+                               test_base.BaseTestCase):
+    """Run migration tests on PostgreSQL backend."""
+    FIXTURE = test_fixtures.PostgresqlOpportunisticFixture
     pass
