@@ -4,7 +4,6 @@
       - openstack-python35-jobs
       - publish-openstack-docs-pti
       - check-requirements
-      - periodic-stable-jobs
       - release-notes-jobs
     check:
       jobs:
