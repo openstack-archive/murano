@@ -50,7 +50,8 @@ class MuranoType(dsl_types.MuranoType):
     def namespace_resolver(self):
         return self._namespace_resolver
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def usage(self):
         raise NotImplementedError()
 

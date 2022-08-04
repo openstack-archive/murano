@@ -54,11 +54,13 @@ class PackageBase(package.Package):
         self._supplier_logo_cache = None
         self._source_directory = source_directory
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def requirements(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def classes(self):
         raise NotImplementedError()
 
@@ -66,7 +68,8 @@ class PackageBase(package.Package):
     def get_class(self, name):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def ui(self):
         raise NotImplementedError()
 

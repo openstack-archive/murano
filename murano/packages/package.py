@@ -38,15 +38,18 @@ class Package(object, metaclass=abc.ABCMeta):
     def format_name(self):
         return self._format_name
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def full_name(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def version(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def classes(self):
         raise NotImplementedError()
 
@@ -54,39 +57,48 @@ class Package(object, metaclass=abc.ABCMeta):
     def runtime_version(self):
         return self._runtime_version
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def requirements(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def package_type(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def display_name(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def description(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def author(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def supplier(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def tags(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def logo(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def supplier_logo(self):
         raise NotImplementedError()
 
@@ -104,11 +116,13 @@ class Package(object, metaclass=abc.ABCMeta):
     def get_resource(self, name):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def ui(self):
         raise NotImplementedError()
 
-    @abc.abstractproperty
+    @property
+    @abc.abstractmethod
     def meta(self):
         raise NotImplementedError()
 
