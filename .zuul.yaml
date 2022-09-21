@@ -1,4 +1,5 @@
 - project:
+    queue: murano
     templates:
       - check-requirements
       - openstack-cover-jobs
@@ -13,7 +14,6 @@
         - murano-grenade
         - murano-tempest-api-ipv6-only
     gate:
-      queue: murano
       jobs:
         - murano-tempest-api
         - murano-tempest-api-ipv6-only
