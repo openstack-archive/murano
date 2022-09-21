@@ -1,4 +1,5 @@
 - project:
+    queue: murano
     templates:
       - check-requirements
       - openstack-cover-jobs
@@ -16,7 +17,6 @@
         - murano-tempest-cfapi
         - murano-grenade
     gate:
-      queue: murano
       jobs:
         - murano-tempest-api
 
