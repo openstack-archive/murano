@@ -37,6 +37,9 @@ def _create_facade_lazily():
     global _LOCK, _FACADE
 
     if _FACADE is None:
+        # FIXME(zigo): autocommit=True it's not compatible with
+        # SQLAlchemy 2.0, and will be removed in future
+        _FACADE = db_session.EngineFacade.from_config(CONF, autocommit=True)
         with _LOCK:
             if _FACADE is None:
                 _FACADE = db_session.EngineFacade.from_config(CONF,
