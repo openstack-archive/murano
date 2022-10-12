@@ -265,7 +265,7 @@ class TestDSLHelpers(base.MuranoTestCase):
         result = murano_object_weak_ref.__call__()
 
         self.assertEqual(mock.sentinel.res, result)
-        self.assertEqual('weakref',
+        self.assertEqual(weakref.ReferenceType.__name__,
                          murano_object_weak_ref.ref.__class__.__name__)
 
     def test_weak_ref_with_null_obj(self):
