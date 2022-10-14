@@ -76,16 +76,8 @@ class TestCaseShell(testtools.TestCase):
 
     def test_help(self):
         stdout, _ = self.shell('--help')
-        usage = """usage: murano-test-runner [-h] [--config-file CONFIG_FILE]
-                          [--os-auth-url OS_AUTH_URL]
-                          [--os-username OS_USERNAME]
-                          [--os-password OS_PASSWORD]
-                          [--os-project-name OS_PROJECT_NAME]
-                          [-l [</path1, /path2> [</path1, /path2> ...]]] [-v]
-                          [--version]
-                          <PACKAGE_FQN>
-                          [<testMethod1, className.testMethod2> [<testMethod1, className.testMethod2"""  # noqa
-        self.assertIn(usage, stdout)
+        self.assertIn('<PACKAGE_FQN>', stdout)
+        self.assertIn('className.testMethod', stdout)
 
     def test_version(self):
         stdout, stderr = self.shell('--version')

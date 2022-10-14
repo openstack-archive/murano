@@ -325,7 +325,7 @@ class MuranoTestRunner(object):
                             default=utils.env('OS_PROJECT_NAME'),
                             help='Defaults to env[OS_PROJECT_NAME]')
         parser.add_argument('-l', '--load_packages_from',
-                            nargs='*', metavar='</path1, /path2>',
+                            nargs='*', metavar='path',
                             help='Directory to search packages from. '
                                  'We be added to the list of current directory'
                                  ' list, provided in a config file.')
@@ -338,7 +338,7 @@ class MuranoTestRunner(object):
                             help='Full name of application package that is '
                                  'going to be tested')
         parser.add_argument('tests', nargs='*',
-                            metavar='<testMethod1, className.testMethod2>',
+                            metavar='className.testMethod',
                             help='List of method names to be tested')
         return parser
 
