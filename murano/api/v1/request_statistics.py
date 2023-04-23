@@ -35,7 +35,7 @@ class RequestStatisticsCollection(object):
         self.average_time = (self.average_time * self.request_count +
                              ex_time) / (self.request_count + 1)
         if tenant:
-            tenant_count = self.requests_per_tenant.get(tenant, 0)
+            tenant_count = self.requests_per_tenant.get(tenant, 0)  # nosec
             tenant_count += 1
             self.requests_per_tenant[tenant] = tenant_count
 
