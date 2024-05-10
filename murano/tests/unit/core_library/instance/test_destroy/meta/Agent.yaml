@@ -1,8 +1,0 @@
-Namespaces:
-    =: io.murano.system
-
-Name: Agent
-
-Properties:
-  host:
-    Contract: $

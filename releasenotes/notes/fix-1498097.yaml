@@ -1,3 +1,0 @@
-fixes:
-  - Avoid race condition during parallel upload of packages, when
-    packages have same tags.

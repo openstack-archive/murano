@@ -1,6 +1,0 @@
----
-features:
-  - Classes to work with Cinder volumes were added to core library.
-    Now it is possible to create new volume from various sources or use
-    existing volume. Also it is possible to attach volumes to instances
-    and boot instances from volumes.

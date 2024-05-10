@@ -1,5 +1,0 @@
-features:
-  - Added the ``description_text`` field to environment and environment templates
-    database tables and respective API objects.
-upgrade:
-  - New database migration 015 has to be applied.

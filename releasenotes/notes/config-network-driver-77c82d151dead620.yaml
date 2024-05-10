@@ -1,6 +1,0 @@
----
-features:
-  - Added the ``driver`` configuration option to the ``networking`` group.
-    It allows to explicitly select the networking driver. It supports 'neutron' and 'nova' options.
-    If set to ``None`` (default), murano attempts to use 'neutron'
-    if available, 'nova' otherwise. The change is backward compatible.

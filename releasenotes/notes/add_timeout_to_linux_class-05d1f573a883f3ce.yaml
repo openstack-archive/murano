@@ -1,4 +1,0 @@
----
-features:
-  - Added the ``timeout`` parameter to ``runCommand`` and ``putFile``
-    methods of the ``io.murano.configuration.Linux`` class.

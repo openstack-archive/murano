@@ -1,5 +1,0 @@
----
-features:
-  - >
-    "List Environments" API call is now able to filter environments by an owner
-    project (tenant).

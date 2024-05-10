@@ -1,1 +1,0 @@
-python-magnumclient>=3.0.0  # Apache-2.0

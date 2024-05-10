@@ -1,3 +1,0 @@
-fixes:
-  - Fixed incorrect murano behaviour if deployed on devstack with keystone v3 by
-    default.

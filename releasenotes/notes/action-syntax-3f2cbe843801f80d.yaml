@@ -1,7 +1,0 @@
----
-features:
-  - Added a new manifest format 1.4.0.
-    Introduced the 'Scope' keyword for class methods to declare a method's
-    accessibility from outside through the API call.
-deprecations:
-  - Deprecated the 'Usage Action' keyword. For format versions >= 1.4.0, use 'Scope Public' instead.

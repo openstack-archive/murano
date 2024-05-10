@@ -1,4 +1,0 @@
----
-features:
-  - New plugin 'murano_heat-translator_plugin' was added.
-    Now it is possible to deploy applications from CSAR templates.

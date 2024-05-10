@@ -1,1 +1,0 @@
-This element install Docker on Ubuntu/CentOS

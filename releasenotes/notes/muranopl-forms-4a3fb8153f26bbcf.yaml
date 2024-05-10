@@ -1,8 +1,0 @@
----
-features:
-  - Added a new engine RPC call to generate json-schema from MuranoPL class.
-    The schema may be generated either from the entire class or for specific
-    model builders - static actions that can be used to generate
-    object model from their input. Class schema is built by inspecting
-    class properties and method schema using the same algorithm but applied
-    to its arguments.

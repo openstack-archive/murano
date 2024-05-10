@@ -1,6 +1,0 @@
-Name: SampleClass2
-
-Properties:
-  class2Property:
-    Contract: $.string().notNull()
-

@@ -1,6 +1,0 @@
----
-features:
-  - Added public field to environment templates. GET method
-    for api now displays public templates from other projects(tenants).
-  - Added public filter to environment templates api.
-  - Added clone action to environment templates.

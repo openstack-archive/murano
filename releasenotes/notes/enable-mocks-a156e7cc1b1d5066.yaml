@@ -1,8 +1,0 @@
----
-features:
-  - Enable mocks in MuranoPL tests cases.
-  - Added :command:`murano-test-tunner` command to run murano package tests.
-  - Introduced two YAQL *inject* functions to enable
-    mocks ``def inject(target, target_method, mock_object, mock_name)``
-    and ``def inject(target, target_method, yaql_expr)``.
-

@@ -1,3 +1,0 @@
-fixes:
-  - API call for deleting a service from environment template did not return
-    result of its operation. The issue is fixed.

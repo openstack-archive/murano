@@ -1,7 +1,0 @@
----
-features:
-  - Added a new API endpoint ``v1/actions`` to call static public methods.
-    It accepts class name, method name,
-    method arguments, and optionally package name and class version in the
-    request body. This call does not create an environment,
-    object instances or database records.

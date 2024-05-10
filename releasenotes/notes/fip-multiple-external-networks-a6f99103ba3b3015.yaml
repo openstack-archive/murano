@@ -1,4 +1,0 @@
----
-fixes:
-  - Murano is now able to assign correct floating IPs when using multiple external networks.
-    It attempts to choose one that shares a router with internal network.

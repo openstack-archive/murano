@@ -1,4 +1,0 @@
-murano:objects+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f", "c86104748a0c4907b4c5981e6d3bce9f", "io.murano.apps.linux.Git")
-murano:properties+("0c810278-7282-4e4a-9d69-7b4c36b6ce6f", "name", "git1")
-murano:objects+("b840b71e-1805-46c5-9e6f-5a3d2c8d773e", "0c810278-7282-4e4a-9d69-7b4c36b6ce6f", "io.murano.resources.LinuxMuranoInstance")
-murano:properties+("b840b71e-1805-46c5-9e6f-5a3d2c8d773e", "name", "whjiyi3uzhxes6")

@@ -1,4 +1,0 @@
----
-features:
-  - Implemented the capability for the helper methods of Linux class to run concurrently
-    if executed for different VM agents.

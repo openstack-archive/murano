@@ -1,4 +1,0 @@
----
-features:
-  - Added magnum plugin to murano, that allows creating/deleting
-    of magnum baymodels and bays from MuranoPL

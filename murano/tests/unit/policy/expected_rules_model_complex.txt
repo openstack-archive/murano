@@ -1,5 +1,0 @@
-murano:properties+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97", "ipAddresses", "10.0.1.13")
-murano:properties+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97", "ipAddresses", "16.60.90.90")
-murano:properties+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97", "networks.customNetworks", "10.0.1.0")
-murano:properties+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97", "networks.customNetworks", "10.0.2.0")
-murano:properties+("ade378ce-00d4-4a33-99eb-7b4b6ea3ab97", "networks.customProp1.prop", "val")

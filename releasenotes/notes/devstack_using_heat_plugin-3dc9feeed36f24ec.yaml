@@ -1,4 +1,0 @@
----
-other:
-  - Since Newton release, heat is available as a devstack plugin.
-    So we remove heat as enable_service in devstack.

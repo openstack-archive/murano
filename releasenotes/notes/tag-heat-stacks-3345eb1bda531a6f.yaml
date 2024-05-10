@@ -1,5 +1,0 @@
----
-features:
-  - Heat stacks created by murano during environment deployment now
-    have 'murano' tag by default. This is controlled by ``stack_tags``
-    config parameter.

@@ -1,4 +1,0 @@
----
-fixes:
-  - Fixed the issue that prevented the test-runner from properly
-    invoking ``setUp`` and ``tearDown`` methods of fixtures in some cases.

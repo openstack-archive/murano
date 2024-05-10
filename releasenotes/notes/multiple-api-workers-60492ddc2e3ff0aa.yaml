@@ -1,9 +1,0 @@
----
-features:
-  - Added the ``api_workers`` option to ``murano`` config group. It controls
-    the number of API workers launched by murano. If not set, it would default to
-    the number of CPUs available.
-
-deprecations:
-  - Renamed the ``workers`` option from the ``engine`` group
-    to ``engine_workers`` to reduce ambiguity with the ``api_workers`` option.

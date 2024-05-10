@@ -1,5 +1,0 @@
-{
-  "className": "ns.Bar",
-  "methodName": "staticAction",
-  "parameters": {"myName": "John"}
-}
